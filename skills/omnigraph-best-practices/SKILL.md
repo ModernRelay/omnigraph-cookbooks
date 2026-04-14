@@ -1,5 +1,5 @@
 ---
-name: omnigraph-local
+name: omnigraph-best-practices
 description: Operate a locally deployed Omnigraph graph database. Use this skill whenever you see Omnigraph CLI commands (omnigraph init/read/change/load/schema/embed/branch/commit/run), .pg schema files, .gq query files, RustFS S3 URIs (s3://omnigraph-local/...), or work inside a folder containing omnigraph.yaml. Covers local RustFS setup, project layout, schema authoring and evolution (plan before apply), query linting, data changes (change vs load --mode merge vs overwrite), branches for data review, embeddings, aliases for automation, HTTP server operation, Cedar policy, and common gotchas. Especially important BEFORE running schema apply (plan first), any load (pick --mode carefully), or any .gq/.pg edit (lint afterward). Apply this skill aggressively when the user mentions Omnigraph, graph migrations, or graph database local development.
 ---
 

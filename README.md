@@ -17,15 +17,19 @@ Packaged agent skills live under [`skills/`](./skills) and can be installed with
 
 | Skill | Description |
 |-------|-------------|
-| [`omnigraph-local`](./skills/omnigraph-local) | Operate a locally deployed Omnigraph — schema authoring and evolution, query linting, data changes, branches, embeddings, aliases, server, policy, and common gotchas |
+| [`omnigraph-intel-bootstrap`](./skills/omnigraph-intel-bootstrap) | Bootstrap a new SPIKE graph from scratch — choose demo or custom, elicit domain + sources, adapt schema, research seed content, init + load |
+| [`omnigraph-best-practices`](./skills/omnigraph-best-practices) | Operate a locally deployed Omnigraph — schema authoring and evolution, query linting, data changes, branches, embeddings, aliases, server, policy, and common gotchas |
 
 Install:
 
 ```bash
-npx skills add ModernRelay/omnigraph-starters@omnigraph-local
+npx skills add ModernRelay/omnigraph-starters@omnigraph-intel-bootstrap
+npx skills add ModernRelay/omnigraph-starters@omnigraph-best-practices
 ```
 
-See [`docs/best-practices.md`](./docs/best-practices.md) for the human-readable version of the same content.
+Typical flow: use `omnigraph-intel-bootstrap` once to set up a new graph, then `omnigraph-best-practices` for day-to-day operations.
+
+See [`docs/best-practices.md`](./docs/best-practices.md) for the human-readable version of the ops content.
 
 ## Repo Structure
 
@@ -37,7 +41,8 @@ omnigraph-starters/
 │   ├── best-practices.md      ← human-readable operational guide
 │   └── omni-schema.md         ← schema design principles
 ├── skills/
-│   └── omnigraph-local/       ← agent skill (SKILL.md + references/)
+│   ├── omnigraph-intel-bootstrap/   ← bootstrap a new SPIKE graph (elicitation + research)
+│   └── omnigraph-best-practices/    ← day-to-day ops (SKILL.md + references/)
 └── <starter>/
     ├── README.md
     ├── CLAUDE.md
