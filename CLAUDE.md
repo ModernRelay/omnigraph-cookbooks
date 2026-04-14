@@ -8,8 +8,8 @@ A collection of Omnigraph graph starters. Each starter is self-contained in its 
 
 ## Tooling
 
-- Omnigraph CLI (aliased `ogdev` locally) works against a live repo (S3 URI or server).
-- `ogdev query lint --schema ./schema.pg --query ./queries/<file>.gq` validates queries against the schema — run after any edit.
+- `omnigraph` CLI works against a live repo (S3 URI or server).
+- `omnigraph query lint --schema ./schema.pg --query ./queries/<file>.gq` validates queries against the schema — run after any edit.
 - Comments in `.pg` files use `//` not `#`.
 - Reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).
 
@@ -20,7 +20,7 @@ Always `cd` into the starter folder first — configs and paths are relative:
 ```bash
 cd industry-intel
 set -a && source ./.env.omni && set +a
-ogdev query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
 ```
 
 ## When Adding a New Starter

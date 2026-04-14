@@ -97,16 +97,16 @@ cd industry-intel
 set -a && source ./.env.omni && set +a
 
 # Lint the schema and queries
-ogdev query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
 
 # Init the repo
-ogdev init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
+omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
 
 # Load the seed
-ogdev load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
+omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
 
 # Query signals forming a pattern
-ogdev read --alias pattern-signals pat-sovereign-ai
+omnigraph read --alias pattern-signals pat-sovereign-ai
 ```
 
 See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.
