@@ -1,33 +1,21 @@
 # CLAUDE.md
 
-Repo-wide guidance for Claude Code. Each starter also has its own `CLAUDE.md` — read both when working inside a starter folder.
+Repo-wide guidance for Claude Code. Each starter also has its own `CLAUDE.md` — read both when working inside one.
 
 ## What This Repo Is
 
-A collection of Omnigraph starters — each one a self-contained schema + seed + queries for a specific use case. Starters may use the SPIKE intelligence framework or their own domain model. See `README.md` for the starter list.
+A collection of Omnigraph graph starters. Each starter is self-contained in its folder. See `README.md` for the list.
 
-## Repo Structure
+## Tooling
 
-- Root: per-starter folders + top-level README/CLAUDE
-- Each starter folder (e.g. `industry-intel/`) is fully self-contained
-- Omnigraph CLI and schema design reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph)
-
-## Conventions Across All Starters
-
-- **Flat node types with `kind` enums** over subtypes or interfaces.
-- **`slug` is external identity everywhere.** `@key` on slug; short prefixes (`sig-`, `pat-`, `el-`, etc.) make grep trivial.
-- **Verb+target edge naming.** `FormsPattern`, `DevelopedByCompany` — direction is readable from the name.
-- **Classification as inline enums, not nodes** — unless the classification itself has properties worth tracking.
-- **Comments in `.pg` files use `//` not `#`.**
-
-## Framework-Specific Conventions (SPIKE starters)
-
-- Use the standard primitives: Signal, Pattern, Insight, KnowHow, Element. Don't rename them without a strong reason.
-- Keep the core analytical loop visible: Signal ↔ Pattern is the point; everything else supports or maps around it.
+- Omnigraph CLI (aliased `ogdev` locally) works against a live repo (S3 URI or server).
+- `ogdev query lint --schema ./schema.pg --query ./queries/<file>.gq` validates queries against the schema — run after any edit.
+- Comments in `.pg` files use `//` not `#`.
+- Reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).
 
 ## Working in a Starter
 
-Always `cd` into the starter folder first:
+Always `cd` into the starter folder first — configs and paths are relative:
 
 ```bash
 cd industry-intel
@@ -35,11 +23,8 @@ set -a && source ./.env.omni && set +a
 ogdev query lint --schema ./schema.pg --query ./queries/signals.gq
 ```
 
-The `query lint` command validates queries against the schema — run it after any schema or query edit.
-
 ## When Adding a New Starter
 
-- Copy `industry-intel/` as a file-layout template (README/CLAUDE/schema/seed/queries/config)
-- Pick the schema shape that fits the domain — SPIKE if it maps cleanly, something else if not
-- Ship real seed data, not placeholders — the value of a starter is that it's opinionated
-- Keep per-starter `README.md` and `CLAUDE.md` in sync with `schema.pg`
+- Create the folder with `README.md`, `CLAUDE.md`, `schema.pg`, `omnigraph.yaml`, `queries/`, and seed data
+- Ship real seed data, not placeholders
+- Keep the starter's README and CLAUDE in sync with its schema
