@@ -16,7 +16,7 @@ server:
   bind: 127.0.0.1:8080
 
 cli:
-  graph: local_server
+  graph: local_s3
   branch: main
   output_format: table
   table_max_column_width: 80
@@ -251,4 +251,3 @@ aliases:
     query: mutations.gq
     name: link_element_developed_by
     args: [element, company]
-

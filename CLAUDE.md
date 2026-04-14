@@ -4,7 +4,7 @@ Repo-wide guidance for Claude Code. Each starter also has its own `CLAUDE.md` â€
 
 ## What This Repo Is
 
-A collection of Omnigraph graph starters. Each starter is self-contained in its folder. See `README.md` for the list.
+A collection of Omnigraph graph starters plus packaged agent skills. Each starter is self-contained in its folder; skills live under `skills/` and are installable via `npx skills add`. See `README.md` for the full list.
 
 ## Tooling
 

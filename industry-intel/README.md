@@ -1,6 +1,6 @@
 # Industry Intel — SPIKE Starter
 
-Knowledge graph starter modeling AI/ML industry intelligence. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph) using the SPIKE framework (see the [root README](../README.md) for the framework overview).
+Knowledge graph starter modeling AI/ML industry intelligence. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph) using the [SPIKE framework](../README.md#spike-framework).
 
 ## Core Analytical Loop
 
@@ -106,7 +106,15 @@ omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
 
 # Query signals forming a pattern
+# `omnigraph.yaml` defaults the CLI to the local S3 graph, so aliases work
+# immediately after init/load.
 omnigraph read --alias pattern-signals pat-sovereign-ai
+
+# Optional: start the starter's local HTTP server in another terminal
+omnigraph-server --config ./omnigraph.yaml
+
+# Then point the alias at the HTTP graph explicitly
+omnigraph read --target local_server --alias pattern-signals pat-sovereign-ai
 ```
 
 See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.
