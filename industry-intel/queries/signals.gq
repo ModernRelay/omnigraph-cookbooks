@@ -1,0 +1,73 @@
+// Signal reads
+
+query get_signal($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+    }
+    return { $s.slug, $s.name, $s.brief, $s.description, $s.domain, $s.stagingTimestamp }
+}
+
+query recent_signals() {
+    match {
+        $s: Signal
+    }
+    return { $s.slug, $s.name, $s.brief, $s.domain, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+    limit 50
+}
+
+query search_signals($q: String) {
+    match {
+        $s: Signal
+        search($s.name, $q)
+    }
+    return { $s.slug, $s.name, $s.brief }
+}
+
+// Signal -> Pattern (core analytical)
+
+query signal_patterns($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s formsPattern $p
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief }
+}
+
+query signal_contradictions($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s contradictsPattern $p
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief }
+}
+
+// Signal -> Element
+
+query signal_elements($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s onElement $e
+    }
+    return { $e.slug, $e.name, $e.kind, $e.brief }
+}
+
+// Signal -> Company
+
+query signal_companies($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s relevantCompany $c
+    }
+    return { $c.slug, $c.name, $c.brief }
+}
+
+// Signal provenance
+
+query signal_sources($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s spottedInArtifact $a
+    }
+    return { $a.slug, $a.name, $a.artifactType, $a.link }
+}

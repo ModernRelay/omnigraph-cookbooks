@@ -1,0 +1,45 @@
+// KnowHow reads
+
+query get_knowhow($slug: String) {
+    match {
+        $k: KnowHow { slug: $slug }
+    }
+    return { $k.slug, $k.name, $k.brief, $k.description, $k.guidelines, $k.context, $k.url }
+}
+
+query recent_knowhow() {
+    match {
+        $k: KnowHow
+    }
+    return { $k.slug, $k.name, $k.brief, $k.stagingTimestamp }
+    order { $k.stagingTimestamp desc }
+    limit 50
+}
+
+query search_knowhow($q: String) {
+    match {
+        $k: KnowHow
+        search($k.name, $q)
+    }
+    return { $k.slug, $k.name, $k.brief }
+}
+
+// KnowHow -> Element
+
+query knowhow_elements($slug: String) {
+    match {
+        $k: KnowHow { slug: $slug }
+        $k referencesElement $e
+    }
+    return { $e.slug, $e.name, $e.kind, $e.brief }
+}
+
+// KnowHow provenance
+
+query knowhow_sources($slug: String) {
+    match {
+        $k: KnowHow { slug: $slug }
+        $k sourcedFromArtifact $a
+    }
+    return { $a.slug, $a.name, $a.artifactType, $a.link }
+}

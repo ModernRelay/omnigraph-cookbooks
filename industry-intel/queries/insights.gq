@@ -1,0 +1,26 @@
+// Insight reads
+
+query get_insight($slug: String) {
+    match {
+        $i: Insight { slug: $slug }
+    }
+    return { $i.slug, $i.name, $i.brief, $i.description, $i.importance }
+}
+
+query search_insights($q: String) {
+    match {
+        $i: Insight
+        search($i.name, $q)
+    }
+    return { $i.slug, $i.name, $i.brief }
+}
+
+// Insight -> Pattern
+
+query insight_patterns($slug: String) {
+    match {
+        $i: Insight { slug: $slug }
+        $i highlightsPattern $p
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief }
+}

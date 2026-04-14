@@ -1,0 +1,83 @@
+// Element reads
+
+query get_element($slug: String) {
+    match {
+        $e: Element { slug: $slug }
+    }
+    return { $e.slug, $e.name, $e.kind, $e.brief, $e.description, $e.category, $e.domain }
+}
+
+query elements_by_kind($kind: String) {
+    match {
+        $e: Element { kind: $kind }
+    }
+    return { $e.slug, $e.name, $e.brief, $e.category }
+    order { $e.name }
+}
+
+query search_elements($q: String) {
+    match {
+        $e: Element
+        search($e.name, $q)
+    }
+    return { $e.slug, $e.name, $e.kind, $e.brief }
+}
+
+// Element -> Element
+
+query element_enables($slug: String) {
+    match {
+        $e: Element { slug: $slug }
+        $e enablesElement $target
+    }
+    return { $target.slug, $target.name, $target.kind, $target.brief }
+}
+
+query element_uses($slug: String) {
+    match {
+        $e: Element { slug: $slug }
+        $e usesElement $dep
+    }
+    return { $dep.slug, $dep.name, $dep.kind, $dep.brief }
+}
+
+// Element -> Pattern
+
+query element_patterns($slug: String) {
+    match {
+        $e: Element { slug: $slug }
+        $e exemplifiesPattern $p
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief }
+}
+
+// Element <- Signal
+
+query element_signals($slug: String) {
+    match {
+        $e: Element { slug: $slug }
+        $s onElement $e
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+}
+
+// Element -> Company
+
+query element_developer($slug: String) {
+    match {
+        $e: Element { slug: $slug }
+        $e developedByCompany $c
+    }
+    return { $c.slug, $c.name, $c.brief }
+}
+
+// Element provenance
+
+query element_sources($slug: String) {
+    match {
+        $e: Element { slug: $slug }
+        $e identifiedInArtifact $a
+    }
+    return { $a.slug, $a.name, $a.artifactType, $a.link }
+}

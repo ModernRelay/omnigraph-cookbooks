@@ -1,0 +1,254 @@
+project:
+  name: Industry Intel — SPIKE Framework
+
+auth:
+  env_file: ./.env.omni
+
+graphs:
+  local_s3:
+    uri: s3://omnigraph-local/repos/spike-intel
+  local_server:
+    uri: http://127.0.0.1:8080
+    bearer_token_env: OMNIGRAPH_BEARER_TOKEN
+
+server:
+  graph: local_s3
+  bind: 127.0.0.1:8080
+
+cli:
+  graph: local_server
+  branch: main
+  output_format: table
+  table_max_column_width: 80
+  table_cell_layout: truncate
+
+query:
+  roots:
+    - queries
+    - .
+
+aliases:
+  # Signals
+  signal:
+    command: read
+    query: signals.gq
+    name: get_signal
+    args: [slug]
+    format: kv
+
+  signals:
+    command: read
+    query: signals.gq
+    name: recent_signals
+
+  signal-patterns:
+    command: read
+    query: signals.gq
+    name: signal_patterns
+    args: [slug]
+
+  signal-elements:
+    command: read
+    query: signals.gq
+    name: signal_elements
+    args: [slug]
+
+  # Patterns
+  pattern:
+    command: read
+    query: patterns.gq
+    name: get_pattern
+    args: [slug]
+    format: kv
+
+  patterns:
+    command: read
+    query: patterns.gq
+    name: patterns_by_kind
+    args: [kind]
+
+  pattern-signals:
+    command: read
+    query: patterns.gq
+    name: pattern_signals
+    args: [slug]
+
+  pattern-elements:
+    command: read
+    query: patterns.gq
+    name: pattern_elements
+    args: [slug]
+
+  # Elements
+  element:
+    command: read
+    query: elements.gq
+    name: get_element
+    args: [slug]
+    format: kv
+
+  elements:
+    command: read
+    query: elements.gq
+    name: elements_by_kind
+    args: [kind]
+
+  element-signals:
+    command: read
+    query: elements.gq
+    name: element_signals
+    args: [slug]
+
+  element-patterns:
+    command: read
+    query: elements.gq
+    name: element_patterns
+    args: [slug]
+
+  # Insights
+  insight:
+    command: read
+    query: insights.gq
+    name: get_insight
+    args: [slug]
+    format: kv
+
+  insight-patterns:
+    command: read
+    query: insights.gq
+    name: insight_patterns
+    args: [slug]
+
+  # KnowHow
+  knowhow:
+    command: read
+    query: knowhow.gq
+    name: get_knowhow
+    args: [slug]
+    format: kv
+
+  knowhows:
+    command: read
+    query: knowhow.gq
+    name: recent_knowhow
+
+  knowhow-elements:
+    command: read
+    query: knowhow.gq
+    name: knowhow_elements
+    args: [slug]
+
+  # Mutations: SPIKE nodes
+  add-signal:
+    command: change
+    query: mutations.gq
+    name: add_signal
+    args: [slug, name, brief, stagingTimestamp, createdAt, updatedAt]
+
+  add-element:
+    command: change
+    query: mutations.gq
+    name: add_element
+    args: [slug, name, kind, createdAt, updatedAt]
+
+  add-pattern:
+    command: change
+    query: mutations.gq
+    name: add_pattern
+    args: [slug, name, kind, createdAt, updatedAt]
+
+  add-insight:
+    command: change
+    query: mutations.gq
+    name: add_insight
+    args: [slug, name, createdAt, updatedAt]
+
+  add-knowhow:
+    command: change
+    query: mutations.gq
+    name: add_knowhow
+    args: [slug, name, stagingTimestamp, createdAt, updatedAt]
+
+  # Mutations: Supportive nodes
+  add-company:
+    command: change
+    query: mutations.gq
+    name: add_company
+    args: [slug, name]
+
+  add-source:
+    command: change
+    query: mutations.gq
+    name: add_source
+    args: [slug, name]
+
+  add-expert:
+    command: change
+    query: mutations.gq
+    name: add_expert
+    args: [slug, name]
+
+  add-artifact:
+    command: change
+    query: mutations.gq
+    name: add_artifact
+    args: [slug, name, artifactType, stagingTimestamp, createdAt, updatedAt]
+
+  # Mutations: Core analytical edges
+  link-forms-pattern:
+    command: change
+    query: mutations.gq
+    name: link_signal_forms_pattern
+    args: [signal, pattern]
+
+  link-contradicts-pattern:
+    command: change
+    query: mutations.gq
+    name: link_signal_contradicts_pattern
+    args: [signal, pattern]
+
+  link-highlights-pattern:
+    command: change
+    query: mutations.gq
+    name: link_insight_highlights_pattern
+    args: [insight, pattern]
+
+  # Mutations: Signal → Element
+  link-on-element:
+    command: change
+    query: mutations.gq
+    name: link_signal_on_element
+    args: [signal, element]
+
+  # Mutations: Element edges
+  link-enables-element:
+    command: change
+    query: mutations.gq
+    name: link_element_enables
+    args: [from, to]
+
+  link-uses-element:
+    command: change
+    query: mutations.gq
+    name: link_element_uses
+    args: [from, to]
+
+  link-exemplifies-pattern:
+    command: change
+    query: mutations.gq
+    name: link_element_exemplifies_pattern
+    args: [element, pattern]
+
+  link-enables-pattern:
+    command: change
+    query: mutations.gq
+    name: link_element_enables_pattern
+    args: [element, pattern]
+
+  # Mutations: Development
+  link-developed-by:
+    command: change
+    query: mutations.gq
+    name: link_element_developed_by
+    args: [element, company]
+

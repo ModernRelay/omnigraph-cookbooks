@@ -1,0 +1,81 @@
+// Pattern reads
+
+query get_pattern($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief, $p.description, $p.evolution }
+}
+
+query patterns_by_kind($kind: String) {
+    match {
+        $p: Pattern { kind: $kind }
+    }
+    return { $p.slug, $p.name, $p.brief }
+    order { $p.name }
+}
+
+query search_patterns($q: String) {
+    match {
+        $p: Pattern
+        search($p.name, $q)
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief }
+}
+
+// Pattern <- Signal (what signals form this pattern?)
+
+query pattern_signals($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $s formsPattern $p
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+}
+
+// Pattern -> Pattern
+
+query pattern_drives($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $p drivesPattern $target
+    }
+    return { $target.slug, $target.name, $target.kind, $target.brief }
+}
+
+query pattern_relies_on($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $p reliesOnPattern $dep
+    }
+    return { $dep.slug, $dep.name, $dep.kind, $dep.brief }
+}
+
+query pattern_contradicts($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $p contradictsToPattern $target
+    }
+    return { $target.slug, $target.name, $target.kind, $target.brief }
+}
+
+// Pattern <- Element
+
+query pattern_elements($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $e exemplifiesPattern $p
+    }
+    return { $e.slug, $e.name, $e.kind, $e.brief }
+}
+
+// Pattern <- Insight
+
+query pattern_insights($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $i highlightsPattern $p
+    }
+    return { $i.slug, $i.name, $i.brief }
+}

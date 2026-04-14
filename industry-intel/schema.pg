@@ -1,0 +1,203 @@
+// Industry Intel: SPIKE Framework — Omnigraph Schema
+// Simplified 2026-04-12: flat Element + Pattern with kind enums
+
+
+// ──────────────────────────────────────────────
+// SPIKE Nodes
+// ──────────────────────────────────────────────
+
+node Signal {
+    slug: String @key
+    name: String @index
+    brief: String @index
+    description: String?
+    domain: enum(training, inference, infra, harness, robotics, security, data-eng, context)?
+    stagingTimestamp: DateTime @index
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Element {
+    slug: String @key
+    name: String @index
+    kind: enum(product, technology, framework, concept, ops) @index
+    brief: String?
+    description: String?
+    category: [String]?
+    domain: enum(training, inference, infra, harness, robotics, security, data-eng, context)?
+
+    // Product / Framework shared
+    website: String?
+    release_year: I32?
+    license: String?
+
+    // Framework-specific
+    repository: String?
+    use_cases: [String]?
+    key_features: [String]?
+    target_users: String?
+
+    // Concept-specific
+    definition: String?
+    key_points: [String]?
+
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Pattern {
+    slug: String @key
+    name: String @index
+    kind: enum(challenge, disruption, dynamic) @index
+    brief: String?
+    description: String?
+    evolution: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Insight {
+    slug: String @key
+    name: String @index
+    brief: String?
+    description: String?
+    importance: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node KnowHow {
+    slug: String @key
+    name: String @index
+    brief: String?
+    description: String?
+    guidelines: [String]?
+    context: String?
+    url: String?
+    stagingTimestamp: DateTime @index
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Supportive Nodes
+// ──────────────────────────────────────────────
+
+node Company {
+    slug: String @key
+    name: String @index
+    brief: String?
+    description: String?
+    site: String?
+    formerly: String?
+    type: enum(bigtech, developer, investor, research, hardware, media)?
+}
+
+node SourceEntity {
+    slug: String @key
+    name: String @index
+    type: enum(blog, newsletter, video_channel, academic_repository, podcast, organization)?
+    platform: String?
+    url: String?
+}
+
+node Expert {
+    slug: String @key
+    name: String @index
+}
+
+node InformationArtifact {
+    slug: String @key
+    name: String @index
+    artifactType: enum(email, youtube, pdf, article)
+    link: String? @unique
+    stagingTimestamp: DateTime @index
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Chunk {
+    text: String
+    chunk_index: I32
+    embedding: Vector(3072) @embed("text") @index
+    createdAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Edges: Core Analytical (Signal ↔ Pattern)
+// ──────────────────────────────────────────────
+
+edge FormsPattern: Signal -> Pattern
+edge ContradictsPattern: Signal -> Pattern
+
+
+// ──────────────────────────────────────────────
+// Edges: Insight → Pattern
+// ──────────────────────────────────────────────
+
+edge HighlightsPattern: Insight -> Pattern
+
+
+// ──────────────────────────────────────────────
+// Edges: Pattern → Pattern
+// ──────────────────────────────────────────────
+
+edge ReliesOnPattern: Pattern -> Pattern
+edge DrivesPattern: Pattern -> Pattern
+edge ContradictsToPattern: Pattern -> Pattern
+
+
+// ──────────────────────────────────────────────
+// Edges: Signal → Element (domain mapping)
+// ──────────────────────────────────────────────
+
+edge OnElement: Signal -> Element
+
+
+// ──────────────────────────────────────────────
+// Edges: Element → Element
+// ──────────────────────────────────────────────
+
+edge EnablesElement: Element -> Element
+edge UsesElement: Element -> Element
+
+
+// ──────────────────────────────────────────────
+// Edges: Element → Pattern
+// ──────────────────────────────────────────────
+
+edge ExemplifiesPattern: Element -> Pattern
+edge EnablesPattern: Element -> Pattern
+
+
+// ──────────────────────────────────────────────
+// Edges: Information Flow
+// ──────────────────────────────────────────────
+
+edge PublishedBySource: InformationArtifact -> SourceEntity @card(0..1)
+edge ContributedByExpert: InformationArtifact -> Expert
+edge PartOfArtifact: Chunk -> InformationArtifact @card(1..1) {
+    @unique(src)
+}
+edge SpottedInArtifact: Signal -> InformationArtifact
+edge IdentifiedInArtifact: Element -> InformationArtifact
+edge SourcedFromArtifact: KnowHow -> InformationArtifact
+edge SourcedFromSource: Signal -> SourceEntity
+
+
+// ──────────────────────────────────────────────
+// Edges: Classification & Development
+// ──────────────────────────────────────────────
+
+edge RelevantCompany: Signal -> Company
+edge DevelopedByCompany: Element -> Company
+edge AffiliatedWithCompany: Expert -> Company
+
+
+// ──────────────────────────────────────────────
+// Edges: KnowHow
+// ──────────────────────────────────────────────
+
+edge ReferencesElement: KnowHow -> Element
