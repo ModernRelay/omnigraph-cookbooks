@@ -25,9 +25,9 @@ curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/
 
 Defaults: RustFS S3 on `127.0.0.1:9000`, console on `:9001`, `omnigraph-server` on `:8080`, bucket `omnigraph-local`. Override with `BUCKET=foo PREFIX=repos/bar BIND=127.0.0.1:8080 curl ...`.
 
-### AWS env vars for direct S3 access
+### AWS env vars (for `init`, `load`, and the server)
 
-Direct `s3://bucket/repo` URIs require AWS credentials pointed at the local RustFS endpoint. Put these in `.env.omni`:
+`init` and `load` write directly to S3-backed storage, and `omnigraph-server` reads from it at startup. Both need AWS credentials pointed at RustFS. Put these in `.env.omni`:
 
 ```bash
 AWS_ACCESS_KEY_ID=rustfsadmin
@@ -323,13 +323,13 @@ Reference via `auth.env_file: .env.omni`. Aliases should only contain query name
 
 ### Start the server
 
-Two forms — pass the URI directly, or let it read from config:
+The server is the canonical runtime entry point — point the CLI, aliases, and agents at it. Start it once per repo:
 
 ```bash
-omnigraph-server s3://omnigraph-local/repos/spike-intel --bind 127.0.0.1:8080
-# or, using server.graph and server.bind from omnigraph.yaml:
 omnigraph-server --config ./omnigraph.yaml
 ```
+
+Reads `server.graph` and `server.bind` from your config. Keep it running in a separate terminal or background process.
 
 ### HTTP routes
 
@@ -348,10 +348,16 @@ omnigraph-server --config ./omnigraph.yaml
 
 Set `OMNIGRAPH_SERVER_BEARER_TOKEN` on the server process. On the client side, declare `bearer_token_env: OMNIGRAPH_BEARER_TOKEN` in `graphs.<name>` and export a matching token. Leave auth off for pure local dev.
 
-### When to use server vs direct S3
+### Setup operations (`init`, `load`) write directly to storage
 
-- **Direct S3** (`s3://...` URI): simpler for local dev, no process to manage, works with any CLI invocation
-- **HTTP server**: required for remote clients, policy enforcement, and a stable target URL across tool sessions
+`init` and `load` write the repo on disk or in S3 — they don't go through the server. Pass the repo URI directly:
+
+```bash
+omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/<name>
+omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/<name>
+```
+
+Everything else — `read`, `change`, `snapshot`, `schema plan/apply`, `branch`, `run`, `commit` — goes through the running server via the CLI's default `cli.graph` target.
 
 ## Policy & Authorization
 

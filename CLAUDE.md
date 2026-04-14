@@ -8,7 +8,7 @@ A collection of Omnigraph graph starters plus packaged agent skills. Each starte
 
 ## Tooling
 
-- `omnigraph` CLI works against a live repo (S3 URI or server).
+- `omnigraph` CLI runs against an `omnigraph-server` instance (canonical runtime path). `init` and `load` are one-time setup ops that write directly to storage.
 - `omnigraph query lint --schema ./schema.pg --query ./queries/<file>.gq` validates queries against the schema — run after any edit.
 - Comments in `.pg` files use `//` not `#`.
 - Reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).

@@ -13,9 +13,10 @@ How to modify data safely in Omnigraph.
 
 ## `change` — Single Edits
 
+Goes through the running server via `cli.graph` (or an alias):
+
 ```bash
 omnigraph change \
-  --uri s3://omnigraph-local/repos/spike-intel \
   --query mutations.gq \
   --name add_signal \
   --params '{"slug":"sig-foo","name":"Foo","brief":"...","stagingTimestamp":"2026-04-14T00:00:00Z","createdAt":"2026-04-14T00:00:00Z","updatedAt":"2026-04-14T00:00:00Z"}'

@@ -4,17 +4,13 @@ How to run `omnigraph-server` and gate operations with Cedar policies.
 
 ## Starting the Server
 
-Two forms — pass the URI directly, or read from config:
+The server is the canonical runtime entry point. Start it once per repo and keep it running — all CLI queries, mutations, and admin ops go through it.
 
 ```bash
-# Direct URI + bind
-omnigraph-server s3://omnigraph-local/repos/spike-intel --bind 127.0.0.1:8080
-
-# Config-driven (uses server.graph and server.bind from omnigraph.yaml)
 omnigraph-server --config ./omnigraph.yaml
 ```
 
-The `--config` form is cleaner — less duplication, and the server graph is the same one the CLI can target via `graphs.<name>`.
+Reads `server.graph` and `server.bind` from the config. Run in a separate terminal or background process.
 
 ### `omnigraph.yaml` server block
 
@@ -71,10 +67,16 @@ omnigraph read --target remote --alias signal sig-foo
 
 Leave auth off entirely for pure local dev.
 
-## When to Use Server vs Direct S3
+## Setup Operations Bypass the Server
 
-- **Direct S3** (`s3://...` URI): simpler for local dev, no process to manage, works with any CLI invocation
-- **HTTP server**: required for remote clients, policy enforcement, and a stable target URL across tool sessions
+`init` and `load` write the repo on storage directly — they don't go through the server. Pass the repo URI:
+
+```bash
+omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/<name>
+omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/<name>
+```
+
+Everything else — `read`, `change`, `snapshot`, `schema plan/apply`, `branch`, `run`, `commit` — goes through the running server.
 
 ## Cedar Policy
 
@@ -178,4 +180,4 @@ When the server is running with a policy file:
 2. Unauthorized requests return `403 Forbidden`
 3. The CLI doesn't bypass policy when it connects over HTTP — it's enforced at the server
 
-Direct S3 access bypasses policy (there's no actor to authenticate). Use HTTP when policy matters.
+Setup ops (`init`, `load`) bypass policy since they write storage directly. Gate those separately at the storage layer (S3 bucket ACLs, object locks) if needed.

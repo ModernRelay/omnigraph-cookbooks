@@ -96,25 +96,20 @@ cd industry-intel
 # Source RustFS credentials
 set -a && source ./.env.omni && set +a
 
-# Lint the schema and queries
+# Lint the schema and queries (pure file check)
 omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
 
-# Init the repo
+# Init the repo (one-time — writes to storage)
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
 
-# Load the seed
+# Load the seed (one-time)
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
 
-# Query signals forming a pattern
-# `omnigraph.yaml` defaults the CLI to the local S3 graph, so aliases work
-# immediately after init/load.
-omnigraph read --alias pattern-signals pat-sovereign-ai
-
-# Optional: start the starter's local HTTP server in another terminal
+# Start the local HTTP server (keep it running — separate terminal or background)
 omnigraph-server --config ./omnigraph.yaml
 
-# Then point the alias at the HTTP graph explicitly
-omnigraph read --target local_server --alias pattern-signals pat-sovereign-ai
+# All queries go through the server via aliases
+omnigraph read --alias pattern-signals pat-sovereign-ai
 ```
 
 See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.

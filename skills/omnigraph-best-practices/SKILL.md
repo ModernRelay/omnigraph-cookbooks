@@ -26,9 +26,9 @@ curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/
 
 Defaults: RustFS S3 on `127.0.0.1:9000`, console on `:9001`, `omnigraph-server` on `:8080`, bucket `omnigraph-local`. Override with `BUCKET=foo PREFIX=repos/bar BIND=127.0.0.1:8080 curl ...`.
 
-### AWS env vars for direct S3 access
+### AWS env vars (for `init`, `load`, and the server)
 
-Direct `s3://...` URIs require AWS credentials pointed at RustFS. Keep them in `.env.omni` (git-ignored):
+`init` and `load` write S3-backed storage directly, and `omnigraph-server` reads from it. Both need AWS credentials pointed at RustFS. Keep them in `.env.omni` (git-ignored):
 
 ```bash
 AWS_ACCESS_KEY_ID=rustfsadmin

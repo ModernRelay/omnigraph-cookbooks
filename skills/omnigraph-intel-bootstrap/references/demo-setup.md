@@ -4,7 +4,7 @@ The quickest path to a populated SPIKE graph. Uses the existing `industry-intel`
 
 ## Prerequisites
 
-1. A local Omnigraph is running (RustFS + optional server). If not, see the `omnigraph-best-practices` skill for the bootstrap command.
+1. RustFS is running locally. If not, see the `omnigraph-best-practices` skill for the bootstrap command.
 2. You're inside the `omnigraph-starters` repo.
 
 ## Steps
@@ -24,6 +24,8 @@ aws --endpoint-url http://127.0.0.1:9000 s3 mb s3://omnigraph-local
 
 ### Init + load
 
+These are one-time setup ops that write directly to storage:
+
 ```bash
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
@@ -34,6 +36,14 @@ Expected output from load:
 ```
 loaded s3://omnigraph-local/repos/spike-intel on branch main with overwrite: 111 nodes across 9 node types, 148 edges across 16 edge types
 ```
+
+### Start the server
+
+```bash
+omnigraph-server --config ./omnigraph.yaml
+```
+
+Keep it running (separate terminal or background). All queries from here on go through it.
 
 ### Verify
 
@@ -69,10 +79,6 @@ Plus 148 edges wiring the graph together.
 
 ## Next Steps
 
-- **Start the HTTP server** (optional, for remote clients):
-  ```bash
-  omnigraph-server --config ./omnigraph.yaml
-  ```
 - **Explore queries** in `queries/*.gq`
 - **Try aliases**: see `omnigraph.yaml` under `aliases:`
 - **For day-to-day ops** (adding signals, evolving schema, branches, embeddings): switch to the `omnigraph-best-practices` skill

@@ -34,6 +34,8 @@ set -a && source ./.env.omni && set +a
 # first time only: aws --endpoint-url http://127.0.0.1:9000 s3 mb s3://omnigraph-local
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
+# Start the server (keep running), then query through it:
+omnigraph-server --config ./omnigraph.yaml &
 omnigraph read --config ./omnigraph.yaml --alias patterns disruption
 ```
 
@@ -141,15 +143,16 @@ Use web research to build real seed content. **Do not fabricate signals or dates
 4. For each pattern, identify the Elements, Companies, Experts mentioned
 5. Write `<slug>/seed.md` (tabular, human-readable) — **present this to the user for review before generating JSONL**
 6. Generate `<slug>/seed.jsonl` from the confirmed seed.md
-7. Init and load:
+7. Init, load, then start the server:
 
 ```bash
 set -a && source ./.env.omni && set +a
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/<slug>
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/<slug>
+omnigraph-server --config ./omnigraph.yaml &
 ```
 
-8. Verify with a sample query:
+8. Verify with a sample query (goes through the server):
 
 ```bash
 omnigraph read --config ./omnigraph.yaml --alias patterns <pattern-kind>
