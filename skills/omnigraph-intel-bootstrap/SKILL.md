@@ -21,11 +21,45 @@ This skill takes a user from zero to a populated, queryable SPIKE graph. Two pat
    ```bash
    curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/local-rustfs-bootstrap.sh | bash
    ```
+   The bootstrap installs `omnigraph` and `omnigraph-server` binaries under `<workdir>/.omnigraph-rustfs-demo/bin/` — **not on PATH by default**. Either add it to PATH or invoke binaries by absolute path.
+
 2. The `omnigraph-starters` repo cloned somewhere on disk. Ask the user where (or default to the current directory):
    ```bash
    git clone https://github.com/ModernRelay/omnigraph-starters.git
    ```
    Record the absolute path to the clone — the **Demo** path runs from `<clone>/industry-intel/`, the **Custom** path runs from `<clone>/` (repo root) so it can copy `industry-intel/` as a template.
+
+## Step 0: Pre-flight checks
+
+Before either path, run these checks (and act on the results):
+
+```bash
+# Are RustFS and any existing server reachable?
+curl -s -o /dev/null -w "rustfs:%{http_code}\n" http://127.0.0.1:9000/
+curl -s -o /dev/null -w "server:%{http_code}\n" http://127.0.0.1:8080/healthz
+
+# Is omnigraph on PATH?
+which omnigraph || echo "NOT ON PATH — add <workdir>/.omnigraph-rustfs-demo/bin to PATH"
+
+# Does the starter have an .env.omni? If not, seed from the example.
+[ -f <clone>/industry-intel/.env.omni ] || cp <clone>/industry-intel/.env.omni.example <clone>/industry-intel/.env.omni
+```
+
+**If `:8080` returns `200` from a server pointed at a different repo** (the bootstrap script auto-starts one), stop it before starting yours, or rebind to a free port via `omnigraph-server --bind 127.0.0.1:8090`.
+
+The `.env.omni` file (created from the example above) contains the 7 mandatory AWS env vars:
+
+```bash
+AWS_ACCESS_KEY_ID=rustfsadmin
+AWS_SECRET_ACCESS_KEY=rustfsadmin
+AWS_REGION=us-east-1
+AWS_ENDPOINT_URL=http://127.0.0.1:9000
+AWS_ENDPOINT_URL_S3=http://127.0.0.1:9000
+AWS_ALLOW_HTTP=true
+AWS_S3_FORCE_PATH_STYLE=true
+```
+
+`AWS_ALLOW_HTTP` and `AWS_S3_FORCE_PATH_STYLE` are mandatory — omitting either gives a cryptic `builder error from lance-io` at init/load time.
 
 ## Step 1: Ask the user which path
 

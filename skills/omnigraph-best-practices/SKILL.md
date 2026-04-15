@@ -31,6 +31,10 @@ curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/
 
 Defaults: RustFS S3 on `127.0.0.1:9000`, console on `:9001`, `omnigraph-server` on `:8080`, bucket `omnigraph-local`. Override with `BUCKET=foo PREFIX=repos/bar BIND=127.0.0.1:8080 curl ...`.
 
+**Heads up — port :8080 is in use after bootstrap.** The bootstrap auto-starts an `omnigraph-server` against its own demo repo. If you start a second server (e.g. for a different starter) without stopping the first, you'll get a silent port collision. Either stop the bootstrap server or start yours with `--bind 127.0.0.1:8090`.
+
+Bootstrap also installs `omnigraph` and `omnigraph-server` binaries under `<workdir>/.omnigraph-rustfs-demo/bin/` — **not on PATH by default**. Add it or invoke binaries by absolute path.
+
 ### AWS env vars (for `init`, `load`, and the server)
 
 `init` and `load` write S3-backed storage directly, and `omnigraph-server` reads from it. Both need AWS credentials pointed at RustFS. Keep them in `.env.omni` (git-ignored):

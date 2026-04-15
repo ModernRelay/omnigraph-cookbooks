@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+!.env.*.example
 
 # Omnigraph local state
 .omnigraph-rustfs-demo/

@@ -4,17 +4,31 @@ The quickest path to a populated SPIKE graph. Uses the existing `industry-intel`
 
 ## Prerequisites
 
+### RustFS + binaries
+
 RustFS must be running locally on `127.0.0.1:9000`. Verify with:
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:9000/
 ```
 
-If you get `000` (no connection), bootstrap RustFS first:
+If you get `000` (no connection), bootstrap RustFS:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/local-rustfs-bootstrap.sh | bash
 ```
+
+Bootstrap installs `omnigraph` and `omnigraph-server` under `<workdir>/.omnigraph-rustfs-demo/bin/` — **not on PATH by default**. Add it or invoke by absolute path.
+
+### Existing server on :8080
+
+Bootstrap auto-starts an `omnigraph-server` on `:8080` against its own demo repo. If you'll be running your own server (later in this flow), check first:
+
+```bash
+curl -s -o /dev/null -w "server:%{http_code}\n" http://127.0.0.1:8080/healthz
+```
+
+If `200`, either stop the bootstrap server or rebind yours via `omnigraph-server --bind 127.0.0.1:8090`.
 
 ## Get the starter content
 
@@ -28,8 +42,11 @@ Then move into the starter folder:
 
 ```bash
 cd omnigraph-starters/industry-intel
+[ -f .env.omni ] || cp .env.omni.example .env.omni
 set -a && source ./.env.omni && set +a
 ```
+
+`.env.omni` is gitignored (it's just credentials). The repo ships `.env.omni.example` with the 7 required AWS vars — copy it on first run.
 
 All commands below run from `industry-intel/`. If the clone is somewhere else, substitute the absolute path.
 
