@@ -4,15 +4,34 @@ The quickest path to a populated SPIKE graph. Uses the existing `industry-intel`
 
 ## Prerequisites
 
-1. RustFS is running locally. If not, see the `omnigraph-best-practices` skill for the bootstrap command.
-2. You're inside the `omnigraph-starters` repo.
-
-## Steps
+RustFS must be running locally on `127.0.0.1:9000`. Verify with:
 
 ```bash
-cd industry-intel
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:9000/
+```
+
+If you get `000` (no connection), bootstrap RustFS first:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/local-rustfs-bootstrap.sh | bash
+```
+
+## Get the starter content
+
+The `industry-intel` starter (schema, queries, seed) lives in the [omnigraph-starters](https://github.com/ModernRelay/omnigraph-starters) repo. Ask the user where to clone it (default: current directory):
+
+```bash
+git clone https://github.com/ModernRelay/omnigraph-starters.git
+```
+
+Then move into the starter folder:
+
+```bash
+cd omnigraph-starters/industry-intel
 set -a && source ./.env.omni && set +a
 ```
+
+All commands below run from `industry-intel/`. If the clone is somewhere else, substitute the absolute path.
 
 ### First-time bucket creation
 

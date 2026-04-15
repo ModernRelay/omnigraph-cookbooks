@@ -15,7 +15,17 @@ This skill takes a user from zero to a populated, queryable SPIKE graph. Two pat
 - **Demo** — use the existing `industry-intel` starter (AI/ML signals as of early 2026). Good for demos, exploration, and understanding what SPIKE looks like populated.
 - **Custom** — set up a new domain (biotech, crypto, fintech, geopolitics, etc.). Takes ~30–60 minutes including initial research and user review.
 
-**Prerequisite:** a local Omnigraph must be running. If the user doesn't have one, direct them to the `omnigraph-best-practices` skill first for the RustFS bootstrap.
+**Prerequisites:**
+
+1. RustFS running on `127.0.0.1:9000`. If not, bootstrap with:
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/local-rustfs-bootstrap.sh | bash
+   ```
+2. The `omnigraph-starters` repo cloned somewhere on disk. Ask the user where (or default to the current directory):
+   ```bash
+   git clone https://github.com/ModernRelay/omnigraph-starters.git
+   ```
+   The `industry-intel/` folder inside the clone holds the schema, queries, and seed used by both paths below. All commands below run from inside that folder — record the absolute path before proceeding so subsequent `cd` commands work.
 
 ## Step 1: Ask the user which path
 
@@ -34,7 +44,7 @@ Quick — just clone, init, load.
 See [`references/demo-setup.md`](references/demo-setup.md) for the full command list. Summary:
 
 ```bash
-cd industry-intel
+cd <path-to-clone>/omnigraph-starters/industry-intel
 set -a && source ./.env.omni && set +a
 # first time only: aws --endpoint-url http://127.0.0.1:9000 s3 mb s3://omnigraph-local
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
