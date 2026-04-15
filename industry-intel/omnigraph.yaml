@@ -245,9 +245,66 @@ aliases:
     name: link_element_enables_pattern
     args: [element, pattern]
 
-  # Mutations: Development
+  # Mutations: Development & affiliation
   link-developed-by:
     command: change
     query: mutations.gq
     name: link_element_developed_by
     args: [element, company]
+
+  link-affiliated-with:
+    command: change
+    query: mutations.gq
+    name: link_expert_affiliated_with
+    args: [expert, company]
+
+  # Mutations: Classification
+  link-relevant-company:
+    command: change
+    query: mutations.gq
+    name: link_signal_relevant_company
+    args: [signal, company]
+
+  # Mutations: Provenance — artifacts + sources
+  link-published-by:
+    command: change
+    query: mutations.gq
+    name: link_artifact_published_by
+    args: [artifact, source]
+
+  link-contributed-by:
+    command: change
+    query: mutations.gq
+    name: link_artifact_contributed_by
+    args: [artifact, expert]
+
+  link-spotted-in:
+    command: change
+    query: mutations.gq
+    name: link_signal_spotted_in
+    args: [signal, artifact]
+
+  link-identified-in:
+    command: change
+    query: mutations.gq
+    name: link_element_identified_in
+    args: [element, artifact]
+
+  link-knowhow-sourced-from:
+    command: change
+    query: mutations.gq
+    name: link_knowhow_sourced_from
+    args: [knowhow, artifact]
+
+  link-signal-sourced-from:
+    command: change
+    query: mutations.gq
+    name: link_signal_sourced_from
+    args: [signal, source]
+
+  # Mutations: KnowHow references
+  link-references-element:
+    command: change
+    query: mutations.gq
+    name: link_knowhow_references
+    args: [knowhow, element]

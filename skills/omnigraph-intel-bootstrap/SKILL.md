@@ -1,6 +1,6 @@
 ---
 name: omnigraph-intel-bootstrap
-description: 'Bootstrap a new Omnigraph-based SPIKE industry intelligence graph from scratch. Use this skill whenever a user wants to set up a new SPIKE graph — either with the existing AI industry demo data or for a new domain (biotech, fintech, crypto, geopolitics, macroeconomics, SaaS, climate tech, etc.). The flow presents a demo-vs-custom decision, then for custom setups elicits domain scope + actors + cadence + sources via structured multi-select (AskUserQuestion), adapts schema and enums for the target domain, runs initial web research to generate real seed content, and executes init + load. Apply aggressively when the user says any of: set up Omnigraph, bootstrap a new graph, create a new SPIKE starter, I want to track X industry, initialize intel for Y, new graph for Z domain, start a new context graph, or similar phrasing. This skill takes a user from zero to a populated, queryable graph.'
+description: 'Bootstrap a new Omnigraph-based SPIKE industry intelligence graph from scratch. Use this skill whenever a user wants to set up a new SPIKE graph — either with the existing AI industry demo data or for a new domain (biotech, fintech, crypto, geopolitics, macroeconomics, SaaS, climate tech, etc.). The flow presents a demo-vs-custom decision, then for custom setups asks about domain scope, actors, cadence, and sources, adapts schema and enums for the target domain, runs initial web research to generate real seed content, and executes init + load. Apply aggressively when the user says any of: set up Omnigraph, bootstrap a new graph, create a new SPIKE starter, I want to track X industry, initialize intel for Y, new graph for Z domain, start a new context graph, or similar phrasing. This skill takes a user from zero to a populated, queryable graph.'
 license: MIT (see LICENSE at repo root)
 metadata:
   author: ModernRelay
@@ -39,8 +39,9 @@ Before either path, run these checks (and act on the results):
 curl -s -o /dev/null -w "rustfs:%{http_code}\n" http://127.0.0.1:9000/
 curl -s -o /dev/null -w "server:%{http_code}\n" http://127.0.0.1:8080/healthz
 
-# Is omnigraph on PATH?
-which omnigraph || echo "NOT ON PATH — add <workdir>/.omnigraph-rustfs-demo/bin to PATH"
+# Ensure omnigraph is on PATH (bootstrap installs outside PATH by default)
+command -v omnigraph >/dev/null || export PATH="$PWD/.omnigraph-rustfs-demo/bin:$PATH"
+command -v omnigraph >/dev/null || { echo "omnigraph not found — install via homebrew or adjust PATH"; exit 1; }
 
 # Does the starter have an .env.omni? If not, seed from the example.
 [ -f <clone>/industry-intel/.env.omni ] || cp <clone>/industry-intel/.env.omni.example <clone>/industry-intel/.env.omni
@@ -64,11 +65,11 @@ AWS_S3_FORCE_PATH_STYLE=true
 
 ## Step 1: Ask the user which path
 
-Use AskUserQuestion:
+Ask the user (use whatever structured-question primitive your runtime offers, or a plain prompt):
 
 > Do you want to:
 > - **Demo** — set up the AI industry intel demo (5 patterns, 15 signals, ~110 nodes, ready to query in ~30 seconds)
-> - **Custom** — set up a graph for a new domain (I'll elicit your domain + sources, adapt the schema, research real seed data, and wire it up)
+> - **Custom** — set up a graph for a new domain (I'll ask about your domain + sources, adapt the schema, research real seed data, and wire it up)
 
 Branch based on the answer.
 
@@ -97,7 +98,7 @@ Six phases, in order. Don't skip ahead — each phase's output feeds the next.
 
 ### Phase 1 — Domain identification
 
-Ask the user which domain they want to track. Use AskUserQuestion with these examples as options:
+Ask the user which domain they want to track. Present these as options:
 
 - Biotech
 - Fintech
@@ -112,9 +113,9 @@ Then narrow:
 
 Capture a **project slug** for the new starter: `bio-intel`, `crypto-intel`, `geo-intel`, etc. This becomes the folder name and the repo prefix (`s3://omnigraph-local/repos/<slug>`).
 
-### Phase 2 — Key questions (multi-select)
+### Phase 2 — Key questions
 
-Use AskUserQuestion for each. See [`references/custom-domain.md`](references/custom-domain.md) for full phrasing and option lists.
+Ask each in turn (multi-select where noted). See [`references/custom-domain.md`](references/custom-domain.md) for full phrasing and option lists.
 
 - **Actors to track** (multi-select): companies, labs, regulators, individuals, protocols, investors
 - **Time horizon**: recent only (3mo), medium (12mo), or full historical

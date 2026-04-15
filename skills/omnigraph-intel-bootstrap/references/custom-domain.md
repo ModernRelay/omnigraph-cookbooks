@@ -1,12 +1,12 @@
 # Custom Domain Setup — Elicitation
 
-Full elicitation flow for Phase 1–4 of the custom path. Use AskUserQuestion throughout to give the user structured multi-select rather than free-form typing where possible.
+Full elicitation flow for Phase 1–4 of the custom path. Use whatever structured-question primitive your runtime provides (Claude Code's `AskUserQuestion`, a picker UI, or plain-text prompts) — the questions are the same either way.
 
 ## Phase 1 — Domain Identification
 
 ### 1a. Pick the domain
 
-AskUserQuestion (single-select with "Other"):
+Ask (single-select with "Other"):
 
 > **Which domain do you want to track?**
 >
@@ -49,7 +49,7 @@ Confirm with the user before proceeding.
 
 ### 2a. Actors to track
 
-AskUserQuestion (multi-select):
+Ask (multi-select):
 
 > **Which kinds of actors matter most in this domain?**
 >
@@ -65,7 +65,7 @@ The selection drives which `Company.type` enum values are needed and whether you
 
 ### 2b. Time horizon
 
-AskUserQuestion (single-select):
+Ask (single-select):
 
 > **Are we tracking only recent signals, or also historical context?**
 >
@@ -77,7 +77,7 @@ Drives how much research depth to aim for in Phase 6.
 
 ### 2c. Update cadence
 
-AskUserQuestion (single-select):
+Ask (single-select):
 
 > **How often will the graph be updated and consumed?**
 >
@@ -90,7 +90,7 @@ Drives whether to set up branch-review flow in later docs.
 
 ### 2d. Primary consumer
 
-AskUserQuestion (single-select):
+Ask (single-select):
 
 > **Who or what consumes the graph's output?**
 >
@@ -105,7 +105,7 @@ Drives `cli.output_format` default and whether to emphasize aliases for agent co
 
 **Sources are the lifeblood of a SPIKE graph. The quality of everything downstream is bounded by source quality.** Spend time here — don't rush.
 
-Ask each question sequentially. Free-form answers are fine here; AskUserQuestion is overkill for open-ended lists.
+Ask each question sequentially. Free-form answers are fine for open-ended lists.
 
 ### 3a. Primary reading list
 
