@@ -119,6 +119,12 @@ aliases:
     name: insight_patterns
     args: [slug]
 
+  insight-elements:
+    command: read
+    query: insights.gq
+    name: insight_elements
+    args: [slug]
+
   # KnowHow
   knowhow:
     command: read
@@ -212,6 +218,12 @@ aliases:
     query: mutations.gq
     name: link_insight_highlights_pattern
     args: [insight, pattern]
+
+  link-relies-on-element:
+    command: change
+    query: mutations.gq
+    name: link_insight_relies_on_element
+    args: [insight, element]
 
   # Mutations: Signal → Element
   link-on-element:

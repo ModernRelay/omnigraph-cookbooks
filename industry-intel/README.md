@@ -23,6 +23,8 @@ Signals and Patterns form the analytical core. Insights interpret them. Elements
     │                   └── UsesElement ────▶ Element
     │
   Insight ── HighlightsPattern ──────▶ Pattern
+    │
+    └── ReliesOnElement ─────────────▶ Element
 
   KnowHow ── ReferencesElement ───────▶ Element
 ```
@@ -41,7 +43,7 @@ Five live patterns in the AI industry:
 
 Each pattern is backed by ~3 real, dated signals with source URLs. Signals connect to the Elements (products, frameworks, concepts) they're about, which in turn connect to Companies that built them.
 
-**Totals:** 111 nodes, 148 edges.
+**Totals:** 109 nodes, 154 edges.
 
 ## Schema Essentials
 
@@ -63,6 +65,7 @@ Each pattern is backed by ~3 real, dated signals with source URLs. Signals conne
 | `ContradictsPattern` | Signal → Pattern | this movement pushes back against that theme |
 | `DrivesPattern` / `ReliesOnPattern` / `ContradictsToPattern` | Pattern → Pattern | causality and structure between themes |
 | `HighlightsPattern` | Insight → Pattern | this observation illuminates a theme |
+| `ReliesOnElement` | Insight → Element | this insight is grounded in a concrete thing |
 | `ExemplifiesPattern` / `EnablesPattern` | Element → Pattern | concrete examples or enablers of a theme |
 | `OnElement` | Signal → Element | which thing the signal is about |
 | `EnablesElement` / `UsesElement` | Element → Element | capability and dependency relationships |

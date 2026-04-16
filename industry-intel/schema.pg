@@ -134,10 +134,11 @@ edge ContradictsPattern: Signal -> Pattern
 
 
 // ──────────────────────────────────────────────
-// Edges: Insight → Pattern
+// Edges: Insight → Pattern / Element
 // ──────────────────────────────────────────────
 
 edge HighlightsPattern: Insight -> Pattern
+edge ReliesOnElement: Insight -> Element
 
 
 // ──────────────────────────────────────────────

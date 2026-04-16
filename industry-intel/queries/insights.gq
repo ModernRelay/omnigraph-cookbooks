@@ -24,3 +24,13 @@ query insight_patterns($slug: String) {
     }
     return { $p.slug, $p.name, $p.kind, $p.brief }
 }
+
+// Insight -> Element
+
+query insight_elements($slug: String) {
+    match {
+        $i: Insight { slug: $slug }
+        $i reliesOnElement $e
+    }
+    return { $e.slug, $e.name, $e.kind, $e.brief }
+}

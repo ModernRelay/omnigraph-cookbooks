@@ -58,6 +58,10 @@ query link_insight_highlights_pattern($insight: String, $pattern: String) {
     insert HighlightsPattern { from: $insight, to: $pattern }
 }
 
+query link_insight_relies_on_element($insight: String, $element: String) {
+    insert ReliesOnElement { from: $insight, to: $element }
+}
+
 query link_pattern_relies_on($from: String, $to: String) {
     insert ReliesOnPattern { from: $from, to: $to }
 }

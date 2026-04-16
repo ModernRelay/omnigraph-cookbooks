@@ -82,7 +82,6 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | slug | name | kind | brief | category |
 |------|------|------|-------|----------|
 | `el-zylon` | Zylon | product | On-prem AI platform for regulated industries. PrivateGPT (57k stars). Air-gapped, fixed-cost. | [infrastructure] |
-| `el-palantir-apollo` | Palantir Apollo | product | Deployment orchestration across air-gapped, classified, edge environments. FedRAMP High, IL5/IL6. | [infrastructure, agentic] |
 | `el-nanograph` | nanograph | product | Schema-first embedded property graph, Rust, local-first. SPIKE ontology. "SQLite for graphs." | [database] |
 
 | `el-hermes-agent` | Hermes Agent | framework | NousResearch OSS agent framework. 40+ tools. Runs on $300 mini PC with local models. | [agentic] |
@@ -93,7 +92,6 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `el-edra` | Edra | product | Auto-updating knowledge bases from operational data. Sequoia-backed. Ex-Palantir founders. | [agentic, rag] |
 | `el-hornet` | Hornet | product | Retrieval engine for agents. Vespa veterans. Schema-first APIs. VPC/on-prem. OSS. | [rag, infrastructure] |
 | `el-playerzero-sim1` | PlayerZero / Sim-1 | product | Long-trace reasoning engine. 92.6% prediction accuracy. PR-level blast radius in CI/CD. | [agentic, dev_tools] |
-| `el-zep-graphiti` | Zep / Graphiti | framework | Temporal knowledge graph for agent memory. Bi-temporal tracking. 94.8-98.2% Deep Memory Retrieval. | [memory, database] |
 | `el-genkm` | GenKM | concept | Unified framework for AI-native KGs. 4-stage architecture. 20+ operator algebra. Provenance tracking. | [rag] |
 | `el-claude-mythos-preview` | Claude Mythos Preview | product | Emergent cybersecurity capabilities. Zero-day exploitation. Not generally available — Project Glasswing only. | [ai_model] |
 | `el-project-glasswing` | Project Glasswing | product | Anthropic's defender-first release of Mythos for securing critical software. | [infrastructure] |
@@ -131,9 +129,7 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | ExemplifiesPattern | `el-erdos-ai-tools` | `pat-accelerated-research` |
 | EnablesPattern | `el-mcp` | `pat-context-graphs` |
 | EnablesPattern | `el-mcp` | `pat-saaspocalypse` |
-| EnablesPattern | `el-palantir-apollo` | `pat-sovereign-ai` |
 | EnablesPattern | `el-hornet` | `pat-context-graphs` |
-| EnablesPattern | `el-zep-graphiti` | `pat-context-graphs` |
 | EnablesPattern | `el-project-glasswing` | `pat-new-cyber-threats` |
 | EnablesPattern | `el-karpathy-llm-wiki` | `pat-accelerated-research` |
 
@@ -152,13 +148,14 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 
 ---
 
-## Insights (3)
+## Insights (4)
 
 | slug | name | brief | importance |
 |------|------|-------|------------|
 | `ins-agents-informed-walkers` | Agents are informed walkers | Agent traverses context graph → adds decision trace → graph compounds → agent becomes smarter. Graph sits as semantic layer on existing data. | Reframes context graphs from product to protocol — works on SQL, NoSQL, markdown. |
 | `ins-functionality-portable` | Functionality is now portable | Claude Code enables cloning cloud apps locally. Not data portability — functionality portability. Apps without network effects are easy to clone. | Explains why SaaS moat was never the feature set — it was the rebuild cost. That cost is now near-zero. |
 | `ins-agents-thrive-messy-systems` | Agents thrive in messy legacy systems | Agents don't need clean APIs. They navigate complex, poorly designed systems natively, choosing tools by semantic value and durability. | Inverts the conventional build-for-agents narrative. Legacy isn't a blocker, it's an opportunity. |
+| `ins-onprem-is-new-cloud` | On-prem is the new cloud | Cloud infra and foundation models are commoditizing. What stays proprietary — data, policies, workflows, ontology — is now the moat. Local frontier models + agent-driven setup collapse on-prem cost; sovereign AI flips from escape hatch to default. | Inverts the 20-year default. As cloud and foundation models commoditize, the durable moat moves inward. |
 
 ### Insight → Pattern edges (HighlightsPattern)
 
@@ -167,6 +164,20 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `ins-agents-informed-walkers` | `pat-context-graphs` |
 | `ins-functionality-portable` | `pat-saaspocalypse` |
 | `ins-agents-thrive-messy-systems` | `pat-new-cyber-threats` |
+| `ins-onprem-is-new-cloud` | `pat-sovereign-ai` |
+
+### Insight → Element edges (ReliesOnElement)
+
+| insight | element |
+|---------|---------|
+| `ins-agents-informed-walkers` | `el-nanograph` |
+| `ins-functionality-portable` | `el-headless-saas` |
+| `ins-functionality-portable` | `el-claude-cowork` |
+| `ins-agents-thrive-messy-systems` | `el-hermes-agent` |
+| `ins-agents-thrive-messy-systems` | `el-openclaw` |
+| `ins-onprem-is-new-cloud` | `el-kimi-k25` |
+| `ins-onprem-is-new-cloud` | `el-zylon` |
+| `ins-onprem-is-new-cloud` | `el-nanograph` |
 
 ---
 
@@ -197,7 +208,6 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `co-google-deepmind` | Google DeepMind | research | AlphaEvolve, AI co-scientist, ScholarPeer, agent attack taxonomy |
 | `co-moonshot-ai` | Moonshot AI | developer | Kimi K2.5. Beijing. Alibaba-backed. |
 | `co-zylon` | Zylon | developer | On-prem AI platform. Built PrivateGPT. |
-| `co-palantir` | Palantir | developer | AIP, Apollo, Ontology, FDE model |
 | `co-meta` | Meta | bigtech | KernelEvolve. Rogue agent breach Mar 2026. |
 | `co-edra` | Edra | developer | Auto-updating knowledge bases. Ex-Palantir. |
 | `co-hornet` | Hornet | developer | Agentic retrieval engine. Vespa veterans. |
@@ -213,7 +223,6 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | element | company |
 |---------|---------|
 | `el-zylon` | `co-zylon` |
-| `el-palantir-apollo` | `co-palantir` |
 | `el-kimi-k25` | `co-moonshot-ai` |
 
 | `el-hermes-agent` | `co-nousresearch` |
@@ -394,7 +403,6 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | slug | website | repository | license | release_year |
 |------|---------|-----------|---------|-------------|
 | `el-zylon` | https://zylon.ai | https://github.com/zylon-ai/private-gpt | proprietary | 2025 |
-| `el-palantir-apollo` | https://palantir.com | — | proprietary | 2020 |
 | `el-nanograph` | — | — | — | 2026 |
 
 | `el-hermes-agent` | https://nousresearch.com | https://github.com/NousResearch/hermes-agent | Apache 2.0 | 2026 |
@@ -404,7 +412,6 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `el-edra` | https://edra.ai | — | proprietary | 2026 |
 | `el-hornet` | https://hornet.dev | — | open source (TBA) | 2026 |
 | `el-playerzero-sim1` | https://playerzero.app | — | proprietary | 2024 |
-| `el-zep-graphiti` | https://getzep.com | https://github.com/getzep/graphiti | Apache 2.0 | 2024 |
 | `el-genkm` | — | — | — | 2026 |
 | `el-claude-mythos-preview` | — | — | restricted (Glasswing only) | 2026 |
 | `el-project-glasswing` | https://anthropic.com/glasswing | — | — | 2026 |
@@ -493,8 +500,6 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 
 **`el-zylon`** — Full-stack on-prem AI platform from the PrivateGPT creators (57k stars). Air-gapped, fixed-cost, production-ready in days. Three tiers: cloud VPC, managed on-prem (via certified partners), or "Zylon in a Box" pre-configured server.
 
-**`el-palantir-apollo`** — Palantir's deployment orchestration for air-gapped, classified (JWICS, SIPRNet), and edge environments. Manages thousands of microservices across hundreds of environments that can't reach the public internet. FedRAMP High, IL5/IL6.
-
 **`el-nanograph`** — Schema-first embedded graph in Rust. Single binary, no cloud dependency. SPIKE ontology as core schema. "SQLite for graphs."
 
 
@@ -513,8 +518,6 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 **`el-hornet`** — Retrieval engine for agents, not humans. Built by Vespa veterans. Agents issue long structured queries in reasoning loops — Hornet trades latency for throughput and recall. Schema-first APIs. On-prem, OSS.
 
 **`el-playerzero-sim1`** — Long-trace reasoning engine. 92.6% accuracy predicting production failures (vs 73.8% Codex/Claude). 64% of failures predictable pre-merge; 83% invisible to CI/CD. $20M funded (Foundation Capital).
-
-**`el-zep-graphiti`** — Temporal knowledge graph engine (Apache 2.0). Bi-temporal tracking: when it happened + when recorded. 94.8-98.2% on Deep Memory Retrieval. 90% faster than MemGPT. MCP server included.
 
 **`el-genkm`** — Methodology unifying 40+ Graph RAG systems under one formalism. 4-stage architecture (Document → Entity-Relation → Cluster → Ontology). 20+ operator algebra with provenance tracking. By Fanghua Yu.
 
@@ -552,6 +555,8 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 
 **`ins-agents-thrive-messy-systems`** — The conventional Silicon Valley narrative argues that developers must build clean APIs, IDLs, or MCP interfaces so AI agents can use their software. Aaron Levie (CEO, Box) argues this is fundamentally wrong: agents are exceptionally good at navigating complex, poorly designed systems natively. They choose tools based on semantic value (does this tool actually solve my problem?), backend cost (how expensive is this call?), and durability (will this interface still work tomorrow?) — rather than requiring elegant developer experience. The implication inverts the "build for agents" narrative: legacy systems aren't a blocker to agentic adoption, they're an opportunity. The enterprises with the messiest, most complex systems may benefit most.
 
+**`ins-onprem-is-new-cloud`** — For two decades, cloud was the default and on-prem was the compliance escape hatch. That relationship is inverting. Open-source frontier models (Kimi K2.5's 1T/32B MoE at 76% lower cost under Modified MIT) are deployable on commodity hardware. Agents now configure firmware, networking, Kubernetes, and Terraform in hours — collapsing the operational tax that made self-hosting impractical. Turnkey platforms (Zylon: air-gapped in under a week) productize the playbook. What remains — and becomes the durable moat — is the stack each company owns: their data, their policies, their workflows, their ontology. Cloud infrastructure and foundation models commoditize fast; the moat moves inward. "On-prem is the new cloud" isn't hardware nostalgia — it's the recognition that sovereign data and sovereign reasoning are the new platform advantage.
+
 ### KnowHows
 
 **`how-to-deploy-onprem-ai`** — A three-tier deployment pattern derived from Zylon's production architecture for regulated industries. Tier 1 (Cloud VPC): deploy into a logically isolated network within your AWS/GCP/Azure account — connect enterprise identity and internal data sources, keep endpoints private. Best for teams needing cloud elasticity with data residency and network isolation. Tier 2 (Managed On-Prem): a certified partner scopes requirements (users, workloads, latency, data classification), provisions compliant infrastructure including GPU, and installs, validates, monitors, and updates the platform under agreed controls. Partners include NeuralRack (US), Panchaea (UK), and Occentus (Spain). Best for organizations without an internal MLOps team. Tier 3 (Fully In-House / Air-Gapped): install on your own servers using online, semi-airgap, or full-airgap patterns; configure hardware/AI presets; integrate with internal identity, logging, and data systems; operate with your own patching and monitoring. Or use "Zylon in a Box" — a pre-configured server that arrives ready to run. All tiers include audit logs, RBAC, encryption at rest and in transit, and air-gap capable architecture.
@@ -575,12 +580,12 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 |-----------|-------|-----------|
 | Pattern | 5 | Yes (brief + description) |
 | Signal | 15 | Yes (brief + description + domain) |
-| Element | 26 | Yes (brief + description + metadata) |
-| Insight | 3 | Yes (brief + description) |
+| Element | 24 | Yes (brief + description + metadata) |
+| Insight | 4 | Yes (brief + description) |
 | KnowHow | 2 | Yes (brief + description + guidelines) |
-| Company | 17 | Brief only |
+| Company | 16 | Brief only |
 | Expert | 7 | Affiliations complete |
 | SourceEntity | 16 | Yes |
 | InformationArtifact | 20 | Yes |
-| **Total nodes** | **111** | |
-| Edges | ~150 | FormsPattern, OnElement, ExemplifiesPattern, EnablesPattern, EnablesElement/UsesElement, HighlightsPattern, ReferencesElement, SpottedInArtifact, SourcedFromSource, PublishedBySource, ContributedByExpert, DevelopedByCompany, AffiliatedWithCompany, RelevantCompany, SourcedFromArtifact |
+| **Total nodes** | **109** | |
+| Edges | 154 | FormsPattern, OnElement, ExemplifiesPattern, EnablesPattern, EnablesElement/UsesElement, HighlightsPattern, ReliesOnElement, ReferencesElement, SpottedInArtifact, SourcedFromSource, PublishedBySource, ContributedByExpert, DevelopedByCompany, AffiliatedWithCompany, RelevantCompany, SourcedFromArtifact |
