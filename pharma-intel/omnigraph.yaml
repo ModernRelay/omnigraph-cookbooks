@@ -1,0 +1,157 @@
+project:
+  name: Pharma Intel — Viking Therapeutics (GLP-1 Obesity)
+
+auth:
+  env_file: ./.env.omni
+
+graphs:
+  local_s3:
+    uri: s3://omnigraph-local/repos/pharma-intel
+  local_server:
+    uri: http://127.0.0.1:8080
+    bearer_token_env: OMNIGRAPH_BEARER_TOKEN
+
+server:
+  graph: local_s3
+  bind: 127.0.0.1:8080
+
+cli:
+  graph: local_server
+  branch: main
+  output_format: table
+  table_max_column_width: 80
+  table_cell_layout: truncate
+
+query:
+  roots:
+    - queries
+    - .
+
+aliases:
+  # ── Signals ──
+  signal: { command: read, query: signals.gq, name: get_signal, args: [slug], format: kv }
+  signals: { command: read, query: signals.gq, name: recent_signals }
+  signals-by-domain: { command: read, query: signals.gq, name: signals_by_domain, args: [domain] }
+  signal-patterns: { command: read, query: signals.gq, name: signal_patterns, args: [slug] }
+  signal-contradictions: { command: read, query: signals.gq, name: signal_contradictions, args: [slug] }
+  signal-compound: { command: read, query: signals.gq, name: signal_compound, args: [slug] }
+  signal-mechanism: { command: read, query: signals.gq, name: signal_mechanism, args: [slug] }
+  signal-trial: { command: read, query: signals.gq, name: signal_trial, args: [slug] }
+  signal-companies: { command: read, query: signals.gq, name: signal_companies, args: [slug] }
+  signal-supports-assumptions: { command: read, query: signals.gq, name: signal_supports_assumptions, args: [slug] }
+  signal-contradicts-assumptions: { command: read, query: signals.gq, name: signal_contradicts_assumptions, args: [slug] }
+  signal-informs-questions: { command: read, query: signals.gq, name: signal_informs_questions, args: [slug] }
+  signal-artifacts: { command: read, query: signals.gq, name: signal_artifacts, args: [slug] }
+
+  # ── Patterns ──
+  pattern: { command: read, query: patterns.gq, name: get_pattern, args: [slug], format: kv }
+  patterns: { command: read, query: patterns.gq, name: patterns_all }
+  patterns-by-kind: { command: read, query: patterns.gq, name: patterns_by_kind, args: [kind] }
+  pattern-signals: { command: read, query: patterns.gq, name: pattern_signals, args: [slug] }
+  pattern-contradictions: { command: read, query: patterns.gq, name: pattern_contradictions, args: [slug] }
+  pattern-drives: { command: read, query: patterns.gq, name: pattern_drives, args: [slug] }
+  pattern-insights: { command: read, query: patterns.gq, name: pattern_insights, args: [slug] }
+
+  # ── Compounds & Mechanisms ──
+  compound: { command: read, query: compounds.gq, name: get_compound, args: [slug], format: kv }
+  compounds: { command: read, query: compounds.gq, name: compounds_all }
+  compounds-by-phase: { command: read, query: compounds.gq, name: compounds_by_phase, args: [phase] }
+  compounds-by-mechanism: { command: read, query: compounds.gq, name: compounds_by_mechanism, args: [mechanism] }
+  compound-sponsor: { command: read, query: compounds.gq, name: compound_sponsor, args: [slug] }
+  compound-trials: { command: read, query: compounds.gq, name: compound_trials, args: [slug] }
+  compound-signals: { command: read, query: compounds.gq, name: compound_signals, args: [slug] }
+  mechanism: { command: read, query: compounds.gq, name: get_mechanism, args: [slug], format: kv }
+  mechanisms: { command: read, query: compounds.gq, name: mechanisms_all }
+  mechanism-compounds: { command: read, query: compounds.gq, name: mechanism_compounds, args: [slug] }
+  mechanism-signals: { command: read, query: compounds.gq, name: mechanism_signals, args: [slug] }
+  mechanism-signals-via-compound: { command: read, query: compounds.gq, name: mechanism_signals_via_compound, args: [slug] }
+
+  # ── Trials, Deals, Regulatory ──
+  trial: { command: read, query: pipeline.gq, name: get_trial, args: [slug], format: kv }
+  trials-by-status: { command: read, query: pipeline.gq, name: trials_by_status, args: [status] }
+  deal: { command: read, query: pipeline.gq, name: get_deal, args: [slug], format: kv }
+  deals: { command: read, query: pipeline.gq, name: deals_all }
+  regulatory: { command: read, query: pipeline.gq, name: get_regulatory, args: [slug], format: kv }
+  regulatory-recent: { command: read, query: pipeline.gq, name: regulatory_recent }
+  company: { command: read, query: pipeline.gq, name: get_company, args: [slug], format: kv }
+  company-compounds: { command: read, query: pipeline.gq, name: company_compounds, args: [slug] }
+  insight: { command: read, query: pipeline.gq, name: get_insight, args: [slug], format: kv }
+  insights: { command: read, query: pipeline.gq, name: insights_all }
+
+  # ── Internal Context (the value layer) ──
+  program: { command: read, query: programs.gq, name: get_program, args: [slug], format: kv }
+  programs: { command: read, query: programs.gq, name: programs_all }
+  program-compound: { command: read, query: programs.gq, name: program_compound, args: [slug] }
+  program-mechanism: { command: read, query: programs.gq, name: program_mechanism, args: [slug] }
+  program-assumptions: { command: read, query: programs.gq, name: program_assumptions, args: [slug] }
+  program-decisions: { command: read, query: programs.gq, name: program_decisions, args: [slug] }
+  program-competitors: { command: read, query: programs.gq, name: program_competitors, args: [slug] }
+  program-signals: { command: read, query: programs.gq, name: program_signals, args: [slug] }
+  program-landscape-signals: { command: read, query: programs.gq, name: program_landscape_signals, args: [slug] }
+  assumption: { command: read, query: programs.gq, name: get_assumption, args: [slug], format: kv }
+  assumptions: { command: read, query: programs.gq, name: assumptions_all }
+  assumption-supports: { command: read, query: programs.gq, name: assumption_supporting_signals, args: [slug] }
+  assumption-contradictions: { command: read, query: programs.gq, name: assumption_contradicting_signals, args: [slug] }
+  decision: { command: read, query: programs.gq, name: get_decision, args: [slug], format: kv }
+  decisions-upcoming: { command: read, query: programs.gq, name: decisions_upcoming }
+  decision-program: { command: read, query: programs.gq, name: decision_program, args: [slug] }
+  decision-questions: { command: read, query: programs.gq, name: decision_questions, args: [slug] }
+  decision-assumptions: { command: read, query: programs.gq, name: decision_assumptions, args: [slug] }
+  question: { command: read, query: programs.gq, name: get_question, args: [slug], format: kv }
+  questions: { command: read, query: programs.gq, name: questions_open }
+  question-signals: { command: read, query: programs.gq, name: question_signals, args: [slug] }
+
+  # ── Mutations: pipeline nodes ──
+  add-compound: { command: change, query: mutations.gq, name: add_compound, args: [slug, name, phase, createdAt, updatedAt] }
+  add-mechanism: { command: change, query: mutations.gq, name: add_mechanism, args: [slug, name, createdAt, updatedAt] }
+  add-trial: { command: change, query: mutations.gq, name: add_trial, args: [slug, name, status, createdAt, updatedAt] }
+  add-company: { command: change, query: mutations.gq, name: add_company, args: [slug, name] }
+  add-deal: { command: change, query: mutations.gq, name: add_deal, args: [slug, name, createdAt, updatedAt] }
+  add-regulatory: { command: change, query: mutations.gq, name: add_regulatory, args: [slug, name, createdAt, updatedAt] }
+
+  # ── Mutations: SPIKE nodes ──
+  add-signal: { command: change, query: mutations.gq, name: add_signal, args: [slug, name, brief, stagingTimestamp, createdAt, updatedAt] }
+  add-pattern: { command: change, query: mutations.gq, name: add_pattern, args: [slug, name, kind, createdAt, updatedAt] }
+  add-insight: { command: change, query: mutations.gq, name: add_insight, args: [slug, name, createdAt, updatedAt] }
+
+  # ── Mutations: provenance ──
+  add-source: { command: change, query: mutations.gq, name: add_source, args: [slug, name] }
+  add-artifact: { command: change, query: mutations.gq, name: add_artifact, args: [slug, name, artifactType, stagingTimestamp, createdAt, updatedAt] }
+
+  # ── Mutations: internal context ──
+  add-program: { command: change, query: mutations.gq, name: add_program, args: [slug, name, createdAt, updatedAt] }
+  add-assumption: { command: change, query: mutations.gq, name: add_assumption, args: [slug, name, level, createdAt, updatedAt] }
+  add-decision: { command: change, query: mutations.gq, name: add_decision, args: [slug, name, status, createdAt, updatedAt] }
+  add-question: { command: change, query: mutations.gq, name: add_question, args: [slug, name, status, createdAt, updatedAt] }
+
+  # ── Mutations: SPIKE analytical edges ──
+  link-forms-pattern: { command: change, query: mutations.gq, name: link_forms_pattern, args: [signal, pattern] }
+  link-contradicts-pattern: { command: change, query: mutations.gq, name: link_contradicts_pattern, args: [signal, pattern] }
+  link-highlights-pattern: { command: change, query: mutations.gq, name: link_highlights_pattern, args: [insight, pattern] }
+  link-drives-pattern: { command: change, query: mutations.gq, name: link_drives_pattern, args: [from, to] }
+
+  # ── Mutations: signal → pipeline classification ──
+  link-about-compound: { command: change, query: mutations.gq, name: link_about_compound, args: [signal, compound] }
+  link-about-mechanism: { command: change, query: mutations.gq, name: link_about_mechanism, args: [signal, mechanism] }
+  link-about-trial: { command: change, query: mutations.gq, name: link_about_trial, args: [signal, trial] }
+  link-relevant-company: { command: change, query: mutations.gq, name: link_relevant_company, args: [signal, company] }
+
+  # ── Mutations: pipeline structure ──
+  link-compound-mechanism: { command: change, query: mutations.gq, name: link_compound_mechanism, args: [compound, mechanism] }
+  link-compound-company: { command: change, query: mutations.gq, name: link_compound_company, args: [compound, company] }
+  link-trial-compound: { command: change, query: mutations.gq, name: link_trial_compound, args: [trial, compound] }
+
+  # ── Mutations: internal ↔ external (the value bridge) ──
+  link-signal-supports-assumption: { command: change, query: mutations.gq, name: link_signal_supports_assumption, args: [signal, assumption] }
+  link-signal-contradicts-assumption: { command: change, query: mutations.gq, name: link_signal_contradicts_assumption, args: [signal, assumption] }
+  link-signal-informs-question: { command: change, query: mutations.gq, name: link_signal_informs_question, args: [signal, question] }
+
+  # ── Mutations: internal structure ──
+  link-program-assumption: { command: change, query: mutations.gq, name: link_program_assumption, args: [program, assumption] }
+  link-decision-program: { command: change, query: mutations.gq, name: link_decision_program, args: [decision, program] }
+  link-decision-question: { command: change, query: mutations.gq, name: link_decision_question, args: [decision, question] }
+  link-decision-assumption: { command: change, query: mutations.gq, name: link_decision_assumption, args: [decision, assumption] }
+
+  # ── Mutations: provenance edges ──
+  link-artifact-source: { command: change, query: mutations.gq, name: link_artifact_source, args: [artifact, source] }
+  link-signal-artifact: { command: change, query: mutations.gq, name: link_signal_artifact, args: [signal, artifact] }

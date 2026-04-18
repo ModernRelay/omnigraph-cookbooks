@@ -1,0 +1,270 @@
+// Pharma Intel: SPIKE + Competitive Pipeline + Internal Context — Omnigraph Schema
+// Seeded around Viking Therapeutics (VKTX) as the public-company sponsor.
+// Three layers: External Pipeline, SPIKE Intelligence, Internal Context.
+
+
+// ──────────────────────────────────────────────
+// External Pipeline Nodes
+// ──────────────────────────────────────────────
+
+node Compound {
+    slug: String @key
+    name: String @index
+    generic_name: String?
+    brief: String?
+    description: String?
+    modality: enum(small-molecule, peptide, biologic, antibody, gene-therapy, cell-therapy)?
+    phase: enum(preclinical, phase-1, phase-2, phase-3, approved, discontinued, withdrawn) @index
+    indication: String?
+    moa_summary: String?
+    route: enum(oral, subcutaneous, iv, intranasal, other)?
+    first_in_human: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Mechanism {
+    slug: String @key
+    name: String @index
+    brief: String?
+    description: String?
+    target: String?
+    pathway: String?
+    validation: enum(preclinical, clinical, approved, questioned)?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Trial {
+    slug: String @key
+    name: String @index
+    nct_id: String? @index
+    phase: enum(phase-1, phase-2, phase-3, phase-4)?
+    status: enum(not-started, enrolling, ongoing, completed, terminated, discontinued) @index
+    design: String?
+    primary_endpoint: String?
+    enrollment: I32?
+    readout_date: String?
+    brief: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Company {
+    slug: String @key
+    name: String @index
+    brief: String?
+    ticker: String?
+    type: enum(pharma, biotech, cro, academic, regulator, payer, investor, association)?
+    hq: String?
+    site: String?
+}
+
+node Deal {
+    slug: String @key
+    name: String @index
+    type: enum(acquisition, license, collaboration, option, asset-purchase)?
+    brief: String?
+    value_usd_m: F64?
+    upfront_usd_m: F64?
+    announced_date: String? @index
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node RegulatoryAction {
+    slug: String @key
+    name: String @index
+    agency: enum(fda, ema, pmda, mhra, nmpa, other)?
+    type: enum(approval, crl, advisory-committee, guidance, warning-letter, withdrawal, priority-review, breakthrough, fast-track, label-change)?
+    brief: String?
+    description: String?
+    action_date: String? @index
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// SPIKE Intelligence Nodes
+// ──────────────────────────────────────────────
+
+node Signal {
+    slug: String @key
+    name: String @index
+    brief: String @index
+    description: String?
+    domain: enum(obesity, t2d, nash, cardiovascular, neuro, oncology, rare, payer, regulatory, manufacturing)?
+    stagingTimestamp: DateTime @index
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Pattern {
+    slug: String @key
+    name: String @index
+    kind: enum(challenge, disruption, dynamic) @index
+    brief: String?
+    description: String?
+    evolution: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Insight {
+    slug: String @key
+    name: String @index
+    brief: String?
+    description: String?
+    importance: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Supportive Nodes (Provenance)
+// ──────────────────────────────────────────────
+
+node SourceEntity {
+    slug: String @key
+    name: String @index
+    type: enum(newswire, journal, regulatory-feed, company-press, earnings-call, analyst-report, conference, sec-filing, blog)?
+    url: String?
+}
+
+node InformationArtifact {
+    slug: String @key
+    name: String @index
+    artifactType: enum(press-release, sec-filing, trial-registration, fda-letter, article, paper, slide-deck, earnings-transcript, advisory-committee-doc)
+    link: String? @unique
+    stagingTimestamp: DateTime @index
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Internal Context Nodes (Viking as sponsor)
+// ──────────────────────────────────────────────
+
+node Program {
+    slug: String @key
+    name: String @index
+    brief: String?
+    description: String?
+    phase: enum(preclinical, phase-1, phase-2, phase-3, approved, discontinued)?
+    indication: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Assumption {
+    slug: String @key
+    name: String @index
+    brief: String?
+    statement: String?
+    level: enum(investment, scientific, competitive, strategic) @index
+    established_date: String?
+    source_url: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Decision {
+    slug: String @key
+    name: String @index
+    brief: String?
+    description: String?
+    decision_date: String? @index
+    status: enum(upcoming, decided, deferred) @index
+    decider: String?
+    outcome: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node OpenQuestion {
+    slug: String @key
+    name: String @index
+    brief: String?
+    description: String?
+    status: enum(open, resolved) @index
+    asked_by: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Core Analytical Edges (SPIKE)
+// ──────────────────────────────────────────────
+
+edge FormsPattern: Signal -> Pattern
+edge ContradictsPattern: Signal -> Pattern
+edge HighlightsPattern: Insight -> Pattern
+edge DrivesPattern: Pattern -> Pattern
+edge ContradictsToPattern: Pattern -> Pattern
+edge ReliesOnCompound: Insight -> Compound
+edge ReliesOnMechanism: Insight -> Mechanism
+
+
+// ──────────────────────────────────────────────
+// Signal Classification (Signal → External)
+// ──────────────────────────────────────────────
+
+edge AboutCompound: Signal -> Compound
+edge AboutMechanism: Signal -> Mechanism
+edge AboutTrial: Signal -> Trial
+edge AboutRegulatoryAction: Signal -> RegulatoryAction
+edge AboutDeal: Signal -> Deal
+edge RelevantCompany: Signal -> Company
+
+
+// ──────────────────────────────────────────────
+// Pipeline Structure
+// ──────────────────────────────────────────────
+
+edge TargetsMechanism: Compound -> Mechanism
+edge DevelopedByCompany: Compound -> Company
+edge InvestigatesCompound: Trial -> Compound
+edge SponsoredByCompany: Trial -> Company
+edge DealLeadParty: Deal -> Company
+edge DealCounterParty: Deal -> Company
+edge TargetsCompound: RegulatoryAction -> Compound
+edge TargetsMechanismReg: RegulatoryAction -> Mechanism
+
+
+// ──────────────────────────────────────────────
+// Internal → External (the value layer)
+// ──────────────────────────────────────────────
+
+edge ProgramDevelopsCompound: Program -> Compound
+edge ProgramTargetsMechanism: Program -> Mechanism
+edge ProgramOwnedByCompany: Program -> Company
+edge ProgramCompetesInMechanism: Program -> Mechanism
+edge SupportsAssumption: Signal -> Assumption
+edge ContradictsAssumption: Signal -> Assumption
+edge InformsQuestion: Signal -> OpenQuestion
+
+
+// ──────────────────────────────────────────────
+// Internal Structure
+// ──────────────────────────────────────────────
+
+edge ProgramDependsOnAssumption: Program -> Assumption
+edge DecisionRegardingProgram: Decision -> Program
+edge DecisionNeedsAnswer: Decision -> OpenQuestion
+edge DecisionBasedOnAssumption: Decision -> Assumption
+edge QuestionRegardingProgram: OpenQuestion -> Program
+edge QuestionRegardingMechanism: OpenQuestion -> Mechanism
+edge QuestionRegardingCompound: OpenQuestion -> Compound
+
+
+// ──────────────────────────────────────────────
+// Provenance
+// ──────────────────────────────────────────────
+
+edge PublishedBySource: InformationArtifact -> SourceEntity @card(0..1)
+edge SpottedInArtifact: Signal -> InformationArtifact
+edge SourcedFromSource: Signal -> SourceEntity

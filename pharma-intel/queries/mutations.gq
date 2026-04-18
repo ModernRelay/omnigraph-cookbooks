@@ -1,0 +1,169 @@
+// ──────────────────────────────────────────────
+// External pipeline nodes
+// ──────────────────────────────────────────────
+
+query add_compound($slug: String, $name: String, $phase: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Compound { slug: $slug, name: $name, phase: $phase, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_mechanism($slug: String, $name: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Mechanism { slug: $slug, name: $name, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_trial($slug: String, $name: String, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Trial { slug: $slug, name: $name, status: $status, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_company($slug: String, $name: String) {
+    insert Company { slug: $slug, name: $name }
+}
+
+query add_deal($slug: String, $name: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Deal { slug: $slug, name: $name, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_regulatory($slug: String, $name: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert RegulatoryAction { slug: $slug, name: $name, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+// ──────────────────────────────────────────────
+// SPIKE nodes
+// ──────────────────────────────────────────────
+
+query add_signal($slug: String, $name: String, $brief: String, $stagingTimestamp: DateTime, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Signal { slug: $slug, name: $name, brief: $brief, stagingTimestamp: $stagingTimestamp, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_pattern($slug: String, $name: String, $kind: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Pattern { slug: $slug, name: $name, kind: $kind, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_insight($slug: String, $name: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Insight { slug: $slug, name: $name, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+// ──────────────────────────────────────────────
+// Provenance nodes
+// ──────────────────────────────────────────────
+
+query add_source($slug: String, $name: String) {
+    insert SourceEntity { slug: $slug, name: $name }
+}
+
+query add_artifact($slug: String, $name: String, $artifactType: String, $stagingTimestamp: DateTime, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert InformationArtifact { slug: $slug, name: $name, artifactType: $artifactType, stagingTimestamp: $stagingTimestamp, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+// ──────────────────────────────────────────────
+// Internal context nodes
+// ──────────────────────────────────────────────
+
+query add_program($slug: String, $name: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Program { slug: $slug, name: $name, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_assumption($slug: String, $name: String, $level: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Assumption { slug: $slug, name: $name, level: $level, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_decision($slug: String, $name: String, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Decision { slug: $slug, name: $name, status: $status, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_question($slug: String, $name: String, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert OpenQuestion { slug: $slug, name: $name, status: $status, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+// ──────────────────────────────────────────────
+// SPIKE analytical edges
+// ──────────────────────────────────────────────
+
+query link_forms_pattern($signal: String, $pattern: String) {
+    insert FormsPattern { from: $signal, to: $pattern }
+}
+
+query link_contradicts_pattern($signal: String, $pattern: String) {
+    insert ContradictsPattern { from: $signal, to: $pattern }
+}
+
+query link_highlights_pattern($insight: String, $pattern: String) {
+    insert HighlightsPattern { from: $insight, to: $pattern }
+}
+
+query link_drives_pattern($from: String, $to: String) {
+    insert DrivesPattern { from: $from, to: $to }
+}
+
+// Signal → external classification
+
+query link_about_compound($signal: String, $compound: String) {
+    insert AboutCompound { from: $signal, to: $compound }
+}
+
+query link_about_mechanism($signal: String, $mechanism: String) {
+    insert AboutMechanism { from: $signal, to: $mechanism }
+}
+
+query link_about_trial($signal: String, $trial: String) {
+    insert AboutTrial { from: $signal, to: $trial }
+}
+
+query link_relevant_company($signal: String, $company: String) {
+    insert RelevantCompany { from: $signal, to: $company }
+}
+
+// Pipeline structure
+
+query link_compound_mechanism($compound: String, $mechanism: String) {
+    insert TargetsMechanism { from: $compound, to: $mechanism }
+}
+
+query link_compound_company($compound: String, $company: String) {
+    insert DevelopedByCompany { from: $compound, to: $company }
+}
+
+query link_trial_compound($trial: String, $compound: String) {
+    insert InvestigatesCompound { from: $trial, to: $compound }
+}
+
+// Internal → external
+
+query link_signal_supports_assumption($signal: String, $assumption: String) {
+    insert SupportsAssumption { from: $signal, to: $assumption }
+}
+
+query link_signal_contradicts_assumption($signal: String, $assumption: String) {
+    insert ContradictsAssumption { from: $signal, to: $assumption }
+}
+
+query link_signal_informs_question($signal: String, $question: String) {
+    insert InformsQuestion { from: $signal, to: $question }
+}
+
+// Internal structure
+
+query link_program_assumption($program: String, $assumption: String) {
+    insert ProgramDependsOnAssumption { from: $program, to: $assumption }
+}
+
+query link_decision_program($decision: String, $program: String) {
+    insert DecisionRegardingProgram { from: $decision, to: $program }
+}
+
+query link_decision_question($decision: String, $question: String) {
+    insert DecisionNeedsAnswer { from: $decision, to: $question }
+}
+
+query link_decision_assumption($decision: String, $assumption: String) {
+    insert DecisionBasedOnAssumption { from: $decision, to: $assumption }
+}
+
+// Provenance
+
+query link_artifact_source($artifact: String, $source: String) {
+    insert PublishedBySource { from: $artifact, to: $source }
+}
+
+query link_signal_artifact($signal: String, $artifact: String) {
+    insert SpottedInArtifact { from: $signal, to: $artifact }
+}

@@ -1,0 +1,105 @@
+// Compound reads
+
+query get_compound($slug: String) {
+    match {
+        $c: Compound { slug: $slug }
+    }
+    return { $c.slug, $c.name, $c.generic_name, $c.phase, $c.indication, $c.modality, $c.route, $c.moa_summary, $c.description }
+}
+
+query compounds_all() {
+    match {
+        $c: Compound
+    }
+    return { $c.slug, $c.name, $c.phase, $c.indication, $c.modality, $c.route }
+    order { $c.phase, $c.name }
+}
+
+query compounds_by_phase($phase: String) {
+    match {
+        $c: Compound { phase: $phase }
+    }
+    return { $c.slug, $c.name, $c.indication, $c.modality, $c.route }
+    order { $c.name }
+}
+
+query compounds_by_mechanism($mechanism: String) {
+    match {
+        $m: Mechanism { slug: $mechanism }
+        $c targetsMechanism $m
+    }
+    return { $c.slug, $c.name, $c.phase, $c.route, $c.moa_summary }
+    order { $c.phase }
+}
+
+query compound_sponsor($slug: String) {
+    match {
+        $c: Compound { slug: $slug }
+        $c developedByCompany $co
+    }
+    return { $co.slug, $co.name, $co.ticker, $co.type }
+}
+
+query compound_trials($slug: String) {
+    match {
+        $c: Compound { slug: $slug }
+        $t investigatesCompound $c
+    }
+    return { $t.slug, $t.name, $t.nct_id, $t.phase, $t.status, $t.readout_date }
+    order { $t.phase }
+}
+
+query compound_signals($slug: String) {
+    match {
+        $c: Compound { slug: $slug }
+        $s aboutCompound $c
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+}
+
+// Mechanism reads
+
+query get_mechanism($slug: String) {
+    match {
+        $m: Mechanism { slug: $slug }
+    }
+    return { $m.slug, $m.name, $m.brief, $m.description, $m.target, $m.pathway, $m.validation }
+}
+
+query mechanisms_all() {
+    match {
+        $m: Mechanism
+    }
+    return { $m.slug, $m.name, $m.brief, $m.validation }
+    order { $m.name }
+}
+
+query mechanism_compounds($slug: String) {
+    match {
+        $m: Mechanism { slug: $slug }
+        $c targetsMechanism $m
+    }
+    return { $c.slug, $c.name, $c.phase, $c.route }
+    order { $c.phase }
+}
+
+query mechanism_signals($slug: String) {
+    match {
+        $m: Mechanism { slug: $slug }
+        $s aboutMechanism $m
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+}
+
+// All signals about ANY compound targeting this mechanism — wider rollup than aboutMechanism alone.
+query mechanism_signals_via_compound($slug: String) {
+    match {
+        $m: Mechanism { slug: $slug }
+        $c targetsMechanism $m
+        $s aboutCompound $c
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp, $c.slug }
+    order { $s.stagingTimestamp desc }
+}

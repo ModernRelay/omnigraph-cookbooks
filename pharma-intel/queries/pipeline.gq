@@ -1,0 +1,109 @@
+// Trials, Deals, Regulatory Actions, Companies, Insights
+
+query get_trial($slug: String) {
+    match {
+        $t: Trial { slug: $slug }
+    }
+    return { $t.slug, $t.name, $t.nct_id, $t.phase, $t.status, $t.design, $t.primary_endpoint, $t.enrollment, $t.readout_date, $t.brief }
+}
+
+query trials_by_status($status: String) {
+    match {
+        $t: Trial { status: $status }
+    }
+    return { $t.slug, $t.name, $t.nct_id, $t.phase, $t.readout_date }
+    order { $t.readout_date }
+}
+
+query trial_sponsor($slug: String) {
+    match {
+        $t: Trial { slug: $slug }
+        $t sponsoredByCompany $c
+    }
+    return { $c.slug, $c.name, $c.ticker, $c.type }
+}
+
+query get_deal($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+    }
+    return { $d.slug, $d.name, $d.type, $d.value_usd_m, $d.upfront_usd_m, $d.announced_date, $d.brief }
+}
+
+query deals_all() {
+    match {
+        $d: Deal
+    }
+    return { $d.slug, $d.name, $d.type, $d.value_usd_m, $d.announced_date, $d.brief }
+    order { $d.announced_date desc }
+}
+
+query deal_parties($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $d dealLeadParty $lead
+        $d dealCounterParty $counter
+    }
+    return { $lead.slug, $lead.name, $counter.slug, $counter.name }
+}
+
+query get_regulatory($slug: String) {
+    match {
+        $r: RegulatoryAction { slug: $slug }
+    }
+    return { $r.slug, $r.name, $r.agency, $r.type, $r.action_date, $r.brief, $r.description }
+}
+
+query regulatory_recent() {
+    match {
+        $r: RegulatoryAction
+    }
+    return { $r.slug, $r.name, $r.agency, $r.type, $r.action_date, $r.brief }
+    order { $r.action_date desc }
+}
+
+query regulatory_compound($slug: String) {
+    match {
+        $r: RegulatoryAction { slug: $slug }
+        $r targetsCompound $c
+    }
+    return { $c.slug, $c.name, $c.phase }
+}
+
+query get_company($slug: String) {
+    match {
+        $c: Company { slug: $slug }
+    }
+    return { $c.slug, $c.name, $c.ticker, $c.type, $c.hq, $c.site, $c.brief }
+}
+
+query company_compounds($slug: String) {
+    match {
+        $co: Company { slug: $slug }
+        $c developedByCompany $co
+    }
+    return { $c.slug, $c.name, $c.phase, $c.indication, $c.route }
+    order { $c.phase }
+}
+
+query get_insight($slug: String) {
+    match {
+        $i: Insight { slug: $slug }
+    }
+    return { $i.slug, $i.name, $i.brief, $i.description, $i.importance }
+}
+
+query insights_all() {
+    match {
+        $i: Insight
+    }
+    return { $i.slug, $i.name, $i.brief, $i.importance }
+}
+
+query insight_patterns($slug: String) {
+    match {
+        $i: Insight { slug: $slug }
+        $i highlightsPattern $p
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief }
+}

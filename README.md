@@ -7,6 +7,7 @@ Opinionated, ready-to-run graph starters built on [Omnigraph](https://github.com
 | Starter | Status | Description |
 |---------|--------|-------------|
 | [`industry-intel/`](./industry-intel) | ✅ ready | AI/ML industry intelligence graph |
+| [`pharma-intel/`](./pharma-intel) | ✅ ready | Pharma competitive intelligence with external pipeline + SPIKE + internal context (Viking Therapeutics GLP-1 reference seed) |
 | `company-context/` | 🚧 planned | Internal decisions, traces, actors, artifacts |
 | `biomed-research/` | 🚧 planned | Biotech & medical research tracking |
 | `competitor-intel/` | 🚧 planned | Competitor launches, pricing, positioning |

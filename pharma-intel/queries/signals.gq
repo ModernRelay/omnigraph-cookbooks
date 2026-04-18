@@ -1,0 +1,121 @@
+// Signal reads
+
+query get_signal($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+    }
+    return { $s.slug, $s.name, $s.brief, $s.description, $s.domain, $s.stagingTimestamp }
+}
+
+query recent_signals() {
+    match {
+        $s: Signal
+    }
+    return { $s.slug, $s.name, $s.brief, $s.domain, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+    limit 50
+}
+
+query search_signals($q: String) {
+    match {
+        $s: Signal
+        search($s.name, $q)
+    }
+    return { $s.slug, $s.name, $s.brief }
+}
+
+query signals_by_domain($domain: String) {
+    match {
+        $s: Signal { domain: $domain }
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+}
+
+// Signal → Pattern
+
+query signal_patterns($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s formsPattern $p
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief }
+}
+
+query signal_contradictions($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s contradictsPattern $p
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief }
+}
+
+// Signal → External pipeline
+
+query signal_compound($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s aboutCompound $c
+    }
+    return { $c.slug, $c.name, $c.phase, $c.indication, $c.moa_summary }
+}
+
+query signal_mechanism($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s aboutMechanism $m
+    }
+    return { $m.slug, $m.name, $m.brief }
+}
+
+query signal_trial($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s aboutTrial $t
+    }
+    return { $t.slug, $t.name, $t.nct_id, $t.phase, $t.status }
+}
+
+query signal_companies($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s relevantCompany $c
+    }
+    return { $c.slug, $c.name, $c.ticker, $c.type }
+}
+
+// Signal → Internal (the high-value edges)
+
+query signal_supports_assumptions($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s supportsAssumption $a
+    }
+    return { $a.slug, $a.name, $a.level, $a.statement }
+}
+
+query signal_contradicts_assumptions($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s contradictsAssumption $a
+    }
+    return { $a.slug, $a.name, $a.level, $a.statement }
+}
+
+query signal_informs_questions($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s informsQuestion $q
+    }
+    return { $q.slug, $q.name, $q.status, $q.description }
+}
+
+// Signal provenance
+
+query signal_artifacts($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s spottedInArtifact $a
+    }
+    return { $a.slug, $a.name, $a.artifactType, $a.link }
+}

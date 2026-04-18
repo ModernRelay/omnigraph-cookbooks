@@ -1,0 +1,72 @@
+// Pattern reads
+
+query get_pattern($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief, $p.description, $p.evolution }
+}
+
+query patterns_all() {
+    match {
+        $p: Pattern
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief }
+    order { $p.name }
+}
+
+query patterns_by_kind($kind: String) {
+    match {
+        $p: Pattern { kind: $kind }
+    }
+    return { $p.slug, $p.name, $p.brief }
+    order { $p.name }
+}
+
+// Pattern ← Signal (what supports / what contradicts)
+
+query pattern_signals($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $s formsPattern $p
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+}
+
+query pattern_contradictions($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $s contradictsPattern $p
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+}
+
+// Pattern → Pattern
+
+query pattern_drives($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $p drivesPattern $t
+    }
+    return { $t.slug, $t.name, $t.kind, $t.brief }
+}
+
+query pattern_contradicts_patterns($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $p contradictsToPattern $t
+    }
+    return { $t.slug, $t.name, $t.kind, $t.brief }
+}
+
+// Pattern ← Insight
+
+query pattern_insights($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $i highlightsPattern $p
+    }
+    return { $i.slug, $i.name, $i.brief, $i.importance }
+}
