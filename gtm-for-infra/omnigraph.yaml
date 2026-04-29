@@ -1,12 +1,12 @@
 project:
-  name: GTM Intel — Modal × Parallel
+  name: gtm-for-infra
 
 auth:
   env_file: ./.env.omni
 
 graphs:
   local_s3:
-    uri: s3://omnigraph-local/repos/gtm-intel
+    uri: s3://omnigraph-local/repos/gtm-for-infra
   local_server:
     uri: http://127.0.0.1:8080
     bearer_token_env: OMNIGRAPH_BEARER_TOKEN

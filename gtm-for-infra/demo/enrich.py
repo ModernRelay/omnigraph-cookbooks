@@ -6,8 +6,7 @@ Takes a list of account slugs + domains, fires a Parallel Task run per account
 with a fixed output schema, then writes the resulting Claims (with full Basis
 provenance) into the Omnigraph graph as a single JSONL patch.
 
-This mirrors what Modal's pipeline does today — but instead of dumping flat rows
-into Snowflake, it produces a traversable graph. Every Claim carries:
+Every Claim carries:
   - confidence (from Parallel's FieldBasis)
   - reasoning + source URLs (from FieldBasis)
   - a ResearchRun pointer with promptVersion + schemaVersion
@@ -21,9 +20,12 @@ Emits:
 
 Load into Omnigraph:
     cd ..
-    set -a && source ./.env.omni && set +a
     omnigraph load --data ./demo/out/claims-<run-id>.jsonl --mode merge \\
-        s3://omnigraph-local/repos/gtm-intel
+        /tmp/gtm-for-infra/repo
+    # or against shared storage:
+    #   set -a && source ./.env.omni && set +a
+    #   omnigraph load --data ./demo/out/claims-<run-id>.jsonl --mode merge \\
+    #       s3://omnigraph-local/repos/gtm-for-infra
 """
 
 from __future__ import annotations
@@ -330,7 +332,7 @@ def main() -> int:
     print("Load with:")
     print(
         f"  omnigraph load --data {out_file.relative_to(Path.cwd())} "
-        f"--mode merge s3://omnigraph-local/repos/gtm-intel"
+        f"--mode merge /tmp/gtm-for-infra/repo"
     )
     return 0
 

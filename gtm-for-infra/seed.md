@@ -1,6 +1,6 @@
-# GTM Intel Seed
+# gtm-for-infra seed
 
-Illustrative roster of 15 AI companies built for the Modal × Parallel demo. **Account `status` values are illustrative** — customer / prospect labels are chosen to make the lookalike query return a compelling result set, not to reflect any actual customer relationships.
+Illustrative roster of 15 AI companies. **Account `status` values are illustrative** — customer / prospect labels are chosen to make the lookalike query return a compelling result set, not to reflect any actual customer relationships.
 
 ## Roster
 
