@@ -17,9 +17,10 @@ parallel-cli auth || parallel-cli login
 If `pipx` is unavailable, install it through your system package manager. As a last resort, use the official Parallel installer only after downloading and inspecting it:
 
 ```bash
-curl -fsSLo /tmp/parallel-install.sh https://parallel.ai/install.sh
-less /tmp/parallel-install.sh
-bash /tmp/parallel-install.sh
+tmp_script="$(mktemp "${TMPDIR:-/tmp}/parallel-install.XXXXXX.sh")"
+curl -fsSLo "$tmp_script" https://parallel.ai/install.sh
+less "$tmp_script"
+bash "$tmp_script"
 ```
 
 ## Run the enrichment

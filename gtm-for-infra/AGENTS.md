@@ -133,9 +133,10 @@ parallel-cli auth || parallel-cli login
 If `pipx` is unavailable, ask the user to install it through their system package manager. As a last resort, point them to the official Parallel installer but do not pipe it directly into a shell; download it first so they can inspect it:
 
 ```bash
-curl -fsSLo /tmp/parallel-install.sh https://parallel.ai/install.sh
-less /tmp/parallel-install.sh
-bash /tmp/parallel-install.sh
+tmp_script="$(mktemp "${TMPDIR:-/tmp}/parallel-install.XXXXXX.sh")"
+curl -fsSLo "$tmp_script" https://parallel.ai/install.sh
+less "$tmp_script"
+bash "$tmp_script"
 ```
 
 Run the enrichment non-blocking, then show the returned monitoring URL to the user:

@@ -211,6 +211,26 @@ def stable_source_slug(url: str) -> str:
     return f"src-{digest}"
 
 
+def load_seed_source_slugs(seed_path: Path) -> dict[str, str]:
+    source_slugs: dict[str, str] = {}
+    if not seed_path.exists():
+        return source_slugs
+
+    with seed_path.open() as f:
+        for line in f:
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            if row.get("type") != "Source":
+                continue
+            data = row.get("data") or {}
+            url = data.get("url")
+            slug = data.get("slug")
+            if url and slug:
+                source_slugs[url] = slug
+    return source_slugs
+
+
 def _as_dict(obj: Any) -> dict[str, Any]:
     # Parallel SDK returns pydantic models; normalize to plain dicts.
     if obj is None:
@@ -228,6 +248,7 @@ def patches_for_account(
     output: dict[str, Any],
     basis: list[Any],
     asserted_at: str,
+    source_slugs_by_url: dict[str, str],
 ) -> Iterable[dict[str, Any]]:
     # One Claim per top-level output field. Cite every FieldBasis citation
     # URL as a Source node, grounded via GroundedInSource.
@@ -265,8 +286,11 @@ def patches_for_account(
             url = cd.get("url")
             if not url:
                 continue
-            source_slug = stable_source_slug(url)
-            yield emit_source(source_slug, url, cd.get("title"))
+            source_slug = source_slugs_by_url.get(url)
+            if source_slug is None:
+                source_slug = stable_source_slug(url)
+                source_slugs_by_url[url] = source_slug
+                yield emit_source(source_slug, url, cd.get("title"))
             yield edge("GroundedInSource", claim_slug, source_slug)
 
 
@@ -293,6 +317,8 @@ def main() -> int:
 
     client = Parallel(api_key=api_key)
     args.out.mkdir(parents=True, exist_ok=True)
+    seed_path = Path(__file__).resolve().parent.parent / "seed.jsonl"
+    source_slugs_by_url = load_seed_source_slugs(seed_path)
 
     batch_slug = f"run-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}"
     ran_at = now_iso()
@@ -317,7 +343,12 @@ def main() -> int:
         patch.append(emit_research_run(run_slug, res["run_id"], ran_at))
         patch.extend(
             patches_for_account(
-                slug, run_slug, res["output"], res["basis"], ran_at
+                slug,
+                run_slug,
+                res["output"],
+                res["basis"],
+                ran_at,
+                source_slugs_by_url,
             )
         )
         successful_runs += 1
