@@ -12,7 +12,7 @@ How to modify data safely in Omnigraph.
 | Additive-only bulk | `load` / `ingest --mode append` | fails on key collision |
 | Clean-slate reseed | `load` / `ingest --mode overwrite` | **destructive** — wipes the branch |
 
-> **Local vs remote**: `load` only works against local repo URIs (`load is only supported against local repo URIs in this milestone`). For remote graphs (HTTP server endpoints, CloudFront-fronted production) use `ingest` — same JSONL format, but the server orchestrates the run and leaves a reviewable branch. See [`references/remote-ops.md`](remote-ops.md) for remote-specific operational concerns including 504 handling, zombie run cleanup, and write-verification ritual.
+> **Local vs remote**: `load` only works against local repo URIs (`load is only supported against local repo URIs in this milestone`). For remote graphs (HTTP server endpoints, CloudFront-fronted production) use `ingest` — same JSONL format, but the server orchestrates the write and leaves a reviewable branch. See [`references/remote-ops.md`](remote-ops.md) for remote-specific operational concerns including 504 handling and write-verification ritual.
 
 ## `change` — Single Edits
 

@@ -37,19 +37,6 @@ omnigraph branch delete --uri $REPO <branch-name>
 
 All support `--json`.
 
-## Runs (Transactional)
-
-Runs are transactional groupings of mutations that can be prepared, then published (committed) or aborted.
-
-```bash
-omnigraph run list $REPO                 # active/recent runs
-omnigraph run show $REPO <run-id>        # detail one run
-omnigraph run publish $REPO <run-id>     # finalize
-omnigraph run abort $REPO <run-id>       # discard
-```
-
-Runs are mostly an advanced workflow — most day-to-day work uses direct `change` and `load` commands.
-
 ## Commits (History)
 
 ```bash

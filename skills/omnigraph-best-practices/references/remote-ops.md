@@ -42,46 +42,12 @@ omnigraph export --config X --type <EdgeType> | grep <slug>
 
 ## 504 Gateway Timeout: response lost, write status unknown
 
-A 504 from the proxy means the server didn't respond within the idle timeout. Three server-side outcomes are possible — **the 504 alone cannot distinguish them**:
+A 504 from the proxy means the server didn't respond within the idle timeout. Two server-side outcomes are possible — **the 504 alone cannot distinguish them**:
 
-1. **Run completed and published** — write landed, `main`'s head advanced. Common for small mutations finishing just past the 30s edge.
-2. **Run still in progress** — will publish or fail soon. Re-check after a minute.
-3. **Zombie run** — `status: running` forever, holds the branch lock, blocks future writes.
+1. **Write completed and published** — landed, `main`'s head advanced. Common for small mutations finishing just past the 30s edge.
+2. **Write still in progress** — will publish or fail soon. Re-check after a minute.
 
 Always verify via `commit list` before retrying. Blind retry on append-only types creates duplicates.
-
-## Zombie runs
-
-A zombie is a transactional run that never publishes or aborts. It holds a branch lock, so the next write to that branch queues, hits the same timeout, and becomes another zombie. Zombies cascade — a single dead run can produce 10+ over a 24h window before writes get noticeably slow.
-
-### Diagnose
-
-```bash
-# All currently-running runs
-omnigraph run list --config X | grep " running "
-
-# Inspect one — zombie if progress=False AND created_at == updated_at
-omnigraph run show --config X <run_id>
-```
-
-Anything > 10 minutes old with `progress=False` is almost certainly dead.
-
-### Clean up
-
-```bash
-omnigraph run abort   --config X <run_id>
-omnigraph branch delete --config X ingest/<name>     # if ingest left a branch behind
-```
-
-**Only abort runs you own or have confirmed abandoned.** Check `actor_id` and age first — aborting a still-active run from another actor will lose their work.
-
-### Branch deletion fails while a zombie holds the branch
-
-```
-cannot delete branch 'X' while run 'Y' targeting it is running
-```
-
-Abort the run first, then delete the branch.
 
 ## `ingest` 504 fingerprint
 
@@ -106,7 +72,6 @@ version drift on node:<Type>: snapshot pinned vN but dataset is at vM — call s
 - `sync_branch()` is **not a CLI command** — it's a server-internal directive that leaked into the error text. Don't go looking for it.
 - Cause: another actor committed to `main` between your CLI's snapshot pin and your `change` attempt.
 - Usually self-resolves on retry — the next call re-pins.
-- Fingerprint in `run list`: `status: failed` (distinct from zombie `status: running`).
 - Calling `omnigraph snapshot` does **not** reliably re-pin for subsequent `change`s in the same session.
 - If persistent, fall back to `ingest` — feature branches don't suffer from concurrent-commit drift.
 
@@ -138,6 +103,5 @@ Then read the file with offset/limit, not via piped stdout.
 - Keep mutations small. Single-node inserts finish well under the timeout.
 - Prefer `change` over `ingest` for ≤ a handful of records.
 - Always run `commit list` after a 504 before deciding to retry.
-- Don't stack timeouts — clean zombies promptly so they don't cascade.
 - For destructive or large-batch work, use `ingest` onto a feature branch and verify the branch head before merging.
 - Read large schemas via file redirect, not piped stdout.

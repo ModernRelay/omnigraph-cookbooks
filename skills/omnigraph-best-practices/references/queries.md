@@ -266,10 +266,10 @@ Date format is asymmetric between `change` (parameter values) and `ingest` / `lo
 | `change --params` | ISO string `"2026-04-29"` | ISO string `"2026-04-29T10:00:00Z"` |
 | `ingest` / `load` JSONL | Integer days since epoch `20572` | ISO string `"2026-04-29T10:00:00Z"` |
 
-Compute integer days form:
+Compute integer days form for a given date `d`:
 
 ```python
-(datetime.date.today() - datetime.date(1970, 1, 1)).days
+(d - datetime.date(1970, 1, 1)).days   # d is the date you're loading, not today()
 ```
 
 This asymmetry is one of the most common silent type errors when bulk-loading data prepared for one path through the other.

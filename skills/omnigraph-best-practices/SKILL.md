@@ -1,8 +1,8 @@
 ---
 name: omnigraph-best-practices
-description: Operate a locally or remotely deployed Omnigraph graph database. Use this skill whenever you see Omnigraph CLI commands (omnigraph init/read/change/load/ingest/schema/embed/branch/commit/run), .pg schema files, .gq query files, RustFS S3 URIs (s3://omnigraph-local/...), remote bearer-authed graph endpoints, 504 errors against a graph, zombie transactional runs, or work inside a folder containing omnigraph.yaml. Covers local RustFS setup, project layout, schema authoring and evolution (plan before apply), query linting, data changes (change vs load vs ingest, --mode merge vs overwrite), branches for data review, embeddings, aliases for automation, HTTP server operation, Cedar policy, remote graph operations (504 verification ritual, zombie run cleanup, ingest vs load tradeoffs, version drift), and common gotchas. Especially important BEFORE running schema apply (plan first), any load (pick --mode carefully), any .gq/.pg edit (lint afterward), or any write to a remote graph (verify via commit list afterward). Apply this skill aggressively when the user mentions Omnigraph, graph migrations, remote graph deploys, 504 errors, zombie runs, or graph database development.
+description: Operate a locally or remotely deployed Omnigraph graph database. Use this skill whenever you see Omnigraph CLI commands (omnigraph init/read/change/load/ingest/schema/embed/branch/commit), .pg schema files, .gq query files, RustFS S3 URIs (s3://omnigraph-local/...), remote bearer-authed graph endpoints, 504 errors against a graph, or work inside a folder containing omnigraph.yaml. Covers local RustFS setup, project layout, schema authoring and evolution (plan before apply), query linting, data changes (change vs load vs ingest, --mode merge vs overwrite), branches for data review, embeddings, aliases for automation, HTTP server operation, Cedar policy, remote graph operations (504 verification ritual, ingest vs load tradeoffs, version drift), and common gotchas. Especially important BEFORE running schema apply (plan first), any load (pick --mode carefully), any .gq/.pg edit (lint afterward), or any write to a remote graph (verify via commit list afterward). Apply this skill aggressively when the user mentions Omnigraph, graph migrations, remote graph deploys, 504 errors, or graph database development.
 license: MIT (see LICENSE at repo root)
-compatibility: Requires omnigraph CLI >= 0.2.2 and Docker (for local RustFS).
+compatibility: Requires omnigraph CLI >= 0.3.1 and Docker (for local RustFS).
 metadata:
   author: ModernRelay
   version: "0.2.0"
@@ -168,8 +168,8 @@ For anything beyond the basics, load the relevant reference file. Each is self-c
 | [`references/schema.md`](references/schema.md) | Editing `.pg` files, running `schema plan`/`apply`, renaming types, backfilling required fields |
 | [`references/queries.md`](references/queries.md) | Writing or linting `.gq` files, search functions, aggregations, multi-hop patterns |
 | [`references/data.md`](references/data.md) | Choosing between `change`, `load`, and `ingest`; branch review workflow; destructive ops |
-| [`references/remote-ops.md`](references/remote-ops.md) | Operating against a remote/CloudFront-fronted graph: 504 verification ritual, zombie runs, version drift, ingest fingerprints, append-only retry safety |
+| [`references/remote-ops.md`](references/remote-ops.md) | Operating against a remote/CloudFront-fronted graph: 504 verification ritual, version drift, ingest fingerprints, append-only retry safety |
 | [`references/search.md`](references/search.md) | Embeddings, `@embed`, vector/text ranking, scope-then-rank pattern |
 | [`references/aliases.md`](references/aliases.md) | Defining aliases for agents, structured output, JSON args |
 | [`references/server-policy.md`](references/server-policy.md) | Starting the HTTP server, routes, bearer auth, Cedar policy gating |
-| [`references/commands.md`](references/commands.md) | `snapshot`, `export`, `run list/show/publish`, `commit list/show`, config resolution order |
+| [`references/commands.md`](references/commands.md) | `snapshot`, `export`, `commit list/show`, config resolution order |
