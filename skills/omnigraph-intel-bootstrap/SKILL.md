@@ -2,7 +2,7 @@
 name: omnigraph-intel-bootstrap
 description: 'Bootstrap a new Omnigraph-based SPIKE industry intelligence graph from scratch. Use this skill whenever a user wants to set up a new SPIKE graph — either with the existing AI industry demo data or for a new domain (biotech, fintech, crypto, geopolitics, macroeconomics, SaaS, climate tech, etc.). The flow presents a demo-vs-custom decision, then for custom setups asks about domain scope, actors, cadence, and sources, adapts schema and enums for the target domain, runs initial web research to generate real seed content, and executes init + load. Apply aggressively when the user says any of: set up Omnigraph, bootstrap a new graph, create a new SPIKE starter, I want to track X industry, initialize intel for Y, new graph for Z domain, start a new context graph, or similar phrasing. This skill takes a user from zero to a populated, queryable graph.'
 license: MIT (see LICENSE at repo root)
-compatibility: Requires omnigraph CLI >= 0.2.2 and Docker (for local RustFS).
+compatibility: Requires omnigraph CLI >= 0.3.1 and Docker (for local RustFS).
 metadata:
   author: ModernRelay
   version: "0.1.0"
@@ -44,7 +44,7 @@ curl -s -o /dev/null -w "server:%{http_code}\n" http://127.0.0.1:8080/healthz
 command -v omnigraph >/dev/null || export PATH="$PWD/.omnigraph-rustfs-demo/bin:$PATH"
 command -v omnigraph >/dev/null || { echo "omnigraph not found — install via homebrew or adjust PATH"; exit 1; }
 
-# Require omnigraph >= 0.2.2 (earlier versions lack `query lint`)
+# Require omnigraph >= 0.3.1
 omnigraph version
 
 # Does the starter have an .env.omni? If not, seed from the example.

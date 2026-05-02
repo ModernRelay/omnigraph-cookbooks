@@ -11,17 +11,21 @@ A collection of Omnigraph graph starters plus packaged agent skills. Each starte
 ## Architecture
 
 - **Storage**: RustFS (S3-compatible) at `s3://omnigraph-local/repos/<name>`. `init` and `load` write directly to storage — they are one-time setup ops and bypass the server.
-- **Runtime**: `omnigraph-server` reads from storage at startup and exposes HTTP on `127.0.0.1:8080`. Day-to-day CLI calls (`read`, `change`, `query lint`) go through the server.
-- **CLI config**: Per-starter `omnigraph.yaml` defines storage URI, server bind, and a library of `aliases` — short names that map to named queries/mutations in `queries/*.gq`. Agents should invoke aliases (e.g. `omnigraph read --alias pattern-signals pat-sovereign-ai`), not raw query files.
+- **Runtime**: `omnigraph-server` reads from storage at startup and exposes HTTP on `127.0.0.1:8080`. Day-to-day CLI calls (`read`, `change`) go through the server.
+- **CLI config**: Per-starter `omnigraph.yaml` defines storage URI, server bind, and a library of `aliases` — short names that map to named queries/mutations in `queries/*.gq`. Agents should invoke aliases (e.g. `omnigraph read --alias pattern-signals pat-sovereign-ai`), not raw query files. Alias arg values are JSON-parsed first, then fall back to string — `29` is an integer, `"29"` is a string.
 - **Auth**: `.env.omni` holds RustFS AWS creds (not committed). Source before CLI commands: `set -a && source ./.env.omni && set +a`.
+
+**Prerequisite**: RustFS must be running locally (Docker-based) before anything beyond `query lint` will work. Bootstrap once via the script in `docs/best-practices.md` → *Local Setup*. Verify with `curl http://127.0.0.1:9000` (RustFS) and, once the server is up, `curl http://127.0.0.1:8080/healthz`.
 
 ## Canonical Workflow
 
 1. **Edit** `schema.pg` or `queries/*.gq`. Comments in both use `//` not `#`.
-2. **Lint** — `omnigraph query lint --schema ./schema.pg --query ./queries/<file>.gq` validates queries against the schema. Run after any edit.
+2. **Lint** — `omnigraph query lint --schema ./schema.pg --query ./queries/<file>.gq` validates queries against the schema. Run after any edit. This is a pure file check: no server, no RustFS, no `.env.omni` needed — use it as the tight inner loop while editing. Everything below requires the server running and env vars sourced.
 3. **Schema changes** — `omnigraph schema plan` before `schema apply`. Never apply without a successful plan. Use `@rename_from(...)` for property/type renames.
 4. **Data changes** — pick the right write command: `change` for edits, `load --mode merge` for bulk, `load --mode overwrite` only for clean slates. Review bulk ingests on a branch, then merge.
 5. **Never string-interpolate** into `.gq` bodies or `--params` — parameterize everything.
+
+There are no repo-level build, test, or lint commands. Validation happens per-starter via `omnigraph query lint`. CI is not configured in this repo.
 
 ## Working in a Starter
 
@@ -32,6 +36,14 @@ cd industry-intel
 set -a && source ./.env.omni && set +a
 omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
 ```
+
+Start the server once per session from inside the starter folder — `read`, `change`, and `snapshot` all go through it:
+
+```bash
+omnigraph-server --config ./omnigraph.yaml   # binds 127.0.0.1:8080
+```
+
+Leave it running in a separate terminal or background process.
 
 ## Skills and Docs
 
