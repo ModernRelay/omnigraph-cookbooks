@@ -85,13 +85,13 @@ The config field is `graphs:` (not `targets:` — that's the old schema) and `cl
 
 ### Commit these, not those
 
-**Commit:** `schema.pg`, `queries/*.gq`, `omnigraph.yaml`, `seed.md`, `seed.jsonl`, per-starter `README.md` and `CLAUDE.md`.
+**Commit:** `schema.pg`, `queries/*.gq`, `omnigraph.yaml`, `seed.md`, `seed.jsonl`, per-cookbook `README.md` and `CLAUDE.md`.
 
 **Ignore:** `.env.omni` (credentials), `.claude/` (local agent state), `*.omni/` (local repo artifacts), `.omnigraph-rustfs-demo/` (bootstrap state).
 
 ### Give agents a CLAUDE.md
 
-A per-starter `CLAUDE.md` tells coding agents where files live, what conventions matter, and how to validate. Without it, agents re-discover the same things every session.
+A per-cookbook `CLAUDE.md` tells coding agents where files live, what conventions matter, and how to validate. Without it, agents re-discover the same things every session.
 
 ## Schema Authoring
 
