@@ -1,11 +1,11 @@
 ---
 name: omnigraph-best-practices
-description: Operate a locally deployed Omnigraph graph database. Use this skill whenever you see Omnigraph CLI commands (omnigraph init/read/change/load/schema/embed/branch/commit/run), .pg schema files, .gq query files, RustFS S3 URIs (s3://omnigraph-local/...), or work inside a folder containing omnigraph.yaml. Covers local RustFS setup, project layout, schema authoring and evolution (plan before apply), query linting, data changes (change vs load --mode merge vs overwrite), branches for data review, embeddings, aliases for automation, HTTP server operation, Cedar policy, and common gotchas. Especially important BEFORE running schema apply (plan first), any load (pick --mode carefully), or any .gq/.pg edit (lint afterward). Apply this skill aggressively when the user mentions Omnigraph, graph migrations, or graph database local development.
+description: Operate a locally or remotely deployed Omnigraph graph database. Use this skill whenever you see Omnigraph CLI commands (omnigraph init/read/change/load/ingest/schema/embed/branch/commit), .pg schema files, .gq query files, RustFS S3 URIs (s3://omnigraph-local/...), remote bearer-authed graph endpoints, 504 errors against a graph, or work inside a folder containing omnigraph.yaml. Covers local RustFS setup, project layout, schema authoring and evolution (plan before apply), query linting, data changes (change vs load vs ingest, --mode merge vs overwrite), branches for data review, embeddings, aliases for automation, HTTP server operation, Cedar policy, remote graph operations (504 verification ritual, ingest vs load tradeoffs, version drift), and common gotchas. Especially important BEFORE running schema apply (plan first), any load (pick --mode carefully), any .gq/.pg edit (lint afterward), or any write to a remote graph (verify via commit list afterward). Apply this skill aggressively when the user mentions Omnigraph, graph migrations, remote graph deploys, 504 errors, or graph database development.
 license: MIT (see LICENSE at repo root)
-compatibility: Requires omnigraph CLI >= 0.2.2 and Docker (for local RustFS).
+compatibility: Requires omnigraph CLI >= 0.3.1 and Docker (for local RustFS).
 metadata:
   author: ModernRelay
-  version: "0.1.0"
+  version: "0.2.0"
   repository: https://github.com/ModernRelay/omnigraph-starters
 ---
 
@@ -13,14 +13,15 @@ metadata:
 
 This skill captures the operational rules for working with a locally deployed Omnigraph (RustFS-backed or remote S3). Follow them when authoring schema, writing queries, loading data, evolving schema, or automating graph operations.
 
-## The Six Rules
+## The Seven Rules
 
 1. **Lint before commit** — `omnigraph query lint --schema schema.pg --query queries/foo.gq` validates both sides against each other. No running repo required.
 2. **Plan before apply** — never run `schema apply` without a successful `schema plan` first. Apply is destructive; plan is free.
 3. **Branches are for data; apply is for schema** — review data ingests on a feature branch then merge. Schema changes go straight to `main`.
-4. **Pick the right write command** — `change` for edits (typechecked, parameterized), `load --mode merge` for bulk upsert, `load --mode overwrite` only for clean slates.
+4. **Pick the right write command** — `change` for edits (typechecked, parameterized), `load --mode merge` for bulk upsert on local repos, `ingest` for remote, `load --mode overwrite` only for clean slates.
 5. **Parameterize everything** — never string-interpolate values into `.gq` bodies or `--params`. Declare `$var: Type` and pass via `--params`.
 6. **Expose agent operations as aliases** — not raw CLI invocations. Aliases decouple the operation name from the query implementation.
+7. **Verify after every remote write** — compare `commit list --branch main` head before and after. The CLI's exit code is not authoritative on remote graphs; proxies can drop the response while the write commits server-side. See `references/remote-ops.md` for the verification ritual and how to recover from 504s.
 
 ## Local Setup
 
@@ -139,6 +140,13 @@ These are the traps most likely to bite. Scan this table before debugging any pa
 | Non-parameterized query values | typecheck surprise, injection risk | Declare `$param: Type` and pass via `--params` |
 | Missing required field in `insert` | `T12: insert for 'X' must provide non-nullable property 'Y'` | Accept the param in the mutation signature |
 | Long-lived feature branches | merge conflicts, schema apply blocked | Merge promptly; delete when done |
+| `mutation { ... }` wrapper in `.gq` | `parse error: expected query_file` at line 1 | Use `query <name>(...) { insert T { ... } }`; there is no top-level `mutation` keyword |
+| `--config` placed before subcommand | `unexpected argument --config` | Put `--config` **after** the subcommand (e.g. `omnigraph schema show --config X`) |
+| Reading a large schema via stdout-capped tool | Truncated, garbled, or duplicated output | `omnigraph schema show > /tmp/schema.pg` first; then read the file with offset/limit |
+| `omnigraph load` against a remote URI | `load is only supported against local repo URIs in this milestone` | Use `ingest` for remote graphs |
+| Blind retry after 504 | Duplicate Signal/Decision/Claim (append-only types lack `@key` dedup) | `commit list --branch main --json` first; head advanced means it landed; only retry if unchanged |
+| `sync_branch()` mentioned in version-drift error | Searching for nonexistent CLI command | Server-internal directive in error text; retry once, fall back to `ingest` if persistent |
+| Stale `ingest/<name>` branches at `main`'s head | 504-orphaned empty branches; eventually block writes | List branches, find ones at `main`'s `graph_commit_id`, `omnigraph branch delete --config X <name>` |
 
 ## Edge Traversal Casing
 
@@ -159,8 +167,9 @@ For anything beyond the basics, load the relevant reference file. Each is self-c
 |-----------|--------------|
 | [`references/schema.md`](references/schema.md) | Editing `.pg` files, running `schema plan`/`apply`, renaming types, backfilling required fields |
 | [`references/queries.md`](references/queries.md) | Writing or linting `.gq` files, search functions, aggregations, multi-hop patterns |
-| [`references/data.md`](references/data.md) | Choosing between `change` and `load`, branch review workflow, destructive ops |
+| [`references/data.md`](references/data.md) | Choosing between `change`, `load`, and `ingest`; branch review workflow; destructive ops |
+| [`references/remote-ops.md`](references/remote-ops.md) | Operating against a remote/CloudFront-fronted graph: 504 verification ritual, version drift, ingest fingerprints, append-only retry safety |
 | [`references/search.md`](references/search.md) | Embeddings, `@embed`, vector/text ranking, scope-then-rank pattern |
 | [`references/aliases.md`](references/aliases.md) | Defining aliases for agents, structured output, JSON args |
 | [`references/server-policy.md`](references/server-policy.md) | Starting the HTTP server, routes, bearer auth, Cedar policy gating |
-| [`references/commands.md`](references/commands.md) | `snapshot`, `export`, `run list/show/publish`, `commit list/show`, config resolution order |
+| [`references/commands.md`](references/commands.md) | `snapshot`, `export`, `commit list/show`, config resolution order |

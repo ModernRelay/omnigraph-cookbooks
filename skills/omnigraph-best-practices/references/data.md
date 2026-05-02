@@ -7,9 +7,12 @@ How to modify data safely in Omnigraph.
 | Task | Command | Why |
 |------|---------|-----|
 | Add/update a single entity | `change` with a named mutation | typechecked, parameterized, auditable |
-| Bulk upsert by `@key` | `load --mode merge` | preserves rows not in the file |
-| Additive-only bulk | `load --mode append` | fails on key collision |
-| Clean-slate reseed | `load --mode overwrite` | **destructive** — wipes the branch |
+| Bulk upsert by `@key` (local repo) | `load --mode merge` | preserves rows not in the file |
+| Bulk upsert (remote repo) | `ingest --mode merge` | server-orchestrated; `load` is rejected on remote URIs |
+| Additive-only bulk | `load` / `ingest --mode append` | fails on key collision |
+| Clean-slate reseed | `load` / `ingest --mode overwrite` | **destructive** — wipes the branch |
+
+> **Local vs remote**: `load` only works against local repo URIs (`load is only supported against local repo URIs in this milestone`). For remote graphs (HTTP server endpoints, CloudFront-fronted production) use `ingest` — same JSONL format, but the server orchestrates the write and leaves a reviewable branch. See [`references/remote-ops.md`](remote-ops.md) for remote-specific operational concerns including 504 handling and write-verification ritual.
 
 ## `change` — Single Edits
 

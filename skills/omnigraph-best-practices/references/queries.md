@@ -195,6 +195,8 @@ match {
 
 ## Mutations
 
+> **No top-level `mutation { ... }` wrapper.** Agents trained on GraphQL reflexively write `mutation { insert T { ... } }` — that fails the parser at character 1 with `parse error: expected query_file`. Every executable block in a `.gq` file is a named `query`; the body's verb (`insert` / `update` / `delete`) determines whether it's a write. Dispatch via `omnigraph change` (not `read`).
+
 ### Insert
 
 ```gq
@@ -254,6 +256,23 @@ query add_and_link($slug: String, $pattern: String, $createdAt: DateTime, $updat
 ```
 
 There's no `upsert` keyword at the query level — use `load --mode merge` for bulk upsert.
+
+### Date and DateTime values
+
+Date format is asymmetric between `change` (parameter values) and `ingest` / `load` (JSONL):
+
+| Path | Date | DateTime |
+|---|---|---|
+| `change --params` | ISO string `"2026-04-29"` | ISO string `"2026-04-29T10:00:00Z"` |
+| `ingest` / `load` JSONL | Integer days since epoch `20572` | ISO string `"2026-04-29T10:00:00Z"` |
+
+Compute integer days form for a given date `d`:
+
+```python
+(d - datetime.date(1970, 1, 1)).days   # d is the date you're loading, not today()
+```
+
+This asymmetry is one of the most common silent type errors when bulk-loading data prepared for one path through the other.
 
 ## Naming Convention
 
