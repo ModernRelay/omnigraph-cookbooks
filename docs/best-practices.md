@@ -389,14 +389,9 @@ omnigraph export $REPO --branch main > graph.jsonl    # stream JSONL dump
 
 `export` is the right tool for large snapshots — don't try to page through the whole graph via read queries.
 
-### Runs and commits
+### Commits
 
 ```bash
-omnigraph run list $REPO                 # active/recent transactional runs
-omnigraph run show $REPO <id>
-omnigraph run publish $REPO <id>         # finalize
-omnigraph run abort $REPO <id>
-
 omnigraph commit list $REPO --branch main
 omnigraph commit show $REPO <id>
 ```
