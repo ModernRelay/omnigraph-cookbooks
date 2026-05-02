@@ -1,6 +1,6 @@
 # Demo Setup — AI Industry Intel
 
-The quickest path to a populated SPIKE graph. Uses the existing `industry-intel` starter as-is.
+The quickest path to a populated SPIKE graph. Uses the existing `industry-intel` cookbook as-is.
 
 ## Prerequisites
 
@@ -31,18 +31,18 @@ curl -s -o /dev/null -w "server:%{http_code}\n" http://127.0.0.1:8080/healthz
 
 If `200`, either stop the bootstrap server or rebind yours via `omnigraph-server --bind 127.0.0.1:8090`.
 
-## Get the starter content
+## Get the cookbook content
 
-The `industry-intel` starter (schema, queries, seed) lives in the [omnigraph-starters](https://github.com/ModernRelay/omnigraph-starters) repo. Ask the user where to clone it (default: current directory):
+The `industry-intel` cookbook (schema, queries, seed) lives in the [omnigraph-cookbooks](https://github.com/ModernRelay/omnigraph-cookbooks) repo. Ask the user where to clone it (default: current directory):
 
 ```bash
-git clone https://github.com/ModernRelay/omnigraph-starters.git
+git clone https://github.com/ModernRelay/omnigraph-cookbooks.git
 ```
 
-Then move into the starter folder:
+Then move into the cookbook folder:
 
 ```bash
-cd omnigraph-starters/industry-intel
+cd omnigraph-cookbooks/industry-intel
 [ -f .env.omni ] || cp .env.omni.example .env.omni
 set -a && source ./.env.omni && set +a
 ```

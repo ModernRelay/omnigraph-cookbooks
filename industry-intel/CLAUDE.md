@@ -1,6 +1,6 @@
 # CLAUDE.md — industry-intel
 
-Scoped guidance for the `industry-intel/` SPIKE starter. Repo-wide conventions live in `../CLAUDE.md`.
+Scoped guidance for the `industry-intel/` SPIKE cookbook. Repo-wide conventions live in `../CLAUDE.md`.
 
 ## What This Is
 

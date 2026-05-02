@@ -1,6 +1,6 @@
-# Industry Intel — SPIKE Starter
+# Industry Intel — SPIKE Cookbook
 
-Knowledge graph starter modeling AI/ML industry intelligence. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph) using the [SPIKE framework](../README.md#spike-framework).
+Knowledge graph cookbook modeling AI/ML industry intelligence. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph) using the [SPIKE framework](../README.md#spike-framework).
 
 ## Core Analytical Loop
 

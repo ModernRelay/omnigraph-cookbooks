@@ -6,7 +6,7 @@ Phase 6: turn the elicited domain + source list into real seed content.
 
 ## Target output
 
-For a new starter, aim for:
+For a new cookbook, aim for:
 
 | Node | Target count | Notes |
 |------|--------------|-------|

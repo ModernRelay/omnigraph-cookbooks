@@ -1,19 +1,19 @@
 ---
 name: omnigraph-intel-bootstrap
-description: 'Bootstrap a new Omnigraph-based SPIKE industry intelligence graph from scratch. Use this skill whenever a user wants to set up a new SPIKE graph — either with the existing AI industry demo data or for a new domain (biotech, fintech, crypto, geopolitics, macroeconomics, SaaS, climate tech, etc.). The flow presents a demo-vs-custom decision, then for custom setups asks about domain scope, actors, cadence, and sources, adapts schema and enums for the target domain, runs initial web research to generate real seed content, and executes init + load. Apply aggressively when the user says any of: set up Omnigraph, bootstrap a new graph, create a new SPIKE starter, I want to track X industry, initialize intel for Y, new graph for Z domain, start a new context graph, or similar phrasing. This skill takes a user from zero to a populated, queryable graph.'
+description: 'Bootstrap a new Omnigraph-based SPIKE industry intelligence graph from scratch. Use this skill whenever a user wants to set up a new SPIKE graph — either with the existing AI industry demo data or for a new domain (biotech, fintech, crypto, geopolitics, macroeconomics, SaaS, climate tech, etc.). The flow presents a demo-vs-custom decision, then for custom setups asks about domain scope, actors, cadence, and sources, adapts schema and enums for the target domain, runs initial web research to generate real seed content, and executes init + load. Apply aggressively when the user says any of: set up Omnigraph, bootstrap a new graph, create a new SPIKE cookbook, I want to track X industry, initialize intel for Y, new graph for Z domain, start a new context graph, or similar phrasing. This skill takes a user from zero to a populated, queryable graph.'
 license: MIT (see LICENSE at repo root)
 compatibility: Requires omnigraph CLI >= 0.3.1 and Docker (for local RustFS).
 metadata:
   author: ModernRelay
   version: "0.1.0"
-  repository: https://github.com/ModernRelay/omnigraph-starters
+  repository: https://github.com/ModernRelay/omnigraph-cookbooks
 ---
 
-# SPIKE Starter Bootstrap
+# SPIKE Cookbook Bootstrap
 
 This skill takes a user from zero to a populated, queryable SPIKE graph. Two paths:
 
-- **Demo** — use the existing `industry-intel` starter (AI/ML signals as of early 2026). Good for demos, exploration, and understanding what SPIKE looks like populated.
+- **Demo** — use the existing `industry-intel` cookbook (AI/ML signals as of early 2026). Good for demos, exploration, and understanding what SPIKE looks like populated.
 - **Custom** — set up a new domain (biotech, crypto, fintech, geopolitics, etc.). Takes ~30–60 minutes including initial research and user review.
 
 **Prerequisites:**
@@ -25,9 +25,9 @@ This skill takes a user from zero to a populated, queryable SPIKE graph. Two pat
    ```
    The bootstrap installs `omnigraph` and `omnigraph-server` binaries under `<workdir>/.omnigraph-rustfs-demo/bin/` — **not on PATH by default**. Either add it to PATH or invoke binaries by absolute path.
 
-2. The `omnigraph-starters` repo cloned somewhere on disk. Ask the user where (or default to the current directory):
+2. The `omnigraph-cookbooks` repo cloned somewhere on disk. Ask the user where (or default to the current directory):
    ```bash
-   git clone https://github.com/ModernRelay/omnigraph-starters.git
+   git clone https://github.com/ModernRelay/omnigraph-cookbooks.git
    ```
    Record the absolute path to the clone — the **Demo** path runs from `<clone>/industry-intel/`, the **Custom** path runs from `<clone>/` (repo root) so it can copy `industry-intel/` as a template.
 
@@ -47,7 +47,7 @@ command -v omnigraph >/dev/null || { echo "omnigraph not found — install via h
 # Require omnigraph >= 0.3.1
 omnigraph version
 
-# Does the starter have an .env.omni? If not, seed from the example.
+# Does the cookbook have an .env.omni? If not, seed from the example.
 [ -f <clone>/industry-intel/.env.omni ] || cp <clone>/industry-intel/.env.omni.example <clone>/industry-intel/.env.omni
 ```
 
@@ -84,7 +84,7 @@ Quick — just clone, init, load.
 See [`references/demo-setup.md`](references/demo-setup.md) for the full command list. Summary:
 
 ```bash
-cd <path-to-clone>/omnigraph-starters/industry-intel
+cd <path-to-clone>/omnigraph-cookbooks/industry-intel
 set -a && source ./.env.omni && set +a
 # first time only: aws --endpoint-url http://127.0.0.1:9000 s3 mb s3://omnigraph-local
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
@@ -115,7 +115,7 @@ Then narrow:
 - Scope: "all of X" or "only Y within X"?
 - Global or regional?
 
-Capture a **project slug** for the new starter: `bio-intel`, `crypto-intel`, `geo-intel`, etc. This becomes the folder name and the repo prefix (`s3://omnigraph-local/repos/<slug>`).
+Capture a **project slug** for the new cookbook: `bio-intel`, `crypto-intel`, `geo-intel`, etc. This becomes the folder name and the repo prefix (`s3://omnigraph-local/repos/<slug>`).
 
 ### Phase 2 — Key questions
 
@@ -147,7 +147,7 @@ Before making changes, echo what you captured back to the user:
 - Horizon + cadence + consumer
 - Source list (grouped by category)
 
-Write this to `<slug>/setup-notes.md` in the new starter folder. Confirming now is cheap; rework later isn't.
+Write this to `<slug>/setup-notes.md` in the new cookbook folder. Confirming now is cheap; rework later isn't.
 
 ### Phase 5 — Adapt the schema
 
@@ -217,7 +217,7 @@ omnigraph read --config ./omnigraph.yaml --alias patterns <pattern-kind>
 
 Tell the user:
 
-- What got created (starter folder, schema, seed counts, repo URI)
+- What got created (cookbook folder, schema, seed counts, repo URI)
 - How to query (via aliases or raw read)
 - To use the `omnigraph-best-practices` skill for day-to-day ops (adding signals, schema evolution, branches)
 

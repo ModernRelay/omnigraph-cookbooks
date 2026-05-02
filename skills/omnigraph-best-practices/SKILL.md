@@ -6,7 +6,7 @@ compatibility: Requires omnigraph CLI >= 0.3.1 and Docker (for local RustFS).
 metadata:
   author: ModernRelay
   version: "0.2.0"
-  repository: https://github.com/ModernRelay/omnigraph-starters
+  repository: https://github.com/ModernRelay/omnigraph-cookbooks
 ---
 
 # Operating Omnigraph Locally
@@ -36,7 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/
 
 Defaults: RustFS S3 on `127.0.0.1:9000`, console on `:9001`, `omnigraph-server` on `:8080`, bucket `omnigraph-local`. Override with `BUCKET=foo PREFIX=repos/bar BIND=127.0.0.1:8080 curl ...`.
 
-**Heads up — port :8080 is in use after bootstrap.** The bootstrap auto-starts an `omnigraph-server` against its own demo repo. If you start a second server (e.g. for a different starter) without stopping the first, you'll get a silent port collision. Either stop the bootstrap server or start yours with `--bind 127.0.0.1:8090`.
+**Heads up — port :8080 is in use after bootstrap.** The bootstrap auto-starts an `omnigraph-server` against its own demo repo. If you start a second server (e.g. for a different cookbook) without stopping the first, you'll get a silent port collision. Either stop the bootstrap server or start yours with `--bind 127.0.0.1:8090`.
 
 Bootstrap also installs `omnigraph` and `omnigraph-server` binaries under `<workdir>/.omnigraph-rustfs-demo/bin/` — **not on PATH by default**. Add it or invoke binaries by absolute path.
 
@@ -111,13 +111,13 @@ Key naming: the config field is `graphs:` (not `targets:` — that's the old sch
 
 ### What to commit
 
-**Commit:** `schema.pg`, `queries/*.gq`, `omnigraph.yaml`, `seed.md`, `seed.jsonl`, per-starter `README.md` and `CLAUDE.md`.
+**Commit:** `schema.pg`, `queries/*.gq`, `omnigraph.yaml`, `seed.md`, `seed.jsonl`, per-cookbook `README.md` and `CLAUDE.md`.
 
 **Ignore:** `.env.omni` (credentials), `.claude/` (local agent state), `*.omni/` (local repo artifacts), `.omnigraph-rustfs-demo/` (bootstrap state).
 
 ### Give agents a `CLAUDE.md`
 
-A per-starter `CLAUDE.md` tells coding agents where files live and what conventions matter. Without it, agents re-discover the same things every session.
+A per-cookbook `CLAUDE.md` tells coding agents where files live and what conventions matter. Without it, agents re-discover the same things every session.
 
 ## Common Gotchas
 

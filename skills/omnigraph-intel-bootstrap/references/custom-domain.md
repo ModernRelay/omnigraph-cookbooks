@@ -39,7 +39,7 @@ Generate a project slug from the domain. Examples:
 - SaaS → `saas-intel`
 
 This becomes:
-- The starter folder name: `<slug>/`
+- The cookbook folder name: `<slug>/`
 - The repo URI: `s3://omnigraph-local/repos/<slug>`
 - The project name in `omnigraph.yaml`
 

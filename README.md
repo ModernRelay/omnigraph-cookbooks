@@ -1,11 +1,11 @@
-# Omnigraph Starters
+# Omnigraph Cookbooks
 
-Opinionated, ready-to-run graph starters built on [Omnigraph](https://github.com/ModernRelay/omnigraph). Each starter is a self-contained schema, seed, and query set for a specific use case.
+Opinionated, ready-to-run graph cookbooks built on [Omnigraph](https://github.com/ModernRelay/omnigraph). Each cookbook is a self-contained schema, seed, and query set for a specific use case.
 
-## Starters
+## Cookbooks
 
-| Starter | Status | Description |
-|---------|--------|-------------|
+| Cookbook | Status | Description |
+|----------|--------|-------------|
 | [`industry-intel/`](./industry-intel) | ✅ ready | AI/ML industry intelligence graph |
 | `company-context/` | 🚧 planned | Internal decisions, traces, actors, artifacts |
 | `biomed-research/` | 🚧 planned | Biotech & medical research tracking |
@@ -23,8 +23,8 @@ Packaged agent skills live under [`skills/`](./skills) and can be installed with
 Install:
 
 ```bash
-npx skills add ModernRelay/omnigraph-starters@omnigraph-intel-bootstrap
-npx skills add ModernRelay/omnigraph-starters@omnigraph-best-practices
+npx skills add ModernRelay/omnigraph-cookbooks@omnigraph-intel-bootstrap
+npx skills add ModernRelay/omnigraph-cookbooks@omnigraph-best-practices
 ```
 
 Typical flow: use `omnigraph-intel-bootstrap` once to set up a new graph, then `omnigraph-best-practices` for day-to-day operations.
@@ -34,7 +34,7 @@ See [`docs/best-practices.md`](./docs/best-practices.md) for the human-readable 
 ## Repo Structure
 
 ```
-omnigraph-starters/
+omnigraph-cookbooks/
 ├── README.md
 ├── CLAUDE.md
 ├── docs/
@@ -43,7 +43,7 @@ omnigraph-starters/
 ├── skills/
 │   ├── omnigraph-intel-bootstrap/   ← bootstrap a new SPIKE graph (elicitation + research)
 │   └── omnigraph-best-practices/    ← day-to-day ops (SKILL.md + references/)
-└── <starter>/
+└── <cookbook>/
     ├── README.md
     ├── CLAUDE.md
     ├── schema.pg
@@ -53,17 +53,17 @@ omnigraph-starters/
     └── queries/*.gq
 ```
 
-Each starter is fully self-contained — `cd` in and follow its README.
+Each cookbook is fully self-contained — `cd` in and follow its README.
 
 ## Getting Started
 
-1. Pick a starter.
+1. Pick a cookbook.
 2. Make sure you have a running Omnigraph instance — see the [Omnigraph repo](https://github.com/ModernRelay/omnigraph).
-3. Follow the starter's Quick Start.
+3. Follow the cookbook's Quick Start.
 
 ## SPIKE Framework
 
-The `industry-intel/` starter uses SPIKE, an opinionated graph modeling lens:
+The `industry-intel/` cookbook uses SPIKE, an opinionated graph modeling lens:
 
 - `Signal`: a dated external fact, movement, or observation
 - `Pattern`: a recurring theme formed, contradicted, or driven by signals
@@ -71,7 +71,7 @@ The `industry-intel/` starter uses SPIKE, an opinionated graph modeling lens:
 - `KnowHow`: an actionable practice or playbook grounded in the graph
 - `Element`: a concrete product, framework, company, or concept the signals are about
 
-SPIKE is a starter-level convention, not a requirement for every graph in this repo.
+SPIKE is a cookbook-level convention, not a requirement for every graph in this repo.
 
 ## Contributing
 
