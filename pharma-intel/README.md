@@ -85,7 +85,7 @@ Viking Therapeutics (NASDAQ: VKTX) is a real public company with a GLP-1/GIP dua
 | Upcoming decisions | 2 | VANQUISH interim readout go/no-go (2026-07-15) · Phase 3 start for oral (2026-09-30) |
 | Open questions | 4 | Pfizer failure mechanism risk · orforglipron competitive window · payer coverage trajectory · manufacturing scale-up path |
 
-**Demo "wow" edges** (surfaced by the graph, not buried in prose):
+**Demo edges** (surfaced by the graph, not buried in prose):
 
 | Signal | Edge | Internal target | Why it matters |
 |--------|------|-----------------|----------------|
