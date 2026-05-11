@@ -1,0 +1,193 @@
+// Internal: Program, Assumption, Decision, OpenQuestion
+
+query get_program($slug: String) {
+    match {
+        $p: Program { slug: $slug }
+    }
+    return { $p.slug, $p.name, $p.phase, $p.indication, $p.brief, $p.description }
+}
+
+query programs_all() {
+    match {
+        $p: Program
+    }
+    return { $p.slug, $p.name, $p.phase, $p.indication, $p.brief }
+    order { $p.name }
+}
+
+query program_compound($slug: String) {
+    match {
+        $p: Program { slug: $slug }
+        $p programDevelopsCompound $c
+    }
+    return { $c.slug, $c.name, $c.phase, $c.route, $c.moa_summary }
+}
+
+query program_mechanism($slug: String) {
+    match {
+        $p: Program { slug: $slug }
+        $p programTargetsMechanism $m
+    }
+    return { $m.slug, $m.name, $m.brief }
+}
+
+query program_assumptions($slug: String) {
+    match {
+        $p: Program { slug: $slug }
+        $p programDependsOnAssumption $a
+    }
+    return { $a.slug, $a.name, $a.level, $a.statement, $a.established_date }
+    order { $a.level }
+}
+
+query program_decisions($slug: String) {
+    match {
+        $p: Program { slug: $slug }
+        $d decisionRegardingProgram $p
+    }
+    return { $d.slug, $d.name, $d.status, $d.decision_date, $d.decider, $d.brief }
+    order { $d.decision_date }
+}
+
+query program_competitors($slug: String) {
+    match {
+        $p: Program { slug: $slug }
+        $p programCompetesInMechanism $m
+        $c targetsMechanism $m
+    }
+    return { $c.slug, $c.name, $c.phase, $c.route, $c.moa_summary }
+    order { $c.phase }
+}
+
+// Signals about the program's compound — "what just happened on my asset".
+query program_signals($slug: String) {
+    match {
+        $p: Program { slug: $slug }
+        $p programDevelopsCompound $c
+        $s aboutCompound $c
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+}
+
+// Signals about ANY compound targeting the program's mechanism — competitive landscape feed.
+query program_landscape_signals($slug: String) {
+    match {
+        $p: Program { slug: $slug }
+        $p programCompetesInMechanism $m
+        $c targetsMechanism $m
+        $s aboutCompound $c
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp, $c.slug }
+    order { $s.stagingTimestamp desc }
+}
+
+// Assumption reads
+
+query get_assumption($slug: String) {
+    match {
+        $a: Assumption { slug: $slug }
+    }
+    return { $a.slug, $a.name, $a.level, $a.statement, $a.established_date, $a.source_url }
+}
+
+query assumptions_all() {
+    match {
+        $a: Assumption
+    }
+    return { $a.slug, $a.name, $a.level, $a.statement }
+    order { $a.level, $a.name }
+}
+
+query assumption_supporting_signals($slug: String) {
+    match {
+        $a: Assumption { slug: $slug }
+        $s supportsAssumption $a
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+}
+
+query assumption_contradicting_signals($slug: String) {
+    match {
+        $a: Assumption { slug: $slug }
+        $s contradictsAssumption $a
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+}
+
+// Decision reads
+
+query get_decision($slug: String) {
+    match {
+        $d: Decision { slug: $slug }
+    }
+    return { $d.slug, $d.name, $d.status, $d.decision_date, $d.decider, $d.brief, $d.description, $d.outcome }
+}
+
+query decisions_upcoming() {
+    match {
+        $d: Decision { status: "upcoming" }
+    }
+    return { $d.slug, $d.name, $d.decision_date, $d.decider, $d.brief }
+    order { $d.decision_date }
+}
+
+query decisions_all() {
+    match {
+        $d: Decision
+    }
+    return { $d.slug, $d.name, $d.status, $d.decision_date, $d.brief }
+    order { $d.decision_date }
+}
+
+query decision_program($slug: String) {
+    match {
+        $d: Decision { slug: $slug }
+        $d decisionRegardingProgram $p
+    }
+    return { $p.slug, $p.name, $p.phase, $p.indication, $p.brief }
+}
+
+query decision_questions($slug: String) {
+    match {
+        $d: Decision { slug: $slug }
+        $d decisionNeedsAnswer $q
+    }
+    return { $q.slug, $q.name, $q.status, $q.description }
+}
+
+query decision_assumptions($slug: String) {
+    match {
+        $d: Decision { slug: $slug }
+        $d decisionBasedOnAssumption $a
+    }
+    return { $a.slug, $a.name, $a.level, $a.statement }
+}
+
+// OpenQuestion reads
+
+query get_question($slug: String) {
+    match {
+        $q: OpenQuestion { slug: $slug }
+    }
+    return { $q.slug, $q.name, $q.status, $q.asked_by, $q.brief, $q.description }
+}
+
+query questions_open() {
+    match {
+        $q: OpenQuestion { status: "open" }
+    }
+    return { $q.slug, $q.name, $q.asked_by, $q.brief }
+    order { $q.name }
+}
+
+query question_signals($slug: String) {
+    match {
+        $q: OpenQuestion { slug: $slug }
+        $s informsQuestion $q
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+}
