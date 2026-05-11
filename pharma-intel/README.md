@@ -95,7 +95,7 @@ Viking Therapeutics (NASDAQ: VKTX) is a real public company with a GLP-1/GIP dua
 | Lilly orforglipron ATTAIN-1 positive | `InformsQuestion` | `q-orforglipron-competitive-window` | Competitive readout answers (partially) a Viking open question |
 | Pfizer danuglipron discontinuation | `InformsQuestion` | `q-pfizer-failure-mechanism-risk` | Cross-sponsor hepatotoxicity risk flagged for Viking's clinical team |
 
-**Totals:** 108 nodes across 15 node types, 192 edges across 34 edge types.
+**Totals:** 113 nodes across 15 node types, 200 edges across 34 edge types.
 
 ## Schema Essentials
 

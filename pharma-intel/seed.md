@@ -173,4 +173,4 @@ Seed data for `schema.pg`. Scope: the GLP-1 obesity competitive landscape, seede
 | ContradictsPattern | `sig-structure-gsbr-p2a-disappointing` | `pat-oral-glp1-thesis` | One pattern, one counter-signal — visible as first-class data |
 | ContradictsPattern | `sig-redefine-cagrisema-readout` | `pat-efficacy-ceiling` | The "more weight loss is always better" assumption gets challenged |
 
-**Totals:** 108 nodes, 192 edges.
+**Totals:** 113 nodes, 200 edges.
