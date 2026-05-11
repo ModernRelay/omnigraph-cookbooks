@@ -89,23 +89,25 @@ A typed, versioned graph of:
 | LinkedIn | none | request data export from LinkedIn (CSV ZIP) |
 | WhatsApp | none | Export Chat → Without Media |
 
-The skill handles per-source setup: opens the integration page in the browser, captures the token, validates with a one-call round-trip, and persists via `keyring`. Connect any subset.
+The skill handles per-source setup: opens the integration page in the browser, captures the token, validates with a one-call round-trip, and persists via `keyring`. Connect any subset. Each source has its own spec doc at `skills/omnigraph-personal-knowledge/references/sources/<source>.md` describing setup, fetch intent, mapping, and known quirks.
 
 ## The pipeline
 
-Every source obeys the same contract: a Python importer in `demo/import_*.py` pulls raw fields and emits rich JSONL with stable IDs. `demo/transform.py` is one dispatch table mapping each `_source` value to a per-source transformation that emits schema-shaped nodes + edges. `omnigraph load --mode merge` upserts by slug. Adding a new app is one new function in the dispatch — the schema itself is source-neutral.
+Every source flows through one shape: the skill reads the source-specific spec, composes fetch + map code inline per session, and emits schema-shaped records that `omnigraph load --mode merge` upserts by slug. **No pre-written Python ships with the cookbook** — the spec is the durable artifact; the code is composed each run, fresh against current source-API documentation.
 
 ```
-your apps                                                  governed graph
-─────────                                                  ──────────────
-Obsidian, Notion, Granola,    →  demo/import_*.py   →     omnigraph load
-Slack, Gmail, Calendar,        emits raw JSONL       (idempotent merge,    → query via skill
-Apple Notes, LinkedIn CSV,    →  demo/transform.py   →    auto-dedup via       /omnigraph-
-WhatsApp export                emits schema-shaped       stable IDs +          personal-
-                               JSONL                     SyncRun state)       knowledge
+your apps                                       governed graph
+─────────                                       ──────────────
+Obsidian, Notion, Granola,    sources/<X>.md    omnigraph load
+Slack, Gmail, Calendar,    →  (agent reads,  →  (idempotent merge,  → skill answers
+Apple Notes, LinkedIn,        composes fetch    dedup via stable      user questions
+WhatsApp                      + map code         IDs + SyncRun)
+                              per session)
 ```
 
-Importers are idempotent (stable IDs upsert) and accept `--since` where the source supports server-side filtering (Notion, Slack, Gmail, Calendar, Drive, Granola). Last-sync timestamps live in the graph itself as `SyncRun` nodes — no external sync DB, no separate state file.
+The agent composes idempotent code (stable IDs upsert) that respects `--since` where the source supports server-side filtering (Notion, Slack, Gmail, Calendar, Drive, Granola). Last-sync timestamps live in the graph itself as `SyncRun` nodes — no external sync DB, no separate state file.
+
+Adding a new app means writing a new spec doc (`skills/.../references/sources/<new>.md`) following the established structure. The schema stays source-neutral; the spec is the durable extension surface.
 
 ## The identity layer
 
@@ -124,25 +126,28 @@ Read aliases match on exact slugs — they don't follow `SameAs` automatically. 
 personal-knowledge/
 ├── README.md             # this file
 ├── AGENTS.md             # authoring contract for cookbook editors
-├── CLAUDE.md             # cookbook-editor guidance
+├── CLAUDE.md             # pointer to AGENTS.md
 ├── EXTENDING.md          # paste-in schema overlays (Health, Finance, etc.)
-├── schema.pg             # 16 typed node types, ~45 edge types, ~310 lines
+├── schema.pg             # 16 typed node types, ~45 edge types
 ├── seed.md               # human-readable tabular seed
 ├── seed.jsonl            # demo seed (fictional persona "Alex Rivera")
 ├── omnigraph.yaml        # ~50 CLI aliases
 ├── queries/
-│   ├── notes.gq, people.gq, conversations.gq, structure.gq
-│   ├── sync.gq, headline.gq, mutations.gq
+│   └── notes, people, conversations, structure, sync, headline, mutations
 └── demo/
-    ├── README.md, requirements.txt
-    ├── transform.py        # raw JSONL → schema-shaped JSONL
-    └── import_*.py × 8     # one importer per source
+    └── test-fixtures/test-vault/   # illustrative data only — no executable code
 
 ../skills/omnigraph-personal-knowledge/
 ├── SKILL.md
 └── references/
-    ├── source-setup.md, headline-report.md, identity-resolution.md
-    ├── sync.md, extending.md
+    ├── sources/                    # one spec per source the agent reads + composes code from
+    │   ├── notion.md, obsidian.md, granola.md, slack.md
+    │   ├── google-workspace.md, apple-notes.md, linkedin.md, whatsapp.md
+    ├── loading-rules.md            # cross-cutting: dedup, dangling edges, SyncRun, stable IDs
+    ├── headline-report.md          # 5-numbers playbook + follow-up rules
+    ├── identity-resolution.md      # dedup wizard + SameAs-aware traversal pattern
+    ├── sync.md                     # incremental-sync contract
+    └── extending.md                # adding a new source spec or domain overlay
 ```
 
 ## Schema
@@ -190,27 +195,11 @@ omnigraph read --alias headline-top-persons
 omnigraph read --alias headline-cross-source-persons
 ```
 
-### Connect your own data (raw CLI)
+### Connect your own data
 
-For environments without an agentskills.io-compatible runtime:
+Connecting your own apps requires an agentskills.io-compatible runtime (Claude Code, Hermes, etc.). The skill reads each source's spec doc (`skills/omnigraph-personal-knowledge/references/sources/<source>.md`) and composes the fetch + map code inline per session — there's no pre-written script to invoke. See `skills/omnigraph-personal-knowledge/SKILL.md` for the orchestration.
 
-```bash
-cd demo
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-
-# Pick a source — Obsidian is the easiest (no auth):
-python import_obsidian.py --vault ~/MyVault --workspace-name my-vault --out /tmp/raw.jsonl
-
-# Transform raw → schema-shaped:
-python transform.py /tmp/raw.jsonl --out /tmp/patch.jsonl
-
-# Merge into the existing repo (assumes init+load above already ran):
-omnigraph load --data /tmp/patch.jsonl --mode merge s3://omnigraph-local/repos/personal-knowledge
-omnigraph read --alias artifacts-from obsidian
-```
-
-The skill collapses this flow into one invocation and adds source selection, credential capture, identity resolution, and the headline report.
+This is intentional. Pre-written importers go stale every time a source's API changes; the spec stays stable while the agent's code is fresh against current docs each run.
 
 ## Using with other agent frameworks
 
