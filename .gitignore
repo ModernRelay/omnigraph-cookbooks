@@ -7,6 +7,10 @@
 # Omnigraph local state
 .omnigraph-rustfs-demo/
 *.omni/
+**/demo/out/
+**/.venv/
+__pycache__/
+*.pyc
 
 # macOS
 .DS_Store

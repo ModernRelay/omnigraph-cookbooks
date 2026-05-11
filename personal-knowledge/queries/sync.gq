@@ -1,0 +1,28 @@
+// Sync state reads — used by the skill to compute --since per source.
+
+query last_sync_for_source($source: String, $status: String) {
+    match {
+        $r: SyncRun { source: $source, status: $status }
+    }
+    return { $r.slug, $r.source, $r.completed_at, $r.records_imported }
+    order { $r.completed_at desc }
+    limit 1
+}
+
+query recent_sync_runs() {
+    match {
+        $r: SyncRun
+    }
+    return { $r.slug, $r.source, $r.status, $r.started_at, $r.completed_at, $r.records_imported }
+    order { $r.started_at desc }
+    limit 20
+}
+
+query sync_runs_by_status($status: String) {
+    match {
+        $r: SyncRun { status: $status }
+    }
+    return { $r.slug, $r.source, $r.started_at, $r.error }
+    order { $r.started_at desc }
+    limit 20
+}

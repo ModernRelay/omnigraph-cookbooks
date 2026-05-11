@@ -1,0 +1,80 @@
+// Note reads + traversals.
+
+query get_note($slug: String) {
+    match {
+        $n: Note { slug: $slug }
+    }
+    return { $n.slug, $n.name, $n.kind, $n.content, $n.tags, $n.createdAt, $n.updatedAt }
+}
+
+query recent_notes() {
+    match {
+        $n: Note
+    }
+    return { $n.slug, $n.name, $n.kind, $n.tags, $n.updatedAt }
+    order { $n.updatedAt desc }
+    limit 50
+}
+
+query notes_by_tag($tag: String) {
+    match {
+        $n: Note
+    }
+    return { $n.slug, $n.name, $n.kind, $n.tags, $n.updatedAt }
+    order { $n.updatedAt desc }
+    limit 50
+}
+
+query notes_about_person($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $n noteAboutPerson $p
+    }
+    return { $n.slug, $n.name, $n.kind, $n.updatedAt }
+    order { $n.updatedAt desc }
+    limit 50
+}
+
+query notes_about_project($slug: String) {
+    match {
+        $pj: Project { slug: $slug }
+        $n noteAboutProject $pj
+    }
+    return { $n.slug, $n.name, $n.kind, $n.updatedAt }
+    order { $n.updatedAt desc }
+    limit 50
+}
+
+query notes_about_organization($slug: String) {
+    match {
+        $o: Organization { slug: $slug }
+        $n noteAboutOrganization $o
+    }
+    return { $n.slug, $n.name, $n.kind, $n.updatedAt }
+    order { $n.updatedAt desc }
+    limit 50
+}
+
+query notes_from_event($slug: String) {
+    match {
+        $e: Event { slug: $slug }
+        $n noteFromEvent $e
+    }
+    return { $n.slug, $n.name, $n.kind, $n.updatedAt }
+}
+
+query note_links($slug: String) {
+    match {
+        $n: Note { slug: $slug }
+        $n linkedNote $other
+    }
+    return { $other.slug, $other.name, $other.kind }
+}
+
+query note_source($slug: String) {
+    match {
+        $n: Note { slug: $slug }
+        $n noteFromArtifact $a
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.url, $a.timestamp }
+}

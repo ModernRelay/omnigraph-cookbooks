@@ -1,0 +1,309 @@
+project:
+  name: "Personal Knowledge Graph"
+
+auth:
+  env_file: ./.env.omni
+
+graphs:
+  local_s3:
+    uri: s3://omnigraph-local/repos/personal-knowledge
+  local_server:
+    uri: http://127.0.0.1:8080
+    bearer_token_env: OMNIGRAPH_BEARER_TOKEN
+
+server:
+  graph: local_s3
+  bind: 127.0.0.1:8080
+
+cli:
+  graph: local_server
+  branch: main
+  output_format: table
+  table_max_column_width: 80
+  table_cell_layout: truncate
+
+query:
+  roots:
+    - queries
+    - .
+
+aliases:
+  # ─── Note reads ────────────────────────────────
+  note:
+    command: read
+    query: notes.gq
+    name: get_note
+    args: [slug]
+    format: kv
+  notes:
+    command: read
+    query: notes.gq
+    name: recent_notes
+  notes-by-tag:
+    command: read
+    query: notes.gq
+    name: notes_by_tag
+    args: [tag]
+  notes-about-person:
+    command: read
+    query: notes.gq
+    name: notes_about_person
+    args: [slug]
+  notes-about-project:
+    command: read
+    query: notes.gq
+    name: notes_about_project
+    args: [slug]
+  notes-from-event:
+    command: read
+    query: notes.gq
+    name: notes_from_event
+    args: [slug]
+  note-links:
+    command: read
+    query: notes.gq
+    name: note_links
+    args: [slug]
+  note-source:
+    command: read
+    query: notes.gq
+    name: note_source
+    args: [slug]
+
+  # ─── People ────────────────────────────────────
+  person:
+    command: read
+    query: people.gq
+    name: get_person
+    args: [slug]
+    format: kv
+  persons:
+    command: read
+    query: people.gq
+    name: recent_persons
+  person-orgs:
+    command: read
+    query: people.gq
+    name: person_organizations
+    args: [slug]
+  person-events:
+    command: read
+    query: people.gq
+    name: person_events
+    args: [slug]
+  person-projects:
+    command: read
+    query: people.gq
+    name: person_projects
+    args: [slug]
+  person-mentions:
+    command: read
+    query: people.gq
+    name: person_mentions
+    args: [slug]
+  person-same-as:
+    command: read
+    query: people.gq
+    name: person_same_as
+    args: [slug]
+  person-external-ids:
+    command: read
+    query: people.gq
+    name: person_external_ids
+    args: [slug]
+
+  # ─── Conversations / Artifacts / Email ──────────
+  conversation:
+    command: read
+    query: conversations.gq
+    name: get_conversation
+    args: [slug]
+    format: kv
+  conversations:
+    command: read
+    query: conversations.gq
+    name: recent_conversations
+  conversation-messages:
+    command: read
+    query: conversations.gq
+    name: conversation_artifacts
+    args: [slug]
+  conversation-participants:
+    command: read
+    query: conversations.gq
+    name: conversation_participants
+    args: [slug]
+  artifact:
+    command: read
+    query: conversations.gq
+    name: get_artifact
+    args: [slug]
+    format: kv
+  artifacts:
+    command: read
+    query: conversations.gq
+    name: recent_artifacts
+  artifacts-from:
+    command: read
+    query: conversations.gq
+    name: artifacts_by_source
+    args: [source]
+  email:
+    command: read
+    query: conversations.gq
+    name: get_email
+    args: [slug]
+    format: kv
+  emails:
+    command: read
+    query: conversations.gq
+    name: recent_emails
+  email-thread:
+    command: read
+    query: conversations.gq
+    name: email_thread
+    args: [thread_id]
+
+  # ─── Life structure ─────────────────────────────
+  area:
+    command: read
+    query: structure.gq
+    name: get_area
+    args: [slug]
+    format: kv
+  areas:
+    command: read
+    query: structure.gq
+    name: areas_by_status
+    args: [status]
+  project:
+    command: read
+    query: structure.gq
+    name: get_project
+    args: [slug]
+    format: kv
+  projects:
+    command: read
+    query: structure.gq
+    name: projects_by_status
+    args: [status]
+  projects-in-area:
+    command: read
+    query: structure.gq
+    name: projects_in_area
+    args: [slug]
+  goal:
+    command: read
+    query: structure.gq
+    name: get_goal
+    args: [slug]
+    format: kv
+  goals:
+    command: read
+    query: structure.gq
+    name: goals_by_status
+    args: [status]
+  goals-for-area:
+    command: read
+    query: structure.gq
+    name: goals_for_area
+    args: [slug]
+  tasks:
+    command: read
+    query: structure.gq
+    name: tasks_by_status
+    args: [status]
+  tasks-for-project:
+    command: read
+    query: structure.gq
+    name: tasks_for_project
+    args: [slug]
+  tasks-for-person:
+    command: read
+    query: structure.gq
+    name: tasks_for_person
+    args: [slug]
+  habits:
+    command: read
+    query: structure.gq
+    name: habits_by_status
+    args: [status]
+  events:
+    command: read
+    query: structure.gq
+    name: upcoming_events
+
+  # ─── Sync ───────────────────────────────────────
+  last-sync:
+    command: read
+    query: sync.gq
+    name: last_sync_for_source
+    args: [source, status]
+    format: kv
+  sync-runs:
+    command: read
+    query: sync.gq
+    name: recent_sync_runs
+  sync-runs-by-status:
+    command: read
+    query: sync.gq
+    name: sync_runs_by_status
+    args: [status]
+
+  # ─── Headline report (skill auto-runs these) ─────
+  headline-notes-by-source:
+    command: read
+    query: headline.gq
+    name: headline_notes_by_source
+  headline-top-persons:
+    command: read
+    query: headline.gq
+    name: headline_top_persons
+  headline-recent-artifacts:
+    command: read
+    query: headline.gq
+    name: headline_recent_artifacts
+  headline-cross-source-persons:
+    command: read
+    query: headline.gq
+    name: headline_cross_source_persons
+  headline-recent-conversations:
+    command: read
+    query: headline.gq
+    name: headline_recent_conversations
+  identity-candidates:
+    command: read
+    query: headline.gq
+    name: identity_candidates_by_email
+
+  # ─── Mutations (Claude composes these via skill) ─
+  add-note:
+    command: change
+    query: mutations.gq
+    name: add_note
+    args: [slug, name, kind, content, createdAt, updatedAt]
+  add-person:
+    command: change
+    query: mutations.gq
+    name: add_person
+    args: [slug, name, relation, createdAt, updatedAt]
+  link-same-as:
+    command: change
+    query: mutations.gq
+    name: link_same_as
+    args: [from, to, confidence, method]
+  link-knows:
+    command: change
+    query: mutations.gq
+    name: link_knows
+    args: [from, to, context]
+  link-note-about-person:
+    command: change
+    query: mutations.gq
+    name: link_note_about_person
+    args: [from, to]
+  record-sync-run:
+    command: change
+    query: mutations.gq
+    name: record_sync_run
+    args: [slug, source, started_at, completed_at, status, records_imported, createdAt, updatedAt]

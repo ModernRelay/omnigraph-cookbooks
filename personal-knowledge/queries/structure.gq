@@ -1,0 +1,100 @@
+// Life-structure reads (Area / Project / Goal / Task / Habit / Event).
+
+query get_area($slug: String) {
+    match {
+        $a: Area { slug: $slug }
+    }
+    return { $a.slug, $a.name, $a.kind, $a.status, $a.brief }
+}
+
+query areas_by_status($status: String) {
+    match {
+        $a: Area { status: $status }
+    }
+    return { $a.slug, $a.name, $a.kind, $a.brief }
+}
+
+query get_project($slug: String) {
+    match {
+        $p: Project { slug: $slug }
+    }
+    return { $p.slug, $p.name, $p.kind, $p.status, $p.brief, $p.description }
+}
+
+query projects_by_status($status: String) {
+    match {
+        $p: Project { status: $status }
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief }
+}
+
+query projects_in_area($slug: String) {
+    match {
+        $a: Area { slug: $slug }
+        $p projectInArea $a
+    }
+    return { $p.slug, $p.name, $p.kind, $p.status }
+}
+
+query get_goal($slug: String) {
+    match {
+        $g: Goal { slug: $slug }
+    }
+    return { $g.slug, $g.name, $g.status, $g.target, $g.due_date, $g.brief }
+}
+
+query goals_by_status($status: String) {
+    match {
+        $g: Goal { status: $status }
+    }
+    return { $g.slug, $g.name, $g.target, $g.due_date }
+    order { $g.due_date asc }
+}
+
+query goals_for_area($slug: String) {
+    match {
+        $a: Area { slug: $slug }
+        $g goalForArea $a
+    }
+    return { $g.slug, $g.name, $g.status, $g.target, $g.due_date }
+}
+
+query tasks_by_status($status: String) {
+    match {
+        $t: Task { status: $status }
+    }
+    return { $t.slug, $t.name, $t.priority, $t.due_date, $t.context, $t.brief }
+    order { $t.priority desc, $t.due_date asc }
+}
+
+query tasks_for_project($slug: String) {
+    match {
+        $pj: Project { slug: $slug }
+        $t taskForProject $pj
+    }
+    return { $t.slug, $t.name, $t.status, $t.priority, $t.due_date }
+}
+
+query tasks_for_person($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $t taskForPerson $p
+    }
+    return { $t.slug, $t.name, $t.status, $t.priority, $t.due_date }
+}
+
+query habits_by_status($status: String) {
+    match {
+        $h: Habit { status: $status }
+    }
+    return { $h.slug, $h.name, $h.frequency, $h.cue, $h.routine, $h.reward }
+}
+
+query upcoming_events() {
+    match {
+        $e: Event
+    }
+    return { $e.slug, $e.name, $e.kind, $e.date, $e.brief }
+    order { $e.date asc }
+    limit 50
+}

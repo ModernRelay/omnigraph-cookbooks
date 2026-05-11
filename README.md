@@ -7,6 +7,7 @@ Opinionated, ready-to-run graph cookbooks built on [Omnigraph](https://github.co
 | Cookbook | Status | Description |
 |----------|--------|-------------|
 | [`industry-intel/`](./industry-intel) | ✅ ready | AI/ML industry intelligence graph |
+| [`personal-knowledge/`](./personal-knowledge) | ✅ ready | Second-brain / personal knowledge graph from Obsidian, Notion, Granola, Slack, Google Workspace, Apple Notes, LinkedIn, WhatsApp |
 | `company-context/` | 🚧 planned | Internal decisions, traces, actors, artifacts |
 | `biomed-research/` | 🚧 planned | Biotech & medical research tracking |
 | `competitor-intel/` | 🚧 planned | Competitor launches, pricing, positioning |
@@ -19,6 +20,7 @@ Packaged agent skills live under [`skills/`](./skills) and can be installed with
 |-------|-------------|
 | [`omnigraph-intel-bootstrap`](./skills/omnigraph-intel-bootstrap) | Bootstrap a new SPIKE graph from scratch — choose demo or custom, elicit domain + sources, adapt schema, research seed content, init + load |
 | [`omnigraph-best-practices`](./skills/omnigraph-best-practices) | Operate a locally deployed Omnigraph — schema authoring and evolution, query linting, data changes, branches, embeddings, aliases, server, policy, and common gotchas |
+| [`omnigraph-personal-knowledge`](./skills/omnigraph-personal-knowledge) | Bootstrap and maintain a personal knowledge graph — pick sources, connect, import idempotently with `--since`, dedup persons cross-source, headline report after every load |
 
 Install:
 

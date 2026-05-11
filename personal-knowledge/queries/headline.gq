@@ -1,0 +1,58 @@
+// Headline-report queries — the 5 numbers the skill auto-runs after every
+// successful load to give the user an immediate sense of their graph.
+
+// 1. Total notes + breakdown by source (joined via Artifact)
+query headline_notes_by_source() {
+    match {
+        $n: Note
+        $n noteFromArtifact $a
+    }
+    return { $a.source, $n.slug }
+}
+
+// 2. People sorted by mention count
+query headline_top_persons() {
+    match {
+        $p: Person
+        $a mentions $p
+    }
+    return { $p.slug, $p.name, $a.slug }
+    limit 1000
+}
+
+// 3. Recent artifacts (last 14 days, capped) — Claude formats counts + samples
+query headline_recent_artifacts() {
+    match {
+        $a: Artifact
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.timestamp }
+    order { $a.timestamp desc }
+    limit 200
+}
+
+// 4. People who appear via more than one ExternalID source — cross-source candidates
+query headline_cross_source_persons() {
+    match {
+        $p: Person
+        $e identifiesPerson $p
+    }
+    return { $p.slug, $p.name, $e.source }
+}
+
+// 5. Recent conversations and their participant counts (skill aggregates)
+query headline_recent_conversations() {
+    match {
+        $c: Conversation
+        $c conversationWith $p
+    }
+    return { $c.slug, $c.name, $c.source, $c.kind, $p.slug }
+    limit 500
+}
+
+// Identity-resolution candidate query — Persons sharing email or normalized name
+query identity_candidates_by_email() {
+    match {
+        $p: Person
+    }
+    return { $p.slug, $p.name, $p.email }
+}

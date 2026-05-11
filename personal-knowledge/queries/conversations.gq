@@ -1,0 +1,92 @@
+// Conversation + Artifact + Email reads.
+
+query get_conversation($slug: String) {
+    match {
+        $c: Conversation { slug: $slug }
+    }
+    return { $c.slug, $c.name, $c.kind, $c.source, $c.external_id }
+}
+
+query recent_conversations() {
+    match {
+        $c: Conversation
+    }
+    return { $c.slug, $c.name, $c.kind, $c.source, $c.updatedAt }
+    order { $c.updatedAt desc }
+    limit 50
+}
+
+query conversation_artifacts($slug: String) {
+    match {
+        $c: Conversation { slug: $slug }
+        $a inConversation $c
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.timestamp, $a.content }
+    order { $a.timestamp desc }
+    limit 200
+}
+
+query conversation_participants($slug: String) {
+    match {
+        $c: Conversation { slug: $slug }
+        $c conversationWith $p
+    }
+    return { $p.slug, $p.name, $p.relation }
+}
+
+query get_artifact($slug: String) {
+    match {
+        $a: Artifact { slug: $slug }
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.url, $a.content, $a.timestamp }
+}
+
+query recent_artifacts() {
+    match {
+        $a: Artifact
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.timestamp }
+    order { $a.timestamp desc }
+    limit 100
+}
+
+query artifacts_by_source($source: String) {
+    match {
+        $a: Artifact { source: $source }
+    }
+    return { $a.slug, $a.name, $a.kind, $a.timestamp }
+    order { $a.timestamp desc }
+    limit 100
+}
+
+query artifact_mentions_persons($slug: String) {
+    match {
+        $a: Artifact { slug: $slug }
+        $a mentions $p
+    }
+    return { $p.slug, $p.name, $p.relation, $p.email }
+}
+
+query get_email($slug: String) {
+    match {
+        $e: Email { slug: $slug }
+    }
+    return { $e.slug, $e.subject, $e.from, $e.to, $e.timestamp, $e.snippet }
+}
+
+query recent_emails() {
+    match {
+        $e: Email
+    }
+    return { $e.slug, $e.subject, $e.from, $e.timestamp }
+    order { $e.timestamp desc }
+    limit 50
+}
+
+query email_thread($thread_id: String) {
+    match {
+        $e: Email { thread_id: $thread_id }
+    }
+    return { $e.slug, $e.subject, $e.from, $e.to, $e.timestamp, $e.snippet }
+    order { $e.timestamp asc }
+}
