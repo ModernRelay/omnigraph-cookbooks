@@ -26,7 +26,7 @@ query program_compound($slug: String) {
 query program_mechanism($slug: String) {
     match {
         $p: Program { slug: $slug }
-        $p programCompetesInMechanism $m
+        $p programTargetsMechanism $m
     }
     return { $m.slug, $m.name, $m.brief }
 }

@@ -8,6 +8,9 @@
 {"type":"Company","data":{"id":"co-zealand-pharma","slug":"co-zealand-pharma","name":"Zealand Pharma","ticker":"ZEAL","type":"biotech","hq":"Copenhagen, Denmark","site":"https://www.zealandpharma.com","brief":"Partner on survodutide with BI. Pipeline includes amylin analog petrelintide and dapiglutide."}}
 {"type":"Company","data":{"id":"co-structure-therapeutics","slug":"co-structure-therapeutics","name":"Structure Therapeutics","ticker":"GPCR","type":"biotech","hq":"South San Francisco, CA","site":"https://www.structuretx.com","brief":"Oral small-molecule GLP-1 agonist GSBR-209 (formerly aleniglipron). Phase 2a disappointment Jan 2026."}}
 {"type":"Company","data":{"id":"co-express-scripts","slug":"co-express-scripts","name":"Express Scripts (Cigna)","type":"payer","hq":"St. Louis, MO","site":"https://www.express-scripts.com","brief":"Pharmacy benefit manager. Tightened GLP-1 coverage with prior authorization requirements mid-2024."}}
+{"type":"Company","data":{"id":"co-carmot-therapeutics","slug":"co-carmot-therapeutics","name":"Carmot Therapeutics","type":"biotech","hq":"Berkeley, CA","brief":"Obesity and diabetes biotech acquired by Roche in Dec 2023; brought CT-388 and CT-996 into Roche's pipeline."}}
+{"type":"Company","data":{"id":"co-versanis-bio","slug":"co-versanis-bio","name":"Versanis Bio","type":"biotech","hq":"New York, NY","brief":"Biotech developing bimagrumab for obesity; acquired by Eli Lilly in Aug 2023."}}
+{"type":"Company","data":{"id":"co-metsera","slug":"co-metsera","name":"Metsera","type":"biotech","hq":"New York, NY","brief":"Obesity biotech with injectable GLP-1 and amylin assets; acquired by Pfizer in Nov 2025."}}
 {"type":"Mechanism","data":{"id":"mech-glp1r-agonist","slug":"mech-glp1r-agonist","name":"GLP-1 receptor agonist","target":"GLP1R","pathway":"Incretin","validation":"approved","brief":"Monotype GLP-1 receptor agonism. Class validated via semaglutide (Wegovy) and older liraglutide.","createdAt":"2026-04-17T00:00:00Z","updatedAt":"2026-04-17T00:00:00Z"}}
 {"type":"Mechanism","data":{"id":"mech-gip-glp1-dual","slug":"mech-gip-glp1-dual","name":"GIP / GLP-1 dual agonist","target":"GIPR + GLP1R","pathway":"Incretin","validation":"approved","brief":"Dual agonism of GIP and GLP-1 receptors. Validated by tirzepatide (Zepbound). Pursued by Viking VK2735.","createdAt":"2026-04-17T00:00:00Z","updatedAt":"2026-04-17T00:00:00Z"}}
 {"type":"Mechanism","data":{"id":"mech-glp1-amylin","slug":"mech-glp1-amylin","name":"GLP-1 + amylin","target":"GLP1R + amylin/calcitonin receptors","pathway":"Incretin + amylin","validation":"clinical","brief":"Combination approach pairing GLP-1 with amylin analog (e.g., cagrilintide). Phase 3 for CagriSema.","createdAt":"2026-04-17T00:00:00Z","updatedAt":"2026-04-17T00:00:00Z"}}
@@ -147,6 +150,9 @@
 {"edge":"DealLeadParty","from":"deal-roche-carmot","to":"co-roche","data":{}}
 {"edge":"DealLeadParty","from":"deal-lilly-versanis","to":"co-eli-lilly","data":{}}
 {"edge":"DealLeadParty","from":"deal-pfizer-metsera","to":"co-pfizer","data":{}}
+{"edge":"DealCounterParty","from":"deal-roche-carmot","to":"co-carmot-therapeutics","data":{}}
+{"edge":"DealCounterParty","from":"deal-lilly-versanis","to":"co-versanis-bio","data":{}}
+{"edge":"DealCounterParty","from":"deal-pfizer-metsera","to":"co-metsera","data":{}}
 {"edge":"TargetsCompound","from":"reg-wegovy-cvd-label","to":"comp-semaglutide","data":{}}
 {"edge":"TargetsCompound","from":"reg-zepbound-osa","to":"comp-tirzepatide","data":{}}
 {"edge":"FormsPattern","from":"sig-viking-venture-p2","to":"pat-glp1-pipeline-explosion","data":{}}
@@ -163,7 +169,7 @@
 {"edge":"FormsPattern","from":"sig-lilly-surmount-5-headhead","to":"pat-efficacy-ceiling","data":{}}
 {"edge":"ContradictsPattern","from":"sig-redefine-cagrisema-readout","to":"pat-efficacy-ceiling","data":{}}
 {"edge":"FormsPattern","from":"sig-express-scripts-exclusion","to":"pat-payer-pushback","data":{}}
-{"edge":"FormsPattern","from":"sig-wegovy-cvd-label-expansion","to":"pat-payer-pushback","data":{}}
+{"edge":"ContradictsPattern","from":"sig-wegovy-cvd-label-expansion","to":"pat-payer-pushback","data":{}}
 {"edge":"ContradictsPattern","from":"sig-cms-medicare-glp1-cvd","to":"pat-payer-pushback","data":{}}
 {"edge":"ContradictsPattern","from":"sig-zepbound-osa-approval","to":"pat-payer-pushback","data":{}}
 {"edge":"DrivesPattern","from":"pat-glp1-pipeline-explosion","to":"pat-efficacy-ceiling","data":{}}

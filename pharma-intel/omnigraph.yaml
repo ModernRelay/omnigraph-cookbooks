@@ -31,6 +31,7 @@ aliases:
   # ── Signals ──
   signal: { command: read, query: signals.gq, name: get_signal, args: [slug], format: kv }
   signals: { command: read, query: signals.gq, name: recent_signals }
+  search-signals: { command: read, query: signals.gq, name: search_signals, args: [q] }
   signals-by-domain: { command: read, query: signals.gq, name: signals_by_domain, args: [domain] }
   signal-patterns: { command: read, query: signals.gq, name: signal_patterns, args: [slug] }
   signal-contradictions: { command: read, query: signals.gq, name: signal_contradictions, args: [slug] }
@@ -50,6 +51,7 @@ aliases:
   pattern-signals: { command: read, query: patterns.gq, name: pattern_signals, args: [slug] }
   pattern-contradictions: { command: read, query: patterns.gq, name: pattern_contradictions, args: [slug] }
   pattern-drives: { command: read, query: patterns.gq, name: pattern_drives, args: [slug] }
+  pattern-contradicts-patterns: { command: read, query: patterns.gq, name: pattern_contradicts_patterns, args: [slug] }
   pattern-insights: { command: read, query: patterns.gq, name: pattern_insights, args: [slug] }
 
   # ── Compounds & Mechanisms ──
@@ -69,14 +71,18 @@ aliases:
   # ── Trials, Deals, Regulatory ──
   trial: { command: read, query: pipeline.gq, name: get_trial, args: [slug], format: kv }
   trials-by-status: { command: read, query: pipeline.gq, name: trials_by_status, args: [status] }
+  trial-sponsor: { command: read, query: pipeline.gq, name: trial_sponsor, args: [slug] }
   deal: { command: read, query: pipeline.gq, name: get_deal, args: [slug], format: kv }
   deals: { command: read, query: pipeline.gq, name: deals_all }
+  deal-parties: { command: read, query: pipeline.gq, name: deal_parties, args: [slug] }
   regulatory: { command: read, query: pipeline.gq, name: get_regulatory, args: [slug], format: kv }
   regulatory-recent: { command: read, query: pipeline.gq, name: regulatory_recent }
+  regulatory-compound: { command: read, query: pipeline.gq, name: regulatory_compound, args: [slug] }
   company: { command: read, query: pipeline.gq, name: get_company, args: [slug], format: kv }
   company-compounds: { command: read, query: pipeline.gq, name: company_compounds, args: [slug] }
   insight: { command: read, query: pipeline.gq, name: get_insight, args: [slug], format: kv }
   insights: { command: read, query: pipeline.gq, name: insights_all }
+  insight-patterns: { command: read, query: pipeline.gq, name: insight_patterns, args: [slug] }
 
   # ── Internal Context (the value layer) ──
   program: { command: read, query: programs.gq, name: get_program, args: [slug], format: kv }
@@ -94,6 +100,7 @@ aliases:
   assumption-contradictions: { command: read, query: programs.gq, name: assumption_contradicting_signals, args: [slug] }
   decision: { command: read, query: programs.gq, name: get_decision, args: [slug], format: kv }
   decisions-upcoming: { command: read, query: programs.gq, name: decisions_upcoming }
+  decisions-all: { command: read, query: programs.gq, name: decisions_all }
   decision-program: { command: read, query: programs.gq, name: decision_program, args: [slug] }
   decision-questions: { command: read, query: programs.gq, name: decision_questions, args: [slug] }
   decision-assumptions: { command: read, query: programs.gq, name: decision_assumptions, args: [slug] }

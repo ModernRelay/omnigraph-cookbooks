@@ -4,7 +4,7 @@ Seed data for `schema.pg`. Scope: the GLP-1 obesity competitive landscape, seede
 
 ---
 
-## Companies (10)
+## Companies (13)
 
 | slug | name | ticker | type |
 |------|------|--------|------|
@@ -18,6 +18,9 @@ Seed data for `schema.pg`. Scope: the GLP-1 obesity competitive landscape, seede
 | `co-zealand-pharma` | Zealand Pharma | ZEAL | biotech |
 | `co-structure-therapeutics` | Structure Therapeutics | GPCR | biotech |
 | `co-express-scripts` | Express Scripts (Cigna) | — | payer |
+| `co-carmot-therapeutics` | Carmot Therapeutics | — | biotech |
+| `co-versanis-bio` | Versanis Bio | — | biotech |
+| `co-metsera` | Metsera | — | biotech |
 
 ## Mechanisms (6)
 
@@ -170,4 +173,4 @@ Seed data for `schema.pg`. Scope: the GLP-1 obesity competitive landscape, seede
 | ContradictsPattern | `sig-structure-gsbr-p2a-disappointing` | `pat-oral-glp1-thesis` | One pattern, one counter-signal — visible as first-class data |
 | ContradictsPattern | `sig-redefine-cagrisema-readout` | `pat-efficacy-ceiling` | The "more weight loss is always better" assumption gets challenged |
 
-**Totals:** ~90 nodes, ~150 edges.
+**Totals:** 108 nodes, 192 edges.

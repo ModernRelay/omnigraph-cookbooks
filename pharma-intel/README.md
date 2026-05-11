@@ -65,7 +65,7 @@ Viking Therapeutics (NASDAQ: VKTX) is a real public company with a GLP-1/GIP dua
 | Trials | 8 | Real NCT IDs including VANQUISH (NCT05930405), SURMOUNT-5, SELECT, ATTAIN-1, REDEFINE-1 |
 | Deals | 3 | Roche/Carmot ($3.1B, Dec 2023), Lilly/Versanis ($1.925B, Aug 2023), Pfizer/Metsera ($4.9B, Nov 2025) |
 | Regulatory | 4 | Zepbound OSA approval, Wegovy CV label, CMS Medicare memo, ERAs |
-| Companies | 10 | Viking, Novo, Lilly, Pfizer, Amgen, Roche, BI, Zealand, Structure, Express Scripts |
+| Companies | 13 | Viking, Novo, Lilly, Pfizer, Amgen, Roche, BI, Zealand, Structure, Express Scripts, Carmot, Versanis, Metsera |
 
 **Four live patterns in GLP-1 obesity:**
 
@@ -95,7 +95,7 @@ Viking Therapeutics (NASDAQ: VKTX) is a real public company with a GLP-1/GIP dua
 | Lilly orforglipron ATTAIN-1 positive | `InformsQuestion` | `q-orforglipron-competitive-window` | Competitive readout answers (partially) a Viking open question |
 | Pfizer danuglipron discontinuation | `InformsQuestion` | `q-pfizer-failure-mechanism-risk` | Cross-sponsor hepatotoxicity risk flagged for Viking's clinical team |
 
-**Totals:** 105 nodes across 15 node types, 189 edges across 33 edge types.
+**Totals:** 108 nodes across 15 node types, 192 edges across 34 edge types.
 
 ## Schema Essentials
 
@@ -144,7 +144,7 @@ Full property tables and constraints in `schema.pg`.
 
 - `schema.pg` — Executable Omnigraph schema (source of truth)
 - `seed.md` / `seed.jsonl` — Seed dataset (human-readable / loadable)
-- `queries/*.gq` — Read queries (6 files, ~67 queries) + mutations (1 file, 35 queries)
+- `queries/*.gq` — Read queries (5 files, 70 queries) + mutations (1 file, 35 queries)
 - `omnigraph.yaml` — CLI config with aliases for all reads + mutations
 - `.env.omni` — RustFS credentials (not committed; see `.env.omni.example`)
 
@@ -203,5 +203,26 @@ omnigraph read --alias signal-informs-questions sig-pfizer-danuglipron-discontin
 omnigraph read --alias program-landscape-signals prog-vk2735-sc
 # → 5 signals across VK2735 (SC + oral) + tirzepatide, time-sorted
 ```
+
+## Agent Analyst Loop
+
+Agents should operate the graph in this order:
+
+```bash
+# 1. Pick a decision and expand its dependencies
+omnigraph read --alias decisions-upcoming
+omnigraph read --alias decision-assumptions dec-oral-phase3-start
+omnigraph read --alias decision-questions dec-oral-phase3-start
+
+# 2. Gather evidence for the key assumptions
+omnigraph read --alias assumption-supports asmp-oral-displaces-injectable
+omnigraph read --alias assumption-contradictions asmp-oral-displaces-injectable
+
+# 3. Trace a new or existing signal into internal impact
+omnigraph read --alias signal-contradicts-assumptions sig-pfizer-danuglipron-discontinued
+omnigraph read --alias signal-informs-questions sig-pfizer-danuglipron-discontinued
+```
+
+For fresh web findings, first map the signal to existing companies, compounds, patterns, assumptions, and open questions; then propose the minimal seed or mutation update.
 
 See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.

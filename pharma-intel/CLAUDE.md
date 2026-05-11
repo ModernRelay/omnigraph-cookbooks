@@ -59,6 +59,17 @@ These are the queries the seed is shaped to light up — preserve them when iter
 
 If a schema or seed change breaks any of these, the three-layer model is not delivering — fix the seed rather than compromising the schema.
 
+## Agent Workflow
+
+Use this starter as a decision-intelligence loop, not just a lookup table:
+
+1. Start from a decision, program, assumption, or fresh external signal.
+2. Expand internal context with aliases like `decision-assumptions`, `decision-questions`, `program-competitors`, and `program-landscape-signals`.
+3. Build the evidence matrix with `assumption-supports` and `assumption-contradictions`.
+4. Trace signal impact with `signal-supports-assumptions`, `signal-contradicts-assumptions`, and `signal-informs-questions`.
+5. If using web research, map each new public signal to existing graph objects before proposing data changes: `AboutCompound`, `RelevantCompany`, `FormsPattern` / `ContradictsPattern`, `SupportsAssumption` / `ContradictsAssumption`, and `InformsQuestion`.
+6. Report the decision impact: what changed, which assumptions moved, which questions remain open, and which graph update should be made.
+
 ## Validation
 
 ```bash
