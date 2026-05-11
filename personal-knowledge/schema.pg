@@ -1,0 +1,411 @@
+// Personal Knowledge Graph — second-brain ontology for Omnigraph.
+// Spine of a personal context graph: people, places, events, projects, tasks,
+// notes, artifacts, conversations, identity resolution, and sync state.
+//
+// Designed to be a starter, not a finished product. Add Health, Financing,
+// Inspiration, RelationshipIntent, Frames, etc. as overlays — see EXTENDING
+// section in README.md for paste-in snippets sourced from the reference
+// "Life Graph" ontology.
+
+
+// ──────────────────────────────────────────────
+// Core Nodes
+// ──────────────────────────────────────────────
+
+node Person {
+    slug: String @key
+    name: String @index
+    first_name: String?
+    last_name: String?
+    relation: enum(family, friend, colleague, acquaintance, professional, mentor, other) @index
+    email: String?
+    phone: String?
+    birthday: Date?
+    brief: String? @index
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Organization {
+    slug: String @key
+    name: String @index
+    kind: enum(company, school, club, community, institution, team) @index
+    brief: String?
+    website: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Place {
+    slug: String @key
+    name: String @index
+    kind: enum(city, country, restaurant, office, home, venue, airport, park, cafe, other) @index
+    address: String?
+    lat: F64?
+    lng: F64?
+    brief: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Event {
+    slug: String @key
+    name: String @index
+    kind: enum(meeting, dinner, trip, call, party, milestone, workout, conference, date, hangout, other) @index
+    brief: String?
+    description: String?
+    date: DateTime @index
+    end_date: DateTime?
+    tags: [String]?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Life Structure (PARA + GTD + Atomic Habits)
+// ──────────────────────────────────────────────
+
+// Areas are ongoing life domains with no end date. Goals, habits, projects,
+// and tasks live under them.
+node Area {
+    slug: String @key
+    name: String @index
+    kind: enum(health, career, finance, relationships, learning, creativity, community, spirituality, other) @index
+    status: enum(active, archived) @index
+    brief: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Project {
+    slug: String @key
+    name: String @index
+    kind: enum(work, personal, hobby, side-project, learning, health) @index
+    status: enum(active, paused, completed, abandoned) @index
+    brief: String?
+    description: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+// Goals have a target outcome. Tasks and habits roll up into goals.
+node Goal {
+    slug: String @key
+    name: String @index
+    status: enum(active, achieved, abandoned, paused) @index
+    target: String?
+    due_date: DateTime?
+    brief: String?
+    tags: [String]?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+// LLM guidance: Tasks follow GTD. New tasks start as inbox, then get clarified.
+// waiting = blocked on someone or something. someday = not now but maybe later.
+node Task {
+    slug: String @key
+    name: String @index
+    status: enum(inbox, next, waiting, someday, done, cancelled) @index
+    kind: enum(action, research, decision, waiting, reminder, admin)? @index
+    context: enum(phone, computer, errand, home, office, anywhere)?
+    priority: enum(low, medium, high, critical)?
+    due_date: DateTime?
+    remind_at: DateTime?
+    brief: String?
+    tags: [String]?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+// Atomic Habits: cue → routine → reward. Habit is the practice; logging
+// individual completions is an overlay (see HabitCompletion in extensions).
+node Habit {
+    slug: String @key
+    name: String @index
+    status: enum(active, paused, dropped) @index
+    frequency: enum(daily, weekly, monthly) @index
+    cue: String?
+    routine: String?
+    reward: String?
+    brief: String?
+    tags: [String]?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Knowledge
+// ──────────────────────────────────────────────
+
+// LLM guidance: Notes must be atomic — one idea, one principle, one insight per node.
+// Prefer short, self-contained content that makes sense without context.
+// Use LinkedNote edges to connect related notes rather than combining them.
+// Name should be a concise summary; content holds the full text.
+node Note {
+    slug: String @key
+    name: String @index
+    kind: enum(idea, reflection, insight, quote, dream, journal, principle) @index
+    content: String?
+    tags: [String]?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Source & Provenance
+// ──────────────────────────────────────────────
+
+// Artifact is the universal source-of-truth container. Anything imported from
+// any source lands as an Artifact first; structured downstream nodes (Notes,
+// Tasks, Events) are derived via DerivedFromArtifact edges.
+node Artifact {
+    slug: String @key
+    name: String @index
+    kind: enum(message, email, post, document, transcript, recording, meeting-note, photo, calendar-entry, voice-note, chat-export) @index
+    source: enum(whatsapp, linkedin, email, calendar, granola, notes-app, web, manual, slack, telegram, instagram, x, readwise, obsidian, notion, apple-notes, drive, other) @index
+    source_ref: String?
+    url: String?
+    blob: Blob?
+    content: String?
+    content_sha256: String? @index
+    timestamp: DateTime @index
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+// Chunk holds embedding-indexed slices of an Artifact (or Email) for semantic
+// retrieval. One Chunk per chunk_index per source row. Immutable.
+node Chunk {
+    text: String
+    chunk_index: I32
+    embedding: Vector(3072)? @embed("text") @index
+    createdAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Conversation (thread identity across channels)
+// ──────────────────────────────────────────────
+
+node Conversation {
+    slug: String @key
+    external_id: String @index
+    kind: enum(dm, group, broadcast, channel, other) @index
+    source: enum(whatsapp, telegram, linkedin, slack, email, sms, imessage, other) @index
+    name: String? @index
+    brief: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Email (first-class — subject, threading, addressing)
+// ──────────────────────────────────────────────
+
+node Email {
+    slug: String @key
+    message_id: String @index
+    thread_id: String @index
+    subject: String?
+    labels: [String]?
+    account: String @index
+    from: String @index
+    to: [String]
+    cc: [String]?
+    timestamp: DateTime @index
+    content_text: String?
+    content_html: String?
+    snippet: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Identity Resolution
+// ──────────────────────────────────────────────
+
+// One ExternalID per (source, external_id) pair. Connect to the canonical
+// node it identifies via IdentifiesPerson / IdentifiesOrganization /
+// IdentifiesPlace. Use SameAs to link Person nodes that turn out to be the
+// same human across sources.
+node ExternalID {
+    slug: String @key
+    source: enum(whatsapp, linkedin, email, slack, telegram, instagram, x, calendar, readwise, obsidian, notion, apple-notes, granola, drive, other) @index
+    external_id: String @index
+    createdAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Sync State
+// ──────────────────────────────────────────────
+
+// One SyncRun per importer invocation. The skill queries the latest
+// succeeded SyncRun per source to compute --since for incremental imports.
+node SyncRun {
+    slug: String @key
+    source: enum(obsidian, notion, granola, slack, gmail, gcalendar, gdrive, apple-notes, linkedin, whatsapp, manual, other) @index
+    started_at: DateTime @index
+    completed_at: DateTime? @index
+    status: enum(running, succeeded, failed, partial) @index
+    records_imported: I32?
+    error: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Edges: Identity Resolution
+// ──────────────────────────────────────────────
+
+edge IdentifiesPerson: ExternalID -> Person
+edge IdentifiesOrganization: ExternalID -> Organization
+edge IdentifiesPlace: ExternalID -> Place
+
+edge SameAs: Person -> Person {
+    confidence: F32?
+    method: String?
+}
+
+
+// ──────────────────────────────────────────────
+// Edges: Person <-> Person
+// ──────────────────────────────────────────────
+
+edge Knows: Person -> Person {
+    context: String?
+    since: Date?
+}
+
+edge Follows: Person -> Person {
+    platform: enum(linkedin, x, instagram, github, other)?
+    since: Date?
+}
+
+
+// ──────────────────────────────────────────────
+// Edges: Person <-> Event / Organization / Project / Place
+// ──────────────────────────────────────────────
+
+edge Attended: Person -> Event
+
+edge BelongsTo: Person -> Organization {
+    role: String?
+    since: Date?
+    until: Date?
+    current: Bool?
+    source_url: String?
+    source: enum(linkedin, email, calendar, whatsapp, manual, web, other)?
+    confidence: F32?
+    notes: String?
+}
+
+edge InvolvedIn: Person -> Project {
+    role: String?
+}
+
+edge LivesIn: Person -> Place {
+    primary: Bool?
+    since: Date?
+}
+
+
+// ──────────────────────────────────────────────
+// Edges: Event / Place / Project / Organization
+// ──────────────────────────────────────────────
+
+edge HappenedAt: Event -> Place
+edge EventForProject: Event -> Project
+edge ProjectForOrganization: Project -> Organization
+edge ProjectInArea: Project -> Area
+edge AreaForOrganization: Area -> Organization
+
+
+// ──────────────────────────────────────────────
+// Edges: Goal / Habit / Task hierarchy
+// ──────────────────────────────────────────────
+
+edge GoalForArea: Goal -> Area
+edge GoalForGoal: Goal -> Goal
+edge GoalForProject: Goal -> Project
+
+edge HabitForArea: Habit -> Area
+edge HabitForGoal: Habit -> Goal
+
+edge TaskForArea: Task -> Area
+edge TaskForGoal: Task -> Goal
+edge TaskForProject: Task -> Project
+edge TaskForPerson: Task -> Person
+edge TaskFromArtifact: Task -> Artifact
+edge TaskFromEvent: Task -> Event
+
+
+// ──────────────────────────────────────────────
+// Edges: Note connections
+// ──────────────────────────────────────────────
+
+edge NoteFromArtifact: Note -> Artifact
+edge NoteAboutPerson: Note -> Person
+edge NoteAboutOrganization: Note -> Organization
+edge NoteAboutProject: Note -> Project
+edge NoteFromEvent: Note -> Event
+edge LinkedNote: Note -> Note
+
+
+// ──────────────────────────────────────────────
+// Edges: Artifact provenance
+// ──────────────────────────────────────────────
+
+edge Mentions: Artifact -> Person
+edge ArtifactFromPerson: Artifact -> Person
+edge ArtifactForProject: Artifact -> Project
+edge RecordOf: Artifact -> Event
+edge InReplyTo: Artifact -> Artifact
+edge DerivedFromArtifact: Artifact -> Artifact {
+    activity: enum(transcribed, summarized, ocr, imported, clipped, corrected, translated, extracted)
+    agent: String?
+    model: String?
+    confidence: F32?
+    createdAt: DateTime
+}
+edge Bookmarked: Person -> Artifact {
+    saved_at: DateTime?
+}
+
+
+// ──────────────────────────────────────────────
+// Edges: Conversation
+// ──────────────────────────────────────────────
+
+edge InConversation: Artifact -> Conversation @card(1..1)
+edge ConversationWith: Conversation -> Person {
+    role: enum(member, admin, owner, creator)?
+    joined_at: DateTime?
+    left_at: DateTime?
+}
+
+
+// ──────────────────────────────────────────────
+// Edges: Email
+// ──────────────────────────────────────────────
+
+edge EmailFromPerson: Email -> Person
+edge EmailToPerson: Email -> Person
+edge EmailInConversation: Email -> Conversation
+edge ChunkOfEmail: Chunk -> Email @card(1..1)
+
+
+// ──────────────────────────────────────────────
+// Edges: Chunks
+// ──────────────────────────────────────────────
+
+edge ChunkOf: Chunk -> Artifact @card(1..1) {
+    @unique(src)
+}

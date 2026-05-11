@@ -1,0 +1,265 @@
+{"type":"Person","data":{"slug":"person-alex-rivera","name":"Alex Rivera","first_name":"Alex","last_name":"Rivera","relation":"other","email":"alex@arivera.dev","brief":"Self","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-08T00:00:00Z"}}
+{"type":"Person","data":{"slug":"person-jane-park","name":"Jane Park","first_name":"Jane","last_name":"Park","relation":"colleague","email":"jane@kettle.so","brief":"PM peer at Kettle","createdAt":"2026-01-15T00:00:00Z","updatedAt":"2026-05-05T00:00:00Z"}}
+{"type":"Person","data":{"slug":"person-jane-park-personal","name":"Jane","relation":"colleague","brief":"Slack handle (jpark)","createdAt":"2026-01-20T00:00:00Z","updatedAt":"2026-05-06T00:00:00Z"}}
+{"type":"Person","data":{"slug":"person-marcus-leblanc","name":"Marcus LeBlanc","first_name":"Marcus","last_name":"LeBlanc","relation":"mentor","email":"marcus@leblancadvisors.com","brief":"Advisor — onboarding/growth","createdAt":"2026-02-01T00:00:00Z","updatedAt":"2026-04-12T00:00:00Z"}}
+{"type":"Person","data":{"slug":"person-priya-shah","name":"Priya Shah","first_name":"Priya","last_name":"Shah","relation":"friend","email":"priya.shah.97@gmail.com","brief":"College friend","createdAt":"2026-01-05T00:00:00Z","updatedAt":"2026-04-22T00:00:00Z"}}
+{"type":"Person","data":{"slug":"person-priya-shah-work","name":"Priya Shah","first_name":"Priya","last_name":"Shah","relation":"professional","email":"priya@cardinaldev.com","brief":"PM at Cardinal Dev","createdAt":"2026-04-18T00:00:00Z","updatedAt":"2026-04-22T00:00:00Z"}}
+{"type":"Person","data":{"slug":"person-tomohiro-sato","name":"Tomohiro Sato","relation":"colleague","email":"tom@kettle.so","brief":"Eng lead at Kettle","createdAt":"2026-01-10T00:00:00Z","updatedAt":"2026-05-06T00:00:00Z"}}
+{"type":"Person","data":{"slug":"person-elena-nikolaidis","name":"Elena Nikolaidis","relation":"acquaintance","email":"elena.n@stanford.edu","brief":"PhD student, Stanford","createdAt":"2026-03-01T00:00:00Z","updatedAt":"2026-04-28T00:00:00Z"}}
+{"type":"Person","data":{"slug":"person-david-chen","name":"David Chen","relation":"mentor","email":"dchen@accelerent.vc","brief":"Investor — Accelerent","createdAt":"2026-02-15T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Person","data":{"slug":"person-rachel-hoffman","name":"Rachel Hoffman","relation":"family","email":"rachel.hoffman.bk@gmail.com","brief":"Sister","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-04T00:00:00Z"}}
+{"type":"Person","data":{"slug":"person-aaron-kim","name":"Aaron Kim","relation":"colleague","email":"aaron@kettle.so","brief":"Designer at Kettle","createdAt":"2026-01-12T00:00:00Z","updatedAt":"2026-05-06T00:00:00Z"}}
+{"type":"Person","data":{"slug":"person-sara-mitchell","name":"Sara Mitchell","relation":"friend","brief":"Travel buddy","createdAt":"2026-02-20T00:00:00Z","updatedAt":"2026-04-05T00:00:00Z"}}
+
+{"type":"Organization","data":{"slug":"org-kettle","name":"Kettle","kind":"company","brief":"Kettle — workflow automation","website":"https://kettle.so","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Organization","data":{"slug":"org-cardinaldev","name":"Cardinal Dev","kind":"company","brief":"Dev tools startup","website":"https://cardinaldev.com","createdAt":"2026-04-18T00:00:00Z","updatedAt":"2026-04-18T00:00:00Z"}}
+{"type":"Organization","data":{"slug":"org-leblanc-advisors","name":"LeBlanc Advisors","kind":"company","createdAt":"2026-02-01T00:00:00Z","updatedAt":"2026-02-01T00:00:00Z"}}
+{"type":"Organization","data":{"slug":"org-accelerent","name":"Accelerent Capital","kind":"company","website":"https://accelerent.vc","createdAt":"2026-02-15T00:00:00Z","updatedAt":"2026-02-15T00:00:00Z"}}
+{"type":"Organization","data":{"slug":"org-stanford","name":"Stanford University","kind":"school","website":"https://stanford.edu","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+
+{"type":"Place","data":{"slug":"place-sf","name":"San Francisco","kind":"city","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Place","data":{"slug":"place-kettle-hq","name":"Kettle HQ","kind":"office","address":"1455 Market St, San Francisco, CA","lat":37.7755,"lng":-122.4180,"createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Place","data":{"slug":"place-blue-bottle-mint","name":"Blue Bottle Coffee — Mint Plaza","kind":"cafe","address":"66 Mint St, San Francisco, CA","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+
+{"type":"Area","data":{"slug":"area-career","name":"Career","kind":"career","status":"active","brief":"Product work + Kettle","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Area","data":{"slug":"area-learning","name":"Learning","kind":"learning","status":"active","brief":"Books, papers, languages","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Area","data":{"slug":"area-relationships","name":"Relationships","kind":"relationships","status":"active","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Area","data":{"slug":"area-health","name":"Health","kind":"health","status":"active","brief":"Running + strength","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+
+{"type":"Project","data":{"slug":"proj-pk-launch","name":"Kettle PK feature launch","kind":"work","status":"active","brief":"Q2 main initiative","description":"Ship the Personal Knowledge feature by end of Q2.","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-05-08T00:00:00Z"}}
+{"type":"Project","data":{"slug":"proj-q2-research","name":"Q2 customer research sprint","kind":"work","status":"active","brief":"30 calls in Q2","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Project","data":{"slug":"proj-pkm-system","name":"Personal PKM rebuild","kind":"personal","status":"active","brief":"Rebuild own knowledge stack","createdAt":"2026-03-15T00:00:00Z","updatedAt":"2026-05-07T00:00:00Z"}}
+{"type":"Project","data":{"slug":"proj-running-sub-90","name":"Half-marathon sub-1:30","kind":"hobby","status":"active","createdAt":"2026-02-01T00:00:00Z","updatedAt":"2026-05-05T00:00:00Z"}}
+{"type":"Project","data":{"slug":"proj-spanish-b2","name":"Spanish to B2","kind":"learning","status":"paused","createdAt":"2026-01-15T00:00:00Z","updatedAt":"2026-04-01T00:00:00Z"}}
+
+{"type":"Goal","data":{"slug":"goal-ship-pk-q2","name":"Ship PK feature by end of Q2","status":"active","target":"GA on June 30","due_date":"2026-06-30T00:00:00Z","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-05-08T00:00:00Z"}}
+{"type":"Goal","data":{"slug":"goal-30-customer-calls","name":"30 customer calls in Q2","status":"active","target":"30 calls","due_date":"2026-06-30T00:00:00Z","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Goal","data":{"slug":"goal-half-marathon-sub-90","name":"Run half marathon under 1:30","status":"active","target":"sub-90 minutes","due_date":"2026-10-15T00:00:00Z","createdAt":"2026-02-01T00:00:00Z","updatedAt":"2026-05-05T00:00:00Z"}}
+
+{"type":"Habit","data":{"slug":"habit-morning-pages","name":"Morning pages","status":"active","frequency":"daily","cue":"After coffee","routine":"Three pages, longhand","reward":"Mental clarity","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-08T00:00:00Z"}}
+{"type":"Habit","data":{"slug":"habit-weekly-review","name":"Weekly review","status":"active","frequency":"weekly","cue":"Sunday morning","routine":"GTD review","reward":"Calm week start","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-04T00:00:00Z"}}
+{"type":"Habit","data":{"slug":"habit-strength-training","name":"Strength training","status":"active","frequency":"weekly","cue":"Monday + Thursday","routine":"45-min lift","reward":"Energy + posture","createdAt":"2026-02-01T00:00:00Z","updatedAt":"2026-05-05T00:00:00Z"}}
+
+{"type":"Task","data":{"slug":"task-draft-pk-spec","name":"Draft PK feature spec","status":"next","kind":"action","priority":"high","due_date":"2026-05-12T00:00:00Z","brief":"Spec for next eng review","createdAt":"2026-05-05T00:00:00Z","updatedAt":"2026-05-07T00:00:00Z"}}
+{"type":"Task","data":{"slug":"task-call-priya","name":"Call Priya re: research interviews","status":"next","kind":"action","priority":"medium","createdAt":"2026-04-30T00:00:00Z","updatedAt":"2026-05-04T00:00:00Z"}}
+{"type":"Task","data":{"slug":"task-review-elena-paper","name":"Review Elena's paper draft","status":"waiting","kind":"research","createdAt":"2026-04-25T00:00:00Z","updatedAt":"2026-04-28T00:00:00Z"}}
+{"type":"Task","data":{"slug":"task-book-flights-dec","name":"Book flights for December trip","status":"inbox","kind":"admin","createdAt":"2026-05-02T00:00:00Z","updatedAt":"2026-05-02T00:00:00Z"}}
+{"type":"Task","data":{"slug":"task-followup-marcus","name":"Follow up with Marcus on advisor agreement","status":"next","kind":"action","priority":"medium","createdAt":"2026-04-15T00:00:00Z","updatedAt":"2026-04-20T00:00:00Z"}}
+{"type":"Task","data":{"slug":"task-q2-okrs-draft","name":"Draft Q2 OKRs","status":"inbox","kind":"decision","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Task","data":{"slug":"task-fix-onboarding-step3","name":"Fix onboarding step 3 dropoff","status":"next","kind":"action","priority":"high","createdAt":"2026-05-03T00:00:00Z","updatedAt":"2026-05-06T00:00:00Z"}}
+{"type":"Task","data":{"slug":"task-renew-passport","name":"Renew passport","status":"someday","kind":"admin","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-04-01T00:00:00Z"}}
+
+{"type":"Note","data":{"slug":"note-pk-vision","name":"PK vision: agents writing into governed context","kind":"insight","content":"The point of personal knowledge isn't capture — it's that agents can read your context and write back into it under governance. Otherwise you've just rebuilt Notion.","tags":["pk","agents","context"],"createdAt":"2026-04-15T00:00:00Z","updatedAt":"2026-05-07T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-bsbb-on-onboarding","name":"Marcus on onboarding: build smaller, but better","kind":"quote","content":"Marcus: \"Cut step 3 entirely. Make step 2 carry the weight. The onboarding funnel doesn't need more steps — it needs better ones.\"","tags":["onboarding","marcus","quote"],"createdAt":"2026-04-12T00:00:00Z","updatedAt":"2026-04-12T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-jane-customer-priorities","name":"Jane's framing of customer priorities","kind":"reflection","content":"Jane reframed our top-3 customer priorities as: (1) reduce setup time, (2) trust the data is right, (3) play well with existing tools. Sequence matters — we kept hearing #3 first because we were asking #3 first.","tags":["customers","priorities","jane"],"createdAt":"2026-04-22T00:00:00Z","updatedAt":"2026-04-22T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-q2-okr-draft","name":"Q2 OKRs (draft)","kind":"idea","content":"O1: Ship PK feature to GA. KR1: 3 design partners using daily. KR2: 50 NPS. O2: 30 customer calls. KR1: Synthesize into pattern doc.","tags":["okr","q2"],"createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-running-form-cue","name":"Running form cue: tall, light, quick","kind":"principle","content":"Three-word reset for running form when fatigue sets in. Tall = posture. Light = footstrike. Quick = cadence (target 180).","tags":["running","cues"],"createdAt":"2026-03-10T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-spanish-conjunctions","name":"Spanish conjunctions (que / como / cuando)","kind":"idea","content":"que → that. como → as / how. cuando → when. Subjunctive triggered by future-uncertain clauses with cuando.","tags":["spanish","grammar"],"createdAt":"2026-02-15T00:00:00Z","updatedAt":"2026-02-15T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-priya-onboarding-pain","name":"Priya: onboarding pain at Cardinal","kind":"reflection","content":"Cardinal's onboarding pain isn't the steps — it's that step 4 expects data the user doesn't have yet. Same pattern we just heard from two other customers. This might be a category-wide problem.","tags":["customers","priya","onboarding","pattern"],"createdAt":"2026-04-22T00:00:00Z","updatedAt":"2026-04-22T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-context-graph-thesis","name":"Context graph thesis","kind":"insight","content":"Apps don't need new features; they need a shared substrate. The context graph is the substrate — typed, versioned, query-able by humans and agents alike.","tags":["thesis","graph","architecture"],"createdAt":"2026-03-20T00:00:00Z","updatedAt":"2026-05-02T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-david-fundraise-advice","name":"David: narrative > numbers in fundraise","kind":"quote","content":"David: \"At seed, narrative beats numbers. By A, the numbers either confirm or contradict the narrative. Start with the story you want the numbers to tell.\"","tags":["fundraise","david","quote"],"createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-elena-rl-paper-summary","name":"Elena's RL paper — summary","kind":"reflection","content":"Elena's draft frames preference learning as a coordination problem rather than a reward-shaping problem. Counterintuitive but cleaner. Need to read sections 4-5 again.","tags":["rl","papers","elena"],"createdAt":"2026-04-28T00:00:00Z","updatedAt":"2026-04-28T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-sara-trip-planning","name":"Trip ideas for December","kind":"journal","content":"Sara wants somewhere warm. Considering: Mexico City + Oaxaca, Lisbon + Porto, Tokyo. Tokyo is most expensive but Sara's never been.","tags":["travel","sara","december"],"createdAt":"2026-04-05T00:00:00Z","updatedAt":"2026-04-05T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-team-offsite-themes","name":"Team offsite — themes","kind":"idea","content":"Offsite themes that surfaced: focus over breadth, ship small but real, fewer meetings, more written. Also: we need a shared definition of 'done'.","tags":["offsite","team","kettle"],"createdAt":"2026-04-30T00:00:00Z","updatedAt":"2026-04-30T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-pkm-redesign-principles","name":"PKM redesign — atomic, not hierarchical","kind":"principle","content":"Stop nesting notes inside folders inside folders. Each note is one idea, linked horizontally. The graph structure replaces the folder structure.","tags":["pkm","atomic-notes","principle"],"createdAt":"2026-03-25T00:00:00Z","updatedAt":"2026-05-04T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-half-marathon-training-plan","name":"Half-marathon training plan","kind":"idea","content":"16 weeks. Tu/Thu intervals, Sat long run, Sun strength. Build to 18mi long run by week 12. Race week 16.","tags":["running","plan"],"createdAt":"2026-02-05T00:00:00Z","updatedAt":"2026-04-20T00:00:00Z"}}
+{"type":"Note","data":{"slug":"note-aaron-design-feedback","name":"Aaron's feedback on the spec","kind":"reflection","content":"Aaron pushed back on the entry point — said the home screen needs to lead with one thing, not three. Probably right. Also: nav cluttered.","tags":["design","aaron","spec"],"createdAt":"2026-05-06T00:00:00Z","updatedAt":"2026-05-06T00:00:00Z"}}
+
+{"type":"Artifact","data":{"slug":"art-obsidian-pk-vision","name":"PK vision","kind":"document","source":"obsidian","source_ref":"thoughts/pk-vision.md","content":"# PK vision\n\nThe point of personal knowledge isn't capture...","timestamp":"2026-05-07T00:00:00Z","createdAt":"2026-04-15T00:00:00Z","updatedAt":"2026-05-07T00:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-obsidian-running-form","name":"Running form — daily","kind":"document","source":"obsidian","source_ref":"daily/2026-03-10.md","content":"Tall, light, quick. Three-word reset.","timestamp":"2026-04-15T00:00:00Z","createdAt":"2026-03-10T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-obsidian-context-graph-thesis","name":"Context graph thesis","kind":"document","source":"obsidian","source_ref":"work/context-graph-thesis.md","content":"Apps don't need new features...","timestamp":"2026-05-02T00:00:00Z","createdAt":"2026-03-20T00:00:00Z","updatedAt":"2026-05-02T00:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-obsidian-pkm-principles","name":"PKM redesign — principles","kind":"document","source":"obsidian","source_ref":"meta/pkm-principles.md","timestamp":"2026-05-04T00:00:00Z","createdAt":"2026-03-25T00:00:00Z","updatedAt":"2026-05-04T00:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-obsidian-half-marathon-plan","name":"Half-marathon training plan","kind":"document","source":"obsidian","source_ref":"running/half-marathon-plan.md","timestamp":"2026-04-20T00:00:00Z","createdAt":"2026-02-05T00:00:00Z","updatedAt":"2026-04-20T00:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-notion-customer-priorities","name":"Customer priorities (Q2)","kind":"document","source":"notion","source_ref":"page-customer-priorities","url":"https://notion.so/customer-priorities","timestamp":"2026-04-22T00:00:00Z","createdAt":"2026-04-22T00:00:00Z","updatedAt":"2026-04-22T00:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-notion-q2-okrs","name":"Q2 OKRs (draft)","kind":"document","source":"notion","source_ref":"page-q2-okrs","url":"https://notion.so/q2-okrs","timestamp":"2026-05-01T00:00:00Z","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-notion-rl-paper-notes","name":"RL paper notes — Elena","kind":"document","source":"notion","source_ref":"page-rl-paper","url":"https://notion.so/rl-paper","timestamp":"2026-04-28T00:00:00Z","createdAt":"2026-04-28T00:00:00Z","updatedAt":"2026-04-28T00:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-apple-spanish-conjunctions","name":"Spanish conjunctions","kind":"document","source":"apple-notes","source_ref":"applenotes-conjunctions","timestamp":"2026-02-15T00:00:00Z","createdAt":"2026-02-15T00:00:00Z","updatedAt":"2026-02-15T00:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-apple-trip-dec-ideas","name":"Trip ideas — December","kind":"document","source":"apple-notes","source_ref":"applenotes-trip-dec","timestamp":"2026-04-05T00:00:00Z","createdAt":"2026-04-05T00:00:00Z","updatedAt":"2026-04-05T00:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-granola-marcus-2026-04-12","name":"Transcript: Marcus 1:1 — advisor onboarding","kind":"transcript","source":"granola","source_ref":"granola-meeting-marcus-04-12","timestamp":"2026-04-12T15:00:00Z","createdAt":"2026-04-12T15:00:00Z","updatedAt":"2026-04-12T15:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-granola-priya-2026-04-22","name":"Transcript: Priya — Cardinal customer interview","kind":"transcript","source":"granola","source_ref":"granola-meeting-priya-04-22","timestamp":"2026-04-22T18:00:00Z","createdAt":"2026-04-22T18:00:00Z","updatedAt":"2026-04-22T18:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-granola-david-2026-05-01","name":"Transcript: David — fundraise prep call","kind":"transcript","source":"granola","source_ref":"granola-meeting-david-05-01","timestamp":"2026-05-01T16:00:00Z","createdAt":"2026-05-01T16:00:00Z","updatedAt":"2026-05-01T16:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-granola-team-offsite-2026-04-30","name":"Transcript: Kettle Q2 offsite","kind":"transcript","source":"granola","source_ref":"granola-meeting-offsite-04-30","timestamp":"2026-04-30T14:00:00Z","createdAt":"2026-04-30T14:00:00Z","updatedAt":"2026-04-30T14:00:00Z"}}
+{"type":"Artifact","data":{"slug":"art-slack-aaron-feedback-2026-05-06","name":"Aaron's spec feedback (Slack)","kind":"message","source":"slack","source_ref":"C123/1715000000.000100","content":"Spec entry point still leads with three things. Should be one. Also nav is busy.","timestamp":"2026-05-06T17:30:00Z","createdAt":"2026-05-06T17:30:00Z","updatedAt":"2026-05-06T17:30:00Z"}}
+
+{"type":"Conversation","data":{"slug":"conv-slack-pk-launch","external_id":"C-PKLAUNCH","kind":"channel","source":"slack","name":"#pk-launch","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-05-08T00:00:00Z"}}
+{"type":"Conversation","data":{"slug":"conv-slack-research","external_id":"D-PRIYA","kind":"dm","source":"slack","createdAt":"2026-04-18T00:00:00Z","updatedAt":"2026-05-04T00:00:00Z"}}
+{"type":"Conversation","data":{"slug":"conv-email-marcus-thread","external_id":"thread-marcus-advisor","kind":"group","source":"email","name":"Advisor agreement — final draft","createdAt":"2026-04-10T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+
+{"type":"Email","data":{"slug":"email-marcus-2026-04-10","message_id":"<marcus-001@leblancadvisors.com>","thread_id":"thread-marcus-advisor","subject":"Advisor agreement — final draft","account":"alex@arivera.dev","from":"marcus@leblancadvisors.com","to":["alex@arivera.dev"],"timestamp":"2026-04-10T18:00:00Z","snippet":"Final advisor agreement attached. Take a look and we can sign Friday.","createdAt":"2026-04-10T18:00:00Z","updatedAt":"2026-04-10T18:00:00Z"}}
+{"type":"Email","data":{"slug":"email-marcus-2026-04-15","message_id":"<alex-r-001@arivera.dev>","thread_id":"thread-marcus-advisor","subject":"Re: Advisor agreement — final draft","account":"alex@arivera.dev","from":"alex@arivera.dev","to":["marcus@leblancadvisors.com"],"timestamp":"2026-04-15T14:30:00Z","snippet":"Looks good. Signed and returned. Thanks Marcus.","createdAt":"2026-04-15T14:30:00Z","updatedAt":"2026-04-15T14:30:00Z"}}
+{"type":"Email","data":{"slug":"email-priya-intro-2026-04-18","message_id":"<priya-cardinal-001@cardinaldev.com>","thread_id":"thread-priya-intro","subject":"Intro — Cardinal Dev customer chat?","account":"alex@arivera.dev","from":"priya@cardinaldev.com","to":["alex@arivera.dev"],"timestamp":"2026-04-18T22:00:00Z","snippet":"Hey! Saw your post on PK. Could chat about what we're seeing at Cardinal — relevant for your research.","createdAt":"2026-04-18T22:00:00Z","updatedAt":"2026-04-18T22:00:00Z"}}
+{"type":"Email","data":{"slug":"email-jane-spec-2026-05-05","message_id":"<jane-001@kettle.so>","thread_id":"thread-jane-spec","subject":"Spec review notes","account":"alex@arivera.dev","from":"jane@kettle.so","to":["alex@arivera.dev"],"cc":["aaron@kettle.so"],"timestamp":"2026-05-05T20:00:00Z","snippet":"Spec is 80% there. Three things to clarify before we ship to eng — see inline.","createdAt":"2026-05-05T20:00:00Z","updatedAt":"2026-05-05T20:00:00Z"}}
+
+{"type":"Event","data":{"slug":"event-marcus-1on1-2026-04-12","name":"Marcus 1:1 — advisor onboarding","kind":"meeting","brief":"First advisor session","date":"2026-04-12T15:00:00Z","end_date":"2026-04-12T16:00:00Z","createdAt":"2026-04-12T15:00:00Z","updatedAt":"2026-04-12T15:00:00Z"}}
+{"type":"Event","data":{"slug":"event-priya-research-2026-04-22","name":"Priya — Cardinal customer interview","kind":"call","brief":"Cardinal onboarding pain","date":"2026-04-22T18:00:00Z","end_date":"2026-04-22T19:00:00Z","createdAt":"2026-04-22T18:00:00Z","updatedAt":"2026-04-22T18:00:00Z"}}
+{"type":"Event","data":{"slug":"event-david-fundraise-2026-05-01","name":"David — fundraise prep call","kind":"call","date":"2026-05-01T16:00:00Z","end_date":"2026-05-01T17:00:00Z","createdAt":"2026-05-01T16:00:00Z","updatedAt":"2026-05-01T16:00:00Z"}}
+{"type":"Event","data":{"slug":"event-team-offsite-2026-04-30","name":"Kettle team offsite Q2","kind":"conference","date":"2026-04-30T14:00:00Z","end_date":"2026-04-30T22:00:00Z","createdAt":"2026-04-30T14:00:00Z","updatedAt":"2026-04-30T14:00:00Z"}}
+
+{"type":"ExternalID","data":{"slug":"ext-email-jane-kettle","source":"email","external_id":"jane@kettle.so","createdAt":"2026-01-15T00:00:00Z"}}
+{"type":"ExternalID","data":{"slug":"ext-slack-jpark","source":"slack","external_id":"U-JPARK","createdAt":"2026-01-20T00:00:00Z"}}
+{"type":"ExternalID","data":{"slug":"ext-email-priya-personal","source":"email","external_id":"priya.shah.97@gmail.com","createdAt":"2026-01-05T00:00:00Z"}}
+{"type":"ExternalID","data":{"slug":"ext-email-priya-cardinal","source":"email","external_id":"priya@cardinaldev.com","createdAt":"2026-04-18T00:00:00Z"}}
+{"type":"ExternalID","data":{"slug":"ext-email-marcus","source":"email","external_id":"marcus@leblancadvisors.com","createdAt":"2026-02-01T00:00:00Z"}}
+{"type":"ExternalID","data":{"slug":"ext-email-david","source":"email","external_id":"dchen@accelerent.vc","createdAt":"2026-02-15T00:00:00Z"}}
+{"type":"ExternalID","data":{"slug":"ext-slack-aaron","source":"slack","external_id":"U-AARON","createdAt":"2026-01-12T00:00:00Z"}}
+{"type":"ExternalID","data":{"slug":"ext-email-aaron","source":"email","external_id":"aaron@kettle.so","createdAt":"2026-01-12T00:00:00Z"}}
+
+{"edge":"IdentifiesPerson","from":"ext-email-jane-kettle","to":"person-jane-park"}
+{"edge":"IdentifiesPerson","from":"ext-slack-jpark","to":"person-jane-park-personal"}
+{"edge":"IdentifiesPerson","from":"ext-email-priya-personal","to":"person-priya-shah"}
+{"edge":"IdentifiesPerson","from":"ext-email-priya-cardinal","to":"person-priya-shah-work"}
+{"edge":"IdentifiesPerson","from":"ext-email-marcus","to":"person-marcus-leblanc"}
+{"edge":"IdentifiesPerson","from":"ext-email-david","to":"person-david-chen"}
+{"edge":"IdentifiesPerson","from":"ext-slack-aaron","to":"person-aaron-kim"}
+{"edge":"IdentifiesPerson","from":"ext-email-aaron","to":"person-aaron-kim"}
+
+{"edge":"BelongsTo","from":"person-jane-park","to":"org-kettle","data":{"role":"PM","current":true,"source":"linkedin"}}
+{"edge":"BelongsTo","from":"person-tomohiro-sato","to":"org-kettle","data":{"role":"Eng Lead","current":true,"source":"linkedin"}}
+{"edge":"BelongsTo","from":"person-aaron-kim","to":"org-kettle","data":{"role":"Designer","current":true,"source":"linkedin"}}
+{"edge":"BelongsTo","from":"person-alex-rivera","to":"org-kettle","data":{"role":"PM","current":true,"source":"manual"}}
+{"edge":"BelongsTo","from":"person-priya-shah-work","to":"org-cardinaldev","data":{"role":"PM","current":true,"source":"email"}}
+{"edge":"BelongsTo","from":"person-marcus-leblanc","to":"org-leblanc-advisors","data":{"role":"Founder","current":true}}
+{"edge":"BelongsTo","from":"person-david-chen","to":"org-accelerent","data":{"role":"Partner","current":true}}
+{"edge":"BelongsTo","from":"person-elena-nikolaidis","to":"org-stanford","data":{"role":"PhD student","current":true}}
+
+{"edge":"LivesIn","from":"person-alex-rivera","to":"place-sf","data":{"primary":true}}
+{"edge":"LivesIn","from":"person-jane-park","to":"place-sf","data":{"primary":true}}
+{"edge":"LivesIn","from":"person-aaron-kim","to":"place-sf","data":{"primary":true}}
+
+{"edge":"InvolvedIn","from":"person-alex-rivera","to":"proj-pk-launch","data":{"role":"PM"}}
+{"edge":"InvolvedIn","from":"person-jane-park","to":"proj-pk-launch","data":{"role":"PM peer"}}
+{"edge":"InvolvedIn","from":"person-tomohiro-sato","to":"proj-pk-launch","data":{"role":"Eng lead"}}
+{"edge":"InvolvedIn","from":"person-aaron-kim","to":"proj-pk-launch","data":{"role":"Design"}}
+{"edge":"InvolvedIn","from":"person-alex-rivera","to":"proj-q2-research","data":{"role":"Lead"}}
+
+{"edge":"ProjectInArea","from":"proj-pk-launch","to":"area-career"}
+{"edge":"ProjectInArea","from":"proj-q2-research","to":"area-career"}
+{"edge":"ProjectInArea","from":"proj-pkm-system","to":"area-learning"}
+{"edge":"ProjectInArea","from":"proj-running-sub-90","to":"area-health"}
+{"edge":"ProjectInArea","from":"proj-spanish-b2","to":"area-learning"}
+
+{"edge":"ProjectForOrganization","from":"proj-pk-launch","to":"org-kettle"}
+{"edge":"ProjectForOrganization","from":"proj-q2-research","to":"org-kettle"}
+
+{"edge":"GoalForArea","from":"goal-ship-pk-q2","to":"area-career"}
+{"edge":"GoalForArea","from":"goal-30-customer-calls","to":"area-career"}
+{"edge":"GoalForArea","from":"goal-half-marathon-sub-90","to":"area-health"}
+{"edge":"GoalForProject","from":"goal-ship-pk-q2","to":"proj-pk-launch"}
+{"edge":"GoalForProject","from":"goal-30-customer-calls","to":"proj-q2-research"}
+{"edge":"GoalForProject","from":"goal-half-marathon-sub-90","to":"proj-running-sub-90"}
+
+{"edge":"HabitForArea","from":"habit-morning-pages","to":"area-learning"}
+{"edge":"HabitForArea","from":"habit-weekly-review","to":"area-career"}
+{"edge":"HabitForArea","from":"habit-strength-training","to":"area-health"}
+
+{"edge":"TaskForProject","from":"task-draft-pk-spec","to":"proj-pk-launch"}
+{"edge":"TaskForProject","from":"task-fix-onboarding-step3","to":"proj-pk-launch"}
+{"edge":"TaskForProject","from":"task-call-priya","to":"proj-q2-research"}
+{"edge":"TaskForPerson","from":"task-call-priya","to":"person-priya-shah-work"}
+{"edge":"TaskForPerson","from":"task-followup-marcus","to":"person-marcus-leblanc"}
+{"edge":"TaskForPerson","from":"task-review-elena-paper","to":"person-elena-nikolaidis"}
+
+{"edge":"NoteFromArtifact","from":"note-pk-vision","to":"art-obsidian-pk-vision"}
+{"edge":"NoteFromArtifact","from":"note-running-form-cue","to":"art-obsidian-running-form"}
+{"edge":"NoteFromArtifact","from":"note-context-graph-thesis","to":"art-obsidian-context-graph-thesis"}
+{"edge":"NoteFromArtifact","from":"note-pkm-redesign-principles","to":"art-obsidian-pkm-principles"}
+{"edge":"NoteFromArtifact","from":"note-half-marathon-training-plan","to":"art-obsidian-half-marathon-plan"}
+{"edge":"NoteFromArtifact","from":"note-jane-customer-priorities","to":"art-notion-customer-priorities"}
+{"edge":"NoteFromArtifact","from":"note-q2-okr-draft","to":"art-notion-q2-okrs"}
+{"edge":"NoteFromArtifact","from":"note-elena-rl-paper-summary","to":"art-notion-rl-paper-notes"}
+{"edge":"NoteFromArtifact","from":"note-spanish-conjunctions","to":"art-apple-spanish-conjunctions"}
+{"edge":"NoteFromArtifact","from":"note-sara-trip-planning","to":"art-apple-trip-dec-ideas"}
+{"edge":"NoteFromArtifact","from":"note-bsbb-on-onboarding","to":"art-granola-marcus-2026-04-12"}
+{"edge":"NoteFromArtifact","from":"note-priya-onboarding-pain","to":"art-granola-priya-2026-04-22"}
+{"edge":"NoteFromArtifact","from":"note-david-fundraise-advice","to":"art-granola-david-2026-05-01"}
+{"edge":"NoteFromArtifact","from":"note-team-offsite-themes","to":"art-granola-team-offsite-2026-04-30"}
+{"edge":"NoteFromArtifact","from":"note-aaron-design-feedback","to":"art-slack-aaron-feedback-2026-05-06"}
+
+{"edge":"NoteAboutPerson","from":"note-bsbb-on-onboarding","to":"person-marcus-leblanc"}
+{"edge":"NoteAboutPerson","from":"note-jane-customer-priorities","to":"person-jane-park"}
+{"edge":"NoteAboutPerson","from":"note-priya-onboarding-pain","to":"person-priya-shah-work"}
+{"edge":"NoteAboutPerson","from":"note-david-fundraise-advice","to":"person-david-chen"}
+{"edge":"NoteAboutPerson","from":"note-elena-rl-paper-summary","to":"person-elena-nikolaidis"}
+{"edge":"NoteAboutPerson","from":"note-sara-trip-planning","to":"person-sara-mitchell"}
+{"edge":"NoteAboutPerson","from":"note-aaron-design-feedback","to":"person-aaron-kim"}
+
+{"edge":"NoteAboutProject","from":"note-pk-vision","to":"proj-pk-launch"}
+{"edge":"NoteAboutProject","from":"note-q2-okr-draft","to":"proj-pk-launch"}
+{"edge":"NoteAboutProject","from":"note-priya-onboarding-pain","to":"proj-q2-research"}
+{"edge":"NoteAboutProject","from":"note-jane-customer-priorities","to":"proj-q2-research"}
+{"edge":"NoteAboutProject","from":"note-team-offsite-themes","to":"proj-pk-launch"}
+{"edge":"NoteAboutProject","from":"note-aaron-design-feedback","to":"proj-pk-launch"}
+{"edge":"NoteAboutProject","from":"note-pkm-redesign-principles","to":"proj-pkm-system"}
+{"edge":"NoteAboutProject","from":"note-half-marathon-training-plan","to":"proj-running-sub-90"}
+
+{"edge":"LinkedNote","from":"note-pk-vision","to":"note-context-graph-thesis"}
+{"edge":"LinkedNote","from":"note-context-graph-thesis","to":"note-pkm-redesign-principles"}
+{"edge":"LinkedNote","from":"note-priya-onboarding-pain","to":"note-bsbb-on-onboarding"}
+{"edge":"LinkedNote","from":"note-jane-customer-priorities","to":"note-priya-onboarding-pain"}
+
+{"edge":"Mentions","from":"art-granola-marcus-2026-04-12","to":"person-marcus-leblanc"}
+{"edge":"Mentions","from":"art-granola-marcus-2026-04-12","to":"person-alex-rivera"}
+{"edge":"Mentions","from":"art-granola-priya-2026-04-22","to":"person-priya-shah-work"}
+{"edge":"Mentions","from":"art-granola-priya-2026-04-22","to":"person-alex-rivera"}
+{"edge":"Mentions","from":"art-granola-david-2026-05-01","to":"person-david-chen"}
+{"edge":"Mentions","from":"art-granola-david-2026-05-01","to":"person-alex-rivera"}
+{"edge":"Mentions","from":"art-granola-team-offsite-2026-04-30","to":"person-jane-park"}
+{"edge":"Mentions","from":"art-granola-team-offsite-2026-04-30","to":"person-tomohiro-sato"}
+{"edge":"Mentions","from":"art-granola-team-offsite-2026-04-30","to":"person-aaron-kim"}
+{"edge":"Mentions","from":"art-slack-aaron-feedback-2026-05-06","to":"person-aaron-kim"}
+{"edge":"Mentions","from":"art-notion-customer-priorities","to":"person-jane-park"}
+{"edge":"Mentions","from":"art-notion-rl-paper-notes","to":"person-elena-nikolaidis"}
+
+{"edge":"RecordOf","from":"art-granola-marcus-2026-04-12","to":"event-marcus-1on1-2026-04-12"}
+{"edge":"RecordOf","from":"art-granola-priya-2026-04-22","to":"event-priya-research-2026-04-22"}
+{"edge":"RecordOf","from":"art-granola-david-2026-05-01","to":"event-david-fundraise-2026-05-01"}
+{"edge":"RecordOf","from":"art-granola-team-offsite-2026-04-30","to":"event-team-offsite-2026-04-30"}
+
+{"edge":"Attended","from":"person-marcus-leblanc","to":"event-marcus-1on1-2026-04-12"}
+{"edge":"Attended","from":"person-alex-rivera","to":"event-marcus-1on1-2026-04-12"}
+{"edge":"Attended","from":"person-priya-shah-work","to":"event-priya-research-2026-04-22"}
+{"edge":"Attended","from":"person-alex-rivera","to":"event-priya-research-2026-04-22"}
+{"edge":"Attended","from":"person-david-chen","to":"event-david-fundraise-2026-05-01"}
+{"edge":"Attended","from":"person-alex-rivera","to":"event-david-fundraise-2026-05-01"}
+{"edge":"Attended","from":"person-jane-park","to":"event-team-offsite-2026-04-30"}
+{"edge":"Attended","from":"person-tomohiro-sato","to":"event-team-offsite-2026-04-30"}
+{"edge":"Attended","from":"person-aaron-kim","to":"event-team-offsite-2026-04-30"}
+{"edge":"Attended","from":"person-alex-rivera","to":"event-team-offsite-2026-04-30"}
+
+{"edge":"HappenedAt","from":"event-team-offsite-2026-04-30","to":"place-kettle-hq"}
+
+{"edge":"InConversation","from":"art-slack-aaron-feedback-2026-05-06","to":"conv-slack-pk-launch"}
+
+{"edge":"ConversationWith","from":"conv-slack-pk-launch","to":"person-jane-park-personal"}
+{"edge":"ConversationWith","from":"conv-slack-pk-launch","to":"person-aaron-kim"}
+{"edge":"ConversationWith","from":"conv-slack-pk-launch","to":"person-tomohiro-sato"}
+{"edge":"ConversationWith","from":"conv-slack-pk-launch","to":"person-alex-rivera"}
+{"edge":"ConversationWith","from":"conv-slack-research","to":"person-priya-shah-work"}
+{"edge":"ConversationWith","from":"conv-slack-research","to":"person-alex-rivera"}
+{"edge":"ConversationWith","from":"conv-email-marcus-thread","to":"person-marcus-leblanc"}
+{"edge":"ConversationWith","from":"conv-email-marcus-thread","to":"person-alex-rivera"}
+
+{"edge":"EmailFromPerson","from":"email-marcus-2026-04-10","to":"person-marcus-leblanc"}
+{"edge":"EmailToPerson","from":"email-marcus-2026-04-10","to":"person-alex-rivera"}
+{"edge":"EmailFromPerson","from":"email-marcus-2026-04-15","to":"person-alex-rivera"}
+{"edge":"EmailToPerson","from":"email-marcus-2026-04-15","to":"person-marcus-leblanc"}
+{"edge":"EmailFromPerson","from":"email-priya-intro-2026-04-18","to":"person-priya-shah-work"}
+{"edge":"EmailToPerson","from":"email-priya-intro-2026-04-18","to":"person-alex-rivera"}
+{"edge":"EmailFromPerson","from":"email-jane-spec-2026-05-05","to":"person-jane-park"}
+{"edge":"EmailToPerson","from":"email-jane-spec-2026-05-05","to":"person-alex-rivera"}
+{"edge":"EmailInConversation","from":"email-marcus-2026-04-10","to":"conv-email-marcus-thread"}
+{"edge":"EmailInConversation","from":"email-marcus-2026-04-15","to":"conv-email-marcus-thread"}
+
+{"edge":"Knows","from":"person-alex-rivera","to":"person-jane-park","data":{"context":"Kettle colleague","since":"2026-01-15"}}
+{"edge":"Knows","from":"person-alex-rivera","to":"person-priya-shah","data":{"context":"College","since":"2018-09-01"}}
+{"edge":"Knows","from":"person-alex-rivera","to":"person-marcus-leblanc","data":{"context":"Advisor"}}
+{"edge":"Knows","from":"person-alex-rivera","to":"person-david-chen","data":{"context":"Investor"}}
+{"edge":"Knows","from":"person-alex-rivera","to":"person-aaron-kim","data":{"context":"Kettle colleague"}}
+{"edge":"Knows","from":"person-alex-rivera","to":"person-tomohiro-sato","data":{"context":"Kettle colleague"}}
+{"edge":"Knows","from":"person-alex-rivera","to":"person-elena-nikolaidis","data":{"context":"Met at Stanford talk"}}
+{"edge":"Knows","from":"person-alex-rivera","to":"person-rachel-hoffman","data":{"context":"Sister"}}
+{"edge":"Knows","from":"person-alex-rivera","to":"person-sara-mitchell","data":{"context":"Travel friend"}}
+
+{"edge":"AreaForOrganization","from":"area-career","to":"org-kettle"}
+
+{"type":"SyncRun","data":{"slug":"sync-seed-load","source":"manual","started_at":"2026-05-08T00:00:00Z","completed_at":"2026-05-08T00:00:00Z","status":"succeeded","records_imported":150,"createdAt":"2026-05-08T00:00:00Z","updatedAt":"2026-05-08T00:00:00Z"}}

@@ -1,0 +1,101 @@
+// ──────────────────────────────────────────────
+// Node insert mutations
+// ──────────────────────────────────────────────
+
+query add_note($slug: String, $name: String, $kind: String, $content: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Note { slug: $slug, name: $name, kind: $kind, content: $content, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_person($slug: String, $name: String, $relation: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Person { slug: $slug, name: $name, relation: $relation, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_organization($slug: String, $name: String, $kind: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Organization { slug: $slug, name: $name, kind: $kind, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_project($slug: String, $name: String, $kind: String, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Project { slug: $slug, name: $name, kind: $kind, status: $status, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_area($slug: String, $name: String, $kind: String, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Area { slug: $slug, name: $name, kind: $kind, status: $status, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_task($slug: String, $name: String, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Task { slug: $slug, name: $name, status: $status, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_event($slug: String, $name: String, $kind: String, $date: DateTime, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Event { slug: $slug, name: $name, kind: $kind, date: $date, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query record_sync_run($slug: String, $source: String, $started_at: DateTime, $completed_at: DateTime, $status: String, $records_imported: I32, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert SyncRun {
+        slug: $slug,
+        source: $source,
+        started_at: $started_at,
+        completed_at: $completed_at,
+        status: $status,
+        records_imported: $records_imported,
+        createdAt: $createdAt,
+        updatedAt: $updatedAt
+    }
+}
+
+
+// ──────────────────────────────────────────────
+// Edge insert mutations
+// ──────────────────────────────────────────────
+
+query link_same_as($from: String, $to: String, $confidence: F32, $method: String) {
+    insert SameAs { from: $from, to: $to, confidence: $confidence, method: $method }
+}
+
+query link_knows($from: String, $to: String, $context: String) {
+    insert Knows { from: $from, to: $to, context: $context }
+}
+
+query link_belongs_to($from: String, $to: String, $role: String, $current: Bool) {
+    insert BelongsTo { from: $from, to: $to, role: $role, current: $current }
+}
+
+query link_attended($from: String, $to: String) {
+    insert Attended { from: $from, to: $to }
+}
+
+query link_involved_in($from: String, $to: String, $role: String) {
+    insert InvolvedIn { from: $from, to: $to, role: $role }
+}
+
+query link_note_about_person($from: String, $to: String) {
+    insert NoteAboutPerson { from: $from, to: $to }
+}
+
+query link_note_about_project($from: String, $to: String) {
+    insert NoteAboutProject { from: $from, to: $to }
+}
+
+query link_note_about_organization($from: String, $to: String) {
+    insert NoteAboutOrganization { from: $from, to: $to }
+}
+
+query link_linked_note($from: String, $to: String) {
+    insert LinkedNote { from: $from, to: $to }
+}
+
+query link_task_for_project($from: String, $to: String) {
+    insert TaskForProject { from: $from, to: $to }
+}
+
+query link_task_for_person($from: String, $to: String) {
+    insert TaskForPerson { from: $from, to: $to }
+}
+
+query link_project_in_area($from: String, $to: String) {
+    insert ProjectInArea { from: $from, to: $to }
+}
+
+query link_goal_for_area($from: String, $to: String) {
+    insert GoalForArea { from: $from, to: $to }
+}

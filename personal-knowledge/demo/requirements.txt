@@ -1,0 +1,21 @@
+# Source-importer dependencies. Pin loosely — we want compatibility with whatever
+# Omnigraph's Python ecosystem expects. Tighten to a hash-pinned lockfile if you
+# care about reproducibility for production sync runs.
+
+# Obsidian — frontmatter parsing
+python-frontmatter>=1.1.0
+
+# Notion — official SDK
+notion-client>=2.2.1
+
+# Slack — official SDK
+slack-sdk>=3.27.0
+
+# Google Workspace (Drive / Gmail / Calendar) — OAuth + API client
+google-api-python-client>=2.130.0
+google-auth>=2.30.0
+google-auth-oauthlib>=1.2.0
+google-auth-httplib2>=0.2.0
+
+# Credential persistence (skill stores per-source tokens here)
+keyring>=25.0.0

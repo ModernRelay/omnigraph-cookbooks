@@ -1,0 +1,79 @@
+// Person reads + traversals.
+
+query get_person($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+    }
+    return { $p.slug, $p.name, $p.relation, $p.email, $p.brief }
+}
+
+query recent_persons() {
+    match {
+        $p: Person
+    }
+    return { $p.slug, $p.name, $p.relation, $p.email, $p.updatedAt }
+    order { $p.updatedAt desc }
+    limit 100
+}
+
+query person_external_ids($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $e identifiesPerson $p
+    }
+    return { $e.slug, $e.source, $e.external_id }
+}
+
+query person_organizations($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p belongsTo $o
+    }
+    return { $o.slug, $o.name, $o.kind }
+}
+
+query person_events($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p attended $e
+    }
+    return { $e.slug, $e.name, $e.kind, $e.date }
+    order { $e.date desc }
+    limit 50
+}
+
+query person_projects($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p involvedIn $pj
+    }
+    return { $pj.slug, $pj.name, $pj.kind, $pj.status }
+}
+
+query person_artifacts($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $a artifactFromPerson $p
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.timestamp }
+    order { $a.timestamp desc }
+    limit 50
+}
+
+query person_mentions($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $a mentions $p
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.timestamp }
+    order { $a.timestamp desc }
+    limit 100
+}
+
+query person_same_as($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p sameAs $other
+    }
+    return { $other.slug, $other.name }
+}
