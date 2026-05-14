@@ -1,0 +1,51 @@
+// Media
+
+query get_media($slug: String) {
+    match {
+        $m: Media { slug: $slug }
+    }
+    return { $m.slug, $m.name, $m.kind, $m.status, $m.rating, $m.url, $m.published_date, $m.brief, $m.tags }
+}
+
+query reading_queue() {
+    match {
+        $m: Media { status: "want" }
+    }
+    return { $m.slug, $m.name, $m.kind, $m.brief, $m.tags }
+    order { $m.name }
+}
+
+query finished_books() {
+    match {
+        $m: Media { kind: "book", status: "finished" }
+    }
+    return { $m.slug, $m.name, $m.rating, $m.brief, $m.published_date }
+    order { $m.rating desc }
+}
+
+query media_by_kind($kind: String) {
+    match {
+        $m: Media { kind: $kind }
+    }
+    return { $m.slug, $m.name, $m.status, $m.rating, $m.brief }
+}
+
+// Media → Author
+
+query media_authored_by($slug: String) {
+    match {
+        $m: Media { slug: $slug }
+        $m mediaAuthoredBy $p
+    }
+    return { $p.slug, $p.name, $p.brief }
+}
+
+// Media ← RecommendedBy
+
+query media_recommended_by($slug: String) {
+    match {
+        $m: Media { slug: $slug }
+        $m mediaRecommendedBy $p
+    }
+    return { $p.slug, $p.name, $p.relation }
+}

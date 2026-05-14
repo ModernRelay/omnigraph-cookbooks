@@ -1,0 +1,87 @@
+// Tasks — GTD
+
+query get_task($slug: String) {
+    match {
+        $t: Task { slug: $slug }
+    }
+    return { $t.slug, $t.name, $t.status, $t.kind, $t.context, $t.priority, $t.due, $t.direction, $t.waiting_on, $t.brief }
+}
+
+query tasks_next() {
+    match {
+        $t: Task { status: "next" }
+    }
+    return { $t.slug, $t.name, $t.context, $t.priority, $t.due, $t.brief }
+    order { $t.due }
+}
+
+query tasks_inbox() {
+    match {
+        $t: Task { status: "inbox" }
+    }
+    return { $t.slug, $t.name, $t.brief, $t.tags, $t.createdAt }
+    order { $t.createdAt desc }
+}
+
+query tasks_waiting() {
+    match {
+        $t: Task { status: "waiting" }
+    }
+    return { $t.slug, $t.name, $t.waiting_on, $t.due, $t.brief }
+    order { $t.due }
+}
+
+query tasks_someday() {
+    match {
+        $t: Task { status: "someday" }
+    }
+    return { $t.slug, $t.name, $t.brief, $t.tags }
+}
+
+query tasks_by_context($context: String) {
+    match {
+        $t: Task { context: $context, status: "next" }
+    }
+    return { $t.slug, $t.name, $t.priority, $t.due, $t.brief }
+    order { $t.due }
+}
+
+// All open commitments I owe (across people)
+
+query tasks_i_owe() {
+    match {
+        $t: Task { direction: "i-owe" }
+    }
+    return { $t.slug, $t.name, $t.status, $t.priority, $t.due, $t.brief }
+    order { $t.due }
+}
+
+// All things they owe me
+
+query tasks_they_owe() {
+    match {
+        $t: Task { direction: "they-owe" }
+    }
+    return { $t.slug, $t.name, $t.status, $t.waiting_on, $t.due, $t.brief }
+    order { $t.due }
+}
+
+// Task → Person
+
+query task_person($slug: String) {
+    match {
+        $t: Task { slug: $slug }
+        $t taskForPerson $p
+    }
+    return { $p.slug, $p.name, $p.relation }
+}
+
+// Task dependencies
+
+query task_dependencies($slug: String) {
+    match {
+        $t: Task { slug: $slug }
+        $t taskDependsOnTask $dep
+    }
+    return { $dep.slug, $dep.name, $dep.status, $dep.brief }
+}

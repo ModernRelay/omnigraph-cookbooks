@@ -1,0 +1,76 @@
+// Notes — every captured thought
+
+query get_note($slug: String) {
+    match {
+        $n: Note { slug: $slug }
+    }
+    return { $n.slug, $n.name, $n.kind, $n.content, $n.when, $n.tags }
+}
+
+query notes_recent() {
+    match {
+        $n: Note
+    }
+    return { $n.slug, $n.name, $n.kind, $n.when }
+    order { $n.when desc }
+    limit 30
+}
+
+query notes_by_kind($kind: String) {
+    match {
+        $n: Note { kind: $kind }
+    }
+    return { $n.slug, $n.name, $n.content, $n.when, $n.tags }
+    order { $n.when desc }
+}
+
+// Notes linked to other notes (Zettelkasten-style)
+
+query note_related($slug: String) {
+    match {
+        $n: Note { slug: $slug }
+        $n relatedNote $other
+    }
+    return { $other.slug, $other.name, $other.kind }
+}
+
+// Preferences captured about a specific person — "gift memory"
+
+query preferences_for_person($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $n: Note { kind: "preference" }
+        $n noteAboutPerson $p
+    }
+    return { $n.slug, $n.name, $n.content, $n.tags }
+}
+
+// All principles — rules I try to live by
+
+query principles_all() {
+    match {
+        $n: Note { kind: "principle" }
+    }
+    return { $n.slug, $n.name, $n.content }
+    order { $n.name }
+}
+
+// All open questions I'm thinking about
+
+query open_questions() {
+    match {
+        $n: Note { kind: "question" }
+    }
+    return { $n.slug, $n.name, $n.content, $n.when }
+    order { $n.when desc }
+}
+
+// Notes derived from an artifact
+
+query note_from_artifact($slug: String) {
+    match {
+        $a: Artifact { slug: $slug }
+        $n noteFromArtifact $a
+    }
+    return { $n.slug, $n.name, $n.kind, $n.content }
+}

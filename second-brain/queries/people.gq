@@ -1,0 +1,149 @@
+// People & Relationships
+
+query get_person($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+    }
+    return { $p.slug, $p.name, $p.relation, $p.location, $p.current_role, $p.birthday, $p.cadence_days, $p.brief }
+}
+
+query people_all() {
+    match {
+        $p: Person
+    }
+    return { $p.slug, $p.name, $p.relation, $p.location, $p.cadence_days }
+    order { $p.name }
+}
+
+query people_by_relation($relation: String) {
+    match {
+        $p: Person { relation: $relation }
+    }
+    return { $p.slug, $p.name, $p.location, $p.cadence_days, $p.birthday, $p.brief }
+    order { $p.name }
+}
+
+query close_friends() {
+    match {
+        $p: Person { relation: "close-friend" }
+    }
+    return { $p.slug, $p.name, $p.location, $p.cadence_days, $p.brief }
+    order { $p.cadence_days }
+}
+
+query family_members() {
+    match {
+        $p: Person { relation: "family" }
+    }
+    return { $p.slug, $p.name, $p.location, $p.cadence_days, $p.birthday }
+    order { $p.name }
+}
+
+// Person → Person (Knows)
+
+query person_knows($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p knows $other
+    }
+    return { $other.slug, $other.name, $other.relation, $other.location }
+}
+
+// Person → Person (family — RelatedToPerson)
+
+query person_family($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p relatedToPerson $r
+    }
+    return { $r.slug, $r.name, $r.relation, $r.location }
+}
+
+// Person → Place (LivesIn)
+
+query person_lives_in($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p livesIn $pl
+    }
+    return { $pl.slug, $pl.name, $pl.kind, $pl.address }
+}
+
+// Person → Organization (WorksAt)
+
+query person_works_at($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p worksAt $o
+    }
+    return { $o.slug, $o.name, $o.kind, $o.website }
+}
+
+// Person ← Event (AttendedBy reversed) — recent contact via events
+
+query person_recent_events($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $e attendedBy $p
+    }
+    return { $e.slug, $e.name, $e.kind, $e.when, $e.mood, $e.brief }
+    order { $e.when desc }
+    limit 20
+}
+
+// Person ← Artifact (MentionsPerson or ArtifactFromPerson) — recent communication
+
+query person_recent_artifacts($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $a mentionsPerson $p
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.timestamp }
+    order { $a.timestamp desc }
+    limit 20
+}
+
+// Open commitments I owe to a person (Task.direction = i-owe, TaskForPerson)
+
+query person_tasks_i_owe($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $t: Task { direction: "i-owe" }
+        $t taskForPerson $p
+    }
+    return { $t.slug, $t.name, $t.status, $t.priority, $t.due, $t.brief }
+    order { $t.due }
+}
+
+// Things they owe me
+
+query person_tasks_they_owe($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $t: Task { direction: "they-owe" }
+        $t taskForPerson $p
+    }
+    return { $t.slug, $t.name, $t.status, $t.waiting_on, $t.brief }
+    order { $t.due }
+}
+
+// Notes about a person (preferences, observations, principles)
+
+query person_notes($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $n noteAboutPerson $p
+    }
+    return { $n.slug, $n.name, $n.kind, $n.content, $n.when }
+    order { $n.kind }
+}
+
+// Media this person recommended
+
+query person_recommended_media($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $m mediaRecommendedBy $p
+    }
+    return { $m.slug, $m.name, $m.kind, $m.status, $m.rating, $m.brief }
+}

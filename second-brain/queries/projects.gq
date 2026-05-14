@@ -1,0 +1,150 @@
+// Projects, Areas, Goals, Habits
+
+query get_project($slug: String) {
+    match {
+        $p: Project { slug: $slug }
+    }
+    return { $p.slug, $p.name, $p.kind, $p.status, $p.brief, $p.description, $p.due }
+}
+
+query projects_active() {
+    match {
+        $p: Project { status: "active" }
+    }
+    return { $p.slug, $p.name, $p.kind, $p.due, $p.brief }
+    order { $p.due }
+}
+
+query projects_exploring() {
+    match {
+        $p: Project { status: "exploring" }
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief }
+}
+
+query project_tasks($slug: String) {
+    match {
+        $p: Project { slug: $slug }
+        $t taskForProject $p
+    }
+    return { $t.slug, $t.name, $t.status, $t.priority, $t.due, $t.brief }
+    order { $t.status, $t.due }
+}
+
+query project_events($slug: String) {
+    match {
+        $p: Project { slug: $slug }
+        $e eventForProject $p
+    }
+    return { $e.slug, $e.name, $e.kind, $e.when, $e.brief }
+    order { $e.when desc }
+}
+
+query project_people($slug: String) {
+    match {
+        $p: Project { slug: $slug }
+        $person personInvolvedInProject $p
+    }
+    return { $person.slug, $person.name, $person.relation }
+}
+
+query project_notes($slug: String) {
+    match {
+        $p: Project { slug: $slug }
+        $n noteAboutProject $p
+    }
+    return { $n.slug, $n.name, $n.kind, $n.content, $n.when }
+    order { $n.when desc }
+}
+
+// Areas
+
+query get_area($slug: String) {
+    match {
+        $a: Area { slug: $slug }
+    }
+    return { $a.slug, $a.name, $a.kind, $a.status, $a.brief }
+}
+
+query areas_all() {
+    match {
+        $a: Area { status: "active" }
+    }
+    return { $a.slug, $a.name, $a.kind, $a.brief }
+    order { $a.name }
+}
+
+query area_projects($slug: String) {
+    match {
+        $a: Area { slug: $slug }
+        $p projectInArea $a
+    }
+    return { $p.slug, $p.name, $p.kind, $p.status, $p.brief }
+}
+
+query area_goals($slug: String) {
+    match {
+        $a: Area { slug: $slug }
+        $g goalForArea $a
+    }
+    return { $g.slug, $g.name, $g.status, $g.timeframe, $g.target, $g.due }
+}
+
+query area_habits($slug: String) {
+    match {
+        $a: Area { slug: $slug }
+        $h habitForArea $a
+    }
+    return { $h.slug, $h.name, $h.status, $h.frequency, $h.streak_current, $h.streak_best }
+}
+
+query area_tasks($slug: String) {
+    match {
+        $a: Area { slug: $slug }
+        $t taskForArea $a
+    }
+    return { $t.slug, $t.name, $t.status, $t.priority, $t.due }
+}
+
+// Goals
+
+query get_goal($slug: String) {
+    match {
+        $g: Goal { slug: $slug }
+    }
+    return { $g.slug, $g.name, $g.status, $g.timeframe, $g.target, $g.due, $g.brief }
+}
+
+query goals_active() {
+    match {
+        $g: Goal { status: "active" }
+    }
+    return { $g.slug, $g.name, $g.timeframe, $g.target, $g.due, $g.brief }
+    order { $g.due }
+}
+
+query goal_tasks($slug: String) {
+    match {
+        $g: Goal { slug: $slug }
+        $t taskForGoal $g
+    }
+    return { $t.slug, $t.name, $t.status, $t.priority, $t.due }
+}
+
+// Habits
+
+query habits_active() {
+    match {
+        $h: Habit { status: "active" }
+    }
+    return { $h.slug, $h.name, $h.frequency, $h.cue, $h.routine, $h.reward, $h.streak_current, $h.streak_best }
+    order { $h.name }
+}
+
+query habit_principle($slug: String) {
+    match {
+        $h: Habit { slug: $slug }
+        $h habitFromPrinciple $n
+    }
+    return { $n.slug, $n.name, $n.content }
+}

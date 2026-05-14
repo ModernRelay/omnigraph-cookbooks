@@ -1,0 +1,375 @@
+{"type":"Person","data":{"id":"per-self","slug":"per-self","name":"Alex Chen","first_name":"Alex","last_name":"Chen","relation":"self","email":"alex@chen.example","birthday":"1989-09-22","location":"Brooklyn, NY","current_role":"Senior Product Designer at Lumen Studio","cadence_days":null,"brief":"36, designer at Lumen, building Quiet Coach on the side. Partner Maya, kids Noa (5) and Sam (2).","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-maya","slug":"per-maya","name":"Maya Park","first_name":"Maya","last_name":"Park","relation":"partner","email":"maya@park.example","birthday":"1990-03-11","location":"Brooklyn, NY","current_role":"Counsel at Meridian Law","cadence_days":1,"how_met":"Friend-of-friend, 2014","brief":"Partner since 2015, married 2018. Counsel at Meridian. Promoted to partner-track Apr 2026.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-noa","slug":"per-noa","name":"Noa Chen-Park","first_name":"Noa","last_name":"Chen-Park","relation":"family","birthday":"2020-11-04","location":"Brooklyn, NY","cadence_days":1,"brief":"5yo. Started kindergarten at Sunny Lane Sep 2025.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-sam","slug":"per-sam","name":"Sam Chen-Park","first_name":"Sam","last_name":"Chen-Park","relation":"family","birthday":"2023-07-19","location":"Brooklyn, NY","cadence_days":1,"brief":"2yo. Preschool decision pending for fall 2026.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-janet","slug":"per-janet","name":"Janet Chen","first_name":"Janet","last_name":"Chen","relation":"family","email":"janet@chen.example","phone":"+1-802-555-0114","birthday":"1958-06-15","location":"Burlington, VT","cadence_days":7,"brief":"Mom. Lives in Burlington since divorce. Prefers phone calls.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-robert","slug":"per-robert","name":"Robert Chen","first_name":"Robert","last_name":"Chen","relation":"family","birthday":"1955-02-28","location":"Tampa, FL","cadence_days":21,"brief":"Dad. Lives in Tampa. We talk monthly-ish.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-hannah","slug":"per-hannah","name":"Hannah Chen","first_name":"Hannah","last_name":"Chen","relation":"family","email":"hannah@chen.example","birthday":"1992-05-30","location":"Seattle, WA","cadence_days":14,"how_met":"Sister","brief":"Younger sister. Vet in Seattle. Visited Brooklyn in March.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-david","slug":"per-david","name":"David Park","first_name":"David","last_name":"Park","relation":"family","birthday":"1959-08-04","location":"Princeton, NJ","cadence_days":30,"brief":"Father-in-law. Retired professor.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-elena","slug":"per-elena","name":"Elena Park","first_name":"Elena","last_name":"Park","relation":"family","birthday":"1961-12-10","location":"Princeton, NJ","cadence_days":30,"brief":"Mother-in-law.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-theo","slug":"per-theo","name":"Theo Rivera","first_name":"Theo","last_name":"Rivera","relation":"close-friend","email":"theo@rivera.example","birthday":"1988-04-02","location":"Brooklyn, NY","current_role":"Engineering Manager at Aperture","cadence_days":21,"how_met":"Roommates junior year of college, 2009","brief":"Best friend since college. Lives 15min away. Loves single malt + jazz vinyl.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-priya","slug":"per-priya","name":"Priya Shah","first_name":"Priya","last_name":"Shah","relation":"close-friend","email":"priya@shah.example","birthday":"1991-10-19","location":"Brooklyn, NY","current_role":"Staff Designer at Lumen Studio","cadence_days":14,"how_met":"Joined Lumen as a junior under me in 2022. Became friends.","brief":"Colleague turned close friend. Pregnant — baby shower last month. Vegetarian, no dairy.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-marco","slug":"per-marco","name":"Marco Bellini","first_name":"Marco","last_name":"Bellini","relation":"close-friend","email":"marco@bellini.example","birthday":"1987-06-25","location":"Brooklyn, NY","current_role":"Photographer","cadence_days":21,"how_met":"Met through Noa and Lia's daughter at the playground, 2023","brief":"Dad of Sofia (5, Noa's playdate buddy). Married to Lia. Specialty coffee obsessive.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-lia","slug":"per-lia","name":"Lia Bellini","first_name":"Lia","last_name":"Bellini","relation":"close-friend","location":"Brooklyn, NY","current_role":"Therapist","birthday":"1988-09-18","cadence_days":30,"brief":"Marco's wife. Sofia's mom. Therapist — great person to think out loud with.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-jordan","slug":"per-jordan","name":"Jordan Wright","first_name":"Jordan","last_name":"Wright","relation":"colleague","location":"Brooklyn, NY","current_role":"Staff Engineer at Lumen Studio","cadence_days":7,"brief":"Engineer paired with me on Q2 redesign.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-bea","slug":"per-bea","name":"Bea Okafor","first_name":"Bea","last_name":"Okafor","relation":"colleague","location":"Brooklyn, NY","current_role":"PM at Lumen Studio","cadence_days":7,"brief":"PM on Q2 redesign.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-kenji","slug":"per-kenji","name":"Kenji Tanaka","first_name":"Kenji","last_name":"Tanaka","relation":"mentor","email":"kenji@tanaka.example","location":"San Francisco, CA","current_role":"VP Design at Northstar","cadence_days":60,"how_met":"My first boss out of school, 2014. Promoted me twice. Moved to SF in 2024.","brief":"Mentor. We do quarterly coffee.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+
+{"type":"Organization","data":{"id":"org-lumen","slug":"org-lumen","name":"Lumen Studio","kind":"company","brief":"Mid-size design agency, Brooklyn. ~80 people. Mix of client work and product.","website":"https://lumen.example","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-meridian-law","slug":"org-meridian-law","name":"Meridian Law","kind":"company","brief":"Maya's law firm. Midtown.","website":"https://meridian.example","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-quietcoach","slug":"org-quietcoach","name":"Quiet Coach LLC","kind":"company","brief":"Alex's side project. AI-assisted personal coaching tool. Pre-launch.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-sunny-prek","slug":"org-sunny-prek","name":"Sunny Lane Preschool","kind":"school","brief":"Noa's K. Considering for Sam fall 2026.","website":"https://sunnylane.example","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-anchor-pediatrics","slug":"org-anchor-pediatrics","name":"Anchor Pediatrics","kind":"company","brief":"Kids' pediatrician — Dr. Patel.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+
+{"type":"Place","data":{"id":"pl-brooklyn","slug":"pl-brooklyn","name":"Brooklyn, NY","kind":"city","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Place","data":{"id":"pl-home","slug":"pl-home","name":"Park Slope Apartment","kind":"home","address":"7th Ave, Park Slope, Brooklyn","brief":"Home. Two bedroom + office nook. Kitchen under renovation.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Place","data":{"id":"pl-lumen-office","slug":"pl-lumen-office","name":"Lumen Studio Office","kind":"office","address":"DUMBO, Brooklyn","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Place","data":{"id":"pl-romans","slug":"pl-romans","name":"Roman's","kind":"restaurant","address":"Fort Greene, Brooklyn","brief":"Go-to. Birthday and date-night place. Maya's favorite.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Place","data":{"id":"pl-prospect-park","slug":"pl-prospect-park","name":"Prospect Park","kind":"park","address":"Park Slope, Brooklyn","brief":"Half-marathon training loop is here.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Place","data":{"id":"pl-sunny-prek","slug":"pl-sunny-prek","name":"Sunny Lane Preschool","kind":"school","address":"5th Ave, Park Slope","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Place","data":{"id":"pl-burlington","slug":"pl-burlington","name":"Burlington, VT","kind":"city","brief":"Mom's town.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Place","data":{"id":"pl-tampa","slug":"pl-tampa","name":"Tampa, FL","kind":"city","brief":"Dad's town.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Place","data":{"id":"pl-seattle","slug":"pl-seattle","name":"Seattle, WA","kind":"city","brief":"Hannah's town.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+
+{"type":"Area","data":{"id":"area-health","slug":"area-health","name":"Health","kind":"health","status":"active","brief":"Physical training, sleep, energy, stress.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Area","data":{"id":"area-career","slug":"area-career","name":"Career","kind":"career","status":"active","brief":"Lumen senior IC track + long-term direction.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Area","data":{"id":"area-family","slug":"area-family","name":"Family","kind":"family","status":"active","brief":"Maya, Noa, Sam — and extended family.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Area","data":{"id":"area-learning","slug":"area-learning","name":"Learning","kind":"learning","status":"active","brief":"Reading, study, deliberate practice.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Area","data":{"id":"area-creativity","slug":"area-creativity","name":"Creativity","kind":"creativity","status":"active","brief":"Quiet Coach + side experiments.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+
+{"type":"Goal","data":{"id":"goal-quietcoach-beta","slug":"goal-quietcoach-beta","name":"Ship Quiet Coach beta","status":"active","timeframe":"yearly","target":"Public beta with 50 users by end of Q3 2026","due":"2026-09-30","brief":"Validate the coaching loop with real users before deciding on next milestone.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Goal","data":{"id":"goal-half-marathon","slug":"goal-half-marathon","name":"Finish NYC Half","status":"active","timeframe":"yearly","target":"Finish NYC Half-Marathon under 2:00","due":"2026-10-04","brief":"First half. Goal: finish strong, sub-2.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Goal","data":{"id":"goal-24-books","slug":"goal-24-books","name":"Read 24 books","status":"active","timeframe":"yearly","target":"24 finished books by Dec 31","due":"2026-12-31","brief":"Two a month. On pace at 9 by mid-May.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Goal","data":{"id":"goal-saving-30k","slug":"goal-saving-30k","name":"Save $30k for house","status":"active","timeframe":"yearly","target":"$30k added to house fund","due":"2026-12-31","brief":"Working toward a down payment by 2028.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+
+{"type":"Project","data":{"id":"proj-quietcoach","slug":"proj-quietcoach","name":"Quiet Coach","kind":"side-project","status":"active","brief":"AI-assisted personal coaching tool. Onboarding flow + first cohort prep.","description":"Web app + iOS shell. Pre-launch. Working on coaching loop quality and onboarding.","due":"2026-09-30","createdAt":"2026-01-15T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Project","data":{"id":"proj-kitchen-reno","slug":"proj-kitchen-reno","name":"Kitchen Renovation","kind":"home","status":"active","brief":"Cabinets + counters + new appliances. Contractor starts June.","due":"2026-08-15","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Project","data":{"id":"proj-lumen-q2","slug":"proj-lumen-q2","name":"Lumen Q2 Client Redesign","kind":"work","status":"active","brief":"Major redesign for Lumen's largest retail client. Ships end of Q2.","due":"2026-06-30","createdAt":"2026-03-15T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Project","data":{"id":"proj-half-marathon","slug":"proj-half-marathon","name":"Half-Marathon Training","kind":"health","status":"active","brief":"18-week program ending NYC Half Oct 4.","due":"2026-10-04","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Project","data":{"id":"proj-sam-prek","slug":"proj-sam-prek","name":"Sam's Preschool Decision","kind":"family","status":"exploring","brief":"Pick a preschool for Sam, starting fall 2026. Sunny Lane vs. two alternatives.","due":"2026-06-15","createdAt":"2026-03-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Project","data":{"id":"proj-japan-trip","slug":"proj-japan-trip","name":"Summer Japan Trip","kind":"family","status":"exploring","brief":"Considering a family trip to Tokyo + Kyoto in late August. Kids' ages on the edge of feasible.","due":"2026-08-25","createdAt":"2026-04-15T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+
+{"type":"Habit","data":{"id":"hab-morning-pages","slug":"hab-morning-pages","name":"Morning Pages","status":"active","frequency":"daily","cue":"First coffee","routine":"3 longhand pages, stream-of-consciousness","reward":"Clear head for the day","streak_current":34,"streak_best":61,"brief":"Cameron's morning pages. Doing for 14 months.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Habit","data":{"id":"hab-3x-run","slug":"hab-3x-run","name":"3x Weekly Run","status":"active","frequency":"weekly","cue":"Mon/Wed/Sat morning","routine":"Run by plan from training app","reward":"Endorphins + on track for Half","streak_current":6,"streak_best":11,"brief":"Half-marathon training core.","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Habit","data":{"id":"hab-sunday-dinner","slug":"hab-sunday-dinner","name":"Sunday Family Dinner","status":"active","frequency":"weekly","cue":"Sunday 5pm","routine":"Cook together, eat as a family at the table no phones","reward":"Connection","streak_current":11,"streak_best":17,"brief":"Non-negotiable.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Habit","data":{"id":"hab-read-bed","slug":"hab-read-bed","name":"Read Before Bed","status":"active","frequency":"daily","cue":"Phone goes in drawer at 10pm","routine":"Read 20+ pages","reward":"Better sleep + book goal progress","streak_current":22,"streak_best":40,"brief":"Phone-in-drawer trigger is critical.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Habit","data":{"id":"hab-deep-work","slug":"hab-deep-work","name":"Deep Work Block","status":"active","frequency":"daily","cue":"After morning pages","routine":"90 minutes uninterrupted on hardest thing","reward":"Highest-leverage work done before email","streak_current":8,"streak_best":24,"brief":"Slipped during Q2 kickoff; restarting.","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+
+{"type":"Event","data":{"id":"ev-theo-birthday","slug":"ev-theo-birthday","name":"Theo's 38th birthday dinner","kind":"birthday","when":"2026-04-02T19:00:00Z","mood":"great","brief":"Roman's, the whole crew. Theo loved the Lagavulin bottle.","createdAt":"2026-04-02T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Event","data":{"id":"ev-noa-kindergarten-start","slug":"ev-noa-kindergarten-start","name":"Noa starts kindergarten","kind":"life-event","when":"2025-09-04T08:30:00Z","mood":"good","brief":"First day at Sunny Lane. Noa was excited; Alex cried.","createdAt":"2025-09-04T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Event","data":{"id":"ev-maya-promotion","slug":"ev-maya-promotion","name":"Maya's promotion to partner-track","kind":"life-event","when":"2026-04-18T18:00:00Z","mood":"great","brief":"Maya was made counsel and put on partner track. Celebrated at Roman's.","createdAt":"2026-04-18T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Event","data":{"id":"ev-hannah-visit","slug":"ev-hannah-visit","name":"Hannah visits from Seattle","kind":"hangout","when":"2026-03-12T15:00:00Z","end_at":"2026-03-15T12:00:00Z","mood":"great","brief":"Three days. Kids loved it. Walked Prospect Park twice.","createdAt":"2026-03-12T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Event","data":{"id":"ev-lumen-q2-kickoff","slug":"ev-lumen-q2-kickoff","name":"Lumen Q2 redesign kickoff","kind":"meeting","when":"2026-03-20T10:00:00Z","mood":"mixed","brief":"Long meeting, scope creeping already. Jordan and Bea both raised flags.","createdAt":"2026-03-20T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Event","data":{"id":"ev-priya-baby-shower","slug":"ev-priya-baby-shower","name":"Priya's baby shower","kind":"party","when":"2026-04-12T14:00:00Z","mood":"great","brief":"At Lia's. Many cookies. Priya glowing.","createdAt":"2026-04-12T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Event","data":{"id":"ev-therapy-tue","slug":"ev-therapy-tue","name":"Therapy (Lia)","kind":"meeting","when":"2026-05-13T17:00:00Z","mood":"mixed","brief":"Talked about Sam's preschool decision and Maya's promotion impact.","createdAt":"2026-05-13T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Event","data":{"id":"ev-quietcoach-demo","slug":"ev-quietcoach-demo","name":"Quiet Coach demo day (planned)","kind":"milestone","when":"2026-07-15T18:00:00Z","brief":"Demo to a friend cohort before public beta.","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Event","data":{"id":"ev-noa-school-conf","slug":"ev-noa-school-conf","name":"Noa's parent-teacher conference","kind":"meeting","when":"2026-06-04T16:30:00Z","brief":"End-of-year check-in with Ms. Reyes.","createdAt":"2026-04-15T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Event","data":{"id":"ev-half-marathon","slug":"ev-half-marathon","name":"NYC Half-Marathon","kind":"milestone","when":"2026-10-04T08:00:00Z","brief":"Race day. Goal: sub-2.","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Event","data":{"id":"ev-japan-trip","slug":"ev-japan-trip","name":"Japan family trip (planned)","kind":"trip","when":"2026-08-12T00:00:00Z","end_at":"2026-08-26T00:00:00Z","brief":"Tokyo + Kyoto + maybe Naoshima. Not yet booked.","createdAt":"2026-04-15T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Event","data":{"id":"ev-mom-birthday","slug":"ev-mom-birthday","name":"Mom's birthday","kind":"birthday","when":"2026-06-15T00:00:00Z","brief":"Mom turns 68. Need to plan a visit or call + gift.","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+
+{"type":"Note","data":{"id":"nt-principle-yes-family","slug":"nt-principle-yes-family","name":"Default to yes for family time","kind":"principle","content":"When uncertain whether to commit family time, default to yes. The marginal cost of skipping work is low; the marginal cost of skipping a 5-year-old's everything is unrecoverable.","when":"2025-12-12","createdAt":"2025-12-12T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-principle-input-output","slug":"nt-principle-input-output","name":"Capture input separately from output","kind":"principle","content":"Don't let inbox-style capture pollute the work surface. Capture cheap and fast; process and synthesize on a separate cadence.","when":"2026-01-08","createdAt":"2026-01-08T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-principle-no-meetings-fri","slug":"nt-principle-no-meetings-fri","name":"No meetings on Fridays","kind":"principle","content":"Friday is a maker day. Decline anything that isn't on fire. Hold the line — it pays back the rest of the week.","when":"2026-02-01","createdAt":"2026-02-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-pref-theo-whisky","slug":"nt-pref-theo-whisky","name":"Theo loves Islay single malts (esp. Lagavulin)","kind":"preference","content":"For Theo: peated Islay over speyside every time. Lagavulin 16 is the safe gift; Ardbeg Uigeadail or Laphroaig 10 Cask Strength upgrades. Loathes blended.","when":"2024-12-20","tags":["gift","theo"],"createdAt":"2024-12-20T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-pref-priya-veg","slug":"nt-pref-priya-veg","name":"Priya is vegetarian + dairy-free","kind":"preference","content":"Vegetarian and lactose-intolerant. Loves Levantine food. When hosting: hummus + warm pita, mushroom dishes, anything roasted. Avoid cheese and creamy sauces.","tags":["food","priya","hosting"],"createdAt":"2024-10-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-pref-mom-calls","slug":"nt-pref-mom-calls","name":"Mom prefers phone calls over texts","kind":"preference","content":"Mom answers texts a day late but loves a 15-minute Sunday afternoon call. Don't ask her to FaceTime — she gets flustered with the camera.","tags":["mom","communication"],"createdAt":"2025-04-10T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-pref-marco-coffee","slug":"nt-pref-marco-coffee","name":"Marco's coffee taste — Sey, Onyx, light roasts","kind":"preference","content":"Marco only drinks single-origin light roasts. Sey, Onyx Coffee Lab, Tim Wendelboe are home runs. Avoid anything dark or blended. Beans, not pre-ground.","tags":["gift","marco","coffee"],"createdAt":"2025-08-15T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-pref-hannah-cameras","slug":"nt-pref-hannah-cameras","name":"Hannah collects 35mm film cameras","kind":"preference","content":"Hannah is into film photography — has a Pentax K1000 and looking for a Contax T2 or Olympus XA. Birthday is May 30.","tags":["gift","hannah","camera"],"createdAt":"2026-03-13T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-journal-2026-05-12","slug":"nt-journal-2026-05-12","name":"Journal — May 12","kind":"journal","content":"Long Monday. Lumen redesign scope creep is making me wonder if I'm choosing the right battles. Maya gave me the talk again about not absorbing other people's anxiety. Quiet Coach onboarding is sitting in my head — I should sketch it tomorrow before email.","when":"2026-05-12","createdAt":"2026-05-12T00:00:00Z","updatedAt":"2026-05-12T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-journal-2026-05-13","slug":"nt-journal-2026-05-13","name":"Journal — May 13","kind":"journal","content":"Therapy. Sam preschool conversation is bigger than it looks. Lia said something that stuck: 'You're not picking a preschool, you're picking a community.' I think that reframes which questions actually matter.","when":"2026-05-13","createdAt":"2026-05-13T00:00:00Z","updatedAt":"2026-05-13T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-insight-mid30s-energy","slug":"nt-insight-mid30s-energy","name":"Mid-30s energy is non-linear","kind":"insight","content":"Energy now is not flat over the day or week — it's spiky. Two hours of deep focus before email is worth a full afternoon of meeting fog. Designing my week around two protected mornings (Tue, Thu) keeps everything else solvable.","when":"2026-03-30","createdAt":"2026-03-30T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-insight-prek-reframe","slug":"nt-insight-prek-reframe","name":"Preschool = picking a community, not a curriculum","kind":"insight","content":"The Montessori vs. play-based debate matters less than which families we'll be spending Saturdays with for the next five years. Optimize for the parents we'll like, the friends Sam will grow up with — curriculum diffs disappear in elementary.","when":"2026-05-13","createdAt":"2026-05-13T00:00:00Z","updatedAt":"2026-05-13T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-insight-maya-cadence","slug":"nt-insight-maya-cadence","name":"Maya recharges in motion, not stillness","kind":"insight","content":"I get my energy from quiet mornings; Maya gets hers from movement and being around people. After her promotion week, she didn't want a quiet weekend — she wanted a busy one. Plan her recharge accordingly.","when":"2026-04-25","createdAt":"2026-04-25T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-insight-q1-2026","slug":"nt-insight-q1-2026","name":"Q1 2026 reflection","kind":"reflection","content":"What worked: morning pages stuck (60-day streak); QC found its onboarding shape. What didn't: deep work block fell off in March during Lumen kickoff. Pattern: I let work soak up the morning protected time. Fix: defend Tue/Thu mornings absolutely.","when":"2026-04-01","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-question-qc-b2b","slug":"nt-question-qc-b2b","name":"Should Quiet Coach pivot to B2B?","kind":"question","content":"Three early users asked if it could be deployed inside their company. Compelling but a totally different product. Worth a real exploration sprint, or distraction from the consumer thesis?","when":"2026-05-01","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-question-sam-prek","slug":"nt-question-sam-prek","name":"Which preschool for Sam?","kind":"question","content":"Sunny Lane (Noa's, easy continuity) vs. Greenfield Co-op (closer community, parent involvement) vs. Lighthouse Montessori (formal curriculum). Decision needed by June 15.","when":"2026-03-01","createdAt":"2026-03-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-decision-half","slug":"nt-decision-half","name":"Decided: NYC Half this October","kind":"decision","content":"Registered for the Oct 4 NYC Half. 18-week training plan starts Apr 1. Sub-2 hour goal.","when":"2026-03-25","createdAt":"2026-03-25T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-idea-onboarding","slug":"nt-idea-onboarding","name":"QC onboarding: start with a real problem","kind":"idea","content":"Don't ask users for goals abstractly — ask them what's currently bugging them this week. Coach the smallest concrete thing first. Concrete -> trust -> deeper.","when":"2026-05-10","createdAt":"2026-05-10T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-quote-rilke","slug":"nt-quote-rilke","name":"Rilke — live the questions","kind":"quote","content":"Live the questions now. Perhaps you will then gradually, without noticing it, live along some distant day into the answer. — Rilke, Letters to a Young Poet","when":"2025-11-20","createdAt":"2025-11-20T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-dream-cabin","slug":"nt-dream-cabin","name":"Dream: a cabin in the Hudson Valley","kind":"dream","content":"Year-round small cabin, walking distance to a town, room for Maya's parents to visit. Five-year horizon, not now.","when":"2026-02-14","createdAt":"2026-02-14T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Note","data":{"id":"nt-reflection-maya-anniv","slug":"nt-reflection-maya-anniv","name":"Reflection: 8 years with Maya","kind":"reflection","content":"What worked: protecting Sunday dinner, weekly date night, named recharge time. What needs work: I default to introvert when she's stressed; she needs the opposite. Be deliberate about that.","when":"2026-05-04","createdAt":"2026-05-04T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+
+{"type":"Task","data":{"id":"tk-send-theo-book","slug":"tk-send-theo-book","name":"Send Theo Bevelin's 'All I Want to Know' link","status":"next","kind":"action","context":"computer","priority":"low","direction":"i-owe","due":"2026-05-20T00:00:00Z","brief":"Promised at his birthday dinner. He's into mental-models books.","createdAt":"2026-04-02T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-call-mom-sunday","slug":"tk-call-mom-sunday","name":"Call Mom Sunday","status":"next","kind":"action","context":"phone","priority":"medium","direction":"i-owe","due":"2026-05-18T15:00:00Z","brief":"Weekly call. She prefers afternoons.","createdAt":"2026-05-11T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-renew-passport","slug":"tk-renew-passport","name":"Renew passport","status":"next","kind":"admin","context":"errand","priority":"high","due":"2026-06-01T00:00:00Z","brief":"Expires Sep. Need it for Japan trip if we go.","createdAt":"2026-04-20T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-pediatrician-sam","slug":"tk-pediatrician-sam","name":"Schedule Sam's 3yr check-up","status":"next","kind":"admin","context":"phone","priority":"medium","due":"2026-06-15T00:00:00Z","brief":"Anchor Pediatrics — Dr. Patel.","createdAt":"2026-05-05T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-maya-bonus-paperwork","slug":"tk-maya-bonus-paperwork","name":"Sign Maya's promotion bonus paperwork","status":"next","kind":"admin","context":"home","priority":"medium","direction":"mutual","due":"2026-05-22T00:00:00Z","brief":"Tax form for the bonus structure.","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-lumen-review","slug":"tk-lumen-review","name":"Prep Lumen Q2 design review deck","status":"next","kind":"action","context":"computer","priority":"high","due":"2026-05-19T00:00:00Z","brief":"Mid-project review with the client.","createdAt":"2026-05-13T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-qc-onboarding","slug":"tk-qc-onboarding","name":"Build QC onboarding flow v1","status":"next","kind":"action","context":"computer","priority":"high","due":"2026-05-31T00:00:00Z","brief":"Translate the 'real problem first' idea into a working flow.","createdAt":"2026-05-10T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-prek-research","slug":"tk-prek-research","name":"Visit Greenfield Co-op + Lighthouse Montessori","status":"next","kind":"research","context":"errand","priority":"high","due":"2026-05-30T00:00:00Z","brief":"Tour both before Sam's decision deadline.","createdAt":"2026-05-13T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-mom-bday-gift","slug":"tk-mom-bday-gift","name":"Buy Mom's birthday gift","status":"next","kind":"action","context":"computer","priority":"medium","due":"2026-06-10T00:00:00Z","brief":"Birthday June 15. Garden tools or photo book of kids.","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-confirm-japan","slug":"tk-confirm-japan","name":"Decide go/no-go on Japan trip + book flights","status":"next","kind":"decision","context":"home","priority":"high","due":"2026-05-25T00:00:00Z","brief":"Decision blocking flight prices.","createdAt":"2026-04-20T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-respond-marco","slug":"tk-respond-marco","name":"Respond to Marco's playdate text","status":"next","kind":"action","context":"phone","priority":"medium","direction":"i-owe","due":"2026-05-15T00:00:00Z","brief":"He suggested Saturday. Need to confirm.","createdAt":"2026-05-13T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-followup-kenji","slug":"tk-followup-kenji","name":"Schedule Q2 coffee with Kenji","status":"next","kind":"action","context":"computer","priority":"low","direction":"i-owe","due":"2026-05-31T00:00:00Z","brief":"Quarterly mentor cadence — overdue.","createdAt":"2026-05-05T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-hannah-callback","slug":"tk-hannah-callback","name":"Hannah to call after vet appointment","status":"waiting","kind":"waiting","direction":"they-owe","waiting_on":"per-hannah","due":"2026-05-20T00:00:00Z","brief":"She said she'd call once Pippa's surgery results were in.","createdAt":"2026-05-10T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-update-resume","slug":"tk-update-resume","name":"Update resume / portfolio","status":"someday","kind":"action","context":"computer","priority":"low","brief":"Not looking, but should be ready.","createdAt":"2026-02-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-inbox-coach-tools","slug":"tk-inbox-coach-tools","name":"Look at competing coaching tools","status":"inbox","brief":"Read a thread about Sano + Coach.me — worth surveying before pivoting.","createdAt":"2026-05-13T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+
+{"type":"Media","data":{"id":"med-deep-work","slug":"med-deep-work","name":"Deep Work","kind":"book","status":"finished","rating":4.5,"url":"https://example.com/deep-work","published_date":"2016-01-05","brief":"Cal Newport. Re-read in Jan; informed my no-meetings-Friday principle.","tags":["focus","work","reread"],"createdAt":"2026-01-15T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Media","data":{"id":"med-atomic-habits","slug":"med-atomic-habits","name":"Atomic Habits","kind":"book","status":"finished","rating":4.0,"published_date":"2018-10-16","brief":"Clear. Foundation for the cue/routine/reward habit modeling.","tags":["habits"],"createdAt":"2025-08-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Media","data":{"id":"med-being-mortal","slug":"med-being-mortal","name":"Being Mortal","kind":"book","status":"consuming","published_date":"2014-10-07","brief":"Gawande. Slow read — heavy.","tags":["mortality","medicine"],"createdAt":"2026-04-20T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Media","data":{"id":"med-outlive-attia","slug":"med-outlive-attia","name":"Outlive","kind":"book","status":"want","published_date":"2023-03-28","brief":"Peter Attia. Recommended by Kenji as foundational for midlife health framing.","tags":["health","aging"],"createdAt":"2026-04-15T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Media","data":{"id":"med-pachinko","slug":"med-pachinko","name":"Pachinko","kind":"book","status":"want","brief":"Min Jin Lee. For the Japan trip prep.","tags":["fiction","japan"],"createdAt":"2026-04-20T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Media","data":{"id":"med-four-thousand","slug":"med-four-thousand","name":"Four Thousand Weeks","kind":"book","status":"finished","rating":5.0,"published_date":"2021-08-10","brief":"Burkeman. The most useful book I read in 2025. Reframes time scarcity.","tags":["time","philosophy"],"createdAt":"2025-12-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Media","data":{"id":"med-pod-ezra","slug":"med-pod-ezra","name":"The Ezra Klein Show","kind":"podcast","status":"consuming","brief":"Long-form interview podcast.","tags":["interview","politics"],"createdAt":"2025-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Media","data":{"id":"med-pod-huberman","slug":"med-pod-huberman","name":"Huberman Lab","kind":"podcast","status":"consuming","brief":"Listening for the health protocols, ignoring the rest.","tags":["health"],"createdAt":"2026-03-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Media","data":{"id":"med-jiro","slug":"med-jiro","name":"Jiro Dreams of Sushi","kind":"movie","status":"finished","rating":4.0,"published_date":"2011-10-23","brief":"Watched on Maya's rec last weekend. Mastery porn.","tags":["documentary","craft"],"createdAt":"2026-05-04T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Media","data":{"id":"med-severance","slug":"med-severance","name":"Severance","kind":"show","status":"consuming","brief":"S2. Watching slowly with Maya after kids' bedtime.","tags":["scifi","work"],"createdAt":"2026-02-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Media","data":{"id":"med-jamesclear","slug":"med-jamesclear","name":"James Clear weekly newsletter","kind":"newsletter","status":"consuming","url":"https://jamesclear.com/3-2-1","brief":"3-2-1 Thursday. Quick read.","tags":["habits","weekly"],"createdAt":"2025-01-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Media","data":{"id":"med-coaching-paper","slug":"med-coaching-paper","name":"AI-mediated coaching: a meta-review (2025)","kind":"paper","status":"finished","rating":3.5,"brief":"Useful for QC framing. Cited in pitch deck.","tags":["quietcoach","research"],"createdAt":"2026-03-10T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+
+{"type":"Artifact","data":{"id":"art-mom-email-1","slug":"art-mom-email-1","name":"Email from Mom about visit","kind":"email","source":"email","source_ref":"<msg-9123@gmail>","thread_id":"thread-mom-visit","content":"Hi sweetheart, would the second weekend in June work for me to visit? I can take the Friday Amtrak and head back Sunday afternoon. Tell Noa I'm bringing her the puzzle she wanted. Love you. — Mom","timestamp":"2026-05-10T14:32:00Z","createdAt":"2026-05-10T14:32:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Artifact","data":{"id":"art-theo-whatsapp-1","slug":"art-theo-whatsapp-1","name":"WhatsApp from Theo — book","kind":"message","source":"whatsapp","source_ref":"wa-7782","thread_id":"thread-theo-1on1","content":"Yo — what was that mental models book you mentioned at dinner? Bevelin?","timestamp":"2026-04-05T20:14:00Z","createdAt":"2026-04-05T20:14:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Artifact","data":{"id":"art-maya-promotion-text","slug":"art-maya-promotion-text","name":"iMessage from Maya — promotion news","kind":"message","source":"imessage","thread_id":"thread-maya","content":"They made it official. Counsel + partner track. Roman's tonight??","timestamp":"2026-04-18T15:02:00Z","createdAt":"2026-04-18T15:02:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Artifact","data":{"id":"art-qc-design-doc","slug":"art-qc-design-doc","name":"Quiet Coach onboarding design doc","kind":"document","source":"manual","content":"Quiet Coach Onboarding v1. Hypothesis: open with a current concrete problem rather than goal abstraction. Five screens, three branches. ...","timestamp":"2026-05-08T12:00:00Z","createdAt":"2026-05-08T12:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Artifact","data":{"id":"art-qc-design-doc-v2","slug":"art-qc-design-doc-v2","name":"Quiet Coach onboarding design doc — v2","kind":"document","source":"manual","content":"Quiet Coach Onboarding v2. Adds branching for 'I'm not sure what's bugging me' path. Adds explicit consent flow. ...","timestamp":"2026-05-12T18:30:00Z","createdAt":"2026-05-12T18:30:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Artifact","data":{"id":"art-lumen-kickoff-notes","slug":"art-lumen-kickoff-notes","name":"Lumen Q2 kickoff notes","kind":"meeting-note","source":"manual","thread_id":"thread-lumen-q2","content":"Kickoff for Q2 redesign. Attendees: Alex, Jordan, Bea, plus client side. Risk: scope creep — already adding 'small' merchandising widget to phase 1. Bea will draft the cut-line memo. ...","timestamp":"2026-03-20T11:00:00Z","createdAt":"2026-03-20T11:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Artifact","data":{"id":"art-onboarding-voice","slug":"art-onboarding-voice","name":"Voice memo — onboarding flash","kind":"voice-note","source":"voice","content":"Walking to coffee. What if the onboarding doesn't ask 'what's your goal' — it asks 'what's bugging you this week.' Concrete pain first. Trust builds. Goal abstraction comes later. ...","timestamp":"2026-05-10T08:20:00Z","createdAt":"2026-05-10T08:20:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Artifact","data":{"id":"art-priya-shower-invite","slug":"art-priya-shower-invite","name":"Calendar invite — Priya's baby shower","kind":"calendar-entry","source":"calendar","url":"https://cal.example/priya-shower","content":"Priya's baby shower at Lia's. Saturday April 12 2pm.","timestamp":"2026-04-12T14:00:00Z","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Artifact","data":{"id":"art-jamesclear-clip-1","slug":"art-jamesclear-clip-1","name":"Web clip — James Clear identity habits","kind":"web-clip","source":"web","url":"https://jamesclear.com/identity-habits","content":"Every action you take is a vote for the type of person you wish to become. The goal is not to read a book — the goal is to become a reader. ...","timestamp":"2026-02-22T07:30:00Z","createdAt":"2026-02-22T07:30:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Artifact","data":{"id":"art-mom-email-summary","slug":"art-mom-email-summary","name":"Summary of Mom's visit email","kind":"document","source":"manual","content":"Summary: Mom proposes 2nd weekend in June, Fri-Sun via Amtrak. Bringing Noa a puzzle. Action: confirm date and pickup logistics.","timestamp":"2026-05-10T14:40:00Z","createdAt":"2026-05-10T14:40:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Artifact","data":{"id":"art-journal-may13","slug":"art-journal-may13","name":"Journal entry — May 13","kind":"document","source":"notes-app","content":"Therapy. Sam preschool conversation is bigger than it looks. Lia said something that stuck: 'You're not picking a preschool, you're picking a community.' I think that reframes which questions actually matter.","timestamp":"2026-05-13T22:00:00Z","createdAt":"2026-05-13T22:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+
+{"edge":"Knows","from":"per-self","to":"per-theo","data":{"context":"college roommates","since":"2009-09-01"}}
+{"edge":"Knows","from":"per-self","to":"per-priya","data":{"context":"work","since":"2022-04-15"}}
+{"edge":"Knows","from":"per-self","to":"per-marco","data":{"context":"kids' playground","since":"2023-05-20"}}
+{"edge":"Knows","from":"per-self","to":"per-lia","data":{"context":"Marco's wife","since":"2023-05-20"}}
+{"edge":"Knows","from":"per-self","to":"per-kenji","data":{"context":"first boss","since":"2014-06-01"}}
+{"edge":"Knows","from":"per-self","to":"per-jordan","data":{"context":"Lumen","since":"2023-01-10"}}
+{"edge":"Knows","from":"per-self","to":"per-bea","data":{"context":"Lumen","since":"2023-01-10"}}
+{"edge":"Knows","from":"per-maya","to":"per-theo","data":{"context":"my partner","since":"2015-02-01"}}
+{"edge":"Knows","from":"per-maya","to":"per-lia","data":{"context":"close-friend wife","since":"2023-06-01"}}
+{"edge":"Knows","from":"per-marco","to":"per-lia","data":{"context":"spouse","since":"2014-07-01"}}
+{"edge":"Knows","from":"per-theo","to":"per-marco","data":{"context":"through me","since":"2024-09-01"}}
+
+{"edge":"RelatedToPerson","from":"per-self","to":"per-maya","data":{"relation":"spouse"}}
+{"edge":"RelatedToPerson","from":"per-maya","to":"per-self","data":{"relation":"spouse"}}
+{"edge":"RelatedToPerson","from":"per-self","to":"per-noa","data":{"relation":"child"}}
+{"edge":"RelatedToPerson","from":"per-self","to":"per-sam","data":{"relation":"child"}}
+{"edge":"RelatedToPerson","from":"per-maya","to":"per-noa","data":{"relation":"child"}}
+{"edge":"RelatedToPerson","from":"per-maya","to":"per-sam","data":{"relation":"child"}}
+{"edge":"RelatedToPerson","from":"per-noa","to":"per-self","data":{"relation":"parent"}}
+{"edge":"RelatedToPerson","from":"per-noa","to":"per-maya","data":{"relation":"parent"}}
+{"edge":"RelatedToPerson","from":"per-noa","to":"per-sam","data":{"relation":"sibling"}}
+{"edge":"RelatedToPerson","from":"per-self","to":"per-janet","data":{"relation":"parent"}}
+{"edge":"RelatedToPerson","from":"per-self","to":"per-robert","data":{"relation":"parent"}}
+{"edge":"RelatedToPerson","from":"per-self","to":"per-hannah","data":{"relation":"sibling"}}
+{"edge":"RelatedToPerson","from":"per-maya","to":"per-david","data":{"relation":"parent"}}
+{"edge":"RelatedToPerson","from":"per-maya","to":"per-elena","data":{"relation":"parent"}}
+{"edge":"RelatedToPerson","from":"per-self","to":"per-david","data":{"relation":"in-law"}}
+{"edge":"RelatedToPerson","from":"per-self","to":"per-elena","data":{"relation":"in-law"}}
+{"edge":"RelatedToPerson","from":"per-marco","to":"per-lia","data":{"relation":"spouse"}}
+
+{"edge":"LivesIn","from":"per-self","to":"pl-home","data":{"primary":true,"since":"2018-06-01"}}
+{"edge":"LivesIn","from":"per-maya","to":"pl-home","data":{"primary":true,"since":"2018-06-01"}}
+{"edge":"LivesIn","from":"per-noa","to":"pl-home","data":{"primary":true,"since":"2020-11-04"}}
+{"edge":"LivesIn","from":"per-sam","to":"pl-home","data":{"primary":true,"since":"2023-07-19"}}
+{"edge":"LivesIn","from":"per-self","to":"pl-brooklyn","data":{"primary":true,"since":"2017-01-01"}}
+{"edge":"LivesIn","from":"per-theo","to":"pl-brooklyn","data":{"primary":true,"since":"2016-08-01"}}
+{"edge":"LivesIn","from":"per-priya","to":"pl-brooklyn","data":{"primary":true,"since":"2020-03-01"}}
+{"edge":"LivesIn","from":"per-marco","to":"pl-brooklyn","data":{"primary":true,"since":"2018-04-01"}}
+{"edge":"LivesIn","from":"per-lia","to":"pl-brooklyn","data":{"primary":true,"since":"2018-04-01"}}
+{"edge":"LivesIn","from":"per-janet","to":"pl-burlington","data":{"primary":true,"since":"2008-03-01"}}
+{"edge":"LivesIn","from":"per-robert","to":"pl-tampa","data":{"primary":true,"since":"2008-03-01"}}
+{"edge":"LivesIn","from":"per-hannah","to":"pl-seattle","data":{"primary":true,"since":"2019-08-01"}}
+
+{"edge":"WorksAt","from":"per-self","to":"org-lumen","data":{"role":"Senior Product Designer","since":"2022-01-10","current":true}}
+{"edge":"WorksAt","from":"per-self","to":"org-quietcoach","data":{"role":"Founder","since":"2026-01-15","current":true}}
+{"edge":"WorksAt","from":"per-maya","to":"org-meridian-law","data":{"role":"Counsel","since":"2020-04-01","current":true}}
+{"edge":"WorksAt","from":"per-priya","to":"org-lumen","data":{"role":"Staff Designer","since":"2022-04-15","current":true}}
+{"edge":"WorksAt","from":"per-jordan","to":"org-lumen","data":{"role":"Staff Engineer","since":"2021-09-01","current":true}}
+{"edge":"WorksAt","from":"per-bea","to":"org-lumen","data":{"role":"PM","since":"2022-11-01","current":true}}
+{"edge":"WorksAt","from":"per-kenji","to":"org-lumen","data":{"role":"VP Design","since":"2014-06-01","until":"2024-03-15","current":false}}
+
+{"edge":"AttendedBy","from":"ev-theo-birthday","to":"per-theo","data":{}}
+{"edge":"AttendedBy","from":"ev-theo-birthday","to":"per-self","data":{}}
+{"edge":"AttendedBy","from":"ev-theo-birthday","to":"per-maya","data":{}}
+{"edge":"AttendedBy","from":"ev-theo-birthday","to":"per-marco","data":{}}
+{"edge":"AttendedBy","from":"ev-theo-birthday","to":"per-lia","data":{}}
+{"edge":"AttendedBy","from":"ev-noa-kindergarten-start","to":"per-noa","data":{}}
+{"edge":"AttendedBy","from":"ev-noa-kindergarten-start","to":"per-self","data":{}}
+{"edge":"AttendedBy","from":"ev-noa-kindergarten-start","to":"per-maya","data":{}}
+{"edge":"AttendedBy","from":"ev-maya-promotion","to":"per-maya","data":{}}
+{"edge":"AttendedBy","from":"ev-maya-promotion","to":"per-self","data":{}}
+{"edge":"AttendedBy","from":"ev-hannah-visit","to":"per-hannah","data":{}}
+{"edge":"AttendedBy","from":"ev-hannah-visit","to":"per-self","data":{}}
+{"edge":"AttendedBy","from":"ev-hannah-visit","to":"per-maya","data":{}}
+{"edge":"AttendedBy","from":"ev-hannah-visit","to":"per-noa","data":{}}
+{"edge":"AttendedBy","from":"ev-hannah-visit","to":"per-sam","data":{}}
+{"edge":"AttendedBy","from":"ev-lumen-q2-kickoff","to":"per-self","data":{}}
+{"edge":"AttendedBy","from":"ev-lumen-q2-kickoff","to":"per-jordan","data":{}}
+{"edge":"AttendedBy","from":"ev-lumen-q2-kickoff","to":"per-bea","data":{}}
+{"edge":"AttendedBy","from":"ev-priya-baby-shower","to":"per-priya","data":{}}
+{"edge":"AttendedBy","from":"ev-priya-baby-shower","to":"per-self","data":{}}
+{"edge":"AttendedBy","from":"ev-priya-baby-shower","to":"per-maya","data":{}}
+{"edge":"AttendedBy","from":"ev-priya-baby-shower","to":"per-lia","data":{}}
+{"edge":"AttendedBy","from":"ev-therapy-tue","to":"per-self","data":{}}
+{"edge":"AttendedBy","from":"ev-noa-school-conf","to":"per-self","data":{}}
+{"edge":"AttendedBy","from":"ev-noa-school-conf","to":"per-maya","data":{}}
+{"edge":"AttendedBy","from":"ev-noa-school-conf","to":"per-noa","data":{}}
+{"edge":"AttendedBy","from":"ev-half-marathon","to":"per-self","data":{}}
+{"edge":"AttendedBy","from":"ev-half-marathon","to":"per-theo","data":{}}
+{"edge":"AttendedBy","from":"ev-japan-trip","to":"per-self","data":{}}
+{"edge":"AttendedBy","from":"ev-japan-trip","to":"per-maya","data":{}}
+{"edge":"AttendedBy","from":"ev-japan-trip","to":"per-noa","data":{}}
+{"edge":"AttendedBy","from":"ev-japan-trip","to":"per-sam","data":{}}
+
+{"edge":"EventForPerson","from":"ev-maya-promotion","to":"per-maya","data":{}}
+{"edge":"EventForPerson","from":"ev-noa-kindergarten-start","to":"per-noa","data":{}}
+{"edge":"EventForPerson","from":"ev-priya-baby-shower","to":"per-priya","data":{}}
+{"edge":"EventForPerson","from":"ev-mom-birthday","to":"per-janet","data":{}}
+{"edge":"EventForPerson","from":"ev-theo-birthday","to":"per-theo","data":{}}
+
+{"edge":"EventForProject","from":"ev-lumen-q2-kickoff","to":"proj-lumen-q2","data":{}}
+{"edge":"EventForProject","from":"ev-quietcoach-demo","to":"proj-quietcoach","data":{}}
+{"edge":"EventForProject","from":"ev-half-marathon","to":"proj-half-marathon","data":{}}
+{"edge":"EventForProject","from":"ev-japan-trip","to":"proj-japan-trip","data":{}}
+
+{"edge":"HappenedAt","from":"ev-theo-birthday","to":"pl-romans","data":{}}
+{"edge":"HappenedAt","from":"ev-maya-promotion","to":"pl-romans","data":{}}
+{"edge":"HappenedAt","from":"ev-noa-kindergarten-start","to":"pl-sunny-prek","data":{}}
+{"edge":"HappenedAt","from":"ev-hannah-visit","to":"pl-home","data":{}}
+{"edge":"HappenedAt","from":"ev-lumen-q2-kickoff","to":"pl-lumen-office","data":{}}
+{"edge":"HappenedAt","from":"ev-priya-baby-shower","to":"pl-home","data":{}}
+{"edge":"HappenedAt","from":"ev-half-marathon","to":"pl-prospect-park","data":{}}
+{"edge":"HappenedAt","from":"ev-noa-school-conf","to":"pl-sunny-prek","data":{}}
+
+{"edge":"NoteAboutPerson","from":"nt-pref-theo-whisky","to":"per-theo","data":{}}
+{"edge":"NoteAboutPerson","from":"nt-pref-priya-veg","to":"per-priya","data":{}}
+{"edge":"NoteAboutPerson","from":"nt-pref-mom-calls","to":"per-janet","data":{}}
+{"edge":"NoteAboutPerson","from":"nt-pref-marco-coffee","to":"per-marco","data":{}}
+{"edge":"NoteAboutPerson","from":"nt-pref-hannah-cameras","to":"per-hannah","data":{}}
+{"edge":"NoteAboutPerson","from":"nt-insight-maya-cadence","to":"per-maya","data":{}}
+{"edge":"NoteAboutPerson","from":"nt-reflection-maya-anniv","to":"per-maya","data":{}}
+
+{"edge":"NoteAboutProject","from":"nt-question-qc-b2b","to":"proj-quietcoach","data":{}}
+{"edge":"NoteAboutProject","from":"nt-idea-onboarding","to":"proj-quietcoach","data":{}}
+{"edge":"NoteAboutProject","from":"nt-question-sam-prek","to":"proj-sam-prek","data":{}}
+{"edge":"NoteAboutProject","from":"nt-insight-prek-reframe","to":"proj-sam-prek","data":{}}
+{"edge":"NoteAboutProject","from":"nt-decision-half","to":"proj-half-marathon","data":{}}
+
+{"edge":"NoteAboutArea","from":"nt-insight-mid30s-energy","to":"area-health","data":{}}
+{"edge":"NoteAboutArea","from":"nt-insight-mid30s-energy","to":"area-career","data":{}}
+{"edge":"NoteAboutArea","from":"nt-insight-q1-2026","to":"area-creativity","data":{}}
+{"edge":"NoteAboutArea","from":"nt-dream-cabin","to":"area-family","data":{}}
+
+{"edge":"NoteFromArtifact","from":"nt-idea-onboarding","to":"art-onboarding-voice","data":{}}
+{"edge":"NoteFromEvent","from":"nt-insight-prek-reframe","to":"ev-therapy-tue","data":{}}
+{"edge":"NoteFromEvent","from":"nt-journal-2026-05-13","to":"ev-therapy-tue","data":{}}
+
+{"edge":"RelatedNote","from":"nt-insight-prek-reframe","to":"nt-question-sam-prek","data":{}}
+{"edge":"RelatedNote","from":"nt-idea-onboarding","to":"nt-question-qc-b2b","data":{}}
+{"edge":"RelatedNote","from":"nt-journal-2026-05-13","to":"nt-insight-prek-reframe","data":{}}
+{"edge":"RelatedNote","from":"nt-principle-yes-family","to":"nt-reflection-maya-anniv","data":{}}
+
+{"edge":"HabitFromPrinciple","from":"hab-sunday-dinner","to":"nt-principle-yes-family","data":{}}
+{"edge":"HabitFromPrinciple","from":"hab-deep-work","to":"nt-principle-no-meetings-fri","data":{}}
+{"edge":"HabitFromPrinciple","from":"hab-morning-pages","to":"nt-principle-input-output","data":{}}
+
+{"edge":"TaskForPerson","from":"tk-send-theo-book","to":"per-theo","data":{}}
+{"edge":"TaskForPerson","from":"tk-call-mom-sunday","to":"per-janet","data":{}}
+{"edge":"TaskForPerson","from":"tk-mom-bday-gift","to":"per-janet","data":{}}
+{"edge":"TaskForPerson","from":"tk-respond-marco","to":"per-marco","data":{}}
+{"edge":"TaskForPerson","from":"tk-followup-kenji","to":"per-kenji","data":{}}
+{"edge":"TaskForPerson","from":"tk-hannah-callback","to":"per-hannah","data":{}}
+{"edge":"TaskForPerson","from":"tk-maya-bonus-paperwork","to":"per-maya","data":{}}
+{"edge":"TaskForPerson","from":"tk-pediatrician-sam","to":"per-sam","data":{}}
+
+{"edge":"TaskForProject","from":"tk-qc-onboarding","to":"proj-quietcoach","data":{}}
+{"edge":"TaskForProject","from":"tk-inbox-coach-tools","to":"proj-quietcoach","data":{}}
+{"edge":"TaskForProject","from":"tk-lumen-review","to":"proj-lumen-q2","data":{}}
+{"edge":"TaskForProject","from":"tk-prek-research","to":"proj-sam-prek","data":{}}
+{"edge":"TaskForProject","from":"tk-confirm-japan","to":"proj-japan-trip","data":{}}
+{"edge":"TaskForProject","from":"tk-renew-passport","to":"proj-japan-trip","data":{}}
+
+{"edge":"TaskForArea","from":"tk-call-mom-sunday","to":"area-family","data":{}}
+{"edge":"TaskForArea","from":"tk-mom-bday-gift","to":"area-family","data":{}}
+{"edge":"TaskForArea","from":"tk-update-resume","to":"area-career","data":{}}
+{"edge":"TaskForArea","from":"tk-followup-kenji","to":"area-career","data":{}}
+
+{"edge":"TaskForGoal","from":"tk-qc-onboarding","to":"goal-quietcoach-beta","data":{}}
+{"edge":"TaskForGoal","from":"tk-inbox-coach-tools","to":"goal-quietcoach-beta","data":{}}
+
+{"edge":"TaskFromArtifact","from":"tk-send-theo-book","to":"art-theo-whatsapp-1","data":{}}
+{"edge":"TaskFromArtifact","from":"tk-respond-marco","to":"art-theo-whatsapp-1","data":{}}
+{"edge":"TaskFromEvent","from":"tk-mom-bday-gift","to":"ev-mom-birthday","data":{}}
+
+{"edge":"TaskDependsOnTask","from":"tk-confirm-japan","to":"tk-renew-passport","data":{"kind":"prerequisite","reason":"need passport before booking international flights"}}
+
+{"edge":"ProjectInArea","from":"proj-quietcoach","to":"area-creativity","data":{}}
+{"edge":"ProjectInArea","from":"proj-quietcoach","to":"area-career","data":{}}
+{"edge":"ProjectInArea","from":"proj-kitchen-reno","to":"area-family","data":{}}
+{"edge":"ProjectInArea","from":"proj-lumen-q2","to":"area-career","data":{}}
+{"edge":"ProjectInArea","from":"proj-half-marathon","to":"area-health","data":{}}
+{"edge":"ProjectInArea","from":"proj-sam-prek","to":"area-family","data":{}}
+{"edge":"ProjectInArea","from":"proj-japan-trip","to":"area-family","data":{}}
+
+{"edge":"ProjectForOrganization","from":"proj-quietcoach","to":"org-quietcoach","data":{}}
+{"edge":"ProjectForOrganization","from":"proj-lumen-q2","to":"org-lumen","data":{}}
+
+{"edge":"GoalForArea","from":"goal-quietcoach-beta","to":"area-creativity","data":{}}
+{"edge":"GoalForArea","from":"goal-half-marathon","to":"area-health","data":{}}
+{"edge":"GoalForArea","from":"goal-24-books","to":"area-learning","data":{}}
+{"edge":"GoalForArea","from":"goal-saving-30k","to":"area-family","data":{}}
+
+{"edge":"HabitForArea","from":"hab-morning-pages","to":"area-creativity","data":{}}
+{"edge":"HabitForArea","from":"hab-3x-run","to":"area-health","data":{}}
+{"edge":"HabitForArea","from":"hab-sunday-dinner","to":"area-family","data":{}}
+{"edge":"HabitForArea","from":"hab-read-bed","to":"area-learning","data":{}}
+{"edge":"HabitForArea","from":"hab-deep-work","to":"area-career","data":{}}
+
+{"edge":"HabitForGoal","from":"hab-3x-run","to":"goal-half-marathon","data":{}}
+{"edge":"HabitForGoal","from":"hab-read-bed","to":"goal-24-books","data":{}}
+
+{"edge":"PersonInvolvedInProject","from":"per-self","to":"proj-quietcoach","data":{"role":"Founder"}}
+{"edge":"PersonInvolvedInProject","from":"per-self","to":"proj-lumen-q2","data":{"role":"Design lead"}}
+{"edge":"PersonInvolvedInProject","from":"per-jordan","to":"proj-lumen-q2","data":{"role":"Engineering lead"}}
+{"edge":"PersonInvolvedInProject","from":"per-bea","to":"proj-lumen-q2","data":{"role":"PM"}}
+{"edge":"PersonInvolvedInProject","from":"per-self","to":"proj-half-marathon","data":{"role":"Runner"}}
+{"edge":"PersonInvolvedInProject","from":"per-theo","to":"proj-half-marathon","data":{"role":"Running buddy"}}
+{"edge":"PersonInvolvedInProject","from":"per-self","to":"proj-kitchen-reno","data":{"role":"Project lead"}}
+{"edge":"PersonInvolvedInProject","from":"per-maya","to":"proj-kitchen-reno","data":{"role":"Project lead"}}
+{"edge":"PersonInvolvedInProject","from":"per-self","to":"proj-sam-prek","data":{"role":"Decision-maker"}}
+{"edge":"PersonInvolvedInProject","from":"per-maya","to":"proj-sam-prek","data":{"role":"Decision-maker"}}
+
+{"edge":"MediaRecommendedBy","from":"med-outlive-attia","to":"per-kenji","data":{}}
+{"edge":"MediaRecommendedBy","from":"med-jiro","to":"per-maya","data":{}}
+{"edge":"MediaRecommendedBy","from":"med-pachinko","to":"per-maya","data":{}}
+{"edge":"MediaRecommendedBy","from":"med-four-thousand","to":"per-kenji","data":{}}
+
+{"edge":"MediaForProject","from":"med-coaching-paper","to":"proj-quietcoach","data":{}}
+{"edge":"MediaForProject","from":"med-atomic-habits","to":"proj-quietcoach","data":{}}
+{"edge":"MediaForArea","from":"med-outlive-attia","to":"area-health","data":{}}
+{"edge":"MediaForArea","from":"med-pod-huberman","to":"area-health","data":{}}
+{"edge":"MediaForArea","from":"med-deep-work","to":"area-career","data":{}}
+{"edge":"MediaForArea","from":"med-four-thousand","to":"area-learning","data":{}}
+
+{"edge":"MentionsPerson","from":"art-mom-email-1","to":"per-janet","data":{}}
+{"edge":"MentionsPerson","from":"art-mom-email-1","to":"per-noa","data":{}}
+{"edge":"MentionsPerson","from":"art-theo-whatsapp-1","to":"per-theo","data":{}}
+{"edge":"MentionsPerson","from":"art-maya-promotion-text","to":"per-maya","data":{}}
+{"edge":"MentionsPerson","from":"art-lumen-kickoff-notes","to":"per-self","data":{}}
+{"edge":"MentionsPerson","from":"art-lumen-kickoff-notes","to":"per-jordan","data":{}}
+{"edge":"MentionsPerson","from":"art-lumen-kickoff-notes","to":"per-bea","data":{}}
+{"edge":"MentionsPerson","from":"art-priya-shower-invite","to":"per-priya","data":{}}
+{"edge":"MentionsPerson","from":"art-priya-shower-invite","to":"per-lia","data":{}}
+
+{"edge":"ArtifactFromPerson","from":"art-mom-email-1","to":"per-janet","data":{}}
+{"edge":"ArtifactFromPerson","from":"art-theo-whatsapp-1","to":"per-theo","data":{}}
+{"edge":"ArtifactFromPerson","from":"art-maya-promotion-text","to":"per-maya","data":{}}
+{"edge":"ArtifactFromPerson","from":"art-qc-design-doc","to":"per-self","data":{}}
+{"edge":"ArtifactFromPerson","from":"art-qc-design-doc-v2","to":"per-self","data":{}}
+{"edge":"ArtifactFromPerson","from":"art-onboarding-voice","to":"per-self","data":{}}
+
+{"edge":"ArtifactForProject","from":"art-qc-design-doc","to":"proj-quietcoach","data":{}}
+{"edge":"ArtifactForProject","from":"art-qc-design-doc-v2","to":"proj-quietcoach","data":{}}
+{"edge":"ArtifactForProject","from":"art-onboarding-voice","to":"proj-quietcoach","data":{}}
+{"edge":"ArtifactForProject","from":"art-lumen-kickoff-notes","to":"proj-lumen-q2","data":{}}
+
+{"edge":"RecordOf","from":"art-lumen-kickoff-notes","to":"ev-lumen-q2-kickoff","data":{}}
+{"edge":"RecordOf","from":"art-priya-shower-invite","to":"ev-priya-baby-shower","data":{}}
+
+{"edge":"DerivedFromArtifact","from":"art-qc-design-doc-v2","to":"art-qc-design-doc","data":{"activity":"corrected","agent":"alex","createdAt":"2026-05-12T18:30:00Z"}}
+{"edge":"DerivedFromArtifact","from":"art-mom-email-summary","to":"art-mom-email-1","data":{"activity":"summarized","agent":"claude","model":"claude-opus","confidence":0.9,"createdAt":"2026-05-10T14:40:00Z"}}
+
