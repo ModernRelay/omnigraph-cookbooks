@@ -102,7 +102,7 @@
 {"type":"Task","data":{"id":"tk-confirm-japan","slug":"tk-confirm-japan","name":"Decide go/no-go on Japan trip + book flights","status":"next","kind":"decision","context":"home","priority":"high","due":"2026-05-25T00:00:00Z","brief":"Decision blocking flight prices.","createdAt":"2026-04-20T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
 {"type":"Task","data":{"id":"tk-respond-marco","slug":"tk-respond-marco","name":"Respond to Marco's playdate text","status":"next","kind":"action","context":"phone","priority":"medium","direction":"i-owe","due":"2026-05-15T00:00:00Z","brief":"He suggested Saturday. Need to confirm.","createdAt":"2026-05-13T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
 {"type":"Task","data":{"id":"tk-followup-kenji","slug":"tk-followup-kenji","name":"Schedule Q2 coffee with Kenji","status":"next","kind":"action","context":"computer","priority":"low","direction":"i-owe","due":"2026-05-31T00:00:00Z","brief":"Quarterly mentor cadence — overdue.","createdAt":"2026-05-05T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
-{"type":"Task","data":{"id":"tk-hannah-callback","slug":"tk-hannah-callback","name":"Hannah to call after vet appointment","status":"waiting","kind":"waiting","direction":"they-owe","waiting_on":"per-hannah","due":"2026-05-20T00:00:00Z","brief":"She said she'd call once Pippa's surgery results were in.","createdAt":"2026-05-10T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
+{"type":"Task","data":{"id":"tk-hannah-callback","slug":"tk-hannah-callback","name":"Hannah to call after vet appointment","status":"waiting","kind":"waiting","direction":"they-owe","due":"2026-05-20T00:00:00Z","brief":"She said she'd call once Pippa's surgery results were in.","createdAt":"2026-05-10T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
 {"type":"Task","data":{"id":"tk-update-resume","slug":"tk-update-resume","name":"Update resume / portfolio","status":"someday","kind":"action","context":"computer","priority":"low","brief":"Not looking, but should be ready.","createdAt":"2026-02-01T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
 {"type":"Task","data":{"id":"tk-inbox-coach-tools","slug":"tk-inbox-coach-tools","name":"Look at competing coaching tools","status":"inbox","brief":"Read a thread about Sano + Coach.me — worth surveying before pivoting.","createdAt":"2026-05-13T00:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
 
@@ -132,34 +132,54 @@
 {"type":"Artifact","data":{"id":"art-journal-may13","slug":"art-journal-may13","name":"Journal entry — May 13","kind":"document","source":"notes-app","content":"Therapy. Sam preschool conversation is bigger than it looks. Lia said something that stuck: 'You're not picking a preschool, you're picking a community.' I think that reframes which questions actually matter.","timestamp":"2026-05-13T22:00:00Z","createdAt":"2026-05-13T22:00:00Z","updatedAt":"2026-05-14T00:00:00Z"}}
 
 {"edge":"Knows","from":"per-self","to":"per-theo","data":{"context":"college roommates","since":"2009-09-01"}}
+{"edge":"Knows","from":"per-theo","to":"per-self","data":{"context":"college roommates","since":"2009-09-01"}}
 {"edge":"Knows","from":"per-self","to":"per-priya","data":{"context":"work","since":"2022-04-15"}}
+{"edge":"Knows","from":"per-priya","to":"per-self","data":{"context":"work","since":"2022-04-15"}}
 {"edge":"Knows","from":"per-self","to":"per-marco","data":{"context":"kids' playground","since":"2023-05-20"}}
+{"edge":"Knows","from":"per-marco","to":"per-self","data":{"context":"kids' playground","since":"2023-05-20"}}
 {"edge":"Knows","from":"per-self","to":"per-lia","data":{"context":"Marco's wife","since":"2023-05-20"}}
+{"edge":"Knows","from":"per-lia","to":"per-self","data":{"context":"Marco's wife","since":"2023-05-20"}}
 {"edge":"Knows","from":"per-self","to":"per-kenji","data":{"context":"first boss","since":"2014-06-01"}}
+{"edge":"Knows","from":"per-kenji","to":"per-self","data":{"context":"first boss","since":"2014-06-01"}}
 {"edge":"Knows","from":"per-self","to":"per-jordan","data":{"context":"Lumen","since":"2023-01-10"}}
+{"edge":"Knows","from":"per-jordan","to":"per-self","data":{"context":"Lumen","since":"2023-01-10"}}
 {"edge":"Knows","from":"per-self","to":"per-bea","data":{"context":"Lumen","since":"2023-01-10"}}
+{"edge":"Knows","from":"per-bea","to":"per-self","data":{"context":"Lumen","since":"2023-01-10"}}
 {"edge":"Knows","from":"per-maya","to":"per-theo","data":{"context":"my partner","since":"2015-02-01"}}
+{"edge":"Knows","from":"per-theo","to":"per-maya","data":{"context":"my partner","since":"2015-02-01"}}
 {"edge":"Knows","from":"per-maya","to":"per-lia","data":{"context":"close-friend wife","since":"2023-06-01"}}
-{"edge":"Knows","from":"per-marco","to":"per-lia","data":{"context":"spouse","since":"2014-07-01"}}
+{"edge":"Knows","from":"per-lia","to":"per-maya","data":{"context":"close-friend wife","since":"2023-06-01"}}
 {"edge":"Knows","from":"per-theo","to":"per-marco","data":{"context":"through me","since":"2024-09-01"}}
+{"edge":"Knows","from":"per-marco","to":"per-theo","data":{"context":"through me","since":"2024-09-01"}}
 
 {"edge":"RelatedToPerson","from":"per-self","to":"per-maya","data":{"relation":"spouse"}}
 {"edge":"RelatedToPerson","from":"per-maya","to":"per-self","data":{"relation":"spouse"}}
 {"edge":"RelatedToPerson","from":"per-self","to":"per-noa","data":{"relation":"child"}}
-{"edge":"RelatedToPerson","from":"per-self","to":"per-sam","data":{"relation":"child"}}
-{"edge":"RelatedToPerson","from":"per-maya","to":"per-noa","data":{"relation":"child"}}
-{"edge":"RelatedToPerson","from":"per-maya","to":"per-sam","data":{"relation":"child"}}
 {"edge":"RelatedToPerson","from":"per-noa","to":"per-self","data":{"relation":"parent"}}
+{"edge":"RelatedToPerson","from":"per-self","to":"per-sam","data":{"relation":"child"}}
+{"edge":"RelatedToPerson","from":"per-sam","to":"per-self","data":{"relation":"parent"}}
+{"edge":"RelatedToPerson","from":"per-maya","to":"per-noa","data":{"relation":"child"}}
 {"edge":"RelatedToPerson","from":"per-noa","to":"per-maya","data":{"relation":"parent"}}
+{"edge":"RelatedToPerson","from":"per-maya","to":"per-sam","data":{"relation":"child"}}
+{"edge":"RelatedToPerson","from":"per-sam","to":"per-maya","data":{"relation":"parent"}}
 {"edge":"RelatedToPerson","from":"per-noa","to":"per-sam","data":{"relation":"sibling"}}
+{"edge":"RelatedToPerson","from":"per-sam","to":"per-noa","data":{"relation":"sibling"}}
 {"edge":"RelatedToPerson","from":"per-self","to":"per-janet","data":{"relation":"parent"}}
+{"edge":"RelatedToPerson","from":"per-janet","to":"per-self","data":{"relation":"child"}}
 {"edge":"RelatedToPerson","from":"per-self","to":"per-robert","data":{"relation":"parent"}}
+{"edge":"RelatedToPerson","from":"per-robert","to":"per-self","data":{"relation":"child"}}
 {"edge":"RelatedToPerson","from":"per-self","to":"per-hannah","data":{"relation":"sibling"}}
+{"edge":"RelatedToPerson","from":"per-hannah","to":"per-self","data":{"relation":"sibling"}}
 {"edge":"RelatedToPerson","from":"per-maya","to":"per-david","data":{"relation":"parent"}}
+{"edge":"RelatedToPerson","from":"per-david","to":"per-maya","data":{"relation":"child"}}
 {"edge":"RelatedToPerson","from":"per-maya","to":"per-elena","data":{"relation":"parent"}}
+{"edge":"RelatedToPerson","from":"per-elena","to":"per-maya","data":{"relation":"child"}}
 {"edge":"RelatedToPerson","from":"per-self","to":"per-david","data":{"relation":"in-law"}}
+{"edge":"RelatedToPerson","from":"per-david","to":"per-self","data":{"relation":"in-law"}}
 {"edge":"RelatedToPerson","from":"per-self","to":"per-elena","data":{"relation":"in-law"}}
+{"edge":"RelatedToPerson","from":"per-elena","to":"per-self","data":{"relation":"in-law"}}
 {"edge":"RelatedToPerson","from":"per-marco","to":"per-lia","data":{"relation":"spouse"}}
+{"edge":"RelatedToPerson","from":"per-lia","to":"per-marco","data":{"relation":"spouse"}}
 
 {"edge":"LivesIn","from":"per-self","to":"pl-home","data":{"primary":true,"since":"2018-06-01"}}
 {"edge":"LivesIn","from":"per-maya","to":"pl-home","data":{"primary":true,"since":"2018-06-01"}}

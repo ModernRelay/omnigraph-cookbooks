@@ -67,6 +67,7 @@ aliases:
   tasks-next: { command: read, query: tasks.gq, name: tasks_next }
   tasks-inbox: { command: read, query: tasks.gq, name: tasks_inbox }
   tasks-waiting: { command: read, query: tasks.gq, name: tasks_waiting }
+  tasks-waiting-on-person: { command: read, query: tasks.gq, name: tasks_waiting_on_person, args: [slug] }
   tasks-someday: { command: read, query: tasks.gq, name: tasks_someday }
   tasks-by-context: { command: read, query: tasks.gq, name: tasks_by_context, args: [context] }
   tasks-i-owe: { command: read, query: tasks.gq, name: tasks_i_owe }

@@ -4,7 +4,7 @@ query get_task($slug: String) {
     match {
         $t: Task { slug: $slug }
     }
-    return { $t.slug, $t.name, $t.status, $t.kind, $t.context, $t.priority, $t.due, $t.direction, $t.waiting_on, $t.brief }
+    return { $t.slug, $t.name, $t.status, $t.kind, $t.context, $t.priority, $t.due, $t.direction, $t.brief }
 }
 
 query tasks_next() {
@@ -23,11 +23,23 @@ query tasks_inbox() {
     order { $t.createdAt desc }
 }
 
+// Tasks blocked on something — combine with task_person for "waiting on whom"
 query tasks_waiting() {
     match {
         $t: Task { status: "waiting" }
     }
-    return { $t.slug, $t.name, $t.waiting_on, $t.due, $t.brief }
+    return { $t.slug, $t.name, $t.due, $t.direction, $t.brief }
+    order { $t.due }
+}
+
+// Tasks waiting on a specific person (status=waiting + TaskForPerson)
+query tasks_waiting_on_person($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $t: Task { status: "waiting" }
+        $t taskForPerson $p
+    }
+    return { $t.slug, $t.name, $t.due, $t.brief }
     order { $t.due }
 }
 
@@ -62,7 +74,7 @@ query tasks_they_owe() {
     match {
         $t: Task { direction: "they-owe" }
     }
-    return { $t.slug, $t.name, $t.status, $t.waiting_on, $t.due, $t.brief }
+    return { $t.slug, $t.name, $t.status, $t.due, $t.brief }
     order { $t.due }
 }
 

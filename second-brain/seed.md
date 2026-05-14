@@ -4,7 +4,9 @@ A complete second-brain graph for **Alex Chen**, a fictional 36-year-old senior 
 
 Everything in this seed is fabricated — names, places, and dates. The point is to give the schema realistic shape for demo queries.
 
-**Totals:** 121 nodes across 12 types, 209 edges across 36 types. `Chunk` is declared in the schema but populated by a separate embedding pipeline, not in this seed.
+**Totals:** 121 nodes across 12 types, 229 edges across 36 types. `Chunk` is declared in the schema but populated by a separate embedding pipeline, not in this seed.
+
+`Knows` and `RelatedToPerson` edges are stored bidirectionally — if A knows B, the seed also loads B knows A; family edges store both `parent → child` and the inverse `child → parent`. This convention is enforced by the loader (the schema can't express pair-uniqueness in Omnigraph 0.4.2, so dedupe lives in the seed).
 
 ## Layout
 

@@ -46,7 +46,7 @@ No SPIKE pattern layer — we deliberately skipped it. This is for individual li
 
 The seed populates the life of a fictional 36-year-old senior product designer in Brooklyn — partner Maya, two kids, a side project, a half-marathon, a kitchen renovation, and a preschool decision in progress. All names, places, and dates are fabricated. See `seed.md` for the full layout.
 
-**Totals:** 121 nodes across 12 types, 209 edges across 36 types.
+**Totals:** 121 nodes across 12 types, 229 edges across 36 types. `Knows` and `RelatedToPerson` are stored bidirectionally — see `CLAUDE.md` for the load-discipline convention.
 
 | Dimension | Count | Includes |
 |---|---|---|

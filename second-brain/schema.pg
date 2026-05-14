@@ -29,6 +29,12 @@
 // ──────────────────────────────────────────────
 
 // "Me" is the Person with slug "per-self" and relation = self.
+//
+// `cadence_days` is the desired contact frequency *from me to them*. Semantically
+// it belongs on a Knows edge or a per-relationship intent node, but the current
+// query language doesn't expose edge properties to projections — so it lives on
+// Person as a pragmatic shortcut. Re-evaluate if the cookbook ever serves more
+// than one user.
 node Person {
     slug: String @key
     name: String @index
@@ -40,10 +46,10 @@ node Person {
     birthday: Date?
     location: String?
     current_role: String?
-    // Desired contact frequency in days. Drives stale-relationship queries.
     cadence_days: I32?
     how_met: String?
     brief: String?
+    tags: [String]?
     createdAt: DateTime
     updatedAt: DateTime
 }
@@ -120,6 +126,7 @@ node Note {
 
 // Task follows GTD. New tasks land in "inbox," then get clarified into a status.
 // direction tracks relationship debts — "i-owe Theo a book recommendation."
+// Who you're waiting on lives on the TaskForPerson edge, not a string property.
 node Task {
     slug: String @key
     name: String @index
@@ -130,7 +137,6 @@ node Task {
     due: DateTime?
     remind_at: DateTime?
     direction: enum(i-owe, they-owe, mutual)?
-    waiting_on: String?
     brief: String?
     tags: [String]?
     createdAt: DateTime
@@ -147,6 +153,7 @@ node Project {
     brief: String?
     description: String?
     due: Date?
+    tags: [String]?
     createdAt: DateTime
     updatedAt: DateTime
 }
@@ -171,12 +178,14 @@ node Goal {
     target: String?
     due: Date?
     brief: String?
+    tags: [String]?
     createdAt: DateTime
     updatedAt: DateTime
 }
 
 // Atomic Habits: cue → routine → reward. Completions are a date array; loses per-completion
 // detail but keeps the schema small. Promote to HabitCompletion node only if you need it.
+// `streak_current` / `streak_best` are denormalized from `completions` — keep them in sync.
 node Habit {
     slug: String @key
     name: String @index
@@ -189,6 +198,7 @@ node Habit {
     streak_current: I32?
     streak_best: I32?
     brief: String?
+    tags: [String]?
     createdAt: DateTime
     updatedAt: DateTime
 }
@@ -249,12 +259,18 @@ node Chunk {
 // Edges: Relationships & Roles
 // ──────────────────────────────────────────────
 
+// Knows is stored bidirectionally by convention — if A knows B, you also load
+// B knows A. This is enforced by load discipline, not the schema (Omnigraph
+// `@unique(src, dst)` is two separate per-column constraints, not pair-uniqueness;
+// dedupe before insert).
 edge Knows: Person -> Person {
     context: String?
     since: Date?
 }
 
-// Family/partnership structure. Use edge property `relation` to qualify.
+// Family / partnership structure. Stored bidirectionally with inverted relation
+// (parent ⇄ child, grandparent ⇄ grandchild). Symmetric relations (spouse, sibling,
+// in-law, ex, partner) are also stored in both directions for query symmetry.
 edge RelatedToPerson: Person -> Person {
     relation: enum(spouse, partner, parent, child, sibling, grandparent, grandchild, in-law, ex)
 }
@@ -276,10 +292,12 @@ edge WorksAt: Person -> Organization {
 // Edges: Event Participation
 // ──────────────────────────────────────────────
 
+// AttendedBy = the person was physically present (any role).
+// EventForPerson = the event is *about* them — honoree, subject, milestone.
+// Both can apply (Theo's birthday: AttendedBy={theo,…} + EventForPerson={theo}).
 edge AttendedBy: Event -> Person
-edge HappenedAt: Event -> Place
+edge HappenedAt: Event -> Place @card(0..1)
 edge EventForProject: Event -> Project
-// For milestones affecting someone else without them "attending" (e.g. their wedding from afar).
 edge EventForPerson: Event -> Person
 
 
@@ -293,8 +311,8 @@ edge NoteAboutArea: Note -> Area
 edge NoteAboutPlace: Note -> Place
 edge NoteAboutOrganization: Note -> Organization
 edge NoteAboutMedia: Note -> Media
-edge NoteFromArtifact: Note -> Artifact
-edge NoteFromEvent: Note -> Event
+edge NoteFromArtifact: Note -> Artifact @card(0..1)
+edge NoteFromEvent: Note -> Event @card(0..1)
 edge RelatedNote: Note -> Note
 // A Habit motivated by a principle (Note with kind=principle).
 edge HabitFromPrinciple: Habit -> Note
@@ -308,8 +326,8 @@ edge TaskForPerson: Task -> Person
 edge TaskForProject: Task -> Project
 edge TaskForArea: Task -> Area
 edge TaskForGoal: Task -> Goal
-edge TaskFromArtifact: Task -> Artifact
-edge TaskFromEvent: Task -> Event
+edge TaskFromArtifact: Task -> Artifact @card(0..1)
+edge TaskFromEvent: Task -> Event @card(0..1)
 edge TaskDependsOnTask: Task -> Task {
     kind: enum(blocked-by, prerequisite, sequence, waiting-on)?
     reason: String?
@@ -333,7 +351,7 @@ edge MediaAuthoredBy: Media -> Person
 edge MediaRecommendedBy: Media -> Person
 edge MediaForProject: Media -> Project
 edge MediaForArea: Media -> Area
-edge MediaPartOf: Media -> Media
+edge MediaPartOf: Media -> Media @card(0..1)
 
 
 // ──────────────────────────────────────────────
@@ -341,10 +359,10 @@ edge MediaPartOf: Media -> Media
 // ──────────────────────────────────────────────
 
 edge MentionsPerson: Artifact -> Person
-edge ArtifactFromPerson: Artifact -> Person
+edge ArtifactFromPerson: Artifact -> Person @card(0..1)
 edge ArtifactForProject: Artifact -> Project
-edge RecordOf: Artifact -> Event
-edge InReplyTo: Artifact -> Artifact
+edge RecordOf: Artifact -> Event @card(0..1)
+edge InReplyTo: Artifact -> Artifact @card(0..1)
 edge DerivedFromArtifact: Artifact -> Artifact {
     activity: enum(transcribed, summarized, ocr, imported, clipped, corrected, translated, extracted)
     agent: String?

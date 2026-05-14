@@ -123,7 +123,7 @@ query person_tasks_they_owe($slug: String) {
         $t: Task { direction: "they-owe" }
         $t taskForPerson $p
     }
-    return { $t.slug, $t.name, $t.status, $t.waiting_on, $t.brief }
+    return { $t.slug, $t.name, $t.status, $t.due, $t.brief }
     order { $t.due }
 }
 

@@ -8,7 +8,7 @@ Opinionated, ready-to-run graph cookbooks built on [Omnigraph](https://github.co
 |----------|--------|-------------|
 | [`industry-intel/`](./industry-intel) | ✅ ready | AI/ML industry intelligence graph |
 | [`pharma-intel/`](./pharma-intel) | ✅ ready | Pharma competitive intelligence with external pipeline + SPIKE + internal context (Viking Therapeutics GLP-1 reference seed) |
-| [`second-brain/`](./second-brain) | ✅ ready | Personal life ontology — people, places, notes, tasks, projects, habits, media (13 node types, fictional "Alex Chen" reference seed) |
+| [`second-brain/`](./second-brain) | ✅ ready | Personal life ontology — people, places, notes, tasks, projects, habits, media, with bidirectional `Knows`/`RelatedToPerson` edges and GTD-style `Task.direction` for relationship debts (13 node types, fictional "Alex Chen" reference seed) |
 | `company-context/` | 🚧 planned | Internal decisions, traces, actors, artifacts |
 | `biomed-research/` | 🚧 planned | Biotech & medical research tracking |
 | `competitor-intel/` | 🚧 planned | Competitor launches, pricing, positioning |

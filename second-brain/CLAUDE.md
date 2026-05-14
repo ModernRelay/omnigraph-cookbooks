@@ -45,12 +45,33 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 - **`per-self` is "me"** with `relation = self`. All self-references use this slug.
 - **One `Note` node, not many** — `kind` enum (idea / journal / insight / principle / preference / quote / dream / question / decision / reflection) is what distinguishes them in queries. Don't promote sub-kinds to their own node types.
 - **`Task.direction = i-owe/they-owe/mutual`** is how relationship-debt tracking lives without a separate `Commitment` node.
+- **`Task.waiting_on` is intentionally absent.** "Who I'm waiting on" is expressed by `status=waiting` + `TaskForPerson`. Don't reintroduce a string slug-shaped property.
 - **Habit completions are a `[Date]` array** on the Habit node. No `HabitCompletion` node.
 - **Email and Conversation collapse into `Artifact`** with `thread_id` property and `InReplyTo` edges. No separate types.
-- **`Person.cadence_days`** is a single number — desired contact frequency. Drives "stale close friends." No 3-axis priority schema.
+- **`Person.cadence_days`** is a single number — desired contact frequency *from me to them*. Semantically it belongs on the `Knows` edge, but the query language doesn't expose edge properties to projections; living on `Person` is a single-user pragmatic shortcut. Re-evaluate if the cookbook ever serves more than one user.
 - **Edges follow `VerbTargetType` naming** (`NoteAboutPerson`, `TaskForProject`, `HabitFromPrinciple`).
 - **Embeddings only on `Chunk`**: `Vector(3072) @embed("text")`. `Chunk` is immutable (no `updatedAt`).
 - **Health / finance / hobby tracking lives as `Area` + `Note`** — not new node types. Specialty cookbooks can extend.
+
+## Conventions enforced by load discipline (not the schema)
+
+Omnigraph 0.4.2's `@unique(src, dst)` is parsed as two separate per-column uniqueness
+constraints, not pair-uniqueness — so it can't enforce "one edge between A and B."
+These conventions therefore live in the loader and reviewer, not in `schema.pg`:
+
+- **`Knows` and `RelatedToPerson` are stored bidirectionally.** If `A knows B`, also load `B knows A`. For `RelatedToPerson`, invert the `relation`: `parent ⇄ child`, `grandparent ⇄ grandchild`. Symmetric relations (`spouse`, `sibling`, `in-law`, `ex`, `partner`) get the same enum on both sides. Single-direction storage made stale-friend / family-tree queries quietly wrong.
+- **No duplicate `(src, dst)` pairs per edge type.** Dedupe before insert; the schema won't catch it.
+- **`AttendedBy` vs. `EventForPerson` are not redundant**:
+  - `AttendedBy` = the person was physically present (any role)
+  - `EventForPerson` = the event is *about* them — honoree, subject, milestone
+  - Both can apply (Theo's birthday: `AttendedBy={theo, …}` + `EventForPerson={theo}`)
+  - `EventForPerson` without `AttendedBy` is for milestones you track from afar (someone's wedding you couldn't attend)
+
+## Known gaps
+
+- **`Note.kind=decision` is not traceable through edges.** A decision-Note can attach to a project via `NoteAboutProject`, but there's no `DecisionRegardingProject` / `DecisionBasedOnBelief` chain. By design (no SPIKE/strategy layer) — but if you later need decision provenance, add explicit edges rather than relying on `kind`.
+- **`Chunk` is declared but the seed has zero.** Embeddings come from a separate ingest pipeline; the static seed can't generate them. Semantic search is a future capability, not a demo today.
+- **Edge-property projections aren't supported in queries.** This means `Knows.context` and `RelatedToPerson.relation` are stored but can't be returned in `read` results. Filter against them in the writer; surface them via dedicated read-side helpers if needed.
 
 ## The Demo "Wow" Queries
 
