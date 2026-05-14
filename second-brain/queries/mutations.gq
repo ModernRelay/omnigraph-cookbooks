@@ -59,8 +59,8 @@ query link_knows($from: String, $to: String) {
     insert Knows { from: $from, to: $to }
 }
 
-query link_related($from: String, $to: String) {
-    insert RelatedToPerson { from: $from, to: $to }
+query link_related($from: String, $to: String, $relation: String) {
+    insert RelatedToPerson { from: $from, to: $to, relation: $relation }
 }
 
 query link_lives_in($from: String, $to: String) {

@@ -121,7 +121,7 @@ aliases:
 
   # ── Mutations: edges ──
   link-knows: { command: change, query: mutations.gq, name: link_knows, args: [from, to] }
-  link-related: { command: change, query: mutations.gq, name: link_related, args: [from, to] }
+  link-related: { command: change, query: mutations.gq, name: link_related, args: [from, to, relation] }
   link-lives-in: { command: change, query: mutations.gq, name: link_lives_in, args: [from, to] }
   link-works-at: { command: change, query: mutations.gq, name: link_works_at, args: [from, to] }
   link-attended-by: { command: change, query: mutations.gq, name: link_attended_by, args: [event, person] }
