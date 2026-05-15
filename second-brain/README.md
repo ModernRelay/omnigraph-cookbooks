@@ -2,7 +2,7 @@
 
 A minimal-but-comprehensive Omnigraph cookbook for individuals. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph).
 
-Where `industry-intel/` and `pharma-intel/` use SPIKE for analytical intelligence, `second-brain/` is opinionated for personal life: people, places, projects, notes, tasks, habits, media — plus the provenance layer needed to capture from any channel. **13 node types, 43 edge types**, designed to feel light when you start and scale up gracefully.
+This cookbook is opinionated for personal life: people, places, projects, notes, tasks, habits, media - plus the provenance layer needed to capture from any channel. **13 node types, 43 edge types**, designed to feel light when you start and scale up gracefully.
 
 ## What This Is
 
@@ -197,7 +197,7 @@ See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI 
 This schema is the minimal core. Common extensions:
 
 - **Strategy layer** — add `Belief` / `OpenQuestion` / `Decision` as first-class nodes (as in `pharma-intel/`) with `SupportsBelief` / `ContradictsBelief` / `InformsQuestion` edges from `Note` or `Artifact`. Turns this into a *thinking partner*, not just a data store.
-- **Health cookbook** — a separate cookbook with full FHIR-grade `HealthRecord` / `Measurement` / `Condition` ontology. Don't fold it in here; keep this lean.
+- **Health cookbook** — a separate cookbook with full FHIR-grade `HealthRecord` / `Measurement` / `Condition` ontology. 
 - **Communication style / writing tone** — a `WritingStyle` node per channel/audience for "draft a message in my voice."
 - **Pattern emergence** — add a single `Theme` node + `NoteFormsTheme` edge if you want explicit emergent-theme tracking without going full SPIKE.
 
