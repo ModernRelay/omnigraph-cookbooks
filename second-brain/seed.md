@@ -87,17 +87,18 @@ Emails, WhatsApp messages, meeting notes, a voice memo, a calendar entry, a web 
 | `open-questions` | — | "Should Quiet Coach pivot to B2B?", "Which preschool for Sam?" |
 | `tasks-next` | — | The clarified GTD next-action list |
 | `tasks-i-owe` | — | All open commitments across people |
-| `area-projects` | `area-creativity` | Quiet Coach + Japan trip |
+| `area-projects` | `area-family` | Kitchen renovation, Sam's preschool decision, Japan trip |
+| `area-projects` | `area-creativity` | Quiet Coach (also linked to `area-career`) |
 | `project-tasks` | `proj-quietcoach` | Onboarding flow task + research task |
 | `goal-tasks` | `goal-quietcoach-beta` | Tasks rolling up to the beta launch goal |
 | `habits-active` | — | All 5 active habits with current streaks |
 | `habit-principle` | `hab-morning-pages` | The principle that motivated it |
 | `reading-queue` | — | Books with status=want |
-| `media-recommended-by` | `per-maya` | Documentary Maya recommended |
+| `media-recommended-by` | `med-jiro` | Maya as the recommender (alias takes a media slug, not a person slug) |
 | `person-recommendations` | `per-kenji` | Books Kenji recommended |
 | `events-recent` | — | Time-sorted recent events |
 | `person-life-events` | `per-maya` | Maya's promotion as a life event |
-| `artifact-derived-from` | `art-quietcoach-design-doc-v2` | v1 doc this was derived from |
+| `artifact-derived-from` | `art-qc-design-doc-v2` | v1 doc this was derived from |
 
 ## Identity Convention
 

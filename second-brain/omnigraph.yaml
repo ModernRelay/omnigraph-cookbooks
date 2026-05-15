@@ -39,7 +39,8 @@ aliases:
   person-lives-in: { command: read, query: people.gq, name: person_lives_in, args: [slug] }
   person-works-at: { command: read, query: people.gq, name: person_works_at, args: [slug] }
   person-recent-events: { command: read, query: people.gq, name: person_recent_events, args: [slug] }
-  person-recent-artifacts: { command: read, query: people.gq, name: person_recent_artifacts, args: [slug] }
+  person-artifacts-mentioning: { command: read, query: people.gq, name: person_artifacts_mentioning, args: [slug] }
+  person-artifacts-from: { command: read, query: people.gq, name: person_artifacts_from, args: [slug] }
   person-tasks-i-owe: { command: read, query: people.gq, name: person_tasks_i_owe, args: [slug] }
   person-tasks-they-owe: { command: read, query: people.gq, name: person_tasks_they_owe, args: [slug] }
   person-notes: { command: read, query: people.gq, name: person_notes, args: [slug] }
@@ -52,6 +53,8 @@ aliases:
   events-by-kind: { command: read, query: events.gq, name: events_by_kind, args: [kind] }
   event-attendees: { command: read, query: events.gq, name: event_attendees, args: [slug] }
   event-place: { command: read, query: events.gq, name: event_place, args: [slug] }
+  event-project: { command: read, query: events.gq, name: event_project, args: [slug] }
+  person-life-events: { command: read, query: events.gq, name: person_life_events, args: [slug] }
 
   # ── Notes ──
   note: { command: read, query: notes.gq, name: get_note, args: [slug], format: kv }
@@ -83,6 +86,7 @@ aliases:
   project-notes: { command: read, query: projects.gq, name: project_notes, args: [slug] }
   area: { command: read, query: projects.gq, name: get_area, args: [slug], format: kv }
   areas: { command: read, query: projects.gq, name: areas_all }
+  areas-active: { command: read, query: projects.gq, name: areas_active }
   area-projects: { command: read, query: projects.gq, name: area_projects, args: [slug] }
   area-goals: { command: read, query: projects.gq, name: area_goals, args: [slug] }
   area-habits: { command: read, query: projects.gq, name: area_habits, args: [slug] }

@@ -312,7 +312,6 @@
 {"edge":"TaskForGoal","from":"tk-inbox-coach-tools","to":"goal-quietcoach-beta","data":{}}
 
 {"edge":"TaskFromArtifact","from":"tk-send-theo-book","to":"art-theo-whatsapp-1","data":{}}
-{"edge":"TaskFromArtifact","from":"tk-respond-marco","to":"art-theo-whatsapp-1","data":{}}
 {"edge":"TaskFromEvent","from":"tk-mom-bday-gift","to":"ev-mom-birthday","data":{}}
 
 {"edge":"TaskDependsOnTask","from":"tk-confirm-japan","to":"tk-renew-passport","data":{"kind":"prerequisite","reason":"need passport before booking international flights"}}

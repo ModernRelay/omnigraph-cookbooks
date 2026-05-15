@@ -68,6 +68,14 @@ query get_area($slug: String) {
 
 query areas_all() {
     match {
+        $a: Area
+    }
+    return { $a.slug, $a.name, $a.kind, $a.status, $a.brief }
+    order { $a.name }
+}
+
+query areas_active() {
+    match {
         $a: Area { status: "active" }
     }
     return { $a.slug, $a.name, $a.kind, $a.brief }

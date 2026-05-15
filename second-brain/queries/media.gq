@@ -7,11 +7,13 @@ query get_media($slug: String) {
     return { $m.slug, $m.name, $m.kind, $m.status, $m.rating, $m.url, $m.published_date, $m.brief, $m.tags }
 }
 
+// "Reading queue" specifically — books with status=want.
+// For other "want" media (movies, podcasts), filter notes-by-kind or use media-by-kind.
 query reading_queue() {
     match {
-        $m: Media { status: "want" }
+        $m: Media { kind: "book", status: "want" }
     }
-    return { $m.slug, $m.name, $m.kind, $m.brief, $m.tags }
+    return { $m.slug, $m.name, $m.brief, $m.tags }
     order { $m.name }
 }
 

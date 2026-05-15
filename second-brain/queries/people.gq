@@ -91,9 +91,10 @@ query person_recent_events($slug: String) {
     limit 20
 }
 
-// Person ← Artifact (MentionsPerson or ArtifactFromPerson) — recent communication
+// Person ← Artifact (MentionsPerson) — artifacts that name the person.
+// The query language has no OR-traversal, so "from" is a separate query below.
 
-query person_recent_artifacts($slug: String) {
+query person_artifacts_mentioning($slug: String) {
     match {
         $p: Person { slug: $slug }
         $a mentionsPerson $p
@@ -103,25 +104,41 @@ query person_recent_artifacts($slug: String) {
     limit 20
 }
 
-// Open commitments I owe to a person (Task.direction = i-owe, TaskForPerson)
+// Person ← Artifact (ArtifactFromPerson) — artifacts authored or sent by the person.
+
+query person_artifacts_from($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $a artifactFromPerson $p
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.timestamp }
+    order { $a.timestamp desc }
+    limit 20
+}
+
+// Open commitments I owe to a person (excludes done/cancelled)
 
 query person_tasks_i_owe($slug: String) {
     match {
         $p: Person { slug: $slug }
         $t: Task { direction: "i-owe" }
         $t taskForPerson $p
+        $t.status != "done"
+        $t.status != "cancelled"
     }
     return { $t.slug, $t.name, $t.status, $t.priority, $t.due, $t.brief }
     order { $t.due }
 }
 
-// Things they owe me
+// Open things they owe me (excludes done/cancelled)
 
 query person_tasks_they_owe($slug: String) {
     match {
         $p: Person { slug: $slug }
         $t: Task { direction: "they-owe" }
         $t taskForPerson $p
+        $t.status != "done"
+        $t.status != "cancelled"
     }
     return { $t.slug, $t.name, $t.status, $t.due, $t.brief }
     order { $t.due }

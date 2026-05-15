@@ -2,7 +2,7 @@
 
 A minimal-but-comprehensive Omnigraph cookbook for individuals. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph).
 
-Where `industry-intel/` and `pharma-intel/` use SPIKE for analytical intelligence, `second-brain/` is opinionated for personal life: people, places, projects, notes, tasks, habits, media — plus the provenance layer needed to capture from any channel. **13 node types, ~30 edge types**, designed to feel light when you start and scale up gracefully.
+Where `industry-intel/` and `pharma-intel/` use SPIKE for analytical intelligence, `second-brain/` is opinionated for personal life: people, places, projects, notes, tasks, habits, media — plus the provenance layer needed to capture from any channel. **13 node types, 43 edge types**, designed to feel light when you start and scale up gracefully.
 
 ## What This Is
 

@@ -58,21 +58,25 @@ query tasks_by_context($context: String) {
     order { $t.due }
 }
 
-// All open commitments I owe (across people)
+// All open commitments I owe (excludes done/cancelled)
 
 query tasks_i_owe() {
     match {
         $t: Task { direction: "i-owe" }
+        $t.status != "done"
+        $t.status != "cancelled"
     }
     return { $t.slug, $t.name, $t.status, $t.priority, $t.due, $t.brief }
     order { $t.due }
 }
 
-// All things they owe me
+// All open things they owe me (excludes done/cancelled)
 
 query tasks_they_owe() {
     match {
         $t: Task { direction: "they-owe" }
+        $t.status != "done"
+        $t.status != "cancelled"
     }
     return { $t.slug, $t.name, $t.status, $t.due, $t.brief }
     order { $t.due }
