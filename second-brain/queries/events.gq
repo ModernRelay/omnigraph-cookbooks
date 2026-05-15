@@ -1,0 +1,75 @@
+// Events
+
+query get_event($slug: String) {
+    match {
+        $e: Event { slug: $slug }
+    }
+    return { $e.slug, $e.name, $e.kind, $e.when, $e.end_at, $e.mood, $e.brief, $e.description }
+}
+
+query events_recent() {
+    match {
+        $e: Event
+    }
+    return { $e.slug, $e.name, $e.kind, $e.when, $e.mood, $e.brief }
+    order { $e.when desc }
+    limit 30
+}
+
+// All events ordered chronologically ascending — caller filters to upcoming by date.
+query events_chronological() {
+    match {
+        $e: Event
+    }
+    return { $e.slug, $e.name, $e.kind, $e.when, $e.brief }
+    order { $e.when }
+}
+
+query events_by_kind($kind: String) {
+    match {
+        $e: Event { kind: $kind }
+    }
+    return { $e.slug, $e.name, $e.when, $e.mood, $e.brief }
+    order { $e.when desc }
+}
+
+// Event → Person (AttendedBy)
+
+query event_attendees($slug: String) {
+    match {
+        $e: Event { slug: $slug }
+        $e attendedBy $p
+    }
+    return { $p.slug, $p.name, $p.relation }
+}
+
+// Event → Place (HappenedAt)
+
+query event_place($slug: String) {
+    match {
+        $e: Event { slug: $slug }
+        $e happenedAt $pl
+    }
+    return { $pl.slug, $pl.name, $pl.kind, $pl.address }
+}
+
+// Event → Project
+
+query event_project($slug: String) {
+    match {
+        $e: Event { slug: $slug }
+        $e eventForProject $proj
+    }
+    return { $proj.slug, $proj.name, $proj.kind, $proj.status }
+}
+
+// Life events for a person (EventForPerson)
+
+query person_life_events($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $e eventForPerson $p
+    }
+    return { $e.slug, $e.name, $e.kind, $e.when, $e.brief }
+    order { $e.when desc }
+}

@@ -1,0 +1,153 @@
+project:
+  name: Second Brain — Personal Life Ontology
+
+auth:
+  env_file: ./.env.omni
+
+graphs:
+  local_s3:
+    uri: s3://omnigraph-local/repos/second-brain
+  local_server:
+    uri: http://127.0.0.1:8080
+    bearer_token_env: OMNIGRAPH_BEARER_TOKEN
+
+server:
+  graph: local_s3
+  bind: 127.0.0.1:8080
+
+cli:
+  graph: local_server
+  branch: main
+  output_format: table
+  table_max_column_width: 80
+  table_cell_layout: truncate
+
+query:
+  roots:
+    - queries
+    - .
+
+aliases:
+  # ── People & Relationships ──
+  person: { command: read, query: people.gq, name: get_person, args: [slug], format: kv }
+  people: { command: read, query: people.gq, name: people_all }
+  people-by-relation: { command: read, query: people.gq, name: people_by_relation, args: [relation] }
+  close-friends: { command: read, query: people.gq, name: close_friends }
+  family: { command: read, query: people.gq, name: family_members }
+  person-knows: { command: read, query: people.gq, name: person_knows, args: [slug] }
+  person-family: { command: read, query: people.gq, name: person_family, args: [slug] }
+  person-lives-in: { command: read, query: people.gq, name: person_lives_in, args: [slug] }
+  person-works-at: { command: read, query: people.gq, name: person_works_at, args: [slug] }
+  person-recent-events: { command: read, query: people.gq, name: person_recent_events, args: [slug] }
+  person-artifacts-mentioning: { command: read, query: people.gq, name: person_artifacts_mentioning, args: [slug] }
+  person-artifacts-from: { command: read, query: people.gq, name: person_artifacts_from, args: [slug] }
+  person-tasks-i-owe: { command: read, query: people.gq, name: person_tasks_i_owe, args: [slug] }
+  person-tasks-they-owe: { command: read, query: people.gq, name: person_tasks_they_owe, args: [slug] }
+  person-notes: { command: read, query: people.gq, name: person_notes, args: [slug] }
+  person-recommendations: { command: read, query: people.gq, name: person_recommended_media, args: [slug] }
+
+  # ── Events ──
+  event: { command: read, query: events.gq, name: get_event, args: [slug], format: kv }
+  events-recent: { command: read, query: events.gq, name: events_recent }
+  events-chronological: { command: read, query: events.gq, name: events_chronological }
+  events-by-kind: { command: read, query: events.gq, name: events_by_kind, args: [kind] }
+  event-attendees: { command: read, query: events.gq, name: event_attendees, args: [slug] }
+  event-place: { command: read, query: events.gq, name: event_place, args: [slug] }
+  event-project: { command: read, query: events.gq, name: event_project, args: [slug] }
+  person-life-events: { command: read, query: events.gq, name: person_life_events, args: [slug] }
+
+  # ── Notes ──
+  note: { command: read, query: notes.gq, name: get_note, args: [slug], format: kv }
+  notes-recent: { command: read, query: notes.gq, name: notes_recent }
+  notes-by-kind: { command: read, query: notes.gq, name: notes_by_kind, args: [kind] }
+  note-related: { command: read, query: notes.gq, name: note_related, args: [slug] }
+  preferences-for-person: { command: read, query: notes.gq, name: preferences_for_person, args: [slug] }
+  principles: { command: read, query: notes.gq, name: principles_all }
+  open-questions: { command: read, query: notes.gq, name: open_questions }
+
+  # ── Tasks ──
+  task: { command: read, query: tasks.gq, name: get_task, args: [slug], format: kv }
+  tasks-next: { command: read, query: tasks.gq, name: tasks_next }
+  tasks-inbox: { command: read, query: tasks.gq, name: tasks_inbox }
+  tasks-waiting: { command: read, query: tasks.gq, name: tasks_waiting }
+  tasks-waiting-on-person: { command: read, query: tasks.gq, name: tasks_waiting_on_person, args: [slug] }
+  tasks-someday: { command: read, query: tasks.gq, name: tasks_someday }
+  tasks-by-context: { command: read, query: tasks.gq, name: tasks_by_context, args: [context] }
+  tasks-i-owe: { command: read, query: tasks.gq, name: tasks_i_owe }
+  tasks-they-owe: { command: read, query: tasks.gq, name: tasks_they_owe }
+
+  # ── Projects, Areas, Goals, Habits ──
+  project: { command: read, query: projects.gq, name: get_project, args: [slug], format: kv }
+  projects-active: { command: read, query: projects.gq, name: projects_active }
+  projects-exploring: { command: read, query: projects.gq, name: projects_exploring }
+  project-tasks: { command: read, query: projects.gq, name: project_tasks, args: [slug] }
+  project-events: { command: read, query: projects.gq, name: project_events, args: [slug] }
+  project-people: { command: read, query: projects.gq, name: project_people, args: [slug] }
+  project-notes: { command: read, query: projects.gq, name: project_notes, args: [slug] }
+  area: { command: read, query: projects.gq, name: get_area, args: [slug], format: kv }
+  areas: { command: read, query: projects.gq, name: areas_all }
+  areas-active: { command: read, query: projects.gq, name: areas_active }
+  area-projects: { command: read, query: projects.gq, name: area_projects, args: [slug] }
+  area-goals: { command: read, query: projects.gq, name: area_goals, args: [slug] }
+  area-habits: { command: read, query: projects.gq, name: area_habits, args: [slug] }
+  area-tasks: { command: read, query: projects.gq, name: area_tasks, args: [slug] }
+  goal: { command: read, query: projects.gq, name: get_goal, args: [slug], format: kv }
+  goals-active: { command: read, query: projects.gq, name: goals_active }
+  goal-tasks: { command: read, query: projects.gq, name: goal_tasks, args: [slug] }
+  habits-active: { command: read, query: projects.gq, name: habits_active }
+  habit-principle: { command: read, query: projects.gq, name: habit_principle, args: [slug] }
+
+  # ── Media ──
+  media: { command: read, query: media.gq, name: get_media, args: [slug], format: kv }
+  reading-queue: { command: read, query: media.gq, name: reading_queue }
+  finished-books: { command: read, query: media.gq, name: finished_books }
+  media-recommended-by: { command: read, query: media.gq, name: media_recommended_by, args: [slug] }
+  media-authored-by: { command: read, query: media.gq, name: media_authored_by, args: [slug] }
+
+  # ── Artifacts ──
+  artifact: { command: read, query: artifacts.gq, name: get_artifact, args: [slug], format: kv }
+  artifacts-by-thread: { command: read, query: artifacts.gq, name: artifacts_by_thread, args: [thread_id] }
+  artifact-people: { command: read, query: artifacts.gq, name: artifact_mentions, args: [slug] }
+  artifact-derived-from: { command: read, query: artifacts.gq, name: artifact_derived_from, args: [slug] }
+
+  # ── Mutations: node creation ──
+  add-person: { command: change, query: mutations.gq, name: add_person, args: [slug, name, relation, createdAt, updatedAt] }
+  add-event: { command: change, query: mutations.gq, name: add_event, args: [slug, name, kind, when, createdAt, updatedAt] }
+  add-place: { command: change, query: mutations.gq, name: add_place, args: [slug, name, kind, createdAt, updatedAt] }
+  add-organization: { command: change, query: mutations.gq, name: add_organization, args: [slug, name, kind, createdAt, updatedAt] }
+  add-note: { command: change, query: mutations.gq, name: add_note, args: [slug, name, kind, createdAt, updatedAt] }
+  add-task: { command: change, query: mutations.gq, name: add_task, args: [slug, name, status, createdAt, updatedAt] }
+  add-project: { command: change, query: mutations.gq, name: add_project, args: [slug, name, kind, status, createdAt, updatedAt] }
+  add-area: { command: change, query: mutations.gq, name: add_area, args: [slug, name, kind, status, createdAt, updatedAt] }
+  add-goal: { command: change, query: mutations.gq, name: add_goal, args: [slug, name, status, createdAt, updatedAt] }
+  add-habit: { command: change, query: mutations.gq, name: add_habit, args: [slug, name, status, frequency, createdAt, updatedAt] }
+  add-media: { command: change, query: mutations.gq, name: add_media, args: [slug, name, kind, createdAt, updatedAt] }
+  add-artifact: { command: change, query: mutations.gq, name: add_artifact, args: [slug, name, kind, source, timestamp, createdAt, updatedAt] }
+
+  # ── Mutations: edges ──
+  link-knows: { command: change, query: mutations.gq, name: link_knows, args: [from, to] }
+  link-related: { command: change, query: mutations.gq, name: link_related, args: [from, to, relation] }
+  link-lives-in: { command: change, query: mutations.gq, name: link_lives_in, args: [from, to] }
+  link-works-at: { command: change, query: mutations.gq, name: link_works_at, args: [from, to] }
+  link-attended-by: { command: change, query: mutations.gq, name: link_attended_by, args: [event, person] }
+  link-event-for-person: { command: change, query: mutations.gq, name: link_event_for_person, args: [event, person] }
+  link-event-for-project: { command: change, query: mutations.gq, name: link_event_for_project, args: [event, project] }
+  link-happened-at: { command: change, query: mutations.gq, name: link_happened_at, args: [event, place] }
+  link-note-about-person: { command: change, query: mutations.gq, name: link_note_about_person, args: [note, person] }
+  link-note-about-project: { command: change, query: mutations.gq, name: link_note_about_project, args: [note, project] }
+  link-note-from-artifact: { command: change, query: mutations.gq, name: link_note_from_artifact, args: [note, artifact] }
+  link-related-note: { command: change, query: mutations.gq, name: link_related_note, args: [from, to] }
+  link-task-for-person: { command: change, query: mutations.gq, name: link_task_for_person, args: [task, person] }
+  link-task-for-project: { command: change, query: mutations.gq, name: link_task_for_project, args: [task, project] }
+  link-task-for-area: { command: change, query: mutations.gq, name: link_task_for_area, args: [task, area] }
+  link-task-for-goal: { command: change, query: mutations.gq, name: link_task_for_goal, args: [task, goal] }
+  link-project-in-area: { command: change, query: mutations.gq, name: link_project_in_area, args: [project, area] }
+  link-goal-for-area: { command: change, query: mutations.gq, name: link_goal_for_area, args: [goal, area] }
+  link-habit-for-area: { command: change, query: mutations.gq, name: link_habit_for_area, args: [habit, area] }
+  link-habit-from-principle: { command: change, query: mutations.gq, name: link_habit_from_principle, args: [habit, note] }
+  link-media-authored-by: { command: change, query: mutations.gq, name: link_media_authored_by, args: [media, person] }
+  link-media-recommended-by: { command: change, query: mutations.gq, name: link_media_recommended_by, args: [media, person] }
+  link-mentions-person: { command: change, query: mutations.gq, name: link_mentions_person, args: [artifact, person] }
+  link-artifact-from-person: { command: change, query: mutations.gq, name: link_artifact_from_person, args: [artifact, person] }
+  link-record-of: { command: change, query: mutations.gq, name: link_record_of, args: [artifact, event] }
+  link-derived-from: { command: change, query: mutations.gq, name: link_derived_from, args: [from, to, activity, createdAt] }

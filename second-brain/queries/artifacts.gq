@@ -1,0 +1,53 @@
+// Artifacts — source-of-truth containers
+
+query get_artifact($slug: String) {
+    match {
+        $a: Artifact { slug: $slug }
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.url, $a.thread_id, $a.timestamp }
+}
+
+query artifacts_recent() {
+    match {
+        $a: Artifact
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.timestamp }
+    order { $a.timestamp desc }
+    limit 30
+}
+
+query artifacts_by_source($source: String) {
+    match {
+        $a: Artifact { source: $source }
+    }
+    return { $a.slug, $a.name, $a.kind, $a.timestamp }
+    order { $a.timestamp desc }
+}
+
+query artifacts_by_thread($thread_id: String) {
+    match {
+        $a: Artifact { thread_id: $thread_id }
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.timestamp }
+    order { $a.timestamp }
+}
+
+// Artifact → mentioned People
+
+query artifact_mentions($slug: String) {
+    match {
+        $a: Artifact { slug: $slug }
+        $a mentionsPerson $p
+    }
+    return { $p.slug, $p.name, $p.relation }
+}
+
+// Artifact from which it was derived (provenance chain)
+
+query artifact_derived_from($slug: String) {
+    match {
+        $a: Artifact { slug: $slug }
+        $a derivedFromArtifact $src
+    }
+    return { $src.slug, $src.name, $src.kind, $src.source }
+}

@@ -1,0 +1,103 @@
+// Tasks — GTD
+
+query get_task($slug: String) {
+    match {
+        $t: Task { slug: $slug }
+    }
+    return { $t.slug, $t.name, $t.status, $t.kind, $t.context, $t.priority, $t.due, $t.direction, $t.brief }
+}
+
+query tasks_next() {
+    match {
+        $t: Task { status: "next" }
+    }
+    return { $t.slug, $t.name, $t.context, $t.priority, $t.due, $t.brief }
+    order { $t.due }
+}
+
+query tasks_inbox() {
+    match {
+        $t: Task { status: "inbox" }
+    }
+    return { $t.slug, $t.name, $t.brief, $t.tags, $t.createdAt }
+    order { $t.createdAt desc }
+}
+
+// Tasks blocked on something — combine with task_person for "waiting on whom"
+query tasks_waiting() {
+    match {
+        $t: Task { status: "waiting" }
+    }
+    return { $t.slug, $t.name, $t.due, $t.direction, $t.brief }
+    order { $t.due }
+}
+
+// Tasks waiting on a specific person (status=waiting + TaskForPerson)
+query tasks_waiting_on_person($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $t: Task { status: "waiting" }
+        $t taskForPerson $p
+    }
+    return { $t.slug, $t.name, $t.due, $t.brief }
+    order { $t.due }
+}
+
+query tasks_someday() {
+    match {
+        $t: Task { status: "someday" }
+    }
+    return { $t.slug, $t.name, $t.brief, $t.tags }
+}
+
+query tasks_by_context($context: String) {
+    match {
+        $t: Task { context: $context, status: "next" }
+    }
+    return { $t.slug, $t.name, $t.priority, $t.due, $t.brief }
+    order { $t.due }
+}
+
+// All open commitments I owe (excludes done/cancelled)
+
+query tasks_i_owe() {
+    match {
+        $t: Task { direction: "i-owe" }
+        $t.status != "done"
+        $t.status != "cancelled"
+    }
+    return { $t.slug, $t.name, $t.status, $t.priority, $t.due, $t.brief }
+    order { $t.due }
+}
+
+// All open things they owe me (excludes done/cancelled)
+
+query tasks_they_owe() {
+    match {
+        $t: Task { direction: "they-owe" }
+        $t.status != "done"
+        $t.status != "cancelled"
+    }
+    return { $t.slug, $t.name, $t.status, $t.due, $t.brief }
+    order { $t.due }
+}
+
+// Task → Person
+
+query task_person($slug: String) {
+    match {
+        $t: Task { slug: $slug }
+        $t taskForPerson $p
+    }
+    return { $p.slug, $p.name, $p.relation }
+}
+
+// Task dependencies
+
+query task_dependencies($slug: String) {
+    match {
+        $t: Task { slug: $slug }
+        $t taskDependsOnTask $dep
+    }
+    return { $dep.slug, $dep.name, $dep.status, $dep.brief }
+}

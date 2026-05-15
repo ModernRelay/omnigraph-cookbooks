@@ -1,0 +1,249 @@
+// ──────────────────────────────────────────────
+// Node mutations
+// ──────────────────────────────────────────────
+
+query add_person($slug: String, $name: String, $relation: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Person { slug: $slug, name: $name, relation: $relation, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_event($slug: String, $name: String, $kind: String, $when: DateTime, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Event { slug: $slug, name: $name, kind: $kind, when: $when, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_place($slug: String, $name: String, $kind: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Place { slug: $slug, name: $name, kind: $kind, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_organization($slug: String, $name: String, $kind: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Organization { slug: $slug, name: $name, kind: $kind, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_note($slug: String, $name: String, $kind: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Note { slug: $slug, name: $name, kind: $kind, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_task($slug: String, $name: String, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Task { slug: $slug, name: $name, status: $status, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_project($slug: String, $name: String, $kind: String, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Project { slug: $slug, name: $name, kind: $kind, status: $status, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_area($slug: String, $name: String, $kind: String, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Area { slug: $slug, name: $name, kind: $kind, status: $status, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_goal($slug: String, $name: String, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Goal { slug: $slug, name: $name, status: $status, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_habit($slug: String, $name: String, $status: String, $frequency: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Habit { slug: $slug, name: $name, status: $status, frequency: $frequency, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_media($slug: String, $name: String, $kind: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Media { slug: $slug, name: $name, kind: $kind, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+query add_artifact($slug: String, $name: String, $kind: String, $source: String, $timestamp: DateTime, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Artifact { slug: $slug, name: $name, kind: $kind, source: $source, timestamp: $timestamp, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+
+// ──────────────────────────────────────────────
+// Relationships & Roles
+// ──────────────────────────────────────────────
+
+query link_knows($from: String, $to: String) {
+    insert Knows { from: $from, to: $to }
+}
+
+query link_related($from: String, $to: String, $relation: String) {
+    insert RelatedToPerson { from: $from, to: $to, relation: $relation }
+}
+
+query link_lives_in($from: String, $to: String) {
+    insert LivesIn { from: $from, to: $to }
+}
+
+query link_works_at($from: String, $to: String) {
+    insert WorksAt { from: $from, to: $to }
+}
+
+
+// ──────────────────────────────────────────────
+// Event participation
+// ──────────────────────────────────────────────
+
+query link_attended_by($event: String, $person: String) {
+    insert AttendedBy { from: $event, to: $person }
+}
+
+query link_event_for_person($event: String, $person: String) {
+    insert EventForPerson { from: $event, to: $person }
+}
+
+query link_event_for_project($event: String, $project: String) {
+    insert EventForProject { from: $event, to: $project }
+}
+
+query link_happened_at($event: String, $place: String) {
+    insert HappenedAt { from: $event, to: $place }
+}
+
+
+// ──────────────────────────────────────────────
+// Notes → world
+// ──────────────────────────────────────────────
+
+query link_note_about_person($note: String, $person: String) {
+    insert NoteAboutPerson { from: $note, to: $person }
+}
+
+query link_note_about_project($note: String, $project: String) {
+    insert NoteAboutProject { from: $note, to: $project }
+}
+
+query link_note_about_area($note: String, $area: String) {
+    insert NoteAboutArea { from: $note, to: $area }
+}
+
+query link_note_about_place($note: String, $place: String) {
+    insert NoteAboutPlace { from: $note, to: $place }
+}
+
+query link_note_about_organization($note: String, $org: String) {
+    insert NoteAboutOrganization { from: $note, to: $org }
+}
+
+query link_note_about_media($note: String, $media: String) {
+    insert NoteAboutMedia { from: $note, to: $media }
+}
+
+query link_note_from_artifact($note: String, $artifact: String) {
+    insert NoteFromArtifact { from: $note, to: $artifact }
+}
+
+query link_note_from_event($note: String, $event: String) {
+    insert NoteFromEvent { from: $note, to: $event }
+}
+
+query link_related_note($from: String, $to: String) {
+    insert RelatedNote { from: $from, to: $to }
+}
+
+
+// ──────────────────────────────────────────────
+// Action & structure
+// ──────────────────────────────────────────────
+
+query link_task_for_person($task: String, $person: String) {
+    insert TaskForPerson { from: $task, to: $person }
+}
+
+query link_task_for_project($task: String, $project: String) {
+    insert TaskForProject { from: $task, to: $project }
+}
+
+query link_task_for_area($task: String, $area: String) {
+    insert TaskForArea { from: $task, to: $area }
+}
+
+query link_task_for_goal($task: String, $goal: String) {
+    insert TaskForGoal { from: $task, to: $goal }
+}
+
+query link_task_from_artifact($task: String, $artifact: String) {
+    insert TaskFromArtifact { from: $task, to: $artifact }
+}
+
+query link_task_from_event($task: String, $event: String) {
+    insert TaskFromEvent { from: $task, to: $event }
+}
+
+query link_task_depends_on($from: String, $to: String) {
+    insert TaskDependsOnTask { from: $from, to: $to }
+}
+
+query link_project_in_area($project: String, $area: String) {
+    insert ProjectInArea { from: $project, to: $area }
+}
+
+query link_project_for_organization($project: String, $org: String) {
+    insert ProjectForOrganization { from: $project, to: $org }
+}
+
+query link_goal_for_area($goal: String, $area: String) {
+    insert GoalForArea { from: $goal, to: $area }
+}
+
+query link_habit_for_area($habit: String, $area: String) {
+    insert HabitForArea { from: $habit, to: $area }
+}
+
+query link_habit_for_goal($habit: String, $goal: String) {
+    insert HabitForGoal { from: $habit, to: $goal }
+}
+
+query link_habit_from_principle($habit: String, $note: String) {
+    insert HabitFromPrinciple { from: $habit, to: $note }
+}
+
+query link_person_involved_in($person: String, $project: String) {
+    insert PersonInvolvedInProject { from: $person, to: $project }
+}
+
+
+// ──────────────────────────────────────────────
+// Media
+// ──────────────────────────────────────────────
+
+query link_media_authored_by($media: String, $person: String) {
+    insert MediaAuthoredBy { from: $media, to: $person }
+}
+
+query link_media_recommended_by($media: String, $person: String) {
+    insert MediaRecommendedBy { from: $media, to: $person }
+}
+
+query link_media_for_project($media: String, $project: String) {
+    insert MediaForProject { from: $media, to: $project }
+}
+
+query link_media_for_area($media: String, $area: String) {
+    insert MediaForArea { from: $media, to: $area }
+}
+
+query link_media_part_of($from: String, $to: String) {
+    insert MediaPartOf { from: $from, to: $to }
+}
+
+
+// ──────────────────────────────────────────────
+// Provenance
+// ──────────────────────────────────────────────
+
+query link_mentions_person($artifact: String, $person: String) {
+    insert MentionsPerson { from: $artifact, to: $person }
+}
+
+query link_artifact_from_person($artifact: String, $person: String) {
+    insert ArtifactFromPerson { from: $artifact, to: $person }
+}
+
+query link_artifact_for_project($artifact: String, $project: String) {
+    insert ArtifactForProject { from: $artifact, to: $project }
+}
+
+query link_record_of($artifact: String, $event: String) {
+    insert RecordOf { from: $artifact, to: $event }
+}
+
+query link_in_reply_to($from: String, $to: String) {
+    insert InReplyTo { from: $from, to: $to }
+}
+
+query link_derived_from($from: String, $to: String, $activity: String, $createdAt: DateTime) {
+    insert DerivedFromArtifact { from: $from, to: $to, activity: $activity, createdAt: $createdAt }
+}
