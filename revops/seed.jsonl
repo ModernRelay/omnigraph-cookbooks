@@ -1,0 +1,328 @@
+{"type":"Source","data":{"id":"src-parallel-monitor","slug":"src-parallel-monitor","name":"Parallel Monitor API","kind":"api","url":"https://parallel.ai","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Source","data":{"id":"src-parallel-task","slug":"src-parallel-task","name":"Parallel Task API","kind":"api","url":"https://parallel.ai","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Source","data":{"id":"src-internal-billing","slug":"src-internal-billing","name":"Internal billing pipeline","kind":"telemetry","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Source","data":{"id":"src-linkedin-public","slug":"src-linkedin-public","name":"LinkedIn public profiles","kind":"social","url":"https://linkedin.com","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Source","data":{"id":"src-news-web","slug":"src-news-web","name":"News web scraping","kind":"public_web","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Actor","data":{"id":"act-human-priya","slug":"act-human-priya","name":"Priya Mehta","actorType":"human","defaultChannel":"email","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Actor","data":{"id":"act-human-james","slug":"act-human-james","name":"James Okonkwo","actorType":"human","defaultChannel":"linkedin","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Actor","data":{"id":"act-human-dana","slug":"act-human-dana","name":"Dana Reyes","actorType":"human","defaultChannel":"email","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Actor","data":{"id":"act-agent-classifier","slug":"act-agent-classifier","name":"workload-classifier","actorType":"agent","agentModel":"claude-opus-4-7","agentVersion":"2026.04","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Actor","data":{"id":"act-agent-fit-scorer","slug":"act-agent-fit-scorer","name":"icp-fit-scorer","actorType":"agent","agentModel":"claude-sonnet-4-6","agentVersion":"2026.03","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Policy","data":{"id":"pol-icp-v1","slug":"pol-icp-v1","policyKey":"icp.ai_native_mid_market","name":"ICP — AI-native mid-market v1","description":"AI-native companies, 50–500 employees, post Series A. Workload type one of: training, inference, agentic. Predicted annual spend > $50k.","kind":"icp","effectiveFrom":"2026-01-01T00:00:00Z","effectiveTo":"2026-03-31T23:59:59Z","status":"archived","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-04-01T00:00:00Z"}}
+{"type":"Policy","data":{"id":"pol-icp-v2","slug":"pol-icp-v2","policyKey":"icp.ai_native_mid_market","name":"ICP — AI-native mid-market v2","description":"AI-native companies, 50–500 employees, post Series B. Workload type one of: training, inference, agentic. Predicted annual spend > $100k. Excludes pre-revenue.","kind":"icp","effectiveFrom":"2026-04-01T00:00:00Z","status":"active","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-04-01T00:00:00Z"}}
+{"type":"Policy","data":{"id":"pol-prompt-classifier-v1","slug":"pol-prompt-classifier-v1","policyKey":"prompt.workload_classifier","name":"Workload classifier prompt v1","description":"Initial workload classification prompt. Output: {workload: training|inference|agentic, confidence: 0..1, rationale}.","kind":"prompt_version","effectiveFrom":"2026-01-01T00:00:00Z","effectiveTo":"2026-03-15T00:00:00Z","status":"archived","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-03-15T00:00:00Z"}}
+{"type":"Policy","data":{"id":"pol-prompt-classifier-v2","slug":"pol-prompt-classifier-v2","policyKey":"prompt.workload_classifier","name":"Workload classifier prompt v2","description":"Adds explicit bottoms-up spend estimation step. Output: {workload, predicted_annual_spend_usd, confidence, rationale, basis_urls}.","kind":"prompt_version","effectiveFrom":"2026-03-15T00:00:00Z","status":"active","createdAt":"2026-03-15T00:00:00Z","updatedAt":"2026-03-15T00:00:00Z"}}
+{"type":"Policy","data":{"id":"pol-screen-do-not-sell","slug":"pol-screen-do-not-sell","policyKey":"screen.do_not_sell","name":"Screening — Do Not Sell list","description":"Excludes sanctioned entities, direct competitors, and accounts on the customer's stated do-not-sell list.","kind":"do_not_sell","effectiveFrom":"2026-01-01T00:00:00Z","status":"active","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Technology","data":{"id":"tech-salesforce","slug":"tech-salesforce","name":"Salesforce","vendor":"Salesforce","category":"crm","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Technology","data":{"id":"tech-snowflake","slug":"tech-snowflake","name":"Snowflake","vendor":"Snowflake","category":"data_warehouse","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Technology","data":{"id":"tech-segment","slug":"tech-segment","name":"Segment","vendor":"Twilio","category":"cdp","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Technology","data":{"id":"tech-hubspot","slug":"tech-hubspot","name":"HubSpot","vendor":"HubSpot","category":"crm","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Technology","data":{"id":"tech-modal","slug":"tech-modal","name":"Modal","vendor":"Modal Labs","category":"infrastructure","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Technology","data":{"id":"tech-together","slug":"tech-together","name":"Together AI Cloud","vendor":"Together AI","category":"infrastructure","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Technology","data":{"id":"tech-aws-bedrock","slug":"tech-aws-bedrock","name":"AWS Bedrock","vendor":"AWS","category":"ai_platform","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-01T00:00:00Z"}}
+{"type":"Account","data":{"id":"acc-anthropic","slug":"acc-anthropic","legalName":"Anthropic","domain":"anthropic.com","hqLocation":"San Francisco","foundedYear":2021,"kind":"customer","segment":"enterprise","industry":"ai_infra","tier":"tier_1","employeeCount":1500,"description":"Foundation model lab. Claude family of models. Major training and inference workloads.","createdAt":"2026-01-15T00:00:00Z","updatedAt":"2026-04-25T00:00:00Z"}}
+{"type":"Account","data":{"id":"acc-harvey","slug":"acc-harvey","legalName":"Harvey","domain":"harvey.ai","hqLocation":"San Francisco","foundedYear":2022,"kind":"customer","segment":"mid_market","industry":"vertical_saas","tier":"tier_1","employeeCount":400,"description":"Legal AI platform. Used by AmLaw 100 firms. Outcome-priced engagements.","createdAt":"2026-01-15T00:00:00Z","updatedAt":"2026-04-22T00:00:00Z"}}
+{"type":"Account","data":{"id":"acc-perplexity","slug":"acc-perplexity","legalName":"Perplexity","domain":"perplexity.ai","hqLocation":"San Francisco","foundedYear":2022,"kind":"customer","segment":"mid_market","industry":"ai_infra","tier":"tier_1","employeeCount":200,"description":"AI-native answer engine. Enterprise tier launching 2026. Major inference workloads.","createdAt":"2026-01-20T00:00:00Z","updatedAt":"2026-04-18T00:00:00Z"}}
+{"type":"Account","data":{"id":"acc-cognition","slug":"acc-cognition","legalName":"Cognition Labs","domain":"cognition.ai","hqLocation":"San Francisco","foundedYear":2023,"kind":"prospect","segment":"startup","industry":"devtools","tier":"tier_1","employeeCount":80,"description":"Devin — autonomous AI software engineer. Series D announced 2026-03.","createdAt":"2026-03-01T00:00:00Z","updatedAt":"2026-04-30T00:00:00Z"}}
+{"type":"Account","data":{"id":"acc-cursor","slug":"acc-cursor","legalName":"Anysphere","domain":"cursor.com","hqLocation":"San Francisco","foundedYear":2022,"kind":"prospect","segment":"startup","industry":"devtools","tier":"tier_1","employeeCount":60,"description":"Cursor IDE — AI-native code editor. $100M+ ARR.","createdAt":"2026-02-10T00:00:00Z","updatedAt":"2026-04-22T00:00:00Z"}}
+{"type":"Account","data":{"id":"acc-decagon","slug":"acc-decagon","legalName":"Decagon","domain":"decagon.ai","hqLocation":"San Francisco","foundedYear":2023,"kind":"prospect","segment":"startup","industry":"saas","tier":"tier_2","employeeCount":50,"description":"AI-native customer support. Series A 2024, growing fast but pre-Series B.","createdAt":"2026-03-19T00:00:00Z","updatedAt":"2026-04-22T00:00:00Z"}}
+{"type":"Account","data":{"id":"acc-sierra","slug":"acc-sierra","legalName":"Sierra","domain":"sierra.ai","hqLocation":"San Francisco","foundedYear":2023,"kind":"prospect","segment":"mid_market","industry":"saas","tier":"tier_1","employeeCount":120,"description":"AI agents for customer experience. Outcome-based pricing. Bret Taylor + Clay Bavor.","createdAt":"2026-03-05T00:00:00Z","updatedAt":"2026-04-20T00:00:00Z"}}
+{"type":"Account","data":{"id":"acc-hippocratic","slug":"acc-hippocratic","legalName":"Hippocratic AI","domain":"hippocraticai.com","hqLocation":"Palo Alto","foundedYear":2023,"kind":"prospect","segment":"mid_market","industry":"healthcare","tier":"tier_2","employeeCount":100,"description":"Healthcare-focused safety-tuned LLMs for clinical staffing.","createdAt":"2026-03-12T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Account","data":{"id":"acc-suno","slug":"acc-suno","legalName":"Suno","domain":"suno.com","hqLocation":"Cambridge MA","foundedYear":2022,"kind":"prospect","segment":"startup","industry":"media","tier":"tier_2","employeeCount":40,"description":"Generative music AI. Massive consumer scale, growing enterprise interest.","createdAt":"2026-03-01T00:00:00Z","updatedAt":"2026-04-10T00:00:00Z"}}
+{"type":"Account","data":{"id":"acc-inflection-old","slug":"acc-inflection-old","legalName":"Inflection AI (legacy)","domain":"inflection.ai","hqLocation":"Palo Alto","foundedYear":2022,"kind":"churned","segment":"mid_market","industry":"ai_infra","tier":"tier_3","employeeCount":35,"description":"Consumer team and most leadership absorbed by Microsoft 2024. Remaining commercial entity wound down.","createdAt":"2025-09-01T00:00:00Z","updatedAt":"2026-02-28T00:00:00Z"}}
+{"type":"Account","data":{"id":"acc-microsoft","slug":"acc-microsoft","legalName":"Microsoft","domain":"microsoft.com","hqLocation":"Redmond","foundedYear":1975,"kind":"prospect","segment":"enterprise","industry":"vertical_saas","tier":"tier_1","employeeCount":228000,"description":"Enterprise AI buyer at scale. AI Everywhere mandate from CEO. Parent of GitHub, OpenAI partner.","createdAt":"2026-02-15T00:00:00Z","updatedAt":"2026-04-10T00:00:00Z"}}
+{"type":"Account","data":{"id":"acc-github","slug":"acc-github","legalName":"GitHub","domain":"github.com","hqLocation":"San Francisco","foundedYear":2008,"kind":"prospect","segment":"enterprise","industry":"devtools","tier":"tier_1","employeeCount":4500,"description":"Microsoft subsidiary. Copilot + enterprise dev platform. Active CDP evaluation for developer growth.","createdAt":"2026-02-15T00:00:00Z","updatedAt":"2026-04-12T00:00:00Z"}}
+{"type":"Account","data":{"id":"acc-together","slug":"acc-together","legalName":"Together AI","domain":"together.ai","hqLocation":"San Francisco","foundedYear":2022,"kind":"partner","segment":"mid_market","industry":"ai_infra","tier":"tier_1","employeeCount":150,"description":"GPU cloud + open-model hosting. Co-sell partner for AI-native customers.","createdAt":"2026-01-10T00:00:00Z","updatedAt":"2026-04-30T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-dario-amodei","slug":"per-dario-amodei","fullName":"Dario Amodei","linkedinUrl":"https://linkedin.com/in/dario-amodei","location":"San Francisco","seniority":"c_level","function":"ceo_office","createdAt":"2026-01-15T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-daniela-amodei","slug":"per-daniela-amodei","fullName":"Daniela Amodei","linkedinUrl":"https://linkedin.com/in/daniela-amodei","location":"San Francisco","seniority":"c_level","function":"ceo_office","createdAt":"2026-01-15T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-winston-weinberg","slug":"per-winston-weinberg","fullName":"Winston Weinberg","linkedinUrl":"https://linkedin.com/in/winston-weinberg","location":"San Francisco","seniority":"c_level","function":"ceo_office","createdAt":"2026-01-15T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-gabe-pereyra","slug":"per-gabe-pereyra","fullName":"Gabe Pereyra","linkedinUrl":"https://linkedin.com/in/gabriel-pereyra","location":"San Francisco","seniority":"c_level","function":"ceo_office","createdAt":"2026-01-15T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-aravind-srinivas","slug":"per-aravind-srinivas","fullName":"Aravind Srinivas","linkedinUrl":"https://linkedin.com/in/aravind-srinivas","location":"San Francisco","seniority":"c_level","function":"ceo_office","createdAt":"2026-01-20T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-scott-wu","slug":"per-scott-wu","fullName":"Scott Wu","linkedinUrl":"https://linkedin.com/in/scott-wu","location":"San Francisco","seniority":"c_level","function":"ceo_office","createdAt":"2026-03-01T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-michael-truell","slug":"per-michael-truell","fullName":"Michael Truell","linkedinUrl":"https://linkedin.com/in/michael-truell","location":"San Francisco","seniority":"c_level","function":"ceo_office","createdAt":"2026-02-10T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-aman-sanger","slug":"per-aman-sanger","fullName":"Aman Sanger","linkedinUrl":"https://linkedin.com/in/aman-sanger","location":"San Francisco","seniority":"c_level","function":"engineering","createdAt":"2026-02-10T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-jesse-zhang","slug":"per-jesse-zhang","fullName":"Jesse Zhang","linkedinUrl":"https://linkedin.com/in/jesse-zhang","location":"San Francisco","seniority":"c_level","function":"ceo_office","createdAt":"2026-03-19T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-bret-taylor","slug":"per-bret-taylor","fullName":"Bret Taylor","linkedinUrl":"https://linkedin.com/in/btaylor","location":"San Francisco","seniority":"c_level","function":"ceo_office","createdAt":"2026-03-05T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-munjal-shah","slug":"per-munjal-shah","fullName":"Munjal Shah","linkedinUrl":"https://linkedin.com/in/munjal","location":"Palo Alto","seniority":"c_level","function":"ceo_office","createdAt":"2026-03-12T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-mikey-shulman","slug":"per-mikey-shulman","fullName":"Mikey Shulman","linkedinUrl":"https://linkedin.com/in/mikey-shulman","location":"Cambridge MA","seniority":"c_level","function":"ceo_office","createdAt":"2026-03-01T00:00:00Z","updatedAt":"2026-04-15T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-satya-nadella","slug":"per-satya-nadella","fullName":"Satya Nadella","linkedinUrl":"https://linkedin.com/in/satyanadella","location":"Redmond","seniority":"c_level","function":"ceo_office","createdAt":"2026-02-15T00:00:00Z","updatedAt":"2026-04-10T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-amy-hood","slug":"per-amy-hood","fullName":"Amy Hood","linkedinUrl":"https://linkedin.com/in/amy-hood","location":"Redmond","seniority":"c_level","function":"finance","createdAt":"2026-02-15T00:00:00Z","updatedAt":"2026-04-10T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-thomas-dohmke","slug":"per-thomas-dohmke","fullName":"Thomas Dohmke","linkedinUrl":"https://linkedin.com/in/ashtom","location":"San Francisco","seniority":"c_level","function":"ceo_office","createdAt":"2026-02-15T00:00:00Z","updatedAt":"2026-04-12T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-vipul-prakash","slug":"per-vipul-prakash","fullName":"Vipul Ved Prakash","linkedinUrl":"https://linkedin.com/in/vipul-ved-prakash","location":"San Francisco","seniority":"c_level","function":"ceo_office","createdAt":"2026-01-10T00:00:00Z","updatedAt":"2026-04-30T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-maya-chen","slug":"per-maya-chen","fullName":"Maya Chen","primaryEmail":"maya@cognition.ai","linkedinUrl":"https://linkedin.com/in/mayachen","location":"San Francisco","seniority":"vp","function":"engineering","createdAt":"2026-01-15T00:00:00Z","updatedAt":"2026-04-25T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-priya-iyer","slug":"per-priya-iyer","fullName":"Priya Iyer","primaryEmail":"priya.iyer@github.com","linkedinUrl":"https://linkedin.com/in/priyaiyer","location":"San Francisco","seniority":"vp","function":"engineering","createdAt":"2026-02-15T00:00:00Z","updatedAt":"2026-04-12T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-david-park","slug":"per-david-park","fullName":"David Park","primaryEmail":"david.park@github.com","linkedinUrl":"https://linkedin.com/in/davidpark","location":"San Francisco","seniority":"director","function":"product","createdAt":"2026-02-15T00:00:00Z","updatedAt":"2026-04-12T00:00:00Z"}}
+{"type":"Person","data":{"id":"per-tomas-vidal","slug":"per-tomas-vidal","fullName":"Tomás Vidal","primaryEmail":"tomas@inflection.ai","location":"Palo Alto","seniority":"director","function":"engineering","createdAt":"2025-09-01T00:00:00Z","updatedAt":"2026-02-28T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-maya-anthropic","slug":"role-maya-anthropic","title":"Director of Platform Engineering","startDate":"2023-04-01","endDate":"2026-03-31","current":false,"level":"director","department":"engineering","createdAt":"2023-04-01T00:00:00Z","updatedAt":"2026-04-01T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-maya-cognition","slug":"role-maya-cognition","title":"VP Engineering","startDate":"2026-04-01","current":true,"level":"vp","department":"engineering","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-04-01T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-dario-anthropic","slug":"role-dario-anthropic","title":"CEO","startDate":"2021-02-01","current":true,"level":"c_level","department":"ceo_office","createdAt":"2021-02-01T00:00:00Z","updatedAt":"2026-01-15T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-daniela-anthropic","slug":"role-daniela-anthropic","title":"President","startDate":"2021-02-01","current":true,"level":"c_level","department":"ceo_office","createdAt":"2021-02-01T00:00:00Z","updatedAt":"2026-01-15T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-winston-harvey","slug":"role-winston-harvey","title":"CEO & Co-founder","startDate":"2022-08-01","current":true,"level":"c_level","department":"ceo_office","createdAt":"2022-08-01T00:00:00Z","updatedAt":"2026-01-15T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-gabe-harvey","slug":"role-gabe-harvey","title":"President & Co-founder","startDate":"2022-08-01","current":true,"level":"c_level","department":"ceo_office","createdAt":"2022-08-01T00:00:00Z","updatedAt":"2026-01-15T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-aravind-perplexity","slug":"role-aravind-perplexity","title":"CEO & Co-founder","startDate":"2022-08-01","current":true,"level":"c_level","department":"ceo_office","createdAt":"2022-08-01T00:00:00Z","updatedAt":"2026-01-20T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-scott-cognition","slug":"role-scott-cognition","title":"CEO & Co-founder","startDate":"2023-11-01","current":true,"level":"c_level","department":"ceo_office","createdAt":"2023-11-01T00:00:00Z","updatedAt":"2026-03-01T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-michael-cursor","slug":"role-michael-cursor","title":"CEO & Co-founder","startDate":"2022-06-01","current":true,"level":"c_level","department":"ceo_office","createdAt":"2022-06-01T00:00:00Z","updatedAt":"2026-02-10T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-aman-cursor","slug":"role-aman-cursor","title":"Co-founder & Chief Architect","startDate":"2022-06-01","current":true,"level":"c_level","department":"engineering","createdAt":"2022-06-01T00:00:00Z","updatedAt":"2026-02-10T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-jesse-decagon","slug":"role-jesse-decagon","title":"CEO & Co-founder","startDate":"2023-06-01","current":true,"level":"c_level","department":"ceo_office","createdAt":"2023-06-01T00:00:00Z","updatedAt":"2026-03-19T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-bret-sierra","slug":"role-bret-sierra","title":"CEO & Co-founder","startDate":"2023-09-01","current":true,"level":"c_level","department":"ceo_office","createdAt":"2023-09-01T00:00:00Z","updatedAt":"2026-03-05T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-munjal-hippocratic","slug":"role-munjal-hippocratic","title":"CEO & Co-founder","startDate":"2023-05-01","current":true,"level":"c_level","department":"ceo_office","createdAt":"2023-05-01T00:00:00Z","updatedAt":"2026-03-12T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-mikey-suno","slug":"role-mikey-suno","title":"CEO & Co-founder","startDate":"2022-01-01","current":true,"level":"c_level","department":"ceo_office","createdAt":"2022-01-01T00:00:00Z","updatedAt":"2026-03-01T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-satya-microsoft","slug":"role-satya-microsoft","title":"CEO","startDate":"2014-02-04","current":true,"level":"c_level","department":"ceo_office","createdAt":"2014-02-04T00:00:00Z","updatedAt":"2026-02-15T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-amy-microsoft","slug":"role-amy-microsoft","title":"CFO","startDate":"2013-07-08","current":true,"level":"c_level","department":"finance","createdAt":"2013-07-08T00:00:00Z","updatedAt":"2026-02-15T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-thomas-github","slug":"role-thomas-github","title":"CEO","startDate":"2021-11-15","current":true,"level":"c_level","department":"ceo_office","createdAt":"2021-11-15T00:00:00Z","updatedAt":"2026-02-15T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-vipul-together","slug":"role-vipul-together","title":"CEO & Co-founder","startDate":"2022-06-01","current":true,"level":"c_level","department":"ceo_office","createdAt":"2022-06-01T00:00:00Z","updatedAt":"2026-01-10T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-priya-github","slug":"role-priya-github","title":"VP Engineering","startDate":"2024-09-01","current":true,"level":"vp","department":"engineering","createdAt":"2024-09-01T00:00:00Z","updatedAt":"2026-02-15T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-david-github","slug":"role-david-github","title":"Director of Product","startDate":"2024-05-01","current":true,"level":"director","department":"product","createdAt":"2024-05-01T00:00:00Z","updatedAt":"2026-02-15T00:00:00Z"}}
+{"type":"Role","data":{"id":"role-tomas-inflection","slug":"role-tomas-inflection","title":"Engineering Director","startDate":"2024-02-01","endDate":"2026-02-28","current":false,"level":"director","department":"engineering","createdAt":"2024-02-01T00:00:00Z","updatedAt":"2026-02-28T00:00:00Z"}}
+{"type":"Lead","data":{"id":"lead-cognition-form","slug":"lead-cognition-form","capturedAt":"2026-04-20T14:23:00Z","rawEmail":"maya@cognition.ai","rawFullName":"Maya Chen","rawCompany":"Cognition","leadSource":"inbound_form","status":"resolved","createdAt":"2026-04-20T14:23:00Z","updatedAt":"2026-04-21T09:00:00Z"}}
+{"type":"Lead","data":{"id":"lead-decagon-conf","slug":"lead-decagon-conf","capturedAt":"2026-03-20T16:00:00Z","rawEmail":"jesse@decagon.ai","rawFullName":"Jesse Zhang","rawCompany":"Decagon","leadSource":"conference","status":"resolved","createdAt":"2026-03-20T16:00:00Z","updatedAt":"2026-03-21T09:00:00Z"}}
+{"type":"Lead","data":{"id":"lead-cursor-referral","slug":"lead-cursor-referral","capturedAt":"2026-04-01T11:00:00Z","rawEmail":"aman@cursor.com","rawFullName":"Aman Sanger","rawCompany":"Cursor","leadSource":"referral","status":"resolved","createdAt":"2026-04-01T11:00:00Z","updatedAt":"2026-04-01T12:00:00Z"}}
+{"type":"Lead","data":{"id":"lead-junk-2026-04","slug":"lead-junk-2026-04","capturedAt":"2026-04-15T08:00:00Z","rawEmail":"test@example.com","rawCompany":"Acme Test","leadSource":"inbound_form","status":"rejected","createdAt":"2026-04-15T08:00:00Z","updatedAt":"2026-04-15T08:30:00Z"}}
+{"type":"Cohort","data":{"id":"coh-q2-targets","slug":"coh-q2-targets","name":"Q2 2026 Target Accounts","definition":"Tier 1 or Tier 2 prospects matching ICP v2, with strong signals in last 60 days.","kind":"target","createdAt":"2026-04-01T00:00:00Z","updatedAt":"2026-04-25T00:00:00Z"}}
+{"type":"Cohort","data":{"id":"coh-ai-native-watch","slug":"coh-ai-native-watch","name":"AI-native mid-market watchlist","definition":"All AI-native companies in segment=mid_market or startup, regardless of stage.","kind":"watchlist","createdAt":"2026-02-01T00:00:00Z","updatedAt":"2026-04-22T00:00:00Z"}}
+{"type":"Cohort","data":{"id":"coh-expansion","slug":"coh-expansion","name":"Expansion candidates","definition":"Customers with ARR growth >20% YoY and engagement_score > 0.6.","kind":"customer_segment","createdAt":"2026-01-15T00:00:00Z","updatedAt":"2026-04-18T00:00:00Z"}}
+{"type":"Opportunity","data":{"id":"opp-anthropic-2026","slug":"opp-anthropic-2026","name":"Anthropic — platform expansion 2026","description":"Renewal + expansion across new training and inference pipelines.","stage":"closed_won","dealType":"expansion","priority":"high","arrUsd":480000.0,"expectedClose":"2026-03-31","closedAt":"2026-03-28","createdAt":"2026-01-20T00:00:00Z","updatedAt":"2026-03-28T00:00:00Z"}}
+{"type":"Opportunity","data":{"id":"opp-cognition-2026","slug":"opp-cognition-2026","name":"Cognition — initial platform for Devin scaling","description":"Net new. Devin scaling infrastructure as Series D-funded growth accelerates.","stage":"qualified","dealType":"net_new","priority":"critical","arrUsd":320000.0,"expectedClose":"2026-06-30","createdAt":"2026-04-21T00:00:00Z","updatedAt":"2026-04-30T00:00:00Z"}}
+{"type":"Opportunity","data":{"id":"opp-cursor-2026","slug":"opp-cursor-2026","name":"Cursor — developer growth analytics","description":"Net new. Cursor wants CDP-style customer data infra for $100M+ ARR scale.","stage":"discovery","dealType":"net_new","priority":"high","arrUsd":180000.0,"expectedClose":"2026-09-30","createdAt":"2026-04-02T00:00:00Z","updatedAt":"2026-04-22T00:00:00Z"}}
+{"type":"Opportunity","data":{"id":"opp-decagon-2026","slug":"opp-decagon-2026","name":"Decagon — pre-revenue evaluation","description":"Net new. Series A but pre-revenue — proceed cautiously.","stage":"discovery","dealType":"net_new","priority":"low","arrUsd":85000.0,"expectedClose":"2026-09-30","createdAt":"2026-03-25T00:00:00Z","updatedAt":"2026-04-22T00:00:00Z"}}
+{"type":"Opportunity","data":{"id":"opp-github-2026","slug":"opp-github-2026","name":"GitHub — enterprise developer analytics","description":"Enterprise pilot for GitHub developer growth. Parent-level (Microsoft) approval required.","stage":"technical_eval","dealType":"net_new","priority":"critical","arrUsd":850000.0,"expectedClose":"2026-08-31","createdAt":"2026-03-01T00:00:00Z","updatedAt":"2026-04-20T00:00:00Z"}}
+{"type":"Opportunity","data":{"id":"opp-inflection-lost","slug":"opp-inflection-lost","name":"Inflection AI — renewal","description":"Lost renewal. Most team absorbed by Microsoft, contract wound down.","stage":"closed_lost","dealType":"renewal","priority":"low","arrUsd":48000.0,"closedAt":"2026-02-28","lossReason":"no_budget","createdAt":"2026-01-15T00:00:00Z","updatedAt":"2026-02-28T00:00:00Z"}}
+{"type":"Signal","data":{"id":"sig-anthropic-claude-mythos","slug":"sig-anthropic-claude-mythos","name":"Anthropic launches Claude Mythos Preview","brief":"Major model release. Drives inference + safety eval infra investment.","description":"Anthropic published Claude Mythos Preview April 7 2026 with a step-change in autonomous capability. Triggers significant inference scaling at the lab.","capturedAt":"2026-04-07T00:00:00Z","kind":"news","strength":"strong","confidence":0.95,"createdAt":"2026-04-07T00:00:00Z"}}
+{"type":"Signal","data":{"id":"sig-cognition-series-d","slug":"sig-cognition-series-d","name":"Cognition: $300M Series D at $5B valuation","brief":"Devin maker raises Series D. Massive infra scaling implied.","description":"Cognition Labs announced $300M Series D at $5B valuation in March 2026 to scale Devin commercially.","capturedAt":"2026-03-18T00:00:00Z","kind":"funding","strength":"strong","confidence":0.98,"createdAt":"2026-03-18T00:00:00Z"}}
+{"type":"Signal","data":{"id":"sig-maya-job-change","slug":"sig-maya-job-change","name":"Maya Chen joins Cognition as VP Engineering","brief":"Former Anthropic Platform Director. Major hiring + leadership-change signal.","description":"Maya Chen announced her move from Anthropic to Cognition as VP Engineering effective April 1 2026. Job-change signal for Maya, leadership-change signal for Cognition.","capturedAt":"2026-04-01T00:00:00Z","kind":"job_change","strength":"strong","confidence":1.0,"createdAt":"2026-04-01T00:00:00Z"}}
+{"type":"Signal","data":{"id":"sig-cursor-100m-arr","slug":"sig-cursor-100m-arr","name":"Cursor crosses $100M ARR","brief":"AI code editor hits milestone. Drives infra and analytics needs.","description":"Anysphere (Cursor) publicly disclosed crossing $100M ARR in Q1 2026.","capturedAt":"2026-03-22T00:00:00Z","kind":"news","strength":"strong","confidence":0.92,"createdAt":"2026-03-22T00:00:00Z"}}
+{"type":"Signal","data":{"id":"sig-perplexity-enterprise","slug":"sig-perplexity-enterprise","name":"Perplexity Enterprise GA","brief":"Enterprise tier launches with major customer wins.","description":"Perplexity made its Enterprise tier generally available in February 2026.","capturedAt":"2026-02-20T00:00:00Z","kind":"news","strength":"medium","confidence":0.9,"createdAt":"2026-02-20T00:00:00Z"}}
+{"type":"Signal","data":{"id":"sig-microsoft-ai-everywhere","slug":"sig-microsoft-ai-everywhere","name":"Microsoft AI Everywhere mandate","brief":"CEO statement: every product line ships AI features by year-end. Triggers subsidiary-level evaluations.","description":"Satya Nadella publicly committed to AI-in-every-product-line on the Q2 FY26 earnings call.","capturedAt":"2026-02-20T00:00:00Z","kind":"leadership_change","strength":"strong","confidence":0.95,"createdAt":"2026-02-20T00:00:00Z"}}
+{"type":"Signal","data":{"id":"sig-github-ai-hiring","slug":"sig-github-ai-hiring","name":"GitHub opens 8 AI/ML roles","brief":"VP Eng publicly hiring. Public LinkedIn posts.","description":"Eight AI/ML engineer openings posted in March 2026.","capturedAt":"2026-03-10T00:00:00Z","kind":"hiring","strength":"medium","confidence":0.92,"createdAt":"2026-03-10T00:00:00Z"}}
+{"type":"Signal","data":{"id":"sig-inflection-microsoft-acqui","slug":"sig-inflection-microsoft-acqui","name":"Inflection commercial team wound down","brief":"Most leadership absorbed by Microsoft in 2024; commercial entity now winding down.","description":"Inflection AI's remaining commercial business announced wind-down following the broader team transition to Microsoft.","capturedAt":"2026-02-15T00:00:00Z","kind":"churn_risk","strength":"strong","confidence":0.95,"createdAt":"2026-02-15T00:00:00Z"}}
+{"type":"Signal","data":{"id":"sig-together-partnership","slug":"sig-together-partnership","name":"Together AI joins partner network","brief":"Co-sell agreement signed.","description":"Together AI signed a co-sell GTM partnership.","capturedAt":"2026-01-10T00:00:00Z","kind":"news","strength":"medium","confidence":1.0,"createdAt":"2026-01-10T00:00:00Z"}}
+{"type":"Signal","data":{"id":"sig-harvey-allen-overy","slug":"sig-harvey-allen-overy","name":"Harvey expands top-10 law-firm footprint","brief":"Named enterprise law-firm win. Validates legal vertical.","description":"Harvey announced an additional AmLaw 10 firm deployment in March 2026.","capturedAt":"2026-03-15T00:00:00Z","kind":"news","strength":"medium","confidence":0.9,"createdAt":"2026-03-15T00:00:00Z"}}
+{"type":"InformationArtifact","data":{"id":"ia-anthropic-mythos","slug":"ia-anthropic-mythos","title":"Anthropic ships Claude Mythos Preview","url":"https://techcrunch.example.com/anthropic-mythos","artifactType":"news","publishedAt":"2026-04-07T12:00:00Z","retrievedAt":"2026-04-07T15:00:00Z","createdAt":"2026-04-07T15:00:00Z"}}
+{"type":"InformationArtifact","data":{"id":"ia-bloomberg-cognition","slug":"ia-bloomberg-cognition","title":"Cognition raises $300M Series D","url":"https://bloomberg.example.com/cognition-series-d","artifactType":"press_release","publishedAt":"2026-03-18T09:00:00Z","retrievedAt":"2026-03-18T12:00:00Z","createdAt":"2026-03-18T12:00:00Z"}}
+{"type":"InformationArtifact","data":{"id":"ia-linkedin-maya-chen","slug":"ia-linkedin-maya-chen","title":"Maya Chen announces move to Cognition","url":"https://linkedin.example.com/posts/mayachen-cognition","artifactType":"post","publishedAt":"2026-04-01T08:00:00Z","retrievedAt":"2026-04-01T10:00:00Z","createdAt":"2026-04-01T10:00:00Z"}}
+{"type":"InformationArtifact","data":{"id":"ia-microsoft-earnings","slug":"ia-microsoft-earnings","title":"Microsoft Q2 FY26 earnings call transcript","url":"https://microsoft.example.com/q2-fy26","artifactType":"filing","publishedAt":"2026-02-20T14:00:00Z","retrievedAt":"2026-02-21T09:00:00Z","createdAt":"2026-02-21T09:00:00Z"}}
+{"type":"Decision","data":{"id":"dec-classify-cognition-2026-04","slug":"dec-classify-cognition-2026-04","decidedAt":"2026-04-02T10:15:00Z","intent":"classify_workload","domain":"sales","status":"approved","assertion":"assumption","confidence":0.84,"confidenceLabel":"high","rationale":"Series D ($300M) + VP Eng hire from Anthropic + Devin scaling. Workload: agentic inference. Predicted annual spend: $220k.","createdAt":"2026-04-02T10:15:00Z"}}
+{"type":"Decision","data":{"id":"dec-classify-decagon-2026-03","slug":"dec-classify-decagon-2026-03","decidedAt":"2026-03-22T11:00:00Z","intent":"classify_workload","domain":"sales","status":"approved","assertion":"assumption","confidence":0.62,"confidenceLabel":"medium","rationale":"Series A but pre-revenue. AI-native customer support — would benefit from CDP but unclear timeline. Workload: agentic. Predicted spend: $85k.","createdAt":"2026-03-22T11:00:00Z"}}
+{"type":"Decision","data":{"id":"dec-qualify-decagon-2026-04","slug":"dec-qualify-decagon-2026-04","decidedAt":"2026-04-15T15:30:00Z","intent":"qualify_for_icp","domain":"sales","status":"rejected","assertion":"assumption","confidence":0.88,"confidenceLabel":"high","rationale":"ICP v2 requires post Series B. Decagon is Series A. Reroute to nurture cadence; revisit after next round.","createdAt":"2026-04-15T15:30:00Z"}}
+{"type":"Decision","data":{"id":"dec-advance-github-2026-04","slug":"dec-advance-github-2026-04","decidedAt":"2026-04-12T09:00:00Z","intent":"advance_stage","domain":"sales","status":"approved","assertion":"fact","confidence":0.95,"confidenceLabel":"high","rationale":"Technical evaluation kicked off following AI Everywhere mandate from Microsoft parent. Advance to technical_eval.","createdAt":"2026-04-12T09:00:00Z"}}
+{"type":"Decision","data":{"id":"dec-disqualify-inflection-2026","slug":"dec-disqualify-inflection-2026","decidedAt":"2026-02-20T16:00:00Z","intent":"disqualify","domain":"sales","status":"approved","assertion":"fact","confidence":0.93,"confidenceLabel":"high","rationale":"Commercial entity winding down following team absorption by Microsoft. Move to do_not_sell.","createdAt":"2026-02-20T16:00:00Z"}}
+{"type":"Decision","data":{"id":"dec-classify-cognition-2026-02","slug":"dec-classify-cognition-2026-02","decidedAt":"2026-02-10T10:00:00Z","intent":"classify_workload","domain":"sales","status":"superseded","assertion":"assumption","confidence":0.55,"confidenceLabel":"medium","rationale":"Initial classification with prompt v1 (pre-Series D). Insufficient context — superseded by April re-run with prompt v2.","createdAt":"2026-02-10T10:00:00Z"}}
+{"type":"Action","data":{"id":"act-enrich-cognition","slug":"act-enrich-cognition","executedAt":"2026-04-02T10:20:00Z","operation":"enrich","channel":"api","success":true,"resultSummary":"Updated tier=tier_1, added to coh-q2-targets","createdAt":"2026-04-02T10:20:00Z"}}
+{"type":"Action","data":{"id":"act-email-maya","slug":"act-email-maya","executedAt":"2026-04-22T14:00:00Z","operation":"send","channel":"email","success":true,"resultSummary":"Welcome-back email sent (champion now at new account)","createdAt":"2026-04-22T14:00:00Z"}}
+{"type":"Action","data":{"id":"act-disqualify-inflection","slug":"act-disqualify-inflection","executedAt":"2026-02-20T16:05:00Z","operation":"update","channel":"internal","success":true,"resultSummary":"Account.kind set to churned","createdAt":"2026-02-20T16:05:00Z"}}
+{"type":"Measurement","data":{"id":"meas-cognition-pred-spend-2026-04","slug":"meas-cognition-pred-spend-2026-04","observedAt":"2026-04-02T10:18:00Z","metricKey":"estimated_annual_spend_usd","value":220000.0,"unit":"USD","confidence":0.84,"createdAt":"2026-04-02T10:18:00Z"}}
+{"type":"Measurement","data":{"id":"meas-decagon-pred-spend-2026-03","slug":"meas-decagon-pred-spend-2026-03","observedAt":"2026-03-22T11:05:00Z","metricKey":"estimated_annual_spend_usd","value":85000.0,"unit":"USD","confidence":0.62,"createdAt":"2026-03-22T11:05:00Z"}}
+{"type":"Measurement","data":{"id":"meas-github-pred-spend","slug":"meas-github-pred-spend","observedAt":"2026-04-12T09:05:00Z","metricKey":"estimated_annual_spend_usd","value":850000.0,"unit":"USD","confidence":0.81,"createdAt":"2026-04-12T09:05:00Z"}}
+{"type":"Measurement","data":{"id":"meas-anthropic-pred-spend-2026-01","slug":"meas-anthropic-pred-spend-2026-01","observedAt":"2026-01-15T00:00:00Z","metricKey":"estimated_annual_spend_usd","value":440000.0,"unit":"USD","confidence":0.83,"createdAt":"2026-01-15T00:00:00Z"}}
+{"type":"Measurement","data":{"id":"meas-anthropic-arr-q1","slug":"meas-anthropic-arr-q1","observedAt":"2026-03-31T00:00:00Z","metricKey":"arr_usd","value":480000.0,"unit":"USD","createdAt":"2026-04-01T00:00:00Z"}}
+{"type":"Measurement","data":{"id":"meas-anthropic-actual-spend-q1","slug":"meas-anthropic-actual-spend-q1","observedAt":"2026-03-31T00:00:00Z","metricKey":"actual_annual_spend_usd","value":495000.0,"unit":"USD","createdAt":"2026-04-01T00:00:00Z"}}
+{"type":"Measurement","data":{"id":"meas-perplexity-arr-q1","slug":"meas-perplexity-arr-q1","observedAt":"2026-03-31T00:00:00Z","metricKey":"arr_usd","value":210000.0,"unit":"USD","createdAt":"2026-04-01T00:00:00Z"}}
+{"type":"Measurement","data":{"id":"meas-perplexity-headcount","slug":"meas-perplexity-headcount","observedAt":"2026-04-01T00:00:00Z","metricKey":"headcount","value":200.0,"createdAt":"2026-04-01T00:00:00Z"}}
+{"type":"Measurement","data":{"id":"meas-anthropic-funding","slug":"meas-anthropic-funding","observedAt":"2026-01-15T00:00:00Z","metricKey":"funding_raised_usd","value":10000000000.0,"unit":"USD","createdAt":"2026-01-15T00:00:00Z"}}
+{"type":"Measurement","data":{"id":"meas-cognition-funding","slug":"meas-cognition-funding","observedAt":"2026-03-18T00:00:00Z","metricKey":"funding_raised_usd","value":300000000.0,"unit":"USD","createdAt":"2026-03-18T00:00:00Z"}}
+{"type":"Measurement","data":{"id":"meas-microsoft-headcount","slug":"meas-microsoft-headcount","observedAt":"2026-04-01T00:00:00Z","metricKey":"headcount","value":228000.0,"createdAt":"2026-04-01T00:00:00Z"}}
+{"type":"Measurement","data":{"id":"meas-cognition-eng-score","slug":"meas-cognition-eng-score","observedAt":"2026-04-25T00:00:00Z","metricKey":"engagement_score","value":0.78,"createdAt":"2026-04-25T00:00:00Z"}}
+{"type":"Measurement","data":{"id":"meas-cognition-pred-spend-v1-2026-02","slug":"meas-cognition-pred-spend-v1-2026-02","observedAt":"2026-02-10T10:05:00Z","metricKey":"estimated_annual_spend_usd","value":140000.0,"unit":"USD","confidence":0.55,"createdAt":"2026-02-10T10:05:00Z"}}
+{"type":"Engagement","data":{"id":"eng-maya-demo-req","slug":"eng-maya-demo-req","occurredAt":"2026-04-20T14:23:00Z","channel":"web","intent":"requested_demo","sentiment":"positive","createdAt":"2026-04-20T14:23:00Z"}}
+{"type":"Engagement","data":{"id":"eng-aman-content-dl","slug":"eng-aman-content-dl","occurredAt":"2026-04-01T11:00:00Z","channel":"content","intent":"downloaded","sentiment":"positive","createdAt":"2026-04-01T11:00:00Z"}}
+{"type":"Engagement","data":{"id":"eng-david-webinar","slug":"eng-david-webinar","occurredAt":"2026-03-25T15:00:00Z","channel":"webinar","intent":"attended","sentiment":"neutral","createdAt":"2026-03-25T15:00:00Z"}}
+{"edge":"HasRole","from":"acc-anthropic","to":"role-maya-anthropic","data":{}}
+{"edge":"HeldByPerson","from":"role-maya-anthropic","to":"per-maya-chen","data":{}}
+{"edge":"HasRole","from":"acc-cognition","to":"role-maya-cognition","data":{}}
+{"edge":"HeldByPerson","from":"role-maya-cognition","to":"per-maya-chen","data":{}}
+{"edge":"HasRole","from":"acc-anthropic","to":"role-dario-anthropic","data":{}}
+{"edge":"HeldByPerson","from":"role-dario-anthropic","to":"per-dario-amodei","data":{}}
+{"edge":"HasRole","from":"acc-anthropic","to":"role-daniela-anthropic","data":{}}
+{"edge":"HeldByPerson","from":"role-daniela-anthropic","to":"per-daniela-amodei","data":{}}
+{"edge":"HasRole","from":"acc-harvey","to":"role-winston-harvey","data":{}}
+{"edge":"HeldByPerson","from":"role-winston-harvey","to":"per-winston-weinberg","data":{}}
+{"edge":"HasRole","from":"acc-harvey","to":"role-gabe-harvey","data":{}}
+{"edge":"HeldByPerson","from":"role-gabe-harvey","to":"per-gabe-pereyra","data":{}}
+{"edge":"HasRole","from":"acc-perplexity","to":"role-aravind-perplexity","data":{}}
+{"edge":"HeldByPerson","from":"role-aravind-perplexity","to":"per-aravind-srinivas","data":{}}
+{"edge":"HasRole","from":"acc-cognition","to":"role-scott-cognition","data":{}}
+{"edge":"HeldByPerson","from":"role-scott-cognition","to":"per-scott-wu","data":{}}
+{"edge":"HasRole","from":"acc-cursor","to":"role-michael-cursor","data":{}}
+{"edge":"HeldByPerson","from":"role-michael-cursor","to":"per-michael-truell","data":{}}
+{"edge":"HasRole","from":"acc-cursor","to":"role-aman-cursor","data":{}}
+{"edge":"HeldByPerson","from":"role-aman-cursor","to":"per-aman-sanger","data":{}}
+{"edge":"HasRole","from":"acc-decagon","to":"role-jesse-decagon","data":{}}
+{"edge":"HeldByPerson","from":"role-jesse-decagon","to":"per-jesse-zhang","data":{}}
+{"edge":"HasRole","from":"acc-sierra","to":"role-bret-sierra","data":{}}
+{"edge":"HeldByPerson","from":"role-bret-sierra","to":"per-bret-taylor","data":{}}
+{"edge":"HasRole","from":"acc-hippocratic","to":"role-munjal-hippocratic","data":{}}
+{"edge":"HeldByPerson","from":"role-munjal-hippocratic","to":"per-munjal-shah","data":{}}
+{"edge":"HasRole","from":"acc-suno","to":"role-mikey-suno","data":{}}
+{"edge":"HeldByPerson","from":"role-mikey-suno","to":"per-mikey-shulman","data":{}}
+{"edge":"HasRole","from":"acc-microsoft","to":"role-satya-microsoft","data":{}}
+{"edge":"HeldByPerson","from":"role-satya-microsoft","to":"per-satya-nadella","data":{}}
+{"edge":"HasRole","from":"acc-microsoft","to":"role-amy-microsoft","data":{}}
+{"edge":"HeldByPerson","from":"role-amy-microsoft","to":"per-amy-hood","data":{}}
+{"edge":"HasRole","from":"acc-github","to":"role-thomas-github","data":{}}
+{"edge":"HeldByPerson","from":"role-thomas-github","to":"per-thomas-dohmke","data":{}}
+{"edge":"HasRole","from":"acc-github","to":"role-priya-github","data":{}}
+{"edge":"HeldByPerson","from":"role-priya-github","to":"per-priya-iyer","data":{}}
+{"edge":"HasRole","from":"acc-github","to":"role-david-github","data":{}}
+{"edge":"HeldByPerson","from":"role-david-github","to":"per-david-park","data":{}}
+{"edge":"HasRole","from":"acc-together","to":"role-vipul-together","data":{}}
+{"edge":"HeldByPerson","from":"role-vipul-together","to":"per-vipul-prakash","data":{}}
+{"edge":"HasRole","from":"acc-inflection-old","to":"role-tomas-inflection","data":{}}
+{"edge":"HeldByPerson","from":"role-tomas-inflection","to":"per-tomas-vidal","data":{}}
+{"edge":"ParentAccount","from":"acc-github","to":"acc-microsoft","data":{}}
+{"edge":"UsesTechnology","from":"acc-anthropic","to":"tech-snowflake","data":{}}
+{"edge":"UsesTechnology","from":"acc-perplexity","to":"tech-aws-bedrock","data":{}}
+{"edge":"UsesTechnology","from":"acc-cognition","to":"tech-modal","data":{}}
+{"edge":"UsesTechnology","from":"acc-cursor","to":"tech-modal","data":{}}
+{"edge":"UsesTechnology","from":"acc-cursor","to":"tech-segment","data":{}}
+{"edge":"UsesTechnology","from":"acc-decagon","to":"tech-hubspot","data":{}}
+{"edge":"UsesTechnology","from":"acc-sierra","to":"tech-salesforce","data":{}}
+{"edge":"UsesTechnology","from":"acc-github","to":"tech-salesforce","data":{}}
+{"edge":"UsesTechnology","from":"acc-github","to":"tech-segment","data":{}}
+{"edge":"UsesTechnology","from":"acc-microsoft","to":"tech-salesforce","data":{}}
+{"edge":"UsesTechnology","from":"acc-harvey","to":"tech-salesforce","data":{}}
+{"edge":"CompetesWithTechnology","from":"tech-modal","to":"tech-together","data":{}}
+{"edge":"ResolvesToPerson","from":"lead-cognition-form","to":"per-maya-chen","data":{"resolvedAt":"2026-04-21T09:00:00Z","method":"auto"}}
+{"edge":"ResolvesToPerson","from":"lead-decagon-conf","to":"per-jesse-zhang","data":{"resolvedAt":"2026-03-21T09:00:00Z","method":"manual"}}
+{"edge":"ResolvesToPerson","from":"lead-cursor-referral","to":"per-aman-sanger","data":{"resolvedAt":"2026-04-01T12:00:00Z","method":"manual"}}
+{"edge":"LeadAtAccount","from":"lead-cognition-form","to":"acc-cognition","data":{}}
+{"edge":"LeadAtAccount","from":"lead-decagon-conf","to":"acc-decagon","data":{}}
+{"edge":"LeadAtAccount","from":"lead-cursor-referral","to":"acc-cursor","data":{}}
+{"edge":"OnAccount","from":"sig-anthropic-claude-mythos","to":"acc-anthropic","data":{}}
+{"edge":"OnAccount","from":"sig-cognition-series-d","to":"acc-cognition","data":{}}
+{"edge":"OnAccount","from":"sig-maya-job-change","to":"acc-cognition","data":{}}
+{"edge":"OnAccount","from":"sig-cursor-100m-arr","to":"acc-cursor","data":{}}
+{"edge":"OnAccount","from":"sig-perplexity-enterprise","to":"acc-perplexity","data":{}}
+{"edge":"OnAccount","from":"sig-microsoft-ai-everywhere","to":"acc-microsoft","data":{}}
+{"edge":"OnAccount","from":"sig-microsoft-ai-everywhere","to":"acc-github","data":{}}
+{"edge":"OnAccount","from":"sig-github-ai-hiring","to":"acc-github","data":{}}
+{"edge":"OnAccount","from":"sig-inflection-microsoft-acqui","to":"acc-inflection-old","data":{}}
+{"edge":"OnAccount","from":"sig-together-partnership","to":"acc-together","data":{}}
+{"edge":"OnAccount","from":"sig-harvey-allen-overy","to":"acc-harvey","data":{}}
+{"edge":"OnPerson","from":"sig-maya-job-change","to":"per-maya-chen","data":{}}
+{"edge":"EvidencedBy","from":"sig-anthropic-claude-mythos","to":"ia-anthropic-mythos","data":{}}
+{"edge":"EvidencedBy","from":"sig-cognition-series-d","to":"ia-bloomberg-cognition","data":{}}
+{"edge":"EvidencedBy","from":"sig-maya-job-change","to":"ia-linkedin-maya-chen","data":{}}
+{"edge":"EvidencedBy","from":"sig-microsoft-ai-everywhere","to":"ia-microsoft-earnings","data":{}}
+{"edge":"MadeBy","from":"dec-classify-cognition-2026-04","to":"act-agent-classifier","data":{}}
+{"edge":"MadeBy","from":"dec-classify-decagon-2026-03","to":"act-agent-classifier","data":{}}
+{"edge":"MadeBy","from":"dec-qualify-decagon-2026-04","to":"act-agent-fit-scorer","data":{}}
+{"edge":"MadeBy","from":"dec-advance-github-2026-04","to":"act-human-james","data":{}}
+{"edge":"MadeBy","from":"dec-disqualify-inflection-2026","to":"act-human-priya","data":{}}
+{"edge":"MadeBy","from":"dec-classify-cognition-2026-02","to":"act-agent-classifier","data":{}}
+{"edge":"InformedBy","from":"dec-classify-cognition-2026-04","to":"sig-cognition-series-d","data":{"influence":"primary"}}
+{"edge":"InformedBy","from":"dec-classify-cognition-2026-04","to":"sig-maya-job-change","data":{"influence":"supporting"}}
+{"edge":"InformedBy","from":"dec-classify-decagon-2026-03","to":"sig-cognition-series-d","data":{"influence":"minor"}}
+{"edge":"InformedBy","from":"dec-qualify-decagon-2026-04","to":"sig-cognition-series-d","data":{"influence":"supporting"}}
+{"edge":"InformedBy","from":"dec-advance-github-2026-04","to":"sig-microsoft-ai-everywhere","data":{"influence":"primary"}}
+{"edge":"InformedBy","from":"dec-advance-github-2026-04","to":"sig-github-ai-hiring","data":{"influence":"supporting"}}
+{"edge":"InformedBy","from":"dec-disqualify-inflection-2026","to":"sig-inflection-microsoft-acqui","data":{"influence":"primary"}}
+{"edge":"ScreenedBy","from":"dec-classify-cognition-2026-04","to":"pol-prompt-classifier-v2","data":{"outcome":"passed"}}
+{"edge":"ScreenedBy","from":"dec-classify-decagon-2026-03","to":"pol-prompt-classifier-v2","data":{"outcome":"passed"}}
+{"edge":"ScreenedBy","from":"dec-qualify-decagon-2026-04","to":"pol-icp-v2","data":{"outcome":"failed"}}
+{"edge":"ScreenedBy","from":"dec-advance-github-2026-04","to":"pol-icp-v2","data":{"outcome":"passed"}}
+{"edge":"ScreenedBy","from":"dec-disqualify-inflection-2026","to":"pol-screen-do-not-sell","data":{"outcome":"passed"}}
+{"edge":"ScreenedBy","from":"dec-classify-cognition-2026-02","to":"pol-prompt-classifier-v1","data":{"outcome":"passed"}}
+{"edge":"ResultedIn","from":"dec-classify-cognition-2026-04","to":"act-enrich-cognition","data":{}}
+{"edge":"ResultedIn","from":"dec-disqualify-inflection-2026","to":"act-disqualify-inflection","data":{}}
+{"edge":"TargetsAccount","from":"dec-classify-cognition-2026-04","to":"acc-cognition","data":{}}
+{"edge":"TargetsAccount","from":"dec-classify-decagon-2026-03","to":"acc-decagon","data":{}}
+{"edge":"TargetsAccount","from":"dec-qualify-decagon-2026-04","to":"acc-decagon","data":{}}
+{"edge":"TargetsAccount","from":"dec-advance-github-2026-04","to":"acc-github","data":{}}
+{"edge":"TargetsAccount","from":"dec-disqualify-inflection-2026","to":"acc-inflection-old","data":{}}
+{"edge":"TargetsAccount","from":"dec-classify-cognition-2026-02","to":"acc-cognition","data":{}}
+{"edge":"TargetsOpportunity","from":"dec-advance-github-2026-04","to":"opp-github-2026","data":{}}
+{"edge":"BasedOnPrecedent","from":"dec-classify-cognition-2026-04","to":"dec-classify-cognition-2026-02","data":{"similarity":"strong"}}
+{"edge":"Supersedes","from":"pol-icp-v2","to":"pol-icp-v1","data":{"reason":"Tightened to post-Series-B; closed-lost analysis showed pre-revenue startups don't convert."}}
+{"edge":"Supersedes","from":"pol-prompt-classifier-v2","to":"pol-prompt-classifier-v1","data":{"reason":"Added explicit bottoms-up spend estimation step."}}
+{"edge":"MatchesPolicy","from":"acc-anthropic","to":"pol-icp-v2","data":{"score":0.94,"classifiedAt":"2026-04-02T10:00:00Z"}}
+{"edge":"MatchesPolicy","from":"acc-harvey","to":"pol-icp-v2","data":{"score":0.88,"classifiedAt":"2026-04-02T10:00:00Z"}}
+{"edge":"MatchesPolicy","from":"acc-perplexity","to":"pol-icp-v2","data":{"score":0.89,"classifiedAt":"2026-04-02T10:00:00Z"}}
+{"edge":"MatchesPolicy","from":"acc-cognition","to":"pol-icp-v2","data":{"score":0.86,"classifiedAt":"2026-04-02T10:00:00Z"}}
+{"edge":"MatchesPolicy","from":"acc-cursor","to":"pol-icp-v2","data":{"score":0.83,"classifiedAt":"2026-04-02T10:00:00Z"}}
+{"edge":"MatchesPolicy","from":"acc-sierra","to":"pol-icp-v2","data":{"score":0.81,"classifiedAt":"2026-04-02T10:00:00Z"}}
+{"edge":"MatchesPolicy","from":"acc-github","to":"pol-icp-v2","data":{"score":0.79,"classifiedAt":"2026-04-12T09:00:00Z"}}
+{"edge":"MatchesPolicy","from":"acc-decagon","to":"pol-icp-v1","data":{"score":0.71,"classifiedAt":"2026-03-22T11:00:00Z"}}
+{"edge":"AtAccount","from":"opp-anthropic-2026","to":"acc-anthropic","data":{}}
+{"edge":"AtAccount","from":"opp-cognition-2026","to":"acc-cognition","data":{}}
+{"edge":"AtAccount","from":"opp-cursor-2026","to":"acc-cursor","data":{}}
+{"edge":"AtAccount","from":"opp-decagon-2026","to":"acc-decagon","data":{}}
+{"edge":"AtAccount","from":"opp-github-2026","to":"acc-github","data":{}}
+{"edge":"AtAccount","from":"opp-inflection-lost","to":"acc-inflection-old","data":{}}
+{"edge":"ChampionedBy","from":"opp-anthropic-2026","to":"per-maya-chen","data":{}}
+{"edge":"BuyerOnDeal","from":"opp-anthropic-2026","to":"per-daniela-amodei","data":{}}
+{"edge":"InfluencerOnDeal","from":"opp-anthropic-2026","to":"per-dario-amodei","data":{}}
+{"edge":"ChampionedBy","from":"opp-cognition-2026","to":"per-maya-chen","data":{}}
+{"edge":"BuyerOnDeal","from":"opp-cognition-2026","to":"per-scott-wu","data":{}}
+{"edge":"ChampionedBy","from":"opp-cursor-2026","to":"per-aman-sanger","data":{}}
+{"edge":"BuyerOnDeal","from":"opp-cursor-2026","to":"per-michael-truell","data":{}}
+{"edge":"ChampionedBy","from":"opp-decagon-2026","to":"per-jesse-zhang","data":{}}
+{"edge":"BuyerOnDeal","from":"opp-decagon-2026","to":"per-jesse-zhang","data":{}}
+{"edge":"ChampionedBy","from":"opp-github-2026","to":"per-priya-iyer","data":{}}
+{"edge":"BuyerOnDeal","from":"opp-github-2026","to":"per-amy-hood","data":{}}
+{"edge":"InfluencerOnDeal","from":"opp-github-2026","to":"per-thomas-dohmke","data":{}}
+{"edge":"InfluencerOnDeal","from":"opp-github-2026","to":"per-david-park","data":{}}
+{"edge":"ProducedByLead","from":"opp-cognition-2026","to":"lead-cognition-form","data":{}}
+{"edge":"ProducedByLead","from":"opp-decagon-2026","to":"lead-decagon-conf","data":{}}
+{"edge":"ProducedByLead","from":"opp-cursor-2026","to":"lead-cursor-referral","data":{}}
+{"edge":"MeasuresAccount","from":"meas-cognition-pred-spend-2026-04","to":"acc-cognition","data":{}}
+{"edge":"MeasuresAccount","from":"meas-decagon-pred-spend-2026-03","to":"acc-decagon","data":{}}
+{"edge":"MeasuresAccount","from":"meas-github-pred-spend","to":"acc-github","data":{}}
+{"edge":"MeasuresAccount","from":"meas-anthropic-pred-spend-2026-01","to":"acc-anthropic","data":{}}
+{"edge":"MeasuresAccount","from":"meas-anthropic-arr-q1","to":"acc-anthropic","data":{}}
+{"edge":"MeasuresAccount","from":"meas-anthropic-actual-spend-q1","to":"acc-anthropic","data":{}}
+{"edge":"MeasuresAccount","from":"meas-perplexity-arr-q1","to":"acc-perplexity","data":{}}
+{"edge":"MeasuresAccount","from":"meas-perplexity-headcount","to":"acc-perplexity","data":{}}
+{"edge":"MeasuresAccount","from":"meas-anthropic-funding","to":"acc-anthropic","data":{}}
+{"edge":"MeasuresAccount","from":"meas-cognition-funding","to":"acc-cognition","data":{}}
+{"edge":"MeasuresAccount","from":"meas-microsoft-headcount","to":"acc-microsoft","data":{}}
+{"edge":"MeasuresAccount","from":"meas-cognition-eng-score","to":"acc-cognition","data":{}}
+{"edge":"MeasuresAccount","from":"meas-cognition-pred-spend-v1-2026-02","to":"acc-cognition","data":{}}
+{"edge":"ProducedByDecision","from":"meas-cognition-pred-spend-2026-04","to":"dec-classify-cognition-2026-04","data":{}}
+{"edge":"ProducedByDecision","from":"meas-decagon-pred-spend-2026-03","to":"dec-classify-decagon-2026-03","data":{}}
+{"edge":"ProducedByDecision","from":"meas-github-pred-spend","to":"dec-advance-github-2026-04","data":{}}
+{"edge":"ProducedByDecision","from":"meas-cognition-pred-spend-v1-2026-02","to":"dec-classify-cognition-2026-02","data":{}}
+{"edge":"ObservedFromSource","from":"meas-cognition-pred-spend-2026-04","to":"src-parallel-task","data":{}}
+{"edge":"ObservedFromSource","from":"meas-decagon-pred-spend-2026-03","to":"src-parallel-task","data":{}}
+{"edge":"ObservedFromSource","from":"meas-github-pred-spend","to":"src-parallel-task","data":{}}
+{"edge":"ObservedFromSource","from":"meas-anthropic-pred-spend-2026-01","to":"src-parallel-task","data":{}}
+{"edge":"ObservedFromSource","from":"meas-anthropic-actual-spend-q1","to":"src-internal-billing","data":{}}
+{"edge":"ObservedFromSource","from":"meas-anthropic-arr-q1","to":"src-internal-billing","data":{}}
+{"edge":"ObservedFromSource","from":"meas-perplexity-arr-q1","to":"src-internal-billing","data":{}}
+{"edge":"ObservedFromSource","from":"meas-anthropic-funding","to":"src-news-web","data":{}}
+{"edge":"ObservedFromSource","from":"meas-cognition-funding","to":"src-news-web","data":{}}
+{"edge":"EngagedByPerson","from":"eng-maya-demo-req","to":"per-maya-chen","data":{}}
+{"edge":"EngagedByPerson","from":"eng-aman-content-dl","to":"per-aman-sanger","data":{}}
+{"edge":"EngagedByPerson","from":"eng-david-webinar","to":"per-david-park","data":{}}
+{"edge":"ActionToPerson","from":"act-email-maya","to":"per-maya-chen","data":{}}
+{"edge":"ActionOnAccount","from":"act-enrich-cognition","to":"acc-cognition","data":{}}
+{"edge":"ActionOnAccount","from":"act-disqualify-inflection","to":"acc-inflection-old","data":{}}
+{"edge":"MemberOfCohort","from":"acc-cognition","to":"coh-q2-targets","data":{}}
+{"edge":"MemberOfCohort","from":"acc-github","to":"coh-q2-targets","data":{}}
+{"edge":"MemberOfCohort","from":"acc-cursor","to":"coh-q2-targets","data":{}}
+{"edge":"MemberOfCohort","from":"acc-sierra","to":"coh-q2-targets","data":{}}
+{"edge":"MemberOfCohort","from":"acc-anthropic","to":"coh-ai-native-watch","data":{}}
+{"edge":"MemberOfCohort","from":"acc-harvey","to":"coh-ai-native-watch","data":{}}
+{"edge":"MemberOfCohort","from":"acc-perplexity","to":"coh-ai-native-watch","data":{}}
+{"edge":"MemberOfCohort","from":"acc-cognition","to":"coh-ai-native-watch","data":{}}
+{"edge":"MemberOfCohort","from":"acc-cursor","to":"coh-ai-native-watch","data":{}}
+{"edge":"MemberOfCohort","from":"acc-decagon","to":"coh-ai-native-watch","data":{}}
+{"edge":"MemberOfCohort","from":"acc-anthropic","to":"coh-expansion","data":{}}
+{"edge":"MemberOfCohort","from":"acc-perplexity","to":"coh-expansion","data":{}}
+{"edge":"MemberOfCohort","from":"acc-harvey","to":"coh-expansion","data":{}}
+{"edge":"AccountEnrichedBySource","from":"acc-cognition","to":"src-parallel-task","data":{}}
+{"edge":"AccountEnrichedBySource","from":"acc-cognition","to":"src-parallel-monitor","data":{}}
+{"edge":"AccountEnrichedBySource","from":"acc-decagon","to":"src-parallel-task","data":{}}
+{"edge":"AccountEnrichedBySource","from":"acc-github","to":"src-parallel-task","data":{}}
+{"edge":"AccountEnrichedBySource","from":"acc-anthropic","to":"src-parallel-task","data":{}}
+{"edge":"PersonEnrichedBySource","from":"per-maya-chen","to":"src-linkedin-public","data":{}}
+{"edge":"PersonEnrichedBySource","from":"per-priya-iyer","to":"src-linkedin-public","data":{}}
+{"edge":"SignalEnrichedBySource","from":"sig-anthropic-claude-mythos","to":"src-parallel-monitor","data":{}}
+{"edge":"SignalEnrichedBySource","from":"sig-cognition-series-d","to":"src-parallel-monitor","data":{}}
+{"edge":"SignalEnrichedBySource","from":"sig-cursor-100m-arr","to":"src-parallel-monitor","data":{}}
+{"edge":"MentionsAccount","from":"ia-anthropic-mythos","to":"acc-anthropic","data":{}}
+{"edge":"MentionsAccount","from":"ia-bloomberg-cognition","to":"acc-cognition","data":{}}
+{"edge":"MentionsAccount","from":"ia-linkedin-maya-chen","to":"acc-cognition","data":{}}
+{"edge":"MentionsAccount","from":"ia-linkedin-maya-chen","to":"acc-anthropic","data":{}}
+{"edge":"MentionsAccount","from":"ia-microsoft-earnings","to":"acc-microsoft","data":{}}
+{"edge":"MentionsAccount","from":"ia-microsoft-earnings","to":"acc-github","data":{}}
+{"edge":"MentionsPerson","from":"ia-linkedin-maya-chen","to":"per-maya-chen","data":{}}

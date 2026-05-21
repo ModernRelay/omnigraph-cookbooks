@@ -1,0 +1,70 @@
+// Engagement (their touch) and Action (our touch) reads.
+
+query recent_engagements($since: DateTime) {
+    match {
+        $e: Engagement
+        $e.occurredAt >= $since
+    }
+    return { $e.slug, $e.channel, $e.intent, $e.sentiment, $e.occurredAt }
+    order { $e.occurredAt desc }
+}
+
+query engagements_by_person($person: String) {
+    match {
+        $p: Person { slug: $person }
+        $e: Engagement
+        $e engagedByPerson $p
+    }
+    return { $e.slug, $e.channel, $e.intent, $e.sentiment, $e.occurredAt }
+    order { $e.occurredAt desc }
+}
+
+query engagements_with_artifact($artifact: String) {
+    match {
+        $a: InformationArtifact { slug: $artifact }
+        $e: Engagement
+        $e engagedWithArtifact $a
+    }
+    return { $e.slug, $e.channel, $e.intent, $e.occurredAt }
+    order { $e.occurredAt desc }
+}
+
+// Recent actions our team or agents took.
+query recent_actions($since: DateTime) {
+    match {
+        $a: Action
+        $a.executedAt >= $since
+    }
+    return { $a.slug, $a.operation, $a.channel, $a.success, $a.executedAt, $a.resultSummary }
+    order { $a.executedAt desc }
+}
+
+query actions_to_person($person: String) {
+    match {
+        $p: Person { slug: $person }
+        $a: Action
+        $a actionToPerson $p
+    }
+    return { $a.slug, $a.operation, $a.channel, $a.success, $a.executedAt }
+    order { $a.executedAt desc }
+}
+
+query actions_on_account($account: String) {
+    match {
+        $acc: Account { slug: $account }
+        $a: Action
+        $a actionOnAccount $acc
+    }
+    return { $a.slug, $a.operation, $a.channel, $a.success, $a.executedAt, $a.resultSummary }
+    order { $a.executedAt desc }
+}
+
+// Failed actions awaiting retry.
+query failed_actions($since: DateTime) {
+    match {
+        $a: Action { success: false }
+        $a.executedAt >= $since
+    }
+    return { $a.slug, $a.operation, $a.errorMessage, $a.executedAt }
+    order { $a.executedAt desc }
+}

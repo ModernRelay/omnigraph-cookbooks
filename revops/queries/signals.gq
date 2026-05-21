@@ -1,0 +1,95 @@
+// Signal reads — recent intent, by kind, filtered by strength, sourced from artifacts.
+
+query get_signal($slug: String) {
+    match { $s: Signal { slug: $slug } }
+    return {
+        $s.slug, $s.name, $s.brief, $s.description,
+        $s.kind, $s.strength, $s.confidence, $s.capturedAt
+    }
+}
+
+query recent_signals($since: DateTime) {
+    match {
+        $s: Signal
+        $s.capturedAt >= $since
+    }
+    return { $s.slug, $s.name, $s.kind, $s.strength, $s.capturedAt, $s.brief }
+    order { $s.capturedAt desc }
+}
+
+query signals_by_kind($kind: String) {
+    match { $s: Signal { kind: $kind } }
+    return { $s.slug, $s.name, $s.strength, $s.confidence, $s.capturedAt, $s.brief }
+    order { $s.capturedAt desc }
+}
+
+// Strong-only feed — drives outreach prioritization.
+query strong_signals_since($since: DateTime) {
+    match {
+        $s: Signal { strength: "strong" }
+        $s.capturedAt >= $since
+    }
+    return { $s.slug, $s.name, $s.kind, $s.capturedAt, $s.brief }
+    order { $s.capturedAt desc }
+}
+
+query search_signals($q: String) {
+    match {
+        $s: Signal
+        search($s.name, $q)
+    }
+    return { $s.slug, $s.name, $s.kind, $s.brief, $s.capturedAt }
+}
+
+// Signal → account.
+query signal_account($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s onAccount $a
+    }
+    return { $a.slug, $a.legalName, $a.kind, $a.segment, $a.industry }
+}
+
+// Signal → person (job-change signals).
+query signal_person($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s onPerson $p
+    }
+    return { $p.slug, $p.fullName, $p.seniority, $p.function }
+}
+
+// Signal → evidence (which artifact backs this signal).
+query signal_evidence($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s evidencedBy $a
+    }
+    return { $a.slug, $a.title, $a.artifactType, $a.url, $a.publishedAt }
+}
+
+// Account heat — recent signal count by strength, grouped per account.
+// Useful as the "what's hot" feed.
+query account_heat($since: DateTime) {
+    match {
+        $s: Signal
+        $s onAccount $a
+        $s.capturedAt >= $since
+    }
+    return { $a.slug, $a.legalName, count($s) as signal_count }
+    order { signal_count desc }
+}
+
+// Funding feed — every funding signal, newest first.
+query funding_feed($since: DateTime) {
+    match {
+        $s: Signal { kind: "funding" }
+        $s onAccount $a
+        $s.capturedAt >= $since
+    }
+    return {
+        $s.slug, $s.name, $s.capturedAt, $s.brief, $s.strength,
+        $a.slug as account, $a.legalName
+    }
+    order { $s.capturedAt desc }
+}

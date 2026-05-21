@@ -1,0 +1,408 @@
+// RevOps Cookbook — Omnigraph Schema
+// A code-first GTM data platform: prospect universe, enrichment, decisions,
+// measurements, and provenance — all in one versioned graph.
+//
+// Design split:
+//   - POINTER nodes (mutable):  current state, updated in place
+//   - CLAIM nodes (append-only): events and observations, never overwritten
+//
+// Canonical core is schema-fixed. Enums marked "[extension point]" are the
+// places customers extend per-domain. See docs/extending.md.
+
+
+// ══════════════════════════════════════════════════════════════════════
+// POINTER NODES (mutable)
+// Carry: slug @key, createdAt, updatedAt
+// ══════════════════════════════════════════════════════════════════════
+
+node Account {
+    slug: String @key
+    legalName: String @index
+    domain: String? @index
+    hqLocation: String?
+    foundedYear: I32?
+
+    kind: enum(prospect, customer, churned, partner, do_not_sell) @index
+    segment: enum(enterprise, mid_market, smb, startup, public_sector) @index   // [extension point]
+    industry: enum(saas, fintech, healthcare, retail, manufacturing, media, ai_infra, devtools, vertical_saas, other) @index   // [extension point]
+    tier: enum(tier_1, tier_2, tier_3, unqualified)?
+
+    employeeCount: I32?
+    description: String?
+
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Person {
+    slug: String @key
+    fullName: String @index
+    primaryEmail: String? @unique
+    linkedinUrl: String?
+    location: String?
+
+    // Latest inferred values — historically accurate values live on Role
+    seniority: enum(ic, manager, director, vp, c_level, founder, board)?
+    function: enum(engineering, product, sales, marketing, finance, legal, hr, ops, customer_success, ceo_office, other)?
+
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Role {
+    // A person's position at an account, time-bounded.
+    // Makes job history, champion tracking, and job-change signals queryable.
+    slug: String @key
+    title: String @index
+    startDate: Date
+    endDate: Date?
+    current: Bool @index
+
+    level: enum(ic, manager, director, vp, c_level, founder, board)?
+    department: enum(engineering, product, sales, marketing, finance, legal, hr, ops, customer_success, ceo_office, other)?
+
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Lead {
+    // Raw inbound row, pre-resolution. Resolves to a Person via ResolvesToPerson.
+    slug: String @key
+    capturedAt: DateTime @index
+    rawEmail: String?
+    rawFullName: String?
+    rawCompany: String?
+
+    leadSource: enum(inbound_form, list_upload, conference, referral, social, manual, partner)
+    status: enum(new, enriching, resolved, rejected, merged) @index
+
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Opportunity {
+    slug: String @key
+    name: String @index
+    description: String?
+
+    stage: enum(discovery, qualified, technical_eval, proposal, negotiation, closed_won, closed_lost, no_decision) @index   // [extension point]
+    dealType: enum(net_new, expansion, renewal, retention)?
+    priority: enum(critical, high, medium, low)?
+    lossReason: enum(price, competitor, no_budget, timing, no_decision, internal_build, other)?
+
+    arrUsd: F64?
+    expectedClose: Date?
+    closedAt: Date?
+
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Cohort {
+    // A named set of accounts (or people). Hand-curated or query-derived.
+    slug: String @key
+    name: String @unique
+    definition: String
+    kind: enum(target, watchlist, customer_segment, do_not_sell, beta_invite, churn_risk) @index   // [extension point]
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Policy {
+    // Versioned governance: ICP definitions, screening gates, prompt versions,
+    // compliance rules. Versions chain via Supersedes.
+    slug: String @key
+    policyKey: String @index                  // stable key shared across versions, e.g. "icp.mid_market_ai_infra"
+    name: String
+    description: String
+    kind: enum(icp, screening, prompt_version, compliance, do_not_sell, scoring_rule) @index   // [extension point]
+
+    effectiveFrom: DateTime
+    effectiveTo: DateTime?
+    status: enum(draft, active, archived) @index
+
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Actor {
+    // Who or what performs work. Routes Decisions, Actions.
+    slug: String @key
+    name: String @unique
+    actorType: enum(human, agent) @index
+    defaultChannel: String?
+
+    // For agents: what model/system is this Actor
+    agentModel: String?
+    agentVersion: String?
+
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Technology {
+    // What an account uses (technographic). Vendor name is a property.
+    slug: String @key
+    name: String @unique
+    vendor: String?
+    category: enum(crm, marketing_automation, data_warehouse, identity, payments, observability, infrastructure, ai_platform, cdp, devtools, other) @index   // [extension point]
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+node Source {
+    // Provenance: where did data originate.
+    slug: String @key
+    name: String @unique
+    kind: enum(internal_crm, public_web, paid_data, api, social, network, referral, telemetry, billing) @index
+    url: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// CLAIM / EVENT NODES (append-only)
+// Carry: slug @key, createdAt. Never overwritten. Corrections via Supersedes
+// or a newer Decision.
+// ══════════════════════════════════════════════════════════════════════
+
+node Signal {
+    // An observed intent/trigger event scoped to an Account or Person.
+    slug: String @key
+    name: String @index
+    brief: String?
+    description: String?
+
+    capturedAt: DateTime @index
+    kind: enum(funding, hiring, job_change, tech_adoption, leadership_change, expansion, competitive_loss, content_engagement, news, regulatory, churn_risk) @index   // [extension point]
+    strength: enum(weak, medium, strong) @index
+    confidence: F32?
+
+    createdAt: DateTime
+}
+
+node Decision {
+    // An append-only record of intent — why we did or chose something.
+    slug: String @key
+    decidedAt: DateTime @index
+    intent: String @index                     // free-form label, e.g. "classify_workload", "advance_stage", "disqualify"
+    domain: enum(sales, marketing, finance, compliance, ops, product) @index
+    status: enum(proposed, approved, rejected, cancelled, superseded) @index
+    assertion: enum(fact, assumption)
+    confidence: F32?
+    confidenceLabel: enum(high, medium, low)?
+    rationale: String?
+
+    createdAt: DateTime
+}
+
+node Action {
+    // An append-only execution log — what was actually done. Replayable.
+    slug: String @key
+    executedAt: DateTime @index
+    operation: enum(create, update, send, delete, classify, enrich, notify) @index
+    channel: enum(email, linkedin, web, content, demo, webinar, event, internal, api)?
+    success: Bool @index
+    errorMessage: String?
+    resultSummary: String?
+    payloadDiff: String?
+
+    createdAt: DateTime
+}
+
+node Measurement {
+    // An append-only time-stamped numeric observation about an entity.
+    // The time-series primitive. Predicted vs. actual, ARR over time, headcount, usage.
+    slug: String @key
+    observedAt: DateTime @index
+    metricKey: enum(
+        estimated_annual_spend_usd,
+        actual_annual_spend_usd,
+        mrr_usd,
+        arr_usd,
+        headcount,
+        funding_raised_usd,
+        engagement_score,
+        intent_score,
+        nps,
+        seat_count,
+        monthly_active_users,
+        usage_units_monthly
+    ) @index   // [extension point — add yours]
+    value: F64
+    unit: String?
+    confidence: F32?
+    createdAt: DateTime
+}
+
+node Engagement {
+    // Their action toward us. Prospect-initiated touch.
+    slug: String @key
+    occurredAt: DateTime @index
+    channel: enum(email, linkedin, web, content, demo, webinar, event, referral) @index
+    intent: enum(opened, clicked, replied, booked_meeting, attended, downloaded, shared, requested_demo)
+    sentiment: enum(positive, neutral, negative, blocker)?
+    createdAt: DateTime
+}
+
+node InformationArtifact {
+    // A discoverable document — news, post, filing, podcast, job posting.
+    slug: String @key
+    title: String @index
+    url: String? @unique
+    artifactType: enum(news, filing, post, podcast, blog, press_release, event, job_posting, internal_note) @index
+    publishedAt: DateTime?
+    retrievedAt: DateTime
+    createdAt: DateTime
+}
+
+node Chunk {
+    // Text chunks of artifacts for semantic retrieval. Embeddings ONLY live here.
+    slug: String @key
+    text: String
+    chunkIndex: I32
+    embedding: Vector(3072) @embed("text") @index
+    createdAt: DateTime
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// EDGES — Backbone (Person ↔ Role ↔ Account)
+// ══════════════════════════════════════════════════════════════════════
+
+edge HasRole: Account -> Role
+edge HeldByPerson: Role -> Person @card(1..1) {
+    @unique(src)
+}
+edge ParentAccount: Account -> Account
+edge UsesTechnology: Account -> Technology {
+    since: Date?
+    confidence: F32?
+}
+edge CompetesWithTechnology: Technology -> Technology
+
+
+// ══════════════════════════════════════════════════════════════════════
+// EDGES — Lead resolution
+// ══════════════════════════════════════════════════════════════════════
+
+edge ResolvesToPerson: Lead -> Person @card(0..1) {
+    @unique(src)
+    resolvedAt: DateTime
+    method: enum(manual, auto, hybrid)?
+}
+edge LeadAtAccount: Lead -> Account
+
+
+// ══════════════════════════════════════════════════════════════════════
+// EDGES — Signal → Entity (intent attribution)
+// ══════════════════════════════════════════════════════════════════════
+
+edge OnAccount: Signal -> Account
+edge OnPerson: Signal -> Person
+edge EvidencedBy: Signal -> InformationArtifact
+
+
+// ══════════════════════════════════════════════════════════════════════
+// EDGES — Decision spine (the audit trail)
+// ══════════════════════════════════════════════════════════════════════
+
+edge MadeBy: Decision -> Actor @card(1..1) {
+    @unique(src)
+}
+
+edge InformedBy: Decision -> Signal {
+    influence: enum(primary, supporting, minor)
+}
+
+edge ScreenedBy: Decision -> Policy {
+    outcome: enum(passed, failed, overridden, not_applicable)
+    overrideReason: String?
+}
+
+edge ResultedIn: Decision -> Action
+edge TargetsAccount: Decision -> Account
+edge TargetsOpportunity: Decision -> Opportunity
+edge TargetsPerson: Decision -> Person
+
+edge BasedOnPrecedent: Decision -> Decision {
+    similarity: enum(strong, moderate, weak)
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// EDGES — Policy versioning
+// ══════════════════════════════════════════════════════════════════════
+
+edge Supersedes: Policy -> Policy {
+    reason: String?
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// EDGES — Account fit (ICP matching)
+// ══════════════════════════════════════════════════════════════════════
+
+edge MatchesPolicy: Account -> Policy {
+    score: F32?
+    classifiedAt: DateTime
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// EDGES — Opportunity (deal anchor + buying committee)
+// ══════════════════════════════════════════════════════════════════════
+
+edge AtAccount: Opportunity -> Account @card(1..1) {
+    @unique(src)
+}
+edge ChampionedBy: Opportunity -> Person
+edge BuyerOnDeal: Opportunity -> Person
+edge InfluencerOnDeal: Opportunity -> Person
+edge BlockerOnDeal: Opportunity -> Person
+edge ProducedByLead: Opportunity -> Lead
+
+
+// ══════════════════════════════════════════════════════════════════════
+// EDGES — Measurement (time-series of numeric observations)
+// ══════════════════════════════════════════════════════════════════════
+
+edge MeasuresAccount: Measurement -> Account
+edge MeasuresPerson: Measurement -> Person
+edge MeasuresOpportunity: Measurement -> Opportunity
+edge ProducedByDecision: Measurement -> Decision
+edge ObservedFromSource: Measurement -> Source
+
+
+// ══════════════════════════════════════════════════════════════════════
+// EDGES — Engagement (their touch) / Action (our touch)
+// ══════════════════════════════════════════════════════════════════════
+
+edge EngagedByPerson: Engagement -> Person
+edge EngagedWithArtifact: Engagement -> InformationArtifact
+edge ActionToPerson: Action -> Person
+edge ActionOnAccount: Action -> Account
+
+
+// ══════════════════════════════════════════════════════════════════════
+// EDGES — Cohorts (saved segments)
+// ══════════════════════════════════════════════════════════════════════
+
+edge MemberOfCohort: Account -> Cohort
+edge PersonMemberOfCohort: Person -> Cohort
+
+
+// ══════════════════════════════════════════════════════════════════════
+// EDGES — Provenance (where data came from)
+// ══════════════════════════════════════════════════════════════════════
+
+edge AccountEnrichedBySource: Account -> Source
+edge PersonEnrichedBySource: Person -> Source
+edge SignalEnrichedBySource: Signal -> Source
+
+edge PartOfArtifact: Chunk -> InformationArtifact @card(1..1) {
+    @unique(src)
+}
+edge MentionsAccount: InformationArtifact -> Account
+edge MentionsPerson: InformationArtifact -> Person

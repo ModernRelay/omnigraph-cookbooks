@@ -1,0 +1,87 @@
+// Opportunity reads — pipeline, buying committee, deal trace.
+
+query get_opportunity($slug: String) {
+    match { $o: Opportunity { slug: $slug } }
+    return {
+        $o.slug, $o.name, $o.stage, $o.dealType, $o.priority,
+        $o.arrUsd, $o.expectedClose, $o.closedAt, $o.lossReason, $o.description
+    }
+}
+
+query pipeline_by_stage($stage: String) {
+    match { $o: Opportunity { stage: $stage } }
+    return { $o.slug, $o.name, $o.dealType, $o.arrUsd, $o.expectedClose }
+    order { $o.expectedClose asc }
+}
+
+// Opportunity → account.
+query opportunity_account($slug: String) {
+    match {
+        $o: Opportunity { slug: $slug }
+        $o atAccount $a
+    }
+    return { $a.slug, $a.legalName, $a.kind, $a.segment, $a.industry }
+}
+
+// Buying committee for an opportunity — Champion, Buyer, Influencer, Blocker.
+query opportunity_committee($slug: String) {
+    match {
+        $o: Opportunity { slug: $slug }
+        $o championedBy $p
+    }
+    return { $p.slug, $p.fullName, $p.seniority, $p.function, "champion" as role }
+}
+
+query opportunity_buyers($slug: String) {
+    match {
+        $o: Opportunity { slug: $slug }
+        $o buyerOnDeal $p
+    }
+    return { $p.slug, $p.fullName, $p.seniority, $p.function }
+}
+
+query opportunity_influencers($slug: String) {
+    match {
+        $o: Opportunity { slug: $slug }
+        $o influencerOnDeal $p
+    }
+    return { $p.slug, $p.fullName, $p.seniority, $p.function }
+}
+
+query opportunity_blockers($slug: String) {
+    match {
+        $o: Opportunity { slug: $slug }
+        $o blockerOnDeal $p
+    }
+    return { $p.slug, $p.fullName, $p.seniority, $p.function }
+}
+
+// Originating lead — attribution.
+query opportunity_origin_lead($slug: String) {
+    match {
+        $o: Opportunity { slug: $slug }
+        $o producedByLead $l
+    }
+    return { $l.slug, $l.capturedAt, $l.leadSource, $l.rawCompany }
+}
+
+// Pipeline aggregate — count and total ARR by stage.
+query pipeline_summary() {
+    match { $o: Opportunity }
+    return { $o.stage, count($o) as opportunities, sum($o.arrUsd) as total_arr }
+    order { total_arr desc }
+}
+
+// Pipeline by deal type.
+query pipeline_by_deal_type() {
+    match { $o: Opportunity }
+    return { $o.dealType, count($o) as opportunities, sum($o.arrUsd) as total_arr }
+    order { total_arr desc }
+}
+
+// Loss reasons — why are we losing deals.
+query loss_reasons() {
+    match { $o: Opportunity { stage: "closed_lost" } }
+    return { $o.lossReason, count($o) as deals, sum($o.arrUsd) as lost_arr }
+    order { deals desc }
+}

@@ -1,0 +1,104 @@
+// Measurement reads — the time-series primitive.
+// Numeric observations about entities: predicted vs actual, ARR, headcount, usage.
+
+query get_measurement($slug: String) {
+    match { $m: Measurement { slug: $slug } }
+    return { $m.slug, $m.metricKey, $m.value, $m.unit, $m.confidence, $m.observedAt }
+}
+
+// All measurements for an account, ordered newest first.
+query account_measurements($account: String) {
+    match {
+        $a: Account { slug: $account }
+        $m: Measurement
+        $m measuresAccount $a
+    }
+    return { $m.slug, $m.metricKey, $m.value, $m.unit, $m.confidence, $m.observedAt }
+    order { $m.observedAt desc }
+}
+
+// One metric stream for an account — e.g., ARR over time.
+query account_metric_stream($account: String, $metric: String) {
+    match {
+        $a: Account { slug: $account }
+        $m: Measurement { metricKey: $metric }
+        $m measuresAccount $a
+    }
+    return { $m.observedAt, $m.value, $m.unit, $m.confidence }
+    order { $m.observedAt asc }
+}
+
+// Latest value of a metric for an account — the "current pointer".
+query account_latest_metric($account: String, $metric: String) {
+    match {
+        $a: Account { slug: $account }
+        $m: Measurement { metricKey: $metric }
+        $m measuresAccount $a
+    }
+    return { $m.observedAt, $m.value, $m.unit, $m.confidence }
+    order { $m.observedAt desc }
+    limit 1
+}
+
+// Sum of a metric across all accounts in a kind (e.g., total predicted spend
+// across all prospects).
+query total_metric_by_account_kind($metric: String, $kind: String) {
+    match {
+        $a: Account { kind: $kind }
+        $m: Measurement { metricKey: $metric }
+        $m measuresAccount $a
+    }
+    return { $a.kind as accountKind, sum($m.value) as totalValue, count($m) as records }
+}
+
+// Predicted vs actual spend per account — joins two metric streams.
+query predicted_vs_actual_spend($since: DateTime) {
+    match {
+        $a: Account
+        $pred: Measurement { metricKey: "estimated_annual_spend_usd" }
+        $actual: Measurement { metricKey: "actual_annual_spend_usd" }
+        $pred measuresAccount $a
+        $actual measuresAccount $a
+        $pred.observedAt >= $since
+        $actual.observedAt >= $since
+    }
+    return {
+        $a.slug, $a.legalName,
+        $pred.value as predicted, $pred.confidence as predConfidence,
+        $actual.value as actual, $actual.observedAt as actualAt
+    }
+    order { $actual.observedAt desc }
+}
+
+// Measurements produced by a particular Decision — full provenance pointer.
+query measurements_from_decision($decision: String) {
+    match {
+        $d: Decision { slug: $decision }
+        $m: Measurement
+        $m producedByDecision $d
+    }
+    return { $m.slug, $m.metricKey, $m.value, $m.confidence, $m.observedAt }
+}
+
+// Measurements from a given source (e.g., Modal's billing pipeline, Parallel API).
+query measurements_from_source($source: String) {
+    match {
+        $src: Source { slug: $source }
+        $m: Measurement
+        $m observedFromSource $src
+    }
+    return { $m.slug, $m.metricKey, $m.value, $m.observedAt }
+    order { $m.observedAt desc }
+}
+
+// Top-N accounts by latest value of a metric (e.g., highest predicted spend).
+query top_accounts_by_metric($metric: String) {
+    match {
+        $a: Account
+        $m: Measurement { metricKey: $metric }
+        $m measuresAccount $a
+    }
+    return { $a.slug, $a.legalName, $a.kind, max($m.value) as latestValue }
+    order { latestValue desc }
+    limit 25
+}

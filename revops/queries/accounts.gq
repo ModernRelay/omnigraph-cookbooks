@@ -1,0 +1,122 @@
+// Account reads — lookup, current state, history, hierarchy.
+
+query get_account($slug: String) {
+    match { $a: Account { slug: $slug } }
+    return {
+        $a.slug, $a.legalName, $a.domain, $a.kind, $a.segment, $a.industry,
+        $a.tier, $a.employeeCount, $a.hqLocation, $a.foundedYear, $a.description
+    }
+}
+
+query accounts_by_kind($kind: String) {
+    match { $a: Account { kind: $kind } }
+    return { $a.slug, $a.legalName, $a.segment, $a.industry, $a.tier, $a.employeeCount }
+    order { $a.updatedAt desc }
+}
+
+query accounts_by_segment($segment: String) {
+    match { $a: Account { segment: $segment } }
+    return { $a.slug, $a.legalName, $a.kind, $a.industry, $a.tier, $a.employeeCount }
+    order { $a.updatedAt desc }
+}
+
+query account_search($q: String) {
+    match {
+        $a: Account
+        search($a.legalName, $q)
+    }
+    return { $a.slug, $a.legalName, $a.kind, $a.industry }
+}
+
+// Current people at an account — walks Account -> Role(current) -> Person.
+query account_current_people($slug: String) {
+    match {
+        $a: Account { slug: $slug }
+        $a hasRole $r
+        $r heldByPerson $p
+        $r.current = true
+    }
+    return { $p.slug, $p.fullName, $r.title, $r.level, $r.department, $r.startDate }
+    order { $r.startDate desc }
+}
+
+// Full account history — every role ever held there, including alumni.
+query account_role_history($slug: String) {
+    match {
+        $a: Account { slug: $slug }
+        $a hasRole $r
+        $r heldByPerson $p
+    }
+    return {
+        $p.slug, $p.fullName, $r.title, $r.level, $r.department,
+        $r.startDate, $r.endDate, $r.current
+    }
+    order { $r.startDate desc }
+}
+
+// Account hierarchy — parents and subsidiaries.
+query account_parents($slug: String) {
+    match {
+        $a: Account { slug: $slug }
+        $a parentAccount $p
+    }
+    return { $p.slug, $p.legalName, $p.kind, $p.industry }
+}
+
+query account_subsidiaries($slug: String) {
+    match {
+        $p: Account { slug: $slug }
+        $sub parentAccount $p
+    }
+    return { $sub.slug, $sub.legalName, $sub.kind, $sub.industry }
+}
+
+// Technographics — what does this account use.
+query account_tech_stack($slug: String) {
+    match {
+        $a: Account { slug: $slug }
+        $a usesTechnology $t
+    }
+    return { $t.slug, $t.name, $t.vendor, $t.category }
+}
+
+// Reverse: what accounts use this technology.
+query accounts_using_tech($tech: String) {
+    match {
+        $a: Account
+        $t: Technology { slug: $tech }
+        $a usesTechnology $t
+    }
+    return { $a.slug, $a.legalName, $a.kind, $a.segment, $a.industry }
+}
+
+// Signals on an account — recent intent activity.
+query account_signals($slug: String) {
+    match {
+        $a: Account { slug: $slug }
+        $s: Signal
+        $s onAccount $a
+    }
+    return { $s.slug, $s.name, $s.kind, $s.strength, $s.capturedAt, $s.brief }
+    order { $s.capturedAt desc }
+}
+
+// Opportunities at an account.
+query account_opportunities($slug: String) {
+    match {
+        $a: Account { slug: $slug }
+        $o: Opportunity
+        $o atAccount $a
+    }
+    return { $o.slug, $o.name, $o.stage, $o.dealType, $o.arrUsd, $o.expectedClose, $o.closedAt }
+    order { $o.expectedClose asc }
+}
+
+// ICP / policy fit — which policies does this account match.
+query account_policy_matches($slug: String) {
+    match {
+        $a: Account { slug: $slug }
+        $a matchesPolicy $p
+    }
+    return { $p.slug, $p.policyKey, $p.name, $p.kind, $p.status }
+}

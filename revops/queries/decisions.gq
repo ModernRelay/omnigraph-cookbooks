@@ -1,0 +1,110 @@
+// Decision reads — the audit trail. Every classification, advance, or
+// disqualification is traceable to signals, policies, and an actor.
+
+query get_decision($slug: String) {
+    match { $d: Decision { slug: $slug } }
+    return {
+        $d.slug, $d.intent, $d.domain, $d.status, $d.assertion,
+        $d.confidence, $d.confidenceLabel, $d.rationale, $d.decidedAt
+    }
+}
+
+query recent_decisions($since: DateTime) {
+    match {
+        $d: Decision
+        $d.decidedAt >= $since
+    }
+    return { $d.slug, $d.intent, $d.domain, $d.status, $d.confidence, $d.decidedAt }
+    order { $d.decidedAt desc }
+}
+
+query decisions_by_intent($intent: String) {
+    match { $d: Decision { intent: $intent } }
+    return { $d.slug, $d.domain, $d.status, $d.confidence, $d.decidedAt, $d.rationale }
+    order { $d.decidedAt desc }
+}
+
+// Full decision trace — what informed it, what it was screened by, who made it.
+query decision_trace($slug: String) {
+    match {
+        $d: Decision { slug: $slug }
+        $d madeBy $actor
+        $d informedBy $sig
+        $d screenedBy $pol
+    }
+    return {
+        $d.slug, $d.intent, $d.rationale, $d.confidence,
+        $actor.slug as actorSlug, $actor.name as actorName, $actor.actorType,
+        $sig.slug as signalSlug, $sig.name as signalName, $sig.kind as signalKind,
+        $pol.slug as policySlug, $pol.policyKey as policyKey, $pol.kind as policyKind
+    }
+}
+
+// Decisions targeting an account.
+query account_decisions($account: String) {
+    match {
+        $a: Account { slug: $account }
+        $d: Decision
+        $d targetsAccount $a
+    }
+    return { $d.slug, $d.intent, $d.status, $d.confidence, $d.decidedAt, $d.rationale }
+    order { $d.decidedAt desc }
+}
+
+// Decisions targeting an opportunity (stage advances, etc.).
+query opportunity_decisions($opp: String) {
+    match {
+        $o: Opportunity { slug: $opp }
+        $d: Decision
+        $d targetsOpportunity $o
+    }
+    return { $d.slug, $d.intent, $d.status, $d.confidence, $d.decidedAt, $d.rationale }
+    order { $d.decidedAt desc }
+}
+
+// Decisions made by an agent (filter on Actor.actorType).
+query decisions_by_agent($actor: String) {
+    match {
+        $d: Decision
+        $a: Actor { slug: $actor }
+        $d madeBy $a
+    }
+    return { $d.slug, $d.intent, $d.status, $d.confidence, $d.decidedAt }
+    order { $d.decidedAt desc }
+}
+
+// Decisions that resulted in an action.
+query decision_actions($slug: String) {
+    match {
+        $d: Decision { slug: $slug }
+        $d resultedIn $a
+    }
+    return { $a.slug, $a.operation, $a.success, $a.executedAt, $a.resultSummary }
+    order { $a.executedAt desc }
+}
+
+// Low-confidence decisions awaiting review.
+query low_confidence_decisions($threshold: F32) {
+    match {
+        $d: Decision
+        $d.confidence < $threshold
+    }
+    return { $d.slug, $d.intent, $d.confidence, $d.decidedAt, $d.rationale }
+    order { $d.confidence asc }
+}
+
+// Superseded decisions — corrections trail.
+query superseded_decisions() {
+    match { $d: Decision { status: "superseded" } }
+    return { $d.slug, $d.intent, $d.decidedAt, $d.rationale }
+    order { $d.decidedAt desc }
+}
+
+// Decisions that referenced a particular precedent.
+query decision_precedents($slug: String) {
+    match {
+        $d: Decision { slug: $slug }
+        $d basedOnPrecedent $prev
+    }
+    return { $prev.slug, $prev.intent, $prev.decidedAt, $prev.rationale }
+}
