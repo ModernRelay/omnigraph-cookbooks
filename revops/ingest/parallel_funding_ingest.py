@@ -197,7 +197,8 @@ def main() -> None:
                 brief = fact.raw[:240]
                 change("add-signal", "--params",
                        json.dumps({"slug": sig_slug, "name": signal_name, "kind": "funding",
-                                   "strength": "strong", "capturedAt": captured, "createdAt": now}),
+                                   "strength": "strong", "capturedAt": captured,
+                                   "brief": brief, "createdAt": now}),
                        dry_run=args.dry_run)
                 change("link-signal-on-account", "--params",
                        json.dumps({"signal": sig_slug, "account": account_slug}),
@@ -228,7 +229,8 @@ def main() -> None:
             change("add-decision", "--params",
                    json.dumps({"slug": dec_slug, "intent": "enrich_funding",
                                "domain": "sales", "status": "approved",
-                               "assertion": "fact", "decidedAt": now, "createdAt": now}),
+                               "assertion": "fact", "rationale": rationale,
+                               "decidedAt": now, "createdAt": now}),
                    dry_run=args.dry_run)
             change("link-made-by", "--params",
                    json.dumps({"decision": dec_slug, "actor": args.actor}),

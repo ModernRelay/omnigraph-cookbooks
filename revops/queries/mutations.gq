@@ -10,8 +10,21 @@ query add_account($slug: String, $legalName: String, $kind: String, $segment: St
     }
 }
 
-query update_account_tier($slug: String, $tier: String, $updatedAt: DateTime) {
+// Audited tier update — atomically updates the Account.tier pointer AND
+// inserts a Decision recording who changed it and why. Use this rather than
+// a bare tier update so the audit trail is always intact.
+query update_account_tier(
+    $slug: String, $tier: String, $updatedAt: DateTime,
+    $decisionSlug: String, $actor: String, $rationale: String, $decidedAt: DateTime
+) {
     update Account set { tier: $tier, updatedAt: $updatedAt } where slug = $slug
+    insert Decision {
+        slug: $decisionSlug, intent: "update_tier", domain: "sales",
+        status: "approved", assertion: "fact", rationale: $rationale,
+        decidedAt: $decidedAt, createdAt: $decidedAt
+    }
+    insert MadeBy { from: $decisionSlug, to: $actor }
+    insert TargetsAccount { from: $decisionSlug, to: $slug }
 }
 
 query update_account_employee_count($slug: String, $employees: I32, $updatedAt: DateTime) {
@@ -56,8 +69,21 @@ query add_opportunity($slug: String, $name: String, $stage: String, $createdAt: 
     }
 }
 
-query advance_stage($slug: String, $stage: String, $updatedAt: DateTime) {
+// Audited stage advance — atomically advances Opportunity.stage AND inserts
+// a Decision recording the transition. Stage transitions are the canonical
+// "must audit" moment for the GTM lifecycle.
+query advance_stage(
+    $slug: String, $stage: String, $updatedAt: DateTime,
+    $decisionSlug: String, $actor: String, $rationale: String, $decidedAt: DateTime
+) {
     update Opportunity set { stage: $stage, updatedAt: $updatedAt } where slug = $slug
+    insert Decision {
+        slug: $decisionSlug, intent: "advance_stage", domain: "sales",
+        status: "approved", assertion: "fact", rationale: $rationale,
+        decidedAt: $decidedAt, createdAt: $decidedAt
+    }
+    insert MadeBy { from: $decisionSlug, to: $actor }
+    insert TargetsOpportunity { from: $decisionSlug, to: $slug }
 }
 
 query close_won($slug: String, $closedAt: Date, $updatedAt: DateTime) {
@@ -113,17 +139,17 @@ query add_source($slug: String, $name: String, $kind: String, $createdAt: DateTi
 // Append-only claim mutations (insert only — never update these types)
 // ══════════════════════════════════════════════════════════════════════
 
-query add_signal($slug: String, $name: String, $kind: String, $strength: String, $capturedAt: DateTime, $createdAt: DateTime) {
+query add_signal($slug: String, $name: String, $kind: String, $strength: String, $capturedAt: DateTime, $createdAt: DateTime, $brief: String?) {
     insert Signal {
         slug: $slug, name: $name, kind: $kind, strength: $strength,
-        capturedAt: $capturedAt, createdAt: $createdAt
+        capturedAt: $capturedAt, brief: $brief, createdAt: $createdAt
     }
 }
 
-query add_decision($slug: String, $intent: String, $domain: String, $status: String, $assertion: String, $decidedAt: DateTime, $createdAt: DateTime) {
+query add_decision($slug: String, $intent: String, $domain: String, $status: String, $assertion: String, $decidedAt: DateTime, $createdAt: DateTime, $rationale: String?) {
     insert Decision {
         slug: $slug, intent: $intent, domain: $domain, status: $status, assertion: $assertion,
-        decidedAt: $decidedAt, createdAt: $createdAt
+        rationale: $rationale, decidedAt: $decidedAt, createdAt: $createdAt
     }
 }
 
@@ -333,6 +359,10 @@ query link_action_to_person($action: String, $person: String) {
 
 query link_action_on_account($action: String, $account: String) {
     insert ActionOnAccount { from: $action, to: $account }
+}
+
+query link_action_executed_by($action: String, $actor: String) {
+    insert ExecutedBy { from: $action, to: $actor }
 }
 
 

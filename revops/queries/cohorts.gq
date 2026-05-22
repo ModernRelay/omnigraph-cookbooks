@@ -36,7 +36,12 @@ query account_cohorts($account: String) {
     return { $c.slug, $c.name, $c.kind, $c.definition }
 }
 
-// Cohort aggregate — count of accounts and total predicted spend per cohort.
+// Cohort aggregate — counts and cumulative-across-all-observations metrics.
+// Because Measurement is append-only, accounts accumulate multiple estimates
+// over time; sum_predicted_spend therefore sums ALL observations, not just
+// the latest per account. measurement_count surfaces the multiplier so
+// callers can see when re-enrichment has inflated the total.
+// For per-account latest, iterate `account_latest_metric` instead.
 query cohort_stats($cohort: String) {
     match {
         $c: Cohort { slug: $cohort }
@@ -48,7 +53,9 @@ query cohort_stats($cohort: String) {
     return {
         $c.slug, $c.name,
         count($a) as account_count,
-        sum($m.value) as total_predicted_spend
+        count($m) as measurement_count,
+        sum($m.value) as sum_predicted_spend_all_observations,
+        max($m.value) as peak_predicted_spend
     }
 }
 

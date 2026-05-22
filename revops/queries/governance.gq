@@ -45,9 +45,14 @@ query policy_decisions($policy: String) {
     order { $d.decidedAt desc }
 }
 
-// Override rate — how often were decisions screened by a policy overridden.
-// Useful for "is this prompt actually doing what we want."
-query policy_override_rate($policy: String) {
+// Total number of decisions screened by a policy. Note: this is a count
+// only — computing a true override RATE requires filtering on the
+// ScreenedBy.outcome edge property (per-edge filter not yet exposed in the
+// current query language). To compute the rate, run this for the total and
+// post-process the outcomes through `policy_decisions` (which returns the
+// full decision list) at the application layer, or filter ScreenedBy edges
+// directly via `omnigraph export`.
+query policy_decision_count($policy: String) {
     match {
         $p: Policy { slug: $policy }
         $d: Decision

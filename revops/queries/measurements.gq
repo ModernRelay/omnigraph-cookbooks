@@ -91,14 +91,16 @@ query measurements_from_source($source: String) {
     order { $m.observedAt desc }
 }
 
-// Top-N accounts by latest value of a metric (e.g., highest predicted spend).
+// Top-N accounts by peak observed value of a metric (highest ever recorded
+// per account, across all Measurement nodes). Note: this is the maximum, not
+// the most recent — for true latest, call `account_latest_metric` per account.
 query top_accounts_by_metric($metric: String) {
     match {
         $a: Account
         $m: Measurement { metricKey: $metric }
         $m measuresAccount $a
     }
-    return { $a.slug, $a.legalName, $a.kind, max($m.value) as latestValue }
-    order { latestValue desc }
+    return { $a.slug, $a.legalName, $a.kind, max($m.value) as peakValue }
+    order { peakValue desc }
     limit 25
 }

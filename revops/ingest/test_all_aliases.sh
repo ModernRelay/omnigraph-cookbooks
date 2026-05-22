@@ -15,13 +15,17 @@ pass=0
 fail=0
 declare -a failures
 
-# alias_name arg1 arg2 ... → run, count rows, record pass/fail
+# alias_name arg1 arg2 ... → run, count rows, record pass/fail.
+# Fails if `omnigraph read` exits non-zero OR emits a recognised error string.
 run() {
     local name="$1"; shift
-    local out
+    local out rc
     out=$(omnigraph read --alias "$name" "$@" 2>&1)
-    if grep -q "^Error:" <<<"$out" || grep -q "not found" <<<"$out" ; then
-        echo "FAIL $name $* :: $(head -2 <<<"$out" | tail -1 | tr -d '[:cntrl:]' | sed 's/\[[0-9;]*m//g' | cut -c1-100)"
+    rc=$?
+    if [ $rc -ne 0 ] || grep -q "^Error:" <<<"$out" || grep -q "not found" <<<"$out" ; then
+        local detail
+        detail=$(head -2 <<<"$out" | tail -1 | tr -d '[:cntrl:]' | sed 's/\[[0-9;]*m//g' | cut -c1-100)
+        echo "FAIL $name $* :: rc=$rc :: $detail"
         fail=$((fail+1))
         failures+=("$name $*")
     else
@@ -104,6 +108,7 @@ run policy-decisions         pol-icp-v2
 run policy-accounts          pol-icp-v2
 run decisions-by-domain
 run decisions-by-actor-type
+run policy-decision-count    pol-icp-v2
 
 # ─── opportunities.gq ────────────────────────────────────────────────────
 echo "── opportunities ──"
@@ -142,6 +147,14 @@ run export-funding-trigger   "$SINCE_OLD"
 run export-pipeline
 run export-cohort            coh-q2-targets
 run export-decisions         "$SINCE_RECENT"
+
+# ─── search.gq ───────────────────────────────────────────────────────────
+echo "── search ──"
+run search-chunks            funding                       # 0 rows OK — chunks not loaded by default
+run artifact-chunks          ia-bloomberg-cognition        # 0 rows OK — same reason
+run account-mentions         acc-anthropic
+run person-mentions          per-maya-chen
+# nearest-chunks omitted — requires a Vector(3072) literal as $q
 
 echo
 echo "── summary ──"

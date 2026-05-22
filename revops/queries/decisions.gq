@@ -62,12 +62,14 @@ query opportunity_decisions($opp: String) {
     order { $d.decidedAt desc }
 }
 
-// Decisions made by an agent (filter on Actor.actorType).
+// Decisions made by a specific agent Actor. Returns empty if the slug
+// resolves to a human Actor — pass an agent slug only.
 query decisions_by_agent($actor: String) {
     match {
         $d: Decision
         $a: Actor { slug: $actor }
         $d madeBy $a
+        $a.actorType = "agent"
     }
     return { $d.slug, $d.intent, $d.status, $d.confidence, $d.decidedAt }
     order { $d.decidedAt desc }

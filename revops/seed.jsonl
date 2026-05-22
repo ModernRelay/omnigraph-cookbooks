@@ -296,6 +296,9 @@
 {"edge":"ActionToPerson","from":"act-email-maya","to":"per-maya-chen","data":{}}
 {"edge":"ActionOnAccount","from":"act-enrich-cognition","to":"acc-cognition","data":{}}
 {"edge":"ActionOnAccount","from":"act-disqualify-inflection","to":"acc-inflection-old","data":{}}
+{"edge":"ExecutedBy","from":"act-enrich-cognition","to":"act-agent-classifier","data":{}}
+{"edge":"ExecutedBy","from":"act-email-maya","to":"act-human-priya","data":{}}
+{"edge":"ExecutedBy","from":"act-disqualify-inflection","to":"act-human-priya","data":{}}
 {"edge":"MemberOfCohort","from":"acc-cognition","to":"coh-q2-targets","data":{}}
 {"edge":"MemberOfCohort","from":"acc-github","to":"coh-q2-targets","data":{}}
 {"edge":"MemberOfCohort","from":"acc-cursor","to":"coh-q2-targets","data":{}}

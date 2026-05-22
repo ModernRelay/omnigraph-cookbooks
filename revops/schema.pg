@@ -383,6 +383,7 @@ edge EngagedByPerson: Engagement -> Person
 edge EngagedWithArtifact: Engagement -> InformationArtifact
 edge ActionToPerson: Action -> Person
 edge ActionOnAccount: Action -> Account
+edge ExecutedBy: Action -> Actor
 
 
 // ══════════════════════════════════════════════════════════════════════

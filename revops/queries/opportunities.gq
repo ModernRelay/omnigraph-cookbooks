@@ -23,7 +23,8 @@ query opportunity_account($slug: String) {
     return { $a.slug, $a.legalName, $a.kind, $a.segment, $a.industry }
 }
 
-// Buying committee for an opportunity — Champion, Buyer, Influencer, Blocker.
+// Champions on an opportunity. For the full buying committee, also call
+// opportunity_buyers, opportunity_influencers, and opportunity_blockers.
 query opportunity_committee($slug: String) {
     match {
         $o: Opportunity { slug: $slug }

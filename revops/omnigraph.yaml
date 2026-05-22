@@ -346,6 +346,12 @@ aliases:
     name: policy_decisions
     args: [policy]
 
+  policy-decision-count:
+    command: read
+    query: governance.gq
+    name: policy_decision_count
+    args: [policy]
+
   policy-accounts:
     command: read
     query: governance.gq
@@ -574,7 +580,7 @@ aliases:
     command: change
     query: mutations.gq
     name: advance_stage
-    args: [slug, stage, updatedAt]
+    args: [slug, stage, updatedAt, decisionSlug, actor, rationale, decidedAt]
 
   close-won:
     command: change
@@ -619,13 +625,13 @@ aliases:
     command: change
     query: mutations.gq
     name: add_signal
-    args: [slug, name, kind, strength, capturedAt, createdAt]
+    args: [slug, name, kind, strength, capturedAt, createdAt, brief]
 
   add-decision:
     command: change
     query: mutations.gq
     name: add_decision
-    args: [slug, intent, domain, status, assertion, decidedAt, createdAt]
+    args: [slug, intent, domain, status, assertion, decidedAt, createdAt, rationale]
 
   add-action:
     command: change
@@ -812,3 +818,45 @@ aliases:
     query: mutations.gq
     name: link_lead_resolves
     args: [lead, person, resolvedAt]
+
+  # ════════════════════════════════════════════════════════════
+  # Mutations — action provenance
+  # ════════════════════════════════════════════════════════════
+  link-action-executed-by:
+    command: change
+    query: mutations.gq
+    name: link_action_executed_by
+    args: [action, actor]
+
+  # ════════════════════════════════════════════════════════════
+  # Search & retrieval (over Chunks of InformationArtifact text)
+  # ════════════════════════════════════════════════════════════
+  search-chunks:
+    command: read
+    query: search.gq
+    name: search_chunks
+    args: [q]
+
+  nearest-chunks:
+    command: read
+    query: search.gq
+    name: nearest_chunks
+    args: [q]
+
+  artifact-chunks:
+    command: read
+    query: search.gq
+    name: artifact_chunks
+    args: [artifact]
+
+  account-mentions:
+    command: read
+    query: search.gq
+    name: account_mentions
+    args: [account]
+
+  person-mentions:
+    command: read
+    query: search.gq
+    name: person_mentions
+    args: [person]
