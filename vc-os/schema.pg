@@ -1,0 +1,523 @@
+// VC OS — Venture-capital operating system schema, built on Omnigraph.
+//
+// Models the seven jobs a VC does (Find / Evaluate / Decide / Win / Help / Monitor / Learn).
+// Organized as 6 core nodes (stable for years) + 11 growth-ring nodes (analytical layer
+// that compounds). See README.md for the design rationale.
+//
+//   Core (6):           Company · Person · Deal · Fund · Market · Artifact
+//   Growth ring (11):   Thesis · Assumption · Question · Signal · Insight · Decision ·
+//                       Commitment · Pattern · Lesson · Chunk · SourceEntity
+//
+// 17 node types, ~50 edge types. Slug-keyed, flat-enum, no interfaces.
+
+
+// ═══════════════════════════════════════════════════════════════════
+// CORE — the six entities the team thinks about every day.
+// These names and shapes should not change for years.
+// ═══════════════════════════════════════════════════════════════════
+
+
+// Company is the universal entity-of-the-world node. It covers every business-like
+// entity: startups we engage with, companies we observe in the market, LPs, peer VC
+// firms, hyperscaler acquirers, customers, regulators, accelerators. The `kind` enum
+// is the lens; `status` carries Quito's engagement state for `kind=startup` (nullable
+// otherwise). Quito itself is a Company with `slug=co-quito, kind=vc-firm`.
+node Company {
+    slug: String @key
+    name: String @index
+    brief: String?
+    description: String?
+    website: String?
+    founded_year: I32?
+    hq: String?
+
+    // What kind of entity this is. Required, indexed — the primary lens.
+    kind: enum(startup, lp-institution, vc-firm, acquirer, customer, bank,
+               regulator, association, accelerator, university, family-office,
+               other) @index
+
+    // Quito's engagement state. Only meaningful for `kind=startup`. Nullable
+    // otherwise. `observed` = "we track this company in our knowledge base but
+    // have not engaged" (e.g., PitchBook-imported, news-sourced).
+    status: enum(cold, watching, pipeline, evaluating, portfolio, exited,
+                 passed, observed)? @index
+
+    // For institutional entities (LPs, hyperscalers, banks): assets under management.
+    aum_usd_m: F64?
+
+    // Sourcing/triage score for `kind=startup`. Skill-derived (0..1 or 0..100).
+    // Nullable; convention rather than constraint.
+    fit_score: F64?
+
+    // Escape hatch for non-structural labels (e.g., "stealth", "ai-native",
+    // "ex-yc-w26"). Avoid encoding queryable concepts here — prefer edges or
+    // dedicated enums.
+    tags: [String]?
+
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Person is an individual human. Roles relative to Quito are NOT properties of the
+// person — they live on edges: `WorksAt co-quito` (team), `FounderOf co-x` (founder),
+// `LpInFund fund-iii` (individual LP), `RoleInDeal deal-y {role: expert}` (expert),
+// `DecisionMakerAt co-aws` (acquirer DM). This keeps the Person definition intrinsic.
+//
+// Enrichment fields (prior_exits, years_operating, education, prior_companies,
+// founder_score) support the "dynamically updating founder view" — typically populated
+// by a scraping/enrichment skill. `last_enriched_at` marks when that ran.
+node Person {
+    slug: String @key
+    name: String @index
+    first_name: String?
+    last_name: String?
+    email: String?
+    linkedin: String?
+    location: String?
+    bio: String?
+
+    // Founder enrichment — typically scraped/inferred, refreshed periodically.
+    prior_exits: I32?
+    years_operating: I32?
+    education: String?
+    prior_companies: [String]?
+    founder_score: F64?
+    last_enriched_at: DateTime?
+
+    tags: [String]?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Deal is a funding event involving a Company. A Deal can be Quito-engaged
+// (`FromFund` set, `LedByPerson` set, `our_check_size_usd_m` set) or externally
+// observed (none of those set, `outcome=observed`). PitchBook-imported rounds we
+// never engaged with use `outcome=observed`.
+//
+// One Company can have many Deals (multiple rounds). The CRM grain.
+node Deal {
+    slug: String @key
+    name: String @index
+    round_type: enum(pre-seed, seed, seed-extension, series-a, series-a-extension,
+                     series-b, series-c, series-d, series-d-plus, growth, bridge,
+                     secondary, other)?
+    stage: enum(sourced, qualified, in-diligence, ic-ready, decided, closed,
+                dead) @index
+    // `observed` = external round, no Quito engagement (e.g. PitchBook import).
+    outcome: enum(open, invested, passed, lost, withdrawn, observed) @index
+    round_size_usd_m: F64?
+    pre_money_valuation_usd_m: F64?
+    post_money_valuation_usd_m: F64?
+    // Optional — null for observed rounds where Quito didn't participate.
+    our_check_size_usd_m: F64?
+    our_ownership_delta_pct: F64?
+    target_close_date: Date?
+    date_announced: Date?
+    date_closed: Date?
+    brief: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Fund — Quito's funds (or any fund tracked in the system).
+node Fund {
+    slug: String @key
+    name: String @index
+    vintage_year: I32?
+    total_size_usd_m: F64?
+    status: enum(raising, investing, harvesting, closed)?
+    sector_focus: String?
+    brief: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Market — sector/vertical/segment. A hub for sector-specialist Theses, Patterns,
+// and Lessons. Companies live in Markets via `CompanyInMarket`.
+// `parent_market` is a free-text pointer (a slug) to a broader Market — promote to
+// an edge if hierarchical queries become load-bearing.
+node Market {
+    slug: String @key
+    name: String @index
+    parent_market: String?
+    brief: String?
+    description: String?
+    tags: [String]?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Artifact — raw source content with native Blob support. Granola transcripts,
+// pitch decks (PDF), emails, screenshots, Slack messages, web pages. The
+// `derivedFromArtifact` chain preserves provenance through transforms
+// (audio → transcript → summary → memo).
+node Artifact {
+    slug: String @key
+    name: String @index
+    kind: enum(email, ticket, slack-msg, meeting-note, transcript, deck,
+               web-page, screenshot, doc, audio, image, summary) @index
+    source: enum(gmail, slack, granola, web, manual, lemlist, sapien, zendesk,
+                 notion, derived, other) @index
+    title: String?
+    body: String?
+    blob: Blob?
+    mime_type: String?
+    url: String?
+    thread_id: String? @index
+    date: Date @index
+    captured_at: DateTime
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// GROWTH RING — the analytical layer that compounds on top of the core.
+// These can be added to or refined without touching core entities.
+// ═══════════════════════════════════════════════════════════════════
+
+
+// Belief layer ────────────────────────────────────────────────────
+
+
+// Thesis — a market- or pattern-level belief Quito has bet on. A Thesis is a
+// Pattern the firm has financialized. Theses become `contradicted` (not just
+// `retired`) when their underlying Assumptions accumulate contradicting Signals.
+node Thesis {
+    slug: String @key
+    name: String @index
+    brief: String?
+    description: String?
+    status: enum(active, retired, contradicted) @index
+    confidence: enum(low, medium, high)?
+    formed_date: Date?
+    tags: [String]?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Assumption — a falsifiable sub-belief grounding a Thesis or Decision.
+// `level` is the lens: is this a market belief, a founder belief, a product
+// belief, a competitive belief, a financial belief, or a strategic belief.
+node Assumption {
+    slug: String @key
+    name: String @index
+    brief: String?
+    description: String?
+    level: enum(market, founder, product, competitive, financial,
+                strategic) @index
+    confidence: enum(low, medium, high)?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Question — an open uncertainty the firm needs to resolve before acting.
+// `priority` reflects urgency relative to upcoming decisions.
+node Question {
+    slug: String @key
+    name: String @index
+    description: String?
+    status: enum(open, partial, resolved) @index
+    priority: enum(low, normal, high, urgent)?
+    asked_at: Date?
+    answer: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Evidence layer ──────────────────────────────────────────────────
+
+
+// Signal — a dated external fact. `date` is when the event happened in the world;
+// `stagingTimestamp` is when we recorded it (matches pharma-intel convention).
+// Signals are what move Beliefs: each Signal supports or contradicts an Assumption
+// or Thesis, or informs a Question.
+node Signal {
+    slug: String @key
+    name: String @index
+    kind: enum(discovery, launch, fundraise, exit, founder-event, market-move,
+               competitive, customer, regulatory, team-change, portfolio-update,
+               board-decision) @index
+    brief: String?
+    description: String?
+    date: Date @index
+    confidence: enum(low, medium, high)?
+    impact: enum(low, normal, high)?
+    stagingTimestamp: DateTime @index
+    url: String?
+    tags: [String]?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Insight — a synthesized internal interpretation. Memo, brief, observation,
+// hypothesis, recap. Multi-agent IC simulation uses two Insights with stance=bull
+// and stance=bear against the same Deal, each grounded in Signals via
+// `InsightReliesOnSignal`. Founder-assessment memos attach via `InsightAboutPerson`.
+node Insight {
+    slug: String @key
+    name: String @index
+    kind: enum(memo, brief, observation, hypothesis, recap) @index
+    stance: enum(bull, bear, neutral)?
+    summary: String?
+    body: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// SourceEntity — the upstream source from which an Artifact (and any Signal
+// derived from it) originated. Reliability scoring lets us invalidate downstream
+// Signals when a source proves unreliable — exactly the kind of provenance-driven
+// revalidation that's the whole point of structured knowledge over PDFs and emails.
+node SourceEntity {
+    slug: String @key
+    name: String @index
+    kind: enum(news, social, blog, expert-call, sec-filing, pitch-deck,
+               founder-direct, customer-call, web-scrape, internal,
+               other) @index
+    // Updates over time as evidence accumulates about this source's track record.
+    reliability: enum(low, medium, high)? @index
+    url: String?
+    brief: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Chunk — IMPLEMENTATION DETAIL for hybrid search. Indexed slices of Artifact
+// content. Not an ontological commitment; if the storage stack changed, this
+// would change shape. v1 of this cookbook ships no Chunks in the seed —
+// populate via `omnigraph embed --reembed_all` after attaching real Artifacts.
+node Chunk {
+    slug: String @key
+    text: String
+    chunk_index: I32
+    embedding: Vector(3072) @embed("text") @index
+    createdAt: DateTime
+}
+
+
+// Action layer ────────────────────────────────────────────────────
+
+
+// Decision — a one-shot decision regarding a Deal, Thesis, or Company. The
+// provenance chain (Decision → basedOnAssumption → contradictedBy → Signal
+// → sourcedFromArtifact → publishedBySource) IS the audit trail. Combined with
+// snapshot-pinned reads, no separate audit log is needed.
+//
+// Note: intros and follow-ups are NOT Decisions — they're Commitments. A Decision
+// is a one-shot act (decided_at). A Commitment is an ongoing obligation (due_date).
+node Decision {
+    slug: String @key
+    name: String @index
+    kind: enum(invest, pass, follow-on, board-flag, double-down, write-off,
+               exit-plan, second-meeting, no-decision) @index
+    rationale: String?
+    decided_at: Date? @index
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Commitment — a deferred action with a deadline and an assignee. Replaces the
+// "intro" or "follow-up" pseudo-decisions. Used for: intros to make, follow-ups
+// owed, board prep deliverables.
+node Commitment {
+    slug: String @key
+    name: String @index
+    status: enum(open, in-progress, done, dropped, blocked) @index
+    priority: enum(low, normal, high, urgent)?
+    due_date: Date?
+    completed_at: Date?
+    detail: String?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Reflexive layer ─────────────────────────────────────────────────
+
+
+// Pattern — a recurring shape observed across many Deals, Signals, or Companies.
+// Patterns AGGREGATE (multiple subjects); Insights INTERPRET (typically one subject).
+// Patterns we have bet on become Theses. Patterns we have learned from become Lessons.
+node Pattern {
+    slug: String @key
+    name: String @index
+    kind: enum(gtm, pricing, founder-archetype, market-timing, exit, failure-mode,
+               tech-adoption, capital-structure, regulatory) @index
+    brief: String?
+    description: String?
+    confidence: enum(low, medium, high)?
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Lesson — a distilled OPERATIONAL rule meant to shape future behavior. Differs
+// from Insight (which is analytical/descriptive) in that Lessons are imperatives.
+// `kind=protocol` covers the "runtime rules / Notion Learnings" use case.
+//
+// `status=tentative` means the Lesson lives on a review branch awaiting human
+// merge — the branch-based replacement for "tentative-learnings → review → promote".
+// `confidence` is epistemic (how strong is the evidence). They can differ: a high-
+// confidence Lesson can still be `tentative` if it just hasn't been merged yet.
+node Lesson {
+    slug: String @key
+    name: String @index
+    kind: enum(protocol, rule-of-thumb, anti-pattern, runbook) @index
+    body: String
+    confidence: enum(low, medium, high)?
+    status: enum(tentative, active, retired) @index
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// EDGES — Engagement loop (the CRM)
+// ═══════════════════════════════════════════════════════════════════
+
+edge ForCompany: Deal -> Company
+edge FromFund: Deal -> Fund
+edge LedByPerson: Deal -> Person
+edge RelevantThesis: Deal -> Thesis
+edge RelevantMarket: Deal -> Market
+edge LeadInvestor: Deal -> Company
+edge ParticipantInvestor: Deal -> Company
+
+// Knows is stored bidirectionally by load discipline (Omnigraph @unique(src,dst)
+// is two separate per-column constraints, not pair-uniqueness). The link_knows
+// mutation creates both directions; the seed loads both. See CLAUDE.md.
+edge Knows: Person -> Person {
+    context: String?
+    since: Date?
+    strength: enum(weak, medium, strong)?
+}
+
+// WorksAt is the canonical employment edge. Quito team members WorksAt co-quito
+// (Company kind=vc-firm). Founders may WorksAt the company they founded (in
+// addition to the FounderOf edge), or work at a different company.
+edge WorksAt: Person -> Company {
+    role: String?
+    since: Date?
+    until: Date?
+    current: Bool?
+}
+
+edge FounderOf: Person -> Company
+edge BoardMemberAt: Person -> Company {
+    role: enum(director, observer, chair, independent)?
+    since: Date?
+    until: Date?
+}
+
+// RoleInDeal: any context-specific role a Person plays for a specific Deal.
+// Use this for experts, customer references, co-investor leads, board candidates,
+// venture partners advising on a deal, etc.
+edge RoleInDeal: Person -> Deal {
+    role: enum(founder, customer-ref, expert, co-investor-lead,
+               co-investor-participant, board-candidate, venture-partner)?
+}
+
+edge DecisionMakerAt: Person -> Company {
+    role: String?
+}
+
+// Exit-landscape edge — Company → Company (e.g., AWS would acquire Pinion Infer).
+edge WouldAcquire: Company -> Company {
+    rationale: String?
+    confidence: enum(low, medium, high)?
+}
+
+// LpInFund is now Company → Fund. Institutional LPs are Companies with
+// kind=lp-institution; individual LPs are family-office Companies (kind=family-office).
+// Individuals working at LP institutions have WorksAt edges; the LP commitment lives
+// at the Company level.
+edge LpInFund: Company -> Fund {
+    commitment_usd_m: F64?
+    committed_at: Date?
+}
+
+edge CompanyInMarket: Company -> Market
+
+
+// ═══════════════════════════════════════════════════════════════════
+// EDGES — Belief + Evidence loop (SPIKE+)
+// ═══════════════════════════════════════════════════════════════════
+
+// Signal classification — what the signal is about
+edge SignalAboutCompany: Signal -> Company
+edge SignalAboutPerson: Signal -> Person
+edge SignalAboutMarket: Signal -> Market
+edge SignalAboutDeal: Signal -> Deal
+
+// Signal → Belief (the analytical loop)
+edge SupportsThesis: Signal -> Thesis
+edge ContradictsThesis: Signal -> Thesis
+edge SupportsAssumption: Signal -> Assumption
+edge ContradictsAssumption: Signal -> Assumption
+edge InformsQuestion: Signal -> Question
+
+// Thesis structure
+edge ThesisReliesOnAssumption: Thesis -> Assumption
+edge ThesisAboutMarket: Thesis -> Market
+edge ThesisAboutCompany: Thesis -> Company
+
+// Question targeting
+edge QuestionAboutDeal: Question -> Deal
+
+// Insight wiring
+edge InsightAboutDeal: Insight -> Deal
+edge InsightAboutCompany: Insight -> Company
+edge InsightAboutPerson: Insight -> Person     // founder-assessment memos attach here
+edge InsightHighlightsPattern: Insight -> Pattern
+edge InsightReliesOnSignal: Insight -> Signal
+
+// Provenance (Artifact ↔ world)
+edge SignalSourcedFromArtifact: Signal -> Artifact
+edge PublishedBySource: Artifact -> SourceEntity     // for revalidation if source reliability drops
+edge ArtifactFromPerson: Artifact -> Person
+edge ArtifactAboutDeal: Artifact -> Deal
+edge ArtifactAboutCompany: Artifact -> Company
+edge ArtifactMentionsPerson: Artifact -> Person
+edge ArtifactDerivedFrom: Artifact -> Artifact {
+    activity: enum(transcribed, summarized, ocr, extracted, distilled,
+                   translated)?
+}
+
+// Chunk for hybrid search
+edge ChunkOfArtifact: Chunk -> Artifact
+
+
+// ═══════════════════════════════════════════════════════════════════
+// EDGES — Decision + Learning loop (audit / feedback)
+// ═══════════════════════════════════════════════════════════════════
+
+edge DecisionRegardingDeal: Decision -> Deal
+edge DecisionRegardingThesis: Decision -> Thesis
+edge DecisionBasedOnAssumption: Decision -> Assumption
+edge DecisionNeedsAnswer: Decision -> Question
+edge DecisionByPerson: Decision -> Person
+
+edge CommitmentForPerson: Commitment -> Person
+edge CommitmentRegardingDeal: Commitment -> Deal
+edge CommitmentAssignedTo: Commitment -> Person
+edge CommitmentFromArtifact: Commitment -> Artifact
+
+// Reflexive: Pattern + Lesson
+edge PatternAcrossDecision: Pattern -> Decision
+edge PatternAcrossSignal: Pattern -> Signal
+edge PatternAcrossCompany: Pattern -> Company
+edge LessonDistilledFromPattern: Lesson -> Pattern
+edge LessonAppliesToMarket: Lesson -> Market

@@ -1,0 +1,204 @@
+// Beliefs — Thesis, Assumption, Question. The value layer.
+
+// ──────────────────────────────────────────────
+// Thesis reads
+// ──────────────────────────────────────────────
+
+query get_thesis($slug: String) {
+    match {
+        $t: Thesis { slug: $slug }
+    }
+    return { $t.slug, $t.name, $t.brief, $t.description, $t.status, $t.confidence, $t.formed_date }
+}
+
+query theses_active() {
+    match {
+        $t: Thesis { status: "active" }
+    }
+    return { $t.slug, $t.name, $t.confidence, $t.brief, $t.formed_date }
+    order { $t.name }
+}
+
+query theses_contradicted() {
+    match {
+        $t: Thesis { status: "contradicted" }
+    }
+    return { $t.slug, $t.name, $t.confidence, $t.brief }
+    order { $t.name }
+}
+
+query theses_retired() {
+    match {
+        $t: Thesis { status: "retired" }
+    }
+    return { $t.slug, $t.name, $t.brief }
+    order { $t.name }
+}
+
+query thesis_assumptions($slug: String) {
+    match {
+        $t: Thesis { slug: $slug }
+        $t thesisReliesOnAssumption $a
+    }
+    return { $a.slug, $a.name, $a.level, $a.brief, $a.confidence }
+}
+
+query thesis_supporting_signals($slug: String) {
+    match {
+        $t: Thesis { slug: $slug }
+        $s supportsThesis $t
+    }
+    return { $s.slug, $s.name, $s.kind, $s.date, $s.brief }
+    order { $s.date desc }
+}
+
+query thesis_contradicting_signals($slug: String) {
+    match {
+        $t: Thesis { slug: $slug }
+        $s contradictsThesis $t
+    }
+    return { $s.slug, $s.name, $s.kind, $s.date, $s.brief }
+    order { $s.date desc }
+}
+
+query thesis_market($slug: String) {
+    match {
+        $t: Thesis { slug: $slug }
+        $t thesisAboutMarket $m
+    }
+    return { $m.slug, $m.name, $m.brief }
+}
+
+query thesis_companies($slug: String) {
+    match {
+        $t: Thesis { slug: $slug }
+        $t thesisAboutCompany $c
+    }
+    return { $c.slug, $c.name, $c.status, $c.brief }
+}
+
+query thesis_deals($slug: String) {
+    match {
+        $t: Thesis { slug: $slug }
+        $d relevantThesis $t
+    }
+    return { $d.slug, $d.name, $d.stage, $d.outcome, $d.brief }
+}
+
+// Pre-board / pre-IC scope: this thesis is contradicted by which signals?
+query thesis_contradictions_via_assumptions($slug: String) {
+    match {
+        $t: Thesis { slug: $slug }
+        $t thesisReliesOnAssumption $a
+        $s contradictsAssumption $a
+    }
+    return { $a.slug, $a.name, $s.slug, $s.name, $s.date, $s.brief }
+    order { $s.date desc }
+}
+
+
+// ──────────────────────────────────────────────
+// Assumption reads
+// ──────────────────────────────────────────────
+
+query get_assumption($slug: String) {
+    match {
+        $a: Assumption { slug: $slug }
+    }
+    return { $a.slug, $a.name, $a.brief, $a.description, $a.level, $a.confidence }
+}
+
+query assumptions_by_level($level: String) {
+    match {
+        $a: Assumption { level: $level }
+    }
+    return { $a.slug, $a.name, $a.brief, $a.confidence }
+    order { $a.name }
+}
+
+query assumption_supports($slug: String) {
+    match {
+        $a: Assumption { slug: $slug }
+        $s supportsAssumption $a
+    }
+    return { $s.slug, $s.name, $s.kind, $s.date, $s.brief }
+    order { $s.date desc }
+}
+
+query assumption_contradictions($slug: String) {
+    match {
+        $a: Assumption { slug: $slug }
+        $s contradictsAssumption $a
+    }
+    return { $s.slug, $s.name, $s.kind, $s.date, $s.brief }
+    order { $s.date desc }
+}
+
+query assumption_theses($slug: String) {
+    match {
+        $a: Assumption { slug: $slug }
+        $t thesisReliesOnAssumption $a
+    }
+    return { $t.slug, $t.name, $t.status, $t.confidence }
+}
+
+query assumption_decisions($slug: String) {
+    match {
+        $a: Assumption { slug: $slug }
+        $dec decisionBasedOnAssumption $a
+    }
+    return { $dec.slug, $dec.name, $dec.kind, $dec.decided_at }
+}
+
+
+// ──────────────────────────────────────────────
+// Question reads
+// ──────────────────────────────────────────────
+
+query get_question($slug: String) {
+    match {
+        $q: Question { slug: $slug }
+    }
+    return { $q.slug, $q.name, $q.description, $q.status, $q.priority, $q.asked_at, $q.answer }
+}
+
+query open_questions() {
+    match {
+        $q: Question { status: "open" }
+    }
+    return { $q.slug, $q.name, $q.priority, $q.asked_at, $q.description }
+    order { $q.asked_at desc }
+}
+
+query questions_by_status($status: String) {
+    match {
+        $q: Question { status: $status }
+    }
+    return { $q.slug, $q.name, $q.priority, $q.description }
+    order { $q.name }
+}
+
+query question_signals($slug: String) {
+    match {
+        $q: Question { slug: $slug }
+        $s informsQuestion $q
+    }
+    return { $s.slug, $s.name, $s.kind, $s.date, $s.brief }
+    order { $s.date desc }
+}
+
+query question_decisions($slug: String) {
+    match {
+        $q: Question { slug: $slug }
+        $dec decisionNeedsAnswer $q
+    }
+    return { $dec.slug, $dec.name, $dec.kind, $dec.decided_at }
+}
+
+query question_deal($slug: String) {
+    match {
+        $q: Question { slug: $slug }
+        $q questionAboutDeal $d
+    }
+    return { $d.slug, $d.name, $d.stage, $d.outcome }
+}

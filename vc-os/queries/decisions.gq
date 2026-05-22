@@ -1,0 +1,128 @@
+// Decision + Commitment reads. Decisions provenance is the audit trail.
+
+// ──────────────────────────────────────────────
+// Decision reads
+// ──────────────────────────────────────────────
+
+query get_decision($slug: String) {
+    match {
+        $dec: Decision { slug: $slug }
+    }
+    return { $dec.slug, $dec.name, $dec.kind, $dec.rationale, $dec.decided_at }
+}
+
+query decisions_recent() {
+    match {
+        $dec: Decision
+    }
+    return { $dec.slug, $dec.name, $dec.kind, $dec.decided_at, $dec.rationale }
+    order { $dec.decided_at desc }
+}
+
+query decisions_by_kind($kind: String) {
+    match {
+        $dec: Decision { kind: $kind }
+    }
+    return { $dec.slug, $dec.name, $dec.decided_at, $dec.rationale }
+    order { $dec.decided_at desc }
+}
+
+query decision_deal($slug: String) {
+    match {
+        $dec: Decision { slug: $slug }
+        $dec decisionRegardingDeal $d
+    }
+    return { $d.slug, $d.name, $d.stage, $d.outcome, $d.brief }
+}
+
+query decision_thesis($slug: String) {
+    match {
+        $dec: Decision { slug: $slug }
+        $dec decisionRegardingThesis $t
+    }
+    return { $t.slug, $t.name, $t.status, $t.confidence }
+}
+
+query decision_assumptions($slug: String) {
+    match {
+        $dec: Decision { slug: $slug }
+        $dec decisionBasedOnAssumption $a
+    }
+    return { $a.slug, $a.name, $a.level, $a.brief, $a.confidence }
+}
+
+query decision_questions($slug: String) {
+    match {
+        $dec: Decision { slug: $slug }
+        $dec decisionNeedsAnswer $q
+    }
+    return { $q.slug, $q.name, $q.status, $q.priority, $q.description }
+}
+
+query decision_by_person($slug: String) {
+    match {
+        $dec: Decision { slug: $slug }
+        $dec decisionByPerson $p
+    }
+    return { $p.slug, $p.name, $p.email }
+}
+
+
+// ──────────────────────────────────────────────
+// Commitment reads
+// ──────────────────────────────────────────────
+
+query get_commitment($slug: String) {
+    match {
+        $cmt: Commitment { slug: $slug }
+    }
+    return { $cmt.slug, $cmt.name, $cmt.status, $cmt.priority, $cmt.due_date, $cmt.completed_at, $cmt.detail }
+}
+
+query commitments_open() {
+    match {
+        $cmt: Commitment { status: "open" }
+    }
+    return { $cmt.slug, $cmt.name, $cmt.priority, $cmt.due_date, $cmt.detail }
+    order { $cmt.due_date asc }
+}
+
+query commitments_by_status($status: String) {
+    match {
+        $cmt: Commitment { status: $status }
+    }
+    return { $cmt.slug, $cmt.name, $cmt.priority, $cmt.due_date }
+    order { $cmt.due_date asc }
+}
+
+query commitment_for_person($slug: String) {
+    match {
+        $cmt: Commitment { slug: $slug }
+        $cmt commitmentForPerson $p
+    }
+    return { $p.slug, $p.name, $p.email }
+}
+
+query commitment_assigned_to($slug: String) {
+    match {
+        $cmt: Commitment { slug: $slug }
+        $cmt commitmentAssignedTo $p
+    }
+    return { $p.slug, $p.name, $p.email }
+}
+
+query commitment_deal($slug: String) {
+    match {
+        $cmt: Commitment { slug: $slug }
+        $cmt commitmentRegardingDeal $d
+    }
+    return { $d.slug, $d.name, $d.stage, $d.outcome, $d.brief }
+}
+
+query commitment_artifact($slug: String) {
+    match {
+        $cmt: Commitment { slug: $slug }
+        $cmt commitmentFromArtifact $a
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.url }
+}

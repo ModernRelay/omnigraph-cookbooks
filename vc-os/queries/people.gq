@@ -1,0 +1,229 @@
+// People + network reads. Person is intrinsic; relationships live on edges.
+// Roles (team / founder / lp / vp / expert) are derived from edge traversals,
+// not from a property on Person. Quito itself is `co-quito` (Company kind=vc-firm);
+// team members `WorksAt co-quito`.
+
+// ──────────────────────────────────────────────
+// Basic reads
+// ──────────────────────────────────────────────
+
+query get_person($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+    }
+    return { $p.slug, $p.name, $p.email, $p.linkedin, $p.location, $p.bio, $p.prior_exits, $p.years_operating, $p.education, $p.founder_score, $p.last_enriched_at }
+}
+
+query search_people($q: String) {
+    match {
+        $p: Person
+        search($p.name, $q)
+    }
+    return { $p.slug, $p.name, $p.location, $p.bio }
+}
+
+// Founders with strong enrichment data
+query founders_enriched() {
+    match {
+        $p: Person
+        $p founderOf $c
+    }
+    return { $p.slug, $p.name, $c.slug, $c.name, $p.prior_exits, $p.years_operating, $p.founder_score, $p.linkedin }
+    order { $p.name }
+}
+
+
+// ──────────────────────────────────────────────
+// Role-derived listings (replace primary_relation filters)
+// ──────────────────────────────────────────────
+
+// Quito team — anyone WorksAt co-quito.
+query team() {
+    match {
+        $p: Person
+        $p worksAt $quito
+        $quito: Company { slug: "co-quito" }
+    }
+    return { $p.slug, $p.name, $p.email, $p.location }
+    order { $p.name }
+}
+
+// Anyone who has founded at least one Company.
+query founders() {
+    match {
+        $p: Person
+        $p founderOf $c
+    }
+    return { $p.slug, $p.name, $c.slug, $c.name, $p.location, $p.linkedin }
+    order { $p.name }
+}
+
+// Anyone working at an LP-institution Company.
+query lp_contacts() {
+    match {
+        $p: Person
+        $p worksAt $org
+        $org: Company { kind: "lp-institution" }
+    }
+    return { $p.slug, $p.name, $org.slug, $org.name, $p.location, $p.email }
+    order { $p.name }
+}
+
+// Anyone working at an acquirer Company (corp dev, M&A leads).
+query acquirer_decision_makers() {
+    match {
+        $p: Person
+        $p decisionMakerAt $org
+        $org: Company { kind: "acquirer" }
+    }
+    return { $p.slug, $p.name, $org.slug, $org.name, $p.location, $p.linkedin }
+    order { $p.name }
+}
+
+// Persons playing any role on a deal (founder, customer-ref, expert, co-investor, …).
+// 0.4.x can't project/filter on the RoleInDeal.role edge property, so we can't
+// narrow to "experts only" at the query layer — the seed-side and the agent-side
+// have to read the edge data directly if they need to distinguish.
+query deal_role_participants() {
+    match {
+        $p: Person
+        $p roleInDeal $d
+    }
+    return { $p.slug, $p.name, $d.slug, $d.name, $p.bio }
+}
+
+
+// ──────────────────────────────────────────────
+// Person → world
+// (use `close_network` for a person's first-degree `Knows` connections.)
+// ──────────────────────────────────────────────
+
+query person_works_at($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p worksAt $c
+    }
+    return { $c.slug, $c.name, $c.kind, $c.website }
+}
+
+query person_founder_of($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p founderOf $c
+    }
+    return { $c.slug, $c.name, $c.kind, $c.status, $c.brief }
+}
+
+query person_board_seats($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p boardMemberAt $c
+    }
+    return { $c.slug, $c.name, $c.kind, $c.status }
+}
+
+query person_role_in_deal($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p roleInDeal $d
+    }
+    return { $d.slug, $d.name, $d.stage, $d.outcome, $d.brief }
+}
+
+query person_decision_maker_at($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p decisionMakerAt $c
+    }
+    return { $c.slug, $c.name, $c.kind, $c.brief }
+}
+
+
+// ──────────────────────────────────────────────
+// Network leverage queries
+// ──────────────────────────────────────────────
+
+// 2-hop: team member → bridge person → founder
+query intro_path_to_founder($slug: String) {
+    match {
+        $founder: Person { slug: $slug }
+        $bridge knows $founder
+        $teammate: Person
+        $teammate knows $bridge
+        $teammate worksAt $quito
+        $quito: Company { slug: "co-quito" }
+    }
+    return { $teammate.slug, $teammate.name, $bridge.slug, $bridge.name }
+}
+
+// 1-hop: which team members directly know this person.
+query direct_team_knowers($slug: String) {
+    match {
+        $target: Person { slug: $slug }
+        $teammate: Person
+        $teammate knows $target
+        $teammate worksAt $quito
+        $quito: Company { slug: "co-quito" }
+    }
+    return { $teammate.slug, $teammate.name }
+}
+
+// Full close network for one person (one-hop).
+query close_network($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $p knows $other
+    }
+    return { $other.slug, $other.name, $other.location }
+    order { $other.name }
+}
+
+// Decisions this person made.
+query person_decisions($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $dec decisionByPerson $p
+    }
+    return { $dec.slug, $dec.name, $dec.kind, $dec.decided_at, $dec.rationale }
+    order { $dec.decided_at desc }
+}
+
+// Open commitments assigned to this person.
+query person_open_commitments($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $cmt commitmentAssignedTo $p
+        $cmt.status = "open"
+    }
+    return { $cmt.slug, $cmt.name, $cmt.priority, $cmt.due_date, $cmt.detail }
+    order { $cmt.due_date asc }
+}
+
+// What's owed TO this person (intros to make, follow-ups owed).
+query person_commitments_for($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $cmt commitmentForPerson $p
+    }
+    return { $cmt.slug, $cmt.name, $cmt.status, $cmt.priority, $cmt.due_date, $cmt.detail }
+    order { $cmt.due_date asc }
+}
+
+// Recent signals about a person (founder events, team changes).
+query person_signals($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $s signalAboutPerson $p
+    }
+    return { $s.slug, $s.name, $s.kind, $s.brief, $s.date }
+    order { $s.date desc }
+}
+
+// Founder-assessment Insights attached to a Person.
+query person_insights($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $i insightAboutPerson $p
+    }
+    return { $i.slug, $i.name, $i.kind, $i.stance, $i.summary }
+}

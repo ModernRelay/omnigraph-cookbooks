@@ -1,0 +1,318 @@
+project:
+  name: VC OS — Venture-capital operating system
+
+graphs:
+  local_s3:
+    uri: s3://omnigraph-local/repos/vc-os
+  local_server:
+    uri: http://127.0.0.1:8080
+    bearer_token_env: OMNIGRAPH_BEARER_TOKEN
+
+server:
+  graph: local_s3
+  bind: 127.0.0.1:8080
+
+cli:
+  graph: local_server
+  branch: main
+  output_format: table
+  table_max_column_width: 80
+  table_cell_layout: truncate
+
+query:
+  roots:
+    - queries
+    - .
+
+aliases:
+  # ══════════════════════════════════════════════════════════════════
+  # VIEW: IC Meeting
+  # ══════════════════════════════════════════════════════════════════
+  pre-ic-brief-company:        { command: read, query: portfolio.gq, name: pre_ic_brief_company, args: [slug] }
+  pre-ic-brief-thesis:         { command: read, query: portfolio.gq, name: pre_ic_brief_thesis, args: [slug] }
+  pre-ic-brief-evidence:       { command: read, query: portfolio.gq, name: pre_ic_brief_evidence, args: [slug] }
+  pre-ic-brief-questions:      { command: read, query: portfolio.gq, name: pre_ic_brief_questions, args: [slug] }
+  pre-ic-brief-debate:         { command: read, query: portfolio.gq, name: pre_ic_brief_debate, args: [slug] }
+  debate-stances:              { command: read, query: deals.gq, name: debate_stances, args: [slug] }
+  founder-card:                { command: read, query: people.gq, name: get_person, args: [slug], format: kv }
+  person-insights:             { command: read, query: people.gq, name: person_insights, args: [slug] }
+
+  # ══════════════════════════════════════════════════════════════════
+  # VIEW: Weekly Pipeline Meeting
+  # ══════════════════════════════════════════════════════════════════
+  deals-open:                  { command: read, query: deals.gq, name: deals_open }
+  pipeline-companies:          { command: read, query: companies.gq, name: pipeline_companies }
+  high-fit-pipeline:           { command: read, query: companies.gq, name: high_fit_pipeline }
+  observed-companies:          { command: read, query: companies.gq, name: observed_companies }
+  recent-signals:              { command: read, query: signals.gq, name: recent_signals }
+  recent-contradictions:       { command: read, query: signals.gq, name: recent_contradictions }
+  open-questions:              { command: read, query: beliefs.gq, name: open_questions }
+
+  # ══════════════════════════════════════════════════════════════════
+  # VIEW: Portfolio Support Meeting
+  # ══════════════════════════════════════════════════════════════════
+  portfolio-book:              { command: read, query: portfolio.gq, name: portfolio_book }
+  portfolio-companies:         { command: read, query: companies.gq, name: portfolio_companies }
+  portfolio-recent-signals:    { command: read, query: portfolio.gq, name: portfolio_recent_signals }
+  portfolio-latest-updates:    { command: read, query: portfolio.gq, name: portfolio_latest_updates }
+  portfolio-open-questions:    { command: read, query: portfolio.gq, name: portfolio_open_questions }
+  portfolio-open-commitments:  { command: read, query: portfolio.gq, name: portfolio_open_commitments }
+  board-prep-pack:             { command: read, query: portfolio.gq, name: board_prep_pack, args: [slug] }
+  board-prep-open-questions:   { command: read, query: portfolio.gq, name: board_prep_open_questions, args: [slug] }
+  board-prep-commitments:      { command: read, query: portfolio.gq, name: board_prep_commitments, args: [slug] }
+  signal-portfolio-impact:     { command: read, query: signals.gq, name: signal_portfolio_impact, args: [slug] }
+  exit-landscape:              { command: read, query: companies.gq, name: exit_landscape, args: [slug] }
+  exit-landscape-decision-makers: { command: read, query: companies.gq, name: exit_landscape_decision_makers, args: [slug] }
+  contradicted-active-theses:  { command: read, query: portfolio.gq, name: contradicted_active_theses }
+  co-investor-leads:           { command: read, query: companies.gq, name: co_investor_leads }
+  co-investor-participants:    { command: read, query: companies.gq, name: co_investor_participants }
+  company-co-investors:        { command: read, query: companies.gq, name: company_co_investors, args: [slug] }
+  vc-firm-coinvestments:       { command: read, query: companies.gq, name: vc_firm_coinvestments, args: [slug] }
+
+  # ══════════════════════════════════════════════════════════════════
+  # VIEW: LPAC / Fund Reporting
+  # ══════════════════════════════════════════════════════════════════
+  fund-portfolio:              { command: read, query: portfolio.gq, name: fund_portfolio, args: [fund_slug] }
+  reserve-pressure:            { command: read, query: portfolio.gq, name: reserve_pressure, args: [fund_slug] }
+  portco-rounds:               { command: read, query: portfolio.gq, name: portco_rounds, args: [slug] }
+  decisions-recent:            { command: read, query: decisions.gq, name: decisions_recent }
+
+  # ══════════════════════════════════════════════════════════════════
+  # PRIMITIVES — Deals
+  # ══════════════════════════════════════════════════════════════════
+  deal:                        { command: read, query: deals.gq, name: get_deal, args: [slug], format: kv }
+  deals-by-stage:              { command: read, query: deals.gq, name: deals_by_stage, args: [stage] }
+  deals-by-outcome:            { command: read, query: deals.gq, name: deals_by_outcome, args: [outcome] }
+  search-deals:                { command: read, query: deals.gq, name: search_deals, args: [q] }
+  deal-company:                { command: read, query: deals.gq, name: deal_company, args: [slug] }
+  deal-fund:                   { command: read, query: deals.gq, name: deal_fund, args: [slug] }
+  deal-lead-partner:           { command: read, query: deals.gq, name: deal_lead_partner, args: [slug] }
+  deal-thesis:                 { command: read, query: deals.gq, name: deal_thesis, args: [slug] }
+  deal-market:                 { command: read, query: deals.gq, name: deal_market, args: [slug] }
+  deal-lead-investor:          { command: read, query: deals.gq, name: deal_lead_investor, args: [slug] }
+  deal-participants:           { command: read, query: deals.gq, name: deal_participants, args: [slug] }
+  deal-people:                 { command: read, query: deals.gq, name: deal_people, args: [slug] }
+  deal-signals:                { command: read, query: deals.gq, name: deal_signals, args: [slug] }
+  deal-artifacts:              { command: read, query: deals.gq, name: deal_artifacts, args: [slug] }
+  deal-insights:               { command: read, query: deals.gq, name: deal_insights, args: [slug] }
+  deal-open-questions:         { command: read, query: deals.gq, name: deal_open_questions, args: [slug] }
+  deal-decisions:              { command: read, query: deals.gq, name: deal_decisions, args: [slug] }
+  deal-commitments:            { command: read, query: deals.gq, name: deal_commitments, args: [slug] }
+
+  # ══════════════════════════════════════════════════════════════════
+  # PRIMITIVES — Companies & Markets
+  # ══════════════════════════════════════════════════════════════════
+  company:                     { command: read, query: companies.gq, name: get_company, args: [slug], format: kv }
+  companies-by-kind:           { command: read, query: companies.gq, name: companies_by_kind, args: [kind] }
+  companies-by-status:         { command: read, query: companies.gq, name: companies_by_status, args: [status] }
+  search-companies:            { command: read, query: companies.gq, name: search_companies, args: [q] }
+  company-deals:               { command: read, query: companies.gq, name: company_deals, args: [slug] }
+  company-founders:            { command: read, query: companies.gq, name: company_founders, args: [slug] }
+  company-board:               { command: read, query: companies.gq, name: company_board, args: [slug] }
+  company-signals:             { command: read, query: companies.gq, name: company_signals, args: [slug] }
+  company-artifacts:           { command: read, query: companies.gq, name: company_artifacts, args: [slug] }
+  company-insights:            { command: read, query: companies.gq, name: company_insights, args: [slug] }
+  company-markets:             { command: read, query: companies.gq, name: company_markets, args: [slug] }
+  company-theses:              { command: read, query: companies.gq, name: company_theses, args: [slug] }
+  market:                      { command: read, query: companies.gq, name: get_market, args: [slug], format: kv }
+  markets:                     { command: read, query: companies.gq, name: markets_all }
+  market-companies:            { command: read, query: companies.gq, name: market_companies, args: [slug] }
+  market-theses:               { command: read, query: companies.gq, name: market_theses, args: [slug] }
+  market-signals:              { command: read, query: companies.gq, name: market_signals, args: [slug] }
+  market-lessons:              { command: read, query: companies.gq, name: market_lessons, args: [slug] }
+
+  # ══════════════════════════════════════════════════════════════════
+  # PRIMITIVES — People (roles via edges, not enum)
+  # ══════════════════════════════════════════════════════════════════
+  person:                      { command: read, query: people.gq, name: get_person, args: [slug], format: kv }
+  search-people:               { command: read, query: people.gq, name: search_people, args: [q] }
+  team:                        { command: read, query: people.gq, name: team }
+  founders:                    { command: read, query: people.gq, name: founders }
+  founders-enriched:           { command: read, query: people.gq, name: founders_enriched }
+  lp-contacts:                 { command: read, query: people.gq, name: lp_contacts }
+  acquirer-decision-makers:    { command: read, query: people.gq, name: acquirer_decision_makers }
+  deal-role-participants:      { command: read, query: people.gq, name: deal_role_participants }
+  person-works-at:             { command: read, query: people.gq, name: person_works_at, args: [slug] }
+  person-founder-of:           { command: read, query: people.gq, name: person_founder_of, args: [slug] }
+  person-board-seats:          { command: read, query: people.gq, name: person_board_seats, args: [slug] }
+  person-role-in-deal:         { command: read, query: people.gq, name: person_role_in_deal, args: [slug] }
+  person-decision-maker-at:    { command: read, query: people.gq, name: person_decision_maker_at, args: [slug] }
+  intro-path-to-founder:       { command: read, query: people.gq, name: intro_path_to_founder, args: [slug] }
+  direct-team-knowers:         { command: read, query: people.gq, name: direct_team_knowers, args: [slug] }
+  close-network:               { command: read, query: people.gq, name: close_network, args: [slug] }
+  person-decisions:            { command: read, query: people.gq, name: person_decisions, args: [slug] }
+  person-open-commitments:     { command: read, query: people.gq, name: person_open_commitments, args: [slug] }
+  person-commitments-for:      { command: read, query: people.gq, name: person_commitments_for, args: [slug] }
+  person-signals:              { command: read, query: people.gq, name: person_signals, args: [slug] }
+
+  # ══════════════════════════════════════════════════════════════════
+  # PRIMITIVES — Signals
+  # ══════════════════════════════════════════════════════════════════
+  signal:                      { command: read, query: signals.gq, name: get_signal, args: [slug], format: kv }
+  signals-by-kind:             { command: read, query: signals.gq, name: signals_by_kind, args: [kind] }
+  search-signals:              { command: read, query: signals.gq, name: search_signals, args: [q] }
+  signal-company:              { command: read, query: signals.gq, name: signal_company, args: [slug] }
+  signal-person:               { command: read, query: signals.gq, name: signal_person, args: [slug] }
+  signal-market:               { command: read, query: signals.gq, name: signal_market, args: [slug] }
+  signal-deal:                 { command: read, query: signals.gq, name: signal_deal, args: [slug] }
+  signal-artifact:             { command: read, query: signals.gq, name: signal_artifact, args: [slug] }
+  signal-supports-assumptions: { command: read, query: signals.gq, name: signal_supports_assumptions, args: [slug] }
+  signal-contradicts-assumptions: { command: read, query: signals.gq, name: signal_contradicts_assumptions, args: [slug] }
+  signal-supports-theses:      { command: read, query: signals.gq, name: signal_supports_theses, args: [slug] }
+  signal-contradicts-theses:   { command: read, query: signals.gq, name: signal_contradicts_theses, args: [slug] }
+  signal-informs-questions:    { command: read, query: signals.gq, name: signal_informs_questions, args: [slug] }
+
+  # ══════════════════════════════════════════════════════════════════
+  # PRIMITIVES — Beliefs (Thesis / Assumption / Question)
+  # ══════════════════════════════════════════════════════════════════
+  thesis:                      { command: read, query: beliefs.gq, name: get_thesis, args: [slug], format: kv }
+  theses-active:               { command: read, query: beliefs.gq, name: theses_active }
+  theses-contradicted:         { command: read, query: beliefs.gq, name: theses_contradicted }
+  theses-retired:              { command: read, query: beliefs.gq, name: theses_retired }
+  thesis-assumptions:          { command: read, query: beliefs.gq, name: thesis_assumptions, args: [slug] }
+  thesis-supporting-signals:   { command: read, query: beliefs.gq, name: thesis_supporting_signals, args: [slug] }
+  thesis-contradicting-signals: { command: read, query: beliefs.gq, name: thesis_contradicting_signals, args: [slug] }
+  thesis-market:               { command: read, query: beliefs.gq, name: thesis_market, args: [slug] }
+  thesis-companies:            { command: read, query: beliefs.gq, name: thesis_companies, args: [slug] }
+  thesis-deals:                { command: read, query: beliefs.gq, name: thesis_deals, args: [slug] }
+  thesis-contradictions-via-assumptions: { command: read, query: beliefs.gq, name: thesis_contradictions_via_assumptions, args: [slug] }
+  assumption:                  { command: read, query: beliefs.gq, name: get_assumption, args: [slug], format: kv }
+  assumptions-by-level:        { command: read, query: beliefs.gq, name: assumptions_by_level, args: [level] }
+  assumption-supports:         { command: read, query: beliefs.gq, name: assumption_supports, args: [slug] }
+  assumption-contradictions:   { command: read, query: beliefs.gq, name: assumption_contradictions, args: [slug] }
+  assumption-theses:           { command: read, query: beliefs.gq, name: assumption_theses, args: [slug] }
+  assumption-decisions:        { command: read, query: beliefs.gq, name: assumption_decisions, args: [slug] }
+  question:                    { command: read, query: beliefs.gq, name: get_question, args: [slug], format: kv }
+  questions-by-status:         { command: read, query: beliefs.gq, name: questions_by_status, args: [status] }
+  question-signals:            { command: read, query: beliefs.gq, name: question_signals, args: [slug] }
+  question-decisions:          { command: read, query: beliefs.gq, name: question_decisions, args: [slug] }
+  question-deal:               { command: read, query: beliefs.gq, name: question_deal, args: [slug] }
+
+  # ══════════════════════════════════════════════════════════════════
+  # PRIMITIVES — Decisions & Commitments
+  # ══════════════════════════════════════════════════════════════════
+  decision:                    { command: read, query: decisions.gq, name: get_decision, args: [slug], format: kv }
+  decisions-by-kind:           { command: read, query: decisions.gq, name: decisions_by_kind, args: [kind] }
+  decision-deal:               { command: read, query: decisions.gq, name: decision_deal, args: [slug] }
+  decision-thesis:             { command: read, query: decisions.gq, name: decision_thesis, args: [slug] }
+  decision-assumptions:        { command: read, query: decisions.gq, name: decision_assumptions, args: [slug] }
+  decision-questions:          { command: read, query: decisions.gq, name: decision_questions, args: [slug] }
+  decision-by-person:          { command: read, query: decisions.gq, name: decision_by_person, args: [slug] }
+  commitment:                  { command: read, query: decisions.gq, name: get_commitment, args: [slug], format: kv }
+  commitments-open:            { command: read, query: decisions.gq, name: commitments_open }
+  commitments-by-status:       { command: read, query: decisions.gq, name: commitments_by_status, args: [status] }
+  commitment-for-person:       { command: read, query: decisions.gq, name: commitment_for_person, args: [slug] }
+  commitment-assigned-to:      { command: read, query: decisions.gq, name: commitment_assigned_to, args: [slug] }
+  commitment-deal:             { command: read, query: decisions.gq, name: commitment_deal, args: [slug] }
+  commitment-artifact:         { command: read, query: decisions.gq, name: commitment_artifact, args: [slug] }
+
+  # ══════════════════════════════════════════════════════════════════
+  # PRIMITIVES — Patterns & Lessons (reflexive layer)
+  # ══════════════════════════════════════════════════════════════════
+  pattern:                     { command: read, query: patterns.gq, name: get_pattern, args: [slug], format: kv }
+  patterns:                    { command: read, query: patterns.gq, name: patterns_all }
+  patterns-by-kind:            { command: read, query: patterns.gq, name: patterns_by_kind, args: [kind] }
+  pattern-signals:             { command: read, query: patterns.gq, name: pattern_signals, args: [slug] }
+  pattern-decisions:           { command: read, query: patterns.gq, name: pattern_decisions, args: [slug] }
+  pattern-companies:           { command: read, query: patterns.gq, name: pattern_companies, args: [slug] }
+  pattern-insights:            { command: read, query: patterns.gq, name: pattern_insights, args: [slug] }
+  lesson:                      { command: read, query: patterns.gq, name: get_lesson, args: [slug], format: kv }
+  lessons-active:              { command: read, query: patterns.gq, name: lessons_active }
+  lessons-tentative:           { command: read, query: patterns.gq, name: lessons_tentative }
+  lessons-by-kind:             { command: read, query: patterns.gq, name: lessons_by_kind, args: [kind] }
+  lesson-pattern:              { command: read, query: patterns.gq, name: lesson_pattern, args: [slug] }
+  lesson-markets:              { command: read, query: patterns.gq, name: lesson_markets, args: [slug] }
+  lessons-for-market:          { command: read, query: patterns.gq, name: lessons_for_market, args: [slug] }
+  protocols:                   { command: read, query: patterns.gq, name: protocols }
+
+  # ══════════════════════════════════════════════════════════════════
+  # PRIMITIVES — Sources (provenance + reliability)
+  # ══════════════════════════════════════════════════════════════════
+  source:                      { command: read, query: sources.gq, name: get_source, args: [slug], format: kv }
+  sources:                     { command: read, query: sources.gq, name: sources_all }
+  sources-by-reliability:      { command: read, query: sources.gq, name: sources_by_reliability, args: [reliability] }
+  sources-by-kind:             { command: read, query: sources.gq, name: sources_by_kind, args: [kind] }
+  source-artifacts:            { command: read, query: sources.gq, name: source_artifacts, args: [slug] }
+  source-downstream-signals:   { command: read, query: sources.gq, name: source_downstream_signals, args: [slug] }
+  artifact-source:             { command: read, query: sources.gq, name: artifact_source, args: [slug] }
+
+  # ══════════════════════════════════════════════════════════════════
+  # MUTATIONS — nodes
+  # ══════════════════════════════════════════════════════════════════
+  add-company:                 { command: change, query: mutations.gq, name: add_company, args: [slug, name, kind, createdAt, updatedAt] }
+  add-person:                  { command: change, query: mutations.gq, name: add_person, args: [slug, name, createdAt, updatedAt] }
+  add-market:                  { command: change, query: mutations.gq, name: add_market, args: [slug, name, createdAt, updatedAt] }
+  add-deal:                    { command: change, query: mutations.gq, name: add_deal, args: [slug, name, stage, outcome, createdAt, updatedAt] }
+  add-fund:                    { command: change, query: mutations.gq, name: add_fund, args: [slug, name, createdAt, updatedAt] }
+  add-artifact:                { command: change, query: mutations.gq, name: add_artifact, args: [slug, name, kind, source, date, captured_at, createdAt, updatedAt] }
+  add-thesis:                  { command: change, query: mutations.gq, name: add_thesis, args: [slug, name, status, createdAt, updatedAt] }
+  add-assumption:              { command: change, query: mutations.gq, name: add_assumption, args: [slug, name, level, createdAt, updatedAt] }
+  add-question:                { command: change, query: mutations.gq, name: add_question, args: [slug, name, status, createdAt, updatedAt] }
+  add-signal:                  { command: change, query: mutations.gq, name: add_signal, args: [slug, name, kind, date, stagingTimestamp, createdAt, updatedAt] }
+  add-insight:                 { command: change, query: mutations.gq, name: add_insight, args: [slug, name, kind, createdAt, updatedAt] }
+  add-source-entity:           { command: change, query: mutations.gq, name: add_source_entity, args: [slug, name, kind, createdAt, updatedAt] }
+  add-chunk:                   { command: change, query: mutations.gq, name: add_chunk, args: [slug, text, chunk_index, createdAt] }
+  add-decision:                { command: change, query: mutations.gq, name: add_decision, args: [slug, name, kind, createdAt, updatedAt] }
+  add-commitment:              { command: change, query: mutations.gq, name: add_commitment, args: [slug, name, status, createdAt, updatedAt] }
+  add-pattern:                 { command: change, query: mutations.gq, name: add_pattern, args: [slug, name, kind, createdAt, updatedAt] }
+  add-lesson:                  { command: change, query: mutations.gq, name: add_lesson, args: [slug, name, kind, body, status, createdAt, updatedAt] }
+
+  # ══════════════════════════════════════════════════════════════════
+  # MUTATIONS — edges
+  # ══════════════════════════════════════════════════════════════════
+  link-deal-company:           { command: change, query: mutations.gq, name: link_deal_company, args: [deal, company] }
+  link-deal-fund:              { command: change, query: mutations.gq, name: link_deal_fund, args: [deal, fund] }
+  link-deal-lead:              { command: change, query: mutations.gq, name: link_deal_lead, args: [deal, person] }
+  link-deal-thesis:            { command: change, query: mutations.gq, name: link_deal_thesis, args: [deal, thesis] }
+  link-deal-market:            { command: change, query: mutations.gq, name: link_deal_market, args: [deal, market] }
+  link-deal-lead-investor:     { command: change, query: mutations.gq, name: link_deal_lead_investor, args: [deal, company] }
+  link-deal-participant:       { command: change, query: mutations.gq, name: link_deal_participant, args: [deal, company] }
+  link-knows:                  { command: change, query: mutations.gq, name: link_knows, args: [from, to] }
+  link-works-at:               { command: change, query: mutations.gq, name: link_works_at, args: [from, to] }
+  link-founder-of:             { command: change, query: mutations.gq, name: link_founder_of, args: [person, company] }
+  link-board-member-at:        { command: change, query: mutations.gq, name: link_board_member_at, args: [person, company] }
+  link-role-in-deal:           { command: change, query: mutations.gq, name: link_role_in_deal, args: [person, deal] }
+  link-decision-maker-at:      { command: change, query: mutations.gq, name: link_decision_maker_at, args: [person, company] }
+  link-would-acquire:          { command: change, query: mutations.gq, name: link_would_acquire, args: [from, to] }
+  link-lp-in-fund:             { command: change, query: mutations.gq, name: link_lp_in_fund, args: [company, fund] }
+  link-company-in-market:      { command: change, query: mutations.gq, name: link_company_in_market, args: [company, market] }
+  link-signal-about-company:   { command: change, query: mutations.gq, name: link_signal_about_company, args: [signal, company] }
+  link-signal-about-person:    { command: change, query: mutations.gq, name: link_signal_about_person, args: [signal, person] }
+  link-signal-about-market:    { command: change, query: mutations.gq, name: link_signal_about_market, args: [signal, market] }
+  link-signal-about-deal:      { command: change, query: mutations.gq, name: link_signal_about_deal, args: [signal, deal] }
+  link-supports-thesis:        { command: change, query: mutations.gq, name: link_supports_thesis, args: [signal, thesis] }
+  link-contradicts-thesis:     { command: change, query: mutations.gq, name: link_contradicts_thesis, args: [signal, thesis] }
+  link-supports-assumption:    { command: change, query: mutations.gq, name: link_supports_assumption, args: [signal, assumption] }
+  link-contradicts-assumption: { command: change, query: mutations.gq, name: link_contradicts_assumption, args: [signal, assumption] }
+  link-informs-question:       { command: change, query: mutations.gq, name: link_informs_question, args: [signal, question] }
+  link-thesis-relies-on-assumption: { command: change, query: mutations.gq, name: link_thesis_relies_on_assumption, args: [thesis, assumption] }
+  link-thesis-about-market:    { command: change, query: mutations.gq, name: link_thesis_about_market, args: [thesis, market] }
+  link-thesis-about-company:   { command: change, query: mutations.gq, name: link_thesis_about_company, args: [thesis, company] }
+  link-question-about-deal:    { command: change, query: mutations.gq, name: link_question_about_deal, args: [question, deal] }
+  link-insight-about-deal:     { command: change, query: mutations.gq, name: link_insight_about_deal, args: [insight, deal] }
+  link-insight-about-company:  { command: change, query: mutations.gq, name: link_insight_about_company, args: [insight, company] }
+  link-insight-about-person:   { command: change, query: mutations.gq, name: link_insight_about_person, args: [insight, person] }
+  link-insight-highlights-pattern: { command: change, query: mutations.gq, name: link_insight_highlights_pattern, args: [insight, pattern] }
+  link-insight-relies-on-signal: { command: change, query: mutations.gq, name: link_insight_relies_on_signal, args: [insight, signal] }
+  link-signal-sourced-from-artifact: { command: change, query: mutations.gq, name: link_signal_sourced_from_artifact, args: [signal, artifact] }
+  link-published-by-source:    { command: change, query: mutations.gq, name: link_published_by_source, args: [artifact, source] }
+  link-artifact-from-person:   { command: change, query: mutations.gq, name: link_artifact_from_person, args: [artifact, person] }
+  link-artifact-about-deal:    { command: change, query: mutations.gq, name: link_artifact_about_deal, args: [artifact, deal] }
+  link-artifact-about-company: { command: change, query: mutations.gq, name: link_artifact_about_company, args: [artifact, company] }
+  link-artifact-mentions-person: { command: change, query: mutations.gq, name: link_artifact_mentions_person, args: [artifact, person] }
+  link-artifact-derived-from:  { command: change, query: mutations.gq, name: link_artifact_derived_from, args: [from, to] }
+  link-chunk-of-artifact:      { command: change, query: mutations.gq, name: link_chunk_of_artifact, args: [chunk, artifact] }
+  link-decision-regarding-deal: { command: change, query: mutations.gq, name: link_decision_regarding_deal, args: [decision, deal] }
+  link-decision-regarding-thesis: { command: change, query: mutations.gq, name: link_decision_regarding_thesis, args: [decision, thesis] }
+  link-decision-based-on-assumption: { command: change, query: mutations.gq, name: link_decision_based_on_assumption, args: [decision, assumption] }
+  link-decision-needs-answer:  { command: change, query: mutations.gq, name: link_decision_needs_answer, args: [decision, question] }
+  link-decision-by-person:     { command: change, query: mutations.gq, name: link_decision_by_person, args: [decision, person] }
+  link-commitment-for-person:  { command: change, query: mutations.gq, name: link_commitment_for_person, args: [commitment, person] }
+  link-commitment-regarding-deal: { command: change, query: mutations.gq, name: link_commitment_regarding_deal, args: [commitment, deal] }
+  link-commitment-assigned-to: { command: change, query: mutations.gq, name: link_commitment_assigned_to, args: [commitment, person] }
+  link-commitment-from-artifact: { command: change, query: mutations.gq, name: link_commitment_from_artifact, args: [commitment, artifact] }
+  link-pattern-across-decision: { command: change, query: mutations.gq, name: link_pattern_across_decision, args: [pattern, decision] }
+  link-pattern-across-signal:  { command: change, query: mutations.gq, name: link_pattern_across_signal, args: [pattern, signal] }
+  link-pattern-across-company: { command: change, query: mutations.gq, name: link_pattern_across_company, args: [pattern, company] }
+  link-lesson-distilled-from:  { command: change, query: mutations.gq, name: link_lesson_distilled_from, args: [lesson, pattern] }
+  link-lesson-applies-to-market: { command: change, query: mutations.gq, name: link_lesson_applies_to_market, args: [lesson, market] }

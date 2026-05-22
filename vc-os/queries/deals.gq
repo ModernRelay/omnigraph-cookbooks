@@ -1,0 +1,187 @@
+// Deal-centric reads. Deal is the CRM grain — every active engagement
+// with a Company about a specific funding event.
+
+// ──────────────────────────────────────────────
+// Basic reads
+// ──────────────────────────────────────────────
+
+query get_deal($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+    }
+    return { $d.slug, $d.name, $d.round_type, $d.stage, $d.outcome, $d.round_size_usd_m, $d.pre_money_valuation_usd_m, $d.our_check_size_usd_m, $d.target_close_date, $d.brief }
+}
+
+query deals_open() {
+    match {
+        $d: Deal { outcome: "open" }
+    }
+    return { $d.slug, $d.name, $d.stage, $d.round_type, $d.target_close_date, $d.brief }
+    order { $d.target_close_date asc }
+}
+
+query deals_by_stage($stage: String) {
+    match {
+        $d: Deal { stage: $stage }
+    }
+    return { $d.slug, $d.name, $d.round_type, $d.outcome, $d.brief }
+    order { $d.name }
+}
+
+query deals_by_outcome($outcome: String) {
+    match {
+        $d: Deal { outcome: $outcome }
+    }
+    return { $d.slug, $d.name, $d.stage, $d.round_type, $d.date_closed, $d.brief }
+    order { $d.date_closed desc }
+}
+
+query search_deals($q: String) {
+    match {
+        $d: Deal
+        search($d.name, $q)
+    }
+    return { $d.slug, $d.name, $d.stage, $d.outcome, $d.brief }
+}
+
+
+// ──────────────────────────────────────────────
+// Deal context
+// ──────────────────────────────────────────────
+
+query deal_company($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $d forCompany $c
+    }
+    return { $c.slug, $c.name, $c.kind, $c.status, $c.brief, $c.website }
+}
+
+query deal_fund($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $d fromFund $f
+    }
+    return { $f.slug, $f.name, $f.vintage_year, $f.total_size_usd_m, $f.status }
+}
+
+query deal_lead_partner($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $d ledByPerson $p
+    }
+    return { $p.slug, $p.name, $p.location, $p.email }
+}
+
+query deal_thesis($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $d relevantThesis $t
+    }
+    return { $t.slug, $t.name, $t.status, $t.confidence, $t.brief }
+}
+
+query deal_market($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $d relevantMarket $m
+    }
+    return { $m.slug, $m.name, $m.brief }
+}
+
+query deal_lead_investor($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $d leadInvestor $o
+    }
+    return { $o.slug, $o.name, $o.kind, $o.brief }
+}
+
+query deal_participants($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $d participantInvestor $o
+    }
+    return { $o.slug, $o.name, $o.kind }
+}
+
+query deal_people($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $p roleInDeal $d
+    }
+    return { $p.slug, $p.name, $p.location, $p.linkedin }
+}
+
+
+// ──────────────────────────────────────────────
+// Deal evidence + analysis
+// ──────────────────────────────────────────────
+
+query deal_signals($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $s signalAboutDeal $d
+    }
+    return { $s.slug, $s.name, $s.kind, $s.brief, $s.date, $s.impact }
+    order { $s.date desc }
+}
+
+query deal_artifacts($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $a artifactAboutDeal $d
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.date, $a.url }
+    order { $a.date desc }
+}
+
+query deal_insights($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $i insightAboutDeal $d
+    }
+    return { $i.slug, $i.name, $i.kind, $i.stance, $i.summary }
+}
+
+query deal_open_questions($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $q questionAboutDeal $d
+    }
+    return { $q.slug, $q.name, $q.status, $q.priority, $q.description }
+}
+
+query deal_decisions($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $dec decisionRegardingDeal $d
+    }
+    return { $dec.slug, $dec.name, $dec.kind, $dec.decided_at, $dec.rationale }
+    order { $dec.decided_at desc }
+}
+
+query deal_commitments($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $cmt commitmentRegardingDeal $d
+    }
+    return { $cmt.slug, $cmt.name, $cmt.status, $cmt.priority, $cmt.due_date, $cmt.detail }
+    order { $cmt.due_date asc }
+}
+
+
+// ──────────────────────────────────────────────
+// Killer queries
+// ──────────────────────────────────────────────
+
+// Multi-agent IC simulation — bull and bear stances grounded in real Signals.
+query debate_stances($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $i insightAboutDeal $d
+        $i.stance != "neutral"
+    }
+    return { $i.slug, $i.kind, $i.stance, $i.summary, $i.body }
+}
+

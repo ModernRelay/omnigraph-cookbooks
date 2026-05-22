@@ -1,0 +1,64 @@
+// SourceEntity reads — provenance and reliability.
+// When a source's reliability is downgraded, all Signals derived from artifacts
+// published by it can be flagged for revalidation.
+
+query get_source($slug: String) {
+    match {
+        $s: SourceEntity { slug: $slug }
+    }
+    return { $s.slug, $s.name, $s.kind, $s.reliability, $s.url, $s.brief }
+}
+
+query sources_all() {
+    match {
+        $s: SourceEntity
+    }
+    return { $s.slug, $s.name, $s.kind, $s.reliability }
+    order { $s.name }
+}
+
+query sources_by_reliability($reliability: String) {
+    match {
+        $s: SourceEntity { reliability: $reliability }
+    }
+    return { $s.slug, $s.name, $s.kind, $s.brief }
+}
+
+query sources_by_kind($kind: String) {
+    match {
+        $s: SourceEntity { kind: $kind }
+    }
+    return { $s.slug, $s.name, $s.reliability, $s.brief }
+}
+
+// Artifacts published by this source.
+query source_artifacts($slug: String) {
+    match {
+        $s: SourceEntity { slug: $slug }
+        $a publishedBySource $s
+    }
+    return { $a.slug, $a.name, $a.kind, $a.date, $a.url }
+    order { $a.date desc }
+}
+
+// Signals whose artifact was published by this source. If reliability drops,
+// these are the signals to revalidate.
+query source_downstream_signals($slug: String) {
+    match {
+        $s: SourceEntity { slug: $slug }
+        $a publishedBySource $s
+        $sig signalSourcedFromArtifact $a
+    }
+    return { $sig.slug, $sig.name, $sig.kind, $sig.date, $sig.impact, $sig.brief }
+    order { $sig.date desc }
+}
+
+// The reverse: given an Artifact, what source published it.
+query artifact_source($slug: String) {
+    match {
+        $a: Artifact { slug: $slug }
+        $a publishedBySource $s
+    }
+    return { $s.slug, $s.name, $s.kind, $s.reliability, $s.brief }
+}
+

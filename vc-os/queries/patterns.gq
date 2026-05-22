@@ -1,0 +1,133 @@
+// Pattern + Lesson reads. The reflexive layer — what the firm has learned
+// across many Deals/Signals/Companies.
+
+// ──────────────────────────────────────────────
+// Pattern reads
+// ──────────────────────────────────────────────
+
+query get_pattern($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief, $p.description, $p.confidence }
+}
+
+query patterns_all() {
+    match {
+        $p: Pattern
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief, $p.confidence }
+    order { $p.name }
+}
+
+query patterns_by_kind($kind: String) {
+    match {
+        $p: Pattern { kind: $kind }
+    }
+    return { $p.slug, $p.name, $p.brief, $p.confidence }
+    order { $p.name }
+}
+
+query pattern_signals($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $p patternAcrossSignal $s
+    }
+    return { $s.slug, $s.name, $s.kind, $s.date, $s.brief }
+    order { $s.date desc }
+}
+
+query pattern_decisions($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $p patternAcrossDecision $dec
+    }
+    return { $dec.slug, $dec.name, $dec.kind, $dec.decided_at, $dec.rationale }
+    order { $dec.decided_at desc }
+}
+
+query pattern_companies($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $p patternAcrossCompany $c
+    }
+    return { $c.slug, $c.name, $c.kind, $c.status }
+}
+
+query pattern_insights($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $i insightHighlightsPattern $p
+    }
+    return { $i.slug, $i.name, $i.kind, $i.summary }
+}
+
+
+// ──────────────────────────────────────────────
+// Lesson reads
+// ──────────────────────────────────────────────
+
+query get_lesson($slug: String) {
+    match {
+        $l: Lesson { slug: $slug }
+    }
+    return { $l.slug, $l.name, $l.kind, $l.body, $l.confidence, $l.status }
+}
+
+query lessons_active() {
+    match {
+        $l: Lesson { status: "active" }
+    }
+    return { $l.slug, $l.name, $l.kind, $l.body, $l.confidence }
+    order { $l.name }
+}
+
+query lessons_tentative() {
+    match {
+        $l: Lesson { status: "tentative" }
+    }
+    return { $l.slug, $l.name, $l.kind, $l.body, $l.confidence }
+    order { $l.name }
+}
+
+query lessons_by_kind($kind: String) {
+    match {
+        $l: Lesson { kind: $kind }
+    }
+    return { $l.slug, $l.name, $l.body, $l.status, $l.confidence }
+    order { $l.name }
+}
+
+query lesson_pattern($slug: String) {
+    match {
+        $l: Lesson { slug: $slug }
+        $l lessonDistilledFromPattern $p
+    }
+    return { $p.slug, $p.name, $p.kind, $p.brief }
+}
+
+query lesson_markets($slug: String) {
+    match {
+        $l: Lesson { slug: $slug }
+        $l lessonAppliesToMarket $m
+    }
+    return { $m.slug, $m.name, $m.brief }
+}
+
+// Sector-specialist runbook: all lessons applying to a given market
+query lessons_for_market($slug: String) {
+    match {
+        $m: Market { slug: $slug }
+        $l lessonAppliesToMarket $m
+    }
+    return { $l.slug, $l.name, $l.kind, $l.body, $l.status, $l.confidence }
+}
+
+// Active protocols across the firm
+query protocols() {
+    match {
+        $l: Lesson { kind: "protocol", status: "active" }
+    }
+    return { $l.slug, $l.name, $l.body, $l.confidence }
+    order { $l.name }
+}

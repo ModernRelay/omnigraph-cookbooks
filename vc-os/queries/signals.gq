@@ -1,0 +1,154 @@
+// Signal-centric reads. Signals are dated external facts that move beliefs.
+
+// ──────────────────────────────────────────────
+// Basic reads
+// ──────────────────────────────────────────────
+
+query get_signal($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+    }
+    return { $s.slug, $s.name, $s.kind, $s.brief, $s.description, $s.date, $s.confidence, $s.impact, $s.url, $s.stagingTimestamp }
+}
+
+query recent_signals() {
+    match {
+        $s: Signal
+    }
+    return { $s.slug, $s.name, $s.kind, $s.brief, $s.date, $s.impact }
+    order { $s.date desc }
+}
+
+query signals_by_kind($kind: String) {
+    match {
+        $s: Signal { kind: $kind }
+    }
+    return { $s.slug, $s.name, $s.brief, $s.date, $s.impact }
+    order { $s.date desc }
+}
+
+query search_signals($q: String) {
+    match {
+        $s: Signal
+        search($s.name, $q)
+    }
+    return { $s.slug, $s.name, $s.kind, $s.brief, $s.date }
+}
+
+// ──────────────────────────────────────────────
+// Signal classification (what it's about)
+// ──────────────────────────────────────────────
+
+query signal_company($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s signalAboutCompany $c
+    }
+    return { $c.slug, $c.name, $c.kind, $c.status }
+}
+
+query signal_person($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s signalAboutPerson $p
+    }
+    return { $p.slug, $p.name, $p.location, $p.linkedin }
+}
+
+query signal_market($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s signalAboutMarket $m
+    }
+    return { $m.slug, $m.name, $m.brief }
+}
+
+query signal_deal($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s signalAboutDeal $d
+    }
+    return { $d.slug, $d.name, $d.stage, $d.outcome, $d.brief }
+}
+
+query signal_artifact($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s signalSourcedFromArtifact $a
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.url, $a.date }
+}
+
+
+// ──────────────────────────────────────────────
+// Signal → Belief impact
+// ──────────────────────────────────────────────
+
+query signal_supports_assumptions($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s supportsAssumption $a
+    }
+    return { $a.slug, $a.name, $a.level, $a.brief }
+}
+
+query signal_contradicts_assumptions($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s contradictsAssumption $a
+    }
+    return { $a.slug, $a.name, $a.level, $a.brief }
+}
+
+query signal_supports_theses($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s supportsThesis $t
+    }
+    return { $t.slug, $t.name, $t.status, $t.confidence, $t.brief }
+}
+
+query signal_contradicts_theses($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s contradictsThesis $t
+    }
+    return { $t.slug, $t.name, $t.status, $t.confidence, $t.brief }
+}
+
+query signal_informs_questions($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s informsQuestion $q
+    }
+    return { $q.slug, $q.name, $q.status, $q.priority, $q.description }
+}
+
+
+// ──────────────────────────────────────────────
+// Killer: Signal → Portfolio impact
+// ──────────────────────────────────────────────
+
+// A new signal arrives — which committed portfolio Decisions does it threaten?
+// Walks: Signal contradicts → Assumption ← basedOn ← Decision → regarding → Deal → forCompany (status=portfolio)
+query signal_portfolio_impact($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s contradictsAssumption $a
+        $dec decisionBasedOnAssumption $a
+        $dec decisionRegardingDeal $d
+        $d forCompany $c
+        $c.status = "portfolio"
+    }
+    return { $c.slug, $c.name, $dec.slug, $dec.name, $dec.kind, $a.slug, $a.name }
+}
+
+// Recent contradictions across the firm
+query recent_contradictions() {
+    match {
+        $s: Signal
+        $s contradictsAssumption $a
+    }
+    return { $s.slug, $s.name, $s.date, $a.slug, $a.name, $a.level }
+    order { $s.date desc }
+}

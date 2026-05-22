@@ -1,0 +1,212 @@
+// Portfolio-scoped killer queries. Portfolio is defined as Company.status = portfolio.
+
+// ──────────────────────────────────────────────
+// Portfolio book + state
+// ──────────────────────────────────────────────
+
+// The book: every portfolio company.
+query portfolio_book() {
+    match {
+        $c: Company { status: "portfolio" }
+    }
+    return { $c.slug, $c.name, $c.kind, $c.brief, $c.website }
+    order { $c.name }
+}
+
+// Portfolio companies in a fund (via Deals → Fund)
+query fund_portfolio($fund_slug: String) {
+    match {
+        $f: Fund { slug: $fund_slug }
+        $d fromFund $f
+        $d forCompany $c
+        $c.status = "portfolio"
+    }
+    return { $c.slug, $c.name, $d.slug, $d.round_type, $d.our_check_size_usd_m, $d.our_ownership_delta_pct, $d.date_closed }
+    order { $c.name }
+}
+
+// All deals (rounds) for a portfolio company — gives position history
+query portco_rounds($slug: String) {
+    match {
+        $c: Company { slug: $slug }
+        $d forCompany $c
+        $d.outcome = "invested"
+    }
+    return { $d.slug, $d.round_type, $d.round_size_usd_m, $d.pre_money_valuation_usd_m, $d.our_check_size_usd_m, $d.our_ownership_delta_pct, $d.date_closed }
+    order { $d.date_closed asc }
+}
+
+// Most recent operating update per portco
+query portfolio_latest_updates() {
+    match {
+        $c: Company { status: "portfolio" }
+        $s signalAboutCompany $c
+        $s.kind = "portfolio-update"
+    }
+    return { $c.slug, $c.name, $s.slug, $s.name, $s.brief, $s.date }
+    order { $s.date desc }
+}
+
+
+// ──────────────────────────────────────────────
+// What's changing in the portfolio
+// ──────────────────────────────────────────────
+
+// All signals about portfolio companies, most recent first
+query portfolio_recent_signals() {
+    match {
+        $c: Company { status: "portfolio" }
+        $s signalAboutCompany $c
+    }
+    return { $c.slug, $c.name, $s.slug, $s.name, $s.kind, $s.date, $s.impact, $s.brief }
+    order { $s.date desc }
+}
+
+// ──────────────────────────────────────────────
+// Open work across the portfolio
+// ──────────────────────────────────────────────
+
+// Open questions across all portfolio companies' deals
+query portfolio_open_questions() {
+    match {
+        $c: Company { status: "portfolio" }
+        $d forCompany $c
+        $q questionAboutDeal $d
+        $q.status = "open"
+    }
+    return { $c.slug, $c.name, $q.slug, $q.name, $q.priority, $q.description }
+    order { $q.priority desc }
+}
+
+// Open commitments on portfolio deals
+query portfolio_open_commitments() {
+    match {
+        $c: Company { status: "portfolio" }
+        $d forCompany $c
+        $cmt commitmentRegardingDeal $d
+        $cmt.status = "open"
+    }
+    return { $c.slug, $c.name, $cmt.slug, $cmt.name, $cmt.priority, $cmt.due_date, $cmt.detail }
+    order { $cmt.due_date asc }
+}
+
+
+// ──────────────────────────────────────────────
+// Board prep pack (the killer query)
+// ──────────────────────────────────────────────
+
+// Everything bearing on the next board meeting for this portco:
+// recent signals, open questions, open commitments.
+query board_prep_pack($slug: String) {
+    match {
+        $c: Company { slug: $slug }
+        $s signalAboutCompany $c
+    }
+    return { $s.slug, $s.name, $s.kind, $s.date, $s.brief }
+    order { $s.date desc }
+}
+
+query board_prep_open_questions($slug: String) {
+    match {
+        $c: Company { slug: $slug }
+        $d forCompany $c
+        $q questionAboutDeal $d
+        $q.status = "open"
+    }
+    return { $q.slug, $q.name, $q.priority, $q.description }
+}
+
+query board_prep_commitments($slug: String) {
+    match {
+        $c: Company { slug: $slug }
+        $d forCompany $c
+        $cmt commitmentRegardingDeal $d
+    }
+    return { $cmt.slug, $cmt.name, $cmt.status, $cmt.due_date, $cmt.detail }
+    order { $cmt.due_date asc }
+}
+
+
+// ──────────────────────────────────────────────
+// Pre-IC brief (the OS-grade killer)
+// ──────────────────────────────────────────────
+
+// A single deal's full belief + evidence + commentary picture
+query pre_ic_brief_company($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $d forCompany $c
+    }
+    return { $c.slug, $c.name, $c.kind, $c.status, $c.brief, $d.round_type, $d.stage, $d.round_size_usd_m, $d.our_check_size_usd_m }
+}
+
+query pre_ic_brief_thesis($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $d relevantThesis $t
+        $t thesisReliesOnAssumption $a
+    }
+    return { $t.slug, $t.name, $t.status, $a.slug, $a.name, $a.level, $a.confidence, $a.brief }
+}
+
+query pre_ic_brief_evidence($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $d relevantThesis $t
+        $t thesisReliesOnAssumption $a
+        $s contradictsAssumption $a
+    }
+    return { $a.slug, $a.name, $s.slug, $s.name, $s.kind, $s.date, $s.brief }
+    order { $s.date desc }
+}
+
+query pre_ic_brief_questions($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $q questionAboutDeal $d
+        $q.status = "open"
+    }
+    return { $q.slug, $q.name, $q.priority, $q.description }
+}
+
+query pre_ic_brief_debate($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $i insightAboutDeal $d
+    }
+    return { $i.slug, $i.kind, $i.stance, $i.summary, $i.body }
+}
+
+
+// ──────────────────────────────────────────────
+// Reserve pressure (Fund × follow-on triggers)
+// ──────────────────────────────────────────────
+
+// Which portfolio companies in this fund have open follow-on-trigger questions?
+query reserve_pressure($fund_slug: String) {
+    match {
+        $f: Fund { slug: $fund_slug }
+        $d fromFund $f
+        $d forCompany $c
+        $c.status = "portfolio"
+        $q questionAboutDeal $d
+        $q.status = "open"
+        $q.priority = "high"
+    }
+    return { $c.slug, $c.name, $d.slug, $q.slug, $q.name, $q.description }
+}
+
+
+// ──────────────────────────────────────────────
+// Contradicted-theses dashboard
+// ──────────────────────────────────────────────
+
+// All active theses with at least one contradicting signal
+query contradicted_active_theses() {
+    match {
+        $t: Thesis { status: "active" }
+        $s contradictsThesis $t
+    }
+    return { $t.slug, $t.name, $t.confidence, $s.slug, $s.name, $s.date, $s.brief }
+    order { $s.date desc }
+}
