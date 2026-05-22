@@ -35,6 +35,25 @@ Omnigraph schemas are ontologies. The canonical design criteria from Gruber's *T
 
 The criteria trade off against each other — Clarity wants tight definitions while Minimal Commitment wants weak ones. Gruber's resolution: *having decided a distinction is worth making, give it the tightest possible definition*. Decide what to model conservatively; once modeled, constrain precisely.
 
+## Twelve Schema Authoring Principles
+
+Concrete operationalizations of the Gruber criteria for day-to-day `.pg` authoring. Expanded versions with examples live in [`docs/omni-schema.md`](../../docs/omni-schema.md).
+
+1. **Schema is the contract** — the `.pg` file drives typechecking, validation, indexes, and migrations. If a rule matters, encode it; don't leave it to application code. *(Clarity, Coherence)*
+2. **Identity must be explicit** — every durable entity gets `@key` on a stable external identifier (slug, email, `external_id`). Don't treat internal row ids as product identity; don't change keys casually. *(Clarity)*
+3. **Model meaning, not tables** — nodes are entities, edges carry real semantics. Prefer `AuthoredBy: Artifact -> Actor` over a generic `RelatedTo: Thing -> Thing`. *(Minimal encoding bias)*
+4. **Keep types strong and intentional** — `Date`/`DateTime` over `String`, enums for lifecycle states, `Vector(N)` only for embeddings, `Blob` only for opaque payloads. Let Omnigraph enforce meaning before data reaches runtime. *(Clarity)*
+5. **Optionality should be deliberate** — `?` is part of the contract, not a convenience. Require fields that are part of identity, lifecycle, or queryability; ask whether missing and empty must differ. *(Clarity, Minimal ontological commitment)*
+6. **Shared shape belongs in interfaces** — repeated property structure across node types belongs in `interface`. Nodes may omit interface properties; the compiler injects them. Redeclarations must type-match. *(Extendibility)*
+7. **Constraints belong in the schema** — `@unique`, `@index`, `@range`, `@check`, `@card`. Don't rely on application code for invariants Omnigraph can enforce itself. *(Clarity, Coherence)*
+8. **Search is a schema decision** — `@index` on `String` for text search, `@index` on `Vector(N)` for vector search, `@embed(prop)` declares embedding source. Search intent is declared, not invented per query. *(Clarity)*
+9. **Edge semantics matter** — edges are first-class. Use edge properties for relationship facts (`WorksAt { since: Date? }`), cardinality for shape (`@card(0..1)`), `@unique(src, dst)` to prevent duplicate links. *(Coherence, Clarity)*
+10. **Schemas should be reviewable** — clear type names, explicit lifecycle enums, obvious keys, no accidental over-generalization. A reviewer should understand what entities/relationships changed and what queries become easier or harder. *(Clarity, meta)*
+11. **Migrations need intent** — use `@rename_from(...)` for property/type renames so `schema plan` can reason about the change. Avoid required-property adds without a backfill plan; keep interface changes deliberate. *(Extendibility)*
+12. **Prefer domain clarity over ORM habits** — no generic `metadata` dumping grounds, no stringly-typed status, no giant catch-all node types with unrelated optional fields, no edge names that hide meaning. *(Minimal encoding bias)*
+
+When designing a new schema, work through: real entities → stable keys → relationships worth their own edge → fields that should be enums → uniqueness/bounds/cardinality → search needs → shared shape into interfaces → how it will evolve.
+
 ## Provenance Is Structural (Multi-Agent Source of Truth)
 
 When Omnigraph serves as canonical truth across multiple agents, every assertion must answer *who said it, when, based on what evidence*. This is the runtime guarantee Gruber's criteria don't cover — his agents shared vocabulary; ours additionally must share attribution. Provenance is therefore part of the schema, not a logging concern.
