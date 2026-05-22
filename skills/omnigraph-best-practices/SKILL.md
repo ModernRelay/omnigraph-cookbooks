@@ -23,6 +23,30 @@ This skill captures the operational rules for working with a locally deployed Om
 6. **Expose agent operations as aliases** — not raw CLI invocations. Aliases decouple the operation name from the query implementation.
 7. **Verify after every remote write** — compare `commit list --branch main` head before and after. The CLI's exit code is not authoritative on remote graphs; proxies can drop the response while the write commits server-side. See `references/remote-ops.md` for the verification ritual and how to recover from 504s.
 
+## Five Ontology Design Criteria (Gruber 1993)
+
+Omnigraph schemas are ontologies. The canonical design criteria from Gruber's *Toward Principles for the Design of Ontologies Used for Knowledge Sharing* (Int. J. Human-Computer Studies 43:907–928) apply directly when authoring `.pg` files.
+
+1. **Clarity** — definitions should communicate intended meaning unambiguously and be independent of social or computational context. In Omnigraph: precise type names, narrow enums over `String`, `@check`/`@range` for stated invariants. A reviewer should understand the domain from the schema alone.
+2. **Coherence** — inferences sanctioned by the schema must be consistent with the domain modeled. Gruber's trap: defining quantity as a `(magnitude, unit)` pair makes `6 feet ≠ 2 yards` even though they describe the same length. In Omnigraph: watch for `@card`, `@unique`, and edge directionality that let the schema distinguish things the domain treats as equal.
+3. **Extendibility** — the schema should support specialization without revising existing definitions. In Omnigraph: prefer interfaces for shared shape, leave enums open where the domain genuinely admits more, model identifiers via mapping functions rather than baking units/formats into the entity.
+4. **Minimal encoding bias** — representation choices made for notation or implementation convenience leak into the model. In Omnigraph: don't type dates as `String` because the source API returns strings; separate conceptual entities (a publication date, a person) from their surface encoding (a year integer, a name string) when both matter.
+5. **Minimal ontological commitment** — make as few claims about the world as the use case requires. In Omnigraph: don't add required properties, closed enums, or `@card(1..1)` "in case"; tighten later via `schema plan`/`apply` when a real constraint emerges. Weaker schemas leave consumers room to specialize.
+
+The criteria trade off against each other — Clarity wants tight definitions while Minimal Commitment wants weak ones. Gruber's resolution: *having decided a distinction is worth making, give it the tightest possible definition*. Decide what to model conservatively; once modeled, constrain precisely.
+
+## Provenance Is Structural (Multi-Agent Source of Truth)
+
+When Omnigraph serves as canonical truth across multiple agents, every assertion must answer *who said it, when, based on what evidence*. This is the runtime guarantee Gruber's criteria don't cover — his agents shared vocabulary; ours additionally must share attribution. Provenance is therefore part of the schema, not a logging concern.
+
+Without structural provenance, agents cannot:
+- **Reconcile disagreements** — no source ranking to break ties when two agents assert contradictory facts.
+- **Retract derived facts** — when a source is later discredited, no trace from claim back to asserter.
+- **Replay graph state** — at a past timestamp; without `asserted_at`, history collapses to "now".
+- **Distinguish confidence levels** — high-evidence facts and speculative ones look identical.
+
+**In Omnigraph:** model provenance as a `Claim`-style interface (or a separate `Claim` node linked to each sourced fact) with required fields — `asserted_by: Actor`, `asserted_at: DateTime`, `evidence_source: Source`, optionally `confidence: F64`. Treat these as required, not optional. Do not stash provenance into a free-text `source: String` or a `metadata: JSON` dump — structured provenance is queryable, indexable, and migratable; free-form is none of these.
+
 ## Local Setup
 
 ### Bootstrap a local RustFS + Omnigraph in one command
