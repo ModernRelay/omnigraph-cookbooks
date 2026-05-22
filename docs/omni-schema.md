@@ -4,7 +4,15 @@ This document captures the core principles behind Omnigraph schemas. It is not
 a full language reference. It is the short version of what a good `.pg` schema
 should optimize for.
 
+These 12 practical principles instantiate the five canonical ontology design
+criteria from Gruber 1993 — **Clarity, Coherence, Extendibility, Minimal
+encoding bias, Minimal ontological commitment**. The criteria (with
+Omnigraph-specific examples and tradeoffs) live in
+[`skills/omnigraph-best-practices/SKILL.md`](../skills/omnigraph-best-practices/SKILL.md#five-ontology-design-criteria-gruber-1993).
+Each principle below tags the Gruber criteria it expresses.
+
 ## 1. Schema Is The Contract
+*Gruber: Clarity, Coherence*
 
 In Omnigraph, the schema is not decoration. It is the executable contract that
 drives:
@@ -19,6 +27,7 @@ If a rule matters to the graph, it should live in the schema instead of being
 left to application code.
 
 ## 2. Identity Must Be Explicit
+*Gruber: Clarity*
 
 Every durable entity should have a stable external identity.
 
@@ -40,6 +49,7 @@ Guideline:
   mutate
 
 ## 3. Model Meaning, Not Tables
+*Gruber: Minimal encoding bias*
 
 Schemas should reflect domain meaning first.
 
@@ -64,6 +74,7 @@ If a relationship matters enough to query, govern, diff, or review, it should
 usually get its own named edge type.
 
 ## 4. Keep Types Strong And Intentional
+*Gruber: Clarity*
 
 Use the narrowest type that matches the data:
 
@@ -90,6 +101,7 @@ decided_at: String
 The point is to let Omnigraph enforce meaning before data reaches runtime.
 
 ## 5. Optionality Should Be Deliberate
+*Gruber: Clarity, Minimal ontological commitment*
 
 Nullable fields are part of the contract, not a convenience.
 
@@ -103,6 +115,7 @@ Use `?` sparingly. A required property is usually better when the value is part
 of the entity’s identity, lifecycle, or queryability.
 
 ## 6. Shared Shape Belongs In Interfaces
+*Gruber: Extendibility*
 
 Use `interface` for fields that should stay consistent across multiple node
 types.
@@ -126,6 +139,7 @@ Important current behavior:
 So interfaces are a real schema mechanism, not just documentation.
 
 ## 7. Constraints Belong In The Schema
+*Gruber: Clarity, Coherence*
 
 If the graph has invariants, encode them directly:
 
@@ -154,6 +168,7 @@ Do not rely on application code for invariants that Omnigraph can enforce
 itself.
 
 ## 8. Search Is A Schema Decision
+*Gruber: Clarity*
 
 Search behavior starts in the schema, not in queries.
 
@@ -177,6 +192,7 @@ vector, and graph traversal against a schema that already declares search
 intent.
 
 ## 9. Edge Semantics Matter
+*Gruber: Coherence, Clarity*
 
 Edges are first-class types. Treat them that way.
 
@@ -197,6 +213,7 @@ edge ManagedBy: Employee -> Manager @card(0..1)
 Use `@unique(src, dst)` when duplicate links should be impossible.
 
 ## 10. Schemas Should Be Reviewable
+*Gruber: Clarity (meta)*
 
 Omnigraph supports branch/merge workflows. Schema changes should be written to
 be reviewed like code:
@@ -215,6 +232,7 @@ A reviewer should be able to understand:
 - what queries will become easier or harder
 
 ## 11. Migrations Need Intent
+*Gruber: Extendibility*
 
 Schema evolution should preserve meaning, not just structure.
 
@@ -235,6 +253,7 @@ Good migration hygiene:
 - keep interface changes deliberate, since they affect multiple types at once
 
 ## 12. Prefer Domain Clarity Over ORM Habits
+*Gruber: Minimal encoding bias*
 
 Omnigraph schemas are not SQL table declarations with graph syntax pasted on
 top.
