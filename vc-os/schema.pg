@@ -366,7 +366,8 @@ node Pattern {
 
 // Lesson — a distilled OPERATIONAL rule meant to shape future behavior. Differs
 // from Insight (which is analytical/descriptive) in that Lessons are imperatives.
-// `kind=protocol` covers the "runtime rules / Notion Learnings" use case.
+// `kind=protocol` covers the runtime-rules use case (declarative behavior rules
+// the team wants agents to follow).
 //
 // `status=tentative` means the Lesson lives on a review branch awaiting human
 // merge — the branch-based replacement for "tentative-learnings → review → promote".

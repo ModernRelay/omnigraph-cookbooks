@@ -6,7 +6,7 @@ Where `industry-intel/` and `pharma-intel/` are intelligence lenses, `vc-os/` is
 
 ## Why a graph, not another tool
 
-A modern VC's stack typically contains 8–12 systems: a CRM (Airtable / Zendesk), a wiki (Notion), chat (Slack), a recordings tool (Granola), spreadsheets (Drive / Excel), portfolio modeling (Tactyc), an outbound platform (Sapien / Lemlist), and per-firm bespoke hacks — a "scout sightings" table, a "Notion learnings" DB, a vector store (MixedBread), local `.md` deal memory, a cross-session memory daemon, a homegrown audit log.
+A modern VC's stack typically contains 8–12 systems: a CRM (Airtable / Zendesk), a wiki (Notion), chat (Slack), a call-recording tool (Granola), spreadsheets and drives (Drive / Excel), portfolio modeling (Tactyc), an outbound platform (Sapien / Lemlist), and per-firm bespoke hacks — a sightings / dedup table, a runtime-rules database, a third-party vector store, local notes for deal memory, a cross-session memory daemon, a homegrown audit log.
 
 Each store solved one problem at one moment. None of them talk to each other natively. Agents end up plumbing the gaps: 4 systems consulted per query, eventual consistency, scattered audit trail, no shared notion of *what is known*. This is fragmentation around tools, not organization around what the firm knows.
 
@@ -29,11 +29,11 @@ The seven jobs a VC does — **Find, Evaluate, Decide, Win, Help, Monitor, Learn
 | Tool | Verdict | Why |
 |---|---|---|
 | **Airtable / Zendesk** (CRM) | **Collapse** | Typed `Deal` + `Company` + typed mutations + branches *is* a CRM, with provenance the SaaS can't offer. |
-| **MixedBread / vector store** | **Collapse** | Native vector + BM25 + RRF on `Chunk`, atomically consistent with the graph. |
+| **Third-party vector store / semantic search** | **Collapse** | Native vector + BM25 + RRF on `Chunk`, atomically consistent with the graph. |
 | **Notion processes + Learnings** | **Collapse** | Protocols = `Lesson{kind=protocol}`. Tentative → confirmed = branches. |
-| **Scout Sightings DB** | **Collapse** | A sighting is `Signal{kind=discovery}`. |
+| **Sightings / dedup table** | **Collapse** | A sighting is `Signal{kind=discovery}` with a uniqueness convention on `(company, source, date)`. |
 | **Deal Memory `.md`** | **Collapse** | `Artifact.blob` and `Insight` carry the content. |
-| **Hindsight / cross-session memory** | **Collapse** | Snapshot-pinned reads + commit history. |
+| **Cross-session memory daemon** | **Collapse** | Snapshot-pinned reads + commit history give the same affordance without a separate service. |
 | **Audit log** | **Collapse** | A `Decision` committed to main *is* the audit trail. |
 | **Drive (originals)** | **Collapse** | Native `Blob` on `Artifact`. |
 | **Slack** | Stays | Real-time chat. Capture-worthy messages become `Artifact`s. |
@@ -46,7 +46,7 @@ The seven jobs a VC does — **Find, Evaluate, Decide, Win, Help, Monitor, Learn
 
 ## The schema — 6 core + 11 growth-ring
 
-Charlotte said it best on the call: *"select the core framework, let's say five, six core entities that are very very stable... they will play this core of the system."* The schema is organized accordingly.
+The core should be 5–6 entities that the team can hold in their head, that stay stable for years even as the analytical layer above them compounds. The schema is organized accordingly.
 
 ### Core (6) — the stable mental model
 
@@ -247,7 +247,7 @@ Which portfolio companies in this fund have open follow-on-trigger questions. Ta
 
 Two operational use cases get covered without any application-layer state:
 
-**Tentative Lessons (the Auto-Learning replacement).**
+**Tentative Lessons — branch-based review replaces tentative-then-review pipelines.**
 An agent notices a recurring pattern in three closed deals → creates a `Lesson{kind=rule-of-thumb, status=tentative}` on a branch named `tentative/<date>`. Human reviews with `omnigraph branch diff`; merges if good, deletes if not. The branch *is* the review process. Replaces "tentative-learnings.md → review → promote to Notion" with one primitive.
 
 **Decision counterfactuals.**

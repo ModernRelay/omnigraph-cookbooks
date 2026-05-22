@@ -68,7 +68,7 @@ v1 seed ships `Chunk` zero (populate via `omnigraph embed --reembed_all`). All o
 - **`Decision.kind`** is one-shot only: `invest, pass, follow-on, board-flag, double-down, write-off, exit-plan, second-meeting, no-decision`. Intros and follow-ups are `Commitment`s, not Decisions.
 - **`Decision` regards Deals (or Theses), not Companies directly.** Portco-level decisions chain via the company's most recent Deal.
 - **`SourceEntity`** carries provenance + reliability. When a source's reliability drops, all `Signal`s sourced from `Artifact`s `PublishedBySource` it can be flagged via `source-downstream-signals`.
-- **`Lesson.kind=protocol`** is the "Notion Learnings / runtime rules" use case. `Lesson.status=tentative` lives on a review branch awaiting human merge.
+- **`Lesson.kind=protocol`** is the runtime-rules use case (declarative behavior rules the team wants agents to follow). `Lesson.status=tentative` lives on a review branch awaiting human merge.
 - **Edges follow `VerbTargetType` naming** (`SignalAboutCompany`, `DecisionBasedOnAssumption`, `LessonDistilledFromPattern`).
 - **Edge traversal in queries is lowerCamelCase** even though the schema declares PascalCase (`$d forCompany $c`).
 - **`Chunk` is implementation detail for hybrid search**, not an ontological commitment. v1 seed has zero Chunks; populate via separate ingest.
