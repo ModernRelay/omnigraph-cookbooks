@@ -4,7 +4,7 @@
 // Organized as 6 core nodes (stable for years) + 11 growth-ring nodes (analytical layer
 // that compounds). See README.md for the design rationale.
 //
-//   Core (6):           Company · Person · Deal · Fund · Market · Artifact
+//   Core (6):           Organization · Person · Deal · Fund · Market · Artifact
 //   Growth ring (11):   Thesis · Assumption · Question · Signal · Insight · Decision ·
 //                       Commitment · Pattern · Lesson · Chunk · SourceEntity
 //
@@ -17,12 +17,12 @@
 // ═══════════════════════════════════════════════════════════════════
 
 
-// Company is the universal entity-of-the-world node. It covers every business-like
-// entity: startups we engage with, companies we observe in the market, LPs, peer VC
+// Organization is the universal entity-of-the-world node. It covers every business-like
+// entity: startups we engage with, organizations we observe in the market, LPs, peer VC
 // firms, hyperscaler acquirers, customers, regulators, accelerators. The `kind` enum
 // is the lens; `status` carries Quito's engagement state for `kind=startup` (nullable
-// otherwise). Quito itself is a Company with `slug=co-quito, kind=vc-firm`.
-node Company {
+// otherwise). Quito itself is a Organization with `slug=org-quito, kind=vc-firm`.
+node Organization {
     slug: String @key
     name: String @index
     brief: String?
@@ -37,7 +37,7 @@ node Company {
                other) @index
 
     // Quito's engagement state. Only meaningful for `kind=startup`. Nullable
-    // otherwise. `observed` = "we track this company in our knowledge base but
+    // otherwise. `observed` = "we track this organization in our knowledge base but
     // have not engaged" (e.g., PitchBook-imported, news-sourced).
     status: enum(cold, watching, pipeline, evaluating, portfolio, exited,
                  passed, observed)? @index
@@ -60,11 +60,11 @@ node Company {
 
 
 // Person is an individual human. Roles relative to Quito are NOT properties of the
-// person — they live on edges: `WorksAt co-quito` (team), `FounderOf co-x` (founder),
+// person — they live on edges: `WorksAt org-quito` (team), `FounderOf co-x` (founder),
 // `LpInFund fund-iii` (individual LP), `RoleInDeal deal-y {role: expert}` (expert),
-// `DecisionMakerAt co-aws` (acquirer DM). This keeps the Person definition intrinsic.
+// `DecisionMakerAt org-aws` (acquirer DM). This keeps the Person definition intrinsic.
 //
-// Enrichment fields (prior_exits, years_operating, education, prior_companies,
+// Enrichment fields (prior_exits, years_operating, education, prior_organizations,
 // founder_score) support the "dynamically updating founder view" — typically populated
 // by a scraping/enrichment skill. `last_enriched_at` marks when that ran.
 node Person {
@@ -81,7 +81,7 @@ node Person {
     prior_exits: I32?
     years_operating: I32?
     education: String?
-    prior_companies: [String]?
+    prior_organizations: [String]?
     founder_score: F64?
     last_enriched_at: DateTime?
 
@@ -91,12 +91,12 @@ node Person {
 }
 
 
-// Deal is a funding event involving a Company. A Deal can be Quito-engaged
+// Deal is a funding event involving a Organization. A Deal can be Quito-engaged
 // (`FromFund` set, `LedByPerson` set, `our_check_size_usd_m` set) or externally
 // observed (none of those set, `outcome=observed`). PitchBook-imported rounds we
 // never engaged with use `outcome=observed`.
 //
-// One Company can have many Deals (multiple rounds). The CRM grain.
+// One Organization can have many Deals (multiple rounds). The CRM grain.
 node Deal {
     slug: String @key
     name: String @index
@@ -137,7 +137,7 @@ node Fund {
 
 
 // Market — sector/vertical/segment. A hub for sector-specialist Theses, Patterns,
-// and Lessons. Companies live in Markets via `CompanyInMarket`.
+// and Lessons. Companies live in Markets via `OrganizationInMarket`.
 // `parent_market` is a free-text pointer (a slug) to a broader Market — promote to
 // an edge if hierarchical queries become load-bearing.
 node Market {
@@ -310,7 +310,7 @@ node Chunk {
 // Action layer ────────────────────────────────────────────────────
 
 
-// Decision — a one-shot decision regarding a Deal, Thesis, or Company. The
+// Decision — a one-shot decision regarding a Deal, Thesis, or Organization. The
 // provenance chain (Decision → basedOnAssumption → contradictedBy → Signal
 // → sourcedFromArtifact → publishedBySource) IS the audit trail. Combined with
 // snapshot-pinned reads, no separate audit log is needed.
@@ -389,13 +389,13 @@ node Lesson {
 // EDGES — Engagement loop (the CRM)
 // ═══════════════════════════════════════════════════════════════════
 
-edge ForCompany: Deal -> Company
+edge ForOrganization: Deal -> Organization
 edge FromFund: Deal -> Fund
 edge LedByPerson: Deal -> Person
 edge RelevantThesis: Deal -> Thesis
 edge RelevantMarket: Deal -> Market
-edge LeadInvestor: Deal -> Company
-edge ParticipantInvestor: Deal -> Company
+edge LeadInvestor: Deal -> Organization
+edge ParticipantInvestor: Deal -> Organization
 
 // Knows is stored bidirectionally by load discipline (Omnigraph @unique(src,dst)
 // is two separate per-column constraints, not pair-uniqueness). The link_knows
@@ -406,18 +406,18 @@ edge Knows: Person -> Person {
     strength: enum(weak, medium, strong)?
 }
 
-// WorksAt is the canonical employment edge. Quito team members WorksAt co-quito
-// (Company kind=vc-firm). Founders may WorksAt the company they founded (in
-// addition to the FounderOf edge), or work at a different company.
-edge WorksAt: Person -> Company {
+// WorksAt is the canonical employment edge. Quito team members WorksAt org-quito
+// (Organization kind=vc-firm). Founders may WorksAt the organization they founded (in
+// addition to the FounderOf edge), or work at a different organization.
+edge WorksAt: Person -> Organization {
     role: String?
     since: Date?
     until: Date?
     current: Bool?
 }
 
-edge FounderOf: Person -> Company
-edge BoardMemberAt: Person -> Company {
+edge FounderOf: Person -> Organization
+edge BoardMemberAt: Person -> Organization {
     role: enum(director, observer, chair, independent)?
     since: Date?
     until: Date?
@@ -431,26 +431,26 @@ edge RoleInDeal: Person -> Deal {
                co-investor-participant, board-candidate, venture-partner)?
 }
 
-edge DecisionMakerAt: Person -> Company {
+edge DecisionMakerAt: Person -> Organization {
     role: String?
 }
 
-// Exit-landscape edge — Company → Company (e.g., AWS would acquire Pinion Infer).
-edge WouldAcquire: Company -> Company {
+// Exit-landscape edge — Organization → Organization (e.g., AWS would acquire Pinion Infer).
+edge WouldAcquire: Organization -> Organization {
     rationale: String?
     confidence: enum(low, medium, high)?
 }
 
-// LpInFund is now Company → Fund. Institutional LPs are Companies with
+// LpInFund is now Organization → Fund. Institutional LPs are Companies with
 // kind=lp-institution; individual LPs are family-office Companies (kind=family-office).
 // Individuals working at LP institutions have WorksAt edges; the LP commitment lives
-// at the Company level.
-edge LpInFund: Company -> Fund {
+// at the Organization level.
+edge LpInFund: Organization -> Fund {
     commitment_usd_m: F64?
     committed_at: Date?
 }
 
-edge CompanyInMarket: Company -> Market
+edge OrganizationInMarket: Organization -> Market
 
 
 // ═══════════════════════════════════════════════════════════════════
@@ -458,7 +458,7 @@ edge CompanyInMarket: Company -> Market
 // ═══════════════════════════════════════════════════════════════════
 
 // Signal classification — what the signal is about
-edge SignalAboutCompany: Signal -> Company
+edge SignalAboutOrganization: Signal -> Organization
 edge SignalAboutPerson: Signal -> Person
 edge SignalAboutMarket: Signal -> Market
 edge SignalAboutDeal: Signal -> Deal
@@ -473,14 +473,14 @@ edge InformsQuestion: Signal -> Question
 // Thesis structure
 edge ThesisReliesOnAssumption: Thesis -> Assumption
 edge ThesisAboutMarket: Thesis -> Market
-edge ThesisAboutCompany: Thesis -> Company
+edge ThesisAboutOrganization: Thesis -> Organization
 
 // Question targeting
 edge QuestionAboutDeal: Question -> Deal
 
 // Insight wiring
 edge InsightAboutDeal: Insight -> Deal
-edge InsightAboutCompany: Insight -> Company
+edge InsightAboutOrganization: Insight -> Organization
 edge InsightAboutPerson: Insight -> Person     // founder-assessment memos attach here
 edge InsightHighlightsPattern: Insight -> Pattern
 edge InsightReliesOnSignal: Insight -> Signal
@@ -490,7 +490,7 @@ edge SignalSourcedFromArtifact: Signal -> Artifact
 edge PublishedBySource: Artifact -> SourceEntity     // for revalidation if source reliability drops
 edge ArtifactFromPerson: Artifact -> Person
 edge ArtifactAboutDeal: Artifact -> Deal
-edge ArtifactAboutCompany: Artifact -> Company
+edge ArtifactAboutOrganization: Artifact -> Organization
 edge ArtifactMentionsPerson: Artifact -> Person
 edge ArtifactDerivedFrom: Artifact -> Artifact {
     activity: enum(transcribed, summarized, ocr, extracted, distilled,
@@ -519,6 +519,6 @@ edge CommitmentFromArtifact: Commitment -> Artifact
 // Reflexive: Pattern + Lesson
 edge PatternAcrossDecision: Pattern -> Decision
 edge PatternAcrossSignal: Pattern -> Signal
-edge PatternAcrossCompany: Pattern -> Company
+edge PatternAcrossOrganization: Pattern -> Organization
 edge LessonDistilledFromPattern: Lesson -> Pattern
 edge LessonAppliesToMarket: Lesson -> Market

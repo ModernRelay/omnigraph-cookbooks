@@ -39,10 +39,10 @@ query search_signals($q: String) {
 // Signal classification (what it's about)
 // ──────────────────────────────────────────────
 
-query signal_company($slug: String) {
+query signal_organization($slug: String) {
     match {
         $s: Signal { slug: $slug }
-        $s signalAboutCompany $c
+        $s signalAboutOrganization $c
     }
     return { $c.slug, $c.name, $c.kind, $c.status }
 }
@@ -130,14 +130,14 @@ query signal_informs_questions($slug: String) {
 // ──────────────────────────────────────────────
 
 // A new signal arrives — which committed portfolio Decisions does it threaten?
-// Walks: Signal contradicts → Assumption ← basedOn ← Decision → regarding → Deal → forCompany (status=portfolio)
+// Walks: Signal contradicts → Assumption ← basedOn ← Decision → regarding → Deal → forOrganization (status=portfolio)
 query signal_portfolio_impact($slug: String) {
     match {
         $s: Signal { slug: $slug }
         $s contradictsAssumption $a
         $dec decisionBasedOnAssumption $a
         $dec decisionRegardingDeal $d
-        $d forCompany $c
+        $d forOrganization $c
         $c.status = "portfolio"
     }
     return { $c.slug, $c.name, $dec.slug, $dec.name, $dec.kind, $a.slug, $a.name }

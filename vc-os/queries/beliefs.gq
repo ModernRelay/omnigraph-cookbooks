@@ -69,10 +69,10 @@ query thesis_market($slug: String) {
     return { $m.slug, $m.name, $m.brief }
 }
 
-query thesis_companies($slug: String) {
+query thesis_organizations($slug: String) {
     match {
         $t: Thesis { slug: $slug }
-        $t thesisAboutCompany $c
+        $t thesisAboutOrganization $c
     }
     return { $c.slug, $c.name, $c.status, $c.brief }
 }

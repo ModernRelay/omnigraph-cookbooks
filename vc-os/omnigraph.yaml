@@ -28,7 +28,7 @@ aliases:
   # ══════════════════════════════════════════════════════════════════
   # VIEW: IC Meeting
   # ══════════════════════════════════════════════════════════════════
-  pre-ic-brief-company:        { command: read, query: portfolio.gq, name: pre_ic_brief_company, args: [slug] }
+  pre-ic-brief-organization:        { command: read, query: portfolio.gq, name: pre_ic_brief_organization, args: [slug] }
   pre-ic-brief-thesis:         { command: read, query: portfolio.gq, name: pre_ic_brief_thesis, args: [slug] }
   pre-ic-brief-evidence:       { command: read, query: portfolio.gq, name: pre_ic_brief_evidence, args: [slug] }
   pre-ic-brief-questions:      { command: read, query: portfolio.gq, name: pre_ic_brief_questions, args: [slug] }
@@ -41,9 +41,9 @@ aliases:
   # VIEW: Weekly Pipeline Meeting
   # ══════════════════════════════════════════════════════════════════
   deals-open:                  { command: read, query: deals.gq, name: deals_open }
-  pipeline-companies:          { command: read, query: companies.gq, name: pipeline_companies }
-  high-fit-pipeline:           { command: read, query: companies.gq, name: high_fit_pipeline }
-  observed-companies:          { command: read, query: companies.gq, name: observed_companies }
+  pipeline-organizations:          { command: read, query: organizations.gq, name: pipeline_organizations }
+  high-fit-pipeline:           { command: read, query: organizations.gq, name: high_fit_pipeline }
+  observed-organizations:          { command: read, query: organizations.gq, name: observed_organizations }
   recent-signals:              { command: read, query: signals.gq, name: recent_signals }
   recent-contradictions:       { command: read, query: signals.gq, name: recent_contradictions }
   open-questions:              { command: read, query: beliefs.gq, name: open_questions }
@@ -52,22 +52,22 @@ aliases:
   # VIEW: Portfolio Support Meeting
   # ══════════════════════════════════════════════════════════════════
   portfolio-book:              { command: read, query: portfolio.gq, name: portfolio_book }
-  portfolio-companies:         { command: read, query: companies.gq, name: portfolio_companies }
+  portfolio-organizations:         { command: read, query: organizations.gq, name: portfolio_organizations }
   portfolio-recent-signals:    { command: read, query: portfolio.gq, name: portfolio_recent_signals }
-  portfolio-latest-updates:    { command: read, query: portfolio.gq, name: portfolio_latest_updates }
+  portfolio-updates-recent:    { command: read, query: portfolio.gq, name: portfolio_updates_recent }
   portfolio-open-questions:    { command: read, query: portfolio.gq, name: portfolio_open_questions }
   portfolio-open-commitments:  { command: read, query: portfolio.gq, name: portfolio_open_commitments }
   board-prep-pack:             { command: read, query: portfolio.gq, name: board_prep_pack, args: [slug] }
   board-prep-open-questions:   { command: read, query: portfolio.gq, name: board_prep_open_questions, args: [slug] }
   board-prep-commitments:      { command: read, query: portfolio.gq, name: board_prep_commitments, args: [slug] }
   signal-portfolio-impact:     { command: read, query: signals.gq, name: signal_portfolio_impact, args: [slug] }
-  exit-landscape:              { command: read, query: companies.gq, name: exit_landscape, args: [slug] }
-  exit-landscape-decision-makers: { command: read, query: companies.gq, name: exit_landscape_decision_makers, args: [slug] }
+  exit-landscape:              { command: read, query: organizations.gq, name: exit_landscape, args: [slug] }
+  exit-landscape-decision-makers: { command: read, query: organizations.gq, name: exit_landscape_decision_makers, args: [slug] }
   contradicted-active-theses:  { command: read, query: portfolio.gq, name: contradicted_active_theses }
-  co-investor-leads:           { command: read, query: companies.gq, name: co_investor_leads }
-  co-investor-participants:    { command: read, query: companies.gq, name: co_investor_participants }
-  company-co-investors:        { command: read, query: companies.gq, name: company_co_investors, args: [slug] }
-  vc-firm-coinvestments:       { command: read, query: companies.gq, name: vc_firm_coinvestments, args: [slug] }
+  co-investor-leads:           { command: read, query: organizations.gq, name: co_investor_leads }
+  co-investor-participants:    { command: read, query: organizations.gq, name: co_investor_participants }
+  organization-co-investors:        { command: read, query: organizations.gq, name: organization_co_investors, args: [slug] }
+  vc-firm-coinvestments:       { command: read, query: organizations.gq, name: vc_firm_coinvestments, args: [slug] }
 
   # ══════════════════════════════════════════════════════════════════
   # VIEW: LPAC / Fund Reporting
@@ -84,7 +84,7 @@ aliases:
   deals-by-stage:              { command: read, query: deals.gq, name: deals_by_stage, args: [stage] }
   deals-by-outcome:            { command: read, query: deals.gq, name: deals_by_outcome, args: [outcome] }
   search-deals:                { command: read, query: deals.gq, name: search_deals, args: [q] }
-  deal-company:                { command: read, query: deals.gq, name: deal_company, args: [slug] }
+  deal-organization:                { command: read, query: deals.gq, name: deal_organization, args: [slug] }
   deal-fund:                   { command: read, query: deals.gq, name: deal_fund, args: [slug] }
   deal-lead-partner:           { command: read, query: deals.gq, name: deal_lead_partner, args: [slug] }
   deal-thesis:                 { command: read, query: deals.gq, name: deal_thesis, args: [slug] }
@@ -102,24 +102,24 @@ aliases:
   # ══════════════════════════════════════════════════════════════════
   # PRIMITIVES — Companies & Markets
   # ══════════════════════════════════════════════════════════════════
-  company:                     { command: read, query: companies.gq, name: get_company, args: [slug], format: kv }
-  companies-by-kind:           { command: read, query: companies.gq, name: companies_by_kind, args: [kind] }
-  companies-by-status:         { command: read, query: companies.gq, name: companies_by_status, args: [status] }
-  search-companies:            { command: read, query: companies.gq, name: search_companies, args: [q] }
-  company-deals:               { command: read, query: companies.gq, name: company_deals, args: [slug] }
-  company-founders:            { command: read, query: companies.gq, name: company_founders, args: [slug] }
-  company-board:               { command: read, query: companies.gq, name: company_board, args: [slug] }
-  company-signals:             { command: read, query: companies.gq, name: company_signals, args: [slug] }
-  company-artifacts:           { command: read, query: companies.gq, name: company_artifacts, args: [slug] }
-  company-insights:            { command: read, query: companies.gq, name: company_insights, args: [slug] }
-  company-markets:             { command: read, query: companies.gq, name: company_markets, args: [slug] }
-  company-theses:              { command: read, query: companies.gq, name: company_theses, args: [slug] }
-  market:                      { command: read, query: companies.gq, name: get_market, args: [slug], format: kv }
-  markets:                     { command: read, query: companies.gq, name: markets_all }
-  market-companies:            { command: read, query: companies.gq, name: market_companies, args: [slug] }
-  market-theses:               { command: read, query: companies.gq, name: market_theses, args: [slug] }
-  market-signals:              { command: read, query: companies.gq, name: market_signals, args: [slug] }
-  market-lessons:              { command: read, query: companies.gq, name: market_lessons, args: [slug] }
+  organization:                     { command: read, query: organizations.gq, name: get_organization, args: [slug], format: kv }
+  organizations-by-kind:           { command: read, query: organizations.gq, name: organizations_by_kind, args: [kind] }
+  organizations-by-status:         { command: read, query: organizations.gq, name: organizations_by_status, args: [status] }
+  search-organizations:            { command: read, query: organizations.gq, name: search_organizations, args: [q] }
+  organization-deals:               { command: read, query: organizations.gq, name: organization_deals, args: [slug] }
+  organization-founders:            { command: read, query: organizations.gq, name: organization_founders, args: [slug] }
+  organization-board:               { command: read, query: organizations.gq, name: organization_board, args: [slug] }
+  organization-signals:             { command: read, query: organizations.gq, name: organization_signals, args: [slug] }
+  organization-artifacts:           { command: read, query: organizations.gq, name: organization_artifacts, args: [slug] }
+  organization-insights:            { command: read, query: organizations.gq, name: organization_insights, args: [slug] }
+  organization-markets:             { command: read, query: organizations.gq, name: organization_markets, args: [slug] }
+  organization-theses:              { command: read, query: organizations.gq, name: organization_theses, args: [slug] }
+  market:                      { command: read, query: organizations.gq, name: get_market, args: [slug], format: kv }
+  markets:                     { command: read, query: organizations.gq, name: markets_all }
+  market-organizations:            { command: read, query: organizations.gq, name: market_organizations, args: [slug] }
+  market-theses:               { command: read, query: organizations.gq, name: market_theses, args: [slug] }
+  market-signals:              { command: read, query: organizations.gq, name: market_signals, args: [slug] }
+  market-lessons:              { command: read, query: organizations.gq, name: market_lessons, args: [slug] }
 
   # ══════════════════════════════════════════════════════════════════
   # PRIMITIVES — People (roles via edges, not enum)
@@ -151,7 +151,7 @@ aliases:
   signal:                      { command: read, query: signals.gq, name: get_signal, args: [slug], format: kv }
   signals-by-kind:             { command: read, query: signals.gq, name: signals_by_kind, args: [kind] }
   search-signals:              { command: read, query: signals.gq, name: search_signals, args: [q] }
-  signal-company:              { command: read, query: signals.gq, name: signal_company, args: [slug] }
+  signal-organization:              { command: read, query: signals.gq, name: signal_organization, args: [slug] }
   signal-person:               { command: read, query: signals.gq, name: signal_person, args: [slug] }
   signal-market:               { command: read, query: signals.gq, name: signal_market, args: [slug] }
   signal-deal:                 { command: read, query: signals.gq, name: signal_deal, args: [slug] }
@@ -173,7 +173,7 @@ aliases:
   thesis-supporting-signals:   { command: read, query: beliefs.gq, name: thesis_supporting_signals, args: [slug] }
   thesis-contradicting-signals: { command: read, query: beliefs.gq, name: thesis_contradicting_signals, args: [slug] }
   thesis-market:               { command: read, query: beliefs.gq, name: thesis_market, args: [slug] }
-  thesis-companies:            { command: read, query: beliefs.gq, name: thesis_companies, args: [slug] }
+  thesis-organizations:            { command: read, query: beliefs.gq, name: thesis_organizations, args: [slug] }
   thesis-deals:                { command: read, query: beliefs.gq, name: thesis_deals, args: [slug] }
   thesis-contradictions-via-assumptions: { command: read, query: beliefs.gq, name: thesis_contradictions_via_assumptions, args: [slug] }
   assumption:                  { command: read, query: beliefs.gq, name: get_assumption, args: [slug], format: kv }
@@ -214,7 +214,7 @@ aliases:
   patterns-by-kind:            { command: read, query: patterns.gq, name: patterns_by_kind, args: [kind] }
   pattern-signals:             { command: read, query: patterns.gq, name: pattern_signals, args: [slug] }
   pattern-decisions:           { command: read, query: patterns.gq, name: pattern_decisions, args: [slug] }
-  pattern-companies:           { command: read, query: patterns.gq, name: pattern_companies, args: [slug] }
+  pattern-organizations:           { command: read, query: patterns.gq, name: pattern_organizations, args: [slug] }
   pattern-insights:            { command: read, query: patterns.gq, name: pattern_insights, args: [slug] }
   lesson:                      { command: read, query: patterns.gq, name: get_lesson, args: [slug], format: kv }
   lessons-active:              { command: read, query: patterns.gq, name: lessons_active }
@@ -239,7 +239,7 @@ aliases:
   # ══════════════════════════════════════════════════════════════════
   # MUTATIONS — nodes
   # ══════════════════════════════════════════════════════════════════
-  add-company:                 { command: change, query: mutations.gq, name: add_company, args: [slug, name, kind, createdAt, updatedAt] }
+  add-organization:                 { command: change, query: mutations.gq, name: add_organization, args: [slug, name, kind, createdAt, updatedAt] }
   add-person:                  { command: change, query: mutations.gq, name: add_person, args: [slug, name, createdAt, updatedAt] }
   add-market:                  { command: change, query: mutations.gq, name: add_market, args: [slug, name, createdAt, updatedAt] }
   add-deal:                    { command: change, query: mutations.gq, name: add_deal, args: [slug, name, stage, outcome, createdAt, updatedAt] }
@@ -260,23 +260,23 @@ aliases:
   # ══════════════════════════════════════════════════════════════════
   # MUTATIONS — edges
   # ══════════════════════════════════════════════════════════════════
-  link-deal-company:           { command: change, query: mutations.gq, name: link_deal_company, args: [deal, company] }
+  link-deal-organization:           { command: change, query: mutations.gq, name: link_deal_organization, args: [deal, organization] }
   link-deal-fund:              { command: change, query: mutations.gq, name: link_deal_fund, args: [deal, fund] }
   link-deal-lead:              { command: change, query: mutations.gq, name: link_deal_lead, args: [deal, person] }
   link-deal-thesis:            { command: change, query: mutations.gq, name: link_deal_thesis, args: [deal, thesis] }
   link-deal-market:            { command: change, query: mutations.gq, name: link_deal_market, args: [deal, market] }
-  link-deal-lead-investor:     { command: change, query: mutations.gq, name: link_deal_lead_investor, args: [deal, company] }
-  link-deal-participant:       { command: change, query: mutations.gq, name: link_deal_participant, args: [deal, company] }
+  link-deal-lead-investor:     { command: change, query: mutations.gq, name: link_deal_lead_investor, args: [deal, organization] }
+  link-deal-participant:       { command: change, query: mutations.gq, name: link_deal_participant, args: [deal, organization] }
   link-knows:                  { command: change, query: mutations.gq, name: link_knows, args: [from, to] }
   link-works-at:               { command: change, query: mutations.gq, name: link_works_at, args: [from, to] }
-  link-founder-of:             { command: change, query: mutations.gq, name: link_founder_of, args: [person, company] }
-  link-board-member-at:        { command: change, query: mutations.gq, name: link_board_member_at, args: [person, company] }
+  link-founder-of:             { command: change, query: mutations.gq, name: link_founder_of, args: [person, organization] }
+  link-board-member-at:        { command: change, query: mutations.gq, name: link_board_member_at, args: [person, organization] }
   link-role-in-deal:           { command: change, query: mutations.gq, name: link_role_in_deal, args: [person, deal] }
-  link-decision-maker-at:      { command: change, query: mutations.gq, name: link_decision_maker_at, args: [person, company] }
+  link-decision-maker-at:      { command: change, query: mutations.gq, name: link_decision_maker_at, args: [person, organization] }
   link-would-acquire:          { command: change, query: mutations.gq, name: link_would_acquire, args: [from, to] }
-  link-lp-in-fund:             { command: change, query: mutations.gq, name: link_lp_in_fund, args: [company, fund] }
-  link-company-in-market:      { command: change, query: mutations.gq, name: link_company_in_market, args: [company, market] }
-  link-signal-about-company:   { command: change, query: mutations.gq, name: link_signal_about_company, args: [signal, company] }
+  link-lp-in-fund:             { command: change, query: mutations.gq, name: link_lp_in_fund, args: [organization, fund] }
+  link-organization-in-market:      { command: change, query: mutations.gq, name: link_organization_in_market, args: [organization, market] }
+  link-signal-about-organization:   { command: change, query: mutations.gq, name: link_signal_about_organization, args: [signal, organization] }
   link-signal-about-person:    { command: change, query: mutations.gq, name: link_signal_about_person, args: [signal, person] }
   link-signal-about-market:    { command: change, query: mutations.gq, name: link_signal_about_market, args: [signal, market] }
   link-signal-about-deal:      { command: change, query: mutations.gq, name: link_signal_about_deal, args: [signal, deal] }
@@ -287,10 +287,10 @@ aliases:
   link-informs-question:       { command: change, query: mutations.gq, name: link_informs_question, args: [signal, question] }
   link-thesis-relies-on-assumption: { command: change, query: mutations.gq, name: link_thesis_relies_on_assumption, args: [thesis, assumption] }
   link-thesis-about-market:    { command: change, query: mutations.gq, name: link_thesis_about_market, args: [thesis, market] }
-  link-thesis-about-company:   { command: change, query: mutations.gq, name: link_thesis_about_company, args: [thesis, company] }
+  link-thesis-about-organization:   { command: change, query: mutations.gq, name: link_thesis_about_organization, args: [thesis, organization] }
   link-question-about-deal:    { command: change, query: mutations.gq, name: link_question_about_deal, args: [question, deal] }
   link-insight-about-deal:     { command: change, query: mutations.gq, name: link_insight_about_deal, args: [insight, deal] }
-  link-insight-about-company:  { command: change, query: mutations.gq, name: link_insight_about_company, args: [insight, company] }
+  link-insight-about-organization:  { command: change, query: mutations.gq, name: link_insight_about_organization, args: [insight, organization] }
   link-insight-about-person:   { command: change, query: mutations.gq, name: link_insight_about_person, args: [insight, person] }
   link-insight-highlights-pattern: { command: change, query: mutations.gq, name: link_insight_highlights_pattern, args: [insight, pattern] }
   link-insight-relies-on-signal: { command: change, query: mutations.gq, name: link_insight_relies_on_signal, args: [insight, signal] }
@@ -298,7 +298,7 @@ aliases:
   link-published-by-source:    { command: change, query: mutations.gq, name: link_published_by_source, args: [artifact, source] }
   link-artifact-from-person:   { command: change, query: mutations.gq, name: link_artifact_from_person, args: [artifact, person] }
   link-artifact-about-deal:    { command: change, query: mutations.gq, name: link_artifact_about_deal, args: [artifact, deal] }
-  link-artifact-about-company: { command: change, query: mutations.gq, name: link_artifact_about_company, args: [artifact, company] }
+  link-artifact-about-organization: { command: change, query: mutations.gq, name: link_artifact_about_organization, args: [artifact, organization] }
   link-artifact-mentions-person: { command: change, query: mutations.gq, name: link_artifact_mentions_person, args: [artifact, person] }
   link-artifact-derived-from:  { command: change, query: mutations.gq, name: link_artifact_derived_from, args: [from, to] }
   link-chunk-of-artifact:      { command: change, query: mutations.gq, name: link_chunk_of_artifact, args: [chunk, artifact] }
@@ -313,6 +313,6 @@ aliases:
   link-commitment-from-artifact: { command: change, query: mutations.gq, name: link_commitment_from_artifact, args: [commitment, artifact] }
   link-pattern-across-decision: { command: change, query: mutations.gq, name: link_pattern_across_decision, args: [pattern, decision] }
   link-pattern-across-signal:  { command: change, query: mutations.gq, name: link_pattern_across_signal, args: [pattern, signal] }
-  link-pattern-across-company: { command: change, query: mutations.gq, name: link_pattern_across_company, args: [pattern, company] }
+  link-pattern-across-organization: { command: change, query: mutations.gq, name: link_pattern_across_organization, args: [pattern, organization] }
   link-lesson-distilled-from:  { command: change, query: mutations.gq, name: link_lesson_distilled_from, args: [lesson, pattern] }
   link-lesson-applies-to-market: { command: change, query: mutations.gq, name: link_lesson_applies_to_market, args: [lesson, market] }

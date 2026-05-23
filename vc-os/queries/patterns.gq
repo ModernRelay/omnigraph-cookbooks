@@ -46,10 +46,10 @@ query pattern_decisions($slug: String) {
     order { $dec.decided_at desc }
 }
 
-query pattern_companies($slug: String) {
+query pattern_organizations($slug: String) {
     match {
         $p: Pattern { slug: $slug }
-        $p patternAcrossCompany $c
+        $p patternAcrossOrganization $c
     }
     return { $c.slug, $c.name, $c.kind, $c.status }
 }

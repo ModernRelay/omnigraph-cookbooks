@@ -8,8 +8,8 @@
 // Core nodes
 // ──────────────────────────────────────────────
 
-query add_company($slug: String, $name: String, $kind: String, $createdAt: DateTime, $updatedAt: DateTime) {
-    insert Company { slug: $slug, name: $name, kind: $kind, createdAt: $createdAt, updatedAt: $updatedAt }
+query add_organization($slug: String, $name: String, $kind: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Organization { slug: $slug, name: $name, kind: $kind, createdAt: $createdAt, updatedAt: $updatedAt }
 }
 
 query add_person($slug: String, $name: String, $createdAt: DateTime, $updatedAt: DateTime) {
@@ -86,8 +86,8 @@ query add_lesson($slug: String, $name: String, $kind: String, $body: String, $st
 // EDGE MUTATIONS — Engagement loop
 // ══════════════════════════════════════════════
 
-query link_deal_company($deal: String, $company: String) {
-    insert ForCompany { from: $deal, to: $company }
+query link_deal_organization($deal: String, $organization: String) {
+    insert ForOrganization { from: $deal, to: $organization }
 }
 
 query link_deal_fund($deal: String, $fund: String) {
@@ -106,50 +106,52 @@ query link_deal_market($deal: String, $market: String) {
     insert RelevantMarket { from: $deal, to: $market }
 }
 
-query link_deal_lead_investor($deal: String, $company: String) {
-    insert LeadInvestor { from: $deal, to: $company }
+query link_deal_lead_investor($deal: String, $organization: String) {
+    insert LeadInvestor { from: $deal, to: $organization }
 }
 
-query link_deal_participant($deal: String, $company: String) {
-    insert ParticipantInvestor { from: $deal, to: $company }
+query link_deal_participant($deal: String, $organization: String) {
+    insert ParticipantInvestor { from: $deal, to: $organization }
 }
 
-// Knows is bidirectional — call this mutation twice (A→B and B→A) for any new
-// relationship. The schema cannot enforce pair uniqueness in 0.4.x.
+// Knows is symmetric — this mutation inserts both directions in one call so
+// callers can't accidentally create a one-way relationship. The schema can't
+// enforce pair uniqueness in 0.4.x; this mutation is the convention.
 query link_knows($from: String, $to: String) {
     insert Knows { from: $from, to: $to }
+    insert Knows { from: $to, to: $from }
 }
 
 query link_works_at($from: String, $to: String) {
     insert WorksAt { from: $from, to: $to }
 }
 
-query link_founder_of($person: String, $company: String) {
-    insert FounderOf { from: $person, to: $company }
+query link_founder_of($person: String, $organization: String) {
+    insert FounderOf { from: $person, to: $organization }
 }
 
-query link_board_member_at($person: String, $company: String) {
-    insert BoardMemberAt { from: $person, to: $company }
+query link_board_member_at($person: String, $organization: String) {
+    insert BoardMemberAt { from: $person, to: $organization }
 }
 
 query link_role_in_deal($person: String, $deal: String) {
     insert RoleInDeal { from: $person, to: $deal }
 }
 
-query link_decision_maker_at($person: String, $company: String) {
-    insert DecisionMakerAt { from: $person, to: $company }
+query link_decision_maker_at($person: String, $organization: String) {
+    insert DecisionMakerAt { from: $person, to: $organization }
 }
 
 query link_would_acquire($from: String, $to: String) {
     insert WouldAcquire { from: $from, to: $to }
 }
 
-query link_lp_in_fund($company: String, $fund: String) {
-    insert LpInFund { from: $company, to: $fund }
+query link_lp_in_fund($organization: String, $fund: String) {
+    insert LpInFund { from: $organization, to: $fund }
 }
 
-query link_company_in_market($company: String, $market: String) {
-    insert CompanyInMarket { from: $company, to: $market }
+query link_organization_in_market($organization: String, $market: String) {
+    insert OrganizationInMarket { from: $organization, to: $market }
 }
 
 
@@ -157,8 +159,8 @@ query link_company_in_market($company: String, $market: String) {
 // EDGE MUTATIONS — Belief + Evidence loop
 // ══════════════════════════════════════════════
 
-query link_signal_about_company($signal: String, $company: String) {
-    insert SignalAboutCompany { from: $signal, to: $company }
+query link_signal_about_organization($signal: String, $organization: String) {
+    insert SignalAboutOrganization { from: $signal, to: $organization }
 }
 
 query link_signal_about_person($signal: String, $person: String) {
@@ -201,8 +203,8 @@ query link_thesis_about_market($thesis: String, $market: String) {
     insert ThesisAboutMarket { from: $thesis, to: $market }
 }
 
-query link_thesis_about_company($thesis: String, $company: String) {
-    insert ThesisAboutCompany { from: $thesis, to: $company }
+query link_thesis_about_organization($thesis: String, $organization: String) {
+    insert ThesisAboutOrganization { from: $thesis, to: $organization }
 }
 
 query link_question_about_deal($question: String, $deal: String) {
@@ -213,8 +215,8 @@ query link_insight_about_deal($insight: String, $deal: String) {
     insert InsightAboutDeal { from: $insight, to: $deal }
 }
 
-query link_insight_about_company($insight: String, $company: String) {
-    insert InsightAboutCompany { from: $insight, to: $company }
+query link_insight_about_organization($insight: String, $organization: String) {
+    insert InsightAboutOrganization { from: $insight, to: $organization }
 }
 
 query link_insight_about_person($insight: String, $person: String) {
@@ -245,8 +247,8 @@ query link_artifact_about_deal($artifact: String, $deal: String) {
     insert ArtifactAboutDeal { from: $artifact, to: $deal }
 }
 
-query link_artifact_about_company($artifact: String, $company: String) {
-    insert ArtifactAboutCompany { from: $artifact, to: $company }
+query link_artifact_about_organization($artifact: String, $organization: String) {
+    insert ArtifactAboutOrganization { from: $artifact, to: $organization }
 }
 
 query link_artifact_mentions_person($artifact: String, $person: String) {
@@ -310,8 +312,8 @@ query link_pattern_across_signal($pattern: String, $signal: String) {
     insert PatternAcrossSignal { from: $pattern, to: $signal }
 }
 
-query link_pattern_across_company($pattern: String, $company: String) {
-    insert PatternAcrossCompany { from: $pattern, to: $company }
+query link_pattern_across_organization($pattern: String, $organization: String) {
+    insert PatternAcrossOrganization { from: $pattern, to: $organization }
 }
 
 query link_lesson_distilled_from($lesson: String, $pattern: String) {

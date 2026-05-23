@@ -8,23 +8,23 @@
 {"type":"Market","data":{"id":"mkt-security","slug":"mkt-security","name":"Security","brief":"Cybersecurity, with emphasis on AI-native and agent-aware defense.","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
 {"type":"Market","data":{"id":"mkt-data","slug":"mkt-data","name":"Data Engineering","parent_market":"mkt-ai-infra","brief":"Data quality, observability, pipelines.","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
 
-{"type":"Company","data":{"id":"co-aetherbrick","slug":"co-aetherbrick","name":"Aetherbrick","brief":"Vertical CRM for property management firms.","website":"https://aetherbrick.example","kind":"startup","status":"portfolio","founded_year":2020,"hq":"Berlin","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-saltline-ai","slug":"co-saltline-ai","name":"Saltline AI","brief":"AI compliance and audit automation for fintech.","website":"https://saltline.example","kind":"startup","status":"portfolio","founded_year":2022,"hq":"Amsterdam","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-pinion-infer","slug":"co-pinion-infer","name":"Pinion Infer","brief":"Inference orchestration across on-prem and cloud.","website":"https://pinion-infer.example","kind":"startup","status":"portfolio","founded_year":2023,"hq":"London","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-bramble-data","slug":"co-bramble-data","name":"Bramble Data","brief":"Data quality monitoring for production ML.","website":"https://bramble-data.example","kind":"startup","status":"portfolio","founded_year":2022,"hq":"Berlin","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-quirebench","slug":"co-quirebench","name":"QuireBench","brief":"LLM evaluation platform.","website":"https://quirebench.example","kind":"startup","status":"portfolio","founded_year":2024,"hq":"Berlin","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-helix-runtime","slug":"co-helix-runtime","name":"Helix Runtime","brief":"On-prem inference platform for regulated industries.","website":"https://helixruntime.example","kind":"startup","status":"evaluating","founded_year":2023,"hq":"Munich","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-axon-eval","slug":"co-axon-eval","name":"Axon Eval","brief":"LLM evaluation as a developer product.","website":"https://axon-eval.example","kind":"startup","status":"evaluating","founded_year":2024,"hq":"Paris","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-mintlayer-data","slug":"co-mintlayer-data","name":"Mintlayer Data","brief":"Synthetic data for vertical AI.","website":"https://mintlayer.example","kind":"startup","status":"evaluating","founded_year":2024,"hq":"Berlin","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-vector-forge","slug":"co-vector-forge","name":"Vector Forge","brief":"Vertical embeddings infra. Passed Q1 2026.","website":"https://vectorforge.example","kind":"startup","status":"passed","founded_year":2024,"hq":"Berlin","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-sigil-security","slug":"co-sigil-security","name":"Sigil Security","brief":"Agentic attack detection for enterprises.","website":"https://sigilsec.example","kind":"startup","status":"evaluating","founded_year":2024,"hq":"Tel Aviv","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-canon-quality","slug":"co-canon-quality","name":"Canon Quality","brief":"Data quality monitoring SaaS.","website":"https://canonquality.example","kind":"startup","status":"evaluating","founded_year":2024,"hq":"Stockholm","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-stratopaint","slug":"co-stratopaint","name":"Stratopaint","brief":"Vertical SaaS for industrial coatings. Passed Q4 2025.","website":"https://stratopaint.example","kind":"startup","status":"passed","founded_year":2023,"hq":"Vienna","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-pulserate","slug":"co-pulserate","name":"PulseRate","brief":"Sales-call AI. Passed Q3 2025 — agentic CRM commoditization risk.","website":"https://pulserate.example","kind":"startup","status":"passed","founded_year":2022,"hq":"London","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-knurlforge","slug":"co-knurlforge","name":"Knurlforge","brief":"DevOps agent platform for SRE teams.","website":"https://knurlforge.example","kind":"startup","status":"pipeline","founded_year":2025,"hq":"Berlin","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-claretmd","slug":"co-claretmd","name":"ClaretMD","brief":"AI medical scribe for outpatient clinics.","website":"https://claretmd.example","kind":"startup","status":"pipeline","founded_year":2024,"hq":"Munich","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-buoybase","slug":"co-buoybase","name":"BuoyBase","brief":"Marine logistics AI for shipping companies.","website":"https://buoybase.example","kind":"startup","status":"watching","founded_year":2025,"hq":"Hamburg","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-orbitwerks","slug":"co-orbitwerks","name":"OrbitWerks","brief":"Satellite data infra and analytics.","website":"https://orbitwerks.example","kind":"startup","status":"watching","founded_year":2024,"hq":"Munich","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-aetherbrick","slug":"org-aetherbrick","name":"Aetherbrick","brief":"Vertical CRM for property management firms.","website":"https://aetherbrick.example","kind":"startup","status":"portfolio","founded_year":2020,"hq":"Berlin","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-saltline-ai","slug":"org-saltline-ai","name":"Saltline AI","brief":"AI compliance and audit automation for fintech.","website":"https://saltline.example","kind":"startup","status":"portfolio","founded_year":2022,"hq":"Amsterdam","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-pinion-infer","slug":"org-pinion-infer","name":"Pinion Infer","brief":"Inference orchestration across on-prem and cloud.","website":"https://pinion-infer.example","kind":"startup","status":"portfolio","founded_year":2023,"hq":"London","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-bramble-data","slug":"org-bramble-data","name":"Bramble Data","brief":"Data quality monitoring for production ML.","website":"https://bramble-data.example","kind":"startup","status":"portfolio","founded_year":2022,"hq":"Berlin","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-quirebench","slug":"org-quirebench","name":"QuireBench","brief":"LLM evaluation platform.","website":"https://quirebench.example","kind":"startup","status":"portfolio","founded_year":2024,"hq":"Berlin","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-helix-runtime","slug":"org-helix-runtime","name":"Helix Runtime","brief":"On-prem inference platform for regulated industries.","website":"https://helixruntime.example","kind":"startup","status":"evaluating","founded_year":2023,"hq":"Munich","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-axon-eval","slug":"org-axon-eval","name":"Axon Eval","brief":"LLM evaluation as a developer product.","website":"https://axon-eval.example","kind":"startup","status":"evaluating","founded_year":2024,"hq":"Paris","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-mintlayer-data","slug":"org-mintlayer-data","name":"Mintlayer Data","brief":"Synthetic data for vertical AI.","website":"https://mintlayer.example","kind":"startup","status":"evaluating","founded_year":2024,"hq":"Berlin","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-vector-forge","slug":"org-vector-forge","name":"Vector Forge","brief":"Vertical embeddings infra. Passed Q1 2026.","website":"https://vectorforge.example","kind":"startup","status":"passed","founded_year":2024,"hq":"Berlin","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-sigil-security","slug":"org-sigil-security","name":"Sigil Security","brief":"Agentic attack detection for enterprises.","website":"https://sigilsec.example","kind":"startup","status":"evaluating","founded_year":2024,"hq":"Tel Aviv","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-canon-quality","slug":"org-canon-quality","name":"Canon Quality","brief":"Data quality monitoring SaaS.","website":"https://canonquality.example","kind":"startup","status":"evaluating","founded_year":2024,"hq":"Stockholm","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-stratopaint","slug":"org-stratopaint","name":"Stratopaint","brief":"Vertical SaaS for industrial coatings. Passed Q4 2025.","website":"https://stratopaint.example","kind":"startup","status":"passed","founded_year":2023,"hq":"Vienna","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-pulserate","slug":"org-pulserate","name":"PulseRate","brief":"Sales-call AI. Passed Q3 2025 — agentic CRM commoditization risk.","website":"https://pulserate.example","kind":"startup","status":"passed","founded_year":2022,"hq":"London","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-knurlforge","slug":"org-knurlforge","name":"Knurlforge","brief":"DevOps agent platform for SRE teams.","website":"https://knurlforge.example","kind":"startup","status":"pipeline","founded_year":2025,"hq":"Berlin","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-claretmd","slug":"org-claretmd","name":"ClaretMD","brief":"AI medical scribe for outpatient clinics.","website":"https://claretmd.example","kind":"startup","status":"pipeline","founded_year":2024,"hq":"Munich","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-buoybase","slug":"org-buoybase","name":"BuoyBase","brief":"Marine logistics AI for shipping companies.","website":"https://buoybase.example","kind":"startup","status":"watching","founded_year":2025,"hq":"Hamburg","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-orbitwerks","slug":"org-orbitwerks","name":"OrbitWerks","brief":"Satellite data infra and analytics.","website":"https://orbitwerks.example","kind":"startup","status":"watching","founded_year":2024,"hq":"Munich","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
 
 {"type":"Person","data":{"id":"per-cj","slug":"per-cj","name":"CJ Müller","first_name":"CJ","last_name":"Müller","location":"Berlin","email":"cj@quito.example","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
 {"type":"Person","data":{"id":"per-pawel","slug":"per-pawel","name":"Pawel Nowak","first_name":"Pawel","last_name":"Nowak","location":"Berlin","email":"pawel@quito.example","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
@@ -59,16 +59,16 @@
 {"type":"Person","data":{"id":"per-acq-microsoft-priti","slug":"per-acq-microsoft-priti","name":"Priti Joshi","location":"Redmond","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
 {"type":"Person","data":{"id":"per-acq-snowflake-leo","slug":"per-acq-snowflake-leo","name":"Leo Hall","location":"San Mateo","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
 
-{"type":"Company","data":{"id":"co-aws","slug":"co-aws","name":"AWS","kind":"acquirer","brief":"Hyperscaler. Acquires infra startups for Bedrock + agent stack.","website":"https://aws.amazon.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-microsoft","slug":"co-microsoft","name":"Microsoft","kind":"acquirer","brief":"Hyperscaler. Active AI-infra M&A.","website":"https://microsoft.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-snowflake","slug":"co-snowflake","name":"Snowflake","kind":"acquirer","brief":"Data platform. Acquires data + governance startups.","website":"https://snowflake.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-databricks","slug":"co-databricks","name":"Databricks","kind":"acquirer","brief":"Data + AI platform. Recent acquihires of eval and inference companies.","website":"https://databricks.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-google-cloud","slug":"co-google-cloud","name":"Google Cloud","kind":"acquirer","brief":"Hyperscaler. Vertex AI ecosystem acquisitions.","website":"https://cloud.google.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-allianz-im","slug":"co-allianz-im","name":"Allianz Investment Management","kind":"lp-institution","brief":"Anchor LP in Fund II and III.","hq":"Munich","aum_usd_m":850000.0,"createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-vestland","slug":"co-vestland","name":"Vestland Capital","kind":"lp-institution","brief":"Norwegian sovereign-style fund.","hq":"Oslo","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-grayrock","slug":"co-grayrock","name":"Grayrock Foundation","kind":"lp-institution","brief":"Endowment-style LP. Climate + tech focus.","hq":"Stockholm","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-sequoia-eu","slug":"co-sequoia-eu","name":"Sequoia Europe","kind":"vc-firm","brief":"Frequent co-investor at Series A.","website":"https://sequoia.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-y-combinator","slug":"co-y-combinator","name":"Y Combinator","kind":"accelerator","brief":"Accelerator. Many sourced companies originated here.","website":"https://ycombinator.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-aws","slug":"org-aws","name":"AWS","kind":"acquirer","brief":"Hyperscaler. Acquires infra startups for Bedrock + agent stack.","website":"https://aws.amazon.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-microsoft","slug":"org-microsoft","name":"Microsoft","kind":"acquirer","brief":"Hyperscaler. Active AI-infra M&A.","website":"https://microsoft.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-snowflake","slug":"org-snowflake","name":"Snowflake","kind":"acquirer","brief":"Data platform. Acquires data + governance startups.","website":"https://snowflake.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-databricks","slug":"org-databricks","name":"Databricks","kind":"acquirer","brief":"Data + AI platform. Recent acquihires of eval and inference companies.","website":"https://databricks.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-google-cloud","slug":"org-google-cloud","name":"Google Cloud","kind":"acquirer","brief":"Hyperscaler. Vertex AI ecosystem acquisitions.","website":"https://cloud.google.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-allianz-im","slug":"org-allianz-im","name":"Allianz Investment Management","kind":"lp-institution","brief":"Anchor LP in Fund II and III.","hq":"Munich","aum_usd_m":850000.0,"createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-vestland","slug":"org-vestland","name":"Vestland Capital","kind":"lp-institution","brief":"Norwegian sovereign-style fund.","hq":"Oslo","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-grayrock","slug":"org-grayrock","name":"Grayrock Foundation","kind":"lp-institution","brief":"Endowment-style LP. Climate + tech focus.","hq":"Stockholm","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-sequoia-eu","slug":"org-sequoia-eu","name":"Sequoia Europe","kind":"vc-firm","brief":"Frequent co-investor at Series A.","website":"https://sequoia.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-y-combinator","slug":"org-y-combinator","name":"Y Combinator","kind":"accelerator","brief":"Accelerator. Many sourced companies originated here.","website":"https://ycombinator.com","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
 
 {"type":"Thesis","data":{"id":"thesis-vertical-ai-infra","slug":"thesis-vertical-ai-infra","name":"Vertical AI infrastructure wins","brief":"Sector-specific inference/training stacks accumulate vertical data moats that general-purpose infra can't.","status":"active","confidence":"high","formed_date":"2024-09-15","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
 {"type":"Thesis","data":{"id":"thesis-on-prem-inference","slug":"thesis-on-prem-inference","name":"On-prem inference for regulated industries","brief":"Regulatory pressure and unit economics push inference off public cloud for fintech, healthcare, defense.","status":"active","confidence":"high","formed_date":"2025-01-10","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
@@ -203,21 +203,21 @@
 {"type":"Lesson","data":{"id":"lsn-shell-anti-pattern","slug":"lsn-shell-anti-pattern","name":"Pass on vertical-SaaS-with-AI-shell deals absent product-led pull","kind":"anti-pattern","body":"Generic AI shells on top of legacy vertical SaaS consistently underperform unless there is independent evidence of product-led pull (free tier signups, organic growth). Distribution does not fix PMF.","status":"active","confidence":"high","createdAt":"2025-12-05T10:00:00Z","updatedAt":"2025-12-05T10:00:00Z"}}
 {"type":"Lesson","data":{"id":"lsn-second-time-founder-bias","slug":"lsn-second-time-founder-bias","name":"Bias toward second-time infra founders","kind":"rule-of-thumb","body":"Boost second-time founders building infra products by one conviction notch. Tentative — needs more datapoints to ratify.","status":"tentative","confidence":"medium","createdAt":"2026-03-01T10:00:00Z","updatedAt":"2026-03-01T10:00:00Z"}}
 
-{"edge":"ForCompany","from":"deal-aetherbrick-seed","to":"co-aetherbrick","data":{}}
-{"edge":"ForCompany","from":"deal-aetherbrick-series-a","to":"co-aetherbrick","data":{}}
-{"edge":"ForCompany","from":"deal-saltline-seed","to":"co-saltline-ai","data":{}}
-{"edge":"ForCompany","from":"deal-pinion-series-a","to":"co-pinion-infer","data":{}}
-{"edge":"ForCompany","from":"deal-bramble-series-a","to":"co-bramble-data","data":{}}
-{"edge":"ForCompany","from":"deal-quirebench-seed","to":"co-quirebench","data":{}}
-{"edge":"ForCompany","from":"deal-helix-series-a","to":"co-helix-runtime","data":{}}
-{"edge":"ForCompany","from":"deal-axon-seed","to":"co-axon-eval","data":{}}
-{"edge":"ForCompany","from":"deal-mintlayer-seed","to":"co-mintlayer-data","data":{}}
-{"edge":"ForCompany","from":"deal-vector-forge-seed","to":"co-vector-forge","data":{}}
-{"edge":"ForCompany","from":"deal-sigil-seed","to":"co-sigil-security","data":{}}
-{"edge":"ForCompany","from":"deal-canon-seed","to":"co-canon-quality","data":{}}
-{"edge":"ForCompany","from":"deal-stratopaint-seed","to":"co-stratopaint","data":{}}
-{"edge":"ForCompany","from":"deal-pulserate-series-a","to":"co-pulserate","data":{}}
-{"edge":"ForCompany","from":"deal-knurlforge-seed","to":"co-knurlforge","data":{}}
+{"edge":"ForOrganization","from":"deal-aetherbrick-seed","to":"org-aetherbrick","data":{}}
+{"edge":"ForOrganization","from":"deal-aetherbrick-series-a","to":"org-aetherbrick","data":{}}
+{"edge":"ForOrganization","from":"deal-saltline-seed","to":"org-saltline-ai","data":{}}
+{"edge":"ForOrganization","from":"deal-pinion-series-a","to":"org-pinion-infer","data":{}}
+{"edge":"ForOrganization","from":"deal-bramble-series-a","to":"org-bramble-data","data":{}}
+{"edge":"ForOrganization","from":"deal-quirebench-seed","to":"org-quirebench","data":{}}
+{"edge":"ForOrganization","from":"deal-helix-series-a","to":"org-helix-runtime","data":{}}
+{"edge":"ForOrganization","from":"deal-axon-seed","to":"org-axon-eval","data":{}}
+{"edge":"ForOrganization","from":"deal-mintlayer-seed","to":"org-mintlayer-data","data":{}}
+{"edge":"ForOrganization","from":"deal-vector-forge-seed","to":"org-vector-forge","data":{}}
+{"edge":"ForOrganization","from":"deal-sigil-seed","to":"org-sigil-security","data":{}}
+{"edge":"ForOrganization","from":"deal-canon-seed","to":"org-canon-quality","data":{}}
+{"edge":"ForOrganization","from":"deal-stratopaint-seed","to":"org-stratopaint","data":{}}
+{"edge":"ForOrganization","from":"deal-pulserate-series-a","to":"org-pulserate","data":{}}
+{"edge":"ForOrganization","from":"deal-knurlforge-seed","to":"org-knurlforge","data":{}}
 
 {"edge":"FromFund","from":"deal-aetherbrick-seed","to":"fund-ii","data":{}}
 {"edge":"FromFund","from":"deal-aetherbrick-series-a","to":"fund-ii","data":{}}
@@ -278,26 +278,26 @@
 {"edge":"RelevantMarket","from":"deal-canon-seed","to":"mkt-data","data":{}}
 {"edge":"RelevantMarket","from":"deal-knurlforge-seed","to":"mkt-dev-tools","data":{}}
 
-{"edge":"LeadInvestor","from":"deal-aetherbrick-series-a","to":"co-sequoia-eu","data":{}}
+{"edge":"LeadInvestor","from":"deal-aetherbrick-series-a","to":"org-sequoia-eu","data":{}}
 
-{"edge":"FounderOf","from":"per-aetherbrick-jens","to":"co-aetherbrick","data":{}}
-{"edge":"FounderOf","from":"per-saltline-rohan","to":"co-saltline-ai","data":{}}
-{"edge":"FounderOf","from":"per-pinion-anya","to":"co-pinion-infer","data":{}}
-{"edge":"FounderOf","from":"per-bramble-tom","to":"co-bramble-data","data":{}}
-{"edge":"FounderOf","from":"per-quirebench-sara","to":"co-quirebench","data":{}}
-{"edge":"FounderOf","from":"per-helix-elena","to":"co-helix-runtime","data":{}}
-{"edge":"FounderOf","from":"per-helix-yuki","to":"co-helix-runtime","data":{}}
-{"edge":"FounderOf","from":"per-axon-marcus","to":"co-axon-eval","data":{}}
-{"edge":"FounderOf","from":"per-mintlayer-priya","to":"co-mintlayer-data","data":{}}
-{"edge":"FounderOf","from":"per-sigil-leon","to":"co-sigil-security","data":{}}
-{"edge":"FounderOf","from":"per-vector-forge-mia","to":"co-vector-forge","data":{}}
+{"edge":"FounderOf","from":"per-aetherbrick-jens","to":"org-aetherbrick","data":{}}
+{"edge":"FounderOf","from":"per-saltline-rohan","to":"org-saltline-ai","data":{}}
+{"edge":"FounderOf","from":"per-pinion-anya","to":"org-pinion-infer","data":{}}
+{"edge":"FounderOf","from":"per-bramble-tom","to":"org-bramble-data","data":{}}
+{"edge":"FounderOf","from":"per-quirebench-sara","to":"org-quirebench","data":{}}
+{"edge":"FounderOf","from":"per-helix-elena","to":"org-helix-runtime","data":{}}
+{"edge":"FounderOf","from":"per-helix-yuki","to":"org-helix-runtime","data":{}}
+{"edge":"FounderOf","from":"per-axon-marcus","to":"org-axon-eval","data":{}}
+{"edge":"FounderOf","from":"per-mintlayer-priya","to":"org-mintlayer-data","data":{}}
+{"edge":"FounderOf","from":"per-sigil-leon","to":"org-sigil-security","data":{}}
+{"edge":"FounderOf","from":"per-vector-forge-mia","to":"org-vector-forge","data":{}}
 
-{"edge":"BoardMemberAt","from":"per-cj","to":"co-aetherbrick","data":{}}
-{"edge":"BoardMemberAt","from":"per-cj","to":"co-pinion-infer","data":{}}
-{"edge":"BoardMemberAt","from":"per-pawel","to":"co-helix-runtime","data":{}}
-{"edge":"BoardMemberAt","from":"per-flo","to":"co-saltline-ai","data":{}}
-{"edge":"BoardMemberAt","from":"per-flo","to":"co-bramble-data","data":{}}
-{"edge":"BoardMemberAt","from":"per-louis","to":"co-quirebench","data":{}}
+{"edge":"BoardMemberAt","from":"per-cj","to":"org-aetherbrick","data":{}}
+{"edge":"BoardMemberAt","from":"per-cj","to":"org-pinion-infer","data":{}}
+{"edge":"BoardMemberAt","from":"per-pawel","to":"org-helix-runtime","data":{}}
+{"edge":"BoardMemberAt","from":"per-flo","to":"org-saltline-ai","data":{}}
+{"edge":"BoardMemberAt","from":"per-flo","to":"org-bramble-data","data":{}}
+{"edge":"BoardMemberAt","from":"per-louis","to":"org-quirebench","data":{}}
 
 {"edge":"RoleInDeal","from":"per-helix-elena","to":"deal-helix-series-a","data":{}}
 {"edge":"RoleInDeal","from":"per-helix-yuki","to":"deal-helix-series-a","data":{}}
@@ -306,41 +306,41 @@
 {"edge":"RoleInDeal","from":"per-expert-cora","to":"deal-sigil-seed","data":{}}
 {"edge":"RoleInDeal","from":"per-expert-malik","to":"deal-mintlayer-seed","data":{}}
 
-{"edge":"DecisionMakerAt","from":"per-acq-aws-rajiv","to":"co-aws","data":{}}
-{"edge":"DecisionMakerAt","from":"per-acq-microsoft-priti","to":"co-microsoft","data":{}}
-{"edge":"DecisionMakerAt","from":"per-acq-snowflake-leo","to":"co-snowflake","data":{}}
+{"edge":"DecisionMakerAt","from":"per-acq-aws-rajiv","to":"org-aws","data":{}}
+{"edge":"DecisionMakerAt","from":"per-acq-microsoft-priti","to":"org-microsoft","data":{}}
+{"edge":"DecisionMakerAt","from":"per-acq-snowflake-leo","to":"org-snowflake","data":{}}
 
-{"edge":"WouldAcquire","from":"co-aws","to":"co-pinion-infer","data":{}}
-{"edge":"WouldAcquire","from":"co-aws","to":"co-bramble-data","data":{}}
-{"edge":"WouldAcquire","from":"co-microsoft","to":"co-pinion-infer","data":{}}
-{"edge":"WouldAcquire","from":"co-microsoft","to":"co-saltline-ai","data":{}}
-{"edge":"WouldAcquire","from":"co-snowflake","to":"co-bramble-data","data":{}}
-{"edge":"WouldAcquire","from":"co-snowflake","to":"co-quirebench","data":{}}
-{"edge":"WouldAcquire","from":"co-databricks","to":"co-quirebench","data":{}}
-{"edge":"WouldAcquire","from":"co-databricks","to":"co-bramble-data","data":{}}
-{"edge":"WouldAcquire","from":"co-google-cloud","to":"co-pinion-infer","data":{}}
-{"edge":"WouldAcquire","from":"co-google-cloud","to":"co-aetherbrick","data":{}}
+{"edge":"WouldAcquire","from":"org-aws","to":"org-pinion-infer","data":{}}
+{"edge":"WouldAcquire","from":"org-aws","to":"org-bramble-data","data":{}}
+{"edge":"WouldAcquire","from":"org-microsoft","to":"org-pinion-infer","data":{}}
+{"edge":"WouldAcquire","from":"org-microsoft","to":"org-saltline-ai","data":{}}
+{"edge":"WouldAcquire","from":"org-snowflake","to":"org-bramble-data","data":{}}
+{"edge":"WouldAcquire","from":"org-snowflake","to":"org-quirebench","data":{}}
+{"edge":"WouldAcquire","from":"org-databricks","to":"org-quirebench","data":{}}
+{"edge":"WouldAcquire","from":"org-databricks","to":"org-bramble-data","data":{}}
+{"edge":"WouldAcquire","from":"org-google-cloud","to":"org-pinion-infer","data":{}}
+{"edge":"WouldAcquire","from":"org-google-cloud","to":"org-aetherbrick","data":{}}
 
-{"edge":"LpInFund","from":"co-grace-tan-fo","to":"fund-iii","data":{"commitment_usd_m":5.0}}
-{"edge":"LpInFund","from":"co-allianz-im","to":"fund-ii","data":{"commitment_usd_m":30.0}}
-{"edge":"LpInFund","from":"co-allianz-im","to":"fund-iii","data":{"commitment_usd_m":60.0}}
-{"edge":"LpInFund","from":"co-vestland","to":"fund-iii","data":{"commitment_usd_m":40.0}}
-{"edge":"LpInFund","from":"co-grayrock","to":"fund-iii","data":{"commitment_usd_m":25.0}}
+{"edge":"LpInFund","from":"org-grace-tan-fo","to":"fund-iii","data":{"commitment_usd_m":5.0}}
+{"edge":"LpInFund","from":"org-allianz-im","to":"fund-ii","data":{"commitment_usd_m":30.0}}
+{"edge":"LpInFund","from":"org-allianz-im","to":"fund-iii","data":{"commitment_usd_m":60.0}}
+{"edge":"LpInFund","from":"org-vestland","to":"fund-iii","data":{"commitment_usd_m":40.0}}
+{"edge":"LpInFund","from":"org-grayrock","to":"fund-iii","data":{"commitment_usd_m":25.0}}
 
-{"edge":"CompanyInMarket","from":"co-aetherbrick","to":"mkt-vertical-saas","data":{}}
-{"edge":"CompanyInMarket","from":"co-saltline-ai","to":"mkt-vertical-saas","data":{}}
-{"edge":"CompanyInMarket","from":"co-pinion-infer","to":"mkt-ai-infra","data":{}}
-{"edge":"CompanyInMarket","from":"co-bramble-data","to":"mkt-data","data":{}}
-{"edge":"CompanyInMarket","from":"co-quirebench","to":"mkt-dev-tools","data":{}}
-{"edge":"CompanyInMarket","from":"co-helix-runtime","to":"mkt-ai-infra","data":{}}
-{"edge":"CompanyInMarket","from":"co-axon-eval","to":"mkt-dev-tools","data":{}}
-{"edge":"CompanyInMarket","from":"co-mintlayer-data","to":"mkt-data","data":{}}
-{"edge":"CompanyInMarket","from":"co-vector-forge","to":"mkt-ai-infra","data":{}}
-{"edge":"CompanyInMarket","from":"co-sigil-security","to":"mkt-security","data":{}}
-{"edge":"CompanyInMarket","from":"co-canon-quality","to":"mkt-data","data":{}}
-{"edge":"CompanyInMarket","from":"co-stratopaint","to":"mkt-vertical-saas","data":{}}
-{"edge":"CompanyInMarket","from":"co-pulserate","to":"mkt-ai-applications","data":{}}
-{"edge":"CompanyInMarket","from":"co-knurlforge","to":"mkt-dev-tools","data":{}}
+{"edge":"OrganizationInMarket","from":"org-aetherbrick","to":"mkt-vertical-saas","data":{}}
+{"edge":"OrganizationInMarket","from":"org-saltline-ai","to":"mkt-vertical-saas","data":{}}
+{"edge":"OrganizationInMarket","from":"org-pinion-infer","to":"mkt-ai-infra","data":{}}
+{"edge":"OrganizationInMarket","from":"org-bramble-data","to":"mkt-data","data":{}}
+{"edge":"OrganizationInMarket","from":"org-quirebench","to":"mkt-dev-tools","data":{}}
+{"edge":"OrganizationInMarket","from":"org-helix-runtime","to":"mkt-ai-infra","data":{}}
+{"edge":"OrganizationInMarket","from":"org-axon-eval","to":"mkt-dev-tools","data":{}}
+{"edge":"OrganizationInMarket","from":"org-mintlayer-data","to":"mkt-data","data":{}}
+{"edge":"OrganizationInMarket","from":"org-vector-forge","to":"mkt-ai-infra","data":{}}
+{"edge":"OrganizationInMarket","from":"org-sigil-security","to":"mkt-security","data":{}}
+{"edge":"OrganizationInMarket","from":"org-canon-quality","to":"mkt-data","data":{}}
+{"edge":"OrganizationInMarket","from":"org-stratopaint","to":"mkt-vertical-saas","data":{}}
+{"edge":"OrganizationInMarket","from":"org-pulserate","to":"mkt-ai-applications","data":{}}
+{"edge":"OrganizationInMarket","from":"org-knurlforge","to":"mkt-dev-tools","data":{}}
 
 {"edge":"Knows","from":"per-cj","to":"per-aetherbrick-jens","data":{"context":"Berlin AI events 2019","since":"2019-03-15","strength":"strong"}}
 {"edge":"Knows","from":"per-aetherbrick-jens","to":"per-cj","data":{"context":"Berlin AI events 2019","since":"2019-03-15","strength":"strong"}}
@@ -371,33 +371,33 @@
 {"edge":"Knows","from":"per-aetherbrick-jens","to":"per-mintlayer-priya","data":{"context":"Berlin founder dinners","since":"2024-11-01","strength":"medium"}}
 {"edge":"Knows","from":"per-mintlayer-priya","to":"per-aetherbrick-jens","data":{"context":"Berlin founder dinners","since":"2024-11-01","strength":"medium"}}
 
-{"edge":"WorksAt","from":"per-allianz-arno","to":"co-allianz-im","data":{"role":"Portfolio Manager","current":true}}
-{"edge":"WorksAt","from":"per-vestland-ina","to":"co-vestland","data":{"role":"Investment Director","current":true}}
-{"edge":"WorksAt","from":"per-grayrock-kai","to":"co-grayrock","data":{"role":"Investment Officer","current":true}}
-{"edge":"WorksAt","from":"per-acq-aws-rajiv","to":"co-aws","data":{"role":"Corp Dev","current":true}}
-{"edge":"WorksAt","from":"per-acq-microsoft-priti","to":"co-microsoft","data":{"role":"M&A Lead, Azure","current":true}}
-{"edge":"WorksAt","from":"per-acq-snowflake-leo","to":"co-snowflake","data":{"role":"Corp Dev","current":true}}
+{"edge":"WorksAt","from":"per-allianz-arno","to":"org-allianz-im","data":{"role":"Portfolio Manager","current":true}}
+{"edge":"WorksAt","from":"per-vestland-ina","to":"org-vestland","data":{"role":"Investment Director","current":true}}
+{"edge":"WorksAt","from":"per-grayrock-kai","to":"org-grayrock","data":{"role":"Investment Officer","current":true}}
+{"edge":"WorksAt","from":"per-acq-aws-rajiv","to":"org-aws","data":{"role":"Corp Dev","current":true}}
+{"edge":"WorksAt","from":"per-acq-microsoft-priti","to":"org-microsoft","data":{"role":"M&A Lead, Azure","current":true}}
+{"edge":"WorksAt","from":"per-acq-snowflake-leo","to":"org-snowflake","data":{"role":"Corp Dev","current":true}}
 
-{"edge":"SignalAboutCompany","from":"sig-helix-discovery","to":"co-helix-runtime","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-helix-yc-mention","to":"co-helix-runtime","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-helix-board-onprem-mandate","to":"co-helix-runtime","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-axon-discovery","to":"co-axon-eval","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-axon-eval-product-launch","to":"co-axon-eval","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-axon-databricks-acquihire-rumor","to":"co-axon-eval","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-vector-forge-aws-deal","to":"co-vector-forge","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-saltline-q1-arr","to":"co-saltline-ai","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-saltline-cs-departure","to":"co-saltline-ai","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-aetherbrick-churn-spike","to":"co-aetherbrick","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-aetherbrick-series-b-talk","to":"co-aetherbrick","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-pinion-customer-win","to":"co-pinion-infer","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-bramble-arr-trajectory","to":"co-bramble-data","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-quirebench-board-decision","to":"co-quirebench","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-stratopaint-founder-departure","to":"co-stratopaint","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-sigil-tegus-call","to":"co-sigil-security","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-canon-customer-ref","to":"co-canon-quality","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-pulserate-pass-vindication","to":"co-pulserate","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-knurlforge-customer-poc","to":"co-knurlforge","data":{}}
-{"edge":"SignalAboutCompany","from":"sig-orbit-spacex-deal","to":"co-orbitwerks","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-helix-discovery","to":"org-helix-runtime","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-helix-yc-mention","to":"org-helix-runtime","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-helix-board-onprem-mandate","to":"org-helix-runtime","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-axon-discovery","to":"org-axon-eval","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-axon-eval-product-launch","to":"org-axon-eval","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-axon-databricks-acquihire-rumor","to":"org-axon-eval","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-vector-forge-aws-deal","to":"org-vector-forge","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-saltline-q1-arr","to":"org-saltline-ai","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-saltline-cs-departure","to":"org-saltline-ai","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-aetherbrick-churn-spike","to":"org-aetherbrick","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-aetherbrick-series-b-talk","to":"org-aetherbrick","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-pinion-customer-win","to":"org-pinion-infer","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-bramble-arr-trajectory","to":"org-bramble-data","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-quirebench-board-decision","to":"org-quirebench","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-stratopaint-founder-departure","to":"org-stratopaint","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-sigil-tegus-call","to":"org-sigil-security","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-canon-customer-ref","to":"org-canon-quality","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-pulserate-pass-vindication","to":"org-pulserate","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-knurlforge-customer-poc","to":"org-knurlforge","data":{}}
+{"edge":"SignalAboutOrganization","from":"sig-orbit-spacex-deal","to":"org-orbitwerks","data":{}}
 
 {"edge":"SignalAboutPerson","from":"sig-mintlayer-founder-tweet","to":"per-mintlayer-priya","data":{}}
 
@@ -495,7 +495,7 @@
 {"edge":"InsightAboutDeal","from":"ins-vector-forge-pass-rationale","to":"deal-vector-forge-seed","data":{}}
 {"edge":"InsightAboutDeal","from":"ins-aetherbrick-followon-brief","to":"deal-aetherbrick-series-a","data":{}}
 
-{"edge":"InsightAboutCompany","from":"ins-saltline-q1-recap","to":"co-saltline-ai","data":{}}
+{"edge":"InsightAboutOrganization","from":"ins-saltline-q1-recap","to":"org-saltline-ai","data":{}}
 
 {"edge":"InsightHighlightsPattern","from":"ins-on-prem-trend-observation","to":"pat-on-prem-shift","data":{}}
 {"edge":"InsightHighlightsPattern","from":"ins-eval-market-hypothesis","to":"pat-eval-fragmentation","data":{}}
@@ -544,11 +544,11 @@
 {"edge":"ArtifactAboutDeal","from":"art-canon-customer-call","to":"deal-canon-seed","data":{}}
 {"edge":"ArtifactAboutDeal","from":"art-vector-forge-pass-email","to":"deal-vector-forge-seed","data":{}}
 
-{"edge":"ArtifactAboutCompany","from":"art-aetherbrick-churn-email","to":"co-aetherbrick","data":{}}
-{"edge":"ArtifactAboutCompany","from":"art-aetherbrick-board-q1","to":"co-aetherbrick","data":{}}
-{"edge":"ArtifactAboutCompany","from":"art-aetherbrick-q1-summary","to":"co-aetherbrick","data":{}}
-{"edge":"ArtifactAboutCompany","from":"art-saltline-q1-update","to":"co-saltline-ai","data":{}}
-{"edge":"ArtifactAboutCompany","from":"art-pinion-customer-win-slack","to":"co-pinion-infer","data":{}}
+{"edge":"ArtifactAboutOrganization","from":"art-aetherbrick-churn-email","to":"org-aetherbrick","data":{}}
+{"edge":"ArtifactAboutOrganization","from":"art-aetherbrick-board-q1","to":"org-aetherbrick","data":{}}
+{"edge":"ArtifactAboutOrganization","from":"art-aetherbrick-q1-summary","to":"org-aetherbrick","data":{}}
+{"edge":"ArtifactAboutOrganization","from":"art-saltline-q1-update","to":"org-saltline-ai","data":{}}
+{"edge":"ArtifactAboutOrganization","from":"art-pinion-customer-win-slack","to":"org-pinion-infer","data":{}}
 
 {"edge":"ArtifactMentionsPerson","from":"art-helix-founder-call-2026-04","to":"per-helix-yuki","data":{}}
 {"edge":"ArtifactMentionsPerson","from":"art-aetherbrick-board-q1","to":"per-cj","data":{}}
@@ -613,7 +613,7 @@
 
 {"edge":"PatternAcrossDecision","from":"pat-vertical-shell-flop","to":"dec-stratopaint-pass","data":{}}
 
-{"edge":"PatternAcrossCompany","from":"pat-founder-second-time-infra","to":"co-helix-runtime","data":{}}
+{"edge":"PatternAcrossOrganization","from":"pat-founder-second-time-infra","to":"org-helix-runtime","data":{}}
 
 {"edge":"LessonDistilledFromPattern","from":"lsn-onprem-validation-protocol","to":"pat-on-prem-shift","data":{}}
 {"edge":"LessonDistilledFromPattern","from":"lsn-vertical-data-moat-eval","to":"pat-vertical-data-moats","data":{}}
@@ -624,8 +624,8 @@
 {"edge":"LessonAppliesToMarket","from":"lsn-vertical-data-moat-eval","to":"mkt-ai-applications","data":{}}
 {"edge":"LessonAppliesToMarket","from":"lsn-shell-anti-pattern","to":"mkt-vertical-saas","data":{}}
 
-{"type":"Company","data":{"id":"co-quito","slug":"co-quito","name":"Quito Capital","kind":"vc-firm","brief":"The firm itself. Team members WorksAt co-quito; the firm has 2 funds (fund-ii, fund-iii).","website":"https://quito.example","hq":"Berlin","aum_usd_m":370.0,"createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
-{"type":"Company","data":{"id":"co-grace-tan-fo","slug":"co-grace-tan-fo","name":"Grace Tan Family Office","kind":"family-office","brief":"Individual LP — Grace Tan's family office vehicle.","hq":"Singapore","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-quito","slug":"org-quito","name":"Quito Capital","kind":"vc-firm","brief":"The firm itself. Team members WorksAt co-quito; the firm has 2 funds (fund-ii, fund-iii).","website":"https://quito.example","hq":"Berlin","aum_usd_m":370.0,"createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-grace-tan-fo","slug":"org-grace-tan-fo","name":"Grace Tan Family Office","kind":"family-office","brief":"Individual LP — Grace Tan's family office vehicle.","hq":"Singapore","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
 
 {"type":"SourceEntity","data":{"id":"src-tegus","slug":"src-tegus","name":"Tegus","kind":"expert-call","reliability":"high","url":"https://tegus.com","brief":"Expert-call transcripts. High signal-to-noise.","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
 {"type":"SourceEntity","data":{"id":"src-pitchbook","slug":"src-pitchbook","name":"PitchBook","kind":"web-scrape","reliability":"high","url":"https://pitchbook.com","brief":"Funding rounds + cap-table data. Authoritative on rounds; can lag on smaller deals.","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
@@ -635,18 +635,18 @@
 
 {"type":"Deal","data":{"id":"deal-stripe-series-i-observed","slug":"deal-stripe-series-i-observed","name":"Stripe — Series I (observed)","round_type":"series-d-plus","stage":"closed","outcome":"observed","round_size_usd_m":650.0,"post_money_valuation_usd_m":91500.0,"date_announced":"2025-08-12","date_closed":"2025-08-12","brief":"External round we observed via PitchBook. No Quito participation. Tracked for in-thesis market intelligence.","createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
 
-{"type":"Company","data":{"id":"co-stripe","slug":"co-stripe","name":"Stripe","kind":"startup","status":"observed","brief":"Payments platform. Tracked via PitchBook for market intelligence.","website":"https://stripe.com","hq":"San Francisco","founded_year":2010,"createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
+{"type":"Organization","data":{"id":"org-stripe","slug":"org-stripe","name":"Stripe","kind":"startup","status":"observed","brief":"Payments platform. Tracked via PitchBook for market intelligence.","website":"https://stripe.com","hq":"San Francisco","founded_year":2010,"createdAt":"2026-05-01T00:00:00Z","updatedAt":"2026-05-01T00:00:00Z"}}
 
-{"edge":"ForCompany","from":"deal-stripe-series-i-observed","to":"co-stripe","data":{}}
+{"edge":"ForOrganization","from":"deal-stripe-series-i-observed","to":"org-stripe","data":{}}
 
-{"edge":"WorksAt","from":"per-cj","to":"co-quito","data":{"role":"Managing Partner","since":"2018-01-01","current":true}}
-{"edge":"WorksAt","from":"per-pawel","to":"co-quito","data":{"role":"Partner","since":"2019-06-01","current":true}}
-{"edge":"WorksAt","from":"per-flo","to":"co-quito","data":{"role":"Partner","since":"2020-09-01","current":true}}
-{"edge":"WorksAt","from":"per-ricardo","to":"co-quito","data":{"role":"Principal","since":"2022-03-01","current":true}}
-{"edge":"WorksAt","from":"per-louis","to":"co-quito","data":{"role":"Senior Associate","since":"2024-01-01","current":true}}
-{"edge":"WorksAt","from":"per-vp-noah","to":"co-quito","data":{"role":"Venture Partner — GTM","since":"2023-09-01","current":true}}
-{"edge":"WorksAt","from":"per-vp-tegan","to":"co-quito","data":{"role":"Venture Partner — Technical","since":"2024-06-01","current":true}}
-{"edge":"WorksAt","from":"per-grace-tan","to":"co-grace-tan-fo","data":{"role":"Principal","since":"2020-01-01","current":true}}
+{"edge":"WorksAt","from":"per-cj","to":"org-quito","data":{"role":"Managing Partner","since":"2018-01-01","current":true}}
+{"edge":"WorksAt","from":"per-pawel","to":"org-quito","data":{"role":"Partner","since":"2019-06-01","current":true}}
+{"edge":"WorksAt","from":"per-flo","to":"org-quito","data":{"role":"Partner","since":"2020-09-01","current":true}}
+{"edge":"WorksAt","from":"per-ricardo","to":"org-quito","data":{"role":"Principal","since":"2022-03-01","current":true}}
+{"edge":"WorksAt","from":"per-louis","to":"org-quito","data":{"role":"Senior Associate","since":"2024-01-01","current":true}}
+{"edge":"WorksAt","from":"per-vp-noah","to":"org-quito","data":{"role":"Venture Partner — GTM","since":"2023-09-01","current":true}}
+{"edge":"WorksAt","from":"per-vp-tegan","to":"org-quito","data":{"role":"Venture Partner — Technical","since":"2024-06-01","current":true}}
+{"edge":"WorksAt","from":"per-grace-tan","to":"org-grace-tan-fo","data":{"role":"Principal","since":"2020-01-01","current":true}}
 
 {"edge":"PublishedBySource","from":"art-helix-founder-call-2026-04","to":"src-founder-direct","data":{}}
 {"edge":"PublishedBySource","from":"art-aetherbrick-churn-email","to":"src-founder-direct","data":{}}
@@ -671,25 +671,25 @@
 {"edge":"DecisionByPerson","from":"dec-onprem-thesis-doubledown","to":"per-cj","data":{}}
 {"edge":"DecisionBasedOnAssumption","from":"dec-onprem-thesis-doubledown","to":"asmp-data-sovereignty-mandates","data":{}}
 
-{"edge":"ParticipantInvestor","from":"deal-pinion-series-a","to":"co-sequoia-eu","data":{}}
-{"edge":"ParticipantInvestor","from":"deal-bramble-series-a","to":"co-sequoia-eu","data":{}}
-{"edge":"ParticipantInvestor","from":"deal-bramble-series-a","to":"co-y-combinator","data":{}}
-{"edge":"ParticipantInvestor","from":"deal-helix-series-a","to":"co-sequoia-eu","data":{}}
+{"edge":"ParticipantInvestor","from":"deal-pinion-series-a","to":"org-sequoia-eu","data":{}}
+{"edge":"ParticipantInvestor","from":"deal-bramble-series-a","to":"org-sequoia-eu","data":{}}
+{"edge":"ParticipantInvestor","from":"deal-bramble-series-a","to":"org-y-combinator","data":{}}
+{"edge":"ParticipantInvestor","from":"deal-helix-series-a","to":"org-sequoia-eu","data":{}}
 
-{"edge":"ThesisAboutCompany","from":"thesis-on-prem-inference","to":"co-helix-runtime","data":{}}
-{"edge":"ThesisAboutCompany","from":"thesis-on-prem-inference","to":"co-pinion-infer","data":{}}
-{"edge":"ThesisAboutCompany","from":"thesis-data-quality-moats","to":"co-bramble-data","data":{}}
-{"edge":"ThesisAboutCompany","from":"thesis-data-quality-moats","to":"co-canon-quality","data":{}}
+{"edge":"ThesisAboutOrganization","from":"thesis-on-prem-inference","to":"org-helix-runtime","data":{}}
+{"edge":"ThesisAboutOrganization","from":"thesis-on-prem-inference","to":"org-pinion-infer","data":{}}
+{"edge":"ThesisAboutOrganization","from":"thesis-data-quality-moats","to":"org-bramble-data","data":{}}
+{"edge":"ThesisAboutOrganization","from":"thesis-data-quality-moats","to":"org-canon-quality","data":{}}
 
 {"edge":"CommitmentFromArtifact","from":"cmt-helix-customer-refs","to":"art-helix-founder-call-2026-04","data":{}}
 {"edge":"CommitmentFromArtifact","from":"cmt-aetherbrick-board-prep","to":"art-aetherbrick-board-q1","data":{}}
 
-{"edge":"PatternAcrossCompany","from":"pat-on-prem-shift","to":"co-helix-runtime","data":{}}
-{"edge":"PatternAcrossCompany","from":"pat-on-prem-shift","to":"co-pinion-infer","data":{}}
-{"edge":"PatternAcrossCompany","from":"pat-vertical-data-moats","to":"co-bramble-data","data":{}}
-{"edge":"PatternAcrossCompany","from":"pat-vertical-data-moats","to":"co-aetherbrick","data":{}}
-{"edge":"PatternAcrossCompany","from":"pat-eval-fragmentation","to":"co-axon-eval","data":{}}
-{"edge":"PatternAcrossCompany","from":"pat-eval-fragmentation","to":"co-quirebench","data":{}}
+{"edge":"PatternAcrossOrganization","from":"pat-on-prem-shift","to":"org-helix-runtime","data":{}}
+{"edge":"PatternAcrossOrganization","from":"pat-on-prem-shift","to":"org-pinion-infer","data":{}}
+{"edge":"PatternAcrossOrganization","from":"pat-vertical-data-moats","to":"org-bramble-data","data":{}}
+{"edge":"PatternAcrossOrganization","from":"pat-vertical-data-moats","to":"org-aetherbrick","data":{}}
+{"edge":"PatternAcrossOrganization","from":"pat-eval-fragmentation","to":"org-axon-eval","data":{}}
+{"edge":"PatternAcrossOrganization","from":"pat-eval-fragmentation","to":"org-quirebench","data":{}}
 
 {"edge":"PatternAcrossDecision","from":"pat-on-prem-shift","to":"dec-helix-second-meeting","data":{}}
 {"edge":"PatternAcrossDecision","from":"pat-on-prem-shift","to":"dec-onprem-thesis-doubledown","data":{}}

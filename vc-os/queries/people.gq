@@ -1,7 +1,7 @@
 // People + network reads. Person is intrinsic; relationships live on edges.
 // Roles (team / founder / lp / vp / expert) are derived from edge traversals,
-// not from a property on Person. Quito itself is `co-quito` (Company kind=vc-firm);
-// team members `WorksAt co-quito`.
+// not from a property on Person. Quito itself is `org-quito` (Organization kind=vc-firm);
+// team members `WorksAt org-quito`.
 
 // ──────────────────────────────────────────────
 // Basic reads
@@ -37,18 +37,18 @@ query founders_enriched() {
 // Role-derived listings (replace primary_relation filters)
 // ──────────────────────────────────────────────
 
-// Quito team — anyone WorksAt co-quito.
+// Quito team — anyone WorksAt org-quito.
 query team() {
     match {
         $p: Person
         $p worksAt $quito
-        $quito: Company { slug: "co-quito" }
+        $quito: Organization { slug: "org-quito" }
     }
     return { $p.slug, $p.name, $p.email, $p.location }
     order { $p.name }
 }
 
-// Anyone who has founded at least one Company.
+// Anyone who has founded at least one Organization.
 query founders() {
     match {
         $p: Person
@@ -58,23 +58,23 @@ query founders() {
     order { $p.name }
 }
 
-// Anyone working at an LP-institution Company.
+// Anyone working at an LP-institution Organization.
 query lp_contacts() {
     match {
         $p: Person
         $p worksAt $org
-        $org: Company { kind: "lp-institution" }
+        $org: Organization { kind: "lp-institution" }
     }
     return { $p.slug, $p.name, $org.slug, $org.name, $p.location, $p.email }
     order { $p.name }
 }
 
-// Anyone working at an acquirer Company (corp dev, M&A leads).
+// Anyone working at an acquirer Organization (corp dev, M&A leads).
 query acquirer_decision_makers() {
     match {
         $p: Person
         $p decisionMakerAt $org
-        $org: Company { kind: "acquirer" }
+        $org: Organization { kind: "acquirer" }
     }
     return { $p.slug, $p.name, $org.slug, $org.name, $p.location, $p.linkedin }
     order { $p.name }
@@ -143,17 +143,19 @@ query person_decision_maker_at($slug: String) {
 // Network leverage queries
 // ──────────────────────────────────────────────
 
-// 2-hop: team member → bridge person → founder
+// 2-hop: team member → bridge person → founder. Constrains the target to a
+// Person with at least one FounderOf edge so non-founders don't slip through.
 query intro_path_to_founder($slug: String) {
     match {
         $founder: Person { slug: $slug }
+        $founder founderOf $f_organization
         $bridge knows $founder
         $teammate: Person
         $teammate knows $bridge
         $teammate worksAt $quito
-        $quito: Company { slug: "co-quito" }
+        $quito: Organization { slug: "org-quito" }
     }
-    return { $teammate.slug, $teammate.name, $bridge.slug, $bridge.name }
+    return { $teammate.slug, $teammate.name, $bridge.slug, $bridge.name, $f_organization.slug }
 }
 
 // 1-hop: which team members directly know this person.
@@ -163,7 +165,7 @@ query direct_team_knowers($slug: String) {
         $teammate: Person
         $teammate knows $target
         $teammate worksAt $quito
-        $quito: Company { slug: "co-quito" }
+        $quito: Organization { slug: "org-quito" }
     }
     return { $teammate.slug, $teammate.name }
 }

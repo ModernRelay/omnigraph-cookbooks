@@ -6,7 +6,7 @@ Scoped guidance for the `vc-os/` cookbook. Repo-wide conventions live in `../CLA
 
 An Omnigraph schema + seed modeling a venture-capital firm's full operating system. Not just an intelligence layer (signals/patterns/insights) but engagement (deals, funds), action (decisions, commitments), and reflexive learning (patterns, lessons) — all in one typed graph. Schema, seed data, and queries only — no application code.
 
-The reference seed is a **fictional Berlin-based AI-infra fund** ("Quito Capital") running Fund III ($250M, vintage 2024). All names, companies, deals, and people are fabricated. The seed exists to shape the demo queries, not to model a real firm.
+The reference seed is a **fictional Berlin-based AI-infra fund** ("Quito Capital") running Fund III ($250M, vintage 2024). All names, organizations, deals, and people are fabricated. The seed exists to shape the demo queries, not to model a real firm.
 
 ## Key Files
 
@@ -33,9 +33,9 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 **Core:**
 | Node | Purpose |
 |---|---|
-| `Company` | Universal entity. `kind` enum: startup/lp-institution/vc-firm/acquirer/customer/bank/regulator/accelerator/family-office/etc. Quito itself is `co-quito` (kind=vc-firm). |
+| `Organization` | Universal entity. `kind` enum: startup/lp-institution/vc-firm/acquirer/customer/bank/regulator/accelerator/family-office/etc. Quito itself is `org-quito` (kind=vc-firm). |
 | `Person` | Individual human. Roles relative to Quito live on edges, not on the node. |
-| `Deal` | A funding event involving a Company. `outcome=observed` for external rounds with no Quito participation. |
+| `Deal` | A funding event involving a Organization. `outcome=observed` for external rounds with no Quito participation. |
 | `Fund` | Quito's funds. |
 | `Market` | Sector/vertical hub. |
 | `Artifact` | Raw content with native Blob. |
@@ -52,25 +52,25 @@ v1 seed ships `Chunk` zero (populate via `omnigraph embed --reembed_all`). All o
 
 **Core analytical loops:**
 
-1. **Engagement** — Deal/Fund/Company structure plus the relationship graph (`Person knows`, `decisionMakerAt`, `WouldAcquire`)
+1. **Engagement** — Deal/Fund/Organization structure plus the relationship graph (`Person knows`, `decisionMakerAt`, `WouldAcquire`)
 2. **Belief + Evidence** — Signal supports/contradicts Assumption|Thesis; Thesis reliesOn Assumption; Insight reliesOnSignal
 3. **Decision + Learning** — Decision basedOnAssumption + needsAnswerToQuestion; Pattern across Signals/Decisions; Lesson distilledFromPattern
 
 **Design choices to preserve:**
 
 - **Slug prefix convention is mandatory** — `co-` (all Companies, regardless of kind), `per-`, `mkt-`, `deal-`, `fund-`, `art-`, `thesis-`, `asmp-`, `q-`, `sig-`, `ins-`, `src-`, `chk-`, `dec-`, `cmt-`, `pat-`, `lsn-`. Don't break it.
-- **One `Company` covers everything.** Startups, LPs, acquirers, peer VCs, customers — all `Company` with different `kind` values. Don't reintroduce a separate `Organization` node.
-- **`co-quito` is Quito itself** — a `Company` with `kind=vc-firm`. Team members `WorksAt co-quito` (this replaces the dropped `Person.primary_relation = team` enum). Funds reference Quito implicitly via `LpInFund` from external LPs.
-- **`Person` is intrinsic** — no `primary_relation` enum. Roles are derived from edges: `WorksAt co-quito` (team), `FounderOf` (founder), `LpInFund` source via `WorksAt` (LP contact), `RoleInDeal {role: expert|customer-ref|venture-partner}` (deal-scoped roles), `DecisionMakerAt $co {kind: acquirer}` (acquirer DM).
-- **`Person` enrichment fields** (`prior_exits`, `years_operating`, `education`, `prior_companies`, `founder_score`, `last_enriched_at`) are populated by a scraping/enrichment skill, refreshed periodically.
-- **One `Company` can have many `Deal`s.** A deal is a round-level engagement. Decisions attach to Deals, not Companies. `outcome=observed` for external rounds (e.g., PitchBook imports) where Quito didn't participate.
+- **One `Organization` covers everything.** Startups, LPs, acquirers, peer VCs, customers — all `Organization` with different `kind` values. Don't reintroduce a separate `Organization` node.
+- **`org-quito` is Quito itself** — a `Organization` with `kind=vc-firm`. Team members `WorksAt org-quito` (this replaces the dropped `Person.primary_relation = team` enum). Funds reference Quito implicitly via `LpInFund` from external LPs.
+- **`Person` is intrinsic** — no `primary_relation` enum. Roles are derived from edges: `WorksAt org-quito` (team), `FounderOf` (founder), `LpInFund` source via `WorksAt` (LP contact), `RoleInDeal {role: founder|customer-ref|expert|co-investor-lead|co-investor-participant|board-candidate|venture-partner}` (deal-scoped roles — keep this list in sync with the enum in `schema.pg`), `DecisionMakerAt $co {kind: acquirer}` (acquirer DM).
+- **`Person` enrichment fields** (`prior_exits`, `years_operating`, `education`, `prior_organizations`, `founder_score`, `last_enriched_at`) are populated by a scraping/enrichment skill, refreshed periodically.
+- **One `Organization` can have many `Deal`s.** A deal is a round-level engagement. Decisions attach to Deals, not Companies. `outcome=observed` for external rounds (e.g., PitchBook imports) where Quito didn't participate.
 - **`Insight.kind`** is `memo, brief, observation, hypothesis, recap`. `stance` (bull/bear/neutral) is separate. Don't conflate; don't reintroduce `debate-bull/bear` kinds.
 - **`Decision.kind`** is one-shot only: `invest, pass, follow-on, board-flag, double-down, write-off, exit-plan, second-meeting, no-decision`. Intros and follow-ups are `Commitment`s, not Decisions.
-- **`Decision` regards Deals (or Theses), not Companies directly.** Portco-level decisions chain via the company's most recent Deal.
+- **`Decision` regards Deals (or Theses), not Companies directly.** Portco-level decisions chain via the organization's most recent Deal.
 - **`SourceEntity`** carries provenance + reliability. When a source's reliability drops, all `Signal`s sourced from `Artifact`s `PublishedBySource` it can be flagged via `source-downstream-signals`.
 - **`Lesson.kind=protocol`** is the runtime-rules use case (declarative behavior rules the team wants agents to follow). `Lesson.status=tentative` lives on a review branch awaiting human merge.
-- **Edges follow `VerbTargetType` naming** (`SignalAboutCompany`, `DecisionBasedOnAssumption`, `LessonDistilledFromPattern`).
-- **Edge traversal in queries is lowerCamelCase** even though the schema declares PascalCase (`$d forCompany $c`).
+- **Edges follow `VerbTargetType` naming** (`SignalAboutOrganization`, `DecisionBasedOnAssumption`, `LessonDistilledFromPattern`).
+- **Edge traversal in queries is lowerCamelCase** even though the schema declares PascalCase (`$d forOrganization $c`).
 - **`Chunk` is implementation detail for hybrid search**, not an ontological commitment. v1 seed has zero Chunks; populate via separate ingest.
 - **Native `Blob` on `Artifact`** — collapses Drive into the graph. v1 seed has zero blob payloads; populate via separate ingest.
 - **USD-denominated financial fields** (`*_usd_m`) bake in a bias. Convert at recording time. Document if EUR/GBP-native sources require it.
@@ -96,7 +96,7 @@ These are the queries the seed is shaped to light up. Preserve them when iterati
 **Engagement / network:**
 | Alias | Input | Expected outcome |
 |---|---|---|
-| `team` | — | 7 people: CJ, Pawel, Flo, Ricardo, Louis + 2 VPs (via WorksAt co-quito) |
+| `team` | — | 7 people: CJ, Pawel, Flo, Ricardo, Louis + 2 VPs (via WorksAt org-quito) |
 | `founders` | — | All Persons with at least one FounderOf edge |
 | `founders-enriched` | — | Founders + enrichment fields (prior_exits, years_operating, founder_score) |
 | `lp-contacts` | — | Persons working at Companies of kind=lp-institution |
@@ -117,12 +117,12 @@ These are the queries the seed is shaped to light up. Preserve them when iterati
 **Portfolio + dashboards:**
 | Alias | Input | Expected outcome |
 |---|---|---|
-| `exit-landscape` | `co-pinion-infer` | AWS, Microsoft, Google Cloud as plausible acquirers |
-| `exit-landscape-decision-makers` | `co-pinion-infer` | Plus corp-dev contacts at each |
-| `board-prep-pack` | `co-aetherbrick` | Recent signals (churn spike, Series B talk) |
+| `exit-landscape` | `org-pinion-infer` | AWS, Microsoft, Google Cloud as plausible acquirers |
+| `exit-landscape-decision-makers` | `org-pinion-infer` | Plus corp-dev contacts at each |
+| `board-prep-pack` | `org-aetherbrick` | Recent signals (churn spike, Series B talk) |
 | `reserve-pressure` | `fund-iii` | Portfolio cos in Fund III with open high-priority questions |
 | `portfolio-recent-signals` | — | Cross-portco feed of changes, time-sorted |
-| `observed-companies` | — | Stripe (PitchBook-imported, no Quito engagement) |
+| `observed-organizations` | — | Stripe (PitchBook-imported, no Quito engagement) |
 
 **Provenance / source reliability:**
 | Alias | Input | Expected outcome |
@@ -147,7 +147,7 @@ Use this cookbook as a decision-intelligence + audit loop, not a lookup table:
 2. **Expand context** with aliases like `deal-signals`, `deal-decisions`, `thesis-assumptions`, `board-prep-pack`.
 3. **Trace evidence** with `assumption-supports` / `assumption-contradictions`, `signal-supports-assumptions` / `signal-contradicts-assumptions`.
 4. **Capture new input** as an `Artifact` first (raw), then derived `Insight` / `Signal` if synthesized (use `ArtifactDerivedFrom` with `activity` enum).
-5. **Wire mentions** — `SignalAboutCompany`, `ArtifactMentionsPerson`, etc., so future queries find it.
+5. **Wire mentions** — `SignalAboutOrganization`, `ArtifactMentionsPerson`, etc., so future queries find it.
 6. **Promote to action** — Decision or Commitment with the full provenance chain.
 7. **Distill into Lessons** — when a Pattern emerges across multiple Decisions, capture as a `Lesson` on a branch; merge after human review.
 

@@ -1,5 +1,5 @@
 // Deal-centric reads. Deal is the CRM grain — every active engagement
-// with a Company about a specific funding event.
+// with a Organization about a specific funding event.
 
 // ──────────────────────────────────────────────
 // Basic reads
@@ -49,10 +49,10 @@ query search_deals($q: String) {
 // Deal context
 // ──────────────────────────────────────────────
 
-query deal_company($slug: String) {
+query deal_organization($slug: String) {
     match {
         $d: Deal { slug: $slug }
-        $d forCompany $c
+        $d forOrganization $c
     }
     return { $c.slug, $c.name, $c.kind, $c.status, $c.brief, $c.website }
 }
@@ -148,6 +148,7 @@ query deal_open_questions($slug: String) {
     match {
         $d: Deal { slug: $slug }
         $q questionAboutDeal $d
+        $q.status = "open"
     }
     return { $q.slug, $q.name, $q.status, $q.priority, $q.description }
 }

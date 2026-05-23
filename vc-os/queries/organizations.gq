@@ -1,61 +1,61 @@
-// Company + Market reads. Company is the universal entity-of-the-world node
+// Organization + Market reads. Organization is the universal entity-of-the-world node
 // (startups, acquirers, LPs, peer firms, customers). `kind` carries the role;
 // `status` carries Quito's engagement state (nullable for non-startup kinds).
 
 // ──────────────────────────────────────────────
-// Company reads
+// Organization reads
 // ──────────────────────────────────────────────
 
-query get_company($slug: String) {
+query get_organization($slug: String) {
     match {
-        $c: Company { slug: $slug }
+        $c: Organization { slug: $slug }
     }
     return { $c.slug, $c.name, $c.brief, $c.description, $c.kind, $c.status, $c.website, $c.hq, $c.founded_year, $c.aum_usd_m, $c.fit_score }
 }
 
-query companies_by_kind($kind: String) {
+query organizations_by_kind($kind: String) {
     match {
-        $c: Company { kind: $kind }
+        $c: Organization { kind: $kind }
     }
     return { $c.slug, $c.name, $c.status, $c.brief }
     order { $c.name }
 }
 
-query companies_by_status($status: String) {
+query organizations_by_status($status: String) {
     match {
-        $c: Company { status: $status }
+        $c: Organization { status: $status }
     }
     return { $c.slug, $c.name, $c.kind, $c.brief }
     order { $c.name }
 }
 
-query portfolio_companies() {
+query portfolio_organizations() {
     match {
-        $c: Company { status: "portfolio" }
+        $c: Organization { status: "portfolio" }
     }
     return { $c.slug, $c.name, $c.brief, $c.website }
     order { $c.name }
 }
 
-query pipeline_companies() {
+query pipeline_organizations() {
     match {
-        $c: Company { status: "pipeline" }
+        $c: Organization { status: "pipeline" }
     }
     return { $c.slug, $c.name, $c.brief, $c.fit_score }
     order { $c.name }
 }
 
-query observed_companies() {
+query observed_organizations() {
     match {
-        $c: Company { status: "observed" }
+        $c: Organization { status: "observed" }
     }
     return { $c.slug, $c.name, $c.brief }
     order { $c.name }
 }
 
-query search_companies($q: String) {
+query search_organizations($q: String) {
     match {
-        $c: Company
+        $c: Organization
         search($c.name, $q)
     }
     return { $c.slug, $c.name, $c.kind, $c.status, $c.brief }
@@ -63,7 +63,7 @@ query search_companies($q: String) {
 
 query high_fit_pipeline() {
     match {
-        $c: Company { status: "pipeline" }
+        $c: Organization { status: "pipeline" }
     }
     return { $c.slug, $c.name, $c.fit_score, $c.brief }
     order { $c.fit_score desc }
@@ -71,72 +71,72 @@ query high_fit_pipeline() {
 
 
 // ──────────────────────────────────────────────
-// Company context
+// Organization context
 // ──────────────────────────────────────────────
 
-query company_deals($slug: String) {
+query organization_deals($slug: String) {
     match {
-        $c: Company { slug: $slug }
-        $d forCompany $c
+        $c: Organization { slug: $slug }
+        $d forOrganization $c
     }
     return { $d.slug, $d.name, $d.round_type, $d.stage, $d.outcome, $d.our_check_size_usd_m, $d.date_closed }
     order { $d.date_closed desc }
 }
 
-query company_founders($slug: String) {
+query organization_founders($slug: String) {
     match {
-        $c: Company { slug: $slug }
+        $c: Organization { slug: $slug }
         $p founderOf $c
     }
     return { $p.slug, $p.name, $p.linkedin, $p.prior_exits, $p.years_operating, $p.founder_score }
 }
 
-query company_board($slug: String) {
+query organization_board($slug: String) {
     match {
-        $c: Company { slug: $slug }
+        $c: Organization { slug: $slug }
         $p boardMemberAt $c
     }
     return { $p.slug, $p.name }
 }
 
-query company_signals($slug: String) {
+query organization_signals($slug: String) {
     match {
-        $c: Company { slug: $slug }
-        $s signalAboutCompany $c
+        $c: Organization { slug: $slug }
+        $s signalAboutOrganization $c
     }
     return { $s.slug, $s.name, $s.kind, $s.brief, $s.date, $s.impact }
     order { $s.date desc }
 }
 
-query company_artifacts($slug: String) {
+query organization_artifacts($slug: String) {
     match {
-        $c: Company { slug: $slug }
-        $a artifactAboutCompany $c
+        $c: Organization { slug: $slug }
+        $a artifactAboutOrganization $c
     }
     return { $a.slug, $a.name, $a.kind, $a.source, $a.date }
     order { $a.date desc }
 }
 
-query company_insights($slug: String) {
+query organization_insights($slug: String) {
     match {
-        $c: Company { slug: $slug }
-        $i insightAboutCompany $c
+        $c: Organization { slug: $slug }
+        $i insightAboutOrganization $c
     }
     return { $i.slug, $i.name, $i.kind, $i.stance, $i.summary }
 }
 
-query company_markets($slug: String) {
+query organization_markets($slug: String) {
     match {
-        $c: Company { slug: $slug }
-        $c companyInMarket $m
+        $c: Organization { slug: $slug }
+        $c organizationInMarket $m
     }
     return { $m.slug, $m.name, $m.brief }
 }
 
-query company_theses($slug: String) {
+query organization_theses($slug: String) {
     match {
-        $c: Company { slug: $slug }
-        $t thesisAboutCompany $c
+        $c: Organization { slug: $slug }
+        $t thesisAboutOrganization $c
     }
     return { $t.slug, $t.name, $t.status, $t.confidence, $t.brief }
 }
@@ -151,7 +151,7 @@ query co_investor_leads() {
     match {
         $d: Deal { outcome: "invested" }
         $d leadInvestor $co
-        $co: Company { kind: "vc-firm" }
+        $co: Organization { kind: "vc-firm" }
     }
     return { $co.slug, $co.name, $d.slug, $d.name, $d.round_type, $d.date_closed }
     order { $d.date_closed desc }
@@ -162,20 +162,20 @@ query co_investor_participants() {
     match {
         $d: Deal { outcome: "invested" }
         $d participantInvestor $co
-        $co: Company { kind: "vc-firm" }
+        $co: Organization { kind: "vc-firm" }
     }
     return { $co.slug, $co.name, $d.slug, $d.name, $d.round_type, $d.date_closed }
     order { $d.date_closed desc }
 }
 
-// Given a Company we invested in, which other VCs were on the round.
-query company_co_investors($slug: String) {
+// Given a Organization we invested in, which other VCs were on the round.
+query organization_co_investors($slug: String) {
     match {
-        $c: Company { slug: $slug }
-        $d forCompany $c
+        $c: Organization { slug: $slug }
+        $d forOrganization $c
         $d.outcome = "invested"
         $d leadInvestor $lead
-        $lead: Company { kind: "vc-firm" }
+        $lead: Organization { kind: "vc-firm" }
     }
     return { $d.slug, $d.round_type, $lead.slug, $lead.name }
 }
@@ -183,10 +183,10 @@ query company_co_investors($slug: String) {
 // Given a VC firm, the deals where they participated alongside us.
 query vc_firm_coinvestments($slug: String) {
     match {
-        $vc: Company { slug: $slug }
+        $vc: Organization { slug: $slug }
         $d participantInvestor $vc
         $d.outcome = "invested"
-        $d forCompany $c
+        $d forOrganization $c
     }
     return { $d.slug, $d.round_type, $d.date_closed, $c.slug, $c.name }
     order { $d.date_closed desc }
@@ -200,7 +200,7 @@ query vc_firm_coinvestments($slug: String) {
 // Companies that could acquire this one.
 query exit_landscape($slug: String) {
     match {
-        $c: Company { slug: $slug }
+        $c: Organization { slug: $slug }
         $o wouldAcquire $c
     }
     return { $o.slug, $o.name, $o.kind, $o.hq, $o.brief }
@@ -209,7 +209,7 @@ query exit_landscape($slug: String) {
 // Decision-makers at those acquirers.
 query exit_landscape_decision_makers($slug: String) {
     match {
-        $c: Company { slug: $slug }
+        $c: Organization { slug: $slug }
         $o wouldAcquire $c
         $p decisionMakerAt $o
     }
@@ -236,10 +236,10 @@ query markets_all() {
     order { $m.name }
 }
 
-query market_companies($slug: String) {
+query market_organizations($slug: String) {
     match {
         $m: Market { slug: $slug }
-        $c companyInMarket $m
+        $c organizationInMarket $m
     }
     return { $c.slug, $c.name, $c.kind, $c.status, $c.brief }
     order { $c.name }

@@ -1,6 +1,6 @@
 # Reference Seed — Quito Capital (fictional AI-infra fund)
 
-Human-readable twin of `seed.jsonl`. All names, deals, companies, and people are fabricated. If you change one, update the other.
+Human-readable twin of `seed.jsonl`. All names, deals, organizations, and people are fabricated. If you change one, update the other.
 
 The firm: **Quito Capital**, Berlin-based, AI-infra focused. Two funds: Fund II ($120M, vintage 2021, harvesting) and Fund III ($250M, vintage 2024, investing). Five-person team in Berlin / London / Paris.
 
@@ -30,31 +30,31 @@ The firm: **Quito Capital**, Berlin-based, AI-infra focused. Two funds: Fund II 
 
 | Slug | Name | Sector | Stage Seen | Sourced |
 |---|---|---|---|---|
-| `co-aetherbrick` | Aetherbrick | vertical-saas | series-a | Fund II (2021 seed + 2023 A) |
-| `co-saltline-ai` | Saltline AI | vertical-saas | seed | Fund II (2022 seed) |
-| `co-pinion-infer` | Pinion Infer | ai-infra | series-a | Fund III (2025 A) |
-| `co-bramble-data` | Bramble Data | data-engineering | series-a | Fund III (2025 A) |
-| `co-quirebench` | QuireBench | dev-tools | seed | Fund III (2025 seed) |
+| `org-aetherbrick` | Aetherbrick | vertical-saas | series-a | Fund II (2021 seed + 2023 A) |
+| `org-saltline-ai` | Saltline AI | vertical-saas | seed | Fund II (2022 seed) |
+| `org-pinion-infer` | Pinion Infer | ai-infra | series-a | Fund III (2025 A) |
+| `org-bramble-data` | Bramble Data | data-engineering | series-a | Fund III (2025 A) |
+| `org-quirebench` | QuireBench | dev-tools | seed | Fund III (2025 seed) |
 
 **Evaluating (5):**
 
 | Slug | Name | Sector | Deal |
 |---|---|---|---|
-| `co-helix-runtime` | Helix Runtime | ai-infra | `deal-helix-series-a` (in-diligence) |
-| `co-axon-eval` | Axon Eval | dev-tools | `deal-axon-seed` (ic-ready) |
-| `co-mintlayer-data` | Mintlayer Data | data-engineering | `deal-mintlayer-seed` (qualified) |
-| `co-sigil-security` | Sigil Security | security | `deal-sigil-seed` (sourced) |
-| `co-canon-quality` | Canon Quality | data-engineering | `deal-canon-seed` (in-diligence) |
+| `org-helix-runtime` | Helix Runtime | ai-infra | `deal-helix-series-a` (in-diligence) |
+| `org-axon-eval` | Axon Eval | dev-tools | `deal-axon-seed` (ic-ready) |
+| `org-mintlayer-data` | Mintlayer Data | data-engineering | `deal-mintlayer-seed` (qualified) |
+| `org-sigil-security` | Sigil Security | security | `deal-sigil-seed` (sourced) |
+| `org-canon-quality` | Canon Quality | data-engineering | `deal-canon-seed` (in-diligence) |
 
 **Passed (3):**
 
 | Slug | Deal | Reason |
 |---|---|---|
-| `co-vector-forge` | `deal-vector-forge-seed` | AWS exclusivity killed differentiation |
-| `co-stratopaint` | `deal-stratopaint-seed` | Vertical SaaS without product-led pull |
-| `co-pulserate` | `deal-pulserate-series-a` | Agentic CRM commoditization risk |
+| `org-vector-forge` | `deal-vector-forge-seed` | AWS exclusivity killed differentiation |
+| `org-stratopaint` | `deal-stratopaint-seed` | Vertical SaaS without product-led pull |
+| `org-pulserate` | `deal-pulserate-series-a` | Agentic CRM commoditization risk |
 
-**Pipeline / watching (4):** `co-knurlforge`, `co-claretmd`, `co-buoybase`, `co-orbitwerks`.
+**Pipeline / watching (4):** `org-knurlforge`, `org-claretmd`, `org-buoybase`, `org-orbitwerks`.
 
 ## People (28)
 
@@ -67,14 +67,14 @@ The firm: **Quito Capital**, Berlin-based, AI-infra focused. Two funds: Fund II 
 
 ## Non-startup Companies (12)
 
-All `Company` rows; the `kind` enum distinguishes them. Includes `co-quito` (Quito itself, kind=vc-firm) and `co-grace-tan-fo` (Grace Tan's family-office LP, kind=family-office).
+All `Organization` rows; the `kind` enum distinguishes them. Includes `org-quito` (Quito itself, kind=vc-firm) and `org-grace-tan-fo` (Grace Tan's family-office LP, kind=family-office).
 
 **Acquirers (5):** AWS, Microsoft, Snowflake, Databricks, Google Cloud — all `kind=acquirer`.
 **LP institutions (3):** Allianz IM, Vestland, Grayrock Foundation — `kind=lp-institution`.
 **VC peer (1):** Sequoia EU — `kind=vc-firm`.
 **Accelerator (1):** Y Combinator — `kind=accelerator`.
-**Quito itself (1):** `co-quito` — `kind=vc-firm`. Team members `WorksAt` it.
-**Family office (1):** `co-grace-tan-fo` — `kind=family-office`. Individual LP modeled this way.
+**Quito itself (1):** `org-quito` — `kind=vc-firm`. Team members `WorksAt` it.
+**Family office (1):** `org-grace-tan-fo` — `kind=family-office`. Individual LP modeled this way.
 
 ## Theses (8)
 
@@ -110,10 +110,10 @@ All `Company` rows; the `kind` enum distinguishes them. Includes `co-quito` (Qui
 ## Deals (15)
 
 **Closed-invested (6):**
-- `deal-aetherbrick-seed`, `deal-aetherbrick-series-a` (same company, two rounds)
+- `deal-aetherbrick-seed`, `deal-aetherbrick-series-a` (same organization, two rounds)
 - `deal-saltline-seed`, `deal-pinion-series-a`, `deal-bramble-series-a`, `deal-quirebench-seed`
 
-**Open (5):**
+**Open (6):**
 - `deal-helix-series-a` (in-diligence, the killer-query deal)
 - `deal-axon-seed` (ic-ready, IC scheduled)
 - `deal-mintlayer-seed` (qualified)
@@ -135,7 +135,7 @@ Notable signals for killer queries:
 - `sig-aetherbrick-churn-spike` (2026-04-07, **high impact**, portfolio-update) — drives the board-prep-pack demo.
 - `sig-databricks-acquihire` (2026-02-10, **high impact**, exit) — validates eval-as-product thesis.
 
-## Insights (10)
+## Insights (12)
 
 12 insights across kinds (`memo`, `brief`, `observation`, `hypothesis`, `recap`) and stances (`bull`, `bear`, `neutral`). Notable:
 
