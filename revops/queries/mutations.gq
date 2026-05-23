@@ -273,6 +273,10 @@ query link_decision_precedent($newDecision: String, $oldDecision: String, $simil
     insert BasedOnPrecedent { from: $newDecision, to: $oldDecision, similarity: $similarity }
 }
 
+query link_decision_supersedes($newDecision: String, $oldDecision: String, $reason: String?) {
+    insert SupersedesDecision { from: $newDecision, to: $oldDecision, reason: $reason }
+}
+
 
 // ══════════════════════════════════════════════════════════════════════
 // Policy versioning + matching

@@ -4,12 +4,12 @@ Scoped guidance for the `revops/` cookbook. Repo-wide conventions live in `../CL
 
 ## What This Is
 
-A code-first GTM data platform on Omnigraph. One graph holds the prospect universe, the enrichment trail, every decision, every measurement, and all provenance. Schema, queries, and seed data only — no application code.
+A code-first GTM intelligence backplane on Omnigraph. One graph holds the prospect universe, signal-based account prioritization, champion job-change context, the enrichment trail, every decision, every measurement, and all provenance. Schema, queries, and seed data only — no application code.
 
 ## Key Files
 
-- `schema.pg` — Executable Omnigraph schema. Source of truth. 17 nodes, ~35 edges.
-- `omnigraph.yaml` — CLI config + 100+ named aliases (the user-facing API).
+- `schema.pg` — Executable Omnigraph schema. Source of truth. 17 nodes, typed edges.
+- `omnigraph.yaml` — CLI config + named aliases (the user-facing API).
 - `queries/*.gq` — Read and mutation queries grouped by primary lens.
 - `seed.md` / `seed.jsonl` — Illustrative scenario (fictional seller, real-ish accounts).
 - `README.md` — Overview, killer queries, extension points.
@@ -29,11 +29,11 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 **Pointer (mutable):** Account, Person, Role, Lead, Opportunity, Cohort, Policy, Actor, Technology, Source
 **Claim (append-only):** Signal, Decision, Action, Measurement, Engagement, InformationArtifact, Chunk
 
-**Core loop:** Signals attach to Accounts and People → Decisions are informed-by Signals, screened-by Policies, made-by Actors, target Accounts/Opps → Decisions produce Measurements (numeric observations) and Actions (execution log) → Opportunities anchor to Accounts via AtAccount and to People via the Champion/Buyer/Influencer/Blocker edges → Outcomes refine Policies (ICP versioning via Supersedes).
+**Core loop:** Signals attach to Accounts and People → scoring/classification Decisions are informed-by Signals, screened-by Policies, made-by Actors, target Accounts/Opps → Decisions produce Measurements (`intent_score`, predicted spend, actual spend) and Actions → prioritized accounts and champion job-change queues feed downstream CRM/outreach tools → outcomes refine Policies (ICP and prompt versioning).
 
 **Design choices to preserve:**
 
-- Mutable pointer vs append-only claim split — never overwrite a Signal, Decision, Action, Measurement, or Engagement. Corrections are new claims with `Supersedes` or `BasedOnPrecedent` edges.
+- Mutable pointer vs append-only claim split — never overwrite a Signal, Decision, Action, Measurement, or Engagement. Decision corrections use `SupersedesDecision`; policy versions use `Supersedes`.
 - `Role` is its own node, time-bounded. Champion tracking and job-change signals depend on this.
 - `Lead` is distinct from `Person`. Resolution via `ResolvesToPerson`.
 - `Policy` carries `policyKey` (stable across versions) + `Supersedes` chain.
@@ -60,7 +60,7 @@ Lint after every schema or query edit. No server, no env required.
 - Prefer narrowest type (enum > string, Date > String).
 - Mutations on pointer nodes — `change` with named mutations. Bulk ingest — `load --mode merge`.
 - Discipline rule, unenforceable in schema: when updating a pointer property that has analytical meaning (e.g., `Account.tier`), always insert a matching `Decision` so the audit trail stays intact.
-- Aliases are the user-facing API. When a query name changes in `.gq`, update the alias in `omnigraph.yaml`. Agents should never invoke raw `--query`/`--name` against this cookbook.
+- Aliases are the user-facing API. Every `.gq` query must be exposed in `omnigraph.yaml`; `ingest/check_alias_coverage.py` enforces this. Agents should never invoke raw `--query`/`--name` against this cookbook.
 
 ## When Adding a Mutation
 

@@ -42,19 +42,22 @@ from pathlib import Path
 
 # ── parsing helpers ─────────────────────────────────────────────────────────
 
-# Strip "$2,300,000,000" or "$2.3 billion" → integer USD.
-_BILLION = re.compile(r"([\d.]+)\s*billion", re.I)
-_MILLION = re.compile(r"([\d.]+)\s*million", re.I)
-_NUMERIC = re.compile(r"[\d,]+")
+# Strip "$2,300,000,000", "$2.3 billion", "$2.3B", or "$285M" -> USD.
+_BILLION = re.compile(r"([\d.]+)\s*(?:billion|bn|b)\b", re.I)
+_MILLION = re.compile(r"([\d.]+)\s*(?:million|mn|m)\b", re.I)
+_MONEY_TOKEN = re.compile(
+    r"\$?\s*[\d,.]+(?:\.\d+)?\s*(?:billion|million|bn|mn|b|m)\b|\$[\d,.]+(?:\.\d+)?",
+    re.I,
+)
 
 
 def parse_usd(value: str) -> float | None:
     if not value or value.strip().lower() in ("undisclosed", "unknown", "n/a", ""):
         return None
-    s = value.strip().replace("$", "").replace(",", "")
-    if m := _BILLION.search(value):
+    s = value.strip().replace("$", "").replace(",", "").replace(" ", "")
+    if m := _BILLION.search(s):
         return float(m.group(1)) * 1_000_000_000
-    if m := _MILLION.search(value):
+    if m := _MILLION.search(s):
         return float(m.group(1)) * 1_000_000
     try:
         return float(s)
@@ -108,15 +111,17 @@ def parse_latest_round(funding_rounds: str) -> FundingFact | None:
     stage = stage_match.group(1) if stage_match else None
 
     valuation = None
-    val_match = re.search(r"valuation[^\d]{0,40}(\$?[\d.,]+\s*(?:billion|million)?)", first, re.I)
+    val_match = (
+        re.search(r"(\$?\s*[\d.,]+(?:\.\d+)?\s*(?:billion|million|bn|mn|b|m)\b)\s+(?:post-money\s+)?valuation", first, re.I)
+        or re.search(r"valuation[^\d$]{0,40}(\$?\s*[\d.,]+(?:\.\d+)?\s*(?:billion|million|bn|mn|b|m)\b)", first, re.I)
+    )
     if val_match:
         valuation = parse_usd(val_match.group(1))
 
-    # Pull all monetary tokens, take the largest as amount unless followed by "valuation"
+    # Pull monetary tokens. The first token is conventionally the round size.
     amount = None
-    amounts = re.findall(r"\$?[\d.,]+\s*(?:billion|million)", first, re.I)
+    amounts = _MONEY_TOKEN.findall(first)
     if amounts:
-        # First numeric token is conventionally the round size; we'll trust that
         amount = parse_usd(amounts[0])
         if amount == valuation and len(amounts) > 1:
             amount = parse_usd(amounts[1])
@@ -154,6 +159,14 @@ def short_id() -> str:
     return uuid.uuid4().hex[:8]
 
 
+def row_value(row: dict[str, str], *keys: str) -> str:
+    for key in keys:
+        value = row.get(key)
+        if value:
+            return value.strip()
+    return ""
+
+
 # ── main ────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -178,15 +191,15 @@ def main() -> None:
 
     with open(args.csv_file) as f:
         for row in csv.DictReader(f):
-            domain = row["domain"].strip()
+            domain = row_value(row, "domain", "company_domain", "website")
             account_slug = slug_map.get(domain)
             if not account_slug:
                 print(f"skip: no slug mapped for {domain}", file=sys.stderr)
                 continue
 
-            company = row["company"]
-            fact = parse_latest_round(row["funding_rounds"])
-            total_funding = parse_usd(row["total_funding_usd"])
+            company = row_value(row, "company", "company_name", "name") or domain
+            fact = parse_latest_round(row_value(row, "funding_rounds", "latest_funding_round", "latest_round"))
+            total_funding = parse_usd(row_value(row, "total_funding_usd", "total_funding", "funding_total"))
             tag = short_id()
 
             # 1. Funding Signal for the latest round
@@ -202,6 +215,9 @@ def main() -> None:
                        dry_run=args.dry_run)
                 change("link-signal-on-account", "--params",
                        json.dumps({"signal": sig_slug, "account": account_slug}),
+                       dry_run=args.dry_run)
+                change("link-signal-source", "--params",
+                       json.dumps({"signal": sig_slug, "source": args.source}),
                        dry_run=args.dry_run)
             else:
                 sig_slug = None

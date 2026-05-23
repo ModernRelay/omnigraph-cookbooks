@@ -1,5 +1,5 @@
 project:
-  name: RevOps — Code-first GTM Data Platform
+  name: RevOps — GTM Intelligence Backplane
 
 auth:
   env_file: ./.env.omni
@@ -213,6 +213,57 @@ aliases:
     name: signal_evidence
     args: [slug]
 
+  signal-account:
+    command: read
+    query: signals.gq
+    name: signal_account
+    args: [slug]
+
+  signal-person:
+    command: read
+    query: signals.gq
+    name: signal_person
+    args: [slug]
+
+  search-signals:
+    command: read
+    query: signals.gq
+    name: search_signals
+    args: [q]
+
+  # ════════════════════════════════════════════════════════════
+  # Prioritization (signal-based seller queues)
+  # ════════════════════════════════════════════════════════════
+  daily-priority-accounts:
+    command: read
+    query: prioritization.gq
+    name: daily_priority_accounts
+    args: [since, policy]
+
+  account-priority-detail:
+    command: read
+    query: prioritization.gq
+    name: account_priority_detail
+    args: [account, since]
+
+  champion-job-change-queue:
+    command: read
+    query: prioritization.gq
+    name: champion_job_change_queue
+    args: [since, policy]
+
+  champion-context:
+    command: read
+    query: prioritization.gq
+    name: champion_context
+    args: [person]
+
+  customer-champion-departures:
+    command: read
+    query: prioritization.gq
+    name: customer_champion_departures
+    args: [since]
+
   # ════════════════════════════════════════════════════════════
   # Decisions (the audit trail)
   # ════════════════════════════════════════════════════════════
@@ -235,6 +286,18 @@ aliases:
     name: decision_trace
     args: [slug]
     format: kv
+
+  decision-lineage:
+    command: read
+    query: decisions.gq
+    name: decision_lineage
+    args: [slug]
+
+  decision-replaced-by:
+    command: read
+    query: decisions.gq
+    name: decision_replaced_by
+    args: [slug]
 
   decisions-by-intent:
     command: read
@@ -266,9 +329,33 @@ aliases:
     name: low_confidence_decisions
     args: [threshold]
 
+  decision-actions:
+    command: read
+    query: decisions.gq
+    name: decision_actions
+    args: [slug]
+
+  superseded-decisions:
+    command: read
+    query: decisions.gq
+    name: superseded_decisions
+
+  decision-precedents:
+    command: read
+    query: decisions.gq
+    name: decision_precedents
+    args: [slug]
+
   # ════════════════════════════════════════════════════════════
   # Measurements (time-series)
   # ════════════════════════════════════════════════════════════
+  measurement:
+    command: read
+    query: measurements.gq
+    name: get_measurement
+    args: [slug]
+    format: kv
+
   account-metrics:
     command: read
     query: measurements.gq
@@ -311,6 +398,12 @@ aliases:
     query: measurements.gq
     name: measurements_from_decision
     args: [decision]
+
+  measurements-from-source:
+    command: read
+    query: measurements.gq
+    name: measurements_from_source
+    args: [source]
 
   # ════════════════════════════════════════════════════════════
   # Governance (policies, prompts, ICPs)
@@ -368,6 +461,18 @@ aliases:
     query: governance.gq
     name: decisions_by_actor_type
 
+  prompt-governance:
+    command: read
+    query: governance.gq
+    name: prompt_governance
+    args: [policy]
+
+  enrichment-audit:
+    command: read
+    query: governance.gq
+    name: enrichment_audit
+    args: [since]
+
   # ════════════════════════════════════════════════════════════
   # Opportunities (pipeline)
   # ════════════════════════════════════════════════════════════
@@ -377,6 +482,12 @@ aliases:
     name: get_opportunity
     args: [slug]
     format: kv
+
+  opportunity-account:
+    command: read
+    query: opportunities.gq
+    name: opportunity_account
+    args: [slug]
 
   pipeline:
     command: read
@@ -423,6 +534,12 @@ aliases:
     query: opportunities.gq
     name: loss_reasons
 
+  opportunity-origin-lead:
+    command: read
+    query: opportunities.gq
+    name: opportunity_origin_lead
+    args: [slug]
+
   # ════════════════════════════════════════════════════════════
   # Cohorts (saved segments)
   # ════════════════════════════════════════════════════════════
@@ -437,6 +554,12 @@ aliases:
     command: read
     query: cohorts.gq
     name: all_cohorts
+
+  cohorts-by-kind:
+    command: read
+    query: cohorts.gq
+    name: cohorts_by_kind
+    args: [kind]
 
   cohort-accounts:
     command: read
@@ -477,11 +600,23 @@ aliases:
     name: engagements_by_person
     args: [person]
 
+  engagements-with-artifact:
+    command: read
+    query: engagements.gq
+    name: engagements_with_artifact
+    args: [artifact]
+
   actions:
     command: read
     query: engagements.gq
     name: recent_actions
     args: [since]
+
+  actions-to-person:
+    command: read
+    query: engagements.gq
+    name: actions_to_person
+    args: [person]
 
   account-actions:
     command: read
@@ -537,6 +672,20 @@ aliases:
     args: [since]
     format: jsonl
 
+  export-priority-accounts:
+    command: read
+    query: exports.gq
+    name: priority_accounts_export
+    args: [since, policy]
+    format: jsonl
+
+  export-champion-job-changes:
+    command: read
+    query: exports.gq
+    name: champion_job_changes_export
+    args: [since, policy]
+    format: jsonl
+
   # ════════════════════════════════════════════════════════════
   # Mutations — pointer nodes
   # ════════════════════════════════════════════════════════════
@@ -545,6 +694,18 @@ aliases:
     query: mutations.gq
     name: add_account
     args: [slug, legalName, kind, segment, industry, createdAt, updatedAt]
+
+  update-account-tier:
+    command: change
+    query: mutations.gq
+    name: update_account_tier
+    args: [slug, tier, updatedAt, decisionSlug, actor, rationale, decidedAt]
+
+  update-account-employee-count:
+    command: change
+    query: mutations.gq
+    name: update_account_employee_count
+    args: [slug, employees, updatedAt]
 
   add-person:
     command: change
@@ -569,6 +730,12 @@ aliases:
     query: mutations.gq
     name: add_lead
     args: [slug, capturedAt, leadSource, status, createdAt, updatedAt]
+
+  update-lead-status:
+    command: change
+    query: mutations.gq
+    name: update_lead_status
+    args: [slug, status, updatedAt]
 
   add-opportunity:
     command: change
@@ -618,6 +785,18 @@ aliases:
     name: add_actor
     args: [slug, name, actorType, createdAt, updatedAt]
 
+  add-technology:
+    command: change
+    query: mutations.gq
+    name: add_technology
+    args: [slug, name, category, createdAt, updatedAt]
+
+  add-source:
+    command: change
+    query: mutations.gq
+    name: add_source
+    args: [slug, name, kind, createdAt, updatedAt]
+
   # ════════════════════════════════════════════════════════════
   # Mutations — append-only claims
   # ════════════════════════════════════════════════════════════
@@ -651,6 +830,12 @@ aliases:
     name: add_engagement
     args: [slug, channel, intent, occurredAt, createdAt]
 
+  add-artifact:
+    command: change
+    query: mutations.gq
+    name: add_artifact
+    args: [slug, title, artifactType, retrievedAt, createdAt]
+
   # ════════════════════════════════════════════════════════════
   # Mutations — core edges (backbone)
   # ════════════════════════════════════════════════════════════
@@ -677,6 +862,12 @@ aliases:
     query: mutations.gq
     name: link_uses_technology
     args: [account, tech]
+
+  link-competes-with:
+    command: change
+    query: mutations.gq
+    name: link_competes_with
+    args: [from, to]
 
   # ════════════════════════════════════════════════════════════
   # Mutations — decision spine
@@ -716,6 +907,24 @@ aliases:
     query: mutations.gq
     name: link_decision_targets_opportunity
     args: [decision, opportunity]
+
+  link-decision-targets-person:
+    command: change
+    query: mutations.gq
+    name: link_decision_targets_person
+    args: [decision, person]
+
+  link-decision-precedent:
+    command: change
+    query: mutations.gq
+    name: link_decision_precedent
+    args: [newDecision, oldDecision, similarity]
+
+  link-decision-supersedes:
+    command: change
+    query: mutations.gq
+    name: link_decision_supersedes
+    args: [newDecision, oldDecision, reason]
 
   # ════════════════════════════════════════════════════════════
   # Mutations — opportunity (buying committee)
@@ -801,6 +1010,18 @@ aliases:
     name: link_signal_on_person
     args: [signal, person]
 
+  link-signal-evidence:
+    command: change
+    query: mutations.gq
+    name: link_signal_evidenced_by
+    args: [signal, artifact]
+
+  link-signal-source:
+    command: change
+    query: mutations.gq
+    name: link_signal_source
+    args: [signal, source]
+
   # ════════════════════════════════════════════════════════════
   # Mutations — cohort membership
   # ════════════════════════════════════════════════════════════
@@ -819,14 +1040,98 @@ aliases:
     name: link_lead_resolves
     args: [lead, person, resolvedAt]
 
+  link-lead-at-account:
+    command: change
+    query: mutations.gq
+    name: link_lead_at_account
+    args: [lead, account]
+
   # ════════════════════════════════════════════════════════════
   # Mutations — action provenance
   # ════════════════════════════════════════════════════════════
+  link-opportunity-origin-lead:
+    command: change
+    query: mutations.gq
+    name: link_opportunity_origin_lead
+    args: [opp, lead]
+
+  link-measures-person:
+    command: change
+    query: mutations.gq
+    name: link_measurement_person
+    args: [measurement, person]
+
+  link-measures-opportunity:
+    command: change
+    query: mutations.gq
+    name: link_measurement_opportunity
+    args: [measurement, opportunity]
+
+  link-engagement-person:
+    command: change
+    query: mutations.gq
+    name: link_engagement_person
+    args: [engagement, person]
+
+  link-engagement-artifact:
+    command: change
+    query: mutations.gq
+    name: link_engagement_artifact
+    args: [engagement, artifact]
+
+  link-action-to-person:
+    command: change
+    query: mutations.gq
+    name: link_action_to_person
+    args: [action, person]
+
+  link-action-on-account:
+    command: change
+    query: mutations.gq
+    name: link_action_on_account
+    args: [action, account]
+
   link-action-executed-by:
     command: change
     query: mutations.gq
     name: link_action_executed_by
     args: [action, actor]
+
+  link-person-cohort:
+    command: change
+    query: mutations.gq
+    name: link_person_cohort
+    args: [person, cohort]
+
+  link-account-source:
+    command: change
+    query: mutations.gq
+    name: link_account_source
+    args: [account, source]
+
+  link-person-source:
+    command: change
+    query: mutations.gq
+    name: link_person_source
+    args: [person, source]
+
+  link-chunk-artifact:
+    command: change
+    query: mutations.gq
+    name: link_chunk_artifact
+    args: [chunk, artifact]
+
+  link-mentions-account:
+    command: change
+    query: mutations.gq
+    name: link_mentions_account
+    args: [artifact, account]
+
+  link-mentions-person:
+    command: change
+    query: mutations.gq
+    name: link_mentions_person
+    args: [artifact, person]
 
   # ════════════════════════════════════════════════════════════
   # Search & retrieval (over Chunks of InformationArtifact text)

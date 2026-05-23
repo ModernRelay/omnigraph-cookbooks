@@ -7,7 +7,7 @@
 //   - CLAIM nodes (append-only): events and observations, never overwritten
 //
 // Canonical core is schema-fixed. Enums marked "[extension point]" are the
-// places customers extend per-domain. See docs/extending.md.
+// places customers extend per-domain. See README.md.
 
 
 // ══════════════════════════════════════════════════════════════════════
@@ -328,6 +328,10 @@ edge TargetsPerson: Decision -> Person
 
 edge BasedOnPrecedent: Decision -> Decision {
     similarity: enum(strong, moderate, weak)
+}
+
+edge SupersedesDecision: Decision -> Decision {
+    reason: String?
 }
 
 

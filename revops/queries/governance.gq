@@ -90,3 +90,43 @@ query decisions_by_actor_type() {
     return { $actor.actorType, count($d) as decision_count }
     order { decision_count desc }
 }
+
+// Prompt-governance view: decisions screened by one prompt/policy, including
+// the actor and any measurement the decision produced.
+query prompt_governance($policy: String) {
+    match {
+        $p: Policy { slug: $policy }
+        $d: Decision
+        $d screenedBy $p
+        $d madeBy $actor
+        $m producedByDecision $d
+    }
+    return {
+        $p.slug as policy, $p.policyKey, $p.name,
+        $d.slug as decision, $d.intent, $d.status, $d.confidence,
+        $d.confidenceLabel, $d.decidedAt,
+        $actor.slug as actor, $actor.name as actorName, $actor.actorType,
+        $m.slug as measurement, $m.metricKey, $m.value, $m.observedAt
+    }
+    order { $d.decidedAt desc }
+}
+
+// Agent enrichment audit: recent agent decisions, their policy, and produced
+// measurements. Narrow enough for enrichment/prompt review dashboards.
+query enrichment_audit($since: DateTime) {
+    match {
+        $d: Decision
+        $d.decidedAt >= $since
+        $d madeBy $actor
+        $actor.actorType = "agent"
+        $d screenedBy $p
+        $m producedByDecision $d
+    }
+    return {
+        $d.slug as decision, $d.intent, $d.status, $d.confidence, $d.decidedAt,
+        $actor.name as actorName,
+        $p.slug as policy, $p.policyKey,
+        $m.slug as measurement, $m.metricKey, $m.value
+    }
+    order { $d.decidedAt desc }
+}

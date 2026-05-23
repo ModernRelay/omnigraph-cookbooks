@@ -1,8 +1,52 @@
-# RevOps — Code-first GTM Data Platform
+# RevOps — GTM Intelligence Backplane
 
-A code-first GTM data platform built on [Omnigraph](https://github.com/ModernRelay/omnigraph). One versioned schema covering prospects, people, signals, decisions, measurements, opportunities, and provenance. Lint your queries, version your prompts, audit every classification, branch for safe iteration, export anywhere downstream.
+Knowledge graph cookbook for AI-native GTM engineering. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph), it models account signals, buyer context, champion movement, AI enrichment, prompt governance, measurements, and decision provenance in one versioned graph.
 
-For any team that prefers schemas to spreadsheets and named queries to ad-hoc SQL, at any scale up to roughly hundreds of thousands of accounts.
+## Core GTM Loop
+
+Signals and roles form the prospecting core. Decisions interpret them. Measurements rank accounts. Policies govern the AI and ICP logic. Exports turn the graph into downstream GTM work queues.
+
+```
+  Signal ── onAccount ─────────────▶ Account ── matchesPolicy ──▶ Policy
+    │                                  │                              ▲
+    │                                  │                              │
+    ├── onPerson ──▶ Person ◀─ heldBy ─┤ Role                         │
+    │                 │                │                              │
+    │                 └── championedBy ▼                              │
+    │                              Opportunity ── atAccount ──────────┘
+    │
+    └── informedBy ◀── Decision ── screenedBy ──▶ Policy
+                        │   │
+                        │   ├── madeBy ─────────▶ Actor (human|agent)
+                        │   ├── producedBy ◀──── Measurement
+                        │   └── resultedIn ─────▶ Action
+```
+
+The operating loop is concrete:
+
+| Workflow | What it answers | Primary aliases |
+|---|---|---|
+| Signal-based account prioritization | Which accounts should a seller or agent work today, and why? | `daily-priority-accounts`, `account-priority-detail` |
+| Champion job-change outbound | Which known champions moved into in-ICP accounts? | `champion-job-change-queue`, `champion-context` |
+| AI enrichment audit | Which agent, prompt, source, and signal produced this score or recommendation? | `decision-trace`, `prompt-governance`, `enrichment-audit` |
+| Prompt and ICP governance | Which policy version screened each decision, and what changed over time? | `policy-history`, `decision-lineage` |
+| Reverse-pipe exports | What rows should CRM, sales engagement, Slack, or dashboards consume? | `export-priority-accounts`, `export-champion-job-changes` |
+
+## Reference Seed: AI GTM, Early 2026
+
+The seed uses recognizable AI companies as accounts: Anthropic, Harvey, Perplexity, Cognition Labs, Anysphere/Cursor, Decagon, Sierra, Hippocratic AI, Suno, Together AI, Microsoft, GitHub, and Inflection AI.
+
+It exercises five GTM patterns:
+
+| Pattern | What it captures |
+|---|---|
+| **Daily account priority** | In-ICP prospects ranked by recent signals, intent score, and predicted spend |
+| **Warm-path outbound** | Prior champions who changed jobs into target accounts |
+| **AI enrichment provenance** | Funding and workload enrichment linked to source, prompt policy, actor, and measurement |
+| **Prompt and ICP versioning** | ICP v1 → v2, classifier prompt v1 → v2, and a signal-priority scoring policy |
+| **Revenue feedback loop** | Predicted spend vs actual spend for prompt and scoring refinement |
+
+**Totals:** 147 nodes, 260 edges, 177 named queries exposed through aliases.
 
 ## What's in here
 
@@ -14,6 +58,7 @@ revops/
 │   ├── accounts.gq        ← lookups, hierarchy, current people, signals on account
 │   ├── people.gq          ← role history, champion tracking, job-change signals
 │   ├── signals.gq         ← intent feed, funding feed, account heat
+│   ├── prioritization.gq  ← daily account queue + champion job-change queue
 │   ├── decisions.gq       ← the audit trail — informed-by, screened-by, trace
 │   ├── measurements.gq    ← time-series: predicted vs actual, ARR, headcount
 │   ├── governance.gq      ← policy/prompt versioning, override rates
@@ -22,44 +67,46 @@ revops/
 │   ├── engagements.gq     ← prospect touches + sales actions
 │   ├── exports.gq         ← reverse-pipe queries (CRM-shaped, dashboard-shaped)
 │   ├── search.gq          ← semantic + lexical retrieval over chunks
-│   └── mutations.gq       ← the write surface (66 mutations)
+│   └── mutations.gq       ← the write surface (69 mutations)
 ├── seed.md                ← narrative description of the seed scenario
 └── seed.jsonl             ← loadable seed data
 ```
 
-## The shape
+## Schema Essentials
 
 **The bet:** the loop is fixed, the taxonomy is yours. Canonical core (Person, Role, Account, Signal, Decision, Measurement, Policy, ...) is schema-fixed. Enums marked `[extension point]` in `schema.pg` (industry, segment, metric keys, signal kinds, stages) are where you extend per-domain.
 
-**The discipline:** mutable *pointer* nodes (current state) vs append-only *claim* nodes (events, observations). Pointers get updated; claims never get overwritten — corrections become new Decisions with `Supersedes` edges.
-
-```
-                Signal ──onAccount──▶ Account ──matchesPolicy──▶ Policy (ICP)
-                  │                     │                          ▲
-                  │                     │                          │ refined by
-                  │                  hasRole                       │
-                  │                     ▼                          │
-                  └─onPerson──▶ Person ◀─heldBy── Role          Outcome
-                                  │                                ▲
-                                  │ championedBy / blockerOnDeal   │
-                                  ▼                                │
-                              Opportunity ──atAccount──────────────┘
-                                  ▲
-                            Engagements (their touch) + Actions (our touch)
-                                  ▲
-                                  └── Decisions ── informedBy ──▶ Signal
-                                          │
-                                          ├── screenedBy ──▶ Policy
-                                          ├── madeBy ──▶ Actor (human|agent)
-                                          ├── resultedIn ──▶ Action
-                                          └── producedBy ◀── Measurement
-```
+**The discipline:** mutable *pointer* nodes (current state) vs append-only *claim* nodes (events, observations). Pointers get updated; claims never get overwritten — corrections become new Decisions with `SupersedesDecision` edges. Policy versions use `Supersedes`.
 
 ## Node types — 17 total
 
 **Pointer nodes** (mutable): `Account`, `Person`, `Role`, `Lead`, `Opportunity`, `Cohort`, `Policy`, `Actor`, `Technology`, `Source`
 
 **Claim / event nodes** (append-only): `Signal`, `Decision`, `Action`, `Measurement`, `Engagement`, `InformationArtifact`, `Chunk`
+
+**Enums that carry the GTM lens:**
+
+| Enum-backed field | Values |
+|---|---|
+| `Account.kind` | `prospect, customer, churned, partner` |
+| `Signal.kind` | `funding, hiring, job_change, leadership_change, usage, churn, news, intent` |
+| `Decision.status` | `pending, approved, rejected, superseded, overridden` |
+| `Opportunity.stage` | `identified, qualified, evaluation, business_case, procurement, closed_won, closed_lost` |
+| `Policy.kind` | `icp, prompt_version, routing_rule, do_not_sell, compliance, scoring_rule` |
+| `Actor.actorType` | `human, agent` |
+
+**Edges that carry the GTM logic:**
+
+| Edge | Route | Meaning |
+|---|---|---|
+| `OnAccount` / `OnPerson` | Signal -> Account / Person | what the signal is about |
+| `HasRole` / `HeldByPerson` | Account -> Role -> Person | current and historical employment, title, function, seniority |
+| `MatchesPolicy` | Account -> Policy | active ICP, screening, and account-fit logic |
+| `ChampionedBy` / `BuyerOnDeal` / `InfluencerOnDeal` / `BlockerOnDeal` | Opportunity -> Person | buying committee and champion graph |
+| `InformedBy` / `ScreenedBy` / `MadeBy` | Decision -> Signal / Policy / Actor | audit trail for AI or human decisions |
+| `TargetsAccount` / `TargetsOpportunity` / `TargetsPerson` | Decision -> Account / Opportunity / Person | what the decision affected |
+| `ProducedByDecision` | Measurement -> Decision | numeric output from a prompt, scorer, or enrichment run |
+| `SupersedesDecision` / `Supersedes` | Decision -> Decision / Policy -> Policy | correction lineage and policy versioning |
 
 Key non-obvious choices:
 
@@ -91,19 +138,52 @@ omnigraph-server --config ./omnigraph.yaml
 
 # Everything else goes through aliases
 omnigraph read --alias pipeline
+omnigraph read --alias daily-priority-accounts 2026-01-01T00:00:00Z pol-icp-v2
+omnigraph read --alias account-priority-detail acc-cognition 2026-01-01T00:00:00Z
 omnigraph read --alias funding-feed 2026-01-01T00:00:00Z
-omnigraph read --alias champion-tracking
+omnigraph read --alias champion-job-change-queue 2026-01-01T00:00:00Z pol-icp-v2
 omnigraph read --alias decision-trace dec-classify-cognition-2026-04
+omnigraph read --alias decision-lineage dec-classify-cognition-2026-04
+omnigraph read --alias prompt-governance pol-signal-score-v1
+omnigraph read --alias enrichment-audit 2026-01-01T00:00:00Z
 omnigraph read --alias predicted-vs-actual 2026-01-01T00:00:00Z
 omnigraph read --alias policy-history icp.ai_native_mid_market
 omnigraph read --alias cohort-top-targets coh-q2-targets
 ```
 
-## Walkthrough — building today's outbound prospecting list
+## Walkthrough — signal to seller action
 
-The seed populates a realistic 2026 AI ecosystem snapshot: Anthropic, Harvey, Perplexity, Cognition Labs, Anysphere/Cursor, Decagon, Sierra, Hippocratic AI, Suno, Together AI, plus a Microsoft → GitHub parent/subsidiary and Inflection AI (legacy) as the churned case. Below is what five minutes of working the graph looks like when your job is to *find and qualify accounts to reach out to today* — not to react to an inbound lead.
+The seed uses real AI companies as recognizable accounts, while the seller, source artifacts, signals, relationships, roles below C-level, opportunity amounts, and predictions are illustrative. The goal is to demonstrate the graph shape for a GTM team.
 
-### 1. Start with intent: who lit up recently?
+Below is the core workflow when your job is to *find and qualify accounts to reach out to today*.
+
+### 1. Start with the daily priority queue
+
+```text
+$ omnigraph read --alias daily-priority-accounts 2026-01-01T00:00:00Z pol-icp-v2
+a.slug         | a.legalName    | intent_score | predicted_spend
+---------------+----------------+--------------+----------------
+acc-cognition  | Cognition Labs | 0.92         | 220000.0
+acc-github     | GitHub         | 0.88         | 850000.0
+acc-sierra     | Sierra         | 0.84         | 260000.0
+acc-cursor     | Anysphere      | 0.76         | 180000.0
+```
+
+`daily-priority-accounts` is the seller queue: in-ICP prospects with recent signal evidence, an `intent_score`, and a predicted spend Measurement. Each score is a Measurement produced by a `Decision { intent: "score_account" }` screened by `pol-signal-score-v1`.
+
+Drill into why an account made the list:
+
+```text
+$ omnigraph read --alias account-priority-detail acc-cognition 2026-01-01T00:00:00Z
+signalName: Cognition: $300M Series D at $5B valuation
+signalKind: funding
+decision: dec-score-cognition-2026-04
+intent: score_account
+policyKey: score.signal_priority
+actorName: icp-fit-scorer
+```
+
+### 2. Start with intent: who lit up recently?
 
 ```text
 $ omnigraph read --alias account-heat 2026-01-01T00:00:00Z
@@ -130,7 +210,7 @@ sig-cognition-series-d | Cognition: $300M Series D at $5B valuation | 2026-03-18
 
 A live trigger from Q1: Cognition raised $300M at $5B. Funding is the canonical outbound-prospecting trigger — budget just opened, vendor evaluations are likely.
 
-### 2. Filter to active ICP — separate the qualified from the curious
+### 3. Filter to active ICP — separate the qualified from the curious
 
 ```text
 $ omnigraph read --alias policy-accounts pol-icp-v2
@@ -150,7 +230,7 @@ Seven accounts match the active ICP version. Three are already customers; four a
 
 ICP itself is versioned. v1 ("post Series A") was archived in March after closed-lost analysis showed pre-revenue startups don't convert; v2 ("post Series B") is what these matches use. Every classification against v1 still references the v1 Policy node — `Supersedes` chains the history without rewriting it.
 
-### 3. Cohort + spend predicted = priority order
+### 4. Cohort + spend predicted = priority order
 
 ```text
 $ omnigraph read --alias cohort-top-targets coh-q2-targets
@@ -161,9 +241,9 @@ acc-github    | GitHub         | devtools   | tier_1 | 850000.0
 acc-cognition | Cognition Labs | devtools   | tier_1 | 220000.0
 ```
 
-The Q2 target cohort already holds the curated short-list, sorted by predicted spend. GitHub leads at $850k; Cognition is #2 at $220k. Each number is a `Measurement` produced by a specific `Decision` made by the classifier agent — not a guess in someone's deck.
+The Q2 target cohort already holds the curated short-list, sorted by predicted spend. GitHub leads at $850k; Cognition is #2 at $220k. Each number is a `Measurement` produced by a specific `Decision` made by the classifier agent.
 
-### 4. Technographic adjacency — adjacent prospects without explicit signals
+### 5. Technographic adjacency — adjacent prospects without explicit signals
 
 ```text
 $ omnigraph read --alias accounts-using-tech tech-modal
@@ -176,7 +256,7 @@ acc-cursor    | Anysphere      | prospect | startup   | devtools
 
 Both Cognition and Cursor run Modal for their compute — a buying signal *adjacent to* explicit intent signals. Useful when two prospects show similar technographic profiles; sell motion can lean on each other.
 
-### 5. Who do we talk to? Current people at the top target
+### 6. Who do we talk to? Current people at the top target
 
 ```text
 $ omnigraph read --alias account-people acc-cognition
@@ -198,19 +278,19 @@ per-aman-sanger | Aman Sanger | Co-founder & Chief Architect | acc-cursor    | A
 per-maya-chen   | Maya Chen   | VP Engineering               | acc-cognition | Cognition Labs
 ```
 
-### 6. The warm-path bonus — already know someone at a prospect?
+### 7. Champion job-change outbound — already know someone at a prospect?
 
 ```text
-$ omnigraph read --alias champion-tracking
-1 rows from branch main via champion_movement
-p.slug        | p.fullName | fromAccount   | fromName  | toAccount     | toName         | rNew.title     | rNew.startDate
---------------+------------+---------------+-----------+---------------+----------------+----------------+---------------
-per-maya-chen | Maya Chen  | acc-anthropic | Anthropic | acc-cognition | Cognition Labs | VP Engineering | 2026-04-01
+$ omnigraph read --alias champion-job-change-queue 2026-01-01T00:00:00Z pol-icp-v2
+person          | fullName   | fromName  | toName         | currentTitle        | priorStage
+----------------+------------+-----------+----------------+---------------------+-----------
+per-nora-patel  | Nora Patel | Harvey    | Sierra         | VP Customer Success | closed_won
+per-maya-chen   | Maya Chen  | Anthropic | Cognition Labs | VP Engineering      | closed_won
 ```
 
-Champion-tracking rolls through every closed-won Opportunity and asks: *did the champion move?* Maya championed the Anthropic deal a year ago and started at Cognition on April 1. She's now sitting as VP Eng at the #2 priority prospect. That's not data you assemble from a Signal feed — it's the relationship graph paying off. The warmest path into Cognition was already in our CRM eighteen months before the prospecting cycle began.
+`champion-job-change-queue` rolls through prior champions, current roles, recent job-change signals, and ICP fit. Maya championed the Anthropic deal and is now at Cognition; Nora championed a Harvey deal and is now at Sierra. The value is relationship history joined to current account fit.
 
-### 7. Show the agent's work before the rep picks up the phone
+### 8. Show the agent's work before the rep picks up the phone
 
 ```text
 $ omnigraph read --alias decision-trace dec-classify-cognition-2026-04
@@ -226,7 +306,17 @@ policyKey: prompt.workload_classifier    policyKind: prompt_version
 
 Every fact behind the $220k prediction is one traversal away: which Signals informed it, which prompt version screened it, which Actor produced it. Reps don't trust black-box scores; they trust evidence chains. This *is* the evidence chain.
 
-### 8. Fresh data on a borderline candidate
+Decision corrections are explicit too:
+
+```text
+$ omnigraph read --alias decision-lineage dec-classify-cognition-2026-04
+decision: dec-classify-cognition-2026-04
+supersedes: dec-classify-cognition-2026-02
+policyKey: prompt.workload_classifier
+actorName: workload-classifier
+```
+
+### 9. Fresh data on a borderline candidate
 
 For Sierra (ICP match, no recent strong signals), pull current fundraising context with the Parallel CLI:
 
@@ -242,7 +332,7 @@ $ python ingest/parallel_funding_ingest.py /tmp/sierra.csv \
     --source src-parallel-task
 ```
 
-11 atomic mutations land: a new funding `Signal`, a `Measurement` of total funding, a `Decision` with rationale + `MadeBy` agent + `InformedBy` Signal + `ScreenedBy` prompt-v2. Sierra now has the same audit-grade context as Cognition. Whether it stays in the cohort or graduates to a higher tier is the next prompt's call — and that prompt's decisions will reference *its* Policy version, so the upgrade trail is preserved automatically.
+12 atomic mutations land: a new funding `Signal`, a source link for the Signal, a `Measurement` of total funding, a `Decision` with rationale + `MadeBy` agent + `InformedBy` Signal + `ScreenedBy` prompt-v2. Sierra now has the same audit-grade context as Cognition. Whether it stays in the cohort or graduates to a higher tier is the next prompt's call — and that prompt's decisions will reference *its* Policy version, so the upgrade trail is preserved automatically.
 
 ### Today's outbound list
 
@@ -268,6 +358,12 @@ These are the queries that justify doing this in a graph rather than a table:
 
 | Alias | What it answers |
 |---|---|
+| `daily-priority-accounts` | The seller queue: in-ICP prospects ranked by recent signals, intent score, and predicted spend. |
+| `account-priority-detail` | Why an account is in the queue: signals, decisions, policies, and actor. |
+| `champion-job-change-queue` | Prior champions who moved into in-ICP accounts. |
+| `decision-lineage` | Which Decision replaced a previous Decision, plus signal/policy/actor provenance. |
+| `prompt-governance` | Decisions and measurements produced under a prompt/scoring Policy. |
+| `enrichment-audit` | Recent agent-produced enrichment/scoring decisions and their measurements. |
 | `champion-tracking` | People who championed a closed-won deal and now work somewhere else. The single highest-converting motion in B2B. |
 | `recent-job-changes` | Signals of kind `job_change` in a window — high-signal, time-bounded. |
 | `decision-trace` | For a given Decision: which Signals informed it, which Policy screened it, which Actor made it, what Action it produced. |
@@ -276,12 +372,14 @@ These are the queries that justify doing this in a graph rather than a table:
 | `account-heat` | Recent signal count grouped by account. The "what's hot" feed. |
 | `account-policy-matches` | Which ICPs does an account match. Returns the audit history of fit classifications. |
 | `agent-decisions` | All Decisions made by a particular Actor (especially useful filtering on `actorType: agent`). |
-| `cohort-top-targets` | Top accounts in a saved segment ranked by latest predicted spend. The "who do I call today" view. |
+| `cohort-top-targets` | Top accounts in a saved segment ranked by latest predicted spend. |
 | `export-funding-trigger` | Recent funding signals shaped as flat JSON for CRM ingestion. |
+| `export-priority-accounts` | Seller queue shaped as flat JSON for CRM or sales-engagement ingestion. |
+| `export-champion-job-changes` | Champion movement rows shaped for CRM, sequencing, or Slack alerts. |
 
 ## Aliases are the user-facing API
 
-Every read and mutation is exposed as a named alias in `omnigraph.yaml`. Agents, scripts, dashboards, and CLI users invoke the alias by name — never raw queries. When the underlying `.gq` query evolves, the alias name stays. Default output is `table` for humans; pair with `--format jsonl` (or set on the alias) for scripts.
+Every read and mutation query is exposed as a named alias in `omnigraph.yaml`, enforced by `ingest/check_alias_coverage.py`. Agents, scripts, dashboards, and CLI users invoke the alias by name — never raw queries. When the underlying `.gq` query evolves, the alias name stays. Default output is `table` for humans; pair with `--format jsonl` (or set on the alias) for scripts.
 
 ## Extension points
 
@@ -342,4 +440,4 @@ The pattern: every external enrichment becomes an append-only `Decision` + `Meas
 
 ## Status
 
-This cookbook is structural-complete: schema lints, all queries lint, seed loads, every alias is wired, and `ingest/test_all_aliases.sh` runs 83 read aliases green against the loaded seed. Treat the seed scenario as illustrative — the seller is unnamed, the accounts (Anthropic, Harvey, Perplexity, Cognition, Cursor, Decagon, Sierra, Hippocratic, Suno, Together, Microsoft, GitHub, Inflection) are real, and roles below the C-level along with all opportunity dollar amounts are invented for demonstration.
+This cookbook is structural-complete: schema lints, all queries lint, seed loads, every query is exposed through an alias, and `ingest/test_all_aliases.sh` covers 107 read aliases against the loaded seed. Treat the seed scenario as illustrative — the seller is unnamed, the accounts are recognizable real companies, and source artifacts, signals, roles below the C-level, buying committees, opportunity dollar amounts, predicted spend, and relationships are invented for demonstration.

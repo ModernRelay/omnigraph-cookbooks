@@ -40,6 +40,36 @@ query decision_trace($slug: String) {
     }
 }
 
+// Correction lineage: the new Decision explicitly supersedes an older one.
+query decision_lineage($slug: String) {
+    match {
+        $d: Decision { slug: $slug }
+        $d supersedesDecision $prev
+        $d madeBy $actor
+        $d informedBy $sig
+        $d screenedBy $pol
+    }
+    return {
+        $d.slug as decision, $d.intent, $d.status, $d.confidence, $d.decidedAt,
+        $prev.slug as supersedes, $prev.intent as previousIntent,
+        $prev.confidence as previousConfidence, $prev.decidedAt as previousDecidedAt,
+        $actor.name as actorName, $actor.actorType,
+        $sig.slug as signal, $sig.name as signalName, $sig.kind as signalKind,
+        $pol.slug as policy, $pol.policyKey, $pol.kind as policyKind
+    }
+    order { $d.decidedAt desc }
+}
+
+// Decisions that were replaced by a later Decision.
+query decision_replaced_by($slug: String) {
+    match {
+        $old: Decision { slug: $slug }
+        $new supersedesDecision $old
+    }
+    return { $new.slug, $new.intent, $new.confidence, $new.decidedAt, $new.rationale }
+    order { $new.decidedAt desc }
+}
+
 // Decisions targeting an account.
 query account_decisions($account: String) {
     match {

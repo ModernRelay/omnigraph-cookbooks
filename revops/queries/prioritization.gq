@@ -1,0 +1,120 @@
+// Prioritization reads — the seller queue that turns signals into action.
+
+// Daily account queue: in-ICP prospect accounts with recent signals, an
+// agent-produced intent score, and an estimated spend measurement.
+query daily_priority_accounts($since: DateTime, $policy: String) {
+    match {
+        $policyNode: Policy { slug: $policy }
+        $a: Account { kind: "prospect" }
+        $a matchesPolicy $policyNode
+        $s: Signal
+        $s onAccount $a
+        $s.capturedAt >= $since
+        $score: Measurement { metricKey: "intent_score" }
+        $score measuresAccount $a
+        $pred: Measurement { metricKey: "estimated_annual_spend_usd" }
+        $pred measuresAccount $a
+    }
+    return {
+        $a.slug, $a.legalName, $a.domain, $a.segment, $a.industry, $a.tier,
+        max($score.value) as intent_score,
+        max($pred.value) as predicted_spend
+    }
+    order { intent_score desc }
+}
+
+// Explain why an account is in the queue.
+query account_priority_detail($account: String, $since: DateTime) {
+    match {
+        $a: Account { slug: $account }
+        $s: Signal
+        $s onAccount $a
+        $s.capturedAt >= $since
+        $d: Decision
+        $d targetsAccount $a
+        $d informedBy $s
+        $d screenedBy $p
+        $d madeBy $actor
+    }
+    return {
+        $a.slug as account, $a.legalName,
+        $s.slug as signal, $s.name as signalName, $s.kind as signalKind,
+        $s.strength, $s.capturedAt,
+        $d.slug as decision, $d.intent, $d.confidence, $d.rationale,
+        $p.slug as policy, $p.policyKey, $actor.name as actorName, $actor.actorType
+    }
+    order { $s.capturedAt desc }
+}
+
+// Champion job-change queue: known champions now at an in-ICP account.
+query champion_job_change_queue($since: DateTime, $policy: String) {
+    match {
+        $policyNode: Policy { slug: $policy }
+        $s: Signal { kind: "job_change" }
+        $s onPerson $p
+        $s.capturedAt >= $since
+        $rNew heldByPerson $p
+        $aNew hasRole $rNew
+        $rNew.current = true
+        $aNew matchesPolicy $policyNode
+        $o: Opportunity
+        $o championedBy $p
+        $o atAccount $aOriginal
+        $aNew.slug != $aOriginal.slug
+    }
+    return {
+        $p.slug as person, $p.fullName,
+        $o.slug as priorOpportunity, $o.stage as priorStage,
+        $aOriginal.slug as fromAccount, $aOriginal.legalName as fromName,
+        $aNew.slug as toAccount, $aNew.legalName as toName,
+        $rNew.title as currentTitle, $s.slug as signal, $s.brief,
+        $s.capturedAt
+    }
+    order { $s.capturedAt desc }
+}
+
+// Full champion context for a person: where they worked and what deals they
+// touched as a champion.
+query champion_context($person: String) {
+    match {
+        $p: Person { slug: $person }
+        $r heldByPerson $p
+        $a hasRole $r
+        $o: Opportunity
+        $o championedBy $p
+        $o atAccount $dealAccount
+    }
+    return {
+        $p.slug, $p.fullName,
+        $a.slug as roleAccount, $a.legalName as roleAccountName,
+        $r.title, $r.startDate, $r.endDate, $r.current,
+        $o.slug as opportunity, $o.name, $o.stage,
+        $dealAccount.slug as dealAccount
+    }
+    order { $r.startDate desc }
+}
+
+// Customer champions who left a customer account; useful for churn-risk review
+// even when the new account is not a prospecting target.
+query customer_champion_departures($since: DateTime) {
+    match {
+        $s: Signal { kind: "job_change" }
+        $s onPerson $p
+        $s.capturedAt >= $since
+        $o: Opportunity { stage: "closed_won" }
+        $o championedBy $p
+        $o atAccount $aOriginal
+        $aOriginal.kind = "customer"
+        $rNew heldByPerson $p
+        $aNew hasRole $rNew
+        $rNew.current = true
+        $aNew.slug != $aOriginal.slug
+    }
+    return {
+        $p.slug as person, $p.fullName,
+        $aOriginal.slug as customer, $aOriginal.legalName as customerName,
+        $aNew.slug as newAccount, $aNew.legalName as newAccountName,
+        $rNew.title, $s.slug as signal, $s.capturedAt, $s.brief
+    }
+    order { $s.capturedAt desc }
+}
