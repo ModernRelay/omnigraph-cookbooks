@@ -1,0 +1,77 @@
+// Cohort reads — saved segments, membership, prioritization queries.
+
+query get_cohort($slug: String) {
+    match { $c: Cohort { slug: $slug } }
+    return { $c.slug, $c.name, $c.kind, $c.definition }
+}
+
+query all_cohorts() {
+    match { $c: Cohort }
+    return { $c.slug, $c.name, $c.kind, $c.definition }
+    order { $c.updatedAt desc }
+}
+
+query cohorts_by_kind($kind: String) {
+    match { $c: Cohort { kind: $kind } }
+    return { $c.slug, $c.name, $c.definition }
+}
+
+// Members of a cohort (accounts).
+query cohort_accounts($cohort: String) {
+    match {
+        $c: Cohort { slug: $cohort }
+        $a: Account
+        $a memberOfCohort $c
+    }
+    return { $a.slug, $a.legalName, $a.kind, $a.segment, $a.industry, $a.tier }
+    order { $a.legalName asc }
+}
+
+// Cohorts an account belongs to.
+query account_cohorts($account: String) {
+    match {
+        $a: Account { slug: $account }
+        $a memberOfCohort $c
+    }
+    return { $c.slug, $c.name, $c.kind, $c.definition }
+}
+
+// Cohort aggregate — counts and cumulative-across-all-observations metrics.
+// Because Measurement is append-only, accounts accumulate multiple estimates
+// over time; sum_predicted_spend therefore sums ALL observations, not just
+// the latest per account. measurement_count surfaces the multiplier so
+// callers can see when re-enrichment has inflated the total.
+// For per-account latest, iterate `account_latest_metric` instead.
+query cohort_stats($cohort: String) {
+    match {
+        $c: Cohort { slug: $cohort }
+        $a: Account
+        $a memberOfCohort $c
+        $m: Measurement { metricKey: "estimated_annual_spend_usd" }
+        $m measuresAccount $a
+    }
+    return {
+        $c.slug, $c.name,
+        count($a) as account_count,
+        count($m) as measurement_count,
+        sum($m.value) as sum_predicted_spend_all_observations,
+        max($m.value) as peak_predicted_spend
+    }
+}
+
+// Top accounts in a cohort by latest predicted spend — the "who do I call today" view.
+query cohort_top_targets($cohort: String) {
+    match {
+        $c: Cohort { slug: $cohort }
+        $a: Account
+        $a memberOfCohort $c
+        $m: Measurement { metricKey: "estimated_annual_spend_usd" }
+        $m measuresAccount $a
+    }
+    return {
+        $a.slug, $a.legalName, $a.industry, $a.tier,
+        max($m.value) as predicted_spend
+    }
+    order { predicted_spend desc }
+    limit 25
+}

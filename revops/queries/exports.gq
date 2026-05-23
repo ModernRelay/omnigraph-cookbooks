@@ -1,0 +1,142 @@
+// Reverse-pipe exports — read aliases producing shapes consumed by downstream
+// systems (CRM, dashboards, agent tools). Pair with --format jsonl.
+
+// CRM-shaped: one row per account with latest predicted spend and last signal.
+query crm_account_export() {
+    match { $a: Account }
+    return {
+        $a.slug as account_id,
+        $a.legalName as legal_name,
+        $a.domain,
+        $a.kind as account_status,
+        $a.segment, $a.industry, $a.tier,
+        $a.employeeCount as employees,
+        $a.updatedAt as updated_at
+    }
+    order { $a.updatedAt desc }
+}
+
+// Person-level CRM export (for contact sync).
+query crm_person_export() {
+    match {
+        $p: Person
+        $r heldByPerson $p
+        $a hasRole $r
+        $r.current = true
+    }
+    return {
+        $p.slug as person_id,
+        $p.fullName as full_name,
+        $p.primaryEmail as email,
+        $p.linkedinUrl as linkedin,
+        $r.title, $r.level, $r.department,
+        $a.slug as account_id, $a.legalName as account_name
+    }
+    order { $p.fullName asc }
+}
+
+// Recent funding events for CRM trigger (Monitor-style downstream).
+query crm_funding_trigger($since: DateTime) {
+    match {
+        $s: Signal { kind: "funding" }
+        $s onAccount $a
+        $s.capturedAt >= $since
+    }
+    return {
+        $s.slug as signal_id,
+        $a.slug as account_id, $a.legalName as account_name, $a.domain,
+        $s.brief, $s.strength, $s.capturedAt as captured_at
+    }
+    order { $s.capturedAt desc }
+}
+
+// Dashboard-shaped: pipeline + ARR by stage and deal type.
+query dashboard_pipeline_breakdown() {
+    match { $o: Opportunity }
+    return {
+        $o.stage as stage,
+        $o.dealType as deal_type,
+        count($o) as deals,
+        sum($o.arrUsd) as total_arr
+    }
+    order { total_arr desc }
+}
+
+// Cohort export — flat rows ready for downstream targeting tools.
+query cohort_membership_export($cohort: String) {
+    match {
+        $c: Cohort { slug: $cohort }
+        $a: Account
+        $a memberOfCohort $c
+    }
+    return {
+        $c.slug as cohort_id, $c.name as cohort_name,
+        $a.slug as account_id, $a.legalName as account_name,
+        $a.industry, $a.segment, $a.tier
+    }
+}
+
+// Decision audit export — flat rows for analytics tools.
+query decision_audit_export($since: DateTime) {
+    match {
+        $d: Decision
+        $d madeBy $actor
+        $d.decidedAt >= $since
+    }
+    return {
+        $d.slug as decision_id, $d.intent, $d.domain, $d.status,
+        $d.confidence, $d.confidenceLabel, $d.decidedAt as decided_at,
+        $actor.slug as actor_id, $actor.name as actor_name, $actor.actorType as actor_type
+    }
+    order { $d.decidedAt desc }
+}
+
+// Seller-queue export: in-ICP prospect accounts ranked by current intent score.
+query priority_accounts_export($since: DateTime, $policy: String) {
+    match {
+        $policyNode: Policy { slug: $policy }
+        $a: Account { kind: "prospect" }
+        $a matchesPolicy $policyNode
+        $s: Signal
+        $s onAccount $a
+        $s.capturedAt >= $since
+        $score: Measurement { metricKey: "intent_score" }
+        $score measuresAccount $a
+        $pred: Measurement { metricKey: "estimated_annual_spend_usd" }
+        $pred measuresAccount $a
+    }
+    return {
+        $a.slug as account_id, $a.legalName as account_name, $a.domain,
+        $a.segment, $a.industry, $a.tier,
+        max($score.value) as intent_score,
+        max($pred.value) as predicted_spend_usd
+    }
+    order { intent_score desc }
+}
+
+// Champion-movement export: warm outbound rows for CRM or sequencing tools.
+query champion_job_changes_export($since: DateTime, $policy: String) {
+    match {
+        $policyNode: Policy { slug: $policy }
+        $s: Signal { kind: "job_change" }
+        $s onPerson $p
+        $s.capturedAt >= $since
+        $rNew heldByPerson $p
+        $aNew hasRole $rNew
+        $rNew.current = true
+        $aNew matchesPolicy $policyNode
+        $o: Opportunity
+        $o championedBy $p
+        $o atAccount $aOriginal
+        $aNew.slug != $aOriginal.slug
+    }
+    return {
+        $p.slug as person_id, $p.fullName as full_name,
+        $aOriginal.slug as prior_account_id, $aOriginal.legalName as prior_account_name,
+        $aNew.slug as target_account_id, $aNew.legalName as target_account_name,
+        $rNew.title as current_title,
+        $o.slug as prior_opportunity_id, $o.stage as prior_opportunity_stage,
+        $s.slug as signal_id, $s.capturedAt as signal_at, $s.brief as reason
+    }
+    order { $s.capturedAt desc }
+}

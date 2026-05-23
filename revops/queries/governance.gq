@@ -1,0 +1,132 @@
+// Governance reads — policy chains, prompt-version provenance, override rates.
+
+query get_policy($slug: String) {
+    match { $p: Policy { slug: $slug } }
+    return {
+        $p.slug, $p.policyKey, $p.name, $p.kind, $p.status,
+        $p.description, $p.effectiveFrom, $p.effectiveTo
+    }
+}
+
+query active_policies_by_kind($kind: String) {
+    match {
+        $p: Policy { kind: $kind, status: "active" }
+    }
+    return { $p.slug, $p.policyKey, $p.name, $p.effectiveFrom, $p.description }
+    order { $p.effectiveFrom desc }
+}
+
+// Full version history for a policy key (ICP v1 → v2 → v3, prompt v1 → v2).
+query policy_version_history($key: String) {
+    match {
+        $p: Policy { policyKey: $key }
+    }
+    return { $p.slug, $p.name, $p.status, $p.effectiveFrom, $p.effectiveTo, $p.description }
+    order { $p.effectiveFrom desc }
+}
+
+// What policy did a given policy supersede.
+query policy_supersedes($slug: String) {
+    match {
+        $p: Policy { slug: $slug }
+        $p supersedes $prev
+    }
+    return { $prev.slug, $prev.name, $prev.effectiveFrom, $prev.effectiveTo }
+}
+
+// All decisions screened by a particular policy.
+query policy_decisions($policy: String) {
+    match {
+        $p: Policy { slug: $policy }
+        $d: Decision
+        $d screenedBy $p
+    }
+    return { $d.slug, $d.intent, $d.status, $d.confidence, $d.decidedAt }
+    order { $d.decidedAt desc }
+}
+
+// Total number of decisions screened by a policy. Note: this is a count
+// only — computing a true override RATE requires filtering on the
+// ScreenedBy.outcome edge property (per-edge filter not yet exposed in the
+// current query language). To compute the rate, run this for the total and
+// post-process the outcomes through `policy_decisions` (which returns the
+// full decision list) at the application layer, or filter ScreenedBy edges
+// directly via `omnigraph export`.
+query policy_decision_count($policy: String) {
+    match {
+        $p: Policy { slug: $policy }
+        $d: Decision
+        $d screenedBy $p
+    }
+    return {
+        $p.slug, $p.policyKey,
+        count($d) as total_decisions
+    }
+}
+
+// Accounts matched by an ICP/Policy.
+query policy_matched_accounts($policy: String) {
+    match {
+        $p: Policy { slug: $policy }
+        $a: Account
+        $a matchesPolicy $p
+    }
+    return { $a.slug, $a.legalName, $a.kind, $a.segment, $a.industry, $a.tier }
+}
+
+// Distribution of decisions by domain (rough governance view).
+query decisions_by_domain() {
+    match { $d: Decision }
+    return { $d.domain, count($d) as decision_count }
+    order { decision_count desc }
+}
+
+// Agent-vs-human decision split.
+query decisions_by_actor_type() {
+    match {
+        $d: Decision
+        $d madeBy $actor
+    }
+    return { $actor.actorType, count($d) as decision_count }
+    order { decision_count desc }
+}
+
+// Prompt-governance view: decisions screened by one prompt/policy, including
+// the actor and any measurement the decision produced.
+query prompt_governance($policy: String) {
+    match {
+        $p: Policy { slug: $policy }
+        $d: Decision
+        $d screenedBy $p
+        $d madeBy $actor
+        $m producedByDecision $d
+    }
+    return {
+        $p.slug as policy, $p.policyKey, $p.name,
+        $d.slug as decision, $d.intent, $d.status, $d.confidence,
+        $d.confidenceLabel, $d.decidedAt,
+        $actor.slug as actor, $actor.name as actorName, $actor.actorType,
+        $m.slug as measurement, $m.metricKey, $m.value, $m.observedAt
+    }
+    order { $d.decidedAt desc }
+}
+
+// Agent enrichment audit: recent agent decisions, their policy, and produced
+// measurements. Narrow enough for enrichment/prompt review dashboards.
+query enrichment_audit($since: DateTime) {
+    match {
+        $d: Decision
+        $d.decidedAt >= $since
+        $d madeBy $actor
+        $actor.actorType = "agent"
+        $d screenedBy $p
+        $m producedByDecision $d
+    }
+    return {
+        $d.slug as decision, $d.intent, $d.status, $d.confidence, $d.decidedAt,
+        $actor.name as actorName,
+        $p.slug as policy, $p.policyKey,
+        $m.slug as measurement, $m.metricKey, $m.value
+    }
+    order { $d.decidedAt desc }
+}

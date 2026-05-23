@@ -1,0 +1,1167 @@
+project:
+  name: RevOps — GTM Intelligence Backplane
+
+auth:
+  env_file: ./.env.omni
+
+graphs:
+  local_s3:
+    uri: s3://omnigraph-local/repos/revops
+  local_server:
+    uri: http://127.0.0.1:8080
+    bearer_token_env: OMNIGRAPH_BEARER_TOKEN
+
+server:
+  graph: local_s3
+  bind: 127.0.0.1:8080
+
+cli:
+  graph: local_server
+  branch: main
+  output_format: table
+  table_max_column_width: 80
+  table_cell_layout: truncate
+
+query:
+  roots:
+    - queries
+    - .
+
+aliases:
+  # ════════════════════════════════════════════════════════════
+  # Accounts
+  # ════════════════════════════════════════════════════════════
+  account:
+    command: read
+    query: accounts.gq
+    name: get_account
+    args: [slug]
+    format: kv
+
+  accounts:
+    command: read
+    query: accounts.gq
+    name: accounts_by_kind
+    args: [kind]
+
+  accounts-by-segment:
+    command: read
+    query: accounts.gq
+    name: accounts_by_segment
+    args: [segment]
+
+  account-search:
+    command: read
+    query: accounts.gq
+    name: account_search
+    args: [q]
+
+  account-people:
+    command: read
+    query: accounts.gq
+    name: account_current_people
+    args: [slug]
+
+  account-role-history:
+    command: read
+    query: accounts.gq
+    name: account_role_history
+    args: [slug]
+
+  account-parents:
+    command: read
+    query: accounts.gq
+    name: account_parents
+    args: [slug]
+
+  account-subsidiaries:
+    command: read
+    query: accounts.gq
+    name: account_subsidiaries
+    args: [slug]
+
+  account-tech:
+    command: read
+    query: accounts.gq
+    name: account_tech_stack
+    args: [slug]
+
+  accounts-using-tech:
+    command: read
+    query: accounts.gq
+    name: accounts_using_tech
+    args: [tech]
+
+  account-signals:
+    command: read
+    query: accounts.gq
+    name: account_signals
+    args: [slug]
+
+  account-opportunities:
+    command: read
+    query: accounts.gq
+    name: account_opportunities
+    args: [slug]
+
+  account-policy-matches:
+    command: read
+    query: accounts.gq
+    name: account_policy_matches
+    args: [slug]
+
+  # ════════════════════════════════════════════════════════════
+  # People + Roles (the career history layer)
+  # ════════════════════════════════════════════════════════════
+  person:
+    command: read
+    query: people.gq
+    name: get_person
+    args: [slug]
+    format: kv
+
+  person-search:
+    command: read
+    query: people.gq
+    name: person_search
+    args: [q]
+
+  person-history:
+    command: read
+    query: people.gq
+    name: person_role_history
+    args: [slug]
+
+  person-current-role:
+    command: read
+    query: people.gq
+    name: person_current_role
+    args: [slug]
+
+  champion-tracking:
+    command: read
+    query: people.gq
+    name: champion_movement
+
+  people-by-segment-function:
+    command: read
+    query: people.gq
+    name: people_by_segment_function
+    args: [segment, function]
+
+  recent-job-changes:
+    command: read
+    query: people.gq
+    name: recent_job_changes
+    args: [since]
+
+  lead-resolution:
+    command: read
+    query: people.gq
+    name: lead_resolution
+    args: [lead]
+
+  person-leads:
+    command: read
+    query: people.gq
+    name: person_leads
+    args: [slug]
+
+  # ════════════════════════════════════════════════════════════
+  # Signals (intent feed)
+  # ════════════════════════════════════════════════════════════
+  signal:
+    command: read
+    query: signals.gq
+    name: get_signal
+    args: [slug]
+    format: kv
+
+  signals:
+    command: read
+    query: signals.gq
+    name: recent_signals
+    args: [since]
+
+  signals-by-kind:
+    command: read
+    query: signals.gq
+    name: signals_by_kind
+    args: [kind]
+
+  strong-signals:
+    command: read
+    query: signals.gq
+    name: strong_signals_since
+    args: [since]
+
+  funding-feed:
+    command: read
+    query: signals.gq
+    name: funding_feed
+    args: [since]
+
+  account-heat:
+    command: read
+    query: signals.gq
+    name: account_heat
+    args: [since]
+
+  signal-evidence:
+    command: read
+    query: signals.gq
+    name: signal_evidence
+    args: [slug]
+
+  signal-account:
+    command: read
+    query: signals.gq
+    name: signal_account
+    args: [slug]
+
+  signal-person:
+    command: read
+    query: signals.gq
+    name: signal_person
+    args: [slug]
+
+  search-signals:
+    command: read
+    query: signals.gq
+    name: search_signals
+    args: [q]
+
+  # ════════════════════════════════════════════════════════════
+  # Prioritization (signal-based seller queues)
+  # ════════════════════════════════════════════════════════════
+  daily-priority-accounts:
+    command: read
+    query: prioritization.gq
+    name: daily_priority_accounts
+    args: [since, policy]
+
+  account-priority-detail:
+    command: read
+    query: prioritization.gq
+    name: account_priority_detail
+    args: [account, since]
+
+  champion-job-change-queue:
+    command: read
+    query: prioritization.gq
+    name: champion_job_change_queue
+    args: [since, policy]
+
+  champion-context:
+    command: read
+    query: prioritization.gq
+    name: champion_context
+    args: [person]
+
+  customer-champion-departures:
+    command: read
+    query: prioritization.gq
+    name: customer_champion_departures
+    args: [since]
+
+  # ════════════════════════════════════════════════════════════
+  # Decisions (the audit trail)
+  # ════════════════════════════════════════════════════════════
+  decision:
+    command: read
+    query: decisions.gq
+    name: get_decision
+    args: [slug]
+    format: kv
+
+  decisions:
+    command: read
+    query: decisions.gq
+    name: recent_decisions
+    args: [since]
+
+  decision-trace:
+    command: read
+    query: decisions.gq
+    name: decision_trace
+    args: [slug]
+    format: kv
+
+  decision-lineage:
+    command: read
+    query: decisions.gq
+    name: decision_lineage
+    args: [slug]
+
+  decision-replaced-by:
+    command: read
+    query: decisions.gq
+    name: decision_replaced_by
+    args: [slug]
+
+  decisions-by-intent:
+    command: read
+    query: decisions.gq
+    name: decisions_by_intent
+    args: [intent]
+
+  account-decisions:
+    command: read
+    query: decisions.gq
+    name: account_decisions
+    args: [account]
+
+  opportunity-decisions:
+    command: read
+    query: decisions.gq
+    name: opportunity_decisions
+    args: [opp]
+
+  agent-decisions:
+    command: read
+    query: decisions.gq
+    name: decisions_by_agent
+    args: [actor]
+
+  low-confidence:
+    command: read
+    query: decisions.gq
+    name: low_confidence_decisions
+    args: [threshold]
+
+  decision-actions:
+    command: read
+    query: decisions.gq
+    name: decision_actions
+    args: [slug]
+
+  superseded-decisions:
+    command: read
+    query: decisions.gq
+    name: superseded_decisions
+
+  decision-precedents:
+    command: read
+    query: decisions.gq
+    name: decision_precedents
+    args: [slug]
+
+  # ════════════════════════════════════════════════════════════
+  # Measurements (time-series)
+  # ════════════════════════════════════════════════════════════
+  measurement:
+    command: read
+    query: measurements.gq
+    name: get_measurement
+    args: [slug]
+    format: kv
+
+  account-metrics:
+    command: read
+    query: measurements.gq
+    name: account_measurements
+    args: [account]
+
+  metric-stream:
+    command: read
+    query: measurements.gq
+    name: account_metric_stream
+    args: [account, metric]
+
+  latest-metric:
+    command: read
+    query: measurements.gq
+    name: account_latest_metric
+    args: [account, metric]
+    format: kv
+
+  total-metric:
+    command: read
+    query: measurements.gq
+    name: total_metric_by_account_kind
+    args: [metric, kind]
+
+  predicted-vs-actual:
+    command: read
+    query: measurements.gq
+    name: predicted_vs_actual_spend
+    args: [since]
+
+  top-accounts-by-metric:
+    command: read
+    query: measurements.gq
+    name: top_accounts_by_metric
+    args: [metric]
+
+  measurements-from-decision:
+    command: read
+    query: measurements.gq
+    name: measurements_from_decision
+    args: [decision]
+
+  measurements-from-source:
+    command: read
+    query: measurements.gq
+    name: measurements_from_source
+    args: [source]
+
+  # ════════════════════════════════════════════════════════════
+  # Governance (policies, prompts, ICPs)
+  # ════════════════════════════════════════════════════════════
+  policy:
+    command: read
+    query: governance.gq
+    name: get_policy
+    args: [slug]
+    format: kv
+
+  active-policies:
+    command: read
+    query: governance.gq
+    name: active_policies_by_kind
+    args: [kind]
+
+  policy-history:
+    command: read
+    query: governance.gq
+    name: policy_version_history
+    args: [key]
+
+  policy-supersedes:
+    command: read
+    query: governance.gq
+    name: policy_supersedes
+    args: [slug]
+
+  policy-decisions:
+    command: read
+    query: governance.gq
+    name: policy_decisions
+    args: [policy]
+
+  policy-decision-count:
+    command: read
+    query: governance.gq
+    name: policy_decision_count
+    args: [policy]
+
+  policy-accounts:
+    command: read
+    query: governance.gq
+    name: policy_matched_accounts
+    args: [policy]
+
+  decisions-by-domain:
+    command: read
+    query: governance.gq
+    name: decisions_by_domain
+
+  decisions-by-actor-type:
+    command: read
+    query: governance.gq
+    name: decisions_by_actor_type
+
+  prompt-governance:
+    command: read
+    query: governance.gq
+    name: prompt_governance
+    args: [policy]
+
+  enrichment-audit:
+    command: read
+    query: governance.gq
+    name: enrichment_audit
+    args: [since]
+
+  # ════════════════════════════════════════════════════════════
+  # Opportunities (pipeline)
+  # ════════════════════════════════════════════════════════════
+  opportunity:
+    command: read
+    query: opportunities.gq
+    name: get_opportunity
+    args: [slug]
+    format: kv
+
+  opportunity-account:
+    command: read
+    query: opportunities.gq
+    name: opportunity_account
+    args: [slug]
+
+  pipeline:
+    command: read
+    query: opportunities.gq
+    name: pipeline_summary
+
+  pipeline-by-stage:
+    command: read
+    query: opportunities.gq
+    name: pipeline_by_stage
+    args: [stage]
+
+  pipeline-by-deal-type:
+    command: read
+    query: opportunities.gq
+    name: pipeline_by_deal_type
+
+  committee:
+    command: read
+    query: opportunities.gq
+    name: opportunity_committee
+    args: [slug]
+
+  buyers:
+    command: read
+    query: opportunities.gq
+    name: opportunity_buyers
+    args: [slug]
+
+  influencers:
+    command: read
+    query: opportunities.gq
+    name: opportunity_influencers
+    args: [slug]
+
+  blockers:
+    command: read
+    query: opportunities.gq
+    name: opportunity_blockers
+    args: [slug]
+
+  loss-reasons:
+    command: read
+    query: opportunities.gq
+    name: loss_reasons
+
+  opportunity-origin-lead:
+    command: read
+    query: opportunities.gq
+    name: opportunity_origin_lead
+    args: [slug]
+
+  # ════════════════════════════════════════════════════════════
+  # Cohorts (saved segments)
+  # ════════════════════════════════════════════════════════════
+  cohort:
+    command: read
+    query: cohorts.gq
+    name: get_cohort
+    args: [slug]
+    format: kv
+
+  cohorts:
+    command: read
+    query: cohorts.gq
+    name: all_cohorts
+
+  cohorts-by-kind:
+    command: read
+    query: cohorts.gq
+    name: cohorts_by_kind
+    args: [kind]
+
+  cohort-accounts:
+    command: read
+    query: cohorts.gq
+    name: cohort_accounts
+    args: [cohort]
+
+  account-cohorts:
+    command: read
+    query: cohorts.gq
+    name: account_cohorts
+    args: [account]
+
+  cohort-stats:
+    command: read
+    query: cohorts.gq
+    name: cohort_stats
+    args: [cohort]
+
+  cohort-top-targets:
+    command: read
+    query: cohorts.gq
+    name: cohort_top_targets
+    args: [cohort]
+
+  # ════════════════════════════════════════════════════════════
+  # Engagements + Actions
+  # ════════════════════════════════════════════════════════════
+  engagements:
+    command: read
+    query: engagements.gq
+    name: recent_engagements
+    args: [since]
+
+  person-engagements:
+    command: read
+    query: engagements.gq
+    name: engagements_by_person
+    args: [person]
+
+  engagements-with-artifact:
+    command: read
+    query: engagements.gq
+    name: engagements_with_artifact
+    args: [artifact]
+
+  actions:
+    command: read
+    query: engagements.gq
+    name: recent_actions
+    args: [since]
+
+  actions-to-person:
+    command: read
+    query: engagements.gq
+    name: actions_to_person
+    args: [person]
+
+  account-actions:
+    command: read
+    query: engagements.gq
+    name: actions_on_account
+    args: [account]
+
+  failed-actions:
+    command: read
+    query: engagements.gq
+    name: failed_actions
+    args: [since]
+
+  # ════════════════════════════════════════════════════════════
+  # Reverse pipes (CRM / dashboard / agent exports)
+  # ════════════════════════════════════════════════════════════
+  export-accounts:
+    command: read
+    query: exports.gq
+    name: crm_account_export
+    format: jsonl
+
+  export-people:
+    command: read
+    query: exports.gq
+    name: crm_person_export
+    format: jsonl
+
+  export-funding-trigger:
+    command: read
+    query: exports.gq
+    name: crm_funding_trigger
+    args: [since]
+    format: jsonl
+
+  export-pipeline:
+    command: read
+    query: exports.gq
+    name: dashboard_pipeline_breakdown
+    format: jsonl
+
+  export-cohort:
+    command: read
+    query: exports.gq
+    name: cohort_membership_export
+    args: [cohort]
+    format: jsonl
+
+  export-decisions:
+    command: read
+    query: exports.gq
+    name: decision_audit_export
+    args: [since]
+    format: jsonl
+
+  export-priority-accounts:
+    command: read
+    query: exports.gq
+    name: priority_accounts_export
+    args: [since, policy]
+    format: jsonl
+
+  export-champion-job-changes:
+    command: read
+    query: exports.gq
+    name: champion_job_changes_export
+    args: [since, policy]
+    format: jsonl
+
+  # ════════════════════════════════════════════════════════════
+  # Mutations — pointer nodes
+  # ════════════════════════════════════════════════════════════
+  add-account:
+    command: change
+    query: mutations.gq
+    name: add_account
+    args: [slug, legalName, kind, segment, industry, createdAt, updatedAt]
+
+  update-account-tier:
+    command: change
+    query: mutations.gq
+    name: update_account_tier
+    args: [slug, tier, updatedAt, decisionSlug, actor, rationale, decidedAt]
+
+  update-account-employee-count:
+    command: change
+    query: mutations.gq
+    name: update_account_employee_count
+    args: [slug, employees, updatedAt]
+
+  add-person:
+    command: change
+    query: mutations.gq
+    name: add_person
+    args: [slug, fullName, createdAt, updatedAt]
+
+  add-role:
+    command: change
+    query: mutations.gq
+    name: add_role
+    args: [slug, title, startDate, current, createdAt, updatedAt]
+
+  close-role:
+    command: change
+    query: mutations.gq
+    name: close_role
+    args: [slug, endDate, updatedAt]
+
+  add-lead:
+    command: change
+    query: mutations.gq
+    name: add_lead
+    args: [slug, capturedAt, leadSource, status, createdAt, updatedAt]
+
+  update-lead-status:
+    command: change
+    query: mutations.gq
+    name: update_lead_status
+    args: [slug, status, updatedAt]
+
+  add-opportunity:
+    command: change
+    query: mutations.gq
+    name: add_opportunity
+    args: [slug, name, stage, createdAt, updatedAt]
+
+  advance-stage:
+    command: change
+    query: mutations.gq
+    name: advance_stage
+    args: [slug, stage, updatedAt, decisionSlug, actor, rationale, decidedAt]
+
+  close-won:
+    command: change
+    query: mutations.gq
+    name: close_won
+    args: [slug, closedAt, updatedAt]
+
+  close-lost:
+    command: change
+    query: mutations.gq
+    name: close_lost
+    args: [slug, closedAt, lossReason, updatedAt]
+
+  add-cohort:
+    command: change
+    query: mutations.gq
+    name: add_cohort
+    args: [slug, name, definition, kind, createdAt, updatedAt]
+
+  add-policy:
+    command: change
+    query: mutations.gq
+    name: add_policy
+    args: [slug, policyKey, name, description, kind, effectiveFrom, status, createdAt, updatedAt]
+
+  archive-policy:
+    command: change
+    query: mutations.gq
+    name: archive_policy
+    args: [slug, effectiveTo, updatedAt]
+
+  add-actor:
+    command: change
+    query: mutations.gq
+    name: add_actor
+    args: [slug, name, actorType, createdAt, updatedAt]
+
+  add-technology:
+    command: change
+    query: mutations.gq
+    name: add_technology
+    args: [slug, name, category, createdAt, updatedAt]
+
+  add-source:
+    command: change
+    query: mutations.gq
+    name: add_source
+    args: [slug, name, kind, createdAt, updatedAt]
+
+  # ════════════════════════════════════════════════════════════
+  # Mutations — append-only claims
+  # ════════════════════════════════════════════════════════════
+  add-signal:
+    command: change
+    query: mutations.gq
+    name: add_signal
+    args: [slug, name, kind, strength, capturedAt, createdAt, brief]
+
+  add-decision:
+    command: change
+    query: mutations.gq
+    name: add_decision
+    args: [slug, intent, domain, status, assertion, decidedAt, createdAt, rationale]
+
+  add-action:
+    command: change
+    query: mutations.gq
+    name: add_action
+    args: [slug, operation, success, executedAt, createdAt]
+
+  add-measurement:
+    command: change
+    query: mutations.gq
+    name: add_measurement
+    args: [slug, metricKey, value, observedAt, createdAt]
+
+  add-engagement:
+    command: change
+    query: mutations.gq
+    name: add_engagement
+    args: [slug, channel, intent, occurredAt, createdAt]
+
+  add-artifact:
+    command: change
+    query: mutations.gq
+    name: add_artifact
+    args: [slug, title, artifactType, retrievedAt, createdAt]
+
+  # ════════════════════════════════════════════════════════════
+  # Mutations — core edges (backbone)
+  # ════════════════════════════════════════════════════════════
+  link-role:
+    command: change
+    query: mutations.gq
+    name: link_has_role
+    args: [account, role]
+
+  link-person:
+    command: change
+    query: mutations.gq
+    name: link_held_by_person
+    args: [role, person]
+
+  link-parent:
+    command: change
+    query: mutations.gq
+    name: link_parent_account
+    args: [child, parent]
+
+  link-tech:
+    command: change
+    query: mutations.gq
+    name: link_uses_technology
+    args: [account, tech]
+
+  link-competes-with:
+    command: change
+    query: mutations.gq
+    name: link_competes_with
+    args: [from, to]
+
+  # ════════════════════════════════════════════════════════════
+  # Mutations — decision spine
+  # ════════════════════════════════════════════════════════════
+  link-made-by:
+    command: change
+    query: mutations.gq
+    name: link_decision_made_by
+    args: [decision, actor]
+
+  link-informed-by:
+    command: change
+    query: mutations.gq
+    name: link_decision_informed_by
+    args: [decision, signal, influence]
+
+  link-screened-by:
+    command: change
+    query: mutations.gq
+    name: link_decision_screened_by
+    args: [decision, policy, outcome]
+
+  link-resulted-in:
+    command: change
+    query: mutations.gq
+    name: link_decision_resulted_in
+    args: [decision, action]
+
+  link-decision-targets-account:
+    command: change
+    query: mutations.gq
+    name: link_decision_targets_account
+    args: [decision, account]
+
+  link-decision-targets-opportunity:
+    command: change
+    query: mutations.gq
+    name: link_decision_targets_opportunity
+    args: [decision, opportunity]
+
+  link-decision-targets-person:
+    command: change
+    query: mutations.gq
+    name: link_decision_targets_person
+    args: [decision, person]
+
+  link-decision-precedent:
+    command: change
+    query: mutations.gq
+    name: link_decision_precedent
+    args: [newDecision, oldDecision, similarity]
+
+  link-decision-supersedes:
+    command: change
+    query: mutations.gq
+    name: link_decision_supersedes
+    args: [newDecision, oldDecision, reason]
+
+  # ════════════════════════════════════════════════════════════
+  # Mutations — opportunity (buying committee)
+  # ════════════════════════════════════════════════════════════
+  link-at-account:
+    command: change
+    query: mutations.gq
+    name: link_opportunity_at_account
+    args: [opp, account]
+
+  link-champion:
+    command: change
+    query: mutations.gq
+    name: link_championed_by
+    args: [opp, person]
+
+  link-buyer:
+    command: change
+    query: mutations.gq
+    name: link_buyer
+    args: [opp, person]
+
+  link-influencer:
+    command: change
+    query: mutations.gq
+    name: link_influencer
+    args: [opp, person]
+
+  link-blocker:
+    command: change
+    query: mutations.gq
+    name: link_blocker
+    args: [opp, person]
+
+  # ════════════════════════════════════════════════════════════
+  # Mutations — policy + matching
+  # ════════════════════════════════════════════════════════════
+  link-supersedes:
+    command: change
+    query: mutations.gq
+    name: link_policy_supersedes
+    args: [newPolicy, oldPolicy]
+
+  link-matches-policy:
+    command: change
+    query: mutations.gq
+    name: link_account_matches_policy
+    args: [account, policy, classifiedAt]
+
+  # ════════════════════════════════════════════════════════════
+  # Mutations — measurement edges
+  # ════════════════════════════════════════════════════════════
+  link-measures-account:
+    command: change
+    query: mutations.gq
+    name: link_measurement_account
+    args: [measurement, account]
+
+  link-measures-decision:
+    command: change
+    query: mutations.gq
+    name: link_measurement_decision
+    args: [measurement, decision]
+
+  link-measures-source:
+    command: change
+    query: mutations.gq
+    name: link_measurement_source
+    args: [measurement, source]
+
+  # ════════════════════════════════════════════════════════════
+  # Mutations — signal edges
+  # ════════════════════════════════════════════════════════════
+  link-signal-on-account:
+    command: change
+    query: mutations.gq
+    name: link_signal_on_account
+    args: [signal, account]
+
+  link-signal-on-person:
+    command: change
+    query: mutations.gq
+    name: link_signal_on_person
+    args: [signal, person]
+
+  link-signal-evidence:
+    command: change
+    query: mutations.gq
+    name: link_signal_evidenced_by
+    args: [signal, artifact]
+
+  link-signal-source:
+    command: change
+    query: mutations.gq
+    name: link_signal_source
+    args: [signal, source]
+
+  # ════════════════════════════════════════════════════════════
+  # Mutations — cohort membership
+  # ════════════════════════════════════════════════════════════
+  link-cohort:
+    command: change
+    query: mutations.gq
+    name: link_account_cohort
+    args: [account, cohort]
+
+  # ════════════════════════════════════════════════════════════
+  # Mutations — lead resolution
+  # ════════════════════════════════════════════════════════════
+  resolve-lead:
+    command: change
+    query: mutations.gq
+    name: link_lead_resolves
+    args: [lead, person, resolvedAt]
+
+  link-lead-at-account:
+    command: change
+    query: mutations.gq
+    name: link_lead_at_account
+    args: [lead, account]
+
+  # ════════════════════════════════════════════════════════════
+  # Mutations — action provenance
+  # ════════════════════════════════════════════════════════════
+  link-opportunity-origin-lead:
+    command: change
+    query: mutations.gq
+    name: link_opportunity_origin_lead
+    args: [opp, lead]
+
+  link-measures-person:
+    command: change
+    query: mutations.gq
+    name: link_measurement_person
+    args: [measurement, person]
+
+  link-measures-opportunity:
+    command: change
+    query: mutations.gq
+    name: link_measurement_opportunity
+    args: [measurement, opportunity]
+
+  link-engagement-person:
+    command: change
+    query: mutations.gq
+    name: link_engagement_person
+    args: [engagement, person]
+
+  link-engagement-artifact:
+    command: change
+    query: mutations.gq
+    name: link_engagement_artifact
+    args: [engagement, artifact]
+
+  link-action-to-person:
+    command: change
+    query: mutations.gq
+    name: link_action_to_person
+    args: [action, person]
+
+  link-action-on-account:
+    command: change
+    query: mutations.gq
+    name: link_action_on_account
+    args: [action, account]
+
+  link-action-executed-by:
+    command: change
+    query: mutations.gq
+    name: link_action_executed_by
+    args: [action, actor]
+
+  link-person-cohort:
+    command: change
+    query: mutations.gq
+    name: link_person_cohort
+    args: [person, cohort]
+
+  link-account-source:
+    command: change
+    query: mutations.gq
+    name: link_account_source
+    args: [account, source]
+
+  link-person-source:
+    command: change
+    query: mutations.gq
+    name: link_person_source
+    args: [person, source]
+
+  link-chunk-artifact:
+    command: change
+    query: mutations.gq
+    name: link_chunk_artifact
+    args: [chunk, artifact]
+
+  link-mentions-account:
+    command: change
+    query: mutations.gq
+    name: link_mentions_account
+    args: [artifact, account]
+
+  link-mentions-person:
+    command: change
+    query: mutations.gq
+    name: link_mentions_person
+    args: [artifact, person]
+
+  # ════════════════════════════════════════════════════════════
+  # Search & retrieval (over Chunks of InformationArtifact text)
+  # ════════════════════════════════════════════════════════════
+  search-chunks:
+    command: read
+    query: search.gq
+    name: search_chunks
+    args: [q]
+
+  nearest-chunks:
+    command: read
+    query: search.gq
+    name: nearest_chunks
+    args: [q]
+
+  artifact-chunks:
+    command: read
+    query: search.gq
+    name: artifact_chunks
+    args: [artifact]
+
+  account-mentions:
+    command: read
+    query: search.gq
+    name: account_mentions
+    args: [account]
+
+  person-mentions:
+    command: read
+    query: search.gq
+    name: person_mentions
+    args: [person]

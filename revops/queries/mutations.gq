@@ -1,0 +1,412 @@
+// ══════════════════════════════════════════════════════════════════════
+// Pointer node mutations (insert / update)
+// ══════════════════════════════════════════════════════════════════════
+
+query add_account($slug: String, $legalName: String, $kind: String, $segment: String, $industry: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Account {
+        slug: $slug, legalName: $legalName,
+        kind: $kind, segment: $segment, industry: $industry,
+        createdAt: $createdAt, updatedAt: $updatedAt
+    }
+}
+
+// Audited tier update — atomically updates the Account.tier pointer AND
+// inserts a Decision recording who changed it and why. Use this rather than
+// a bare tier update so the audit trail is always intact.
+query update_account_tier(
+    $slug: String, $tier: String, $updatedAt: DateTime,
+    $decisionSlug: String, $actor: String, $rationale: String, $decidedAt: DateTime
+) {
+    update Account set { tier: $tier, updatedAt: $updatedAt } where slug = $slug
+    insert Decision {
+        slug: $decisionSlug, intent: "update_tier", domain: "sales",
+        status: "approved", assertion: "fact", rationale: $rationale,
+        decidedAt: $decidedAt, createdAt: $decidedAt
+    }
+    insert MadeBy { from: $decisionSlug, to: $actor }
+    insert TargetsAccount { from: $decisionSlug, to: $slug }
+}
+
+query update_account_employee_count($slug: String, $employees: I32, $updatedAt: DateTime) {
+    update Account set { employeeCount: $employees, updatedAt: $updatedAt } where slug = $slug
+}
+
+query add_person($slug: String, $fullName: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Person {
+        slug: $slug, fullName: $fullName,
+        createdAt: $createdAt, updatedAt: $updatedAt
+    }
+}
+
+query add_role($slug: String, $title: String, $startDate: Date, $current: Bool, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Role {
+        slug: $slug, title: $title,
+        startDate: $startDate, current: $current,
+        createdAt: $createdAt, updatedAt: $updatedAt
+    }
+}
+
+query close_role($slug: String, $endDate: Date, $updatedAt: DateTime) {
+    update Role set { endDate: $endDate, current: false, updatedAt: $updatedAt } where slug = $slug
+}
+
+query add_lead($slug: String, $capturedAt: DateTime, $leadSource: String, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Lead {
+        slug: $slug, capturedAt: $capturedAt,
+        leadSource: $leadSource, status: $status,
+        createdAt: $createdAt, updatedAt: $updatedAt
+    }
+}
+
+query update_lead_status($slug: String, $status: String, $updatedAt: DateTime) {
+    update Lead set { status: $status, updatedAt: $updatedAt } where slug = $slug
+}
+
+query add_opportunity($slug: String, $name: String, $stage: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Opportunity {
+        slug: $slug, name: $name, stage: $stage,
+        createdAt: $createdAt, updatedAt: $updatedAt
+    }
+}
+
+// Audited stage advance — atomically advances Opportunity.stage AND inserts
+// a Decision recording the transition. Stage transitions are the canonical
+// "must audit" moment for the GTM lifecycle.
+query advance_stage(
+    $slug: String, $stage: String, $updatedAt: DateTime,
+    $decisionSlug: String, $actor: String, $rationale: String, $decidedAt: DateTime
+) {
+    update Opportunity set { stage: $stage, updatedAt: $updatedAt } where slug = $slug
+    insert Decision {
+        slug: $decisionSlug, intent: "advance_stage", domain: "sales",
+        status: "approved", assertion: "fact", rationale: $rationale,
+        decidedAt: $decidedAt, createdAt: $decidedAt
+    }
+    insert MadeBy { from: $decisionSlug, to: $actor }
+    insert TargetsOpportunity { from: $decisionSlug, to: $slug }
+}
+
+query close_won($slug: String, $closedAt: Date, $updatedAt: DateTime) {
+    update Opportunity set { stage: "closed_won", closedAt: $closedAt, updatedAt: $updatedAt } where slug = $slug
+}
+
+query close_lost($slug: String, $closedAt: Date, $lossReason: String, $updatedAt: DateTime) {
+    update Opportunity set { stage: "closed_lost", closedAt: $closedAt, lossReason: $lossReason, updatedAt: $updatedAt } where slug = $slug
+}
+
+query add_cohort($slug: String, $name: String, $definition: String, $kind: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Cohort {
+        slug: $slug, name: $name, definition: $definition, kind: $kind,
+        createdAt: $createdAt, updatedAt: $updatedAt
+    }
+}
+
+query add_policy($slug: String, $policyKey: String, $name: String, $description: String, $kind: String, $effectiveFrom: DateTime, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Policy {
+        slug: $slug, policyKey: $policyKey, name: $name, description: $description, kind: $kind,
+        effectiveFrom: $effectiveFrom, status: $status,
+        createdAt: $createdAt, updatedAt: $updatedAt
+    }
+}
+
+query archive_policy($slug: String, $effectiveTo: DateTime, $updatedAt: DateTime) {
+    update Policy set { status: "archived", effectiveTo: $effectiveTo, updatedAt: $updatedAt } where slug = $slug
+}
+
+query add_actor($slug: String, $name: String, $actorType: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Actor {
+        slug: $slug, name: $name, actorType: $actorType,
+        createdAt: $createdAt, updatedAt: $updatedAt
+    }
+}
+
+query add_technology($slug: String, $name: String, $category: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Technology {
+        slug: $slug, name: $name, category: $category,
+        createdAt: $createdAt, updatedAt: $updatedAt
+    }
+}
+
+query add_source($slug: String, $name: String, $kind: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Source {
+        slug: $slug, name: $name, kind: $kind,
+        createdAt: $createdAt, updatedAt: $updatedAt
+    }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// Append-only claim mutations (insert only — never update these types)
+// ══════════════════════════════════════════════════════════════════════
+
+query add_signal($slug: String, $name: String, $kind: String, $strength: String, $capturedAt: DateTime, $createdAt: DateTime, $brief: String?) {
+    insert Signal {
+        slug: $slug, name: $name, kind: $kind, strength: $strength,
+        capturedAt: $capturedAt, brief: $brief, createdAt: $createdAt
+    }
+}
+
+query add_decision($slug: String, $intent: String, $domain: String, $status: String, $assertion: String, $decidedAt: DateTime, $createdAt: DateTime, $rationale: String?) {
+    insert Decision {
+        slug: $slug, intent: $intent, domain: $domain, status: $status, assertion: $assertion,
+        rationale: $rationale, decidedAt: $decidedAt, createdAt: $createdAt
+    }
+}
+
+query add_action($slug: String, $operation: String, $success: Bool, $executedAt: DateTime, $createdAt: DateTime) {
+    insert Action {
+        slug: $slug, operation: $operation, success: $success,
+        executedAt: $executedAt, createdAt: $createdAt
+    }
+}
+
+query add_measurement($slug: String, $metricKey: String, $value: F64, $observedAt: DateTime, $createdAt: DateTime) {
+    insert Measurement {
+        slug: $slug, metricKey: $metricKey, value: $value,
+        observedAt: $observedAt, createdAt: $createdAt
+    }
+}
+
+query add_engagement($slug: String, $channel: String, $intent: String, $occurredAt: DateTime, $createdAt: DateTime) {
+    insert Engagement {
+        slug: $slug, channel: $channel, intent: $intent,
+        occurredAt: $occurredAt, createdAt: $createdAt
+    }
+}
+
+query add_artifact($slug: String, $title: String, $artifactType: String, $retrievedAt: DateTime, $createdAt: DateTime) {
+    insert InformationArtifact {
+        slug: $slug, title: $title, artifactType: $artifactType,
+        retrievedAt: $retrievedAt, createdAt: $createdAt
+    }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// Backbone edges (Person ↔ Role ↔ Account)
+// ══════════════════════════════════════════════════════════════════════
+
+query link_has_role($account: String, $role: String) {
+    insert HasRole { from: $account, to: $role }
+}
+
+query link_held_by_person($role: String, $person: String) {
+    insert HeldByPerson { from: $role, to: $person }
+}
+
+query link_parent_account($child: String, $parent: String) {
+    insert ParentAccount { from: $child, to: $parent }
+}
+
+query link_uses_technology($account: String, $tech: String) {
+    insert UsesTechnology { from: $account, to: $tech }
+}
+
+query link_competes_with($from: String, $to: String) {
+    insert CompetesWithTechnology { from: $from, to: $to }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// Lead resolution
+// ══════════════════════════════════════════════════════════════════════
+
+query link_lead_resolves($lead: String, $person: String, $resolvedAt: DateTime) {
+    insert ResolvesToPerson { from: $lead, to: $person, resolvedAt: $resolvedAt }
+}
+
+query link_lead_at_account($lead: String, $account: String) {
+    insert LeadAtAccount { from: $lead, to: $account }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// Signal → entity
+// ══════════════════════════════════════════════════════════════════════
+
+query link_signal_on_account($signal: String, $account: String) {
+    insert OnAccount { from: $signal, to: $account }
+}
+
+query link_signal_on_person($signal: String, $person: String) {
+    insert OnPerson { from: $signal, to: $person }
+}
+
+query link_signal_evidenced_by($signal: String, $artifact: String) {
+    insert EvidencedBy { from: $signal, to: $artifact }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// Decision spine
+// ══════════════════════════════════════════════════════════════════════
+
+query link_decision_made_by($decision: String, $actor: String) {
+    insert MadeBy { from: $decision, to: $actor }
+}
+
+query link_decision_informed_by($decision: String, $signal: String, $influence: String) {
+    insert InformedBy { from: $decision, to: $signal, influence: $influence }
+}
+
+query link_decision_screened_by($decision: String, $policy: String, $outcome: String) {
+    insert ScreenedBy { from: $decision, to: $policy, outcome: $outcome }
+}
+
+query link_decision_resulted_in($decision: String, $action: String) {
+    insert ResultedIn { from: $decision, to: $action }
+}
+
+query link_decision_targets_account($decision: String, $account: String) {
+    insert TargetsAccount { from: $decision, to: $account }
+}
+
+query link_decision_targets_opportunity($decision: String, $opportunity: String) {
+    insert TargetsOpportunity { from: $decision, to: $opportunity }
+}
+
+query link_decision_targets_person($decision: String, $person: String) {
+    insert TargetsPerson { from: $decision, to: $person }
+}
+
+query link_decision_precedent($newDecision: String, $oldDecision: String, $similarity: String) {
+    insert BasedOnPrecedent { from: $newDecision, to: $oldDecision, similarity: $similarity }
+}
+
+query link_decision_supersedes($newDecision: String, $oldDecision: String, $reason: String?) {
+    insert SupersedesDecision { from: $newDecision, to: $oldDecision, reason: $reason }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// Policy versioning + matching
+// ══════════════════════════════════════════════════════════════════════
+
+query link_policy_supersedes($newPolicy: String, $oldPolicy: String) {
+    insert Supersedes { from: $newPolicy, to: $oldPolicy }
+}
+
+query link_account_matches_policy($account: String, $policy: String, $classifiedAt: DateTime) {
+    insert MatchesPolicy { from: $account, to: $policy, classifiedAt: $classifiedAt }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// Opportunity edges
+// ══════════════════════════════════════════════════════════════════════
+
+query link_opportunity_at_account($opp: String, $account: String) {
+    insert AtAccount { from: $opp, to: $account }
+}
+
+query link_championed_by($opp: String, $person: String) {
+    insert ChampionedBy { from: $opp, to: $person }
+}
+
+query link_buyer($opp: String, $person: String) {
+    insert BuyerOnDeal { from: $opp, to: $person }
+}
+
+query link_influencer($opp: String, $person: String) {
+    insert InfluencerOnDeal { from: $opp, to: $person }
+}
+
+query link_blocker($opp: String, $person: String) {
+    insert BlockerOnDeal { from: $opp, to: $person }
+}
+
+query link_opportunity_origin_lead($opp: String, $lead: String) {
+    insert ProducedByLead { from: $opp, to: $lead }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// Measurement edges
+// ══════════════════════════════════════════════════════════════════════
+
+query link_measurement_account($measurement: String, $account: String) {
+    insert MeasuresAccount { from: $measurement, to: $account }
+}
+
+query link_measurement_person($measurement: String, $person: String) {
+    insert MeasuresPerson { from: $measurement, to: $person }
+}
+
+query link_measurement_opportunity($measurement: String, $opportunity: String) {
+    insert MeasuresOpportunity { from: $measurement, to: $opportunity }
+}
+
+query link_measurement_decision($measurement: String, $decision: String) {
+    insert ProducedByDecision { from: $measurement, to: $decision }
+}
+
+query link_measurement_source($measurement: String, $source: String) {
+    insert ObservedFromSource { from: $measurement, to: $source }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// Engagement / Action edges
+// ══════════════════════════════════════════════════════════════════════
+
+query link_engagement_person($engagement: String, $person: String) {
+    insert EngagedByPerson { from: $engagement, to: $person }
+}
+
+query link_engagement_artifact($engagement: String, $artifact: String) {
+    insert EngagedWithArtifact { from: $engagement, to: $artifact }
+}
+
+query link_action_to_person($action: String, $person: String) {
+    insert ActionToPerson { from: $action, to: $person }
+}
+
+query link_action_on_account($action: String, $account: String) {
+    insert ActionOnAccount { from: $action, to: $account }
+}
+
+query link_action_executed_by($action: String, $actor: String) {
+    insert ExecutedBy { from: $action, to: $actor }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// Cohort membership
+// ══════════════════════════════════════════════════════════════════════
+
+query link_account_cohort($account: String, $cohort: String) {
+    insert MemberOfCohort { from: $account, to: $cohort }
+}
+
+query link_person_cohort($person: String, $cohort: String) {
+    insert PersonMemberOfCohort { from: $person, to: $cohort }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// Provenance edges
+// ══════════════════════════════════════════════════════════════════════
+
+query link_account_source($account: String, $source: String) {
+    insert AccountEnrichedBySource { from: $account, to: $source }
+}
+
+query link_person_source($person: String, $source: String) {
+    insert PersonEnrichedBySource { from: $person, to: $source }
+}
+
+query link_signal_source($signal: String, $source: String) {
+    insert SignalEnrichedBySource { from: $signal, to: $source }
+}
+
+query link_chunk_artifact($chunk: String, $artifact: String) {
+    insert PartOfArtifact { from: $chunk, to: $artifact }
+}
+
+query link_mentions_account($artifact: String, $account: String) {
+    insert MentionsAccount { from: $artifact, to: $account }
+}
+
+query link_mentions_person($artifact: String, $person: String) {
+    insert MentionsPerson { from: $artifact, to: $person }
+}

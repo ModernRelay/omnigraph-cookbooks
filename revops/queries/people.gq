@@ -1,0 +1,109 @@
+// People reads — career history, champion tracking, role queries.
+
+query get_person($slug: String) {
+    match { $p: Person { slug: $slug } }
+    return {
+        $p.slug, $p.fullName, $p.primaryEmail, $p.linkedinUrl,
+        $p.seniority, $p.function, $p.location
+    }
+}
+
+query person_search($q: String) {
+    match {
+        $p: Person
+        search($p.fullName, $q)
+    }
+    return { $p.slug, $p.fullName, $p.primaryEmail, $p.seniority, $p.function }
+}
+
+// Full job history for a person — every role they've held.
+query person_role_history($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $r heldByPerson $p
+        $a hasRole $r
+    }
+    return {
+        $a.slug, $a.legalName, $r.title, $r.level, $r.department,
+        $r.startDate, $r.endDate, $r.current
+    }
+    order { $r.startDate desc }
+}
+
+// Current role for a person (singular if data is well-formed).
+query person_current_role($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $r heldByPerson $p
+        $a hasRole $r
+        $r.current = true
+    }
+    return { $a.slug, $a.legalName, $r.title, $r.level, $r.department, $r.startDate }
+}
+
+// Champion tracking: people who championed a closed-won deal and are now
+// at a *different* account. The B2B holy grail.
+query champion_movement() {
+    match {
+        $o: Opportunity { stage: "closed_won" }
+        $o championedBy $p
+        $rNew heldByPerson $p
+        $aNew hasRole $rNew
+        $rNew.current = true
+        $o atAccount $aOriginal
+        $aNew.slug != $aOriginal.slug
+    }
+    return {
+        $p.slug, $p.fullName,
+        $aOriginal.slug as fromAccount, $aOriginal.legalName as fromName,
+        $aNew.slug as toAccount, $aNew.legalName as toName,
+        $rNew.title, $rNew.startDate
+    }
+    order { $rNew.startDate desc }
+}
+
+// All current people at accounts in a given segment + function (sales targeting).
+query people_by_segment_function($segment: String, $function: String) {
+    match {
+        $a: Account { segment: $segment }
+        $a hasRole $r
+        $r heldByPerson $p
+        $r.current = true
+        $p.function = $function
+    }
+    return { $p.slug, $p.fullName, $r.title, $a.slug as account, $a.legalName }
+    order { $a.legalName asc }
+}
+
+// Recent job changes (Signal kind = job_change) on people, last 90 days.
+query recent_job_changes($since: DateTime) {
+    match {
+        $s: Signal { kind: "job_change" }
+        $s onPerson $p
+        $s.capturedAt >= $since
+    }
+    return {
+        $s.slug, $s.name, $s.capturedAt, $s.brief, $s.strength,
+        $p.slug as person, $p.fullName
+    }
+    order { $s.capturedAt desc }
+}
+
+// Lead resolution — given a Lead, what Person does it resolve to.
+query lead_resolution($lead: String) {
+    match {
+        $l: Lead { slug: $lead }
+        $l resolvesToPerson $p
+    }
+    return { $p.slug, $p.fullName, $p.primaryEmail, $p.seniority, $p.function }
+}
+
+// Reverse — given a Person, which Leads resolved to them.
+query person_leads($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $l resolvesToPerson $p
+    }
+    return { $l.slug, $l.capturedAt, $l.rawCompany, $l.leadSource, $l.status }
+    order { $l.capturedAt desc }
+}

@@ -1,0 +1,49 @@
+// Semantic / lexical retrieval over artifact chunks.
+// Embeddings only live on Chunk; queries scope first, then rank.
+
+query search_chunks($q: String) {
+    match {
+        $c: Chunk
+        search($c.text, $q)
+    }
+    return { $c.slug, $c.text, $c.chunkIndex }
+}
+
+query nearest_chunks($q: Vector(3072)) {
+    match { $c: Chunk }
+    return { $c.slug, $c.text, $c.chunkIndex }
+    order { nearest($c.embedding, $q) }
+    limit 10
+}
+
+// Chunks belonging to a particular artifact.
+query artifact_chunks($artifact: String) {
+    match {
+        $a: InformationArtifact { slug: $artifact }
+        $c partOfArtifact $a
+    }
+    return { $c.slug, $c.text, $c.chunkIndex }
+    order { $c.chunkIndex asc }
+}
+
+// Recent artifacts mentioning an account (provenance).
+query account_mentions($account: String) {
+    match {
+        $a: Account { slug: $account }
+        $art: InformationArtifact
+        $art mentionsAccount $a
+    }
+    return { $art.slug, $art.title, $art.artifactType, $art.url, $art.publishedAt }
+    order { $art.publishedAt desc }
+}
+
+// Recent artifacts mentioning a person.
+query person_mentions($person: String) {
+    match {
+        $p: Person { slug: $person }
+        $art: InformationArtifact
+        $art mentionsPerson $p
+    }
+    return { $art.slug, $art.title, $art.artifactType, $art.url, $art.publishedAt }
+    order { $art.publishedAt desc }
+}
