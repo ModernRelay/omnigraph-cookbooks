@@ -439,108 +439,129 @@ dec-pulserate-pass             | Pass on PulseRate Series A                | pas
 
 Five patterns the graph shape uniquely enables. The common shape: **agent proposes on a branch, partner reviews via `branch diff`, merges into `main`**. Each is invocable from `claude -p ...` (or any agent runtime) against the local omnigraph server.
 
-At a glance:
-
-| Agent | Trigger | External input | Graph reads | Graph writes (always on a `tentative/…` branch) |
-|---|---|---|---|---|
-| **Post-call ingestion** | After every founder / portco call | Granola transcript | mentioned `Person` + `Organization`; related `Thesis` + `Assumption`; the deal's open `Commitment`s | new `Artifact`; 0–3 `Signal`s with `supports`/`contradicts` to Assumptions; `Commitment`s from action items |
-| **Scout-pick triage** | Daily, on inbound mention | HN launch / Twitter / scout email / founder DM | `search-organizations` for dedup; `Organization.status` for verdict; relevant `Pattern`s + `Lesson`s for the market | if "new": `Organization` + `Signal{kind=discovery}` + enrichment edges (`OrganizationInMarket`, `SignalInformsQuestion`, etc.) |
-| **Pre-X brief** | On-demand: IC, board, founder call, partner 1:1, LP update | None — pure graph fan-out | 5–8 aliases across `Thesis`, `Assumption`, `Question`, `Signal`, `Decision`, `Commitment`, `Meeting`, `Insight` | None (read-only) |
-| **Multi-agent IC simulation** | On-demand for high-conviction deals | None | same fan-out as Pre-X brief + cross-cutting `Pattern` aggregation | 2–3 parallel `Insight{stance=bull \| bear \| neutral}` nodes + `InsightReliesOnSignal` + `InsightHighlightsPattern` on a shared branch |
-| **Reflexive learning sweep** | Quarterly cron | None | recent `Decision`s; `Pattern.acrossDecision` aggregations; outcome consistency | `Lesson{status=tentative}` + `DistilledFromPattern` + `AppliesToMarket` |
-
-Only the first two pull external data. Everything else is graph-internal: the firm's accumulated knowledge composes itself. Detail per workflow below.
+For each agent below: the natural-language **prompt** you'd send it, concrete **pulls** (graph reads it makes) and **writes** (graph mutations it lands on a `tentative/…` branch). Only the first two also consume external data (a transcript or a scout note); the other three are pure graph composition.
 
 ### 1. Post-call ingestion · daily, after every founder/portco call
 
-Granola transcript lands → agent creates branch `tentative/ingest-<date>` → on that branch, atomically creates the `Artifact`, links it to the `Meeting`, resolves mentioned people/orgs (creating if new), derives material `Signal`s with `signalAbout*` + `supports/contradicts` to existing Assumptions, and extracts `Commitment`s from "I'll send you…" / "Let's reconvene in two weeks". Partner merges.
+**Prompt** (real shape):
+> A Granola transcript just landed for the helix-second-call meeting (`mtg-helix-followup-2026-05`). Ingest it into the graph. Resolve mentioned people/orgs, derive material signals (link to existing Theses/Assumptions), extract action items as Commitments. Land everything on `tentative/ingest-helix-2026-05-29`. Don't fabricate; if a mentioned person isn't in the graph, surface that rather than guessing a slug.
 
-```bash
-omnigraph change --alias add-artifact          art-helix-2026-05-29 "Helix follow-up call" transcript meeting-tool granola 2026-05-29 …
-omnigraph change --alias link-artifact-from-meeting    art-helix-2026-05-29 mtg-helix-followup-2026-05
-omnigraph change --alias link-artifact-mentions-person art-helix-2026-05-29 per-helix-yuki
-omnigraph change --alias add-signal            sig-helix-customer-concentration "Top-3 customer at 35% ARR" customer 2026-05-29 …
-omnigraph change --alias link-signal-contradicts-assumption sig-helix-customer-concentration asmp-helix-onprem-margin
-omnigraph change --alias add-commitment        cmt-helix-cohort-report "Cohort report by next IC" open …
-omnigraph change --alias link-commitment-assigned-to   cmt-helix-cohort-report per-helix-yuki
-```
+**External input:** Granola transcript (text or `Artifact{blob}`).
 
-**Why graph:** entity resolution + signal classification + commitment extraction are four typed mutations in one atomic transaction. Without typed schema this is 4+ uncoordinated CRM API calls with no consistency guarantee — and no reproducible record of "what did we extract from that call".
+**Pulls (example, against the Helix narrative):**
+- `meeting mtg-helix-followup-2026-05` — meeting context, attendees
+- `search-people "Yuki"` → `per-helix-yuki`
+- `organization-theses org-helix-runtime` → `thesis-on-prem-inference` + 3 grounding assumptions (anchor candidates for new signals)
+- `deal-open-questions deal-helix-series-a` → `q-helix-onprem-margin` (so new signals can `informsQuestion` it)
 
-### 2. Scout-pick triage · daily cron
+**Writes (example, on `tentative/ingest-helix-2026-05-29`):**
+- `add-artifact art-helix-call-2026-05-29 "Helix follow-up call" transcript meeting-tool granola …`
+- `link-artifact-from-meeting art-helix-call-2026-05-29 mtg-helix-followup-2026-05`
+- `link-artifact-mentions-person art-helix-call-2026-05-29 per-helix-yuki`
+- `add-signal sig-helix-top3-concentration "Top-3 customer at 35% ARR" customer 2026-05-29 …`
+- `link-signal-contradicts-assumption sig-helix-top3-concentration asmp-helix-onprem-margin`
+- `add-commitment cmt-helix-cohort-report "Cohort report by next IC" open …` + `link-commitment-assigned-to per-helix-yuki` + `link-commitment-from-meeting mtg-helix-followup-2026-05`
 
-Incoming external mention (Hacker News launch, Twitter signal, scout email, founder DM) → agent runs the four-branch dedup verdict from `Organization.status`, lands genuinely new picks on a branch:
+**Why graph:** entity resolution + signal classification + commitment extraction become four typed mutations in one atomic transaction. Without typed schema this is 4+ uncoordinated CRM API calls with no consistency guarantee — and no reproducible record of "what did we extract from that call".
 
-```bash
-omnigraph read --alias search-organizations "<query>"   # known / resurface / new / out-of-scope from status enum
+### 2. Scout-pick triage · daily, on every inbound mention
 
-# If "new":
-omnigraph branch create tentative/scout-2026-05-29
-omnigraph change --branch tentative/scout-2026-05-29 --alias add-organization   org-<slug> "<name>" startup …
-omnigraph change --branch tentative/scout-2026-05-29 --alias add-signal         sig-<slug>-discovery "Discovery: <name>" discovery 2026-05-29 …
-omnigraph change --branch tentative/scout-2026-05-29 --alias link-signal-about-organization sig-<slug>-discovery org-<slug>
-```
+**Prompt** (real shape, tested live):
+> A scout sent in: *"Saw a launch from Ferrumix on HN — vertical AI for industrial maintenance shops, two ex-Siemens engineers, YC W26, ferrumix.ai. Note: I think we passed on something similar last quarter (Stratopaint?)."* Triage it. Decide if it's new/resurfacing/known/out-of-scope per `Organization.status`. If similar prior decisions exist, surface them. If new, create on a `tentative/scout-<date>` branch and enrich with sector hub, founder info if given, and links to relevant Patterns/Lessons.
 
-**Why graph:** the four-branch verdict is a structural property of `Organization.status`, not a tree in `policy.ts`. The daily-cap rule moves into a Cedar policy on `add-signal{kind=discovery}` mutations counting rolling-24h commits per actor — single source of truth, no separate counter.
+**External input:** raw scout note (text, an email, an HN link).
 
-### 3. Pre-X brief · on-demand for every IC / board / founder call / partner 1:1
+**Pulls (example, against the Ferrumix scenario):**
+- `search-organizations "ferrumix"` → 0 rows (so: new)
+- `search-organizations "stratopaint"` → 1 row, `org-stratopaint` with `status=passed`
+- `organization-deals org-stratopaint` + `decision-deal deal-stratopaint-seed` → surfaces `dec-stratopaint-pass`
+- `lessons-for-market mkt-vertical-saas` → `lsn-shell-anti-pattern`, `lsn-vertical-data-moat-eval`
+- `pattern-organizations pat-vertical-shell-flop` → confirms the prior pass anchors a known failure pattern
 
-Multi-alias fan-out, all reads against one snapshot:
+**Writes (example, on `tentative/scout-ferrumix-triage-20260529`):**
+- `add-organization org-ferrumix "Ferrumix" startup …` (status=`watching`, brief includes "ex-Siemens engineers, YC W26", website=`https://ferrumix.ai`)
+- `link-organization-in-market org-ferrumix mkt-vertical-saas`
+- `add-artifact art-ferrumix-hn-launch …` (HN note for provenance)
+- `add-signal sig-ferrumix-launch-discovery "Ferrumix launches on HN (YC W26)" discovery 2026-05-29 …`
+- `link-signal-about-organization sig-ferrumix-launch-discovery org-ferrumix`
+- `link-signal-sourced-from-artifact sig-ferrumix-launch-discovery art-ferrumix-hn-launch`
+- `link-signal-informs-question sig-ferrumix-launch-discovery q-vertical-saas-ai-shells-still-valid` (Ferrumix is fresh data for the existing "are our shell-pattern passes wrong?" question)
+- `add-insight-with-stance ins-ferrumix-shell-risk … memo neutral "pattern-matches the vertical-shell failure mode; ex-Siemens founders may have a proprietary-data counter — run the 5-customer protocol before deciding"`
+- `link-insight-highlights-pattern ins-ferrumix-shell-risk pat-vertical-shell-flop`
 
-```bash
-# Pre-IC for a deal
-omnigraph read --alias pre-ic-brief-thesis      deal-helix-series-a
-omnigraph read --alias pre-ic-brief-evidence    deal-helix-series-a
-omnigraph read --alias pre-ic-brief-questions   deal-helix-series-a
-omnigraph read --alias debate-stances           deal-helix-series-a
-omnigraph read --alias ic-prep-meeting-history  deal-helix-series-a
-omnigraph read --alias ic-prep-open-commitments deal-helix-series-a
+Founder Person nodes deliberately **not** created — scout didn't name them.
 
-# Pre-board for a portco
-omnigraph read --alias board-prep-pack            org-aetherbrick
-omnigraph read --alias board-prep-open-questions  org-aetherbrick
-omnigraph read --alias board-prep-commitments     org-aetherbrick
-omnigraph read --alias board-prep-meeting-history org-aetherbrick
-```
+**Why graph:** the dedup verdict is a structural property of `Organization.status`, not a tree in `policy.ts`. The Stratopaint linkage surfaces *because* the firm's prior pass is on the same Pattern in the same Market — no semantic-search hack needed.
 
-**Why graph:** five-to-eight reads in parallel against a single commit-pinned snapshot. The same brief re-run six months later (against the same commit ID) returns byte-identical context — no other store gives you that.
+### 3. Pre-X brief · on-demand for every IC, board, founder call, partner 1:1
+
+**Prompt** (real shape, tested live):
+> Pawel is leading the upcoming IC for `deal-helix-series-a` (in-diligence, target close in 3 weeks). Generate a tight markdown brief covering: thesis context, supporting and contradicting evidence, open questions, internal debate to date, prior meetings, outstanding commitments. Cite slugs you actually saw. End with one of: STRONG INVEST / INVEST WITH CONDITIONS / PASS / NEEDS MORE DILIGENCE.
+
+**External input:** None. Pure graph composition.
+
+**Pulls (example):**
+- `deal deal-helix-series-a` → terms ($14M on $42M, $5M check, target close 2026-07-15)
+- `deal-lead-partner deal-helix-series-a` → `per-pawel`
+- `pre-ic-brief-thesis deal-helix-series-a` → `thesis-on-prem-inference` + 3 assumptions with levels + confidences
+- `pre-ic-brief-evidence deal-helix-series-a` → `sig-aws-bedrock-onprem`, `sig-microsoft-onprem-push` (both contradicting margin assumptions)
+- `pre-ic-brief-questions deal-helix-series-a` → `q-helix-onprem-margin` (high priority)
+- `debate-stances deal-helix-series-a` → `ins-helix-bull`, `ins-helix-bear` (each citing different signal subsets)
+- `ic-prep-meeting-history deal-helix-series-a` → `mtg-helix-founder-call-2026-04` + attendees + summary
+- `ic-prep-open-commitments deal-helix-series-a` → `cmt-helix-customer-refs` (high, due 2026-06-15), `cmt-helix-second-meeting` (overdue)
+
+**Writes:** None. Output is the synthesized markdown brief returned to the partner — every reproducibility property comes from the snapshot-pinned reads.
+
+**Why graph:** five-to-eight reads against a single commit-pinned snapshot. The same brief re-run six months later against the same commit returns byte-identical evidence — no other store gives you that. In a real agent run, the synthesis surfaced "bull defends the demand pillar, bear attacks the margin pillar — they aren't arguing about the same thing" and flagged that the margin-testing commitment was a month overdue. That was a structural read, not a clever LLM observation.
 
 ### 4. Multi-agent IC simulation · on-demand for high-conviction deals
 
-Two (or three) parallel forked agents — bull, bear, optionally neutral — read the same snapshot, write `Insight{stance=…}` rows to the same branch, each grounding via `InsightReliesOnSignal` to specific evidence:
+**Prompt** (real shape, tested live as two parallel agents):
+> You are the **BULL** agent in a parallel IC debate for `org-quirebench` (LLM evaluation platform, portfolio org from a 2025 seed). The question is *follow-on participation in a hypothetical Series A*. The **BEAR** agent is running simultaneously against the same branch (`ic-debate-quirebench-20260529`). Read state, prior signals, related Patterns. Take the bull side. Write an `Insight{stance=bull}` with `add-insight-with-stance`, citing **real** signals via `InsightReliesOnSignal`. Don't invent. — *(bear agent gets the same prompt with BULL↔BEAR swapped.)*
 
-```bash
-omnigraph branch create tentative/ic-debate-helix-2026-06
-# Agent A:
-omnigraph change --branch … --alias add-insight              ins-helix-bull-v2 "Why we should invest" memo …
-omnigraph change --branch … --alias link-insight-about-deal  ins-helix-bull-v2 deal-helix-series-a
-omnigraph change --branch … --alias link-insight-relies-on-signal ins-helix-bull-v2 sig-helix-board-onprem-mandate
-# Agent B (parallel):
-omnigraph change --branch … --alias add-insight              ins-helix-bear-v2 "Why we should pass" memo …
-omnigraph change --branch … --alias link-insight-about-deal  ins-helix-bear-v2 deal-helix-series-a
-omnigraph change --branch … --alias link-insight-relies-on-signal ins-helix-bear-v2 sig-aws-bedrock-onprem
-# Read back: bull + bear side-by-side, citing real signals
-omnigraph read --alias debate-stances deal-helix-series-a
-```
+**External input:** None.
 
-**Why graph:** `Insight.stance` + `InsightReliesOnSignal` + same-deal grouping is the schema's debate primitive. Both insights cite the same signals from the same snapshot; the disagreement is structurally visible. Replaces P9's "3-agent founder tribunal" pattern with first-class persistence.
+**Pulls (example — bull):**
+- `organization org-quirebench` + `organization-theses org-quirebench` → `thesis-eval-as-product` (active, zero contradictions)
+- `market-signals mkt-dev-tools` → `sig-eval-fragmentation-news`, `sig-databricks-acquihire`
+- `organization-signals org-quirebench` → `sig-quirebench-board-decision` (Pro tier launched, live monetization)
+- `pattern-organizations pat-eval-fragmentation` → confirms QuireBench + Axon both sit on this pattern
+
+**Pulls (example — bear, same agent shape, different selection):**
+- Same `thesis-eval-as-product` + `pat-eval-fragmentation` reads
+- Plus `signal sig-axon-databricks-acquihire-rumor` → "Databricks tried to acquihire our own Axon; founder declined"
+
+**Writes (example, both agents on `tentative/ic-debate-quirebench-20260529`):**
+- `add-insight-with-stance ins-quirebench-followon-bull "QuireBench — bull case" memo bull "open field + acquirer floor + live revenue" …`
+- `link-insight-about-deal ins-quirebench-followon-bull deal-quirebench-seed`
+- `link-insight-relies-on-signal ins-quirebench-followon-bull sig-eval-fragmentation-news`
+- `link-insight-relies-on-signal ins-quirebench-followon-bull sig-databricks-acquihire`
+- `link-insight-relies-on-signal ins-quirebench-followon-bull sig-quirebench-board-decision`
+- `link-insight-highlights-pattern ins-quirebench-followon-bull pat-eval-fragmentation`
+
+…and symmetrically for `ins-quirebench-followon-bear`, citing `sig-eval-fragmentation-news` + `sig-databricks-acquihire` + `sig-axon-databricks-acquihire-rumor` and **also** linking to the same `pat-eval-fragmentation` — interpreted oppositely (bull: open field; bear: crowded, no moat). Read back: `debate-stances deal-quirebench-seed` returns both rows side-by-side.
+
+**Why graph:** `Insight.stance` + `InsightReliesOnSignal` + same-deal grouping is the schema's debate primitive. Both insights cite the same Pattern (`pat-eval-fragmentation`) and overlapping signals — the disagreement is structurally legible, not just stylistically. Replaces P9's "3-agent founder tribunal" with first-class persistence partners can audit row-by-row.
 
 ### 5. Reflexive learning sweep · quarterly
 
-Scan recently-closed `Decision`s, group by `Pattern` via `acrossDecision`, propose tentative `Lesson`s on a branch:
+**Prompt** (shape):
+> Scan recent `Decision`s + active `Pattern`s. For any Pattern with ≥3 supporting Decisions and consistent outcome (all-pass / all-invest / all-write-off / all-double-down), propose a tentative `Lesson` on `tentative/lesson-<slug>-<quarter>`. Cite the Pattern via `distilledFromPattern`. End with a digest of what landed.
 
-```bash
-omnigraph read --alias decisions-recent
-omnigraph read --alias patterns
-# For each Pattern with ≥3 acrossDecision edges + consistent outcome:
-omnigraph branch create tentative/lesson-<slug>-2026-q2
-omnigraph change --branch … --alias add-lesson lsn-<slug> "<title>" rule-of-thumb "<body>" tentative …
-omnigraph change --alias link-lesson-distilled-from lsn-<slug> pat-<slug>
-```
+**External input:** None.
 
-Partner reviews via `branch diff`; merges into `main` to promote `status=tentative → active`, or deletes the branch.
+**Pulls (example):**
+- `decisions-recent` → 6 Decisions in the active set (`dec-pulserate-pass`, `dec-stratopaint-pass`, `dec-vector-forge-pass`, `dec-aetherbrick-follow-on-eval`, `dec-axon-ic-recommend-invest`, `dec-onprem-thesis-doubledown`)
+- `patterns` + `pattern-decisions pat-vertical-shell-flop` → 3 Decisions (all passes — consistent outcome)
+- `lessons-active` → existing Lessons (avoid duplicating `lsn-shell-anti-pattern` which already documents this)
 
-**Why graph:** `Lesson.status=tentative` + branch-based promote replaces the markdown buffer / promote loop with a single primitive. Pattern aggregation across Decisions is the schema's reason for splitting `Pattern` from `Insight`.
+**Writes (example, only if a new pattern is found — in the seed this sweep would not produce a new Lesson, which is the right answer):**
+- `omnigraph branch create tentative/lesson-<slug>-2026-q2`
+- `add-lesson lsn-<slug> "<title>" rule-of-thumb "<body>" tentative …`
+- `link-lesson-distilled-from lsn-<slug> pat-<slug>`
+- `link-lesson-applies-to-market lsn-<slug> mkt-<slug>` (if scoped to a sector)
+
+**Why graph:** `Lesson.status=tentative` + branch-based promote replaces the markdown buffer / promote loop with one primitive. `Pattern.acrossDecision` aggregation is what makes "this shape recurred 3 times" a deterministic query, not a vibes call.
 
 ## v1 scope
 
