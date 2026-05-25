@@ -694,3 +694,76 @@
 {"edge":"PatternAcrossDecision","from":"pat-on-prem-shift","to":"dec-helix-second-meeting","data":{}}
 {"edge":"PatternAcrossDecision","from":"pat-on-prem-shift","to":"dec-onprem-thesis-doubledown","data":{}}
 {"edge":"PatternAcrossDecision","from":"pat-vertical-shell-flop","to":"dec-pulserate-pass","data":{}}
+
+{"type":"Meeting","data":{"id":"mtg-helix-founder-call-2026-04","slug":"mtg-helix-founder-call-2026-04","name":"Helix Runtime — first founder call","kind":"founder-call","scheduled_at":"2026-04-12T14:00:00Z","duration_min":60,"status":"occurred","location":"Google Meet","summary":"First founder call with Elena and Yuki. Validated on-prem mandate; surfaced the AWS Bedrock margin concern as the open question to chase. Three customer reference calls agreed as next step.","createdAt":"2026-04-12T15:00:00Z","updatedAt":"2026-04-12T15:00:00Z"}}
+{"type":"Meeting","data":{"id":"mtg-helix-ic-2026-06","slug":"mtg-helix-ic-2026-06","name":"Helix Runtime — IC","kind":"ic","scheduled_at":"2026-06-20T15:00:00Z","duration_min":75,"status":"scheduled","location":"Berlin HQ + Zoom","summary":"Series A IC for Helix Runtime. Pawel leading. Customer refs and AWS Bedrock margin teardown required pre-meeting.","createdAt":"2026-05-20T10:00:00Z","updatedAt":"2026-05-20T10:00:00Z"}}
+{"type":"Meeting","data":{"id":"mtg-aetherbrick-board-q1-2026","slug":"mtg-aetherbrick-board-q1-2026","name":"Aetherbrick — Q1 2026 board","kind":"board","scheduled_at":"2026-04-08T15:00:00Z","duration_min":90,"status":"occurred","location":"Berlin HQ","summary":"Q1 board. Churn spike in top-30 cohort flagged. Series B talk surfaced. Board prep doc committed for Q2 board.","createdAt":"2026-04-08T17:00:00Z","updatedAt":"2026-04-08T17:00:00Z"}}
+{"type":"Meeting","data":{"id":"mtg-aetherbrick-board-q2-2026","slug":"mtg-aetherbrick-board-q2-2026","name":"Aetherbrick — Q2 2026 board","kind":"board","scheduled_at":"2026-07-09T15:00:00Z","duration_min":90,"status":"scheduled","location":"Berlin HQ","summary":"Next board. Churn cohort follow-up + Series B framework decision expected.","createdAt":"2026-05-15T10:00:00Z","updatedAt":"2026-05-15T10:00:00Z"}}
+{"type":"Meeting","data":{"id":"mtg-axon-ic-2026-05","slug":"mtg-axon-ic-2026-05","name":"Axon Eval — IC","kind":"ic","scheduled_at":"2026-05-12T14:00:00Z","duration_min":75,"status":"occurred","location":"Berlin HQ + Zoom","summary":"Seed IC for Axon Eval. Recommended invest; one final enterprise reference call required before close.","createdAt":"2026-05-12T16:00:00Z","updatedAt":"2026-05-12T16:00:00Z"}}
+{"type":"Meeting","data":{"id":"mtg-axon-final-ref-2026-06","slug":"mtg-axon-final-ref-2026-06","name":"Axon Eval — final enterprise reference","kind":"expert-call","scheduled_at":"2026-06-09T15:00:00Z","duration_min":45,"status":"scheduled","summary":"Final enterprise reference call before Axon close.","createdAt":"2026-05-13T10:00:00Z","updatedAt":"2026-05-13T10:00:00Z"}}
+{"type":"Meeting","data":{"id":"mtg-partner-onprem-thesis-2026-04","slug":"mtg-partner-onprem-thesis-2026-04","name":"Partner offsite — on-prem-inference thesis review","kind":"internal","scheduled_at":"2026-04-20T16:00:00Z","duration_min":60,"status":"occurred","location":"Berlin HQ","summary":"Partner review of on-prem-inference thesis. EU AI Act fine + AWS Bedrock launch both validate. Decided to double down on scouting capacity for this thesis.","createdAt":"2026-04-20T17:00:00Z","updatedAt":"2026-04-20T17:00:00Z"}}
+{"type":"Meeting","data":{"id":"mtg-weekly-pipeline-2026-05-13","slug":"mtg-weekly-pipeline-2026-05-13","name":"Weekly pipeline meeting — 2026-05-13","kind":"pipeline-review","scheduled_at":"2026-05-13T10:00:00Z","duration_min":60,"status":"occurred","location":"Berlin HQ + Zoom","summary":"Weekly pipeline. Helix IC scheduled. Axon close on track pending reference. Two new pipeline orgs surfaced via Pawel.","createdAt":"2026-05-13T11:00:00Z","updatedAt":"2026-05-13T11:00:00Z"}}
+
+{"edge":"MeetingAboutDeal","from":"mtg-helix-founder-call-2026-04","to":"deal-helix-series-a","data":{}}
+{"edge":"MeetingAboutDeal","from":"mtg-helix-ic-2026-06","to":"deal-helix-series-a","data":{}}
+{"edge":"MeetingAboutDeal","from":"mtg-axon-ic-2026-05","to":"deal-axon-seed","data":{}}
+{"edge":"MeetingAboutDeal","from":"mtg-axon-final-ref-2026-06","to":"deal-axon-seed","data":{}}
+
+{"edge":"MeetingAboutOrganization","from":"mtg-helix-founder-call-2026-04","to":"org-helix-runtime","data":{}}
+{"edge":"MeetingAboutOrganization","from":"mtg-helix-ic-2026-06","to":"org-helix-runtime","data":{}}
+{"edge":"MeetingAboutOrganization","from":"mtg-aetherbrick-board-q1-2026","to":"org-aetherbrick","data":{}}
+{"edge":"MeetingAboutOrganization","from":"mtg-aetherbrick-board-q2-2026","to":"org-aetherbrick","data":{}}
+{"edge":"MeetingAboutOrganization","from":"mtg-axon-ic-2026-05","to":"org-axon-eval","data":{}}
+{"edge":"MeetingAboutOrganization","from":"mtg-axon-final-ref-2026-06","to":"org-axon-eval","data":{}}
+
+{"edge":"MeetingAboutThesis","from":"mtg-partner-onprem-thesis-2026-04","to":"thesis-on-prem-inference","data":{}}
+
+{"edge":"MeetingAttendedBy","from":"mtg-helix-founder-call-2026-04","to":"per-pawel","data":{"role":"host"}}
+{"edge":"MeetingAttendedBy","from":"mtg-helix-founder-call-2026-04","to":"per-helix-elena","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-helix-founder-call-2026-04","to":"per-helix-yuki","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-helix-ic-2026-06","to":"per-cj","data":{"role":"host"}}
+{"edge":"MeetingAttendedBy","from":"mtg-helix-ic-2026-06","to":"per-pawel","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-helix-ic-2026-06","to":"per-flo","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-helix-ic-2026-06","to":"per-ricardo","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-helix-ic-2026-06","to":"per-louis","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-helix-ic-2026-06","to":"per-vp-tegan","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-aetherbrick-board-q1-2026","to":"per-cj","data":{"role":"host"}}
+{"edge":"MeetingAttendedBy","from":"mtg-aetherbrick-board-q1-2026","to":"per-aetherbrick-jens","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-aetherbrick-board-q2-2026","to":"per-cj","data":{"role":"host"}}
+{"edge":"MeetingAttendedBy","from":"mtg-aetherbrick-board-q2-2026","to":"per-aetherbrick-jens","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-axon-ic-2026-05","to":"per-flo","data":{"role":"host"}}
+{"edge":"MeetingAttendedBy","from":"mtg-axon-ic-2026-05","to":"per-cj","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-axon-ic-2026-05","to":"per-pawel","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-axon-ic-2026-05","to":"per-ricardo","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-axon-ic-2026-05","to":"per-louis","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-axon-final-ref-2026-06","to":"per-flo","data":{"role":"host"}}
+{"edge":"MeetingAttendedBy","from":"mtg-axon-final-ref-2026-06","to":"per-vp-noah","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-partner-onprem-thesis-2026-04","to":"per-cj","data":{"role":"host"}}
+{"edge":"MeetingAttendedBy","from":"mtg-partner-onprem-thesis-2026-04","to":"per-pawel","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-partner-onprem-thesis-2026-04","to":"per-flo","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-partner-onprem-thesis-2026-04","to":"per-ricardo","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-partner-onprem-thesis-2026-04","to":"per-louis","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-weekly-pipeline-2026-05-13","to":"per-cj","data":{"role":"host"}}
+{"edge":"MeetingAttendedBy","from":"mtg-weekly-pipeline-2026-05-13","to":"per-pawel","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-weekly-pipeline-2026-05-13","to":"per-flo","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-weekly-pipeline-2026-05-13","to":"per-ricardo","data":{"role":"attendee"}}
+{"edge":"MeetingAttendedBy","from":"mtg-weekly-pipeline-2026-05-13","to":"per-louis","data":{"role":"attendee"}}
+
+{"edge":"ArtifactFromMeeting","from":"art-helix-founder-call-2026-04","to":"mtg-helix-founder-call-2026-04","data":{}}
+{"edge":"ArtifactFromMeeting","from":"art-aetherbrick-board-q1","to":"mtg-aetherbrick-board-q1-2026","data":{}}
+
+{"edge":"DecisionFromMeeting","from":"dec-helix-second-meeting","to":"mtg-helix-founder-call-2026-04","data":{}}
+{"edge":"DecisionFromMeeting","from":"dec-axon-ic-recommend-invest","to":"mtg-axon-ic-2026-05","data":{}}
+{"edge":"DecisionFromMeeting","from":"dec-onprem-thesis-doubledown","to":"mtg-partner-onprem-thesis-2026-04","data":{}}
+
+{"edge":"CommitmentFromMeeting","from":"cmt-helix-customer-refs","to":"mtg-helix-founder-call-2026-04","data":{}}
+{"edge":"CommitmentFromMeeting","from":"cmt-aetherbrick-board-prep","to":"mtg-aetherbrick-board-q1-2026","data":{}}
+{"edge":"CommitmentFromMeeting","from":"cmt-axon-final-check","to":"mtg-axon-ic-2026-05","data":{}}
+
+{"type":"Artifact","data":{"id":"art-md-thesis-on-prem-inference","slug":"art-md-thesis-on-prem-inference","name":"Wiki: On-prem inference for regulated industries","kind":"markdown","source":"github","repo":"quito-vc/wiki","path":"wiki/theses/on-prem-inference.md","branch":"main","commit_sha":"7a3c1b9f4e2d5a6b8c9d0e1f2a3b4c5d6e7f8a9b","url":"https://github.com/quito-vc/wiki/blob/7a3c1b9f4e2d5a6b8c9d0e1f2a3b4c5d6e7f8a9b/wiki/theses/on-prem-inference.md","body":"# On-prem inference for regulated industries\n\n**Status:** active · **Confidence:** high · **Formed:** 2025-01-10\n\n## Why we believe this\n\nRegulatory pressure (EU AI Act, DORA) and unit economics (H100 amortization, data egress) push inference off public cloud for fintech, healthcare, and defense. The bet: there's a category of inference-orchestration platforms that win by being the *trusted on-prem layer* — neither the model vendor nor the hyperscaler.\n\n## Underlying assumptions\n\n1. Data sovereignty mandates force on-prem (high confidence)\n2. On-prem inference reaches cost parity by end of 2026 (medium)\n3. Helix in particular can maintain 60%+ margin (medium — under review post-AWS-Bedrock)\n\n## Disqualifying signals\n\n- Hyperscalers ship on-prem appliances that close the cost+latency gap (AWS Bedrock March 2026; under review)\n- Open-source on-prem stacks (vLLM + similar) commoditize the orchestration layer\n\n## Active bets\n\n- Pinion Infer (portfolio) — Series A\n- Helix Runtime (in-diligence) — Series A target close July 2026","date":"2025-01-10","captured_at":"2025-01-10T10:00:00Z","last_synced_at":"2026-05-20T08:00:00Z","createdAt":"2025-01-10T10:00:00Z","updatedAt":"2026-05-20T08:00:00Z"}}
+{"type":"Artifact","data":{"id":"art-md-lesson-onprem-validation","slug":"art-md-lesson-onprem-validation","name":"Wiki: On-prem demand validation protocol","kind":"markdown","source":"github","repo":"quito-vc/wiki","path":"wiki/learnings/onprem-validation-protocol.md","branch":"main","commit_sha":"3f4e5d6c7b8a9012345678abcdef9876543210fe","url":"https://github.com/quito-vc/wiki/blob/3f4e5d6c7b8a9012345678abcdef9876543210fe/wiki/learnings/onprem-validation-protocol.md","body":"# On-prem demand validation protocol\n\n**Status:** active · **Confidence:** high · **Kind:** protocol\n\nBefore underwriting any on-prem-inference deal, complete:\n\n1. **One CIO call at a regulated-industry target customer.** Not VP Eng — CIO. Question: is on-prem mandated by *internal policy* or just *current preference*?\n2. **One ex-hyperscaler infra eng call.** Question: how long until {AWS/Azure/GCP} ships a competitive on-prem SKU for this workload?\n3. **One reference call with a current paying customer.** Question: would you switch to a hyperscaler appliance if priced 30% below?\n\n**Why this rule exists:** post-Vector Forge, we recognized that vendor-claimed mandates often turn out to be vendor-claimed *preferences* that fold under price pressure. This protocol forces three independent data points before conviction.\n\n**When to skip:** never. Even on second-time founders.","date":"2026-02-01","captured_at":"2026-02-01T10:00:00Z","last_synced_at":"2026-05-15T08:00:00Z","createdAt":"2026-02-01T10:00:00Z","updatedAt":"2026-05-15T08:00:00Z"}}
+{"type":"Artifact","data":{"id":"art-md-pattern-on-prem-shift","slug":"art-md-pattern-on-prem-shift","name":"Wiki: On-prem inference shift pattern","kind":"markdown","source":"github","repo":"quito-vc/wiki","path":"wiki/patterns/on-prem-shift.md","branch":"main","commit_sha":"a1b2c3d4e5f67890123456789abcdef012345678","url":"https://github.com/quito-vc/wiki/blob/a1b2c3d4e5f67890123456789abcdef012345678/wiki/patterns/on-prem-shift.md","body":"# On-prem inference shift\n\n**Kind:** market-timing · **Confidence:** high\n\nRegulated industries are pushing inference off public cloud — recurring shape across fintech (EU DORA), healthcare (HIPAA + state-level data residency), and EU public sector (AI Act Art. 22). Capital flowing toward on-prem orchestration startups (Pinion, Helix) and away from pure cloud-vendor solutions.\n\nFirst observed: 2024-Q4 with the first European bank we tracked turning down a Bedrock pilot for a Pinion POC.\n\nNow observed across:\n- Helix Runtime — Series A — on-prem inference platform for regulated industries\n- Pinion Infer — Series A — inference orchestration across on-prem and cloud\n- And tangentially: data-sovereignty signals around mkt-ai-infra and mkt-security\n\n**Promoted to active thesis** (thesis-on-prem-inference, 2025-01-10).\n**Driven decisions:** dec-helix-second-meeting, dec-onprem-thesis-doubledown.","date":"2024-11-01","captured_at":"2024-11-01T10:00:00Z","last_synced_at":"2026-04-20T08:00:00Z","createdAt":"2024-11-01T10:00:00Z","updatedAt":"2026-04-20T08:00:00Z"}}
+
+{"edge":"ArtifactDocumentsThesis","from":"art-md-thesis-on-prem-inference","to":"thesis-on-prem-inference","data":{}}
+{"edge":"ArtifactDocumentsLesson","from":"art-md-lesson-onprem-validation","to":"lsn-onprem-validation-protocol","data":{}}
+{"edge":"ArtifactDocumentsPattern","from":"art-md-pattern-on-prem-shift","to":"pat-on-prem-shift","data":{}}

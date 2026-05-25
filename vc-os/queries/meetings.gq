@@ -1,0 +1,255 @@
+// Meeting-centric reads. Meetings are the operational primitive — what the firm
+// did with its time. The transcript/notes live as Artifact{kind=transcript|meeting-note}
+// linked via ArtifactFromMeeting; the Meeting itself binds attendees, subject,
+// and outcomes (Decisions, Commitments) around the event.
+
+// ──────────────────────────────────────────────
+// Basic reads
+// ──────────────────────────────────────────────
+
+query get_meeting($slug: String) {
+    match {
+        $m: Meeting { slug: $slug }
+    }
+    return { $m.slug, $m.name, $m.kind, $m.scheduled_at, $m.duration_min, $m.status, $m.location, $m.summary }
+}
+
+query meetings_recent() {
+    match {
+        $m: Meeting
+        $m.status = "occurred"
+    }
+    return { $m.slug, $m.name, $m.kind, $m.scheduled_at, $m.summary }
+    order { $m.scheduled_at desc }
+}
+
+query meetings_upcoming() {
+    match {
+        $m: Meeting { status: "scheduled" }
+    }
+    return { $m.slug, $m.name, $m.kind, $m.scheduled_at, $m.location, $m.summary }
+    order { $m.scheduled_at asc }
+}
+
+query meetings_by_kind($kind: String) {
+    match {
+        $m: Meeting { kind: $kind }
+    }
+    return { $m.slug, $m.name, $m.scheduled_at, $m.status, $m.summary }
+    order { $m.scheduled_at desc }
+}
+
+query meetings_by_status($status: String) {
+    match {
+        $m: Meeting { status: $status }
+    }
+    return { $m.slug, $m.name, $m.kind, $m.scheduled_at, $m.summary }
+    order { $m.scheduled_at desc }
+}
+
+query search_meetings($q: String) {
+    match {
+        $m: Meeting
+        search($m.name, $q)
+    }
+    return { $m.slug, $m.name, $m.kind, $m.scheduled_at, $m.status, $m.summary }
+}
+
+
+// ──────────────────────────────────────────────
+// Meeting subject (what it was about)
+// ──────────────────────────────────────────────
+
+query meeting_deal($slug: String) {
+    match {
+        $m: Meeting { slug: $slug }
+        $m meetingAboutDeal $d
+    }
+    return { $d.slug, $d.name, $d.stage, $d.outcome, $d.brief }
+}
+
+query meeting_organization($slug: String) {
+    match {
+        $m: Meeting { slug: $slug }
+        $m meetingAboutOrganization $c
+    }
+    return { $c.slug, $c.name, $c.kind, $c.status, $c.brief }
+}
+
+query meeting_thesis($slug: String) {
+    match {
+        $m: Meeting { slug: $slug }
+        $m meetingAboutThesis $t
+    }
+    return { $t.slug, $t.name, $t.status, $t.brief }
+}
+
+query meeting_market($slug: String) {
+    match {
+        $m: Meeting { slug: $slug }
+        $m meetingAboutMarket $mk
+    }
+    return { $mk.slug, $mk.name, $mk.brief }
+}
+
+
+// ──────────────────────────────────────────────
+// Attendance
+// ──────────────────────────────────────────────
+
+query meeting_attendees($slug: String) {
+    match {
+        $m: Meeting { slug: $slug }
+        $m meetingAttendedBy $p
+    }
+    return { $p.slug, $p.name, $p.email, $p.location }
+    order { $p.name }
+}
+
+query meetings_attended_by($slug: String) {
+    match {
+        $p: Person { slug: $slug }
+        $m meetingAttendedBy $p
+    }
+    return { $m.slug, $m.name, $m.kind, $m.scheduled_at, $m.status }
+    order { $m.scheduled_at desc }
+}
+
+
+// ──────────────────────────────────────────────
+// Outputs (what came out of the meeting)
+// ──────────────────────────────────────────────
+
+query meeting_artifacts($slug: String) {
+    match {
+        $m: Meeting { slug: $slug }
+        $a artifactFromMeeting $m
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.date }
+    order { $a.date desc }
+}
+
+query meeting_decisions($slug: String) {
+    match {
+        $m: Meeting { slug: $slug }
+        $dec decisionFromMeeting $m
+    }
+    return { $dec.slug, $dec.name, $dec.kind, $dec.decided_at, $dec.rationale }
+    order { $dec.decided_at desc }
+}
+
+query meeting_commitments($slug: String) {
+    match {
+        $m: Meeting { slug: $slug }
+        $cmt commitmentFromMeeting $m
+    }
+    return { $cmt.slug, $cmt.name, $cmt.status, $cmt.priority, $cmt.due_date, $cmt.detail }
+    order { $cmt.due_date asc }
+}
+
+
+// ──────────────────────────────────────────────
+// Killer queries — meetings ↔ deals/orgs (operational JTBDs)
+// ──────────────────────────────────────────────
+
+// All meetings explicitly tagged to this organization (direct subject only;
+// for deal-mediated meetings use `meetings_via_deal_for_organization`).
+query meetings_with_organization($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $m meetingAboutOrganization $c
+    }
+    return { $m.slug, $m.name, $m.kind, $m.scheduled_at, $m.status, $m.summary }
+    order { $m.scheduled_at desc }
+}
+
+// All meetings about deals attached to this organization. Pair with
+// `meetings_with_organization` for the full meeting history.
+query meetings_via_deal_for_organization($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $d forOrganization $c
+        $m meetingAboutDeal $d
+    }
+    return { $m.slug, $m.name, $m.kind, $m.scheduled_at, $m.status, $d.slug, $d.name }
+    order { $m.scheduled_at desc }
+}
+
+query meetings_with_deal($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $m meetingAboutDeal $d
+    }
+    return { $m.slug, $m.name, $m.kind, $m.scheduled_at, $m.status, $m.summary }
+    order { $m.scheduled_at desc }
+}
+
+query meetings_with_thesis($slug: String) {
+    match {
+        $t: Thesis { slug: $slug }
+        $m meetingAboutThesis $t
+    }
+    return { $m.slug, $m.name, $m.kind, $m.scheduled_at, $m.status, $m.summary }
+    order { $m.scheduled_at desc }
+}
+
+
+// ──────────────────────────────────────────────
+// Board prep — JTBD: "what's changed since the last board?"
+// ──────────────────────────────────────────────
+
+// All occurred board meetings for an organization, time-sorted (most recent first).
+// Agent or UI takes the head row as "last board meeting."
+query board_meetings_for_organization($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $m meetingAboutOrganization $c
+        $m.kind = "board"
+        $m.status = "occurred"
+    }
+    return { $m.slug, $m.name, $m.scheduled_at, $m.summary }
+    order { $m.scheduled_at desc }
+}
+
+// All scheduled (not yet occurred) board meetings for an organization.
+// Head row is the next board.
+query upcoming_board_meetings_for_organization($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $m meetingAboutOrganization $c
+        $m.kind = "board"
+        $m.status = "scheduled"
+    }
+    return { $m.slug, $m.name, $m.scheduled_at, $m.location, $m.summary }
+    order { $m.scheduled_at asc }
+}
+
+
+// ──────────────────────────────────────────────
+// IC prep — JTBD: "bring me up to speed on this deal before IC"
+// ──────────────────────────────────────────────
+
+// All occurred meetings for a deal, with kind + summary. Use as the
+// "what we've discussed so far" panel in pre-IC briefs.
+query ic_prep_meeting_history($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $m meetingAboutDeal $d
+        $m.status = "occurred"
+    }
+    return { $m.slug, $m.name, $m.kind, $m.scheduled_at, $m.summary }
+    order { $m.scheduled_at desc }
+}
+
+// Open commitments tied to meetings about this deal — "what's still owed
+// before we IC."
+query ic_prep_open_commitments($slug: String) {
+    match {
+        $d: Deal { slug: $slug }
+        $m meetingAboutDeal $d
+        $cmt commitmentFromMeeting $m
+        $cmt.status = "open"
+    }
+    return { $cmt.slug, $cmt.name, $cmt.priority, $cmt.due_date, $cmt.detail }
+    order { $cmt.due_date asc }
+}

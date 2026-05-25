@@ -1,14 +1,14 @@
 // VC OS — Venture-capital operating system schema, built on Omnigraph.
 //
 // Models the seven jobs a VC does (Find / Evaluate / Decide / Win / Help / Monitor / Learn).
-// Organized as 6 core nodes (stable for years) + 11 growth-ring nodes (analytical layer
+// Organized as 7 core nodes (stable for years) + 11 growth-ring nodes (analytical layer
 // that compounds). See README.md for the design rationale.
 //
-//   Core (6):           Organization · Person · Deal · Fund · Market · Artifact
+//   Core (7):           Organization · Person · Deal · Fund · Market · Artifact · Meeting
 //   Growth ring (11):   Thesis · Assumption · Question · Signal · Insight · Decision ·
 //                       Commitment · Pattern · Lesson · Chunk · SourceEntity
 //
-// 17 node types, ~50 edge types. Slug-keyed, flat-enum, no interfaces.
+// 18 node types, ~63 edge types. Slug-keyed, flat-enum, no interfaces.
 
 
 // ═══════════════════════════════════════════════════════════════════
@@ -152,25 +152,84 @@ node Market {
 }
 
 
-// Artifact — raw source content with native Blob support. Granola transcripts,
-// pitch decks (PDF), emails, screenshots, Slack messages, web pages. The
-// `derivedFromArtifact` chain preserves provenance through transforms
+// Artifact — raw source content with three storage modes:
+//
+//   1. Inline text   — `body` populated (small text, transcripts, derived summaries)
+//   2. Native binary — `blob` populated (decks, audio, images, screenshots, PDFs)
+//   3. External live — `url` populated, content may drift (web pages, gmail messages)
+//   4. Pinned git    — `source=github` + `repo + path + commit_sha + branch + last_synced_at`
+//                       (partner-curated markdown that lives in a wiki repo;
+//                        `body` caches the text at `commit_sha`)
+//
+// The `derivedFromArtifact` chain preserves provenance through transforms
 // (audio → transcript → summary → memo).
+//
+// For the git-pinned mode (typically `kind=markdown, source=github`), the
+// design intent is:
+//   • The Artifact is the *current* pointer to a logical document
+//   • `commit_sha + last_synced_at` records last-known-good state
+//   • `body` is cached text at that commit (so queries don't network out)
+//   • Historical "what did the doc say on date X" goes through git history
+//     at the commit_sha captured by a graph branch snapshot of that date
+//   • Updates happen in place by an importer (cron or webhook); ArtifactDerivedFrom
+//     is reserved for content-transform lineage (transcript → summary), not
+//     for tracking every wiki edit.
 node Artifact {
     slug: String @key
     name: String @index
     kind: enum(email, ticket, slack-msg, meeting-note, transcript, deck,
-               web-page, screenshot, doc, audio, image, summary) @index
+               web-page, screenshot, doc, audio, image, summary, markdown) @index
     source: enum(gmail, slack, granola, web, manual, lemlist, sapien, zendesk,
-                 notion, derived, other) @index
+                 notion, derived, github, other) @index
     title: String?
     body: String?
     blob: Blob?
     mime_type: String?
     url: String?
+    // Git-pinned reference fields. Populated when the Artifact represents a
+    // version-controlled document (typically markdown in a wiki repo).
+    // `repo`/`path`/`branch` are the live pointer; `commit_sha`/`last_synced_at`
+    // pin the state captured in `body`/`url`. Branch-based audit looks up the
+    // commit_sha captured in the snapshot, then walks git history to that sha.
+    repo: String? @index
+    path: String?
+    commit_sha: String?
+    branch: String?
+    last_synced_at: DateTime?
     thread_id: String? @index
     date: Date @index
     captured_at: DateTime
+    createdAt: DateTime
+    updatedAt: DateTime
+}
+
+
+// Meeting — a scheduled (or ad-hoc) event with structure that Artifact alone
+// can't carry: time, attendees, subject (deal/org/thesis), and outputs
+// (transcript, decisions, commitments). The transcript itself is an
+// `Artifact{kind=transcript|meeting-note}` linked via `ArtifactFromMeeting`;
+// the Meeting is what binds attendees, agenda, and outcomes around it.
+//
+// JTBDs served (see README "Operational loops"):
+//   • IC brief — what's been said in prior meetings about this deal
+//   • Board prep — what was committed at the last board, due before the next
+//   • Founder/expert call history with a Person or Organization
+//   • Handoff — "what did Pawel discuss with Yuki?"
+//
+// `kind=external-other` is the escape hatch for meetings that don't fit the
+// canonical VC cadences (dinners, conferences, ad-hoc 1:1s).
+node Meeting {
+    slug: String @key
+    name: String @index
+    kind: enum(ic, board, partner-1on1, pipeline-review, portfolio-1on1,
+               lp-update, founder-call, dd-call, expert-call, internal,
+               external-other) @index
+    scheduled_at: DateTime @index
+    duration_min: I32?
+    status: enum(scheduled, occurred, cancelled, rescheduled) @index
+    location: String?
+    summary: String?
+    tags: [String]?
     createdAt: DateTime
     updatedAt: DateTime
 }
@@ -497,6 +556,16 @@ edge ArtifactDerivedFrom: Artifact -> Artifact {
                    translated)?
 }
 
+// Documents-edges: a curated belief node (Thesis/Lesson/Pattern) is *backed*
+// by a markdown artifact in the wiki repo. The structured node owns the
+// relational shape (status, confidence, edges); the markdown owns the prose.
+// Typically the linked Artifact has `kind=markdown, source=github` and the
+// git-pinned fields populated. One-to-one is expected but not enforced —
+// multiple drafts/revisions are possible during edit cycles.
+edge ArtifactDocumentsThesis: Artifact -> Thesis
+edge ArtifactDocumentsLesson: Artifact -> Lesson
+edge ArtifactDocumentsPattern: Artifact -> Pattern
+
 // Chunk for hybrid search
 edge ChunkOfArtifact: Chunk -> Artifact
 
@@ -522,3 +591,30 @@ edge PatternAcrossSignal: Pattern -> Signal
 edge PatternAcrossOrganization: Pattern -> Organization
 edge LessonDistilledFromPattern: Lesson -> Pattern
 edge LessonAppliesToMarket: Lesson -> Market
+
+
+// ═══════════════════════════════════════════════════════════════════
+// EDGES — Meetings (operational layer)
+// ═══════════════════════════════════════════════════════════════════
+//
+// Meeting subject: what the meeting was about. A meeting can be about
+// multiple subjects (e.g. a partner 1:1 that discussed 3 deals); load all.
+edge MeetingAboutDeal: Meeting -> Deal
+edge MeetingAboutOrganization: Meeting -> Organization
+edge MeetingAboutThesis: Meeting -> Thesis
+edge MeetingAboutMarket: Meeting -> Market
+
+// Meeting attendance. The `role` discriminates host/attendee/optional/declined
+// so the same edge type covers invites and acceptances. Note: edge-property
+// projection isn't supported in 0.4.x reads (see CLAUDE.md "Known gaps") —
+// filter by role at write time and surface via dedicated read-side helpers.
+edge MeetingAttendedBy: Meeting -> Person {
+    role: enum(host, attendee, optional, declined)?
+}
+
+// Meeting outputs. Direction follows existing convention (the dependent
+// entity points back to the source), matching `ArtifactFromPerson`,
+// `CommitmentFromArtifact`, `SignalSourcedFromArtifact`.
+edge ArtifactFromMeeting: Artifact -> Meeting
+edge DecisionFromMeeting: Decision -> Meeting
+edge CommitmentFromMeeting: Commitment -> Meeting

@@ -1,0 +1,147 @@
+// Wiki / markdown reads. The graph holds the *relational* shape of belief
+// (Thesis status, Lesson confidence, Pattern membership); markdown in a
+// partner-curated git repo holds the *prose*. Both link via Artifact:
+//   Artifact{kind=markdown, source=github, repo, path, commit_sha, branch, last_synced_at, body}
+// connected to the belief node by ArtifactDocuments{Thesis,Lesson,Pattern}.
+
+// ──────────────────────────────────────────────
+// Basic reads — markdown artifacts as first-class
+// ──────────────────────────────────────────────
+
+query get_markdown_artifact($slug: String) {
+    match {
+        $a: Artifact { slug: $slug }
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.repo, $a.path, $a.branch, $a.commit_sha, $a.url, $a.last_synced_at, $a.body }
+}
+
+// All github-stored artifacts, most-recently-synced first. Source-based filter
+// (post-v0.5.0 enum extension via wipe+reload migration).
+query markdown_artifacts_recent() {
+    match {
+        $a: Artifact { source: "github" }
+    }
+    return { $a.slug, $a.name, $a.kind, $a.repo, $a.path, $a.branch, $a.commit_sha, $a.last_synced_at }
+    order { $a.last_synced_at desc }
+}
+
+// All github-stored artifacts in a specific repo (so a fund can run multiple wikis).
+query markdown_artifacts_in_repo($repo: String) {
+    match {
+        $a: Artifact { source: "github", repo: $repo }
+    }
+    return { $a.slug, $a.name, $a.kind, $a.path, $a.branch, $a.commit_sha, $a.last_synced_at }
+    order { $a.path }
+}
+
+// Markdown artifacts specifically — filters out other future github-sourced kinds.
+query markdown_artifacts_only() {
+    match {
+        $a: Artifact { kind: "markdown", source: "github" }
+    }
+    return { $a.slug, $a.name, $a.repo, $a.path, $a.branch, $a.commit_sha, $a.last_synced_at }
+    order { $a.last_synced_at desc }
+}
+
+
+// ──────────────────────────────────────────────
+// Belief ↔ wiki bridges (forward: from belief node to its doc)
+// ──────────────────────────────────────────────
+
+query thesis_doc($slug: String) {
+    match {
+        $t: Thesis { slug: $slug }
+        $a artifactDocumentsThesis $t
+    }
+    return { $a.slug, $a.name, $a.repo, $a.path, $a.branch, $a.commit_sha, $a.url, $a.last_synced_at, $a.body }
+}
+
+query lesson_doc($slug: String) {
+    match {
+        $l: Lesson { slug: $slug }
+        $a artifactDocumentsLesson $l
+    }
+    return { $a.slug, $a.name, $a.repo, $a.path, $a.branch, $a.commit_sha, $a.url, $a.last_synced_at, $a.body }
+}
+
+query pattern_doc($slug: String) {
+    match {
+        $p: Pattern { slug: $slug }
+        $a artifactDocumentsPattern $p
+    }
+    return { $a.slug, $a.name, $a.repo, $a.path, $a.branch, $a.commit_sha, $a.url, $a.last_synced_at, $a.body }
+}
+
+
+// ──────────────────────────────────────────────
+// Reverse bridges (from a doc to what it documents)
+// ──────────────────────────────────────────────
+
+query markdown_documents_thesis($slug: String) {
+    match {
+        $a: Artifact { slug: $slug }
+        $a artifactDocumentsThesis $t
+    }
+    return { $t.slug, $t.name, $t.status, $t.confidence }
+}
+
+query markdown_documents_lesson($slug: String) {
+    match {
+        $a: Artifact { slug: $slug }
+        $a artifactDocumentsLesson $l
+    }
+    return { $l.slug, $l.name, $l.status, $l.confidence, $l.kind }
+}
+
+query markdown_documents_pattern($slug: String) {
+    match {
+        $a: Artifact { slug: $slug }
+        $a artifactDocumentsPattern $p
+    }
+    return { $p.slug, $p.name, $p.confidence, $p.kind }
+}
+
+
+// ──────────────────────────────────────────────
+// Coverage queries — feed the wiki-drift JTBD
+// ──────────────────────────────────────────────
+//
+// Omnigraph 0.4 doesn't support NOT-EXISTS / anti-joins, so the "which theses
+// lack a doc?" question is answered by *set diff* on the caller side:
+// diff `theses_active_for_doc_review` (everything) against
+// `theses_with_docs` (the subset that has a wiki page) — the difference is
+// the drift set. Same pattern for lessons.
+
+query theses_active_for_doc_review() {
+    match {
+        $t: Thesis { status: "active" }
+    }
+    return { $t.slug, $t.name, $t.confidence }
+    order { $t.name }
+}
+
+query theses_with_docs() {
+    match {
+        $t: Thesis { status: "active" }
+        $a artifactDocumentsThesis $t
+    }
+    return { $t.slug, $t.name, $a.slug, $a.path, $a.last_synced_at }
+    order { $t.name }
+}
+
+query lessons_active_for_doc_review() {
+    match {
+        $l: Lesson { status: "active" }
+    }
+    return { $l.slug, $l.name, $l.kind, $l.confidence }
+    order { $l.name }
+}
+
+query lessons_with_docs() {
+    match {
+        $l: Lesson { status: "active" }
+        $a artifactDocumentsLesson $l
+    }
+    return { $l.slug, $l.name, $a.slug, $a.path, $a.last_synced_at }
+    order { $l.name }
+}

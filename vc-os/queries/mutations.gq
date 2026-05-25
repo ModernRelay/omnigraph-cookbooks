@@ -32,6 +32,27 @@ query add_artifact($slug: String, $name: String, $kind: String, $source: String,
     insert Artifact { slug: $slug, name: $name, kind: $kind, source: $source, date: $date, captured_at: $captured_at, createdAt: $createdAt, updatedAt: $updatedAt }
 }
 
+query add_meeting($slug: String, $name: String, $kind: String, $scheduled_at: DateTime, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Meeting { slug: $slug, name: $name, kind: $kind, scheduled_at: $scheduled_at, status: $status, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
+// Git-pinned markdown artifact. `kind` defaults to "markdown" and `source` to
+// "github" semantically; pass them in for forward-compat with other VCS or doc kinds.
+// `body` carries the cached text at `commit_sha`; importer/cron updates both in lockstep.
+query add_markdown_artifact($slug: String, $name: String, $kind: String, $source: String,
+                            $repo: String, $path: String, $commit_sha: String, $branch: String,
+                            $url: String, $body: String,
+                            $date: Date, $captured_at: DateTime, $last_synced_at: DateTime,
+                            $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Artifact {
+        slug: $slug, name: $name, kind: $kind, source: $source,
+        repo: $repo, path: $path, commit_sha: $commit_sha, branch: $branch,
+        url: $url, body: $body,
+        date: $date, captured_at: $captured_at, last_synced_at: $last_synced_at,
+        createdAt: $createdAt, updatedAt: $updatedAt
+    }
+}
+
 
 // ──────────────────────────────────────────────
 // Growth-ring nodes
@@ -259,6 +280,18 @@ query link_artifact_derived_from($from: String, $to: String) {
     insert ArtifactDerivedFrom { from: $from, to: $to }
 }
 
+query link_artifact_documents_thesis($artifact: String, $thesis: String) {
+    insert ArtifactDocumentsThesis { from: $artifact, to: $thesis }
+}
+
+query link_artifact_documents_lesson($artifact: String, $lesson: String) {
+    insert ArtifactDocumentsLesson { from: $artifact, to: $lesson }
+}
+
+query link_artifact_documents_pattern($artifact: String, $pattern: String) {
+    insert ArtifactDocumentsPattern { from: $artifact, to: $pattern }
+}
+
 query link_chunk_of_artifact($chunk: String, $artifact: String) {
     insert ChunkOfArtifact { from: $chunk, to: $artifact }
 }
@@ -322,4 +355,41 @@ query link_lesson_distilled_from($lesson: String, $pattern: String) {
 
 query link_lesson_applies_to_market($lesson: String, $market: String) {
     insert LessonAppliesToMarket { from: $lesson, to: $market }
+}
+
+
+// ══════════════════════════════════════════════
+// EDGE MUTATIONS — Meetings (operational layer)
+// ══════════════════════════════════════════════
+
+query link_meeting_about_deal($meeting: String, $deal: String) {
+    insert MeetingAboutDeal { from: $meeting, to: $deal }
+}
+
+query link_meeting_about_organization($meeting: String, $organization: String) {
+    insert MeetingAboutOrganization { from: $meeting, to: $organization }
+}
+
+query link_meeting_about_thesis($meeting: String, $thesis: String) {
+    insert MeetingAboutThesis { from: $meeting, to: $thesis }
+}
+
+query link_meeting_about_market($meeting: String, $market: String) {
+    insert MeetingAboutMarket { from: $meeting, to: $market }
+}
+
+query link_meeting_attended_by($meeting: String, $person: String) {
+    insert MeetingAttendedBy { from: $meeting, to: $person }
+}
+
+query link_artifact_from_meeting($artifact: String, $meeting: String) {
+    insert ArtifactFromMeeting { from: $artifact, to: $meeting }
+}
+
+query link_decision_from_meeting($decision: String, $meeting: String) {
+    insert DecisionFromMeeting { from: $decision, to: $meeting }
+}
+
+query link_commitment_from_meeting($commitment: String, $meeting: String) {
+    insert CommitmentFromMeeting { from: $commitment, to: $meeting }
 }

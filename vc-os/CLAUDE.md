@@ -28,7 +28,7 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 
 ## Domain Model
 
-**Core (6) + Growth ring (11) = 17 nodes total.** The core is stable for years; the growth ring evolves as the firm learns.
+**Core (7) + Growth ring (11) = 18 nodes total.** The core is stable for years; the growth ring evolves as the firm learns.
 
 **Core:**
 | Node | Purpose |
@@ -39,6 +39,7 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 | `Fund` | Quito's funds. |
 | `Market` | Sector/vertical hub. |
 | `Artifact` | Raw content with native Blob. |
+| `Meeting` | Scheduled (or ad-hoc) event with attendees, subject, outputs. Transcript lives as `Artifact{kind=transcript|meeting-note}` linked via `ArtifactFromMeeting`. |
 
 **Growth ring:**
 | Layer | Nodes | Purpose |
@@ -55,10 +56,11 @@ v1 seed ships `Chunk` zero (populate via `omnigraph embed --reembed_all`). All o
 1. **Engagement** — Deal/Fund/Organization structure plus the relationship graph (`Person knows`, `decisionMakerAt`, `WouldAcquire`)
 2. **Belief + Evidence** — Signal supports/contradicts Assumption|Thesis; Thesis reliesOn Assumption; Insight reliesOnSignal
 3. **Decision + Learning** — Decision basedOnAssumption + needsAnswerToQuestion; Pattern across Signals/Decisions; Lesson distilledFromPattern
+4. **Operational (Meetings)** — Meeting `meetingAboutDeal|Organization|Thesis|Market`; `meetingAttendedBy Person {role}`; `Artifact|Decision|Commitment fromMeeting`. Powers "show me every interaction with X" and "what was committed at the last board."
 
 **Design choices to preserve:**
 
-- **Slug prefix convention is mandatory** — `co-` (all Companies, regardless of kind), `per-`, `mkt-`, `deal-`, `fund-`, `art-`, `thesis-`, `asmp-`, `q-`, `sig-`, `ins-`, `src-`, `chk-`, `dec-`, `cmt-`, `pat-`, `lsn-`. Don't break it.
+- **Slug prefix convention is mandatory** — `org-` (all Organizations, regardless of `kind`), `per-`, `mkt-`, `deal-`, `fund-`, `art-`, `mtg-`, `thesis-`, `asmp-`, `q-`, `sig-`, `ins-`, `src-`, `chk-`, `dec-`, `cmt-`, `pat-`, `lsn-`. Don't break it.
 - **One `Organization` covers everything.** Startups, LPs, acquirers, peer VCs, customers — all `Organization` with different `kind` values. Don't reintroduce a separate `Organization` node.
 - **`org-quito` is Quito itself** — a `Organization` with `kind=vc-firm`. Team members `WorksAt org-quito` (this replaces the dropped `Person.primary_relation = team` enum). Funds reference Quito implicitly via `LpInFund` from external LPs.
 - **`Person` is intrinsic** — no `primary_relation` enum. Roles are derived from edges: `WorksAt org-quito` (team), `FounderOf` (founder), `LpInFund` source via `WorksAt` (LP contact), `RoleInDeal {role: founder|customer-ref|expert|co-investor-lead|co-investor-participant|board-candidate|venture-partner}` (deal-scoped roles — keep this list in sync with the enum in `schema.pg`), `DecisionMakerAt $co {kind: acquirer}` (acquirer DM).
@@ -74,6 +76,9 @@ v1 seed ships `Chunk` zero (populate via `omnigraph embed --reembed_all`). All o
 - **`Chunk` is implementation detail for hybrid search**, not an ontological commitment. v1 seed has zero Chunks; populate via separate ingest.
 - **Native `Blob` on `Artifact`** — collapses Drive into the graph. v1 seed has zero blob payloads; populate via separate ingest.
 - **USD-denominated financial fields** (`*_usd_m`) bake in a bias. Convert at recording time. Document if EUR/GBP-native sources require it.
+- **`Meeting` is the operational primitive, not a duplicate of `Artifact`.** The transcript / board notes are still `Artifact{kind=transcript|meeting-note}`. The Meeting carries the things an Artifact can't: scheduled time, attendee set, status (scheduled / occurred / cancelled), and the outputs (`DecisionFromMeeting`, `CommitmentFromMeeting`) the meeting produced. When ingesting a Granola call, create the `Meeting` first, then attach the transcript via `ArtifactFromMeeting`.
+- **`Meeting` outputs follow the inbound-edge convention** — `Artifact → Meeting`, `Decision → Meeting`, `Commitment → Meeting` (the dependent points to the source), mirroring `ArtifactFromPerson` and `CommitmentFromArtifact`. Don't add reverse `MeetingProduces*` edges; they'd double-count.
+- **A `Meeting` can be about multiple subjects.** A partner 1:1 covering 3 deals should load 3 `MeetingAboutDeal` edges, not be split into 3 meetings.
 
 ## Conventions enforced by load discipline (not the schema)
 
@@ -87,6 +92,9 @@ Omnigraph 0.4.x's `@unique(src, dst)` is two separate per-column constraints, no
 
 - **Edge-property projections aren't supported in queries** — `Knows.strength`, `WorksAt.role`, `RoleInDeal.role`, `BoardMemberAt.role`, etc. are stored but cannot be returned in `read` results. Filter in the writer; surface via dedicated read-side helpers if needed.
 - **`Chunk` is declared but the seed has zero.** Embeddings come from a separate ingest pipeline (`omnigraph embed --reembed_all`); the static seed can't generate them. Hybrid search is a v1-deferred capability.
+- **Alias args bind to query parameters by *name*, not position.** An alias `args: [slug]` only binds to a query that declares `$slug`. Renaming the alias arg to `[deal_slug]` without also renaming `$slug → $deal_slug` in the query silently drops the filter — the query then matches every row instead of one. If you want clearer arg names, rename in *both* places; otherwise add a comment block above the alias group explaining the input semantics.
+- **Adding values to an existing enum requires a wipe + re-init + reload (as of Omnigraph 0.5.0).** `schema apply` (even with `--allow-data-loss`) rejects enum extensions as destructive type changes (`OG-MF-106` — "changing property type ... not supported in schema migration v1"). The migration path is: kill the server, `aws s3 rm s3://<bucket>/repos/<name>/ --recursive` (run twice — first pass leaves a handful of files), `omnigraph init --schema schema.pg`, `omnigraph load --data <stripped-seed>.jsonl --mode overwrite`. Reload takes ~10–15 min for a 200-node / 400-edge seed. Batch multiple enum or property-type changes into one wipe-reload cycle — single-change wipes aren't worth the cost.
+- **`omnigraph-server` on 0.5.0 requires auth or explicit `--unauthenticated`.** Cedar policy enforcement is now engine-wide and the server refuses to start without bearer tokens, a policy file, or `--unauthenticated` (env: `OMNIGRAPH_UNAUTHENTICATED=1`). For local dev, set the env var. For Railway/production, configure a Cedar policy YAML.
 - **`Artifact.blob` is declared but the seed uses none.** Same status as Chunks — populate via separate ingest.
 
 ## The Demo "Wow" Queries
@@ -136,6 +144,18 @@ These are the queries the seed is shaped to light up. Preserve them when iterati
 |---|---|---|
 | `lessons-active` | — | 3 active firm lessons (on-prem protocol, vertical-moat eval, shell anti-pattern) |
 | `lessons-tentative` | — | The "second-time founder bias" lesson awaiting review |
+
+**Operational (Meetings):**
+| Alias | Input | Expected outcome |
+|---|---|---|
+| `meetings-upcoming` | — | Helix IC (June 20), Aetherbrick Q2 board (July 9), Axon final ref (June 9) |
+| `meetings-with-organization` | `org-aetherbrick` | Q1 board (occurred April 8) + Q2 board (scheduled July 9) |
+| `meetings-with-deal` | `deal-helix-series-a` | Founder call (April 12, occurred) + IC (June 20, scheduled) |
+| `board-meetings-for-organization` | `org-aetherbrick` | The Q1 board (occurred) — head row for the "last board" view |
+| `meeting-decisions` | `mtg-axon-ic-2026-05` | `dec-axon-ic-recommend-invest` |
+| `meeting-commitments` | `mtg-aetherbrick-board-q1-2026` | `cmt-aetherbrick-board-prep` |
+| `ic-prep-meeting-history` | `deal-helix-series-a` | Helix founder call (April) — what was discussed before IC |
+| `ic-prep-open-commitments` | `deal-helix-series-a` | `cmt-helix-customer-refs` — what's still owed before IC |
 
 If a schema or seed change breaks any of these, the OS lens is not delivering — fix the seed rather than compromising the schema.
 

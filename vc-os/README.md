@@ -22,13 +22,13 @@ Every action either:
 
 The seven jobs a VC does — **Find, Evaluate, Decide, Win, Help, Monitor, Learn** — all collapse into one analytical loop over beliefs. The ontology is shaped to make that loop a 2-hop graph traversal.
 
-## The schema — 6 core + 11 growth-ring
+## The schema — 7 core + 11 growth-ring
 
-The core should be 5–6 entities that the team can hold in their head, that stay stable for years even as the analytical layer above them compounds. The schema is organized accordingly.
+The core should be 5–7 entities that the team can hold in their head, that stay stable for years even as the analytical layer above them compounds. The schema is organized accordingly.
 
-### Core (6) — the stable mental model
+### Core (7) — the stable mental model
 
-These six names and shapes should not change for years. They are the entities the team thinks about every day.
+These seven names and shapes should not change for years. They are the entities the team thinks about every day.
 
 | Node | Purpose |
 |---|---|
@@ -38,6 +38,7 @@ These six names and shapes should not change for years. They are the entities th
 | **`Fund`** | Quito's funds. |
 | **`Market`** | Sector/vertical hub. Sector-specialist Theses, Patterns, and Lessons cluster around it. |
 | **`Artifact`** | Raw content with native `Blob` — Granola transcripts, pitch decks, emails, screenshots, slack messages. |
+| **`Meeting`** | A scheduled (or ad-hoc) event with attendees, subject, and outputs. The transcript is an `Artifact`; the Meeting binds attendees + agenda + outcomes (Decisions, Commitments) around it. Covers IC, board, founder calls, partner offsites, pipeline reviews, expert calls. |
 
 ### Growth ring (11) — the analytical layer that compounds
 
@@ -50,9 +51,9 @@ Built on top of the core. These can be added to or refined without touching the 
 | Action | `Decision` · `Commitment` | What we do. `Decision` is one-shot (`decided_at`); `Commitment` is deferred-action with a deadline. Intros and follow-ups are `Commitment`s, not `Decision`s. |
 | Reflexive | `Pattern` · `Lesson` | What we learn. `Pattern` aggregates across many subjects; `Insight` interprets one. `Lesson` is operational (changes future behavior); `Insight` is descriptive. |
 
-**17 nodes total** (`Chunk` ships zero rows in v1 — populate via `omnigraph embed --reembed_all`).
+**18 nodes total** (`Chunk` ships zero rows in v1 — populate via `omnigraph embed --reembed_all`).
 
-Slug prefixes: `org- per- mkt- deal- fund- art- thesis- asmp- q- sig- ins- src- chk- dec- cmt- pat- lsn-`.
+Slug prefixes: `org- per- mkt- deal- fund- art- mtg- thesis- asmp- q- sig- ins- src- chk- dec- cmt- pat- lsn-`.
 
 ### Three loops, one graph
 
@@ -182,6 +183,36 @@ Each box is a node type; arrows are edge types. Read each loop top-to-bottom.
    └────────────┘
 ```
 
+**Loop 4 — Operational (Meetings).** A `Meeting` is the operational primitive — it binds attendees, a subject (`Deal` / `Organization` / `Thesis` / `Market`), and the outputs that came of it. The transcript or board notes live as an `Artifact{kind=transcript|meeting-note}` linked via `ArtifactFromMeeting`; `Decision`s and `Commitment`s the meeting produced point back via `DecisionFromMeeting` and `CommitmentFromMeeting`. This is what powers "show me every interaction we've had with Helix" and "what was committed at the last Aetherbrick board" — single-hop traversals that previously required Granola + calendar + Notion stitching.
+
+```
+   ┌────────────┐  meetingAboutDeal       ┌────────────┐
+   │  Meeting   │────────────────────────▶│    Deal    │
+   │ (ic, board,│  meetingAboutOrg        ┌────────────┐
+   │ founder-   │────────────────────────▶│    Org     │
+   │ call, dd-  │  meetingAboutThesis     ┌────────────┐
+   │ call,      │────────────────────────▶│   Thesis   │
+   │ partner-   │  meetingAboutMarket     ┌────────────┐
+   │ 1on1,      │────────────────────────▶│   Market   │
+   │ pipeline-  │                         └────────────┘
+   │ review,    │
+   │ portfolio- │  meetingAttendedBy      ┌────────────┐
+   │ 1on1, lp-  │────────────────────────▶│   Person   │
+   │ update,    │  {role: host/attendee/  └────────────┘
+   │ expert-    │   optional/declined}
+   │ call,      │
+   │ internal,  │                         ┌────────────┐
+   │ external-  │◀─artifactFromMeeting────│  Artifact  │
+   │ other;     │                         └────────────┘
+   │ status:    │                         ┌────────────┐
+   │ scheduled  │◀─decisionFromMeeting────│  Decision  │
+   │ /occurred/ │                         └────────────┘
+   │ cancelled/ │                         ┌────────────┐
+   │ resched-   │◀─commitmentFromMeeting──│ Commitment │
+   │ uled)      │                         └────────────┘
+   └────────────┘
+```
+
 ### Key enums (the lens)
 
 | Enum | Values |
@@ -200,6 +231,8 @@ Each box is a node type; arrows are edge types. Read each loop top-to-bottom.
 | `Lesson.kind` | `protocol, rule-of-thumb, anti-pattern, runbook` |
 | `Lesson.status` | `tentative, active, retired` — `tentative` lives on a review branch awaiting human merge |
 | `Thesis.status` | `active, retired, contradicted` |
+| `Meeting.kind` | `ic, board, partner-1on1, pipeline-review, portfolio-1on1, lp-update, founder-call, dd-call, expert-call, internal, external-other` |
+| `Meeting.status` | `scheduled, occurred, cancelled, rescheduled` |
 
 ### What's deliberately *not* a node
 
@@ -210,14 +243,13 @@ These omissions are what keep the model coherent.
 - **No "Sighting" type.** A sighting = `Signal{kind=discovery}` with a uniqueness convention on `(organization, source, date)`.
 - **No "Thread" / "Conversation" type.** Artifacts have `thread_id` + `ArtifactDerivedFrom` chains.
 - **No "Memo" type.** A memo = `Insight{kind=memo, aboutDeal=…}` with a blob.
-- **No "Meeting" / "Event" type.** A call = `Artifact{kind=meeting-note}` with `MentionsPerson` edges.
 - **No "PortfolioOrganization" subtype.** It's `Organization.status = portfolio`.
 - **No reified "User" / "Team Member".** Quito itself is `org-quito` (Organization kind=vc-firm); team members `WorksAt org-quito`. Authorship and ownership live on edges (`DecisionByPerson`, `CommitmentAssignedTo`).
 - **No "Protocol" / "Runbook" type.** They're `Lesson{kind=protocol|runbook}`.
 
 ## Reference seed — Fictional Series-A AI-infra fund
 
-The seed populates a fictional Berlin-based AI-infra fund running Fund III ($250M, vintage 2024). Single coherent narrative; exercises all 16 active node types (`Chunk` is schema-only). **All names, deals, organizations, and people are fabricated.**
+The seed populates a fictional Berlin-based AI-infra fund running Fund III ($250M, vintage 2024). Single coherent narrative; exercises all 17 active node types (`Chunk` is schema-only). **All names, deals, organizations, and people are fabricated.**
 
 | Layer | Count | Includes |
 |---|---|---|
@@ -231,8 +263,9 @@ The seed populates a fictional Berlin-based AI-infra fund running Fund III ($250
 | Signals | ~30 | Mix of competitive, fundraise, portfolio-update, market-move |
 | Decisions | 7 | invest, pass (×3), follow-on, second-meeting, thesis-level double-down |
 | Patterns / Lessons | 5 / 4 | AI-infra-specific |
+| Meetings | 8 | 2 ICs (Axon occurred, Helix upcoming), 2 Aetherbrick boards (Q1 occurred, Q2 upcoming), Helix founder call, Axon expert ref call, partner thesis-review offsite, weekly pipeline |
 
-**Totals (loaded):** 197 nodes across 16 active types, 415 edges across 55 edge types. `Chunk` is schema-only (zero seeded). Bidirectional `Knows` accounts for 28 of the 415 edges (14 unique pairs × 2).
+**Totals (loaded):** 205 nodes across 17 active types, 464 edges across 62 edge types. `Chunk` is schema-only (zero seeded). Bidirectional `Knows` accounts for 28 of those edges (14 unique pairs × 2).
 
 ## Killer queries
 
@@ -273,11 +306,23 @@ Bull and bear `Insight`s grounded in real `Signal`s. Two agents run in parallel 
 ### Board-prep pack
 
 ```bash
-omnigraph read --alias board-prep-pack             org-aetherbrick
-omnigraph read --alias board-prep-open-questions   org-aetherbrick
-omnigraph read --alias board-prep-commitments      org-aetherbrick
+omnigraph read --alias board-prep-pack                  org-aetherbrick
+omnigraph read --alias board-prep-open-questions        org-aetherbrick
+omnigraph read --alias board-prep-commitments           org-aetherbrick
+omnigraph read --alias board-prep-meeting-history       org-aetherbrick   # prior board meetings
+omnigraph read --alias board-prep-next-meeting          org-aetherbrick   # scheduled next board
 ```
-What's changed since the last board meeting, what's still open, what was committed last time. Cross-references portfolio `Signal`s, open `Question`s, open `Commitment`s.
+What's changed since the last board meeting, what's still open, what was committed last time, when the next board is. Cross-references portfolio `Signal`s, open `Question`s, open `Commitment`s, and the `Meeting` cadence.
+
+### Meeting history with a deal or organization
+
+```bash
+omnigraph read --alias meetings-with-deal               deal-helix-series-a
+omnigraph read --alias meetings-with-organization       org-aetherbrick
+omnigraph read --alias ic-prep-meeting-history          deal-helix-series-a
+omnigraph read --alias ic-prep-open-commitments         deal-helix-series-a
+```
+"Show me every interaction we've had with this deal/org" — single-hop traversal that previously required stitching Granola + calendar + Notion. `ic-prep-meeting-history` is the IC pre-read view; `ic-prep-open-commitments` returns commitments still outstanding from prior meetings about the deal (e.g., the three customer-reference calls owed before Helix IC).
 
 ### Intro path to a founder
 
@@ -334,10 +379,10 @@ This v1 prioritizes a coherent narrative-and-graph demo over running embeddings 
 vc-os/
 ├── README.md          # this file
 ├── CLAUDE.md          # scoped agent guidance
-├── schema.pg          # 17 nodes, ~51 edges, ~17 enums — source of truth
+├── schema.pg          # 18 nodes, ~59 edges, ~19 enums — source of truth
 ├── seed.md            # human-readable narrative (twin of seed.jsonl)
 ├── seed.jsonl         # loadable seed
-├── omnigraph.yaml     # CLI config + ~70 aliases
+├── omnigraph.yaml     # CLI config + ~190 aliases
 └── queries/
     ├── deals.gq           # 20 reads
     ├── organizations.gq   # 28 reads (incl. exit-landscape + co-investor)
@@ -348,10 +393,11 @@ vc-os/
     ├── patterns.gq        # 15 reads
     ├── portfolio.gq       # 17 reads
     ├── sources.gq         # 7 reads (provenance + reliability)
-    └── mutations.gq       # 17 add_* + 56 link_* = 73 mutations
+    ├── meetings.gq        # 23 reads (incl. IC + board prep + meeting history)
+    └── mutations.gq       # 18 add_* + 64 link_* = 82 mutations
 ```
 
-Total: 235 named queries, ~160 aliases.
+Total: 258 named queries, ~190 aliases.
 
 ## Quick Start
 

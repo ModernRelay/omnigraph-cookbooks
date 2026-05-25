@@ -4,7 +4,7 @@ Human-readable twin of `seed.jsonl`. All names, deals, organizations, and people
 
 The firm: **Quito Capital**, Berlin-based, AI-infra focused. Two funds: Fund II ($120M, vintage 2021, harvesting) and Fund III ($250M, vintage 2024, investing). Five-person team in Berlin / London / Paris.
 
-**Totals (loaded):** 197 nodes across 16 active types, 415 edges across 55 edge types. (`Chunk` is declared in the schema but zero rows in the seed — v1 ships no embeddings.) `Knows` is loaded bidirectionally (14 unique pairs × 2 = 28 edges).
+**Totals (loaded):** 205 nodes across 17 active types, 464 edges across 62 edge types. (`Chunk` is declared in the schema but zero rows in the seed — v1 ships no embeddings.) `Knows` is loaded bidirectionally (14 unique pairs × 2 = 28 edges).
 
 ## Funds
 
@@ -182,5 +182,20 @@ Mix of open / in-progress / done. Includes intros to make, board-prep deliverabl
 | `lsn-vertical-data-moat-eval` | rule-of-thumb | active |
 | `lsn-shell-anti-pattern` | anti-pattern | active |
 | `lsn-second-time-founder-bias` | rule-of-thumb | **tentative** (lives on review branch) |
+
+## Meetings (8)
+
+The operational layer — what the firm actually did with its time. Mix of `occurred` (5) and `scheduled` (3). Every Decision and most Commitments in the seed are tied to a Meeting via `DecisionFromMeeting` / `CommitmentFromMeeting`, so the audit chain extends to "which conversation produced this."
+
+| Slug | Kind | When | Status | Subject |
+|---|---|---|---|---|
+| `mtg-helix-founder-call-2026-04` | founder-call | 2026-04-12 | occurred | `deal-helix-series-a` + `org-helix-runtime`. Transcript: `art-helix-founder-call-2026-04`. Produced `dec-helix-second-meeting` + `cmt-helix-customer-refs`. |
+| `mtg-helix-ic-2026-06` | ic | 2026-06-20 | scheduled | `deal-helix-series-a`. Full team + `per-vp-tegan`. |
+| `mtg-aetherbrick-board-q1-2026` | board | 2026-04-08 | occurred | `org-aetherbrick`. Transcript: `art-aetherbrick-board-q1`. Produced `cmt-aetherbrick-board-prep`. |
+| `mtg-aetherbrick-board-q2-2026` | board | 2026-07-09 | scheduled | `org-aetherbrick`. The "next board" for the board-prep demo. |
+| `mtg-axon-ic-2026-05` | ic | 2026-05-12 | occurred | `deal-axon-seed`. Produced `dec-axon-ic-recommend-invest` + `cmt-axon-final-check`. |
+| `mtg-axon-final-ref-2026-06` | expert-call | 2026-06-09 | scheduled | `deal-axon-seed`. The final reference owed before close. |
+| `mtg-partner-onprem-thesis-2026-04` | internal | 2026-04-20 | occurred | `thesis-on-prem-inference`. Produced `dec-onprem-thesis-doubledown`. |
+| `mtg-weekly-pipeline-2026-05-13` | pipeline-review | 2026-05-13 | occurred | No subject edges (full-team weekly cadence). |
 
 The `tentative` lesson demonstrates the branch-as-review workflow: an agent identified the pattern, drafted the lesson on a branch, and a human must merge to promote it to `active`.

@@ -143,6 +143,26 @@ query signal_portfolio_impact($slug: String) {
     return { $c.slug, $c.name, $dec.slug, $dec.name, $dec.kind, $a.slug, $a.name }
 }
 
+// Broader than portfolio: any *engaged* organization (watching, pipeline,
+// evaluating, or portfolio) whose active Deal Decisions rest on an assumption
+// this signal contradicts. Use this when a signal lands and you want to know
+// every live deal it touches — not just closed investments.
+query signal_engagement_impact($slug: String) {
+    match {
+        $s: Signal { slug: $slug }
+        $s contradictsAssumption $a
+        $dec decisionBasedOnAssumption $a
+        $dec decisionRegardingDeal $d
+        $d forOrganization $c
+        $c.status != "passed"
+        $c.status != "exited"
+        $d.stage != "dead"
+        $d.stage != "decided"
+        $d.stage != "closed"
+    }
+    return { $c.slug, $c.name, $c.status, $dec.slug, $dec.name, $dec.kind, $a.slug, $a.name }
+}
+
 // Recent contradictions across the firm
 query recent_contradictions() {
     match {

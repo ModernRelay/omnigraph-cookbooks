@@ -28,11 +28,15 @@ aliases:
   # ══════════════════════════════════════════════════════════════════
   # VIEW: IC Meeting
   # ══════════════════════════════════════════════════════════════════
-  pre-ic-brief-organization:        { command: read, query: portfolio.gq, name: pre_ic_brief_organization, args: [slug] }
+  # All pre-ic-brief-* aliases take a *Deal* slug (not an Organization slug).
+  # Example: omnigraph read --alias pre-ic-brief-organization deal-helix-series-a
+  pre-ic-brief-organization:   { command: read, query: portfolio.gq, name: pre_ic_brief_organization, args: [slug] }
   pre-ic-brief-thesis:         { command: read, query: portfolio.gq, name: pre_ic_brief_thesis, args: [slug] }
   pre-ic-brief-evidence:       { command: read, query: portfolio.gq, name: pre_ic_brief_evidence, args: [slug] }
   pre-ic-brief-questions:      { command: read, query: portfolio.gq, name: pre_ic_brief_questions, args: [slug] }
   pre-ic-brief-debate:         { command: read, query: portfolio.gq, name: pre_ic_brief_debate, args: [slug] }
+  pre-ic-meeting-history:      { command: read, query: meetings.gq, name: ic_prep_meeting_history, args: [slug] }
+  pre-ic-open-commitments:     { command: read, query: meetings.gq, name: ic_prep_open_commitments, args: [slug] }
   debate-stances:              { command: read, query: deals.gq, name: debate_stances, args: [slug] }
   founder-card:                { command: read, query: people.gq, name: get_person, args: [slug], format: kv }
   person-insights:             { command: read, query: people.gq, name: person_insights, args: [slug] }
@@ -60,7 +64,11 @@ aliases:
   board-prep-pack:             { command: read, query: portfolio.gq, name: board_prep_pack, args: [slug] }
   board-prep-open-questions:   { command: read, query: portfolio.gq, name: board_prep_open_questions, args: [slug] }
   board-prep-commitments:      { command: read, query: portfolio.gq, name: board_prep_commitments, args: [slug] }
+  board-prep-meeting-history:  { command: read, query: meetings.gq, name: board_meetings_for_organization, args: [slug] }
+  board-prep-next-meeting:     { command: read, query: meetings.gq, name: upcoming_board_meetings_for_organization, args: [slug] }
   signal-portfolio-impact:     { command: read, query: signals.gq, name: signal_portfolio_impact, args: [slug] }
+  # Broader than portfolio: any engaged org (pipeline, evaluating, in-diligence, ic-ready, watching, portfolio).
+  signal-engagement-impact:    { command: read, query: signals.gq, name: signal_engagement_impact, args: [slug] }
   exit-landscape:              { command: read, query: organizations.gq, name: exit_landscape, args: [slug] }
   exit-landscape-decision-makers: { command: read, query: organizations.gq, name: exit_landscape_decision_makers, args: [slug] }
   contradicted-active-theses:  { command: read, query: portfolio.gq, name: contradicted_active_theses }
@@ -137,6 +145,9 @@ aliases:
   person-board-seats:          { command: read, query: people.gq, name: person_board_seats, args: [slug] }
   person-role-in-deal:         { command: read, query: people.gq, name: person_role_in_deal, args: [slug] }
   person-decision-maker-at:    { command: read, query: people.gq, name: person_decision_maker_at, args: [slug] }
+  # Network-leverage queries. For full "who can intro me?" coverage, call both
+  # intro-direct-to-founder (1-hop) and intro-path-to-founder (2-hop bridge).
+  intro-direct-to-founder:     { command: read, query: people.gq, name: intro_direct_to_founder, args: [slug] }
   intro-path-to-founder:       { command: read, query: people.gq, name: intro_path_to_founder, args: [slug] }
   direct-team-knowers:         { command: read, query: people.gq, name: direct_team_knowers, args: [slug] }
   close-network:               { command: read, query: people.gq, name: close_network, args: [slug] }
@@ -226,6 +237,53 @@ aliases:
   protocols:                   { command: read, query: patterns.gq, name: protocols }
 
   # ══════════════════════════════════════════════════════════════════
+  # PRIMITIVES — Meetings (operational layer)
+  # ══════════════════════════════════════════════════════════════════
+  meeting:                     { command: read, query: meetings.gq, name: get_meeting, args: [slug], format: kv }
+  meetings-recent:             { command: read, query: meetings.gq, name: meetings_recent }
+  meetings-upcoming:           { command: read, query: meetings.gq, name: meetings_upcoming }
+  meetings-by-kind:            { command: read, query: meetings.gq, name: meetings_by_kind, args: [kind] }
+  meetings-by-status:          { command: read, query: meetings.gq, name: meetings_by_status, args: [status] }
+  search-meetings:             { command: read, query: meetings.gq, name: search_meetings, args: [q] }
+  meeting-deal:                { command: read, query: meetings.gq, name: meeting_deal, args: [slug] }
+  meeting-organization:        { command: read, query: meetings.gq, name: meeting_organization, args: [slug] }
+  meeting-thesis:              { command: read, query: meetings.gq, name: meeting_thesis, args: [slug] }
+  meeting-market:              { command: read, query: meetings.gq, name: meeting_market, args: [slug] }
+  meeting-attendees:           { command: read, query: meetings.gq, name: meeting_attendees, args: [slug] }
+  meetings-attended-by:        { command: read, query: meetings.gq, name: meetings_attended_by, args: [slug] }
+  meeting-artifacts:           { command: read, query: meetings.gq, name: meeting_artifacts, args: [slug] }
+  meeting-decisions:           { command: read, query: meetings.gq, name: meeting_decisions, args: [slug] }
+  meeting-commitments:         { command: read, query: meetings.gq, name: meeting_commitments, args: [slug] }
+  meetings-with-organization:  { command: read, query: meetings.gq, name: meetings_with_organization, args: [slug] }
+  meetings-via-deal-for-organization: { command: read, query: meetings.gq, name: meetings_via_deal_for_organization, args: [slug] }
+  meetings-with-deal:          { command: read, query: meetings.gq, name: meetings_with_deal, args: [slug] }
+  meetings-with-thesis:        { command: read, query: meetings.gq, name: meetings_with_thesis, args: [slug] }
+  board-meetings-for-organization: { command: read, query: meetings.gq, name: board_meetings_for_organization, args: [slug] }
+  upcoming-board-meetings-for-organization: { command: read, query: meetings.gq, name: upcoming_board_meetings_for_organization, args: [slug] }
+  ic-prep-meeting-history:     { command: read, query: meetings.gq, name: ic_prep_meeting_history, args: [slug] }
+  ic-prep-open-commitments:    { command: read, query: meetings.gq, name: ic_prep_open_commitments, args: [slug] }
+
+  # ══════════════════════════════════════════════════════════════════
+  # PRIMITIVES — Wiki (markdown artifacts pinned to git commits)
+  # ══════════════════════════════════════════════════════════════════
+  markdown-artifact:               { command: read, query: wiki.gq, name: get_markdown_artifact, args: [slug], format: kv }
+  markdown-artifacts-recent:       { command: read, query: wiki.gq, name: markdown_artifacts_recent }
+  markdown-artifacts-in-repo:      { command: read, query: wiki.gq, name: markdown_artifacts_in_repo, args: [repo] }
+  markdown-artifacts-only:         { command: read, query: wiki.gq, name: markdown_artifacts_only }
+  thesis-doc:                      { command: read, query: wiki.gq, name: thesis_doc, args: [slug], format: kv }
+  lesson-doc:                      { command: read, query: wiki.gq, name: lesson_doc, args: [slug], format: kv }
+  pattern-doc:                     { command: read, query: wiki.gq, name: pattern_doc, args: [slug], format: kv }
+  markdown-documents-thesis:       { command: read, query: wiki.gq, name: markdown_documents_thesis, args: [slug] }
+  markdown-documents-lesson:       { command: read, query: wiki.gq, name: markdown_documents_lesson, args: [slug] }
+  markdown-documents-pattern:      { command: read, query: wiki.gq, name: markdown_documents_pattern, args: [slug] }
+  # Drift JTBD = set-diff on the caller side: active-for-review minus with-docs
+  # = the set that needs partner attention. Omnigraph 0.4 has no NOT-EXISTS.
+  theses-active-for-doc-review:    { command: read, query: wiki.gq, name: theses_active_for_doc_review }
+  theses-with-docs:                { command: read, query: wiki.gq, name: theses_with_docs }
+  lessons-active-for-doc-review:   { command: read, query: wiki.gq, name: lessons_active_for_doc_review }
+  lessons-with-docs:               { command: read, query: wiki.gq, name: lessons_with_docs }
+
+  # ══════════════════════════════════════════════════════════════════
   # PRIMITIVES — Sources (provenance + reliability)
   # ══════════════════════════════════════════════════════════════════
   source:                      { command: read, query: sources.gq, name: get_source, args: [slug], format: kv }
@@ -245,6 +303,8 @@ aliases:
   add-deal:                    { command: change, query: mutations.gq, name: add_deal, args: [slug, name, stage, outcome, createdAt, updatedAt] }
   add-fund:                    { command: change, query: mutations.gq, name: add_fund, args: [slug, name, createdAt, updatedAt] }
   add-artifact:                { command: change, query: mutations.gq, name: add_artifact, args: [slug, name, kind, source, date, captured_at, createdAt, updatedAt] }
+  add-meeting:                 { command: change, query: mutations.gq, name: add_meeting, args: [slug, name, kind, scheduled_at, status, createdAt, updatedAt] }
+  add-markdown-artifact:       { command: change, query: mutations.gq, name: add_markdown_artifact, args: [slug, name, kind, source, repo, path, commit_sha, branch, url, body, date, captured_at, last_synced_at, createdAt, updatedAt] }
   add-thesis:                  { command: change, query: mutations.gq, name: add_thesis, args: [slug, name, status, createdAt, updatedAt] }
   add-assumption:              { command: change, query: mutations.gq, name: add_assumption, args: [slug, name, level, createdAt, updatedAt] }
   add-question:                { command: change, query: mutations.gq, name: add_question, args: [slug, name, status, createdAt, updatedAt] }
@@ -301,6 +361,9 @@ aliases:
   link-artifact-about-organization: { command: change, query: mutations.gq, name: link_artifact_about_organization, args: [artifact, organization] }
   link-artifact-mentions-person: { command: change, query: mutations.gq, name: link_artifact_mentions_person, args: [artifact, person] }
   link-artifact-derived-from:  { command: change, query: mutations.gq, name: link_artifact_derived_from, args: [from, to] }
+  link-artifact-documents-thesis:  { command: change, query: mutations.gq, name: link_artifact_documents_thesis, args: [artifact, thesis] }
+  link-artifact-documents-lesson:  { command: change, query: mutations.gq, name: link_artifact_documents_lesson, args: [artifact, lesson] }
+  link-artifact-documents-pattern: { command: change, query: mutations.gq, name: link_artifact_documents_pattern, args: [artifact, pattern] }
   link-chunk-of-artifact:      { command: change, query: mutations.gq, name: link_chunk_of_artifact, args: [chunk, artifact] }
   link-decision-regarding-deal: { command: change, query: mutations.gq, name: link_decision_regarding_deal, args: [decision, deal] }
   link-decision-regarding-thesis: { command: change, query: mutations.gq, name: link_decision_regarding_thesis, args: [decision, thesis] }
@@ -316,3 +379,11 @@ aliases:
   link-pattern-across-organization: { command: change, query: mutations.gq, name: link_pattern_across_organization, args: [pattern, organization] }
   link-lesson-distilled-from:  { command: change, query: mutations.gq, name: link_lesson_distilled_from, args: [lesson, pattern] }
   link-lesson-applies-to-market: { command: change, query: mutations.gq, name: link_lesson_applies_to_market, args: [lesson, market] }
+  link-meeting-about-deal:     { command: change, query: mutations.gq, name: link_meeting_about_deal, args: [meeting, deal] }
+  link-meeting-about-organization: { command: change, query: mutations.gq, name: link_meeting_about_organization, args: [meeting, organization] }
+  link-meeting-about-thesis:   { command: change, query: mutations.gq, name: link_meeting_about_thesis, args: [meeting, thesis] }
+  link-meeting-about-market:   { command: change, query: mutations.gq, name: link_meeting_about_market, args: [meeting, market] }
+  link-meeting-attended-by:    { command: change, query: mutations.gq, name: link_meeting_attended_by, args: [meeting, person] }
+  link-artifact-from-meeting:  { command: change, query: mutations.gq, name: link_artifact_from_meeting, args: [artifact, meeting] }
+  link-decision-from-meeting:  { command: change, query: mutations.gq, name: link_decision_from_meeting, args: [decision, meeting] }
+  link-commitment-from-meeting: { command: change, query: mutations.gq, name: link_commitment_from_meeting, args: [commitment, meeting] }

@@ -145,6 +145,10 @@ query person_decision_maker_at($slug: String) {
 
 // 2-hop: team member → bridge person → founder. Constrains the target to a
 // Person with at least one FounderOf edge so non-founders don't slip through.
+//
+// NOTE: This pattern *requires* a bridge — if a teammate knows the founder
+// directly, no row is returned. To cover the full JTBD "who can intro me?",
+// also call `intro_direct_to_founder` (1-hop) and union the results.
 query intro_path_to_founder($slug: String) {
     match {
         $founder: Person { slug: $slug }
@@ -156,6 +160,22 @@ query intro_path_to_founder($slug: String) {
         $quito: Organization { slug: "org-quito" }
     }
     return { $teammate.slug, $teammate.name, $bridge.slug, $bridge.name, $f_organization.slug }
+}
+
+// 1-hop direct: which team members directly know this founder. Companion to
+// `intro_path_to_founder` — together they cover both "warm intro" and
+// "I know them already" cases. Constrains the target to be a founder so
+// non-founders don't slip through.
+query intro_direct_to_founder($slug: String) {
+    match {
+        $founder: Person { slug: $slug }
+        $founder founderOf $f_organization
+        $teammate: Person
+        $teammate knows $founder
+        $teammate worksAt $quito
+        $quito: Organization { slug: "org-quito" }
+    }
+    return { $teammate.slug, $teammate.name, $f_organization.slug }
 }
 
 // 1-hop: which team members directly know this person.
