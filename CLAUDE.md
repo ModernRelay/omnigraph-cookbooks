@@ -6,7 +6,7 @@ Repo-wide guidance. Each starter also has its own `CLAUDE.md` — read both when
 
 ## What This Repo Is
 
-A collection of Omnigraph graph starters plus packaged agent skills. Each starter is self-contained in its folder; skills live under `skills/` and are installable via `npx skills add`. Currently only `industry-intel/` is shipped (AI/ML intel on the SPIKE framework — Signal, Pattern, Insight, KnowHow, Element). See `README.md` for the full list and planned starters.
+A collection of Omnigraph graph starters plus packaged agent skills. Each starter is self-contained in its folder; skills live under `skills/` and are installable via `pnpm dlx skills add`. Currently only `industry-intel/` is shipped (AI/ML intel on the SPIKE framework — Signal, Pattern, Insight, KnowHow, Element). See `README.md` for the full list and planned starters.
 
 ## Architecture
 
@@ -37,10 +37,11 @@ omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
 
 - `skills/omnigraph-intel-bootstrap/` — bootstrap a new SPIKE graph (elicitation + research + init/load)
 - `skills/omnigraph-best-practices/` — day-to-day ops; mirrors `docs/best-practices.md`
+- `skills/ontology-modeling/`: semantic model design and review before encoding meaning into schema
 - `docs/best-practices.md` — operational guide (human-readable)
 - `docs/omni-schema.md` — schema design principles
 
-When working on schema or ops questions, consult `docs/` directly rather than duplicating guidance here.
+When schema work changes identity, class boundaries, relation semantics, or governance, consult `ontology-modeling` first. When implementing those decisions in Omnigraph, use `omnigraph-best-practices`.
 
 ## When Adding a New Starter
 

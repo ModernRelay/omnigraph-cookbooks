@@ -150,3 +150,19 @@ Most schemas are fine without interfaces. Reach for them only when 3+ node types
 - **Edge semantics matter** — prefer `AuthoredBy` over `RelatedTo`
 - **Constraints live in the schema** — `@unique`, `@range`, `@card` keep invariants out of application code
 - **Schemas are reviewable** — clear names, explicit enums, obvious keys
+
+## Semantic Design Handoff
+
+Use `ontology-modeling` before or alongside this reference when a `.pg` change
+alters domain meaning, not just syntax. Common triggers:
+
+- Changing `@key` fields or identity criteria
+- Splitting or merging node types
+- Replacing an attribute with an edge or reified node
+- Renaming an edge because the relation semantics changed
+- Adding required properties that downstream consumers will treat as facts
+- Changing governance, provenance, or validation expectations
+
+After the semantic decision is settled, return here for Omnigraph mechanics:
+`schema plan`, `schema apply`, `@rename_from`, optional to required backfills,
+query linting, and migration safety.

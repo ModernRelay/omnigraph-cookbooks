@@ -13,6 +13,8 @@ metadata:
 
 This skill captures the operational rules for working with a locally deployed Omnigraph (RustFS-backed or remote S3). Follow them when authoring schema, writing queries, loading data, evolving schema, or automating graph operations.
 
+For schema changes that alter domain meaning, identity criteria, class boundaries, or edge semantics, use `ontology-modeling` before or alongside this skill. This skill covers safe Omnigraph implementation; `ontology-modeling` covers whether the model means the right thing.
+
 ## The Six Rules
 
 1. **Lint before commit** — `omnigraph query lint --schema schema.pg --query queries/foo.gq` validates both sides against each other. No running repo required.

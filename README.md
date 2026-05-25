@@ -13,21 +13,23 @@ Opinionated, ready-to-run graph starters built on [Omnigraph](https://github.com
 
 ## Agent Skills
 
-Packaged agent skills live under [`skills/`](./skills) and can be installed with the `npx skills` CLI:
+Packaged agent skills live under [`skills/`](./skills) and can be installed with the `pnpm dlx skills` CLI:
 
 | Skill | Description |
 |-------|-------------|
 | [`omnigraph-intel-bootstrap`](./skills/omnigraph-intel-bootstrap) | Bootstrap a new SPIKE graph from scratch — choose demo or custom, elicit domain + sources, adapt schema, research seed content, init + load |
 | [`omnigraph-best-practices`](./skills/omnigraph-best-practices) | Operate a locally deployed Omnigraph — schema authoring and evolution, query linting, data changes, branches, embeddings, aliases, server, policy, and common gotchas |
+| [`ontology-modeling`](./skills/ontology-modeling) | Design and review semantic models: consensus, identity, relation semantics, quality trade-offs, governance, and representation choices before encoding them in a graph |
 
 Install:
 
 ```bash
-npx skills add ModernRelay/omnigraph-starters@omnigraph-intel-bootstrap
-npx skills add ModernRelay/omnigraph-starters@omnigraph-best-practices
+pnpm dlx skills add ModernRelay/omnigraph-starters@omnigraph-intel-bootstrap
+pnpm dlx skills add ModernRelay/omnigraph-starters@omnigraph-best-practices
+pnpm dlx skills add ModernRelay/omnigraph-starters@ontology-modeling
 ```
 
-Typical flow: use `omnigraph-intel-bootstrap` once to set up a new graph, then `omnigraph-best-practices` for day-to-day operations.
+Typical flow: use `omnigraph-intel-bootstrap` once to set up a new graph, `ontology-modeling` when the schema meaning is unsettled, then `omnigraph-best-practices` for day-to-day operations and safe implementation.
 
 See [`docs/best-practices.md`](./docs/best-practices.md) for the human-readable version of the ops content.
 
@@ -42,7 +44,8 @@ omnigraph-starters/
 │   └── omni-schema.md         ← schema design principles
 ├── skills/
 │   ├── omnigraph-intel-bootstrap/   ← bootstrap a new SPIKE graph (elicitation + research)
-│   └── omnigraph-best-practices/    ← day-to-day ops (SKILL.md + references/)
+│   ├── omnigraph-best-practices/    ← day-to-day ops (SKILL.md + references/)
+│   └── ontology-modeling/           ← semantic model design and review
 └── <starter>/
     ├── README.md
     ├── CLAUDE.md
