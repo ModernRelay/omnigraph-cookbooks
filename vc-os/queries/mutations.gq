@@ -78,6 +78,13 @@ query add_insight($slug: String, $name: String, $kind: String, $createdAt: DateT
     insert Insight { slug: $slug, name: $name, kind: $kind, createdAt: $createdAt, updatedAt: $updatedAt }
 }
 
+// IC-debate variant: same as add_insight but also sets stance + summary at
+// create time, so the resulting Insight participates in debate-stances reads.
+// Multi-agent IC simulation (bull + bear in parallel) uses this.
+query add_insight_with_stance($slug: String, $name: String, $kind: String, $stance: String, $summary: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Insight { slug: $slug, name: $name, kind: $kind, stance: $stance, summary: $summary, createdAt: $createdAt, updatedAt: $updatedAt }
+}
+
 // Convenience helper for publisher / database / expert-network orgs with a
 // reliability rating. Use the generic `add_organization` for everything else.
 query add_publisher_organization($slug: String, $name: String, $kind: String, $reliability: String, $createdAt: DateTime, $updatedAt: DateTime) {

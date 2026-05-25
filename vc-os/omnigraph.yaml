@@ -315,6 +315,7 @@ aliases:
   add-question:                { command: change, query: mutations.gq, name: add_question, args: [slug, name, status, createdAt, updatedAt] }
   add-signal:                  { command: change, query: mutations.gq, name: add_signal, args: [slug, name, kind, date, stagingTimestamp, createdAt, updatedAt] }
   add-insight:                 { command: change, query: mutations.gq, name: add_insight, args: [slug, name, kind, createdAt, updatedAt] }
+  add-insight-with-stance:     { command: change, query: mutations.gq, name: add_insight_with_stance, args: [slug, name, kind, stance, summary, createdAt, updatedAt] }
   add-publisher-organization:  { command: change, query: mutations.gq, name: add_publisher_organization, args: [slug, name, kind, reliability, createdAt, updatedAt] }
   add-chunk:                   { command: change, query: mutations.gq, name: add_chunk, args: [slug, text, chunk_index, createdAt] }
   add-decision:                { command: change, query: mutations.gq, name: add_decision, args: [slug, name, kind, createdAt, updatedAt] }
