@@ -437,7 +437,19 @@ dec-pulserate-pass             | Pass on PulseRate Series A                | pas
 
 ## Example agent workflows
 
-Five patterns the graph shape uniquely enables. The common shape: **agent proposes on a branch, partner reviews via `branch diff`, merges into `main`**. Each workflow is invocable from `claude -p ...` (or any agent runtime) against the local omnigraph server.
+Five patterns the graph shape uniquely enables. The common shape: **agent proposes on a branch, partner reviews via `branch diff`, merges into `main`**. Each is invocable from `claude -p ...` (or any agent runtime) against the local omnigraph server.
+
+At a glance:
+
+| Agent | Trigger | External input | Graph reads | Graph writes (always on a `tentative/…` branch) |
+|---|---|---|---|---|
+| **Post-call ingestion** | After every founder / portco call | Granola transcript | mentioned `Person` + `Organization`; related `Thesis` + `Assumption`; the deal's open `Commitment`s | new `Artifact`; 0–3 `Signal`s with `supports`/`contradicts` to Assumptions; `Commitment`s from action items |
+| **Scout-pick triage** | Daily, on inbound mention | HN launch / Twitter / scout email / founder DM | `search-organizations` for dedup; `Organization.status` for verdict; relevant `Pattern`s + `Lesson`s for the market | if "new": `Organization` + `Signal{kind=discovery}` + enrichment edges (`OrganizationInMarket`, `SignalInformsQuestion`, etc.) |
+| **Pre-X brief** | On-demand: IC, board, founder call, partner 1:1, LP update | None — pure graph fan-out | 5–8 aliases across `Thesis`, `Assumption`, `Question`, `Signal`, `Decision`, `Commitment`, `Meeting`, `Insight` | None (read-only) |
+| **Multi-agent IC simulation** | On-demand for high-conviction deals | None | same fan-out as Pre-X brief + cross-cutting `Pattern` aggregation | 2–3 parallel `Insight{stance=bull \| bear \| neutral}` nodes + `InsightReliesOnSignal` + `InsightHighlightsPattern` on a shared branch |
+| **Reflexive learning sweep** | Quarterly cron | None | recent `Decision`s; `Pattern.acrossDecision` aggregations; outcome consistency | `Lesson{status=tentative}` + `DistilledFromPattern` + `AppliesToMarket` |
+
+Only the first two pull external data. Everything else is graph-internal: the firm's accumulated knowledge composes itself. Detail per workflow below.
 
 ### 1. Post-call ingestion · daily, after every founder/portco call
 
