@@ -444,124 +444,108 @@ For each agent below: the natural-language **prompt** you'd send it, concrete **
 ### 1. Post-call ingestion · daily, after every founder/portco call
 
 **Prompt** (real shape):
-> A Granola transcript just landed for the helix-second-call meeting (`mtg-helix-followup-2026-05`). Ingest it into the graph. Resolve mentioned people/orgs, derive material signals (link to existing Theses/Assumptions), extract action items as Commitments. Land everything on `tentative/ingest-helix-2026-05-29`. Don't fabricate; if a mentioned person isn't in the graph, surface that rather than guessing a slug.
+> A Granola transcript just landed for the Helix follow-up call (`mtg-helix-followup-2026-05`). Ingest it: resolve mentioned people/orgs, derive material signals and tie them to the right Assumptions, extract action items as Commitments. Land everything on `tentative/ingest-helix-2026-05-29`. Don't fabricate; if a mentioned person isn't in the graph, surface that rather than guessing a slug.
 
 **External input:** Granola transcript (text or `Artifact{blob}`).
 
-**Pulls (example, against the Helix narrative):**
-- `meeting mtg-helix-followup-2026-05` — meeting context, attendees
-- `search-people "Yuki"` → `per-helix-yuki`
-- `organization-theses org-helix-runtime` → `thesis-on-prem-inference` + 3 grounding assumptions (anchor candidates for new signals)
-- `deal-open-questions deal-helix-series-a` → `q-helix-onprem-margin` (so new signals can `informsQuestion` it)
+**Pulls (an example pass against the Helix narrative):**
+- Loads the meeting itself — agenda, attendees, prior summary — so the agent knows what was supposed to be discussed (`mtg-helix-followup-2026-05`)
+- Resolves the first name "Yuki" from the transcript to the existing founder Person record (`per-helix-yuki` — found via `search-people`)
+- Fetches the deal's grounding belief structure so any new signal can be tied in: the active **on-prem inference thesis** and its three backing assumptions (data-sovereignty mandates, on-prem cost parity, Helix's 60%+ margin)
+- Reads what's still open on the deal so new signals can be linked to the right question — here, the high-priority **"can Helix sustain margins as cloud catches up?"** (`q-helix-onprem-margin`)
 
-**Writes (example, on `tentative/ingest-helix-2026-05-29`):**
-- `add-artifact art-helix-call-2026-05-29 "Helix follow-up call" transcript meeting-tool granola …`
-- `link-artifact-from-meeting art-helix-call-2026-05-29 mtg-helix-followup-2026-05`
-- `link-artifact-mentions-person art-helix-call-2026-05-29 per-helix-yuki`
-- `add-signal sig-helix-top3-concentration "Top-3 customer at 35% ARR" customer 2026-05-29 …`
-- `link-signal-contradicts-assumption sig-helix-top3-concentration asmp-helix-onprem-margin`
-- `add-commitment cmt-helix-cohort-report "Cohort report by next IC" open …` + `link-commitment-assigned-to per-helix-yuki` + `link-commitment-from-meeting mtg-helix-followup-2026-05`
+**Writes (on `tentative/ingest-helix-2026-05-29`):**
+- Records the transcript itself as an Artifact (source category `meeting-tool`, source_app `granola`), linked back to the meeting and tagged with every attendee mentioned by name
+- A new Signal capturing the material observation from the call — "Top-3 customer at 35% ARR, no diversification before IC" — and ties it as **contradicting evidence** against the margin assumption. So the bear case on this deal now has one more structural data point next time the debate is read
+- An action item extracted from "we'll send the cohort report before IC": a Commitment owed by Yuki, due 2026-06-12, linked back to this meeting and to the Helix Series A deal — so it shows up automatically in the IC-prep view a week from now
+- All three writes share the same branch, so the partner sees them together in `branch diff` and merges atomically
 
-**Why graph:** entity resolution + signal classification + commitment extraction become four typed mutations in one atomic transaction. Without typed schema this is 4+ uncoordinated CRM API calls with no consistency guarantee — and no reproducible record of "what did we extract from that call".
+**Why graph:** entity resolution + signal classification + commitment extraction become typed mutations in one atomic transaction. Without typed schema this is 4+ uncoordinated CRM API calls with no consistency guarantee — and no reproducible record of "what did we extract from that call".
 
 ### 2. Scout-pick triage · daily, on every inbound mention
 
 **Prompt** (real shape, tested live):
-> A scout sent in: *"Saw a launch from Ferrumix on HN — vertical AI for industrial maintenance shops, two ex-Siemens engineers, YC W26, ferrumix.ai. Note: I think we passed on something similar last quarter (Stratopaint?)."* Triage it. Decide if it's new/resurfacing/known/out-of-scope per `Organization.status`. If similar prior decisions exist, surface them. If new, create on a `tentative/scout-<date>` branch and enrich with sector hub, founder info if given, and links to relevant Patterns/Lessons.
+> A scout sent in: *"Saw a launch from Ferrumix on HN — vertical AI for industrial maintenance shops, two ex-Siemens engineers, YC W26, ferrumix.ai. Note: I think we passed on something similar last quarter (Stratopaint?)."* Triage it. Decide new/resurfacing/known/out-of-scope per `Organization.status`. If similar prior decisions exist, surface them. If new, create on a `tentative/scout-<date>` branch and enrich with sector hub, founder info if given, and links to relevant Patterns/Lessons.
 
-**External input:** raw scout note (text, an email, an HN link).
+**External input:** raw scout note (text, email, HN link).
 
-**Pulls (example, against the Ferrumix scenario):**
-- `search-organizations "ferrumix"` → 0 rows (so: new)
-- `search-organizations "stratopaint"` → 1 row, `org-stratopaint` with `status=passed`
-- `organization-deals org-stratopaint` + `decision-deal deal-stratopaint-seed` → surfaces `dec-stratopaint-pass`
-- `lessons-for-market mkt-vertical-saas` → `lsn-shell-anti-pattern`, `lsn-vertical-data-moat-eval`
-- `pattern-organizations pat-vertical-shell-flop` → confirms the prior pass anchors a known failure pattern
+**Pulls:**
+- Searches the graph for Ferrumix — returns zero rows, so the verdict is **new** (not a resurfacing)
+- Searches for Stratopaint (the scout's half-memory) — returns the org and its prior **pass decision** from Q4 2025, with the rationale "vertical SaaS without product-led pull"
+- Walks from that pass to the firm's accumulated learning on it: the **shell-anti-pattern lesson** ("distribution doesn't fix PMF"), the **5-customer data-moat eval protocol** lesson, and the underlying **vertical-shell-flop pattern** that Stratopaint anchors
+- Finds the existing open question "are our shell-pattern passes still right?" — there's a live institutional uncertainty that Ferrumix is fresh data on
 
-**Writes (example, on `tentative/scout-ferrumix-triage-20260529`):**
-- `add-organization org-ferrumix "Ferrumix" startup …` (status=`watching`, brief includes "ex-Siemens engineers, YC W26", website=`https://ferrumix.ai`)
-- `link-organization-in-market org-ferrumix mkt-vertical-saas`
-- `add-artifact art-ferrumix-hn-launch …` (HN note for provenance)
-- `add-signal sig-ferrumix-launch-discovery "Ferrumix launches on HN (YC W26)" discovery 2026-05-29 …`
-- `link-signal-about-organization sig-ferrumix-launch-discovery org-ferrumix`
-- `link-signal-sourced-from-artifact sig-ferrumix-launch-discovery art-ferrumix-hn-launch`
-- `link-signal-informs-question sig-ferrumix-launch-discovery q-vertical-saas-ai-shells-still-valid` (Ferrumix is fresh data for the existing "are our shell-pattern passes wrong?" question)
-- `add-insight-with-stance ins-ferrumix-shell-risk … memo neutral "pattern-matches the vertical-shell failure mode; ex-Siemens founders may have a proprietary-data counter — run the 5-customer protocol before deciding"`
-- `link-insight-highlights-pattern ins-ferrumix-shell-risk pat-vertical-shell-flop`
+**Writes (on `tentative/scout-ferrumix-triage-20260529`):**
+- A new Organization for Ferrumix, status `watching`, kind `startup`. The brief captures what the scout actually said — "ex-Siemens engineers, YC W26", website `ferrumix.ai` — and the org is wired into the `mkt-vertical-saas` sector hub so the relevant lessons are reachable from it
+- A scout-discovery Signal dated today, linked to Ferrumix
+- The HN note itself recorded as an Artifact (so the provenance for the signal isn't just "the scout said")
+- A structural link from the new signal to the open re-evaluation question — so the question now has one more datapoint and will surface higher next time it's reviewed
+- A neutral-stance Insight that names the tension explicitly: "pattern-matches the vertical-shell failure mode, but ex-Siemens founders in industrial maintenance may have proprietary-data access that flips the call. Run the 5-customer protocol before deciding." It's linked to the vertical-shell-flop pattern so the connection is queryable, not just prose
+- Founder Person nodes deliberately **not** created — the scout didn't name them. The agent flags this as the top enrichment gap rather than inventing slugs
 
-Founder Person nodes deliberately **not** created — scout didn't name them.
-
-**Why graph:** the dedup verdict is a structural property of `Organization.status`, not a tree in `policy.ts`. The Stratopaint linkage surfaces *because* the firm's prior pass is on the same Pattern in the same Market — no semantic-search hack needed.
+**Why graph:** the dedup verdict is a structural property of `Organization.status`, not a tree in `policy.ts`. The Stratopaint linkage surfaces *because* the firm's prior pass is on the same Pattern in the same Market — no semantic-search hack needed. The lessons and the open question come along for free because they're already attached to that pattern.
 
 ### 3. Pre-X brief · on-demand for every IC, board, founder call, partner 1:1
 
 **Prompt** (real shape, tested live):
-> Pawel is leading the upcoming IC for `deal-helix-series-a` (in-diligence, target close in 3 weeks). Generate a tight markdown brief covering: thesis context, supporting and contradicting evidence, open questions, internal debate to date, prior meetings, outstanding commitments. Cite slugs you actually saw. End with one of: STRONG INVEST / INVEST WITH CONDITIONS / PASS / NEEDS MORE DILIGENCE.
+> Pawel is leading the upcoming IC for `deal-helix-series-a` (in-diligence, target close in 3 weeks). Generate a tight markdown brief covering: thesis context, supporting and contradicting evidence, open questions, internal debate to date, prior meetings, outstanding commitments. Cite real evidence — no invented data. End with one of: STRONG INVEST / INVEST WITH CONDITIONS / PASS / NEEDS MORE DILIGENCE.
 
-**External input:** None. Pure graph composition.
+**External input:** None.
 
-**Pulls (example):**
-- `deal deal-helix-series-a` → terms ($14M on $42M, $5M check, target close 2026-07-15)
-- `deal-lead-partner deal-helix-series-a` → `per-pawel`
-- `pre-ic-brief-thesis deal-helix-series-a` → `thesis-on-prem-inference` + 3 assumptions with levels + confidences
-- `pre-ic-brief-evidence deal-helix-series-a` → `sig-aws-bedrock-onprem`, `sig-microsoft-onprem-push` (both contradicting margin assumptions)
-- `pre-ic-brief-questions deal-helix-series-a` → `q-helix-onprem-margin` (high priority)
-- `debate-stances deal-helix-series-a` → `ins-helix-bull`, `ins-helix-bear` (each citing different signal subsets)
-- `ic-prep-meeting-history deal-helix-series-a` → `mtg-helix-founder-call-2026-04` + attendees + summary
-- `ic-prep-open-commitments deal-helix-series-a` → `cmt-helix-customer-refs` (high, due 2026-06-15), `cmt-helix-second-meeting` (overdue)
+**Pulls:**
+- The deal terms themselves — $14M round on $42M pre, our $5M check, target close 2026-07-15 — and the lead partner (Pawel)
+- The deal's grounding thesis (**on-prem inference for regulated industries**, active, high confidence) and its three backing assumptions, each with a confidence level — sovereignty mandates (high), cost parity (medium), Helix margin (medium)
+- Every signal that **supports or contradicts** any of those assumptions. Both medium-confidence financial pillars come back with multiple contradicting signals (AWS Bedrock on-prem appliance launch; Microsoft's on-prem GPU SKUs); the high-confidence demand pillar comes back fully supported (€42M EU AI Act enforcement; an anchor customer mandating on-prem-only post-DORA)
+- The deal's open questions, by priority — surfaces one high-priority one: *"Can Helix sustain margins as cloud catches up?"*
+- Both prior internal memos written about this deal — the bull and the bear cases — and which signals each cites
+- Every meeting that's already happened or is scheduled about this deal — here just the founder call from April, with attendees and the summary that already named the margin question as the open item
+- Every still-open commitment owed before IC — the three customer reference calls (high priority, due in 3 weeks) and the long-overdue second-meeting margin test
 
-**Writes:** None. Output is the synthesized markdown brief returned to the partner — every reproducibility property comes from the snapshot-pinned reads.
+**Writes:** None. The output is the synthesized markdown brief returned to the partner — every reproducibility property comes from the snapshot-pinned reads.
 
-**Why graph:** five-to-eight reads against a single commit-pinned snapshot. The same brief re-run six months later against the same commit returns byte-identical evidence — no other store gives you that. In a real agent run, the synthesis surfaced "bull defends the demand pillar, bear attacks the margin pillar — they aren't arguing about the same thing" and flagged that the margin-testing commitment was a month overdue. That was a structural read, not a clever LLM observation.
+**Why graph:** ~8 reads against a single commit-pinned snapshot. The same brief re-run six months later against the same commit returns byte-identical evidence — no other store gives you that. In the live agent run, the synthesis surfaced "bull defends the demand pillar, bear attacks the margin pillar — they aren't arguing about the same thing" and flagged that the margin-testing commitment was a month overdue. Both observations are structural — counting which pillars each side's cited signals attack, and comparing today's date against `Commitment.due_date`. Not clever LLM observation; mechanical graph traversal.
 
 ### 4. Multi-agent IC simulation · on-demand for high-conviction deals
 
 **Prompt** (real shape, tested live as two parallel agents):
-> You are the **BULL** agent in a parallel IC debate for `org-quirebench` (LLM evaluation platform, portfolio org from a 2025 seed). The question is *follow-on participation in a hypothetical Series A*. The **BEAR** agent is running simultaneously against the same branch (`ic-debate-quirebench-20260529`). Read state, prior signals, related Patterns. Take the bull side. Write an `Insight{stance=bull}` with `add-insight-with-stance`, citing **real** signals via `InsightReliesOnSignal`. Don't invent. — *(bear agent gets the same prompt with BULL↔BEAR swapped.)*
+> You are the **BULL** agent in a parallel IC debate for `org-quirebench` (LLM evaluation platform, portfolio org from a 2025 seed). The question is *follow-on participation in a hypothetical Series A*. The **BEAR** agent is running simultaneously against the same branch (`ic-debate-quirebench-20260529`). Read state, prior signals, related Patterns. Take the bull side. Write an Insight with `add-insight-with-stance`, citing real signals via `InsightReliesOnSignal`. Don't invent. — *(bear agent gets the same prompt with BULL↔BEAR swapped.)*
 
 **External input:** None.
 
-**Pulls (example — bull):**
-- `organization org-quirebench` + `organization-theses org-quirebench` → `thesis-eval-as-product` (active, zero contradictions)
-- `market-signals mkt-dev-tools` → `sig-eval-fragmentation-news`, `sig-databricks-acquihire`
-- `organization-signals org-quirebench` → `sig-quirebench-board-decision` (Pro tier launched, live monetization)
-- `pattern-organizations pat-eval-fragmentation` → confirms QuireBench + Axon both sit on this pattern
+**Pulls (shared between both agents):**
+- The portfolio org itself and its grounding thesis (**eval-as-product**, active, zero contradictions)
+- All signals about the dev-tools market, surfacing the **state-of-LLM-eval** signal ("14 vendors and growing, no clear leader") and the **Databricks acquihire** ("eval startup acquired for ~$95M")
+- The org's own recent signals — most importantly the **board-approved Pro tier launch** (live monetization)
+- The **eval-fragmentation pattern**, which aggregates QuireBench, Axon Eval, and 3 other firms
 
-**Pulls (example — bear, same agent shape, different selection):**
-- Same `thesis-eval-as-product` + `pat-eval-fragmentation` reads
-- Plus `signal sig-axon-databricks-acquihire-rumor` → "Databricks tried to acquihire our own Axon; founder declined"
+**Bear agent additionally pulls:**
+- The **Axon acquihire-rumor signal** — "Databricks pitched acquihire to our own Axon; founder declined". The bull doesn't lean on this because it cuts against the standalone-outcome read.
 
-**Writes (example, both agents on `tentative/ic-debate-quirebench-20260529`):**
-- `add-insight-with-stance ins-quirebench-followon-bull "QuireBench — bull case" memo bull "open field + acquirer floor + live revenue" …`
-- `link-insight-about-deal ins-quirebench-followon-bull deal-quirebench-seed`
-- `link-insight-relies-on-signal ins-quirebench-followon-bull sig-eval-fragmentation-news`
-- `link-insight-relies-on-signal ins-quirebench-followon-bull sig-databricks-acquihire`
-- `link-insight-relies-on-signal ins-quirebench-followon-bull sig-quirebench-board-decision`
-- `link-insight-highlights-pattern ins-quirebench-followon-bull pat-eval-fragmentation`
+**Writes (both agents on `tentative/ic-debate-quirebench-20260529`):**
+- **Bull memo** — "QuireBench in an open field with an acquirer floor and live monetization; follow-on preserves ownership in the likely category winner." Cites the eval-fragmentation signal (open field), the Databricks acquihire (acquirer floor sets a $95M downside), and the Pro tier board decision (revenue is real). Anchored on the same eval-fragmentation pattern that defines the market.
+- **Bear memo** — "Recommend pass. The same $95M Databricks deal was an *acquihire* not a product M&A; the rumored Axon acquihire was *declined*; QuireBench is 1-of-14 with no moat. Pattern reads as commoditization, not opportunity." Cites the eval-fragmentation signal (crowded), the Databricks acquihire (acqui-talent priced — exit ceiling, not floor), and the Axon-rumor (the easy exit was already foreclosed on our own portfolio). Anchored on the *same* eval-fragmentation pattern, interpreted oppositely.
+- Read back via `debate-stances deal-quirebench-seed` returns both memos side-by-side with their stance, summary, and the signals they cite.
 
-…and symmetrically for `ins-quirebench-followon-bear`, citing `sig-eval-fragmentation-news` + `sig-databricks-acquihire` + `sig-axon-databricks-acquihire-rumor` and **also** linking to the same `pat-eval-fragmentation` — interpreted oppositely (bull: open field; bear: crowded, no moat). Read back: `debate-stances deal-quirebench-seed` returns both rows side-by-side.
-
-**Why graph:** `Insight.stance` + `InsightReliesOnSignal` + same-deal grouping is the schema's debate primitive. Both insights cite the same Pattern (`pat-eval-fragmentation`) and overlapping signals — the disagreement is structurally legible, not just stylistically. Replaces P9's "3-agent founder tribunal" with first-class persistence partners can audit row-by-row.
+**Why graph:** both memos linked to the **same Pattern node** with opposite framings is the schema's debate primitive working. The disagreement is structurally legible — the partner can see at a glance "these two agents are arguing about how to read the same evidence" rather than "two LLM essays that happen to disagree". Replaces P9's "3-agent founder tribunal" with first-class persistence partners can audit row-by-row.
 
 ### 5. Reflexive learning sweep · quarterly
 
 **Prompt** (shape):
-> Scan recent `Decision`s + active `Pattern`s. For any Pattern with ≥3 supporting Decisions and consistent outcome (all-pass / all-invest / all-write-off / all-double-down), propose a tentative `Lesson` on `tentative/lesson-<slug>-<quarter>`. Cite the Pattern via `distilledFromPattern`. End with a digest of what landed.
+> Scan recent Decisions plus active Patterns. For any Pattern with ≥3 supporting Decisions and consistent outcome (all-pass / all-invest / all-write-off / all-double-down), propose a tentative Lesson on `tentative/lesson-<slug>-<quarter>`. Cite the Pattern via `distilledFromPattern`. End with a digest of what landed (or that nothing did, if the existing Lessons already cover everything).
 
 **External input:** None.
 
-**Pulls (example):**
-- `decisions-recent` → 6 Decisions in the active set (`dec-pulserate-pass`, `dec-stratopaint-pass`, `dec-vector-forge-pass`, `dec-aetherbrick-follow-on-eval`, `dec-axon-ic-recommend-invest`, `dec-onprem-thesis-doubledown`)
-- `patterns` + `pattern-decisions pat-vertical-shell-flop` → 3 Decisions (all passes — consistent outcome)
-- `lessons-active` → existing Lessons (avoid duplicating `lsn-shell-anti-pattern` which already documents this)
+**Pulls:**
+- Every Decision from the last quarter — for the v1 seed that's 6 Decisions: three vertical-shell *passes* (PulseRate, Stratopaint, Vector Forge), an Aetherbrick *follow-on evaluation*, an Axon *invest recommendation*, and a thesis-level *double-down on on-prem inference*
+- Every Pattern, with its `acrossDecision` aggregations — the **vertical-shell-flop** pattern has three supporting Decisions, all passes, consistent outcome (clear lesson candidate). The **on-prem shift** pattern has the Helix-second-meeting commitment (was a Decision pre-cleanup) plus the double-down — only two, and outcomes diverge (one is a hold-while-testing, the other is an active bet), so no consistent lesson yet
+- Every already-active Lesson — discovers that the shell-anti-pattern lesson already exists and documents exactly this shape, so a new Lesson here would be a duplicate
 
-**Writes (example, only if a new pattern is found — in the seed this sweep would not produce a new Lesson, which is the right answer):**
-- `omnigraph branch create tentative/lesson-<slug>-2026-q2`
-- `add-lesson lsn-<slug> "<title>" rule-of-thumb "<body>" tentative …`
-- `link-lesson-distilled-from lsn-<slug> pat-<slug>`
-- `link-lesson-applies-to-market lsn-<slug> mkt-<slug>` (if scoped to a sector)
+**Writes (only if a genuinely new pattern is found — for the v1 seed, none):**
+- A new Lesson with `status=tentative`, body capturing the rule of thumb in operational terms, linked to the Pattern it was distilled from and to the Market(s) it applies to. Partner reviews via `branch diff`; merging promotes `status=tentative → active`, deletion drops the lesson.
 
-**Why graph:** `Lesson.status=tentative` + branch-based promote replaces the markdown buffer / promote loop with one primitive. `Pattern.acrossDecision` aggregation is what makes "this shape recurred 3 times" a deterministic query, not a vibes call.
+For the v1 seed this sweep produces nothing — which is the **right** answer. The existing `lsn-shell-anti-pattern` covers the three vertical-shell passes; the on-prem pattern hasn't accumulated enough closed Decisions yet to distill. A sweep that always produces a Lesson would be a hallucinating sweep.
+
+**Why graph:** `Lesson.status=tentative` + branch-based promote replaces the markdown buffer / promote loop with one primitive. `Pattern.acrossDecision` aggregation is what makes "this shape recurred 3 times with consistent outcome" a deterministic query, not a vibes call. The duplicate-check against existing active Lessons is the same primitive — `lesson distilledFromPattern X` already covered?
 
 ## v1 scope
 
