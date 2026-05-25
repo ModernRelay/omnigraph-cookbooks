@@ -1,14 +1,18 @@
 // VC OS — Venture-capital operating system schema, built on Omnigraph.
 //
 // Models the seven jobs a VC does (Find / Evaluate / Decide / Win / Help / Monitor / Learn).
-// Organized as 7 core nodes (stable for years) + 11 growth-ring nodes (analytical layer
+// Organized as 7 core nodes (stable for years) + 10 growth-ring nodes (analytical layer
 // that compounds). See README.md for the design rationale.
 //
 //   Core (7):           Organization · Person · Deal · Fund · Market · Artifact · Meeting
-//   Growth ring (11):   Thesis · Assumption · Question · Signal · Insight · Decision ·
-//                       Commitment · Pattern · Lesson · Chunk · SourceEntity
+//   Growth ring (10):   Thesis · Assumption · Question · Signal · Insight · Decision ·
+//                       Commitment · Pattern · Lesson · Chunk
 //
-// 18 node types, ~63 edge types. Slug-keyed, flat-enum, no interfaces.
+// 17 node types, 67 edge types declared (65 populated in the v1 seed).
+// Slug-keyed, flat-enum, no interfaces.
+//
+// Source provenance lives on Organization (kind=publisher|database|expert-network)
+// with a `reliability` property — no separate SourceEntity node.
 
 
 // ═══════════════════════════════════════════════════════════════════
@@ -32,15 +36,24 @@ node Organization {
     hq: String?
 
     // What kind of entity this is. Required, indexed — the primary lens.
+    // `publisher` / `database` / `expert-network` cover provenance sources
+    // (TechCrunch, PitchBook, Tegus) that used to live in SourceEntity.
     kind: enum(startup, lp-institution, vc-firm, acquirer, customer, bank,
                regulator, association, accelerator, university, family-office,
-               other) @index
+               publisher, database, expert-network, other) @index
 
     // Quito's engagement state. Only meaningful for `kind=startup`. Nullable
     // otherwise. `observed` = "we track this organization in our knowledge base but
     // have not engaged" (e.g., PitchBook-imported, news-sourced).
     status: enum(cold, watching, pipeline, evaluating, portfolio, exited,
                  passed, observed)? @index
+
+    // Source-reliability rating. Meaningful for `kind` in
+    // (publisher, database, expert-network) — these are the entities whose
+    // track record we score. When a publisher's reliability drops, walk
+    // `published-by-organization` ← Artifact ← SignalSourcedFromArtifact ← Signal
+    // to flag downstream Signals for revalidation.
+    reliability: enum(low, medium, high)? @index
 
     // For institutional entities (LPs, hyperscalers, banks): assets under management.
     aum_usd_m: F64?
@@ -70,8 +83,6 @@ node Organization {
 node Person {
     slug: String @key
     name: String @index
-    first_name: String?
-    last_name: String?
     email: String?
     linkedin: String?
     location: String?
@@ -177,10 +188,16 @@ node Market {
 node Artifact {
     slug: String @key
     name: String @index
-    kind: enum(email, ticket, slack-msg, meeting-note, transcript, deck,
+    kind: enum(email, ticket, chat-msg, meeting-note, transcript, deck,
                web-page, screenshot, doc, audio, image, summary, markdown) @index
-    source: enum(gmail, slack, granola, web, manual, lemlist, sapien, zendesk,
-                 notion, derived, github, other) @index
+    // Coarse category of capture channel. Vendor names live in `source_app`
+    // so swapping CRM/note tools doesn't require a schema migration.
+    source: enum(email, chat, meeting-tool, web, doc-tool, crm, outbound,
+                 manual, derived, repo, other) @index
+    // Free-text vendor/app name (e.g. "gmail", "slack", "granola", "lemlist",
+    // "notion", "github"). Optional; lets queries narrow by specific tool
+    // without baking vendor names into the schema.
+    source_app: String? @index
     title: String?
     body: String?
     blob: Blob?
@@ -318,36 +335,21 @@ node Signal {
 }
 
 
-// Insight — a synthesized internal interpretation. Memo, brief, observation,
-// hypothesis, recap. Multi-agent IC simulation uses two Insights with stance=bull
-// and stance=bear against the same Deal, each grounded in Signals via
-// `InsightReliesOnSignal`. Founder-assessment memos attach via `InsightAboutPerson`.
+// Insight — a synthesized internal interpretation. Multi-agent IC simulation
+// uses two Insights with stance=bull and stance=bear against the same Deal,
+// each grounded in Signals via `InsightReliesOnSignal`. Founder-assessment
+// memos attach via `InsightAboutPerson`.
+//
+// Note: `hypothesis` is NOT a valid kind here. An open prediction awaiting
+// evidence is a `Question`, which has the right lifecycle (open/partial/resolved)
+// and participates in the `DecisionNeedsAnswer` traversal.
 node Insight {
     slug: String @key
     name: String @index
-    kind: enum(memo, brief, observation, hypothesis, recap) @index
+    kind: enum(memo, brief, observation, recap) @index
     stance: enum(bull, bear, neutral)?
     summary: String?
     body: String?
-    createdAt: DateTime
-    updatedAt: DateTime
-}
-
-
-// SourceEntity — the upstream source from which an Artifact (and any Signal
-// derived from it) originated. Reliability scoring lets us invalidate downstream
-// Signals when a source proves unreliable — exactly the kind of provenance-driven
-// revalidation that's the whole point of structured knowledge over PDFs and emails.
-node SourceEntity {
-    slug: String @key
-    name: String @index
-    kind: enum(news, social, blog, expert-call, sec-filing, pitch-deck,
-               founder-direct, customer-call, web-scrape, internal,
-               other) @index
-    // Updates over time as evidence accumulates about this source's track record.
-    reliability: enum(low, medium, high)? @index
-    url: String?
-    brief: String?
     createdAt: DateTime
     updatedAt: DateTime
 }
@@ -371,16 +373,17 @@ node Chunk {
 
 // Decision — a one-shot decision regarding a Deal, Thesis, or Organization. The
 // provenance chain (Decision → basedOnAssumption → contradictedBy → Signal
-// → sourcedFromArtifact → publishedBySource) IS the audit trail. Combined with
-// snapshot-pinned reads, no separate audit log is needed.
+// → sourcedFromArtifact → publishedByOrganization) IS the audit trail. Combined
+// with snapshot-pinned reads, no separate audit log is needed.
 //
-// Note: intros and follow-ups are NOT Decisions — they're Commitments. A Decision
-// is a one-shot act (decided_at). A Commitment is an ongoing obligation (due_date).
+// Note: intros, follow-ups, schedule-a-second-meeting, and flag-at-next-board
+// are NOT Decisions — they're Commitments. A Decision is a one-shot act
+// (decided_at). A Commitment is an ongoing obligation (due_date).
 node Decision {
     slug: String @key
     name: String @index
-    kind: enum(invest, pass, follow-on, board-flag, double-down, write-off,
-               exit-plan, second-meeting, no-decision) @index
+    kind: enum(invest, pass, follow-on, double-down, write-off, exit-plan,
+               no-decision) @index
     rationale: String?
     decided_at: Date? @index
     createdAt: DateTime
@@ -546,7 +549,10 @@ edge InsightReliesOnSignal: Insight -> Signal
 
 // Provenance (Artifact ↔ world)
 edge SignalSourcedFromArtifact: Signal -> Artifact
-edge PublishedBySource: Artifact -> SourceEntity     // for revalidation if source reliability drops
+// Publishing-source organization (publisher / database / expert-network).
+// When the org's `reliability` drops, walk this edge backward through
+// SignalSourcedFromArtifact to flag every downstream Signal for revalidation.
+edge PublishedByOrganization: Artifact -> Organization
 edge ArtifactFromPerson: Artifact -> Person
 edge ArtifactAboutDeal: Artifact -> Deal
 edge ArtifactAboutOrganization: Artifact -> Organization

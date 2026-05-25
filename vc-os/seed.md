@@ -4,7 +4,7 @@ Human-readable twin of `seed.jsonl`. All names, deals, organizations, and people
 
 The firm: **Quito Capital**, Berlin-based, AI-infra focused. Two funds: Fund II ($120M, vintage 2021, harvesting) and Fund III ($250M, vintage 2024, investing). Five-person team in Berlin / London / Paris.
 
-**Totals (loaded):** 205 nodes across 17 active types, 464 edges across 62 edge types. (`Chunk` is declared in the schema but zero rows in the seed — v1 ships no embeddings.) `Knows` is loaded bidirectionally (14 unique pairs × 2 = 28 edges).
+**Totals (loaded):** 207 nodes across 16 active types, 460 edges across 65 edge types. (`Chunk` is declared in the schema but zero rows in the seed — v1 ships no embeddings.) `Knows` is loaded bidirectionally (14 unique pairs × 2 = 28 edges). Source-provenance entities (TechCrunch, PitchBook, Tegus, anon blog) live as `Organization` rows with `kind in (publisher, database, expert-network)` and a `reliability` rating — not as a separate `SourceEntity` node.
 
 ## Funds
 
@@ -65,9 +65,9 @@ The firm: **Quito Capital**, Berlin-based, AI-infra focused. Two funds: Fund II 
 **Experts (3):** Jordan (on-prem), Malik (GTM), Cora (security CISO).
 **Acquirer DMs (3):** Rajiv (AWS), Priti (Microsoft), Leo (Snowflake).
 
-## Non-startup Companies (12)
+## Non-startup Companies (16)
 
-All `Organization` rows; the `kind` enum distinguishes them. Includes `org-quito` (Quito itself, kind=vc-firm) and `org-grace-tan-fo` (Grace Tan's family-office LP, kind=family-office).
+All `Organization` rows; the `kind` enum distinguishes them. Includes `org-quito` (Quito itself, kind=vc-firm), `org-grace-tan-fo` (Grace Tan's family-office LP, kind=family-office), and 4 source-provenance orgs (collapsed from the old `SourceEntity` node).
 
 **Acquirers (5):** AWS, Microsoft, Snowflake, Databricks, Google Cloud — all `kind=acquirer`.
 **LP institutions (3):** Allianz IM, Vestland, Grayrock Foundation — `kind=lp-institution`.
@@ -75,6 +75,11 @@ All `Organization` rows; the `kind` enum distinguishes them. Includes `org-quito
 **Accelerator (1):** Y Combinator — `kind=accelerator`.
 **Quito itself (1):** `org-quito` — `kind=vc-firm`. Team members `WorksAt` it.
 **Family office (1):** `org-grace-tan-fo` — `kind=family-office`. Individual LP modeled this way.
+**Publishers (2):** `org-techcrunch` (medium reliability), `org-anonblog` (low reliability) — `kind=publisher`.
+**Database (1):** `org-pitchbook` (high reliability) — `kind=database`.
+**Expert network (1):** `org-tegus` (high reliability) — `kind=expert-network`.
+
+The four source orgs carry a `reliability` rating; reliability-driven Signal revalidation walks `Organization ← publishedByOrganization ← Artifact ← signalSourcedFromArtifact ← Signal`. The `src-founder-direct` provenance tag from the old schema is gone — content from a founder is queryable via `Artifact → fromPerson → Person → founderOf → Organization`.
 
 ## Theses (8)
 
@@ -137,7 +142,7 @@ Notable signals for killer queries:
 
 ## Insights (12)
 
-12 insights across kinds (`memo`, `brief`, `observation`, `hypothesis`, `recap`) and stances (`bull`, `bear`, `neutral`). Notable:
+12 insights across kinds (`memo`, `brief`, `observation`, `recap`) and stances (`bull`, `bear`, `neutral`). Open uncertainties live on `Question`, not `Insight{kind=hypothesis}`. Notable:
 
 - `ins-helix-bull` + `ins-helix-bear` — the multi-agent IC simulation demo; both grounded in real Signals.
 - `ins-axon-memo` — IC memo for the Axon investment recommendation.
@@ -146,25 +151,26 @@ Notable signals for killer queries:
 
 ## Artifacts (15)
 
-15 artifacts mixing transcripts (Granola), emails (Gmail), decks, web pages, Slack messages, derived summaries. All metadata-only in v1 (no blob payloads). One ArtifactDerivedFrom chain: board notes → AI summary.
+15 artifacts mixing transcripts (`source=meeting-tool`, `source_app=granola`), emails (`source=email`, `source_app=gmail`), decks, web pages, chat messages (`source=chat`, `source_app=slack`), derived summaries, and git-pinned markdown (`source=repo`, `source_app=github`). All metadata-only in v1 (no blob payloads). One `ArtifactDerivedFrom` chain: board notes → AI summary.
 
-## Decisions (7)
+## Decisions (6)
+
+Only true one-shot decisions live here. *Schedule another meeting* and *flag at next board* are `Commitment`s.
 
 | Slug | Kind | Regarding | By |
 |---|---|---|---|
 | `dec-vector-forge-pass` | pass | deal-vector-forge-seed | per-pawel |
 | `dec-pulserate-pass` | pass | deal-pulserate-series-a | per-flo |
 | `dec-stratopaint-pass` | pass | deal-stratopaint-seed | per-cj |
-| `dec-helix-second-meeting` | second-meeting | deal-helix-series-a | per-pawel |
 | `dec-aetherbrick-follow-on-eval` | follow-on | deal-aetherbrick-series-a | per-cj |
 | `dec-axon-ic-recommend-invest` | invest | deal-axon-seed | per-flo |
 | `dec-onprem-thesis-doubledown` | double-down | **thesis-on-prem-inference** (the only thesis-level Decision in the seed — exercises `DecisionRegardingThesis`) | per-cj |
 
 Each Decision is linked to: regardingDeal (or regardingThesis), basedOnAssumption (1-2), needsAnswerToQuestion (when applicable), byPerson.
 
-## Commitments (8)
+## Commitments (9)
 
-Mix of open / in-progress / done. Includes intros to make, board-prep deliverables, customer-ref calls, and follow-up emails to passed founders.
+Mix of open / in-progress / done. Includes intros to make, board-prep deliverables, customer-ref calls, follow-up emails to passed founders, and `cmt-helix-second-meeting` (which used to be a Decision but is correctly a Commitment — it has a due_date and an assignee, not a `decided_at`).
 
 ## Patterns (5) and Lessons (4)
 
@@ -189,7 +195,7 @@ The operational layer — what the firm actually did with its time. Mix of `occu
 
 | Slug | Kind | When | Status | Subject |
 |---|---|---|---|---|
-| `mtg-helix-founder-call-2026-04` | founder-call | 2026-04-12 | occurred | `deal-helix-series-a` + `org-helix-runtime`. Transcript: `art-helix-founder-call-2026-04`. Produced `dec-helix-second-meeting` + `cmt-helix-customer-refs`. |
+| `mtg-helix-founder-call-2026-04` | founder-call | 2026-04-12 | occurred | `deal-helix-series-a` + `org-helix-runtime`. Transcript: `art-helix-founder-call-2026-04`. Produced `cmt-helix-second-meeting` + `cmt-helix-customer-refs`. |
 | `mtg-helix-ic-2026-06` | ic | 2026-06-20 | scheduled | `deal-helix-series-a`. Full team + `per-vp-tegan`. |
 | `mtg-aetherbrick-board-q1-2026` | board | 2026-04-08 | occurred | `org-aetherbrick`. Transcript: `art-aetherbrick-board-q1`. Produced `cmt-aetherbrick-board-prep`. |
 | `mtg-aetherbrick-board-q2-2026` | board | 2026-07-09 | scheduled | `org-aetherbrick`. The "next board" for the board-prep demo. |

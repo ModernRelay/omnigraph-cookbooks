@@ -14,7 +14,7 @@ The reference seed is a **fictional Berlin-based AI-infra fund** ("Quito Capital
 - `README.md` — Design rationale, collapsed stack analysis, killer queries.
 - `seed.md` / `seed.jsonl` — Reference seed (human-readable / loadable).
 - `queries/*.gq` — Read and mutation queries. One file per domain.
-- `omnigraph.yaml` — CLI config with ~140 aliases.
+- `omnigraph.yaml` — CLI config with 294 aliases.
 
 Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).
 
@@ -28,28 +28,28 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 
 ## Domain Model
 
-**Core (7) + Growth ring (11) = 18 nodes total.** The core is stable for years; the growth ring evolves as the firm learns.
+**Core (7) + Growth ring (10) = 17 nodes total.** The core is stable for years; the growth ring evolves as the firm learns.
 
 **Core:**
 | Node | Purpose |
 |---|---|
-| `Organization` | Universal entity. `kind` enum: startup/lp-institution/vc-firm/acquirer/customer/bank/regulator/accelerator/family-office/etc. Quito itself is `org-quito` (kind=vc-firm). |
+| `Organization` | Universal entity. `kind` enum: startup/lp-institution/vc-firm/acquirer/customer/bank/regulator/accelerator/family-office/**publisher/database/expert-network**/other. Quito itself is `org-quito` (kind=vc-firm). Source-provenance entities (TechCrunch, PitchBook, Tegus, anon blog) live here with `kind` in (publisher, database, expert-network) plus a `reliability` rating. |
 | `Person` | Individual human. Roles relative to Quito live on edges, not on the node. |
 | `Deal` | A funding event involving a Organization. `outcome=observed` for external rounds with no Quito participation. |
 | `Fund` | Quito's funds. |
 | `Market` | Sector/vertical hub. |
-| `Artifact` | Raw content with native Blob. |
+| `Artifact` | Raw content with native Blob. `source` is a coarse category (`email/chat/meeting-tool/web/doc-tool/crm/outbound/manual/derived/repo/other`); `source_app` carries the specific vendor name (`gmail`, `granola`, `slack`, `github`, etc.). |
 | `Meeting` | Scheduled (or ad-hoc) event with attendees, subject, outputs. Transcript lives as `Artifact{kind=transcript|meeting-note}` linked via `ArtifactFromMeeting`. |
 
 **Growth ring:**
 | Layer | Nodes | Purpose |
 |---|---|---|
-| Belief | `Thesis`, `Assumption`, `Question` | Investing DNA |
-| Evidence | `Signal`, `Insight`, `SourceEntity`, `Chunk` | What moves beliefs. `SourceEntity` enables reliability-driven signal revalidation. `Chunk` is implementation detail. |
-| Action | `Decision`, `Commitment` | What we do. Decisions are one-shot; Commitments are deferred actions with deadlines. |
+| Belief | `Thesis`, `Assumption`, `Question` | Investing DNA. `Question` is the home for open uncertainties — *not* `Insight{kind=hypothesis}`. |
+| Evidence | `Signal`, `Insight`, `Chunk` | What moves beliefs. `Chunk` is implementation detail. Source-reliability lives on the publishing Organization, not on a separate node. |
+| Action | `Decision`, `Commitment` | What we do. Decisions are one-shot (`decided_at`); Commitments are deferred actions with deadlines. Schedule-another-meeting and flag-at-next-board are Commitments, not Decisions. |
 | Reflexive | `Pattern`, `Lesson` | What we learn |
 
-v1 seed ships `Chunk` zero (populate via `omnigraph embed --reembed_all`). All other 16 active.
+v1 seed ships `Chunk` zero (populate via `omnigraph embed --reembed_all`). All other 16 node types active.
 
 **Core analytical loops:**
 
@@ -60,16 +60,17 @@ v1 seed ships `Chunk` zero (populate via `omnigraph embed --reembed_all`). All o
 
 **Design choices to preserve:**
 
-- **Slug prefix convention is mandatory** — `org-` (all Organizations, regardless of `kind`), `per-`, `mkt-`, `deal-`, `fund-`, `art-`, `mtg-`, `thesis-`, `asmp-`, `q-`, `sig-`, `ins-`, `src-`, `chk-`, `dec-`, `cmt-`, `pat-`, `lsn-`. Don't break it.
+- **Slug prefix convention is mandatory** — `org-` (all Organizations, including the four source-provenance orgs `org-techcrunch`/`org-pitchbook`/`org-tegus`/`org-anonblog`), `per-`, `mkt-`, `deal-`, `fund-`, `art-`, `mtg-`, `thesis-`, `asmp-`, `q-`, `sig-`, `ins-`, `chk-`, `dec-`, `cmt-`, `pat-`, `lsn-`. The old `src-` prefix is gone — those nodes are now Organizations. Don't reintroduce it.
 - **One `Organization` covers everything.** Startups, LPs, acquirers, peer VCs, customers — all `Organization` with different `kind` values. Don't reintroduce a separate `Organization` node.
 - **`org-quito` is Quito itself** — a `Organization` with `kind=vc-firm`. Team members `WorksAt org-quito` (this replaces the dropped `Person.primary_relation = team` enum). Funds reference Quito implicitly via `LpInFund` from external LPs.
 - **`Person` is intrinsic** — no `primary_relation` enum. Roles are derived from edges: `WorksAt org-quito` (team), `FounderOf` (founder), `LpInFund` source via `WorksAt` (LP contact), `RoleInDeal {role: founder|customer-ref|expert|co-investor-lead|co-investor-participant|board-candidate|venture-partner}` (deal-scoped roles — keep this list in sync with the enum in `schema.pg`), `DecisionMakerAt $co {kind: acquirer}` (acquirer DM).
 - **`Person` enrichment fields** (`prior_exits`, `years_operating`, `education`, `prior_organizations`, `founder_score`, `last_enriched_at`) are populated by a scraping/enrichment skill, refreshed periodically.
 - **One `Organization` can have many `Deal`s.** A deal is a round-level engagement. Decisions attach to Deals, not Companies. `outcome=observed` for external rounds (e.g., PitchBook imports) where Quito didn't participate.
-- **`Insight.kind`** is `memo, brief, observation, hypothesis, recap`. `stance` (bull/bear/neutral) is separate. Don't conflate; don't reintroduce `debate-bull/bear` kinds.
-- **`Decision.kind`** is one-shot only: `invest, pass, follow-on, board-flag, double-down, write-off, exit-plan, second-meeting, no-decision`. Intros and follow-ups are `Commitment`s, not Decisions.
+- **`Insight.kind`** is `memo, brief, observation, recap`. `stance` (bull/bear/neutral) is separate. **`hypothesis` was removed** — open uncertainties belong on `Question`, which has the right lifecycle. Don't conflate; don't reintroduce `debate-bull/bear` kinds.
+- **`Decision.kind`** is one-shot only: `invest, pass, follow-on, double-down, write-off, exit-plan, no-decision`. **Intros, follow-ups, schedule-a-second-meeting, and flag-at-next-board are `Commitment`s, not Decisions** — they have due dates and assignees, not `decided_at` timestamps. Don't reintroduce `second-meeting` or `board-flag` as Decision kinds.
 - **`Decision` regards Deals (or Theses), not Companies directly.** Portco-level decisions chain via the organization's most recent Deal.
-- **`SourceEntity`** carries provenance + reliability. When a source's reliability drops, all `Signal`s sourced from `Artifact`s `PublishedBySource` it can be flagged via `source-downstream-signals`.
+- **Source provenance lives on Organization, not on a separate node.** A publishing source (TechCrunch, PitchBook, Tegus, anon blog) is an `Organization` with `kind` in `(publisher, database, expert-network)` and a `reliability` enum (low/medium/high). When reliability drops, walk `Organization ← publishedByOrganization ← Artifact ← signalSourcedFromArtifact ← Signal` to flag downstream signals (`source-downstream-signals` alias). Don't reintroduce a separate `SourceEntity` node.
+- **`Artifact.source` is a coarse category, vendor names go in `source_app`.** Use the category enum (`email, chat, meeting-tool, web, doc-tool, crm, outbound, manual, derived, repo, other`) for filtering; put the specific vendor (`gmail`, `granola`, `slack`, `github`, `lemlist`, `notion`, `zendesk`, …) in `source_app`. This keeps the schema stable when the firm switches CRM tools.
 - **`Lesson.kind=protocol`** is the runtime-rules use case (declarative behavior rules the team wants agents to follow). `Lesson.status=tentative` lives on a review branch awaiting human merge.
 - **Edges follow `VerbTargetType` naming** (`SignalAboutOrganization`, `DecisionBasedOnAssumption`, `LessonDistilledFromPattern`).
 - **Edge traversal in queries is lowerCamelCase** even though the schema declares PascalCase (`$d forOrganization $c`).
@@ -135,9 +136,11 @@ These are the queries the seed is shaped to light up. Preserve them when iterati
 **Provenance / source reliability:**
 | Alias | Input | Expected outcome |
 |---|---|---|
-| `sources` | — | 5 SourceEntity rows with reliability |
-| `source-downstream-signals` | `src-techcrunch` | All Signals from medium-reliability TechCrunch artifacts |
-| `sources-by-reliability` | `low` | Anonymous blog source flagged |
+| `publishers` | — | TechCrunch (medium) + anon blog (low) — `Organization{kind=publisher}` |
+| `databases` | — | PitchBook (high) — `Organization{kind=database}` |
+| `expert-networks` | — | Tegus (high) — `Organization{kind=expert-network}` |
+| `source-downstream-signals` | `org-techcrunch` | 4 Signals from medium-reliability TechCrunch artifacts |
+| `sources-by-reliability` | `low` | Anonymous blog flagged |
 
 **Reflexive:**
 | Alias | Input | Expected outcome |

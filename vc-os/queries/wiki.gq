@@ -1,7 +1,8 @@
 // Wiki / markdown reads. The graph holds the *relational* shape of belief
 // (Thesis status, Lesson confidence, Pattern membership); markdown in a
 // partner-curated git repo holds the *prose*. Both link via Artifact:
-//   Artifact{kind=markdown, source=github, repo, path, commit_sha, branch, last_synced_at, body}
+//   Artifact{kind=markdown, source=repo, source_app="github", repo, path,
+//            commit_sha, branch, last_synced_at, body}
 // connected to the belief node by ArtifactDocuments{Thesis,Lesson,Pattern}.
 
 // ──────────────────────────────────────────────
@@ -15,29 +16,29 @@ query get_markdown_artifact($slug: String) {
     return { $a.slug, $a.name, $a.kind, $a.source, $a.repo, $a.path, $a.branch, $a.commit_sha, $a.url, $a.last_synced_at, $a.body }
 }
 
-// All github-stored artifacts, most-recently-synced first. Source-based filter
-// (post-v0.5.0 enum extension via wipe+reload migration).
+// All repo-stored artifacts, most-recently-synced first. `source=repo` covers
+// any git-backed content; narrow to a specific provider via `source_app`.
 query markdown_artifacts_recent() {
     match {
-        $a: Artifact { source: "github" }
+        $a: Artifact { source: "repo" }
     }
     return { $a.slug, $a.name, $a.kind, $a.repo, $a.path, $a.branch, $a.commit_sha, $a.last_synced_at }
     order { $a.last_synced_at desc }
 }
 
-// All github-stored artifacts in a specific repo (so a fund can run multiple wikis).
+// All repo-stored artifacts in a specific repo (so a fund can run multiple wikis).
 query markdown_artifacts_in_repo($repo: String) {
     match {
-        $a: Artifact { source: "github", repo: $repo }
+        $a: Artifact { source: "repo", repo: $repo }
     }
     return { $a.slug, $a.name, $a.kind, $a.path, $a.branch, $a.commit_sha, $a.last_synced_at }
     order { $a.path }
 }
 
-// Markdown artifacts specifically — filters out other future github-sourced kinds.
+// Markdown artifacts specifically — filters out other future repo-sourced kinds.
 query markdown_artifacts_only() {
     match {
-        $a: Artifact { kind: "markdown", source: "github" }
+        $a: Artifact { kind: "markdown", source: "repo" }
     }
     return { $a.slug, $a.name, $a.repo, $a.path, $a.branch, $a.commit_sha, $a.last_synced_at }
     order { $a.last_synced_at desc }

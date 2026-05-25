@@ -286,8 +286,13 @@ aliases:
   # ══════════════════════════════════════════════════════════════════
   # PRIMITIVES — Sources (provenance + reliability)
   # ══════════════════════════════════════════════════════════════════
+  # Sources are Organizations with kind in (publisher, database, expert-network)
+  # and a `reliability` rating. Reliability drops trigger downstream-signal revalidation.
+  # 0.4 has no enum-IN filter, so "all sources" is the union of publishers + databases + expert-networks.
   source:                      { command: read, query: sources.gq, name: get_source, args: [slug], format: kv }
-  sources:                     { command: read, query: sources.gq, name: sources_all }
+  publishers:                  { command: read, query: sources.gq, name: publishers }
+  databases:                   { command: read, query: sources.gq, name: databases }
+  expert-networks:             { command: read, query: sources.gq, name: expert_networks }
   sources-by-reliability:      { command: read, query: sources.gq, name: sources_by_reliability, args: [reliability] }
   sources-by-kind:             { command: read, query: sources.gq, name: sources_by_kind, args: [kind] }
   source-artifacts:            { command: read, query: sources.gq, name: source_artifacts, args: [slug] }
@@ -302,7 +307,7 @@ aliases:
   add-market:                  { command: change, query: mutations.gq, name: add_market, args: [slug, name, createdAt, updatedAt] }
   add-deal:                    { command: change, query: mutations.gq, name: add_deal, args: [slug, name, stage, outcome, createdAt, updatedAt] }
   add-fund:                    { command: change, query: mutations.gq, name: add_fund, args: [slug, name, createdAt, updatedAt] }
-  add-artifact:                { command: change, query: mutations.gq, name: add_artifact, args: [slug, name, kind, source, date, captured_at, createdAt, updatedAt] }
+  add-artifact:                { command: change, query: mutations.gq, name: add_artifact, args: [slug, name, kind, source, source_app, date, captured_at, createdAt, updatedAt] }
   add-meeting:                 { command: change, query: mutations.gq, name: add_meeting, args: [slug, name, kind, scheduled_at, status, createdAt, updatedAt] }
   add-markdown-artifact:       { command: change, query: mutations.gq, name: add_markdown_artifact, args: [slug, name, kind, source, repo, path, commit_sha, branch, url, body, date, captured_at, last_synced_at, createdAt, updatedAt] }
   add-thesis:                  { command: change, query: mutations.gq, name: add_thesis, args: [slug, name, status, createdAt, updatedAt] }
@@ -310,7 +315,7 @@ aliases:
   add-question:                { command: change, query: mutations.gq, name: add_question, args: [slug, name, status, createdAt, updatedAt] }
   add-signal:                  { command: change, query: mutations.gq, name: add_signal, args: [slug, name, kind, date, stagingTimestamp, createdAt, updatedAt] }
   add-insight:                 { command: change, query: mutations.gq, name: add_insight, args: [slug, name, kind, createdAt, updatedAt] }
-  add-source-entity:           { command: change, query: mutations.gq, name: add_source_entity, args: [slug, name, kind, createdAt, updatedAt] }
+  add-publisher-organization:  { command: change, query: mutations.gq, name: add_publisher_organization, args: [slug, name, kind, reliability, createdAt, updatedAt] }
   add-chunk:                   { command: change, query: mutations.gq, name: add_chunk, args: [slug, text, chunk_index, createdAt] }
   add-decision:                { command: change, query: mutations.gq, name: add_decision, args: [slug, name, kind, createdAt, updatedAt] }
   add-commitment:              { command: change, query: mutations.gq, name: add_commitment, args: [slug, name, status, createdAt, updatedAt] }
@@ -355,7 +360,7 @@ aliases:
   link-insight-highlights-pattern: { command: change, query: mutations.gq, name: link_insight_highlights_pattern, args: [insight, pattern] }
   link-insight-relies-on-signal: { command: change, query: mutations.gq, name: link_insight_relies_on_signal, args: [insight, signal] }
   link-signal-sourced-from-artifact: { command: change, query: mutations.gq, name: link_signal_sourced_from_artifact, args: [signal, artifact] }
-  link-published-by-source:    { command: change, query: mutations.gq, name: link_published_by_source, args: [artifact, source] }
+  link-published-by-organization: { command: change, query: mutations.gq, name: link_published_by_organization, args: [artifact, organization] }
   link-artifact-from-person:   { command: change, query: mutations.gq, name: link_artifact_from_person, args: [artifact, person] }
   link-artifact-about-deal:    { command: change, query: mutations.gq, name: link_artifact_about_deal, args: [artifact, deal] }
   link-artifact-about-organization: { command: change, query: mutations.gq, name: link_artifact_about_organization, args: [artifact, organization] }

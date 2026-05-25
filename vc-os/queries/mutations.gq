@@ -28,8 +28,8 @@ query add_fund($slug: String, $name: String, $createdAt: DateTime, $updatedAt: D
     insert Fund { slug: $slug, name: $name, createdAt: $createdAt, updatedAt: $updatedAt }
 }
 
-query add_artifact($slug: String, $name: String, $kind: String, $source: String, $date: Date, $captured_at: DateTime, $createdAt: DateTime, $updatedAt: DateTime) {
-    insert Artifact { slug: $slug, name: $name, kind: $kind, source: $source, date: $date, captured_at: $captured_at, createdAt: $createdAt, updatedAt: $updatedAt }
+query add_artifact($slug: String, $name: String, $kind: String, $source: String, $source_app: String, $date: Date, $captured_at: DateTime, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Artifact { slug: $slug, name: $name, kind: $kind, source: $source, source_app: $source_app, date: $date, captured_at: $captured_at, createdAt: $createdAt, updatedAt: $updatedAt }
 }
 
 query add_meeting($slug: String, $name: String, $kind: String, $scheduled_at: DateTime, $status: String, $createdAt: DateTime, $updatedAt: DateTime) {
@@ -78,8 +78,10 @@ query add_insight($slug: String, $name: String, $kind: String, $createdAt: DateT
     insert Insight { slug: $slug, name: $name, kind: $kind, createdAt: $createdAt, updatedAt: $updatedAt }
 }
 
-query add_source_entity($slug: String, $name: String, $kind: String, $createdAt: DateTime, $updatedAt: DateTime) {
-    insert SourceEntity { slug: $slug, name: $name, kind: $kind, createdAt: $createdAt, updatedAt: $updatedAt }
+// Convenience helper for publisher / database / expert-network orgs with a
+// reliability rating. Use the generic `add_organization` for everything else.
+query add_publisher_organization($slug: String, $name: String, $kind: String, $reliability: String, $createdAt: DateTime, $updatedAt: DateTime) {
+    insert Organization { slug: $slug, name: $name, kind: $kind, reliability: $reliability, createdAt: $createdAt, updatedAt: $updatedAt }
 }
 
 query add_chunk($slug: String, $text: String, $chunk_index: I32, $createdAt: DateTime) {
@@ -256,8 +258,8 @@ query link_signal_sourced_from_artifact($signal: String, $artifact: String) {
     insert SignalSourcedFromArtifact { from: $signal, to: $artifact }
 }
 
-query link_published_by_source($artifact: String, $source: String) {
-    insert PublishedBySource { from: $artifact, to: $source }
+query link_published_by_organization($artifact: String, $organization: String) {
+    insert PublishedByOrganization { from: $artifact, to: $organization }
 }
 
 query link_artifact_from_person($artifact: String, $person: String) {
