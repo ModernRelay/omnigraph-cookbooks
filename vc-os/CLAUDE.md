@@ -35,7 +35,7 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 |---|---|
 | `Organization` | Universal entity. `kind` enum: startup/lp-institution/vc-firm/acquirer/customer/bank/regulator/accelerator/family-office/**publisher/database/expert-network**/other. Quito itself is `org-quito` (kind=vc-firm). Source-provenance entities (TechCrunch, PitchBook, Tegus, anon blog) live here with `kind` in (publisher, database, expert-network) plus a `reliability` rating. |
 | `Person` | Individual human. Roles relative to Quito live on edges, not on the node. |
-| `Deal` | A funding event involving a Organization. `outcome=observed` for external rounds with no Quito participation. |
+| `Deal` | A funding event involving an Organization. `outcome=observed` for external rounds with no Quito participation. |
 | `Fund` | Quito's funds. |
 | `Market` | Sector/vertical hub. |
 | `Artifact` | Raw content with native Blob. `source` is a coarse category (`email/chat/meeting-tool/web/doc-tool/crm/outbound/manual/derived/repo/other`); `source_app` carries the specific vendor name (`gmail`, `granola`, `slack`, `github`, etc.). |

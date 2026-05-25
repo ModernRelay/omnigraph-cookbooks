@@ -9,9 +9,12 @@
 // Basic reads — markdown artifacts as first-class
 // ──────────────────────────────────────────────
 
+// Get a single markdown Artifact by slug. Filtered to kind=markdown so callers
+// passing a non-markdown slug get 0 rows back rather than a partially-null
+// shape that pretends to be one.
 query get_markdown_artifact($slug: String) {
     match {
-        $a: Artifact { slug: $slug }
+        $a: Artifact { slug: $slug, kind: "markdown" }
     }
     return { $a.slug, $a.name, $a.kind, $a.source, $a.repo, $a.path, $a.branch, $a.commit_sha, $a.url, $a.last_synced_at, $a.body }
 }

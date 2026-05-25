@@ -168,8 +168,10 @@ query co_investor_participants() {
     order { $d.date_closed desc }
 }
 
-// Given a Organization we invested in, which other VCs were on the round.
-query organization_co_investors($slug: String) {
+// Given an Organization we invested in, which other VCs LED the round.
+// Split into two queries because Omnigraph 0.4 has no OR primitive — callers
+// (or aliases) union the leads + participants for the full co-investor view.
+query organization_co_investor_leads($slug: String) {
     match {
         $c: Organization { slug: $slug }
         $d forOrganization $c
@@ -178,6 +180,18 @@ query organization_co_investors($slug: String) {
         $lead: Organization { kind: "vc-firm" }
     }
     return { $d.slug, $d.round_type, $lead.slug, $lead.name }
+}
+
+// Given an Organization we invested in, which other VCs PARTICIPATED in the round.
+query organization_co_investor_participants($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $d forOrganization $c
+        $d.outcome = "invested"
+        $d participantInvestor $part
+        $part: Organization { kind: "vc-firm" }
+    }
+    return { $d.slug, $d.round_type, $part.slug, $part.name }
 }
 
 // Given a VC firm, the deals where they participated alongside us.

@@ -156,6 +156,8 @@ query signal_engagement_impact($slug: String) {
         $d forOrganization $c
         $c.status != "passed"
         $c.status != "exited"
+        $c.status != "cold"
+        $c.status != "observed"
         $d.stage != "dead"
         $d.stage != "decided"
         $d.stage != "closed"

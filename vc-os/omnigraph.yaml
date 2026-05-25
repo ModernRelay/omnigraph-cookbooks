@@ -74,7 +74,10 @@ aliases:
   contradicted-active-theses:  { command: read, query: portfolio.gq, name: contradicted_active_theses }
   co-investor-leads:           { command: read, query: organizations.gq, name: co_investor_leads }
   co-investor-participants:    { command: read, query: organizations.gq, name: co_investor_participants }
-  organization-co-investors:        { command: read, query: organizations.gq, name: organization_co_investors, args: [slug] }
+  # `organization-co-investors` was renamed to make the lead/participant split honest.
+  # Callers wanting the full co-investor view should union both reads.
+  organization-co-investor-leads:        { command: read, query: organizations.gq, name: organization_co_investor_leads, args: [slug] }
+  organization-co-investor-participants: { command: read, query: organizations.gq, name: organization_co_investor_participants, args: [slug] }
   vc-firm-coinvestments:       { command: read, query: organizations.gq, name: vc_firm_coinvestments, args: [slug] }
 
   # ══════════════════════════════════════════════════════════════════

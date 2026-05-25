@@ -241,12 +241,15 @@ query ic_prep_meeting_history($slug: String) {
     order { $m.scheduled_at desc }
 }
 
-// Open commitments tied to meetings about this deal — "what's still owed
-// before we IC."
+// Open commitments tied to meetings that have already occurred for this deal —
+// "what's still owed before we IC." The $m.status="occurred" filter prevents
+// commitments recorded ahead of a *future* meeting from leaking into the pre-IC
+// view; only obligations from past conversations count as outstanding work.
 query ic_prep_open_commitments($slug: String) {
     match {
         $d: Deal { slug: $slug }
         $m meetingAboutDeal $d
+        $m.status = "occurred"
         $cmt commitmentFromMeeting $m
         $cmt.status = "open"
     }
