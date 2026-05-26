@@ -1,0 +1,10 @@
+# Server-side config for the Railway template.
+#
+# Why this file exists at all: the policy file path has no env-var
+# override in the server today — it's only resolved via `policy.file`
+# in an omnigraph.yaml passed with `--config`. Everything else (target
+# URI, bind, tokens) comes from environment variables wired in
+# railway.toml's startCommand and the template's variable list.
+
+policy:
+  file: /etc/omnigraph/policy.yaml

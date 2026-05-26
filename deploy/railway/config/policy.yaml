@@ -1,0 +1,69 @@
+# Cedar-via-YAML policy for the Railway template.
+#
+# The omnigraph engine compiles this YAML into Cedar at startup; the
+# compiled rules gate every request that hits the server (and every
+# direct-engine call from an embedded SDK).
+#
+# Three actor groups are pre-wired to the three bearer tokens that the
+# Railway template auto-generates via ${{secret(48)}}:
+#
+#   admins   → admin token   → all actions on every branch
+#   writers  → writer token  → read/export/change anywhere, plus
+#                              branch_create against unprotected branches
+#   readers  → reader token  → read + export only
+#
+# `main` is marked protected — writers cannot create branches with main
+# as the target, and they cannot run schema_apply / branch_delete /
+# branch_merge anywhere. Operators who want to relax this can either
+# fork the template or `omnigraph policy validate` a customized file
+# pointed at by `OMNIGRAPH_POLICY_FILE` in a downstream image.
+
+version: 1
+
+groups:
+  admins:
+    - admin
+  writers:
+    - writer
+  readers:
+    - reader
+
+protected_branches:
+  - main
+
+rules:
+  - id: admins-full-access
+    allow:
+      actors: { group: admins }
+      actions:
+        - read
+        - export
+        - change
+        - schema_apply
+        - branch_create
+        - branch_delete
+        - branch_merge
+
+  - id: writers-read-any-branch
+    allow:
+      actors: { group: writers }
+      actions: [read, export]
+      branch_scope: any
+
+  - id: writers-change-any-branch
+    allow:
+      actors: { group: writers }
+      actions: [change]
+      branch_scope: any
+
+  - id: writers-branch-unprotected
+    allow:
+      actors: { group: writers }
+      actions: [branch_create]
+      target_branch_scope: unprotected
+
+  - id: readers-read-any-branch
+    allow:
+      actors: { group: readers }
+      actions: [read, export]
+      branch_scope: any
