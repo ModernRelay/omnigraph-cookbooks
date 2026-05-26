@@ -20,16 +20,34 @@ compute. No volumes attached — all state lives in the Bucket.
 
 ## Deploy
 
-Each ready cookbook gets its own template. Click the matching button:
+Each ready cookbook gets its own one-click button. Click to deploy.
 
-- `industry-intel` — AI/ML industry intelligence (SPIKE framework)
-- `pharma-intel`   — Pharma competitive intelligence
-- `second-brain`   — Personal life automation
-- `vc-os`          — Venture-capital operating system
+| Cookbook | What it is | Deploy |
+|---|---|---|
+| `industry-intel` | AI/ML industry intelligence (SPIKE framework) | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/TBD-industry-intel) |
+| `pharma-intel` | Pharma competitive intelligence | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/TBD-pharma-intel) |
+| `second-brain` | Personal life automation | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/TBD-second-brain) |
+| `vc-os` | Venture-capital operating system | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/TBD-vc-os) |
 
-> Template URLs are published from the Railway dashboard. Until they're
-> live, deploy manually: create a Railway project, add a Bucket, add a
-> service from this repo with the env variables below.
+> **Status:** Template URLs above are placeholders until the templates
+> are published on Railway. Until then, deploy manually:
+>
+> ```bash
+> railway init
+> railway bucket create graph-storage --region <closest-to-you>
+> railway add --service omnigraph
+> railway variable set --service omnigraph --skip-deploys \
+>   "OMNIGRAPH_COOKBOOK=industry-intel" \
+>   "OMNIGRAPH_TARGET_URI=s3://\${{graph-storage.BUCKET}}/graph" \
+>   "AWS_ENDPOINT_URL=\${{graph-storage.ENDPOINT}}" \
+>   "AWS_ENDPOINT_URL_S3=\${{graph-storage.ENDPOINT}}" \
+>   "AWS_ACCESS_KEY_ID=\${{graph-storage.ACCESS_KEY_ID}}" \
+>   "AWS_SECRET_ACCESS_KEY=\${{graph-storage.SECRET_ACCESS_KEY}}" \
+>   "AWS_REGION=\${{graph-storage.REGION}}" \
+>   'OMNIGRAPH_SERVER_BEARER_TOKENS_JSON={"admin":"CHANGEME","writer":"CHANGEME","reader":"CHANGEME"}'
+> # Make sure the service's region matches the Bucket region (railway scale)
+> railway up --service omnigraph
+> ```
 
 ## Service region
 
