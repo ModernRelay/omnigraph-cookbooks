@@ -7,7 +7,7 @@ Opinionated, ready-to-run graph cookbooks built on [Omnigraph](https://github.co
 | Cookbook | Status | Description |
 |----------|--------|-------------|
 | [`industry-intel/`](./industry-intel) | ✅ ready | AI/ML industry intelligence graph |
-| [`pharma-intel/`](./pharma-intel) | ✅ ready | Pharma competitive intelligence with external pipeline + SPIKE + internal context (Viking Therapeutics GLP-1 reference seed) |
+| [`pharma-intel/`](./pharma-intel) | ✅ ready | Pharma competitive intelligence |
 | [`second-brain/`](./second-brain) | ✅ ready | Personal life automation graph |
 | [`vc-os/`](./vc-os) | ✅ ready | Venture-capital operating system |
 | `company-context/` | 🚧 planned | Internal decisions, traces, actors, artifacts |
