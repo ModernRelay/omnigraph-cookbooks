@@ -24,13 +24,28 @@ if [ ! -f "$SCHEMA_PATH" ]; then
   exit 64
 fi
 
-if omnigraph snapshot "$OMNIGRAPH_TARGET_URI" --json >/dev/null 2>&1; then
-  echo "init: graph at $OMNIGRAPH_TARGET_URI already initialized; skipping"
-  exit 0
-fi
+# Three states to handle on every deploy:
+#   1. No manifest        -> run `omnigraph init` then `load`
+#   2. Manifest, has rows -> skip everything (no work needed)
+#   3. Manifest, 0 rows   -> previous deploy init'd but the seed load
+#                            didn't complete; skip `init` (which would
+#                            error "already exists") and retry `load`
+#
+# State 3 is the recovery path. Without it, a transient load failure on
+# the first deploy permanently strands the graph empty because snapshot
+# still succeeds on subsequent deploys.
 
-echo "init: cookbook=$COOKBOOK schema=$SCHEMA_PATH target=$OMNIGRAPH_TARGET_URI"
-omnigraph init --schema "$SCHEMA_PATH" "$OMNIGRAPH_TARGET_URI"
+SNAPSHOT_JSON=""
+if SNAPSHOT_JSON=$(omnigraph snapshot "$OMNIGRAPH_TARGET_URI" --json 2>/dev/null); then
+  if printf '%s' "$SNAPSHOT_JSON" | grep -q '"row_count":[[:space:]]*[1-9]'; then
+    echo "init: graph at $OMNIGRAPH_TARGET_URI already seeded; skipping"
+    exit 0
+  fi
+  echo "init: manifest exists but graph has no rows; retrying seed load"
+else
+  echo "init: cookbook=$COOKBOOK schema=$SCHEMA_PATH target=$OMNIGRAPH_TARGET_URI"
+  omnigraph init --schema "$SCHEMA_PATH" "$OMNIGRAPH_TARGET_URI"
+fi
 
 if [ "${OMNIGRAPH_LOAD_SEED:-true}" = "true" ]; then
   if [ -f "$SEED_PATH" ]; then
