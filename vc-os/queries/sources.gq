@@ -1,0 +1,81 @@
+// Source-provenance reads. Sources are Organizations with
+// `kind in (publisher, database, expert-network)` and a `reliability` rating.
+// When a source's reliability is downgraded, every Signal sourced from one of
+// its Artifacts can be flagged for revalidation.
+
+query get_source($slug: String) {
+    match {
+        $o: Organization { slug: $slug }
+    }
+    return { $o.slug, $o.name, $o.kind, $o.reliability, $o.website, $o.brief }
+}
+
+// All sources: publishers (TechCrunch, etc.), databases (PitchBook), expert
+// networks (Tegus). Omnigraph 0.4 has no enum-IN filter at the match level
+// and no OR primitive, so "all sources" is composed by the caller from the
+// three by-kind queries below. `sources_by_reliability` filters across all
+// three kinds in one query because every source-type org has a reliability set.
+query sources_by_kind($kind: String) {
+    match {
+        $o: Organization { kind: $kind }
+    }
+    return { $o.slug, $o.name, $o.reliability, $o.brief }
+    order { $o.name }
+}
+
+query publishers() {
+    match { $o: Organization { kind: "publisher" } }
+    return { $o.slug, $o.name, $o.reliability, $o.brief }
+    order { $o.name }
+}
+
+query databases() {
+    match { $o: Organization { kind: "database" } }
+    return { $o.slug, $o.name, $o.reliability, $o.brief }
+    order { $o.name }
+}
+
+query expert_networks() {
+    match { $o: Organization { kind: "expert-network" } }
+    return { $o.slug, $o.name, $o.reliability, $o.brief }
+    order { $o.name }
+}
+
+query sources_by_reliability($reliability: String) {
+    match {
+        $o: Organization { reliability: $reliability }
+    }
+    return { $o.slug, $o.name, $o.kind, $o.brief }
+    order { $o.name }
+}
+
+// Artifacts published by this source.
+query source_artifacts($slug: String) {
+    match {
+        $o: Organization { slug: $slug }
+        $a publishedByOrganization $o
+    }
+    return { $a.slug, $a.name, $a.kind, $a.date, $a.url }
+    order { $a.date desc }
+}
+
+// Signals whose artifact was published by this source. If reliability drops,
+// these are the signals to revalidate.
+query source_downstream_signals($slug: String) {
+    match {
+        $o: Organization { slug: $slug }
+        $a publishedByOrganization $o
+        $sig signalSourcedFromArtifact $a
+    }
+    return { $sig.slug, $sig.name, $sig.kind, $sig.date, $sig.impact, $sig.brief }
+    order { $sig.date desc }
+}
+
+// The reverse: given an Artifact, what organization published it.
+query artifact_source($slug: String) {
+    match {
+        $a: Artifact { slug: $slug }
+        $a publishedByOrganization $o
+    }
+    return { $o.slug, $o.name, $o.kind, $o.reliability, $o.brief }
+}

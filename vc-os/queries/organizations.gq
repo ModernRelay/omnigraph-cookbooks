@@ -1,0 +1,285 @@
+// Organization + Market reads. Organization is the universal entity-of-the-world node
+// (startups, acquirers, LPs, peer firms, customers). `kind` carries the role;
+// `status` carries Quito's engagement state (nullable for non-startup kinds).
+
+// ──────────────────────────────────────────────
+// Organization reads
+// ──────────────────────────────────────────────
+
+query get_organization($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+    }
+    return { $c.slug, $c.name, $c.brief, $c.description, $c.kind, $c.status, $c.website, $c.hq, $c.founded_year, $c.aum_usd_m, $c.fit_score }
+}
+
+query organizations_by_kind($kind: String) {
+    match {
+        $c: Organization { kind: $kind }
+    }
+    return { $c.slug, $c.name, $c.status, $c.brief }
+    order { $c.name }
+}
+
+query organizations_by_status($status: String) {
+    match {
+        $c: Organization { status: $status }
+    }
+    return { $c.slug, $c.name, $c.kind, $c.brief }
+    order { $c.name }
+}
+
+query portfolio_organizations() {
+    match {
+        $c: Organization { status: "portfolio" }
+    }
+    return { $c.slug, $c.name, $c.brief, $c.website }
+    order { $c.name }
+}
+
+query pipeline_organizations() {
+    match {
+        $c: Organization { status: "pipeline" }
+    }
+    return { $c.slug, $c.name, $c.brief, $c.fit_score }
+    order { $c.name }
+}
+
+query observed_organizations() {
+    match {
+        $c: Organization { status: "observed" }
+    }
+    return { $c.slug, $c.name, $c.brief }
+    order { $c.name }
+}
+
+query search_organizations($q: String) {
+    match {
+        $c: Organization
+        search($c.name, $q)
+    }
+    return { $c.slug, $c.name, $c.kind, $c.status, $c.brief }
+}
+
+query high_fit_pipeline() {
+    match {
+        $c: Organization { status: "pipeline" }
+    }
+    return { $c.slug, $c.name, $c.fit_score, $c.brief }
+    order { $c.fit_score desc }
+}
+
+
+// ──────────────────────────────────────────────
+// Organization context
+// ──────────────────────────────────────────────
+
+query organization_deals($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $d forOrganization $c
+    }
+    return { $d.slug, $d.name, $d.round_type, $d.stage, $d.outcome, $d.our_check_size_usd_m, $d.date_closed }
+    order { $d.date_closed desc }
+}
+
+query organization_founders($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $p founderOf $c
+    }
+    return { $p.slug, $p.name, $p.linkedin, $p.prior_exits, $p.years_operating, $p.founder_score }
+}
+
+query organization_board($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $p boardMemberAt $c
+    }
+    return { $p.slug, $p.name }
+}
+
+query organization_signals($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $s signalAboutOrganization $c
+    }
+    return { $s.slug, $s.name, $s.kind, $s.brief, $s.date, $s.impact }
+    order { $s.date desc }
+}
+
+query organization_artifacts($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $a artifactAboutOrganization $c
+    }
+    return { $a.slug, $a.name, $a.kind, $a.source, $a.date }
+    order { $a.date desc }
+}
+
+query organization_insights($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $i insightAboutOrganization $c
+    }
+    return { $i.slug, $i.name, $i.kind, $i.stance, $i.summary }
+}
+
+query organization_markets($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $c organizationInMarket $m
+    }
+    return { $m.slug, $m.name, $m.brief }
+}
+
+query organization_theses($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $t thesisAboutOrganization $c
+    }
+    return { $t.slug, $t.name, $t.status, $t.confidence, $t.brief }
+}
+
+
+// ──────────────────────────────────────────────
+// Co-investor history (universal VC concern)
+// ──────────────────────────────────────────────
+
+// VC firms that led the rounds we invested in.
+query co_investor_leads() {
+    match {
+        $d: Deal { outcome: "invested" }
+        $d leadInvestor $co
+        $co: Organization { kind: "vc-firm" }
+    }
+    return { $co.slug, $co.name, $d.slug, $d.name, $d.round_type, $d.date_closed }
+    order { $d.date_closed desc }
+}
+
+// VC firms that participated in the rounds we invested in.
+query co_investor_participants() {
+    match {
+        $d: Deal { outcome: "invested" }
+        $d participantInvestor $co
+        $co: Organization { kind: "vc-firm" }
+    }
+    return { $co.slug, $co.name, $d.slug, $d.name, $d.round_type, $d.date_closed }
+    order { $d.date_closed desc }
+}
+
+// Given an Organization we invested in, which other VCs LED the round.
+// Split into two queries because Omnigraph 0.4 has no OR primitive — callers
+// (or aliases) union the leads + participants for the full co-investor view.
+query organization_co_investor_leads($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $d forOrganization $c
+        $d.outcome = "invested"
+        $d leadInvestor $lead
+        $lead: Organization { kind: "vc-firm" }
+    }
+    return { $d.slug, $d.round_type, $lead.slug, $lead.name }
+}
+
+// Given an Organization we invested in, which other VCs PARTICIPATED in the round.
+query organization_co_investor_participants($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $d forOrganization $c
+        $d.outcome = "invested"
+        $d participantInvestor $part
+        $part: Organization { kind: "vc-firm" }
+    }
+    return { $d.slug, $d.round_type, $part.slug, $part.name }
+}
+
+// Given a VC firm, the deals where they participated alongside us.
+query vc_firm_coinvestments($slug: String) {
+    match {
+        $vc: Organization { slug: $slug }
+        $d participantInvestor $vc
+        $d.outcome = "invested"
+        $d forOrganization $c
+    }
+    return { $d.slug, $d.round_type, $d.date_closed, $c.slug, $c.name }
+    order { $d.date_closed desc }
+}
+
+
+// ──────────────────────────────────────────────
+// Exit landscape
+// ──────────────────────────────────────────────
+
+// Companies that could acquire this one.
+query exit_landscape($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $o wouldAcquire $c
+    }
+    return { $o.slug, $o.name, $o.kind, $o.hq, $o.brief }
+}
+
+// Decision-makers at those acquirers.
+query exit_landscape_decision_makers($slug: String) {
+    match {
+        $c: Organization { slug: $slug }
+        $o wouldAcquire $c
+        $p decisionMakerAt $o
+    }
+    return { $o.slug, $o.name, $p.slug, $p.name, $p.linkedin }
+}
+
+
+// ──────────────────────────────────────────────
+// Market reads
+// ──────────────────────────────────────────────
+
+query get_market($slug: String) {
+    match {
+        $m: Market { slug: $slug }
+    }
+    return { $m.slug, $m.name, $m.brief, $m.description, $m.parent_market }
+}
+
+query markets_all() {
+    match {
+        $m: Market
+    }
+    return { $m.slug, $m.name, $m.parent_market, $m.brief }
+    order { $m.name }
+}
+
+query market_organizations($slug: String) {
+    match {
+        $m: Market { slug: $slug }
+        $c organizationInMarket $m
+    }
+    return { $c.slug, $c.name, $c.kind, $c.status, $c.brief }
+    order { $c.name }
+}
+
+query market_theses($slug: String) {
+    match {
+        $m: Market { slug: $slug }
+        $t thesisAboutMarket $m
+    }
+    return { $t.slug, $t.name, $t.status, $t.confidence, $t.brief }
+}
+
+query market_signals($slug: String) {
+    match {
+        $m: Market { slug: $slug }
+        $s signalAboutMarket $m
+    }
+    return { $s.slug, $s.name, $s.kind, $s.brief, $s.date }
+    order { $s.date desc }
+}
+
+query market_lessons($slug: String) {
+    match {
+        $m: Market { slug: $slug }
+        $l lessonAppliesToMarket $m
+    }
+    return { $l.slug, $l.name, $l.kind, $l.body, $l.status }
+}
