@@ -4,7 +4,7 @@ Opinionated Omnigraph cookbook for venture-capital firms. Built on [Omnigraph](h
 
 ## Why a graph, not another tool
 
-A modern VC's stack typically contains 8–12 systems: a CRM (Airtable / Zendesk), a wiki (Notion), chat (Slack), a call-recording tool (Granola), spreadsheets and drives (Drive / Excel), portfolio modeling (Tactyc), an outbound platform, and per-firm bespoke hacks - a sightings / dedup table, a runtime-rules database, a third-party vector store, local notes for deal memory, a cross-session memory daemon, a homegrown audit log.
+A modern VC's stack typically contains 8–12 systems: a CRM (Affinity / Airtable ), a wiki (Notion), chat (Slack), a call-recording tool (Granola), spreadsheets and drives (Drive / Excel), portfolio modeling (Tactyc), an outbound platform, and per-firm bespoke hacks - a sightings / prospect databases, a third-party vector store for semantic search, local notes for firm memory, a cross-session memory daemon, a homegrown audit log.
 
 Each store solved one problem at one moment. None of them talk to each other natively. Agents end up plumbing the gaps: brittle point-to-point integrations, slow queries and high token usage, scattered audit trail, no shared notion of *what is known*. Adding automations makes the system more fragile rather than compouding.
 
