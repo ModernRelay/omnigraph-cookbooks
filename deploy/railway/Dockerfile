@@ -49,13 +49,9 @@ RUN groupadd --system omnigraph \
 COPY --from=builder /src/target/release/omnigraph        /usr/local/bin/omnigraph
 COPY --from=builder /src/target/release/omnigraph-server /usr/local/bin/omnigraph-server
 
-# Bake every ready cookbook into the image. The .dockerignore strips out
-# docs (README.md / CLAUDE.md / seed.md / .env.omni*) so only the
-# schema, seed data, queries, and per-cookbook omnigraph.yaml land here.
-COPY industry-intel /cookbooks/industry-intel
-COPY pharma-intel   /cookbooks/pharma-intel
-COPY second-brain   /cookbooks/second-brain
-COPY vc-os          /cookbooks/vc-os
+# Cookbooks are not bundled in the image — init.sh fetches the schema
+# at deploy time via $OMNIGRAPH_SCHEMA_URL. This keeps the image small
+# and lets any schema (not just the bundled cookbooks) be used.
 
 # Server-side config: where the Cedar-via-YAML policy file lives.
 COPY deploy/railway/config/omnigraph.yaml /etc/omnigraph/omnigraph.yaml

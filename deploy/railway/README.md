@@ -11,35 +11,38 @@ runs `omnigraph init` + seed load on first boot.
 | ---------------------- | ------------------------------------------------------------------------ |
 | `omnigraph-server`     | Single Railway service (this repo's `deploy/railway/Dockerfile`)         |
 | Storage                | Railway Bucket — first-party S3, R2-backed, free egress                  |
-| Schema                 | The cookbook you pick is applied via `omnigraph init`; the graph then starts empty |
+| Schema                 | Pulled from `OMNIGRAPH_SCHEMA_URL` at deploy time and applied via `omnigraph init` |
 | Auth (3 actors)        | `admin` / `writer` / `reader` bearer tokens auto-generated at deploy     |
 | Authz                  | Cedar-via-YAML policy at `/etc/omnigraph/policy.yaml` (baked into image) |
 | Public HTTPS endpoint  | Railway-managed `*.up.railway.app` domain with auto-SSL                  |
 
-The template is **schema-only** by default — you get the cookbook's
-typed structure ready to receive your real data. To load the cookbook's
-bundled demo `seed.jsonl` for a quick interactive look, set
-`OMNIGRAPH_LOAD_SEED=true` (see env table below).
+The template is **schema-only**: it applies the schema you point at and
+then stops. The graph starts empty and ready to receive your real data
+via the `omnigraph` CLI or the HTTP API. Demo `seed.jsonl` files from
+the cookbooks are not auto-loaded.
 
 Total cost on Railway Hobby: ~$0.015/GB-month for storage + the service's
 compute. No volumes attached — all state lives in the Bucket.
 
 ## Deploy
 
-One template covers all cookbooks. At deploy time, pick which cookbook's
-schema to apply via the `OMNIGRAPH_COOKBOOK` variable:
-
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/TBD)
 
-Valid values for `OMNIGRAPH_COOKBOOK` (the deploy form will accept any
-string; only these are bundled in the image today):
+At deploy time, paste the URL of the schema you want to apply via the
+`OMNIGRAPH_SCHEMA_URL` variable. Any HTTPS URL to a `.pg` file works —
+the bundled cookbooks in this repo are the obvious starting point:
 
-| Cookbook | Schema describes |
+| Cookbook | Schema URL to paste |
 |---|---|
-| `industry-intel` | AI/ML industry intelligence (SPIKE framework) |
-| `pharma-intel` | Pharma competitive intelligence |
-| `second-brain` | Personal life automation |
-| `vc-os` | Venture-capital operating system |
+| AI/ML industry intelligence (SPIKE) | `https://raw.githubusercontent.com/ModernRelay/omnigraph-cookbooks/main/industry-intel/schema.pg` |
+| Pharma competitive intelligence | `https://raw.githubusercontent.com/ModernRelay/omnigraph-cookbooks/main/pharma-intel/schema.pg` |
+| Personal life automation | `https://raw.githubusercontent.com/ModernRelay/omnigraph-cookbooks/main/second-brain/schema.pg` |
+| Venture-capital operating system | `https://raw.githubusercontent.com/ModernRelay/omnigraph-cookbooks/main/vc-os/schema.pg` |
+
+You can also paste a URL to your own schema (GitHub raw, gist, S3
+signed URL, anywhere HTTPS-reachable). The deploy initializes the graph
+with that schema and then stops — fill the graph with your own data
+afterwards via the `omnigraph` CLI or the HTTP API.
 
 > **Status:** Template URL above is a placeholder until the template is
 > published on Railway. Until then, deploy manually:
@@ -49,7 +52,7 @@ string; only these are bundled in the image today):
 > railway bucket create graph-storage --region <closest-to-you>
 > railway add --service omnigraph
 > railway variable set --service omnigraph --skip-deploys \
->   "OMNIGRAPH_COOKBOOK=industry-intel" \
+>   "OMNIGRAPH_SCHEMA_URL=https://raw.githubusercontent.com/ModernRelay/omnigraph-cookbooks/main/industry-intel/schema.pg" \
 >   "OMNIGRAPH_TARGET_URI=s3://\${{graph-storage.BUCKET}}/graph" \
 >   "AWS_ENDPOINT_URL=\${{graph-storage.ENDPOINT}}" \
 >   "AWS_ENDPOINT_URL_S3=\${{graph-storage.ENDPOINT}}" \
@@ -77,7 +80,7 @@ what each does (and to make manual deploys reproducible).
 
 | Variable                              | Value at deploy                                                                          |
 | ------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `OMNIGRAPH_COOKBOOK`                  | `industry-intel` (or another ready cookbook name)                                        |
+| `OMNIGRAPH_SCHEMA_URL`                | HTTPS URL of a `.pg` schema file. Default: `https://raw.githubusercontent.com/ModernRelay/omnigraph-cookbooks/main/industry-intel/schema.pg`. Override with any URL. |
 | `OMNIGRAPH_TARGET_URI`                | `s3://${{Bucket.BUCKET}}/graph`                                                          |
 | `AWS_ENDPOINT_URL`                    | `${{Bucket.ENDPOINT}}` — read by Lance's `object_store`                                  |
 | `AWS_ENDPOINT_URL_S3`                 | `${{Bucket.ENDPOINT}}` — read by the omnigraph S3 adapter (set both for cross-version safety) |
@@ -85,7 +88,6 @@ what each does (and to make manual deploys reproducible).
 | `AWS_SECRET_ACCESS_KEY`               | `${{Bucket.SECRET_ACCESS_KEY}}`                                                          |
 | `AWS_REGION`                          | `${{Bucket.REGION}}`                                                                     |
 | `OMNIGRAPH_SERVER_BEARER_TOKENS_JSON` | `{"admin":"${{secret(48)}}","writer":"${{secret(48)}}","reader":"${{secret(48)}}"}`      |
-| `OMNIGRAPH_LOAD_SEED`                 | `false` by default. Set to `true` to also load the cookbook's bundled demo `seed.jsonl` for an interactive demo deploy. |
 | `GEMINI_API_KEY` (optional)           | Empty by default; supply yours at deploy time to unlock text-input vector search         |
 
 ### Embeddings + Gemini
@@ -172,43 +174,30 @@ that need a different role/group structure:
 3. Validate locally: `omnigraph policy validate --policy ./deploy/railway/config/policy.yaml`.
 4. Push the fork and point your Railway service at it.
 
-## After you customize the schema
-
-The template is for *initial* deploys. Once you've run `omnigraph schema
-apply` against the live graph with your own schema, the cookbook seed
-in the image no longer matches the manifest. Subsequent re-deploys will
-hit this — the `preDeployCommand` script (`init.sh`) sees a manifest
-with 0 rows (because your custom schema has new tables that aren't
-populated by the cookbook seed) and tries to retry the seed load,
-which then fails with `"unknown node type '<name>'"`.
-
-This is intentional fail-loud behavior: better than silently dumping
-cookbook seed data on top of your custom schema. To opt out:
-
-1. Set `OMNIGRAPH_LOAD_SEED=false` on the omnigraph service. The init
-   script will then init missing manifests but never auto-load seed.
-2. Or empty the cookbook's bundled schema/seed via your own fork —
-   see "Customizing" above.
-
 ## Re-deploy and schema changes
 
 The `preDeployCommand` runs `omnigraph-railway-init.sh` between build
 and start on every deploy. The script is idempotent:
 
-- **Empty bucket** → `omnigraph init` + (optional) `omnigraph load`.
+- **Empty bucket** → `curl $OMNIGRAPH_SCHEMA_URL` + `omnigraph init`.
 - **Existing graph** → script detects via `omnigraph snapshot` and
   skips. No data loss across re-deploys.
 
-Schema changes are **not** auto-applied. After editing the cookbook
-schema, run `omnigraph schema apply` against the running server from a
-workstation. See the engine docs.
+Schema changes are **not** auto-applied. After updating
+`OMNIGRAPH_SCHEMA_URL` (or the file it points at), run
+`omnigraph schema apply` against the running server from a workstation
+to migrate the live graph. See the engine docs.
 
-## Switching cookbooks
+## Switching schemas
 
-`OMNIGRAPH_COOKBOOK` only affects the first deploy (when the bucket is
-empty). To switch a running service to a different cookbook, you have to
-destroy the Bucket and let the next deploy re-init — the schema is
-graph-scoped and can't be swapped in place.
+`OMNIGRAPH_SCHEMA_URL` only affects the first deploy (when the bucket
+is empty). To switch a running service to a different schema either:
+
+1. Apply the migration via `omnigraph schema apply` against the live
+   server (recommended — preserves data where the migration plan
+   allows).
+2. Destroy the Bucket via `railway bucket delete graph-storage` and
+   redeploy; the next deploy re-runs init.sh against the new schema URL.
 
 ## Local validation
 
@@ -222,7 +211,7 @@ docker run --rm omnigraph-railway:test ls /cookbooks
 
 # Run against a local RustFS (the engine repo ships a bootstrap script)
 docker run --rm \
-  -e OMNIGRAPH_COOKBOOK=industry-intel \
+  -e OMNIGRAPH_SCHEMA_URL=https://raw.githubusercontent.com/ModernRelay/omnigraph-cookbooks/main/industry-intel/schema.pg \
   -e OMNIGRAPH_TARGET_URI=s3://omnigraph-local/graph \
   -e AWS_ENDPOINT_URL_S3=http://host.docker.internal:9000 \
   -e AWS_ACCESS_KEY_ID=rustfsadmin \
