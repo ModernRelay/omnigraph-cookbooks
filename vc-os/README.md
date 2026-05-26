@@ -1,18 +1,18 @@
-# VC OS — A venture-capital operating system as a knowledge graph
+# VC OS - A venture-capital operating system as a knowledge graph
 
-Opinionated Omnigraph cookbook for venture-capital firms. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph), shaped from a first-principles teardown of how a modern AI-era VC actually works. Covers pipeline, diligence, decisions, portfolio, network, audit, and learning — all in one typed graph.
+Opinionated Omnigraph cookbook for venture-capital firms. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph), shaped from a first-principles teardown of how a modern AI-era VC actually works. Covers pipeline, diligence, decisions, portfolio, network, audit, and learning - all in one typed graph.
 
 ## Why a graph, not another tool
 
-A modern VC's stack typically contains 8–12 systems: a CRM (Airtable / Zendesk), a wiki (Notion), chat (Slack), a call-recording tool (Granola), spreadsheets and drives (Drive / Excel), portfolio modeling (Tactyc), an outbound platform, and per-firm bespoke hacks — a sightings / dedup table, a runtime-rules database, a third-party vector store, local notes for deal memory, a cross-session memory daemon, a homegrown audit log.
+A modern VC's stack typically contains 8–12 systems: a CRM (Airtable / Zendesk), a wiki (Notion), chat (Slack), a call-recording tool (Granola), spreadsheets and drives (Drive / Excel), portfolio modeling (Tactyc), an outbound platform, and per-firm bespoke hacks - a sightings / dedup table, a runtime-rules database, a third-party vector store, local notes for deal memory, a cross-session memory daemon, a homegrown audit log.
 
-Each store solved one problem at one moment. None of them talk to each other natively. Agents end up plumbing the gaps: 4 systems consulted per query, eventual consistency, scattered audit trail, no shared notion of *what is known*. This is fragmentation around tools, not organization around what the firm knows.
+Each store solved one problem at one moment. None of them talk to each other natively. Agents end up plumbing the gaps: brittle point-to-point integrations, slow queries and high token usage, scattered audit trail, no shared notion of *what is known*. Adding automations makes the system more fragile rather than compouding.
 
-With Omnigraph's native capabilities — typed schema + typed mutations, native blobs, hybrid search (vector + BM25 + RRF + FTS) in one runtime, git-style branches/commits, snapshot-pinned reads, policy-as-code — most of that per-firm bespoke storage collapses inward.
+With Omnigraph's native capabilities - typed schema + typed mutations, native blobs, hybrid search (vector + BM25 + RRF + FTS) in one runtime, git-style branches/commits, snapshot-pinned reads, policy-as-code - most of that per-firm bespoke storage collapses inward.
 
 ## From first principles
 
-A firm is in the business of maintaining a **structured, dated, contradictable set of beliefs** about organizations, founders, and markets — and acting on them.
+A firm is in the business of maintaining a **structured, dated, contradictable set of beliefs** about organizations, founders, and markets - and acting on them.
 
 Every action either:
 - **generates** a belief (scout finding, founder call, research brief)
@@ -20,9 +20,9 @@ Every action either:
 - **acts on** a belief (decision, intro, board flag, follow-on)
 - **records** the act (memo, log, comment)
 
-The seven jobs a VC does — **Find, Evaluate, Decide, Win, Help, Monitor, Learn** — all collapse into one analytical loop over beliefs. The ontology is shaped to make that loop a 2-hop graph traversal.
+The seven jobs a VC does - **Find, Evaluate, Decide, Win, Help, Monitor, Learn** - all collapse into one analytical loop over beliefs. The ontology is shaped to make that loop a 2-hop graph traversal.
 
-## The schema — 7 core + 10 growth-ring
+## The schema - 7 core + 10 growth-ring
 
 The core is the entities the team can hold in their head, stable for years even as the analytical layer above them compounds. The schema is organized accordingly.
 
@@ -31,11 +31,11 @@ The core is the entities the team can hold in their head, stable for years even 
 | Node | Purpose |
 |---|---|
 | **`Organization`** | Any real-world business entity. `kind` carries the role (startup / lp-institution / vc-firm / acquirer / customer / bank / regulator / accelerator / family-office / **publisher / database / expert-network** / …); `status` carries Quito's engagement state for `kind=startup` (nullable otherwise); `reliability` (low/med/high) is meaningful for the source-type kinds. Quito itself is `org-quito` (`kind=vc-firm`). |
-| **`Person`** | An individual human. Roles relative to Quito live on edges, not on the node — `WorksAt org-quito` (team), `FounderOf co-x` (founder), `RoleInDeal {role: expert}` (expert). |
+| **`Person`** | An individual human. Roles relative to Quito live on edges, not on the node - `WorksAt org-quito` (team), `FounderOf co-x` (founder), `RoleInDeal {role: expert}` (expert). |
 | **`Deal`** | A funding event involving an Organization. Quito-engaged Deals have `FromFund` set; externally observed Deals (PitchBook imports) use `outcome=observed`. |
 | **`Fund`** | Quito's funds. |
 | **`Market`** | Sector/vertical hub. Sector-specialist Theses, Patterns, and Lessons cluster around it. |
-| **`Artifact`** | Raw content with native `Blob` — Granola transcripts, pitch decks, emails, screenshots, chat messages, markdown wiki pages. `source` is a coarse category (`email/chat/meeting-tool/web/doc-tool/crm/outbound/manual/derived/repo/other`); `source_app` is the specific vendor name. |
+| **`Artifact`** | Raw content with native `Blob` - Granola transcripts, pitch decks, emails, screenshots, chat messages, markdown wiki pages. `source` is a coarse category (`email/chat/meeting-tool/web/doc-tool/crm/outbound/manual/derived/repo/other`); `source_app` is the specific vendor name. |
 | **`Meeting`** | A scheduled (or ad-hoc) event with attendees, subject, and outputs. The transcript is an `Artifact`; the Meeting binds attendees + agenda + outcomes (Decisions, Commitments) around it. Covers IC, board, founder calls, partner offsites, pipeline reviews, expert calls. |
 
 ### Analytical layer
@@ -44,12 +44,12 @@ Built on top of the core. These can be added to or refined without touching the 
 
 | Layer | Nodes | Purpose |
 |---|---|---|
-| Belief | `Thesis` · `Assumption` · `Question` | The value layer (investing DNA). `Question` is the home for open uncertainties — not `Insight{kind=hypothesis}`. |
+| Belief | `Thesis` · `Assumption` · `Question` | The value layer (investing DNA). `Question` is the home for open uncertainties - not `Insight{kind=hypothesis}`. |
 | Evidence | `Signal` · `Insight` · `Chunk` | What moves beliefs. `Chunk` is implementation detail for hybrid search, not an ontological commitment. |
 | Action | `Decision` · `Commitment` | What we do. `Decision` is one-shot (`decided_at`); `Commitment` is deferred-action with a deadline. Intros, follow-ups, *schedule-another-meeting*, and *flag-at-next-board* are `Commitment`s, not `Decision`s. |
 | Reflexive | `Pattern` · `Lesson` | What we learn. `Pattern` aggregates across many subjects; `Insight` interprets one. `Lesson` is operational (changes future behavior); `Insight` is descriptive. |
 
-**17 node types total** (`Chunk` ships zero rows in v1 — populate via `omnigraph embed --reembed_all`). Source-provenance entities (TechCrunch, PitchBook, Tegus, anon blog) live as `Organization` rows with `kind` in `(publisher, database, expert-network)` and a `reliability` rating — no separate `SourceEntity` node.
+**17 node types total** (`Chunk` ships zero rows in v1 - populate via `omnigraph embed --reembed_all`). Source-provenance entities (TechCrunch, PitchBook, Tegus, anon blog) live as `Organization` rows with `kind` in `(publisher, database, expert-network)` and a `reliability` rating - no separate `SourceEntity` node.
 
 Slug prefixes: `org- per- mkt- deal- fund- art- mtg- thesis- asmp- q- sig- ins- chk- dec- cmt- pat- lsn-`.
 
@@ -76,7 +76,7 @@ Every node type appears exactly once. Each row lists a node and where its outgoi
    ┌─── BELIEF (investing DNA) ────────────────────────────────────────────────┐
    │  Thesis     → Assumption (reliesOnAssumption), Market (aboutMarket),      │
    │              Organization (aboutOrganization)                             │
-   │  Assumption [leaf — receives reliesOn, supports/contradicts, basedOn]     │
+   │  Assumption [leaf - receives reliesOn, supports/contradicts, basedOn]     │
    │  Question   → Deal (questionAboutDeal)                                    │
    └───────────────────────────────────────────────────────────────────────────┘
               ▲ supportsThesis | contradictsThesis  (Signals move beliefs)
@@ -92,21 +92,21 @@ Every node type appears exactly once. Each row lists a node and where its outgoi
               ▲ signalAboutOrganization | signalAboutPerson | signalAboutDeal
               │ artifactAboutDeal | publishedByOrganization | documentsThesis
    ┌─── CORE (engagement, the CRM grain) ──────────────────────────────────────┐
-   │  Fund         [leaf — receives FromFund + LpInFund]                       │
+   │  Fund         [leaf - receives FromFund + LpInFund]                       │
    │  Deal         → Fund (fromFund), Organization (forOrganization,           │
    │                 leadInvestor, participantInvestor), Person (ledByPerson), │
    │                 Thesis (relevantThesis), Market (relevantMarket)          │
    │  Organization → Market (organizationInMarket), Organization (wouldAcquire │
-   │                 — self), Fund (lpInFund, when kind=lp-institution|        │
+   │                 - self), Fund (lpInFund, when kind=lp-institution|        │
    │                 family-office)                                            │
    │  Person       → Deal (roleInDeal), Organization (worksAt, founderOf,      │
-   │                 boardMemberAt, decisionMakerAt), Person (knows — self,    │
+   │                 boardMemberAt, decisionMakerAt), Person (knows - self,    │
    │                 bidirectional)                                            │
    │  Market       [leaf]                                                      │
    │  Artifact     → Organization (publishedByOrganization,                    │
    │                 artifactAboutOrganization), Deal (artifactAboutDeal),     │
    │                 Person (fromPerson, mentionsPerson), Artifact             │
-   │                 (derivedFrom — self), Thesis/Lesson/Pattern (documents),  │
+   │                 (derivedFrom - self), Thesis/Lesson/Pattern (documents),  │
    │                 Meeting (fromMeeting)                                     │
    │  Meeting      → Deal/Organization/Thesis/Market (meetingAbout*),          │
    │                 Person (attendedBy {role})                                │
@@ -120,21 +120,21 @@ Every node type appears exactly once. Each row lists a node and where its outgoi
 | Enum | Values |
 |---|---|
 | `Organization.kind` | `startup, lp-institution, vc-firm, acquirer, customer, bank, regulator, association, accelerator, university, family-office, publisher, database, expert-network, other` |
-| `Organization.status` | `cold, watching, pipeline, evaluating, portfolio, exited, passed, observed` — nullable for non-startup kinds |
-| `Organization.reliability` | `low, medium, high` — meaningful for `kind` in (publisher, database, expert-network); null elsewhere |
+| `Organization.status` | `cold, watching, pipeline, evaluating, portfolio, exited, passed, observed` - nullable for non-startup kinds |
+| `Organization.reliability` | `low, medium, high` - meaningful for `kind` in (publisher, database, expert-network); null elsewhere |
 | `Deal.stage` | `sourced, qualified, in-diligence, ic-ready, decided, closed, dead` |
 | `Deal.outcome` | `open, invested, passed, lost, withdrawn, observed` (`observed` = external round we tracked but didn't engage with) |
 | `Decision.kind` | `invest, pass, follow-on, double-down, write-off, exit-plan, no-decision` (intros, follow-ups, schedule-another-meeting, flag-at-next-board are `Commitment`s) |
 | `Assumption.level` | `market, founder, product, competitive, financial, strategic` |
 | `Question.status` | `open, partial, resolved` |
 | `Signal.kind` | `discovery, launch, fundraise, exit, founder-event, market-move, competitive, customer, regulatory, team-change, portfolio-update, board-decision` |
-| `Insight.kind` | `memo, brief, observation, recap` — open uncertainties live on `Question`, not here |
+| `Insight.kind` | `memo, brief, observation, recap` - open uncertainties live on `Question`, not here |
 | `Insight.stance` | `bull, bear, neutral` |
 | `Artifact.kind` | `email, ticket, chat-msg, meeting-note, transcript, deck, web-page, screenshot, doc, audio, image, summary, markdown` |
-| `Artifact.source` | `email, chat, meeting-tool, web, doc-tool, crm, outbound, manual, derived, repo, other` — coarse category, vendor name in `source_app` |
+| `Artifact.source` | `email, chat, meeting-tool, web, doc-tool, crm, outbound, manual, derived, repo, other` - coarse category, vendor name in `source_app` |
 | `Pattern.kind` | `gtm, pricing, founder-archetype, market-timing, exit, failure-mode, tech-adoption, capital-structure, regulatory` |
 | `Lesson.kind` | `protocol, rule-of-thumb, anti-pattern, runbook` |
-| `Lesson.status` | `tentative, active, retired` — `tentative` lives on a review branch awaiting human merge |
+| `Lesson.status` | `tentative, active, retired` - `tentative` lives on a review branch awaiting human merge |
 | `Thesis.status` | `active, retired, contradicted` |
 | `Meeting.kind` | `ic, board, partner-1on1, pipeline-review, portfolio-1on1, lp-update, founder-call, dd-call, expert-call, internal, external-other` |
 | `Meeting.status` | `scheduled, occurred, cancelled, rescheduled` |
@@ -150,9 +150,9 @@ Every node type appears exactly once. Each row lists a node and where its outgoi
 - **No reified "User" / "Team Member".** Quito itself is `org-quito` (Organization kind=vc-firm); team members `WorksAt org-quito`. Authorship and ownership live on edges (`DecisionByPerson`, `CommitmentAssignedTo`).
 - **No "Protocol" / "Runbook" type.** They're `Lesson{kind=protocol|runbook}`.
 - **No separate "SourceEntity" node.** A source is an `Organization` with `kind` in `(publisher, database, expert-network)` and a `reliability` rating. Reliability-driven revalidation walks the same `published-by-organization` ← Artifact ← `signalSourcedFromArtifact` ← Signal chain that a separate SourceEntity used to.
-- **No `hypothesis` value on `Insight.kind`.** An open uncertainty awaiting evidence is a `Question` — that has the right lifecycle (`open/partial/resolved`) and participates in the `DecisionNeedsAnswer` traversal.
+- **No `hypothesis` value on `Insight.kind`.** An open uncertainty awaiting evidence is a `Question` - that has the right lifecycle (`open/partial/resolved`) and participates in the `DecisionNeedsAnswer` traversal.
 
-## Reference seed — Fictional Series-A AI-infra fund
+## Reference seed - Fictional Series-A AI-infra fund
 
 The seed populates a fictional Berlin-based AI-infra fund running Fund III ($250M, vintage 2024). Single coherent narrative; exercises all 16 populated node types (`Chunk` is schema-only). **All names, deals, organizations, and people are fabricated.**
 
@@ -172,7 +172,7 @@ The seed populates a fictional Berlin-based AI-infra fund running Fund III ($250
 
 **Totals (loaded):** 207 nodes across 16 active types, 460 edges across 65 edge types. `Chunk` is schema-only (zero seeded). Bidirectional `Knows` accounts for 28 of those edges (14 unique pairs × 2).
 
-## Example queries — with live output
+## Example queries - with live output
 
 The seed is shaped to light these up. Each is a single graph traversal that would otherwise require hand-stitching across 4+ systems. Output below is verbatim from `omnigraph read --alias <name> [args]` against the loaded seed.
 
@@ -185,7 +185,7 @@ omnigraph read --alias pre-ic-brief-questions deal-helix-series-a
 omnigraph read --alias debate-stances         deal-helix-series-a
 ```
 
-**`pre-ic-brief-thesis`** — relevant thesis + grounding assumptions:
+**`pre-ic-brief-thesis`** - relevant thesis + grounding assumptions:
 ```
 t.slug                   | t.name                                     | a.slug                            | a.level   | a.confidence
 -------------------------+--------------------------------------------+-----------------------------------+-----------+-------------
@@ -194,7 +194,7 @@ thesis-on-prem-inference | On-prem inference for regulated industries | asmp-inf
 thesis-on-prem-inference | On-prem inference for regulated industries | asmp-helix-onprem-margin          | financial | medium
 ```
 
-**`pre-ic-brief-evidence`** — signals contradicting those assumptions:
+**`pre-ic-brief-evidence`** - signals contradicting those assumptions:
 ```
 a.slug                            | s.slug                    | s.kind      | s.date     | s.brief
 ----------------------------------+---------------------------+-------------+------------+--------
@@ -203,14 +203,14 @@ asmp-helix-onprem-margin          | sig-aws-bedrock-onprem    | competitive | 20
 asmp-helix-onprem-margin          | sig-microsoft-onprem-push | market-move | 2026-01-28 | Microsoft on-prem GPU SKUs for regulated…
 ```
 
-**`pre-ic-brief-questions`** — open uncertainties:
+**`pre-ic-brief-questions`** - open uncertainties:
 ```
 q.slug                | q.priority | q.description
 ----------------------+------------+--------------
 q-helix-onprem-margin | high       | AWS Bedrock now offers on-prem appliances. Does Helix's margin profile hold?
 ```
 
-**`debate-stances`** — bull + bear Insights grounded in real Signals:
+**`debate-stances`** - bull + bear Insights grounded in real Signals:
 ```
 i.slug         | i.kind | i.stance | i.summary
 ---------------+--------+----------+----------
@@ -224,7 +224,7 @@ ins-helix-bear | memo   | bear     | AWS Bedrock on-prem appliance launched in M
 omnigraph read --alias signal-portfolio-impact sig-vector-forge-aws-deal
 ```
 
-Walks `Signal → contradicts → Assumption → basedOn(inv) → Decision → regarding → Deal → forOrganization(status=portfolio)`. A new external signal arrives — which committed portfolio decisions just got destabilized?
+Walks `Signal → contradicts → Assumption → basedOn(inv) → Decision → regarding → Deal → forOrganization(status=portfolio)`. A new external signal arrives - which committed portfolio decisions just got destabilized?
 
 ```
 c.slug          | c.name      | dec.slug                       | dec.kind  | a.name
@@ -239,7 +239,7 @@ omnigraph read --alias exit-landscape                  org-pinion-infer
 omnigraph read --alias exit-landscape-decision-makers  org-pinion-infer
 ```
 
-**`exit-landscape`** — plausible acquirers:
+**`exit-landscape`** - plausible acquirers:
 ```
 o.slug           | o.name       | o.kind   | o.brief
 -----------------+--------------+----------+--------
@@ -248,7 +248,7 @@ org-microsoft    | Microsoft    | acquirer | Hyperscaler. Active AI-infra M&A.
 org-google-cloud | Google Cloud | acquirer | Hyperscaler. Vertex AI ecosystem acquisitions.
 ```
 
-**`exit-landscape-decision-makers`** — corp-dev contacts at each:
+**`exit-landscape-decision-makers`** - corp-dev contacts at each:
 ```
 o.slug        | o.name    | p.slug                  | p.name
 --------------+-----------+-------------------------+-------
@@ -266,26 +266,26 @@ omnigraph read --alias board-prep-meeting-history       org-aetherbrick   # prio
 omnigraph read --alias board-prep-next-meeting          org-aetherbrick   # scheduled next board
 ```
 
-**`board-prep-pack`** — recent signals since last board:
+**`board-prep-pack`** - recent signals since last board:
 ```
 s.slug                        | s.name                                     | s.date     | s.brief
 ------------------------------+--------------------------------------------+------------+--------
-sig-aetherbrick-series-b-talk | Aetherbrick — early Series B conversations | 2026-04-22 | CEO begins early Series B talks. Sequoia EU likely to lead.
-sig-aetherbrick-churn-spike   | Aetherbrick — Q1 churn spike (8.3%)        | 2026-04-07 | Q1 gross churn 8.3% (vs 4.5% Q4). Three mid-market logos lost…
+sig-aetherbrick-series-b-talk | Aetherbrick - early Series B conversations | 2026-04-22 | CEO begins early Series B talks. Sequoia EU likely to lead.
+sig-aetherbrick-churn-spike   | Aetherbrick - Q1 churn spike (8.3%)        | 2026-04-07 | Q1 gross churn 8.3% (vs 4.5% Q4). Three mid-market logos lost…
 ```
 
-**`board-prep-commitments`** — what's owed before the next board:
+**`board-prep-commitments`** - what's owed before the next board:
 ```
 cmt.slug                   | cmt.name                     | cmt.status | cmt.due_date | cmt.detail
 ---------------------------+------------------------------+------------+--------------+-----------
-cmt-aetherbrick-board-prep | Aetherbrick — board prep doc | open       | 2026-06-08   | Compile board prep covering churn analysis + Series B follow-on framework.
+cmt-aetherbrick-board-prep | Aetherbrick - board prep doc | open       | 2026-06-08   | Compile board prep covering churn analysis + Series B follow-on framework.
 ```
 
-**`board-prep-next-meeting`** — when the next board is:
+**`board-prep-next-meeting`** - when the next board is:
 ```
 m.slug                        | m.name                      | m.scheduled_at           | m.location | m.summary
 ------------------------------+-----------------------------+--------------------------+------------+----------
-mtg-aetherbrick-board-q2-2026 | Aetherbrick — Q2 2026 board | 2026-07-09T15:00:00.000Z | Berlin HQ  | Next board. Churn cohort follow-up + Series B framework decision expected.
+mtg-aetherbrick-board-q2-2026 | Aetherbrick - Q2 2026 board | 2026-07-09T15:00:00.000Z | Berlin HQ  | Next board. Churn cohort follow-up + Series B framework decision expected.
 ```
 
 ### Meeting history with a deal or organization
@@ -296,12 +296,12 @@ omnigraph read --alias ic-prep-meeting-history          deal-helix-series-a
 omnigraph read --alias ic-prep-open-commitments         deal-helix-series-a
 ```
 
-**`ic-prep-open-commitments`** — what's still owed before Helix IC:
+**`ic-prep-open-commitments`** - what's still owed before Helix IC:
 ```
 cmt.slug                 | cmt.name                           | cmt.priority | cmt.due_date | cmt.detail
 -------------------------+------------------------------------+--------------+--------------+-----------
-cmt-helix-second-meeting | Helix — schedule second meeting    | normal       | 2026-04-25   | On-prem mandate validated but need to test margin assumption…
-cmt-helix-customer-refs  | Helix — 3 customer reference calls | high         | 2026-06-15   | Schedule and complete 3 customer reference calls before Helix IC.
+cmt-helix-second-meeting | Helix - schedule second meeting    | normal       | 2026-04-25   | On-prem mandate validated but need to test margin assumption…
+cmt-helix-customer-refs  | Helix - 3 customer reference calls | high         | 2026-06-15   | Schedule and complete 3 customer reference calls before Helix IC.
 ```
 
 ### Intro path to a founder
@@ -311,14 +311,14 @@ omnigraph read --alias direct-team-knowers     per-helix-elena   # 1-hop
 omnigraph read --alias intro-path-to-founder   per-helix-yuki    # 2-hop via bridge
 ```
 
-**`direct-team-knowers per-helix-elena`** — who on the firm already knows her:
+**`direct-team-knowers per-helix-elena`** - who on the firm already knows her:
 ```
 teammate.slug | teammate.name
 --------------+--------------
 per-pawel     | Pawel Nowak
 ```
 
-**`intro-path-to-founder per-helix-yuki`** — 2-hop bridge:
+**`intro-path-to-founder per-helix-yuki`** - 2-hop bridge:
 ```
 teammate.slug | teammate.name | bridge.slug          | bridge.name
 --------------+---------------+----------------------+------------
@@ -372,17 +372,17 @@ org-anonblog   | Anonymous tech blog | low           | Pseudonymous blog. Mixed 
 org-techcrunch | TechCrunch          | medium        | Press releases + breaking news. Reliable on facts; commentary low signal.
 ```
 
-**`source-downstream-signals org-techcrunch`** — if TechCrunch's reliability drops, these signals need revalidation:
+**`source-downstream-signals org-techcrunch`** - if TechCrunch's reliability drops, these signals need revalidation:
 ```
 sig.slug                  | sig.name                                   | sig.kind    | sig.date   | sig.impact
 --------------------------+--------------------------------------------+-------------+------------+-----------
-sig-eu-ai-act-enforcement | EU AI Act — first major enforcement action | regulatory  | 2026-04-15 | high
+sig-eu-ai-act-enforcement | EU AI Act - first major enforcement action | regulatory  | 2026-04-15 | high
 sig-aws-bedrock-onprem    | AWS Bedrock launches on-prem appliance     | competitive | 2026-03-04 | high
 sig-databricks-acquihire  | Databricks acquires eval startup           | exit        | 2026-02-10 | high
 sig-microsoft-onprem-push | Microsoft expands Azure on-prem AI         | market-move | 2026-01-28 | normal
 ```
 
-That walk — `Organization{reliability=low/medium} ← publishedByOrganization ← Artifact ← signalSourcedFromArtifact ← Signal` — is what justifies collapsing the old `SourceEntity` node into `Organization`. The provenance traversal is identical; one less node type to learn.
+That walk - `Organization{reliability=low/medium} ← publishedByOrganization ← Artifact ← signalSourcedFromArtifact ← Signal` - is what justifies collapsing the old `SourceEntity` node into `Organization`. The provenance traversal is identical; one less node type to learn.
 
 ### Active lessons (firm protocols)
 
@@ -404,7 +404,7 @@ omnigraph read --alias team
 omnigraph read --alias decisions-recent
 ```
 
-**`team`** — 5 partners + 2 VPs, all derived from `WorksAt org-quito`:
+**`team`** - 5 partners + 2 VPs, all derived from `WorksAt org-quito`:
 ```
 p.slug       | p.name          | p.email               | p.location
 -------------+-----------------+-----------------------+-----------
@@ -417,12 +417,12 @@ per-ricardo  | Ricardo Silva   | ricardo@quito.example | Berlin
 per-vp-tegan | Tegan O'Brien   | null                  | Cambridge
 ```
 
-**`decisions-recent`** — 6 actual Decisions in the seed (no schedule-a-meeting or board-flag entries — those are Commitments):
+**`decisions-recent`** - 6 actual Decisions in the seed (no schedule-a-meeting or board-flag entries - those are Commitments):
 ```
 dec.slug                       | dec.name                                  | dec.kind    | dec.decided_at
 -------------------------------+-------------------------------------------+-------------+---------------
-dec-axon-ic-recommend-invest   | Axon Eval — IC recommend invest           | invest      | 2026-05-12
-dec-aetherbrick-follow-on-eval | Aetherbrick — evaluate Series B follow-on | follow-on   | 2026-04-22
+dec-axon-ic-recommend-invest   | Axon Eval - IC recommend invest           | invest      | 2026-05-12
+dec-aetherbrick-follow-on-eval | Aetherbrick - evaluate Series B follow-on | follow-on   | 2026-04-22
 dec-onprem-thesis-doubledown   | Double down on on-prem-inference thesis   | double-down | 2026-04-20
 dec-vector-forge-pass          | Pass on Vector Forge seed                 | pass        | 2026-01-22
 dec-stratopaint-pass           | Pass on Stratopaint seed                  | pass        | 2025-11-15
@@ -431,9 +431,9 @@ dec-pulserate-pass             | Pass on PulseRate Series A                | pas
 
 ## How branches + commits replace audit + tentative-review
 
-**Tentative Lessons — branch-based review.** An agent notices a recurring pattern in three closed deals → creates a `Lesson{kind=rule-of-thumb, status=tentative}` on a branch named `tentative/<date>`. Human reviews with `omnigraph branch diff`; merges if good, deletes if not. The branch *is* the review process.
+**Tentative Lessons - branch-based review.** An agent notices a recurring pattern in three closed deals → creates a `Lesson{kind=rule-of-thumb, status=tentative}` on a branch named `tentative/<date>`. Human reviews with `omnigraph branch diff`; merges if good, deletes if not. The branch *is* the review process.
 
-**Decision counterfactuals.** A `Decision` committed to main is snapshot-pinned to the exact `Assumption`/`Signal`/`Question` state at the moment of decision. Six months later: "what would we have decided if we'd known X?" — branch from the decision's commit, mutate one Assumption, re-run the pre-IC brief query. The diff is the counterfactual.
+**Decision counterfactuals.** A `Decision` committed to main is snapshot-pinned to the exact `Assumption`/`Signal`/`Question` state at the moment of decision. Six months later: "what would we have decided if we'd known X?" - branch from the decision's commit, mutate one Assumption, re-run the pre-IC brief query. The diff is the counterfactual.
 
 ## Example agent workflows
 
@@ -444,7 +444,7 @@ For each agent below: the natural-language **prompt** you'd send it, concrete **
 ### 1. Post-call ingestion · every 10 min (cron)
 
 **Prompt:**
-> Fetch new Granola transcripts since `sync-state.granola.last_synced_at`. For each: create the Artifact, resolve mentioned people/orgs (don't fabricate — flag unresolved), derive material Signals tied to the deal's existing Theses/Assumptions, extract action items as Commitments with assignee + due. One branch per meeting, `tentative/ingest-<meeting-slug>`. Update the cursor.
+> Fetch new Granola transcripts since `sync-state.granola.last_synced_at`. For each: create the Artifact, resolve mentioned people/orgs (don't fabricate - flag unresolved), derive material Signals tied to the deal's existing Theses/Assumptions, extract action items as Commitments with assignee + due. One branch per meeting, `tentative/ingest-<meeting-slug>`. Update the cursor.
 
 **External:** Granola REST.
 
@@ -452,7 +452,7 @@ For each agent below: the natural-language **prompt** you'd send it, concrete **
 
 **Writes (per transcript, on its own branch):** the transcript as an Artifact (source `meeting-tool`, app `granola`) · 0–3 Signals each tied as `supports`/`contradicts` against the right Assumption · 0–N Commitments with assignee + `fromMeeting` back-edge + due-date.
 
-**Why graph:** the Artifact, derived Signals, and extracted Commitments land as one atomic branch — a partial failure in one mutation rolls back the whole call's ingest, no orphan signals.
+**Why graph:** the Artifact, derived Signals, and extracted Commitments land as one atomic branch - a partial failure in one mutation rolls back the whole call's ingest, no orphan signals.
 
 ### 2. Scout-pick triage · daily 08:00 (cron)
 
@@ -476,14 +476,14 @@ For each agent below: the natural-language **prompt** you'd send it, concrete **
 
 **Pulls (IC variant):** deal terms + lead partner · grounding Thesis + Assumptions with confidence · `supports/contradicts` Signals per Assumption (the asymmetry surfaces here) · open Questions by priority · existing bull/bear Insights and which Signals each cites · prior Meetings with attendee + summary · still-open Commitments with due dates.
 
-**Writes:** None — output is the synthesized brief returned via the channel that triggered it.
+**Writes:** None - output is the synthesized brief returned via the channel that triggered it.
 
-**Why graph:** ~8 reads against one commit-pinned snapshot; re-runnable at the same commit ID six months later for counterfactual diligence reviews. Asymmetries like "bull defends demand pillar, bear attacks margin pillar" surface mechanically from counting which Assumptions each side's signals attack — not from clever synthesis.
+**Why graph:** ~8 reads against one commit-pinned snapshot; re-runnable at the same commit ID six months later for counterfactual diligence reviews. Asymmetries like "bull defends demand pillar, bear attacks margin pillar" surface mechanically from counting which Assumptions each side's signals attack - not from clever synthesis.
 
 ### 4. Multi-agent IC simulation · calendar webhook 48h before a high-conviction IC
 
-**Prompt** (one per agent — bull / bear / neutral fork):
-> An IC is in 48h. You are the {bull | bear | neutral} agent. Read the deal's Thesis + Assumptions + recent Signals + related Patterns. Pick the evidence that genuinely supports your stance — overlap with the other agents is expected, that's the point. Write one `Insight{stance=…}` with `add-insight-with-stance` on the shared debate branch, citing Signals via `InsightReliesOnSignal` and any Pattern via `InsightHighlightsPattern`. Don't invent. Neutral agent: name what new evidence would resolve the disagreement.
+**Prompt** (one per agent - bull / bear / neutral fork):
+> An IC is in 48h. You are the {bull | bear | neutral} agent. Read the deal's Thesis + Assumptions + recent Signals + related Patterns. Pick the evidence that genuinely supports your stance - overlap with the other agents is expected, that's the point. Write one `Insight{stance=…}` with `add-insight-with-stance` on the shared debate branch, citing Signals via `InsightReliesOnSignal` and any Pattern via `InsightHighlightsPattern`. Don't invent. Neutral agent: name what new evidence would resolve the disagreement.
 
 **External:** the calendar invite for the IC.
 
@@ -491,7 +491,7 @@ For each agent below: the natural-language **prompt** you'd send it, concrete **
 
 **Writes (one Insight per agent, all on a shared `tentative/ic-debate-<deal>` branch):** Insight with stance + summary + body · `InsightAboutDeal` · `InsightReliesOnSignal` per cited Signal · `InsightHighlightsPattern` if a market-shape Pattern is load-bearing.
 
-**Why graph:** bull and bear linking the *same* Pattern with opposite framings makes the disagreement structurally legible. Partner can audit "are they arguing about different evidence, or interpreting the same evidence oppositely?" at a glance — not from re-reading two essays.
+**Why graph:** bull and bear linking the *same* Pattern with opposite framings makes the disagreement structurally legible. Partner can audit "are they arguing about different evidence, or interpreting the same evidence oppositely?" at a glance - not from re-reading two essays.
 
 ### 5. Reflexive learning sweep · quarterly (cron)
 
@@ -504,7 +504,7 @@ For each agent below: the natural-language **prompt** you'd send it, concrete **
 
 **Writes (only when a Pattern qualifies and isn't already covered):** `Lesson{status=tentative}` with body + `DistilledFromPattern` + `AppliesToMarket`.
 
-**Why graph:** `Pattern.acrossDecision` aggregation makes "this shape recurred N times with consistent outcome" a deterministic query, not a vibes call. The duplicate-check against active Lessons is the same primitive — a sweep that always produces a Lesson would be a hallucinating sweep.
+**Why graph:** `Pattern.acrossDecision` aggregation makes "this shape recurred N times with consistent outcome" a deterministic query, not a vibes call. The duplicate-check against active Lessons is the same primitive - a sweep that always produces a Lesson would be a hallucinating sweep.
 
 ## v1 scope
 
@@ -516,7 +516,7 @@ For each agent below: the natural-language **prompt** you'd send it, concrete **
 
 **Deferred (extensions, not blockers):**
 - **Real blob + embedding examples in seed.** Schema declares the capability. Attach real PDFs/transcripts as `Artifact.blob`, populate `Chunk` rows, then `omnigraph embed --reembed_all` followed by hybrid queries combining `nearest()` / `bm25()` / `rrf()` with graph traversal.
-- **Cedar policies** (`policies/`) — per-role access control (team / lp / read-only-portfolio) collapses application-layer permission code into the graph server.
+- **Cedar policies** (`policies/`) - per-role access control (team / lp / read-only-portfolio) collapses application-layer permission code into the graph server.
 - **Sector-specialist Pattern/Lesson packs.** AI-infra Patterns ship with the reference seed; talent-tech / climate / B2B-SaaS variants are sibling cookbooks.
 - **`Measurement` node** for time-series KPIs/cash/runway (currently captured loosely via `Signal{kind=portfolio-update}`).
 
@@ -526,7 +526,7 @@ For each agent below: the natural-language **prompt** you'd send it, concrete **
 vc-os/
 ├── README.md          # this file
 ├── CLAUDE.md          # scoped agent guidance
-├── schema.pg          # 17 nodes, ~62 edges, ~19 enums — source of truth
+├── schema.pg          # 17 nodes, ~62 edges, ~19 enums - source of truth
 ├── seed.md            # human-readable narrative (twin of seed.jsonl)
 ├── seed.jsonl         # loadable seed
 ├── omnigraph.yaml     # CLI config + 294 aliases
@@ -576,7 +576,7 @@ AWS_S3_FORCE_PATH_STYLE=true
 EOF
 set -a && source ./.env.omni && set +a
 
-# 3. Lint the schema and queries (pure file check — no server needed)
+# 3. Lint the schema and queries (pure file check - no server needed)
 omnigraph query lint --schema ./schema.pg --query ./queries/deals.gq
 
 # 4. Create the bucket, init the repo, load the seed
@@ -585,7 +585,7 @@ curl -s -X PUT http://127.0.0.1:9000/omnigraph-local/ -H 'Host: omnigraph-local.
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/vc-os
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/vc-os
 
-# 5. Start the local HTTP server (keep it running — separate terminal)
+# 5. Start the local HTTP server (keep it running - separate terminal)
 omnigraph-server --config ./omnigraph.yaml
 
 # 6. Query through the server via aliases
@@ -606,7 +606,7 @@ omnigraph read --alias person-insights          per-helix-yuki     # founder ass
 omnigraph read --alias observed-organizations                      # PitchBook-imported (no Quito engagement)
 ```
 
-The aliases are also grouped by meeting view in `omnigraph.yaml` — `VIEW: IC Meeting`, `VIEW: Weekly Pipeline Meeting`, `VIEW: Portfolio Support Meeting`, `VIEW: LPAC / Fund Reporting` — so dashboards map 1:1 to alias bundles.
+The aliases are also grouped by meeting view in `omnigraph.yaml` - `VIEW: IC Meeting`, `VIEW: Weekly Pipeline Meeting`, `VIEW: Portfolio Support Meeting`, `VIEW: LPAC / Fund Reporting` - so dashboards map 1:1 to alias bundles.
 
 See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.
 
@@ -616,14 +616,14 @@ See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI 
 2. **Replace the seed.** Use your firm's actual organizations, theses, people, and decisions. Start with current pipeline + portfolio; backfill history as time allows.
 3. **Customize the `Market` taxonomy.** Sector-specialist firms (talent-tech, climate, fintech) only need to change `Market` enum-style values and the `Pattern`/`Lesson` content.
 4. **Wire your existing tools as ingest sources.** Granola → `Artifact{kind=transcript, source=meeting-tool, source_app=granola}`. Slack → `Artifact{kind=chat-msg, source=chat, source_app=slack}`. Email → `Artifact{kind=email, source=email, source_app=gmail}`. The CRM gets fully replaced; everything else feeds in via mutations.
-5. **Run the example queries against your real data.** If any returns empty, your seed is undermodeling the loop the query exercises — fix the seed, not the schema.
+5. **Run the example queries against your real data.** If any returns empty, your seed is undermodeling the loop the query exercises - fix the seed, not the schema.
 
 ## Why this is the first "OS-grade" cookbook
 
 Three properties no other cookbook in this repo delivers together:
 
-1. **All seven workflow stages in one graph** — Find / Evaluate / Decide / Win / Help / Monitor / Learn.
-2. **First-class engagement + action + reflexive layers.** `Deal`/`Fund`, `Decision`/`Commitment`, `Pattern`/`Lesson` share priority with `Signal`/`Insight` — they aren't bolted on.
+1. **All seven workflow stages in one graph** - Find / Evaluate / Decide / Win / Help / Monitor / Learn.
+2. **First-class engagement + action + reflexive layers.** `Deal`/`Fund`, `Decision`/`Commitment`, `Pattern`/`Lesson` share priority with `Signal`/`Insight` - they aren't bolted on.
 3. **Stack collapse is the design principle.** Schema choices (native `Blob` on `Artifact`, hybrid search via `Chunk`, branch-as-audit, `Organization` as the universal entity-of-the-world) exist *specifically* to let the graph replace CRM + document store + learnings DB + audit log + access control + source-provenance registry.
 
-The same pattern should generalize to other knowledge-work firms — law, consulting, family office, sales-led B2B sales operations.
+The same pattern should generalize to other knowledge-work firms - law, consulting, family office, sales-led B2B sales operations.
