@@ -47,15 +47,15 @@ else
   omnigraph init --schema "$SCHEMA_PATH" "$OMNIGRAPH_TARGET_URI"
 fi
 
-if [ "${OMNIGRAPH_LOAD_SEED:-true}" = "true" ]; then
+if [ "${OMNIGRAPH_LOAD_SEED:-false}" = "true" ]; then
   if [ -f "$SEED_PATH" ]; then
-    echo "init: loading seed from $SEED_PATH (mode=merge)"
+    echo "init: loading bundled demo seed from $SEED_PATH (mode=merge)"
     omnigraph load --data "$SEED_PATH" --mode merge "$OMNIGRAPH_TARGET_URI"
   else
     echo "init: no seed file at $SEED_PATH; continuing with empty graph"
   fi
 else
-  echo "init: OMNIGRAPH_LOAD_SEED=false, skipping seed load"
+  echo "init: OMNIGRAPH_LOAD_SEED not set; graph stays empty (only the cookbook schema is applied)"
 fi
 
 echo "init: complete"

@@ -11,26 +11,38 @@ runs `omnigraph init` + seed load on first boot.
 | ---------------------- | ------------------------------------------------------------------------ |
 | `omnigraph-server`     | Single Railway service (this repo's `deploy/railway/Dockerfile`)         |
 | Storage                | Railway Bucket — first-party S3, R2-backed, free egress                  |
+| Schema                 | The cookbook you pick is applied via `omnigraph init`; the graph then starts empty |
 | Auth (3 actors)        | `admin` / `writer` / `reader` bearer tokens auto-generated at deploy     |
 | Authz                  | Cedar-via-YAML policy at `/etc/omnigraph/policy.yaml` (baked into image) |
 | Public HTTPS endpoint  | Railway-managed `*.up.railway.app` domain with auto-SSL                  |
+
+The template is **schema-only** by default — you get the cookbook's
+typed structure ready to receive your real data. To load the cookbook's
+bundled demo `seed.jsonl` for a quick interactive look, set
+`OMNIGRAPH_LOAD_SEED=true` (see env table below).
 
 Total cost on Railway Hobby: ~$0.015/GB-month for storage + the service's
 compute. No volumes attached — all state lives in the Bucket.
 
 ## Deploy
 
-Each ready cookbook gets its own one-click button. Click to deploy.
+One template covers all cookbooks. At deploy time, pick which cookbook's
+schema to apply via the `OMNIGRAPH_COOKBOOK` variable:
 
-| Cookbook | What it is | Deploy |
-|---|---|---|
-| `industry-intel` | AI/ML industry intelligence (SPIKE framework) | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/TBD-industry-intel) |
-| `pharma-intel` | Pharma competitive intelligence | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/TBD-pharma-intel) |
-| `second-brain` | Personal life automation | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/TBD-second-brain) |
-| `vc-os` | Venture-capital operating system | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/TBD-vc-os) |
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/TBD)
 
-> **Status:** Template URLs above are placeholders until the templates
-> are published on Railway. Until then, deploy manually:
+Valid values for `OMNIGRAPH_COOKBOOK` (the deploy form will accept any
+string; only these are bundled in the image today):
+
+| Cookbook | Schema describes |
+|---|---|
+| `industry-intel` | AI/ML industry intelligence (SPIKE framework) |
+| `pharma-intel` | Pharma competitive intelligence |
+| `second-brain` | Personal life automation |
+| `vc-os` | Venture-capital operating system |
+
+> **Status:** Template URL above is a placeholder until the template is
+> published on Railway. Until then, deploy manually:
 >
 > ```bash
 > railway init
@@ -73,7 +85,7 @@ what each does (and to make manual deploys reproducible).
 | `AWS_SECRET_ACCESS_KEY`               | `${{Bucket.SECRET_ACCESS_KEY}}`                                                          |
 | `AWS_REGION`                          | `${{Bucket.REGION}}`                                                                     |
 | `OMNIGRAPH_SERVER_BEARER_TOKENS_JSON` | `{"admin":"${{secret(48)}}","writer":"${{secret(48)}}","reader":"${{secret(48)}}"}`      |
-| `OMNIGRAPH_LOAD_SEED`                 | `true` (override to `false` for an empty graph)                                          |
+| `OMNIGRAPH_LOAD_SEED`                 | `false` by default. Set to `true` to also load the cookbook's bundled demo `seed.jsonl` for an interactive demo deploy. |
 | `GEMINI_API_KEY` (optional)           | Empty by default; supply yours at deploy time to unlock text-input vector search         |
 
 ### Embeddings + Gemini
