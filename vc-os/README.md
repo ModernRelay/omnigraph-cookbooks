@@ -30,12 +30,12 @@ The core is the entities the team can hold in their head, stable for years even 
 
 | Node | Purpose |
 |---|---|
-| **`Organization`** | Any real-world business entity. `kind` carries the role (startup / lp-institution / vc-firm / acquirer / customer / bank / regulator / accelerator / family-office / **publisher / database / expert-network** / …); `status` carries Quito's engagement state for `kind=startup` (nullable otherwise); `reliability` (low/med/high) is meaningful for the source-type kinds. Quito itself is `org-quito` (`kind=vc-firm`). |
-| **`Person`** | An individual human. Roles relative to Quito live on edges, not on the node - `WorksAt org-quito` (team), `FounderOf co-x` (founder), `RoleInDeal {role: expert}` (expert). |
-| **`Deal`** | A funding event involving an Organization. Quito-engaged Deals have `FromFund` set; externally observed Deals (PitchBook imports) use `outcome=observed`. |
-| **`Fund`** | Quito's funds. |
+| **`Organization`** | Any real-world business entity |
+| **`Person`** | An individual human. Roles live on edges, not on the node - `WorksAt org-quito` (team), `FounderOf co-x` (founder), `RoleInDeal {role: expert}` (expert). |
+| **`Deal`** | A funding event involving an Organization. |
+| **`Fund`** | The firm's funds. |
 | **`Market`** | Sector/vertical hub. Sector-specialist Theses, Patterns, and Lessons cluster around it. |
-| **`Artifact`** | Raw content with native `Blob` - Granola transcripts, pitch decks, emails, screenshots, chat messages, markdown wiki pages. `source` is a coarse category (`email/chat/meeting-tool/web/doc-tool/crm/outbound/manual/derived/repo/other`); `source_app` is the specific vendor name. |
+| **`Artifact`** | Raw content with native `Blob` - Granola transcripts, pitch decks, emails, screenshots, chat messages, markdown wiki pages.  |
 | **`Meeting`** | A scheduled (or ad-hoc) event with attendees, subject, and outputs. The transcript is an `Artifact`; the Meeting binds attendees + agenda + outcomes (Decisions, Commitments) around it. Covers IC, board, founder calls, partner offsites, pipeline reviews, expert calls. |
 
 ### Analytical layer
@@ -45,11 +45,11 @@ Built on top of the core. These can be added to or refined without touching the 
 | Layer | Nodes | Purpose |
 |---|---|---|
 | Belief | `Thesis` · `Assumption` · `Question` | The value layer (investing DNA). `Question` is the home for open uncertainties - not `Insight{kind=hypothesis}`. |
-| Evidence | `Signal` · `Insight` · `Chunk` | What moves beliefs. `Chunk` is implementation detail for hybrid search, not an ontological commitment. |
+| Evidence | `Signal` · `Insight` · `Chunk` | What moves beliefs. `Chunk` is implementation detail for hybrid search. |
 | Action | `Decision` · `Commitment` | What we do. `Decision` is one-shot (`decided_at`); `Commitment` is deferred-action with a deadline. Intros, follow-ups, *schedule-another-meeting*, and *flag-at-next-board* are `Commitment`s, not `Decision`s. |
 | Reflexive | `Pattern` · `Lesson` | What we learn. `Pattern` aggregates across many subjects; `Insight` interprets one. `Lesson` is operational (changes future behavior); `Insight` is descriptive. |
 
-**17 node types total** (`Chunk` ships zero rows in v1 - populate via `omnigraph embed --reembed_all`). Source-provenance entities (TechCrunch, PitchBook, Tegus, anon blog) live as `Organization` rows with `kind` in `(publisher, database, expert-network)` and a `reliability` rating - no separate `SourceEntity` node.
+**17 node types total** (`Chunk` should be populated via `omnigraph embed --reembed_all`). Source-provenance entities (TechCrunch, PitchBook, Tegus, anon blog) live as `Organization` rows with `kind` in `(publisher, database, expert-network)` and a `reliability` rating - no separate `SourceEntity` node.
 
 Slug prefixes: `org- per- mkt- deal- fund- art- mtg- thesis- asmp- q- sig- ins- chk- dec- cmt- pat- lsn-`.
 
