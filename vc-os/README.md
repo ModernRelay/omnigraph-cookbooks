@@ -1,6 +1,6 @@
 # VC OS - A venture-capital operating system as a knowledge graph
 
-Opinionated Omnigraph cookbook for venture-capital firms. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph), shaped from a first-principles teardown of how a modern AI-era VC actually works. Covers pipeline, diligence, decisions, portfolio, network, audit, and learning - all in one typed graph.
+Opinionated Omnigraph cookbook for venture-capital firms. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph), shaped from a first-principles teardown of how a token-maxxing VC should work. Covers pipeline, diligence, decisions, portfolio, network, audit, and learning - all in one typed graph.
 
 ## Why a graph, not another tool
 
