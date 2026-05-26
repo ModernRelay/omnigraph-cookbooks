@@ -142,6 +142,24 @@ that need a different role/group structure:
 3. Validate locally: `omnigraph policy validate --policy ./deploy/railway/config/policy.yaml`.
 4. Push the fork and point your Railway service at it.
 
+## After you customize the schema
+
+The template is for *initial* deploys. Once you've run `omnigraph schema
+apply` against the live graph with your own schema, the cookbook seed
+in the image no longer matches the manifest. Subsequent re-deploys will
+hit this — the `preDeployCommand` script (`init.sh`) sees a manifest
+with 0 rows (because your custom schema has new tables that aren't
+populated by the cookbook seed) and tries to retry the seed load,
+which then fails with `"unknown node type '<name>'"`.
+
+This is intentional fail-loud behavior: better than silently dumping
+cookbook seed data on top of your custom schema. To opt out:
+
+1. Set `OMNIGRAPH_LOAD_SEED=false` on the omnigraph service. The init
+   script will then init missing manifests but never auto-load seed.
+2. Or empty the cookbook's bundled schema/seed via your own fork —
+   see "Customizing" above.
+
 ## Re-deploy and schema changes
 
 The `preDeployCommand` runs `omnigraph-railway-init.sh` between build
