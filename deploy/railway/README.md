@@ -56,6 +56,34 @@ what each does (and to make manual deploys reproducible).
 | `AWS_REGION`                          | `${{Bucket.REGION}}`                                                                     |
 | `OMNIGRAPH_SERVER_BEARER_TOKENS_JSON` | `{"admin":"${{secret(48)}}","writer":"${{secret(48)}}","reader":"${{secret(48)}}"}`      |
 | `OMNIGRAPH_LOAD_SEED`                 | `true` (override to `false` for an empty graph)                                          |
+| `GEMINI_API_KEY` (optional)           | Empty by default; supply yours at deploy time to unlock text-input vector search         |
+
+### Embeddings + Gemini
+
+Three of the four cookbooks (`industry-intel`, `second-brain`, `vc-os`)
+have schemas with `Vector(...) @embed("...")` fields. The seed load does
+**not** populate those vectors — they stay null unless you run
+`omnigraph embed --reembed-all` against the deployed graph (out of scope
+for v1 of this template; the cookbooks don't yet ship the seed-side
+`embeddings:` block required by that flow).
+
+Practical consequences:
+
+- Without `GEMINI_API_KEY`, the deploy still works for every query type
+  we ship in the cookbook (`get_*`, `recent_*`, traversals like
+  `pattern_signals`, FTS via `search(...)`). Only `nearest(field, "text",
+  k)` queries that need to embed a *text* input at query time return 500
+  with `"GEMINI_API_KEY is required when nearest() needs a string
+  embedding"`.
+- With `GEMINI_API_KEY` set, the same vector queries work once you've
+  populated the embedding columns via `omnigraph embed` (workstation-
+  initiated; runs against the running server).
+- `pharma-intel` has no `@embed` fields and never needs the key.
+
+The Railway template marks `GEMINI_API_KEY` as an **optional user-input
+variable** — the deploy UI shows a blank field with the description
+above. Leave it blank to skip; set it to a Gemini API key to enable
+text-input vector search later.
 
 `${{Bucket.*}}` and `${{secret(N)}}` are Railway's reference-variable
 and template-function syntax — they resolve at deploy time without
