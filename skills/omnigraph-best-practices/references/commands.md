@@ -55,15 +55,15 @@ omnigraph schema apply --schema ./next.pg $REPO
 
 See `references/schema.md` for the full workflow.
 
-## Query Lint
+## Lint
 
 ```bash
-omnigraph query lint --schema ./schema.pg --query ./queries/foo.gq --json
+omnigraph lint --schema ./schema.pg --query ./queries/foo.gq --json
 # or against a live repo:
-omnigraph query lint --query ./queries/foo.gq $REPO --json
+omnigraph lint --query ./queries/foo.gq $REPO --json
 ```
 
-See `references/queries.md`.
+`omnigraph query lint` / `omnigraph query check` still work as deprecated aliases (they rewrite to `omnigraph lint` and warn). See `references/queries.md`.
 
 ## Embed
 
@@ -98,19 +98,21 @@ omnigraph ingest --data ./delta.jsonl --branch feature-x --from main --mode merg
 
 `--mode` values for both: `overwrite`, `merge`, `append`. See `references/data.md`.
 
-## Read / Change
+## Query / Mutate
 
 ```bash
-omnigraph read  --query queries/signals.gq --name get_signal --params '{"slug":"sig-foo"}'
-omnigraph change --query queries/mutations.gq --name add_signal --params '{"slug":"sig-foo",...}'
+omnigraph query  --query queries/signals.gq --name get_signal --params '{"slug":"sig-foo"}'
+omnigraph mutate --query queries/mutations.gq --name add_signal --params '{"slug":"sig-foo",...}'
 ```
 
 With aliases:
 
 ```bash
-omnigraph read  --alias signal sig-foo
-omnigraph change --alias add-signal sig-foo "Name" "Brief" 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z
+omnigraph query  --alias signal sig-foo
+omnigraph mutate --alias add-signal sig-foo "Name" "Brief" 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z
 ```
+
+> `omnigraph read` / `omnigraph change` still work as **deprecated** aliases (they warn to stderr); prefer `query` / `mutate`. Both also accept inline source via `-e/--query-string '<gq>'` instead of `--query <file>`.
 
 ## Config Resolution Order
 
@@ -133,7 +135,7 @@ For params:
 
 ## Output Formats
 
-`--format <fmt>` on read/change:
+`--format <fmt>` on query/mutate:
 
 - `table` (default) — human-readable
 - `kv` — `key: value` per line; good for single rows

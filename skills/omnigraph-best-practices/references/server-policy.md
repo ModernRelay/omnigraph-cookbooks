@@ -20,7 +20,7 @@ graphs:
     uri: s3://omnigraph-local/repos/spike-intel
 
 server:
-  graph: local_s3          # which graph to serve
+  graph: local_s3          # which graph to serve (single-graph mode)
   bind: 127.0.0.1:8080     # where to listen
 ```
 
@@ -31,14 +31,16 @@ server:
 | `GET /healthz` | liveness probe |
 | `GET /snapshot` | table state + row counts |
 | `GET /export` | JSONL stream of a branch |
-| `POST /read` | read query execution |
-| `POST /change` | mutation execution |
+| `POST /query` | read query execution |
+| `POST /mutate` | mutation execution |
+| `POST /read` / `POST /change` | **deprecated** aliases for `/query` / `/mutate` — still served, but carry `Deprecation: true` and `Link: </query>; rel="successor-version"` response headers. Prefer the canonical names. |
 | `POST /schema/apply` | schema migration |
 | `GET /branches` | branch list |
-| `GET /runs` | transactional run history |
 | `GET /commits` | commit history |
 
 Query params for read routes: `?branch=main` or `?snapshot=<id>`.
+
+> **No `/runs` endpoint.** The transactional Run state machine and its `/runs` routes were removed in v0.4.0. Writes now publish directly and commit atomically via the `__manifest` table; use `GET /commits` for write/audit history. A request to `/runs` returns 404.
 
 ## Auth
 
@@ -62,10 +64,19 @@ Then export the token before running the CLI:
 
 ```bash
 export OMNIGRAPH_BEARER_TOKEN=s3cret
-omnigraph read --target remote --alias signal sig-foo
+omnigraph query --target remote --alias signal sig-foo
 ```
 
-Leave auth off entirely for pure local dev.
+### Running without auth requires an explicit opt-in
+
+You can no longer just "leave auth off." Since v0.6.0 the server **refuses to start** when it has neither bearer tokens nor a policy file, unless you explicitly opt in:
+
+```bash
+omnigraph-server --config ./omnigraph.yaml --unauthenticated
+# or: OMNIGRAPH_UNAUTHENTICATED=1 omnigraph-server --config ./omnigraph.yaml
+```
+
+This is a guardrail against accidentally shipping an open server. For pure local dev, pass `--unauthenticated` deliberately.
 
 ## Setup Operations Bypass the Server
 
@@ -76,23 +87,41 @@ omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/<name>
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/<name>
 ```
 
-Everything else — `read`, `change`, `snapshot`, `schema plan/apply`, `branch`, `run`, `commit` — goes through the running server.
+Everything else — `query`, `mutate`, `snapshot`, `schema plan/apply`, `branch`, `commit` — goes through the running server.
 
 ## Cedar Policy
 
 Omnigraph can gate sensitive actions with [Cedar](https://www.cedarpolicy.com/) policies.
 
+### Default-deny posture
+
+Policy is enforced engine-wide (every authoring path calls the same gate), and the default is **closed**, not open:
+
+| Server state | Bearer tokens | Policy file | Behavior |
+|---|---|---|---|
+| **Open** | no | no | Every request permitted — but the server refuses to start without `--unauthenticated` / `OMNIGRAPH_UNAUTHENTICATED=1`. |
+| **DefaultDeny** | yes | no | Every authenticated request for an action other than `read` is rejected (HTTP 403). "Tokens but forgot the policy file" no longer ships the illusion of protection. |
+| **PolicyEnabled** | yes | yes | Requests are evaluated against your Cedar rules. |
+
+So configuring a policy file is what *enables* writes — there is no "permit everything by default" mode once tokens are set.
+
 ### Gated actions
+
+Per-graph actions (evaluated against the graph being addressed):
 
 | Action | Protects |
 |--------|----------|
 | `read` | query execution |
-| `change` | mutations |
 | `export` | data export |
+| `change` | mutations |
 | `schema_apply` | schema migrations |
 | `branch_create` | branch creation |
+| `branch_delete` | branch deletion |
 | `branch_merge` | merges (especially into protected branches) |
-| `run_publish`, `run_abort` | transactional run control |
+
+`admin` exists but is reserved (no call site yet — don't write rules for it). In multi-graph deployments there is also a server-scoped `graph_list` action gating `GET /graphs`; it lives in a separate `server.policy.file`.
+
+> The old `run_publish` / `run_abort` actions were **removed in v0.4.0**. A `policy.yaml` that still references them fails validation — delete those rules; the `change` action covers the equivalent gating.
 
 For any shared repo, gate at least `schema_apply` and `branch_merge`.
 
@@ -104,38 +133,46 @@ policy:
   file: ./policy.yaml
 ```
 
-### Policy.yaml shape
+### `policy.yaml` shape
+
+The policy model is **allow-only**: every rule is a `permit`. You grant capabilities to groups; anything ungranted is denied by default. There is **no `deny` / `effect` key** — to forbid something, simply don't grant it.
 
 ```yaml
+version: 1                          # required; must be 1
+
 groups:
   admins: [act-alice, act-bob]
-  team: [act-carol, act-dan]
+  team:   [act-carol, act-dan]
 
 protected_branches:
   - main
 
 rules:
-  - name: admins-can-apply-schema
-    effect: permit
-    actors: admins
-    actions: [schema_apply]
+  - id: admins-can-apply-schema     # rules use `id`, not `name`
+    allow:                          # required `allow:` block
+      actors: { group: admins }     # references a group by name
+      actions: [schema_apply]
+      target_branch_scope: protected
 
-  - name: team-can-merge-to-protected
-    effect: permit
-    actors: team
-    actions: [branch_merge]
-    target_branch_scope: protected
+  - id: team-can-merge-to-protected
+    allow:
+      actors: { group: team }
+      actions: [branch_merge]
+      target_branch_scope: protected
 
-  - name: deny-unreviewed-schema-apply
-    effect: deny
-    actions: [schema_apply]
-    branch_scope: any
-    # unless overridden by explicit permit
+  - id: team-can-read-write-unprotected
+    allow:
+      actors: { group: team }
+      actions: [read, change]
+      branch_scope: unprotected
 ```
 
-Rule scopes:
-- `branch_scope: any | protected | unprotected`
-- `target_branch_scope: protected | unprotected` (for merges)
+To "block unreviewed schema applies," you don't write a deny rule — you just don't grant `schema_apply` to that group. Default-deny does the rest.
+
+Scope rules (a rule's `allow` block may use **at most one**):
+
+- `branch_scope: any | protected | unprotected` — for `read`, `export`, `change` (matches the source branch).
+- `target_branch_scope: any | protected | unprotected` — for `schema_apply`, `branch_create`, `branch_delete`, `branch_merge` (matches the destination branch).
 
 ### Validate, test, explain
 
@@ -150,21 +187,22 @@ omnigraph policy test --config ./omnigraph.yaml
 omnigraph policy explain \
   --actor act-alice \
   --action schema_apply \
-  --branch main \
+  --target-branch main \
   --config ./omnigraph.yaml
 ```
 
 ### Test cases (`policy.tests.yaml`)
 
 ```yaml
+version: 1                          # required; must be 1
 cases:
-  - name: alice-can-apply-schema
+  - id: alice-can-apply-schema      # cases use `id`, not `name`
     actor: act-alice
     action: schema_apply
-    branch: main
-    expect: permit
+    target_branch: main             # schema_apply is target-branch scoped
+    expect: allow                   # `allow` / `deny` (not `permit`)
 
-  - name: random-user-cannot-merge-to-main
+  - id: random-user-cannot-merge-to-main
     actor: act-random
     action: branch_merge
     target_branch: main
@@ -176,8 +214,8 @@ Run `policy test` after every policy edit. Tests are cheap.
 ## Server + Policy Together
 
 When the server is running with a policy file:
-1. All HTTP routes check the authenticated actor (from the bearer token) against Cedar rules
-2. Unauthorized requests return `403 Forbidden`
-3. The CLI doesn't bypass policy when it connects over HTTP — it's enforced at the server
+1. Every request resolves the actor from the bearer token (the client cannot set actor identity) and checks it against Cedar rules.
+2. Unauthorized requests return `403 Forbidden`.
+3. The CLI doesn't bypass policy when it connects over HTTP — it's enforced at the server. Enforcement is also engine-wide, so CLI direct-engine writes and embedded SDK consumers hit the same gate.
 
-Setup ops (`init`, `load`) bypass policy since they write storage directly. Gate those separately at the storage layer (S3 bucket ACLs, object locks) if needed.
+Setup ops (`init`, `load`) write storage directly. With a policy configured they still flow through the engine-layer enforce gate for the actor you pass via `--as` (or `cli.actor` in `omnigraph.yaml`); gate the raw storage layer too (S3 bucket ACLs, object locks) if the bucket is shared.

@@ -85,7 +85,7 @@ Keep it running (separate terminal or background). All queries from here on go t
 ### Verify
 
 ```bash
-omnigraph read --config ./omnigraph.yaml --alias patterns disruption
+omnigraph query --config ./omnigraph.yaml --alias patterns disruption
 ```
 
 Should return 2 patterns: SaaSpocalypse, Sovereign AI.
@@ -93,7 +93,7 @@ Should return 2 patterns: SaaSpocalypse, Sovereign AI.
 Try a traversal:
 
 ```bash
-omnigraph read --config ./omnigraph.yaml --alias pattern-signals pat-sovereign-ai
+omnigraph query --config ./omnigraph.yaml --alias pattern-signals pat-sovereign-ai
 ```
 
 Should return 3 signals.

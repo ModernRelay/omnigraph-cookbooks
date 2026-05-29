@@ -47,7 +47,7 @@ edge PartOfArtifact: Chunk -> InformationArtifact @card(1..1) {
 ### Lint after every edit
 
 ```bash
-omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
 ```
 
 This validates the schema **and** the queries against it. No running repo required. Wire it into a precommit hook.
