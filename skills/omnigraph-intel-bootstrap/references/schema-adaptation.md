@@ -201,7 +201,7 @@ After every schema edit:
 
 ```bash
 cd <slug>
-omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
 ```
 
 The queries themselves probably don't need changes — they mostly operate on slugs and don't reference enum values. Lint will flag anything that broke.
