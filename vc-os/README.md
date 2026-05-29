@@ -549,7 +549,7 @@ docker run -d --name omnigraph-rustfs-vcos \
   -e RUSTFS_ALLOW_INSECURE_DEFAULT_CREDENTIALS=true \
   -e RUSTFS_ADDRESS=0.0.0.0:9000 -e RUSTFS_CONSOLE_ADDRESS=0.0.0.0:9001 \
   -v /tmp/rustfs-vcos:/data \
-  rustfs/rustfs:latest
+  rustfs/rustfs:1.0.0-beta.4   # pinned: ':latest' floats; beta.4 is the image RUSTFS_ALLOW_INSECURE_DEFAULT_CREDENTIALS targets
 
 # 2. Create .env.omni (these are the local RustFS dev creds; .env.omni is gitignored)
 cat > .env.omni <<'EOF'
