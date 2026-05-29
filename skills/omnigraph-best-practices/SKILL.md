@@ -162,6 +162,8 @@ These are the traps most likely to bite. Scan this table before debugging any pa
 | Adding non-nullable property without backfill | unsupported migration | Make optional → backfill → tighten in follow-up apply |
 | Config uses `targets:` / `target:` | `graph 'X' not found in omnigraph.yaml` | Rename to `graphs:` / `graph:` |
 | `omnigraph init --json` | `unexpected argument --json` | `init` doesn't support `--json`; drop the flag |
+| `omnigraph init` on an already-initialized URI | `AlreadyInitialized` error (v0.6.0+) | `--force` to re-init (skips the schema preflight; does **not** purge data) |
+| `schema apply` dropping a property/type | soft-dropped or rejected (no data loss) | add `--allow-data-loss` to actually drop the column |
 | Committing `.env.omni` | credential leak | Add `.env*` to `.gitignore` |
 | Non-parameterized query values | typecheck surprise, injection risk | Declare `$param: Type` and pass via `--params` |
 | Missing required field in `insert` | `T12: insert for 'X' must provide non-nullable property 'Y'` | Accept the param in the mutation signature |
@@ -197,5 +199,5 @@ For anything beyond the basics, load the relevant reference file. Each is self-c
 | [`references/remote-ops.md`](references/remote-ops.md) | Operating against a remote/CloudFront-fronted graph: 504 verification ritual, version drift, ingest fingerprints, append-only retry safety |
 | [`references/search.md`](references/search.md) | Embeddings, `@embed`, vector/text ranking, scope-then-rank pattern |
 | [`references/aliases.md`](references/aliases.md) | Defining aliases for agents, structured output, JSON args |
-| [`references/server-policy.md`](references/server-policy.md) | Starting the HTTP server, routes, bearer auth, Cedar policy gating |
+| [`references/server-policy.md`](references/server-policy.md) | Starting the HTTP server, routes, bearer auth, Cedar policy gating, multi-graph mode |
 | [`references/commands.md`](references/commands.md) | `snapshot`, `export`, `commit list/show`, config resolution order |

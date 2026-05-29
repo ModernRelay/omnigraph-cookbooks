@@ -68,6 +68,8 @@ omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
 ```
 
+If the repo already exists, `init` errors with `AlreadyInitialized` (v0.6.0+) — add `--force` to re-init (it won't purge existing data; the `load --mode overwrite` below replaces the rows).
+
 Expected output from load:
 
 ```

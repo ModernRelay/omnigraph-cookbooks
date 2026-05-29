@@ -211,6 +211,37 @@ cases:
 
 Run `policy test` after every policy edit. Tests are cheap.
 
+## Multi-graph mode (v0.6.0+)
+
+One `omnigraph-server` process can serve up to 10 graphs at once. Mode is inferred from config: a non-empty `graphs:` map **with no single-mode selector** (`server.graph`, a positional `<URI>`, or `--target`) starts the server in multi mode.
+
+```yaml
+server:
+  bind: 0.0.0.0:8080
+  policy:
+    file: ./server-policy.yaml          # server-level Cedar (graph_list)
+
+graphs:
+  alpha:
+    uri: s3://tenant-bucket/alpha
+    policy:
+      file: ./policies/alpha.yaml       # per-graph Cedar
+  beta:
+    uri: s3://tenant-bucket/beta
+    # no per-graph policy → engine-layer enforcement is a no-op for beta
+```
+
+**Routes are namespaced per graph.** Every per-graph route moves under `/graphs/{graph_id}/...` (`/graphs/alpha/query`, `/graphs/alpha/branches`, …). The bare flat routes (`/query`, `/snapshot`, …) return **404** in multi mode; conversely the cluster routes return **405** in single mode. SDK clients generated against a single-mode spec must regenerate.
+
+**`GET /graphs`** lists the registered graphs (sorted by `graph_id`). It's gated by the server-scoped `graph_list` action and requires `server.policy.file` to be exposed — even under `--unauthenticated`, server topology stays closed until you explicitly authorize it. `omnigraph graphs list` mirrors it (remote servers only; rejects local URIs).
+
+**Policy attaches at two levels:**
+- `graphs.<id>.policy.file` — per-graph rules (`read`, `change`, `branch_*`, `schema_apply`). Each graph flows through its own policy.
+- `server.policy.file` — server-level rules (`graph_list`).
+- Top-level `policy.file` is **rejected** in multi mode (ambiguous across graphs); it stays valid for single-graph / CLI-local use. The loaders reject a `graph_list` rule in a per-graph file (or a `read` rule in the server file) at startup.
+
+Runtime add/remove of graphs is **not** in v0.6.0 — operators edit `omnigraph.yaml` and restart.
+
 ## Server + Policy Together
 
 When the server is running with a policy file:

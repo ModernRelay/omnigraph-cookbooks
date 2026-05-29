@@ -46,6 +46,14 @@ omnigraph commit show $REPO <commit-id>
 
 Inspect graph history. Useful for "what changed between these two points" investigation.
 
+## Graphs (multi-graph servers)
+
+```bash
+omnigraph graphs list --config X --json
+```
+
+Lists the graphs a multi-graph server serves. Remote servers only (rejects local URIs); the server must expose `GET /graphs` via `server.policy.file`. See `references/server-policy.md`.
+
 ## Schema
 
 ```bash
@@ -83,6 +91,8 @@ omnigraph init --schema ./schema.pg $REPO
 ```
 
 Creates a new repo at `$REPO` with the given schema. Also scaffolds `omnigraph.yaml` in the current directory if one doesn't exist — review and edit the template before committing (default graph names are placeholders).
+
+**Strict by default (v0.6.0+):** `init` against a URI that already holds schema files errors with `AlreadyInitialized` instead of silently overwriting. Use `omnigraph init --force` to re-init deliberately. `--force` only skips the schema-file preflight — it does **not** purge existing Lance datasets.
 
 **Note:** `init` does not accept `--json`. Drop the flag if you see `unexpected argument --json`.
 
