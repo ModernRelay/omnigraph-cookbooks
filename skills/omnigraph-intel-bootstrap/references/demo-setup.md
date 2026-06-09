@@ -79,10 +79,10 @@ loaded s3://omnigraph-local/repos/spike-intel on branch main with overwrite: 111
 ### Start the server
 
 ```bash
-omnigraph-server --config ./omnigraph.yaml
+omnigraph-server --config ./omnigraph.yaml --unauthenticated
 ```
 
-Keep it running (separate terminal or background). All queries from here on go through it.
+`--unauthenticated` is required for local dev — since v0.6.0 the server refuses to start without bearer tokens or a policy file. Keep it running (separate terminal or background). All queries from here on go through it.
 
 ### Verify
 

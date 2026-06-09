@@ -90,7 +90,7 @@ set -a && source ./.env.omni && set +a
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
 # Start the server (keep running), then query through it:
-omnigraph-server --config ./omnigraph.yaml &
+omnigraph-server --config ./omnigraph.yaml --unauthenticated &   # local dev; v0.6.0+ needs auth/policy or this flag
 omnigraph query --config ./omnigraph.yaml --alias patterns disruption
 ```
 
@@ -204,7 +204,7 @@ cd <clone>/<slug>
 set -a && source ./.env.omni && set +a
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/<slug>
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/<slug>
-omnigraph-server --config ./omnigraph.yaml &
+omnigraph-server --config ./omnigraph.yaml --unauthenticated &   # local dev; v0.6.0+ needs auth/policy or this flag
 ```
 
 8. Verify with a sample query (goes through the server):

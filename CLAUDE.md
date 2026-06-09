@@ -40,7 +40,7 @@ omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
 Start the server once per session from inside the cookbook folder — `query`, `mutate`, and `snapshot` all go through it:
 
 ```bash
-omnigraph-server --config ./omnigraph.yaml   # binds 127.0.0.1:8080
+omnigraph-server --config ./omnigraph.yaml --unauthenticated   # binds 127.0.0.1:8080; local dev — v0.6.0+ refuses to start without auth/policy or this flag
 ```
 
 Leave it running in a separate terminal or background process.

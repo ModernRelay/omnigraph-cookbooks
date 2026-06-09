@@ -9,7 +9,7 @@ For schema **design** principles (identity, types, edges, constraints) see [`omn
 1. **Lint before commit** — `omnigraph lint --schema schema.pg --query queries/foo.gq` (`query lint` still works as a deprecated alias)
 2. **Plan before apply** — never `schema apply` without a successful `schema plan` first
 3. **Branches are for data; apply is for schema** — review data ingests on a branch, then merge; schema changes go straight to `main`
-4. **Pick the right write command** — `change` for edits, `load --mode merge` for bulk, `overwrite` only for clean slates
+4. **Pick the right write command** — `mutate` for edits, `load --mode merge` for bulk, `overwrite` only for clean slates
 5. **Parameterize everything** — never string-interpolate into `.gq` bodies or `--params`
 6. **Expose agent operations as aliases** — not raw CLI invocations
 
@@ -75,7 +75,7 @@ query:
   roots: [queries, .]
 aliases:
   signal:
-    command: read
+    command: query
     query: signals.gq
     name: get_signal
     args: [slug]
@@ -162,7 +162,7 @@ node Account @rename_from("User") {
 
 ### Required properties need a backfill plan
 
-Adding a non-nullable property to an existing node is rejected as unsupported. Pattern: make it optional, backfill with a `change` mutation or `load --mode merge`, then tighten to required in a follow-up `apply`.
+Adding a non-nullable property to an existing node is rejected as unsupported. Pattern: make it optional, backfill with a `mutate` or `load --mode merge`, then tighten to required in a follow-up `apply`.
 
 ### Keep keys stable
 
@@ -215,7 +215,7 @@ Edge `FormsPattern` is traversed as `$s formsPattern $p` in query patterns (sche
 
 | Task | Command | Notes |
 |------|---------|-------|
-| Add/update a single entity | `change` with a named mutation | parameterized, typechecked, auditable |
+| Add/update a single entity | `mutate` with a named mutation | parameterized, typechecked, auditable |
 | Bulk upsert by `@key` | `load --mode merge` | preserves rows not in the file |
 | Additive-only bulk | `load --mode append` | fails on key collision |
 | Clean-slate reseed | `load --mode overwrite` | destructive; wipes the branch |
@@ -298,19 +298,19 @@ Omnigraph runs two distinct embedding clients: the **engine/ingest** client (def
 
 ### Every agent operation should be an alias
 
-Agents calling raw `omnigraph read --query ... --name ... --params ...` drift as queries evolve. Aliases decouple the operation name from the query implementation:
+Agents calling raw `omnigraph query --query ... --name ... --params ...` drift as queries evolve. Aliases decouple the operation name from the query implementation:
 
 ```yaml
 aliases:
   signal:
-    command: read
+    command: query
     query: signals.gq
     name: get_signal
     args: [slug]
     format: kv
 ```
 
-Agents call `omnigraph read --alias signal sig-kimi-k25`. When the query changes, the alias stays.
+Agents call `omnigraph query --alias signal sig-kimi-k25` (`read` still works as a deprecated alias). When the query changes, the alias stays.
 
 ### Default to structured output
 
@@ -331,8 +331,10 @@ Reference via `auth.env_file: .env.omni`. Aliases should only contain query name
 The server is the canonical runtime entry point — point the CLI, aliases, and agents at it. Start it once per repo:
 
 ```bash
-omnigraph-server --config ./omnigraph.yaml
+omnigraph-server --config ./omnigraph.yaml --unauthenticated
 ```
+
+`--unauthenticated` is required for local dev: since v0.6.0 the server refuses to start without bearer tokens or a policy file. Drop the flag once you've configured auth (see below).
 
 Reads `server.graph` and `server.bind` from your config. Keep it running in a separate terminal or background process.
 
