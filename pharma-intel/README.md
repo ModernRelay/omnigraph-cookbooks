@@ -160,7 +160,7 @@ cp .env.omni.example .env.omni
 set -a && source ./.env.omni && set +a
 
 # Lint the schema and queries (pure file check)
-omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
 
 # Init the repo (one-time — writes to storage)
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/pharma-intel

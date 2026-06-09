@@ -564,7 +564,7 @@ EOF
 set -a && source ./.env.omni && set +a
 
 # 3. Lint the schema and queries (pure file check - no server needed)
-omnigraph query lint --schema ./schema.pg --query ./queries/deals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/deals.gq
 
 # 4. Create the bucket, init the repo, load the seed
 curl -s -X PUT http://127.0.0.1:9000/omnigraph-local/ -H 'Host: omnigraph-local.localhost' \

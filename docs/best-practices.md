@@ -6,7 +6,7 @@ For schema **design** principles (identity, types, edges, constraints) see [`omn
 
 ## TL;DR
 
-1. **Lint before commit** — `omnigraph query lint --schema schema.pg --query queries/foo.gq`
+1. **Lint before commit** — `omnigraph lint --schema schema.pg --query queries/foo.gq` (`query lint` still works as a deprecated alias)
 2. **Plan before apply** — never `schema apply` without a successful `schema plan` first
 3. **Branches are for data; apply is for schema** — review data ingests on a branch, then merge; schema changes go straight to `main`
 4. **Pick the right write command** — `change` for edits, `load --mode merge` for bulk, `overwrite` only for clean slates
@@ -119,7 +119,7 @@ If the same enum values appear on multiple nodes, duplicate the inline declarati
 
 ### Edge constraints go inside a body block
 
-`@unique(src, dst)` on an edge goes inside `{ }`, not after `@card(...)`:
+`@unique(src, dst)` on an edge goes inside a `{ }` body block, after `@card(...)`:
 
 ```pg
 edge PartOfArtifact: Chunk -> InformationArtifact @card(1..1) {
@@ -130,10 +130,10 @@ edge PartOfArtifact: Chunk -> InformationArtifact @card(1..1) {
 ### Lint after every edit
 
 ```bash
-omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
 ```
 
-This validates **both** the schema and the queries against it — no running repo required. Wire it into a precommit hook.
+This validates **both** the schema and the queries against it — no running repo required. Wire it into a precommit hook. (`omnigraph query lint` / `query check` still work as deprecated argv shims that rewrite to `omnigraph lint`.)
 
 ## Schema Evolution
 
@@ -290,6 +290,10 @@ omnigraph embed --seed ./embed-config.yaml --reembed_all
 
 `--reembed_all` regenerates; the default is `fill_missing`.
 
+### Two embedding clients
+
+Omnigraph runs two distinct embedding clients: the **engine/ingest** client (default `gemini-embedding-2-preview`, 3072-dim — this is what `@embed` uses at load time, configured via `GEMINI_API_KEY` / `OMNIGRAPH_GEMINI_BASE_URL`) and the **compiler/query-time** client (default `text-embedding-3-small`, OpenAI-style, configured via `OPENAI_*` / `NANOGRAPH_EMBED_MODEL`) that auto-embeds a query string passed to a ranking op. `Vector(N)` must match the **ingest** model's dimension; keep the query-time model on the same dimension or similarity search breaks.
+
 ## Aliases & Agent Automation
 
 ### Every agent operation should be an alias
@@ -339,15 +343,18 @@ Reads `server.graph` and `server.bind` from your config. Keep it running in a se
 | `GET /healthz` | liveness probe |
 | `GET /snapshot` | table state + row counts |
 | `GET /export` | JSONL stream of a branch |
-| `POST /read` | read query execution |
-| `POST /change` | mutation execution |
+| `POST /query` | read query execution (`POST /read` is a deprecated alias) |
+| `POST /mutate` | mutation execution (`POST /change` is a deprecated alias) |
+| `GET /queries`, `POST /queries/{name}` | stored-query catalog + invocation (v0.6.1) |
 | `POST /schema/apply` | schema migration |
 | `GET /branches` | branch list |
-| `GET /runs`, `GET /commits` | transactional history |
+| `GET /commits` | write/audit history |
+
+> There is **no `/runs` endpoint** — the transactional Run state machine was removed in v0.4.0. Use `GET /commits` for write history; a request to `/runs` returns 404.
 
 ### Auth
 
-Set `OMNIGRAPH_SERVER_BEARER_TOKEN` on the server process. On the client side, declare `bearer_token_env: OMNIGRAPH_BEARER_TOKEN` in `graphs.<name>` and export a matching token. Leave auth off for pure local dev.
+Set `OMNIGRAPH_SERVER_BEARER_TOKEN` on the server process. On the client side, declare `bearer_token_env: OMNIGRAPH_BEARER_TOKEN` in `graphs.<name>` and export a matching token. **Since v0.6.0 the server refuses to start** with neither bearer tokens nor a policy file — for pure local dev pass `--unauthenticated` (or `OMNIGRAPH_UNAUTHENTICATED=1`) deliberately.
 
 ### Setup operations (`init`, `load`) write directly to storage
 
@@ -358,13 +365,17 @@ omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/<name>
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/<name>
 ```
 
-Everything else — `read`, `change`, `snapshot`, `schema plan/apply`, `branch`, `run`, `commit` — goes through the running server via the CLI's default `cli.graph` target.
+Everything else — `query`, `mutate`, `snapshot`, `schema plan/apply`, `branch`, `commit` — goes through the running server via the CLI's default `cli.graph` target.
 
 ## Policy & Authorization
 
 ### Gate the dangerous actions
 
-Cedar policies can gate `schema_apply`, `branch_merge`, `change`, `export`, etc. For any shared repo, gate at least `schema_apply` and `branch_merge`.
+Cedar policies can gate `schema_apply`, `branch_merge`, `change`, `export`, `invoke_query`, etc. For any shared repo, gate at least `schema_apply` and `branch_merge`. (`invoke_query`, v0.6.1, gates the stored-query surface — stored mutations are double-gated with `change`.)
+
+### Config follows identity (v0.6.1)
+
+A top-level `policy:` (and `queries:`) block applies **only** to an anonymous bare-URI single-graph server. A graph served **by name** (`server.graph` / `--target`) must nest them under `graphs.<name>.policy` / `graphs.<name>.queries`. Leaving them at the top level with a named graph makes the server **refuse to boot** with migration guidance.
 
 ### Validate, test, explain
 
@@ -388,6 +399,15 @@ omnigraph export $REPO --branch main > graph.jsonl    # stream JSONL dump
 ```
 
 `export` is the right tool for large snapshots — don't try to page through the whole graph via read queries.
+
+### Maintenance & stored queries (v0.6.1)
+
+```bash
+omnigraph optimize $REPO --json                      # non-destructive Lance compaction (skips Blob-column tables; see --json "skipped")
+omnigraph cleanup  $REPO --keep 5 --older-than 7d --confirm   # destructive version GC
+omnigraph queries validate                           # type-check the stored-query registry vs live schema (offline)
+omnigraph queries list                               # list registry queries, MCP exposure, typed params
+```
 
 ### Commits
 
@@ -424,6 +444,8 @@ omnigraph commit show $REPO <id>
 | Committing `.env.omni` | credential leak | Add `.env*` to `.gitignore` |
 | Non-parameterized values in queries | typecheck surprise, injection risk | Declare `$param: Type` and pass via `--params` |
 | Long-lived feature branches | merge conflicts, schema apply blocked | Merge promptly; delete when done |
+| Top-level `policy:`/`queries:` with a named graph (v0.6.1) | server refuses to boot | Nest under `graphs.<name>.policy` / `.queries` |
+| `omnigraph optimize` "skipping" a Blob table | not an error — Lance blob-v2 limitation | Expected; non-blob tables still compact |
 
 ## See Also
 

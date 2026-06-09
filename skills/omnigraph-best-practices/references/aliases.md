@@ -25,6 +25,8 @@ omnigraph query --alias signal sig-kimi-k25
 
 When the query changes, the alias stays stable. The agent keeps working.
 
+> **Aliases ≠ stored queries.** A CLI `aliases:` entry is **client-side** — it tells the local `omnigraph` CLI which `.gq` file + query name + params to send; the server never sees it. The v0.6.1 **`queries:`** registry is **server-side** — curated queries the server loads, type-checks at startup, and exposes over `GET /queries` / `POST /queries/{name}` (gated by `invoke_query`). Use aliases for your own CLI/agent ergonomics; use the `queries:` registry to expose a vetted query surface to remote callers or MCP. See [`stored-queries.md`](stored-queries.md).
+
 ## Alias Schema
 
 ```yaml

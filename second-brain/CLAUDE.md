@@ -55,9 +55,11 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 
 ## Conventions enforced by load discipline (not the schema)
 
-Omnigraph 0.4.2's `@unique(src, dst)` is parsed as two separate per-column uniqueness
-constraints, not pair-uniqueness — so it can't enforce "one edge between A and B."
-These conventions therefore live in the loader and reviewer, not in `schema.pg`:
+Omnigraph's `@unique(src, dst)` on an edge has historically been parsed as two separate
+per-column uniqueness constraints, not pair-uniqueness — so it can't enforce "one edge
+between A and B." This was the observed behavior through 0.4.2 and no fix is noted in the
+0.6.x release notes; re-verify against your engine version before relying on schema-level
+pair-uniqueness. Until confirmed, these conventions live in the loader and reviewer, not in `schema.pg`:
 
 - **`Knows` and `RelatedToPerson` are stored bidirectionally.** If `A knows B`, also load `B knows A`. For `RelatedToPerson`, invert the `relation`: `parent ⇄ child`, `grandparent ⇄ grandchild`. Symmetric relations (`spouse`, `sibling`, `in-law`, `ex`, `partner`) get the same enum on both sides. Single-direction storage made stale-friend / family-tree queries quietly wrong.
 - **No duplicate `(src, dst)` pairs per edge type.** Dedupe before insert; the schema won't catch it.
@@ -113,10 +115,10 @@ For longer captures, chunk into `Chunk` records linked via `ChunkOf` — semanti
 ## Validation
 
 ```bash
-omnigraph query lint --schema ./schema.pg --query ./queries/people.gq
+omnigraph lint --schema ./schema.pg --query ./queries/people.gq
 ```
 
-The `query lint` command validates both queries and schema against each other — use it after any schema or query edit.
+The `lint` command validates both queries and schema against each other — use it after any schema or query edit. (`query lint` still works as a deprecated alias.)
 
 ## When Editing
 

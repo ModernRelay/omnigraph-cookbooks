@@ -220,4 +220,4 @@ Before moving to Phase 6:
 - [ ] Kept Pattern.kind as-is (usually)
 - [ ] Updated `omnigraph.yaml` project name + graph URI
 - [ ] Deleted `industry-intel`'s `seed.jsonl` from the new folder (will regenerate in Phase 6)
-- [ ] `query lint` passes with 0 errors
+- [ ] `lint` passes with 0 errors

@@ -124,6 +124,33 @@ omnigraph mutate --alias add-signal sig-foo "Name" "Brief" 2026-04-14T00:00:00Z 
 
 > `omnigraph read` / `omnigraph change` still work as **deprecated** aliases (they warn to stderr); prefer `query` / `mutate`. Both also accept inline source via `-e/--query-string '<gq>'` instead of `--query <file>`.
 
+## Maintenance: Optimize & Cleanup (v0.6.1)
+
+### `optimize` — non-destructive Lance compaction
+
+```bash
+omnigraph optimize $REPO --json
+```
+
+Compacts fragments and reclaims deleted-row space. Non-destructive — safe to run any time. **Skips tables with a `Blob` property** (Lance blob-v2 compaction decode bug); skipped tables are reported in the `skipped` field of `--json` output and in logs. Non-blob tables compact normally. Blob-table fragment count won't shrink until the upstream Lance fix lands — reads/writes are unaffected.
+
+### `cleanup` — destructive version GC
+
+```bash
+omnigraph cleanup $REPO --keep 5 --older-than 7d --confirm
+```
+
+Garbage-collects old table versions, dropping time-travel reachability for anything pruned. **Destructive** — requires `--confirm`. Duration units for `--older-than`: `s`, `m`, `h`, `d`, `w`. Also reconciles orphaned per-table forks left by an interrupted `branch delete`.
+
+## Stored Queries (v0.6.1)
+
+```bash
+omnigraph queries validate              # type-check the stored-query registry vs the live schema (offline; exits non-zero on drift)
+omnigraph queries list                  # list registry query names, MCP exposure, and typed params
+```
+
+`validate` opens the selected graph and type-checks every query in the `queries:` block — catches schema drift without restarting the server. `list` prints the selected registry. Select the registry with `--target <graph>` or `cli.graph`; with no graph selected, `list` shows only the top-level `queries:` block. Distinct from `lint` (which validates a single `.gq` file). See `references/stored-queries.md`.
+
 ## Config Resolution Order
 
 When the CLI decides which graph to target:
