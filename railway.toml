@@ -9,7 +9,13 @@ dockerfilePath = "deploy/railway/Dockerfile"
 # Positional URI overrides the config's `server.graph` lookup, so the
 # bundled /etc/omnigraph/omnigraph.yaml only contributes its `policy.file`
 # pointer; the target itself is driven by Railway Bucket env wiring.
-startCommand = "sh -c 'omnigraph-server \"$OMNIGRAPH_TARGET_URI\" --config /etc/omnigraph/omnigraph.yaml --bind \"0.0.0.0:$PORT\"'"
+#
+# `exec` is load-bearing: a Dockerfile/image start command is run in exec
+# form, so the shell wrapper (needed for $PORT expansion) becomes PID 1.
+# Without `exec`, that shell — not omnigraph-server — receives Railway's
+# SIGTERM on redeploy/teardown, so the server never drains and gets
+# SIGKILLed. Railway's own docs use `/bin/sh -c "exec ..."` for this.
+startCommand = "sh -c 'exec omnigraph-server \"$OMNIGRAPH_TARGET_URI\" --config /etc/omnigraph/omnigraph.yaml --bind \"0.0.0.0:$PORT\"'"
 
 # Runs between build and start. The script is idempotent — it skips when
 # the graph at $OMNIGRAPH_TARGET_URI already has a manifest, so re-deploys

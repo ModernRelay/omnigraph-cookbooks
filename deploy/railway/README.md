@@ -10,7 +10,7 @@ runs `omnigraph init` + seed load on first boot.
 | Piece                  | Where it runs                                                            |
 | ---------------------- | ------------------------------------------------------------------------ |
 | `omnigraph-server`     | Single Railway service (this repo's `deploy/railway/Dockerfile`)         |
-| Storage                | Railway Bucket — first-party S3, R2-backed, free egress                  |
+| Storage                | Railway Bucket — first-party S3, unlimited free S3 ops + bucket egress   |
 | Schema                 | Pulled from `OMNIGRAPH_SCHEMA_URL` at deploy time and applied via `omnigraph init` |
 | Auth (3 actors)        | `admin` / `writer` / `reader` bearer tokens auto-generated at deploy     |
 | Authz                  | Cedar-via-YAML policy at `/etc/omnigraph/policy.yaml` (baked into image) |
@@ -21,12 +21,16 @@ then stops. The graph starts empty and ready to receive your real data
 via the `omnigraph` CLI or the HTTP API. Demo `seed.jsonl` files from
 the cookbooks are not auto-loaded.
 
-Total cost on Railway Hobby: ~$0.015/GB-month for storage + the service's
-compute. No volumes attached — all state lives in the Bucket.
+Total cost on Railway Hobby: ~$0.015/GB-month for stored data + the
+service's compute. No volumes attached — all state lives in the Bucket.
+Bucket egress and S3 API operations are free and unlimited, but note that
+*uploads from the service to the Bucket* (every `init` / `load` / `change`)
+count as **service egress** and are billed at Railway's standard public
+egress rate — Buckets are not on the private network.
 
 ## Deploy
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/TBD)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/TEMPLATE_CODE?utm_medium=integration&utm_source=button&utm_campaign=omnigraph)
 
 At deploy time, paste the URL of the schema you want to apply via the
 `OMNIGRAPH_SCHEMA_URL` variable. Any HTTPS URL to a `.pg` file works —
@@ -44,13 +48,18 @@ signed URL, anywhere HTTPS-reachable). The deploy initializes the graph
 with that schema and then stops — fill the graph with your own data
 afterwards via the `omnigraph` CLI or the HTTP API.
 
-> **Status:** Template URL above is a placeholder until the template is
-> published on Railway. Until then, deploy manually:
+> **Status:** `TEMPLATE_CODE` in the button URL above is a placeholder —
+> replace it with the real template code (and `utm_campaign` with the
+> template name) once the template is published on Railway. Until then,
+> deploy manually:
 >
 > ```bash
 > railway init
 > railway bucket create graph-storage --region <closest-to-you>
 > railway add --service omnigraph
+> # The ${{secret(48)}} template function only runs on a *template* deploy,
+> # not via `railway variable set` — so generate real tokens yourself here:
+> ADMIN=$(openssl rand -hex 24); WRITER=$(openssl rand -hex 24); READER=$(openssl rand -hex 24)
 > railway variable set --service omnigraph --skip-deploys \
 >   "OMNIGRAPH_SCHEMA_URL=https://raw.githubusercontent.com/ModernRelay/omnigraph-cookbooks/main/industry-intel/schema.pg" \
 >   "OMNIGRAPH_TARGET_URI=s3://\${{graph-storage.BUCKET}}/graph" \
@@ -59,19 +68,61 @@ afterwards via the `omnigraph` CLI or the HTTP API.
 >   "AWS_ACCESS_KEY_ID=\${{graph-storage.ACCESS_KEY_ID}}" \
 >   "AWS_SECRET_ACCESS_KEY=\${{graph-storage.SECRET_ACCESS_KEY}}" \
 >   "AWS_REGION=\${{graph-storage.REGION}}" \
->   'OMNIGRAPH_SERVER_BEARER_TOKENS_JSON={"admin":"CHANGEME","writer":"CHANGEME","reader":"CHANGEME"}'
+>   "OMNIGRAPH_SERVER_BEARER_TOKENS_JSON={\"admin\":\"$ADMIN\",\"writer\":\"$WRITER\",\"reader\":\"$READER\"}"
 > # Make sure the service's region matches the Bucket region (railway scale)
 > railway up --service omnigraph
 > ```
 
-## Service region
+## Service region — this is critical, not cosmetic
 
-Place the service in the same Railway region as the Bucket. The Bucket
-region is fixed at creation (sjc / iad / ams / sin); the service should
-match. Cross-region traffic to S3-API operations adds 200–500 ms RTT
-per call, which makes `omnigraph load` painfully slow because the
-referential-integrity validation does many sequential list/get calls.
-In-region keeps loads at a few seconds even for thousands of rows.
+**You must place the service in the same region as the Bucket.** A Railway
+service with no explicit region (`region: null`, the default) deploys to
+the workspace's default region — which is almost never the Bucket's region.
+Because `omnigraph-server` does **many sequential S3 round-trips per
+operation**, a cross-region service↔Bucket hop multiplies that RTT on every
+read and write. Measured on a deliberately mismatched deploy (service on
+default region, Bucket in `sjc`):
+
+| Operation | Cross-region (mismatched) | In-region (expected) |
+| --------- | ------------------------- | -------------------- |
+| `/healthz` (no Bucket) | ~390 ms | ~390 ms |
+| `snapshot` read | **~5.7 s** | sub-second |
+| single-node write | **~46 s** | ~1 s |
+
+So a mismatch isn't "a bit slower" — it makes the graph effectively
+unusable for writes. The Bucket region is fixed at creation; set the
+**service** region to match it (Railway dashboard → service **Settings →
+Region**, or pin it in config-as-code via
+[`multiRegionConfig`](https://docs.railway.com/config-as-code/reference#multi-region-configuration)
+using the identifier from the table below). Verify after deploy that the
+service's region matches the Bucket's.
+
+Mind the two naming schemes: the **Bucket CLI** uses short codes
+(`sjc` / `iad` / `ams` / `sin`), while the **service** region picker (and
+config-as-code) uses the full identifiers. Match them up:
+
+| Location               | Bucket code | Service identifier        |
+| ---------------------- | ----------- | ------------------------- |
+| California, US West    | `sjc`       | `us-west2`                |
+| Virginia, US East      | `iad`       | `us-east4-eqdc4a`         |
+| Amsterdam, EU West     | `ams`       | `europe-west4-drams3a`    |
+| Singapore, SE Asia     | `sin`       | `asia-southeast1-eqsg3a`  |
+
+Because no Railway Volume is attached, changing the service region later
+is zero-downtime — only volume-backed services incur migration downtime.
+
+## Scaling and availability
+
+**Keep this service at a single replica.** Railway's production-readiness
+checklist recommends ≥2 replicas, but that assumes a stateless service.
+`omnigraph-server` is a single-writer store backed by one shared Bucket
+prefix, and Railway load-balances replicas randomly with no sticky
+sessions — two replicas would race on the same S3 objects and can corrupt
+the graph. Do **not** raise the replica count or add multi-region
+replicas in the dashboard. Durability comes from Railway's Bucket storage
+plus the `ON_FAILURE` restart policy; for point-in-time safety, run
+`omnigraph export` / `snapshot` to a second location on a schedule, since
+Buckets have no built-in snapshot/versioning.
 
 ## Required environment variables
 
@@ -188,6 +239,32 @@ Schema changes are **not** auto-applied. After updating
 `omnigraph schema apply` against the running server from a workstation
 to migrate the live graph. See the engine docs.
 
+## Loading data
+
+The deploy is schema-only; you fill the graph yourself. Two paths, with
+sharp edges to know about:
+
+- **Through the server (recommended): `omnigraph mutate` over HTTPS** with
+  an admin bearer token, targeting the service URL. The server performs the
+  writes in its own region, so it's version-safe and avoids cross-network
+  S3. Note `omnigraph load` does **not** accept a remote server URL
+  (*"load is only supported against local graph URIs in this milestone"*),
+  so bulk loads go via `mutate`; keep each request modestly sized (a single
+  mutation with ~100 inserts can exceed Railway's request timeout and
+  return 502 — batch into smaller chunks).
+- **Direct to the Bucket (`omnigraph load s3://…`): version-pinned and
+  in-region only.** Two hazards, both learned the hard way:
+  1. **Version skew corrupts the graph.** Your local CLI must match the
+     deployed `OMNIGRAPH_REF`. An older CLI writing a graph created by a
+     newer server writes Lance fragments and *then* aborts on the manifest
+     version check, leaving the graph inconsistent (`Lance HEAD … ahead of
+     manifest`, needs `omnigraph repair`). Always `omnigraph version`-check
+     against the server before a direct load.
+  2. **Run it in-region.** A direct load from a laptop across the world to
+     the Bucket pays the cross-region RTT on every one of its many
+     sequential S3 calls — minutes-to-hours for a few hundred rows. Run the
+     loader from the Bucket's region (or just use `mutate`).
+
 ## Switching schemas
 
 `OMNIGRAPH_SCHEMA_URL` only affects the first deploy (when the bucket
@@ -196,8 +273,9 @@ is empty). To switch a running service to a different schema either:
 1. Apply the migration via `omnigraph schema apply` against the live
    server (recommended — preserves data where the migration plan
    allows).
-2. Destroy the Bucket via `railway bucket delete graph-storage` and
-   redeploy; the next deploy re-runs init.sh against the new schema URL.
+2. Destroy the Bucket via `railway bucket -b graph-storage delete` (the
+   bucket is named with the global `-b/--bucket` flag, not a positional)
+   and redeploy; the next deploy re-runs init.sh against the new schema URL.
 
 ## Local validation
 
@@ -205,9 +283,11 @@ is empty). To switch a running service to a different schema either:
 # Build the image
 docker build -f deploy/railway/Dockerfile -t omnigraph-railway:test .
 
-# Verify the binaries and cookbooks landed
+# Verify the binaries landed (the schema is fetched at deploy time from
+# $OMNIGRAPH_SCHEMA_URL, not baked into the image, so there's nothing
+# cookbook-specific to inspect here).
 docker run --rm omnigraph-railway:test omnigraph --version
-docker run --rm omnigraph-railway:test ls /cookbooks
+docker run --rm omnigraph-railway:test omnigraph-server --version
 
 # Run against a local RustFS (the engine repo ships a bootstrap script)
 docker run --rm \
@@ -226,18 +306,23 @@ docker run --rm \
 ## Pinning + maintenance
 
 The Dockerfile pins the omnigraph engine to a specific tag via
-`ARG OMNIGRAPH_REF=v0.5.0`. Bump that on every omnigraph release that
-changes server behavior, the policy schema, or the CLI surface. The
-cookbooks themselves are read at build time — adding a new cookbook to
-the repo means rebuilding the image before a new Railway template can
-target it.
+`ARG OMNIGRAPH_REF=v0.6.2`. Bump that on every omnigraph release that
+changes server behavior, the policy schema, or the CLI surface. Schemas
+are **not** baked into the image — `init.sh` fetches whatever
+`OMNIGRAPH_SCHEMA_URL` points at, so a new cookbook needs no image
+rebuild; just point a deploy at its `schema.pg` raw URL.
+
+Because the service builds from this GitHub repo (not a prebuilt image),
+merges to `main` surface an update PR to everyone who deployed the
+template — keep a changelog and call out breaking changes (e.g. an
+`OMNIGRAPH_REF` bump) so deployers know what they're accepting.
 
 ## Files
 
 ```
 railway.toml             # build/deploy/preDeployCommand/healthcheck (at repo root — Railway reads it from here)
 deploy/railway/
-├── Dockerfile           # Multi-stage build (rust:slim → debian:bookworm-slim)
+├── Dockerfile           # Pulls prebuilt omnigraph release binaries onto debian:trixie-slim
 ├── .dockerignore        # Trims context to schema/seed/queries/yaml only
 ├── scripts/
 │   └── init.sh          # Idempotent omnigraph init + optional seed load
