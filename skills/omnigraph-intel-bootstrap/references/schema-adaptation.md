@@ -186,15 +186,13 @@ After schema changes, update both config files for the new slug:
 # cluster.yaml — the deployment (graph id, schema, queries)
 graphs:
   <slug>:
-    schema: ./schema.pg
-    queries:
-      # one entry per `query <name>` in your .gq files
-      patterns: { file: ./queries/patterns.gq }
+    schema: schema.pg
+    queries: queries/    # every `query <name>` in queries/*.gq registers
 
 # omnigraph.yaml — per-operator CLI sugar only
 graphs:
   local:
-    uri: ./graphs/<slug>.omni    # the derived root cluster apply creates
+    uri: graphs/<slug>.omni    # the derived root cluster apply creates
   local_server:
     uri: http://127.0.0.1:8080
 ```
@@ -207,7 +205,7 @@ After every schema edit:
 
 ```bash
 cd <slug>
-omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema schema.pg --query queries/signals.gq
 ```
 
 The queries themselves probably don't need changes — they mostly operate on slugs and don't reference enum values. Lint will flag anything that broke.

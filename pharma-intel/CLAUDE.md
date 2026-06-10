@@ -73,7 +73,7 @@ Use this starter as a decision-intelligence loop, not just a lookup table:
 ## Validation
 
 ```bash
-omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema schema.pg --query queries/signals.gq
 ```
 
 The `lint` command validates both queries and schema against each other — use it after any schema or query edit. (`query lint` still works as a deprecated alias.)
@@ -91,9 +91,9 @@ The `lint` command validates both queries and schema against each other — use 
 
 `cluster.yaml` is the deployment: graph `pharma`, `schema.pg`, and every
 stored query, converged with `omnigraph cluster import|plan|apply --config .`
-(apply creates `./graphs/pharma.omni`; schema edits show migration previews
+(apply creates `graphs/pharma.omni`; schema edits show migration previews
 in plan; graph deletion is approval-gated). `omnigraph.yaml` is per-operator
 only — aliases, CLI defaults, `cli.actor` for `--as` attribution. Serve with
 `omnigraph-server --cluster .` (never reads omnigraph.yaml). Data still flows
-through `omnigraph load/mutate` against `./graphs/pharma.omni`. Never commit
+through `omnigraph load/mutate` against `graphs/pharma.omni`. Never commit
 `__cluster/` or `graphs/` (gitignored — local state).

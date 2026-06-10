@@ -40,7 +40,7 @@ Generate a project slug from the domain. Examples:
 
 This becomes:
 - The cookbook folder name: `<slug>/`
-- The graph root: `./graphs/<slug>.omni` (derived — created by `cluster apply`)
+- The graph root: `graphs/<slug>.omni` (derived — created by `cluster apply`)
 - The project name in `omnigraph.yaml`
 
 Confirm with the user before proceeding.
@@ -158,7 +158,7 @@ Before touching any code, echo the captured info back:
 # Setup notes — <domain>
 
 **Project slug:** <slug>
-**Graph root:** ./graphs/<slug>.omni (created by `cluster apply`; cluster.yaml is the deployment file)
+**Graph root:** graphs/<slug>.omni (created by `cluster apply`; cluster.yaml is the deployment file)
 **Scope:** <narrow/broad + geographic focus>
 
 ## Actors

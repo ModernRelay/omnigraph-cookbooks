@@ -44,7 +44,7 @@ Then move into the cookbook folder:
 ```bash
 cd omnigraph-cookbooks/industry-intel
 [ -f .env.omni ] || cp .env.omni.example .env.omni
-set -a && source ./.env.omni && set +a
+set -a && source .env.omni && set +a
 ```
 
 `.env.omni` is gitignored (it's just credentials). The repo ships `.env.omni.example` with the 7 required AWS vars — copy it on first run.
@@ -61,8 +61,8 @@ schema, and all 66 stored queries. One-time setup:
 ```bash
 omnigraph cluster import --config .                # create the state ledger
 omnigraph cluster plan   --config .                # preview (optional but wise)
-omnigraph cluster apply  --config . --as <you>     # creates ./graphs/spike.omni, applies schema, publishes queries
-omnigraph load --data ./seed.jsonl --mode overwrite ./graphs/spike.omni
+omnigraph cluster apply  --config . --as <you>     # creates graphs/spike.omni, applies schema, publishes queries
+omnigraph load --data seed.jsonl --mode overwrite graphs/spike.omni
 ```
 
 Apply is idempotent — re-running it on a converged cluster is a no-op. No
@@ -71,7 +71,7 @@ RustFS, bucket, or credentials are involved on this path.
 Expected output from load:
 
 ```
-loaded ./graphs/spike.omni on branch main with overwrite: 109 nodes across 9 node types, 154 edges across 17 edge types
+loaded graphs/spike.omni on branch main with overwrite: 109 nodes across 9 node types, 154 edges across 17 edge types
 ```
 
 ### Start the server
@@ -89,7 +89,7 @@ direct HTTP endpoint: `POST /graphs/spike/queries/<name>`.
 ### Verify
 
 ```bash
-omnigraph query --config ./omnigraph.yaml --alias patterns disruption
+omnigraph query --config omnigraph.yaml --alias patterns disruption
 ```
 
 Should return 2 patterns: SaaSpocalypse, Sovereign AI.
@@ -97,7 +97,7 @@ Should return 2 patterns: SaaSpocalypse, Sovereign AI.
 Try a traversal:
 
 ```bash
-omnigraph query --config ./omnigraph.yaml --alias pattern-signals pat-sovereign-ai
+omnigraph query --config omnigraph.yaml --alias pattern-signals pat-sovereign-ai
 ```
 
 Should return 3 signals.
@@ -129,7 +129,7 @@ Plus 148 edges wiring the graph together.
 To wipe and reload the demo data from scratch:
 
 ```bash
-omnigraph load --data ./seed.jsonl --mode overwrite ./graphs/spike.omni
+omnigraph load --data seed.jsonl --mode overwrite graphs/spike.omni
 ```
 
 `overwrite` truncates the branch before loading — safe for a demo repo, not for production.

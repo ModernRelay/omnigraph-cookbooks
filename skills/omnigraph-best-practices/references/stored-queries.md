@@ -82,12 +82,12 @@ In a cluster deployment, queries are declared in `cluster.yaml` instead:
 ```yaml
 graphs:
   knowledge:
-    queries:
-      find_person: { file: ./queries/people.gq }
+    queries: queries/    # discover every `query <name>` in queries/*.gq
 ```
 
-The key must match the `query <name>` declaration in the file (a file may
-hold many queries — declare each name against the same file). `cluster apply`
+A file list (`[a.gq, b.gq]`) and a fine-grained `name: { file: ... }` map are
+also accepted; with discovery the `.gq` files are the declaration and
+duplicate names across files fail validation. `cluster apply`
 publishes them to a content-addressed catalog; the `--cluster` server
 type-checks and serves every applied query (`GET /graphs/<id>/queries`,
 `POST /graphs/<id>/queries/<name>`). There is no `mcp:`/expose flag in

@@ -7,7 +7,7 @@ How to run `omnigraph-server` and gate operations with Cedar policies.
 The server is the canonical runtime entry point. Start it once per repo and keep it running — all CLI queries, mutations, and admin ops go through it.
 
 ```bash
-omnigraph-server --config ./omnigraph.yaml
+omnigraph-server --config omnigraph.yaml
 ```
 
 Reads `server.graph` and `server.bind` from the config. Run in a separate terminal or background process.
@@ -50,7 +50,7 @@ Set `OMNIGRAPH_SERVER_BEARER_TOKEN` on the server process:
 
 ```bash
 OMNIGRAPH_SERVER_BEARER_TOKEN=s3cret \
-  omnigraph-server --config ./omnigraph.yaml
+  omnigraph-server --config omnigraph.yaml
 ```
 
 On the client side, declare the env var that holds the matching token in `graphs.<name>`:
@@ -74,8 +74,8 @@ omnigraph query --target remote --alias signal sig-foo
 You can no longer just "leave auth off." Since v0.6.0 the server **refuses to start** when it has neither bearer tokens nor a policy file, unless you explicitly opt in:
 
 ```bash
-omnigraph-server --config ./omnigraph.yaml --unauthenticated
-# or: OMNIGRAPH_UNAUTHENTICATED=1 omnigraph-server --config ./omnigraph.yaml
+omnigraph-server --config omnigraph.yaml --unauthenticated
+# or: OMNIGRAPH_UNAUTHENTICATED=1 omnigraph-server --config omnigraph.yaml
 ```
 
 This is a guardrail against accidentally shipping an open server. For pure local dev, pass `--unauthenticated` deliberately.
@@ -85,8 +85,8 @@ This is a guardrail against accidentally shipping an open server. For pure local
 `init` and `load` write the repo on storage directly — they don't go through the server. Pass the repo URI:
 
 ```bash
-omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/<name>
-omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/<name>
+omnigraph init --schema schema.pg s3://omnigraph-local/repos/<name>
+omnigraph load --data seed.jsonl --mode overwrite s3://omnigraph-local/repos/<name>
 ```
 
 Everything else — `query`, `mutate`, `snapshot`, `schema plan/apply`, `branch`, `commit` — goes through the running server.
@@ -133,7 +133,7 @@ For any shared repo, gate at least `schema_apply` and `branch_merge`.
 ```yaml
 # omnigraph.yaml
 policy:
-  file: ./policy.yaml
+  file: policy.yaml
 ```
 
 > **Config-follows-identity (v0.6.1, breaking).** A top-level `policy:` (and `queries:`) block applies **only** to an anonymous bare-URI single-graph server. A graph served **by name** — `server.graph: <name>` or `--target <name>` — must nest its policy under that graph:
@@ -143,7 +143,7 @@ policy:
 >   local_s3:
 >     uri: s3://omnigraph-local/repos/spike-intel
 >     policy:
->       file: ./policy.yaml          # per-graph; required when the graph is named
+>       file: policy.yaml          # per-graph; required when the graph is named
 > server:
 >   graph: local_s3
 > ```
@@ -195,17 +195,17 @@ Scope rules (a rule's `allow` block may use **at most one**):
 
 ```bash
 # Compile Cedar + check syntax
-omnigraph policy validate --config ./omnigraph.yaml
+omnigraph policy validate --config omnigraph.yaml
 
 # Run declarative test cases from policy.tests.yaml
-omnigraph policy test --config ./omnigraph.yaml
+omnigraph policy test --config omnigraph.yaml
 
 # Debug a single decision
 omnigraph policy explain \
   --actor act-alice \
   --action schema_apply \
   --target-branch main \
-  --config ./omnigraph.yaml
+  --config omnigraph.yaml
 ```
 
 ### Test cases (`policy.tests.yaml`)
@@ -236,13 +236,13 @@ One `omnigraph-server` process can serve up to 10 graphs at once. Mode is inferr
 server:
   bind: 0.0.0.0:8080
   policy:
-    file: ./server-policy.yaml          # server-level Cedar (graph_list)
+    file: server-policy.yaml          # server-level Cedar (graph_list)
 
 graphs:
   alpha:
     uri: s3://tenant-bucket/alpha
     policy:
-      file: ./policies/alpha.yaml       # per-graph Cedar
+      file: policies/alpha.yaml       # per-graph Cedar
   beta:
     uri: s3://tenant-bucket/beta
     # no per-graph policy → engine-layer enforcement is a no-op for beta

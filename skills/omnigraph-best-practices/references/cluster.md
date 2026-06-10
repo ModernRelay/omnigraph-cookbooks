@@ -24,14 +24,15 @@ version: 1
 state: { backend: cluster, lock: true }
 graphs:
   knowledge:
-    schema: ./schema.pg
-    queries:
-      find_person: { file: ./queries/people.gq }   # name must match `query find_person` in the file
+    schema: schema.pg
+    queries: queries/    # the .gq files ARE the declaration — every `query <name>` registers
 policies:
-  base: { file: ./base.policy.yaml, applies_to: [knowledge] }  # or [cluster] for server-level
+  base: { file: base.policy.yaml, applies_to: [knowledge] }  # or [cluster] for server-level
 ```
 
-A `.gq` file may hold many queries; declare each name against the same file.
+`queries` also accepts a file list (`[a.gq, b.gq]`) or a fine-grained
+`name: { file: ... }` map. Discovery is loud: unparseable files and duplicate
+names across files fail validation.
 
 ## The loop (memorize this)
 
@@ -43,7 +44,7 @@ omnigraph cluster apply    --config . --as <you>   # converge (idempotent)
 omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated  # serve (local dev)
 ```
 
-- **`apply` creates graphs** at `./graphs/<id>.omni` — there is no separate
+- **`apply` creates graphs** at `graphs/<id>.omni` — there is no separate
   `omnigraph init` in cluster mode.
 - **Schema changes**: edit the `.pg`, `plan` shows the engine's real migration
   steps (`add_property`, `drop_property [soft]`, `unsupported: …`), `apply`

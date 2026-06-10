@@ -2,7 +2,7 @@
 
 Operational guide for working with Omnigraph: project layout, schema evolution, queries, data changes, branches, and agent automation.
 
-For schema **design** principles (identity, types, edges, constraints) see [`omni-schema.md`](./omni-schema.md). This doc is about how to **operate** an Omnigraph project day-to-day.
+For schema **design** principles (identity, types, edges, constraints) see [`omni-schema.md`](omni-schema.md). This doc is about how to **operate** an Omnigraph project day-to-day.
 
 > **Cluster mode (omnigraph >= 0.7.0):** new projects should prefer the
 > declarative cluster control plane — `cluster.yaml` + `omnigraph cluster
@@ -51,7 +51,7 @@ AWS_S3_FORCE_PATH_STYLE=true
 Source before running CLI commands:
 
 ```bash
-set -a && source ./.env.omni && set +a
+set -a && source .env.omni && set +a
 ```
 
 Reference via `auth.env_file: .env.omni` in `omnigraph.yaml` if you want the CLI to load it automatically.
@@ -138,7 +138,7 @@ edge PartOfArtifact: Chunk -> InformationArtifact @card(1..1) {
 ### Lint after every edit
 
 ```bash
-omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema schema.pg --query queries/signals.gq
 ```
 
 This validates **both** the schema and the queries against it — no running repo required. Wire it into a precommit hook. (`omnigraph query lint` / `query check` still work as deprecated argv shims that rewrite to `omnigraph lint`.)
@@ -148,8 +148,8 @@ This validates **both** the schema and the queries against it — no running rep
 ### Plan before apply, always
 
 ```bash
-omnigraph schema plan --schema ./next.pg s3://bucket/repo --json
-omnigraph schema apply --schema ./next.pg s3://bucket/repo
+omnigraph schema plan --schema next.pg s3://bucket/repo --json
+omnigraph schema apply --schema next.pg s3://bucket/repo
 ```
 
 `schema plan` returns `"supported": true|false` with the full step list. If `supported: false`, fix the source before applying. Apply is destructive — there's no undo.
@@ -250,7 +250,7 @@ Data changes go through feature branches. Schema changes go straight to `main` v
 
 ```bash
 omnigraph branch create --uri $REPO --from main staging-2026-04-14
-omnigraph ingest --data ./delta.jsonl --branch staging-2026-04-14 --mode merge --uri $REPO
+omnigraph ingest --data delta.jsonl --branch staging-2026-04-14 --mode merge --uri $REPO
 # run read queries against --branch staging-2026-04-14 to verify
 omnigraph branch merge --uri $REPO staging-2026-04-14 --into main
 ```
@@ -293,7 +293,7 @@ query related_chunks($slug: String, $q: Vector(3072)) {
 If you change the source field or mutate the text at scale:
 
 ```bash
-omnigraph embed --seed ./embed-config.yaml --reembed_all
+omnigraph embed --seed embed-config.yaml --reembed_all
 ```
 
 `--reembed_all` regenerates; the default is `fill_missing`.
@@ -339,7 +339,7 @@ Reference via `auth.env_file: .env.omni`. Aliases should only contain query name
 The server is the canonical runtime entry point — point the CLI, aliases, and agents at it. Start it once per repo:
 
 ```bash
-omnigraph-server --config ./omnigraph.yaml --unauthenticated
+omnigraph-server --config omnigraph.yaml --unauthenticated
 ```
 
 `--unauthenticated` is required for local dev: since v0.6.0 the server refuses to start without bearer tokens or a policy file. Drop the flag once you've configured auth (see below).
@@ -371,8 +371,8 @@ Set `OMNIGRAPH_SERVER_BEARER_TOKEN` on the server process. On the client side, d
 `init` and `load` write the repo on disk or in S3 — they don't go through the server. Pass the repo URI directly:
 
 ```bash
-omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/<name>
-omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/<name>
+omnigraph init --schema schema.pg s3://omnigraph-local/repos/<name>
+omnigraph load --data seed.jsonl --mode overwrite s3://omnigraph-local/repos/<name>
 ```
 
 Everything else — `query`, `mutate`, `snapshot`, `schema plan/apply`, `branch`, `commit` — goes through the running server via the CLI's default `cli.graph` target.
@@ -390,8 +390,8 @@ A top-level `policy:` (and `queries:`) block applies **only** to an anonymous ba
 ### Validate, test, explain
 
 ```bash
-omnigraph policy validate --config ./omnigraph.yaml
-omnigraph policy test --config ./omnigraph.yaml
+omnigraph policy validate --config omnigraph.yaml
+omnigraph policy test --config omnigraph.yaml
 omnigraph policy explain --actor act-alice --action schema_apply --branch main
 ```
 
@@ -428,7 +428,7 @@ omnigraph commit show $REPO <id>
 
 ### Init scaffolding
 
-`omnigraph init --schema ./schema.pg $REPO` scaffolds an `omnigraph.yaml` if one doesn't exist. Review the template before committing — it has placeholder graphs and no aliases.
+`omnigraph init --schema schema.pg $REPO` scaffolds an `omnigraph.yaml` if one doesn't exist. Review the template before committing — it has placeholder graphs and no aliases.
 
 ### Config resolution order
 
@@ -459,5 +459,5 @@ omnigraph commit show $REPO <id>
 
 ## See Also
 
-- [`omni-schema.md`](./omni-schema.md) — schema design principles
+- [`omni-schema.md`](omni-schema.md) — schema design principles
 - [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph) — upstream repo

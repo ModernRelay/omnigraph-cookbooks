@@ -95,20 +95,20 @@ All commands run from `industry-intel/`:
 
 The cookbook is a **cluster directory**: `cluster.yaml` declares the graph,
 its schema, and all 66 stored queries; `omnigraph cluster apply` converges it
-(creating the graph at `./graphs/spike.omni`); the server serves the applied
+(creating the graph at `graphs/spike.omni`); the server serves the applied
 state. No object store or credentials needed to get started.
 
 ```bash
 cd industry-intel
 
-# One-time: record the ledger, preview, converge (creates ./graphs/spike.omni,
+# One-time: record the ledger, preview, converge (creates graphs/spike.omni,
 # applies schema.pg, publishes all stored queries)
 omnigraph cluster import --config .
 omnigraph cluster plan   --config .
 omnigraph cluster apply  --config . --as <you>
 
 # Load the seed through the data plane (one-time)
-omnigraph load --data ./seed.jsonl --mode overwrite ./graphs/spike.omni
+omnigraph load --data seed.jsonl --mode overwrite graphs/spike.omni
 
 # Serve the applied state (keep running — separate terminal or background)
 omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated   # local dev
@@ -133,10 +133,10 @@ classic path against RustFS (start it via the omnigraph repo's
 `scripts/local-rustfs-bootstrap.sh`):
 
 ```bash
-set -a && source ./.env.omni && set +a
-omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
-omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
-omnigraph-server --config ./omnigraph.yaml --unauthenticated
+set -a && source .env.omni && set +a
+omnigraph init --schema schema.pg s3://omnigraph-local/repos/spike-intel
+omnigraph load --data seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
+omnigraph-server --config omnigraph.yaml --unauthenticated
 ```
 
 Re-point `graphs.local_s3` in `omnigraph.yaml` (commented out by default) and

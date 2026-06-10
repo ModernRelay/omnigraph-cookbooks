@@ -154,20 +154,20 @@ All commands run from `pharma-intel/`:
 
 The cookbook is a **cluster directory**: `cluster.yaml` declares the graph,
 its schema, and all 105 stored queries; `omnigraph cluster apply` converges
-it (creating the graph at `./graphs/pharma.omni`); the server serves the
+it (creating the graph at `graphs/pharma.omni`); the server serves the
 applied state. No object store or credentials needed to get started.
 
 ```bash
 cd pharma-intel
 
-# One-time: record the ledger, preview, converge (creates ./graphs/pharma.omni,
+# One-time: record the ledger, preview, converge (creates graphs/pharma.omni,
 # applies schema.pg, publishes all stored queries)
 omnigraph cluster import --config .
 omnigraph cluster plan   --config .
 omnigraph cluster apply  --config . --as <you>
 
 # Load the seed through the data plane (one-time)
-omnigraph load --data ./seed.jsonl --mode overwrite ./graphs/pharma.omni
+omnigraph load --data seed.jsonl --mode overwrite graphs/pharma.omni
 
 # Serve the applied state (keep running — separate terminal or background)
 omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated   # local dev
@@ -192,10 +192,10 @@ then `cluster plan` (schema edits show real migration steps) → `cluster apply`
 
 ```bash
 cp .env.omni.example .env.omni
-set -a && source ./.env.omni && set +a
-omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/pharma-intel
-omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/pharma-intel
-omnigraph-server --config ./omnigraph.yaml --unauthenticated
+set -a && source .env.omni && set +a
+omnigraph init --schema schema.pg s3://omnigraph-local/repos/pharma-intel
+omnigraph load --data seed.jsonl --mode overwrite s3://omnigraph-local/repos/pharma-intel
+omnigraph-server --config omnigraph.yaml --unauthenticated
 ```
 
 Re-point `graphs.local_s3` in `omnigraph.yaml` (commented out by default) and

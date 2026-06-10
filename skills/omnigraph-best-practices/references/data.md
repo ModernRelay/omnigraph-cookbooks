@@ -48,7 +48,7 @@ JSONL format:
 Load command:
 
 ```bash
-omnigraph load --data ./seed.jsonl --mode merge s3://omnigraph-local/repos/spike-intel
+omnigraph load --data seed.jsonl --mode merge s3://omnigraph-local/repos/spike-intel
 ```
 
 ### `--mode` semantics
@@ -85,7 +85,7 @@ REPO=s3://omnigraph-local/repos/spike-intel
 omnigraph branch create --uri $REPO --from main staging-2026-04-14
 
 # 2. Load delta onto the branch (merge mode is typical for review)
-omnigraph ingest --data ./delta.jsonl --branch staging-2026-04-14 --mode merge --uri $REPO
+omnigraph ingest --data delta.jsonl --branch staging-2026-04-14 --mode merge --uri $REPO
 
 # 3. Verify on the branch (reads can target --branch or --snapshot)
 omnigraph query --alias recent-signals --branch staging-2026-04-14
@@ -117,7 +117,7 @@ Long-lived branches compound merge risk. The usual flow is: create â†’ ingest â†
 For any ingestion that could disrupt downstream queries (overwriting a heavily-referenced node type, removing edges en masse, reseeding a core table), use a feature branch:
 
 ```bash
-omnigraph ingest --data ./risky.jsonl --branch recovery-2026-04-14 \
+omnigraph ingest --data risky.jsonl --branch recovery-2026-04-14 \
   --from main --mode overwrite --uri $REPO
 # inspect, diff, verify reads
 omnigraph branch merge --uri $REPO recovery-2026-04-14 --into main

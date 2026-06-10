@@ -85,11 +85,11 @@ See [`references/demo-setup.md`](references/demo-setup.md) for the full command 
 ```bash
 cd <path-to-clone>/omnigraph-cookbooks/industry-intel
 omnigraph cluster import --config .
-omnigraph cluster apply  --config . --as <you>     # creates ./graphs/spike.omni + publishes queries
-omnigraph load --data ./seed.jsonl --mode overwrite ./graphs/spike.omni
+omnigraph cluster apply  --config . --as <you>     # creates graphs/spike.omni + publishes queries
+omnigraph load --data seed.jsonl --mode overwrite graphs/spike.omni
 # Serve the applied state (keep running), then query through it:
 omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated &   # local dev
-omnigraph query --config ./omnigraph.yaml --alias patterns disruption    # CLI alias sugar
+omnigraph query --config omnigraph.yaml --alias patterns disruption    # CLI alias sugar
 ```
 
 After this, point the user at the `omnigraph-best-practices` skill for day-to-day operations.
@@ -180,7 +180,7 @@ After editing:
 
 ```bash
 cd <slug>
-omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema schema.pg --query queries/signals.gq
 ```
 
 Fix any lint errors before moving on.
@@ -203,15 +203,15 @@ Use web research to build real seed content. **Do not fabricate signals or dates
 cd <clone>/<slug>
 omnigraph cluster import --config .
 omnigraph cluster plan   --config .                # review what apply will do
-omnigraph cluster apply  --config . --as <you>     # creates ./graphs/<slug>.omni
-omnigraph load --data ./seed.jsonl --mode overwrite ./graphs/<slug>.omni
+omnigraph cluster apply  --config . --as <you>     # creates graphs/<slug>.omni
+omnigraph load --data seed.jsonl --mode overwrite graphs/<slug>.omni
 omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated &   # local dev
 ```
 
 8. Verify with a sample query (goes through the server):
 
 ```bash
-omnigraph query --config ./omnigraph.yaml --alias patterns <pattern-kind>
+omnigraph query --config omnigraph.yaml --alias patterns <pattern-kind>
 ```
 
 ### Phase 7 — Hand-off
@@ -220,7 +220,7 @@ Tell the user:
 
 - What got created: the cookbook folder (a **cluster directory** —
   `cluster.yaml` declares graph + schema + queries; the graph lives at
-  `./graphs/<slug>.omni`, created by apply), the seed counts
+  `graphs/<slug>.omni`, created by apply), the seed counts
 - How to query: CLI aliases (per-operator `omnigraph.yaml`), or HTTP —
   every declared query is served at `POST /graphs/<slug>/queries/<name>`
 - The day-2 loop: edit `.pg`/`.gq`/`cluster.yaml` → `cluster plan` →

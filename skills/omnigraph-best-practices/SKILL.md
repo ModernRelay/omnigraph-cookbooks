@@ -83,7 +83,7 @@ AWS_S3_FORCE_PATH_STYLE=true
 Source before running CLI commands:
 
 ```bash
-set -a && source ./.env.omni && set +a
+set -a && source .env.omni && set +a
 ```
 
 Or reference `auth.env_file: .env.omni` in `omnigraph.yaml` for automatic loading.

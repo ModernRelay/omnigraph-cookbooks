@@ -7,7 +7,7 @@ project:
 
 graphs:
   local:
-    uri: ./graphs/spike.omni          # the derived root cluster apply creates
+    uri: graphs/spike.omni          # the derived root cluster apply creates
   local_server:
     # NB: graph-scoped base — cluster servers are multi-graph
     uri: http://127.0.0.1:8080/graphs/spike
@@ -17,7 +17,7 @@ graphs:
   #   uri: s3://omnigraph-local/repos/spike-intel
 
 # auth:
-#   env_file: ./.env.omni   # only needed for the S3 alternative / embeddings
+#   env_file: .env.omni   # only needed for the S3 alternative / embeddings
 
 cli:
   graph: local_server

@@ -47,7 +47,7 @@ edge PartOfArtifact: Chunk -> InformationArtifact @card(1..1) {
 ### Lint after every edit
 
 ```bash
-omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema schema.pg --query queries/signals.gq
 ```
 
 This validates the schema **and** the queries against it. No running repo required. Wire it into a precommit hook.
@@ -57,9 +57,9 @@ This validates the schema **and** the queries against it. No running repo requir
 ### Plan before apply — always
 
 ```bash
-omnigraph schema plan --schema ./next.pg s3://bucket/repo --json
+omnigraph schema plan --schema next.pg s3://bucket/repo --json
 # inspect "supported": true|false and the step list
-omnigraph schema apply --schema ./next.pg s3://bucket/repo
+omnigraph schema apply --schema next.pg s3://bucket/repo
 ```
 
 If `supported: false`, fix the source before applying. Plan is free; run it as often as needed.
@@ -69,7 +69,7 @@ Plan/apply diagnostics carry stable codes of the form **`OG-XXX-NNN`** (since v0
 **Destructive drops are gated (since v0.5.0).** Dropping a property or type is a soft drop by default (or rejected); to actually lose data you must opt in:
 
 ```bash
-omnigraph schema apply --schema ./next.pg s3://bucket/repo --allow-data-loss
+omnigraph schema apply --schema next.pg s3://bucket/repo --allow-data-loss
 ```
 
 Over HTTP the equivalent is `{"allow_data_loss": true}` in the schema-apply body. Without the flag, a destructive drop returns a structured diagnostic instead of silently deleting columns.
