@@ -213,7 +213,7 @@ Rules:
 
 ```bash
 cd <slug>
-omnigraph query lint --schema ./schema.pg --query ./queries/mutations.gq
+omnigraph lint --schema ./schema.pg --query ./queries/mutations.gq
 ```
 
 Lint doesn't validate the seed directly, but it confirms the schema accepts every field.
@@ -231,8 +231,8 @@ If load fails (missing required field, invalid enum value, unknown type), fix se
 ### Step 11 — Smoke test
 
 ```bash
-omnigraph read --config ./omnigraph.yaml --alias patterns disruption
-omnigraph read --config ./omnigraph.yaml --alias signals
+omnigraph query --config ./omnigraph.yaml --alias patterns disruption
+omnigraph query --config ./omnigraph.yaml --alias signals
 ```
 
 Should return the patterns and signals you seeded.
@@ -240,7 +240,7 @@ Should return the patterns and signals you seeded.
 Try a traversal:
 
 ```bash
-omnigraph read --config ./omnigraph.yaml --alias pattern-signals pat-<your-pattern>
+omnigraph query --config ./omnigraph.yaml --alias pattern-signals pat-<your-pattern>
 ```
 
 ## Common Pitfalls

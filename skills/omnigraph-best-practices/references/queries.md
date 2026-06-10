@@ -11,13 +11,13 @@ Writing `.gq` query files in Omnigraph.
 ## Linting
 
 ```bash
-omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
 ```
 
 Or (lint against a live repo):
 
 ```bash
-omnigraph query lint --query ./queries/signals.gq s3://bucket/repo
+omnigraph lint --query ./queries/signals.gq s3://bucket/repo
 ```
 
 Lint returns:
@@ -41,10 +41,12 @@ query get_signal($slug: String) {
 Never string-interpolate values into query bodies. Pass them via `--params`:
 
 ```bash
-omnigraph read --query signals.gq --name get_signal --params '{"slug":"sig-foo"}'
+omnigraph query --query signals.gq --name get_signal --params '{"slug":"sig-foo"}'
 ```
 
 The compiler typechecks parameter values against declared types.
+
+> For one-off/ad-hoc execution, pass the query inline instead of a file with `-e/--query-string` (v0.6.0+): `omnigraph query -e 'query q($slug: String){ match { $s: Signal { slug: $slug } } return { $s.name } }' --params '{"slug":"sig-foo"}'` (and `omnigraph mutate -e '...'`). `-e` is mutually exclusive with `--query <file>` and `--alias` — exactly one is required.
 
 ## Query Structure
 
@@ -195,7 +197,7 @@ match {
 
 ## Mutations
 
-> **No top-level `mutation { ... }` wrapper.** Agents trained on GraphQL reflexively write `mutation { insert T { ... } }` — that fails the parser at character 1 with `parse error: expected query_file`. Every executable block in a `.gq` file is a named `query`; the body's verb (`insert` / `update` / `delete`) determines whether it's a write. Dispatch via `omnigraph change` (not `read`).
+> **No top-level `mutation { ... }` wrapper.** Agents trained on GraphQL reflexively write `mutation { insert T { ... } }` — that fails the parser at character 1 with `parse error: expected query_file`. Every executable block in a `.gq` file is a named `query`; the body's verb (`insert` / `update` / `delete`) determines whether it's a write. Dispatch via `omnigraph mutate` (not `query`).
 
 ### Insert
 
@@ -257,13 +259,15 @@ query add_and_link($slug: String, $pattern: String, $createdAt: DateTime, $updat
 
 There's no `upsert` keyword at the query level — use `load --mode merge` for bulk upsert.
 
+> **Insert/update-only OR delete-only (the D₂ rule).** A single mutation query may contain inserts and updates, **or** deletes — never both. Mixing a `delete` with an `insert`/`update` in the same query is rejected at parse time. (Inserts/updates go through a staged two-phase publish; deletes inline-commit because Lance has no public two-phase delete, so they can't share one atomic statement.) Split a delete-then-insert into two separate mutations.
+
 ### Date and DateTime values
 
-Date format is asymmetric between `change` (parameter values) and `ingest` / `load` (JSONL):
+Date format is asymmetric between `mutate` (parameter values) and `ingest` / `load` (JSONL):
 
 | Path | Date | DateTime |
 |---|---|---|
-| `change --params` | ISO string `"2026-04-29"` | ISO string `"2026-04-29T10:00:00Z"` |
+| `mutate --params` | ISO string `"2026-04-29"` | ISO string `"2026-04-29T10:00:00Z"` |
 | `ingest` / `load` JSONL | Integer days since epoch `20572` | ISO string `"2026-04-29T10:00:00Z"` |
 
 Compute integer days form for a given date `d`:

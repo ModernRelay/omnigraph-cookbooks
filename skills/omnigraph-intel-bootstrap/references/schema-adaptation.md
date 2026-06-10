@@ -201,7 +201,7 @@ After every schema edit:
 
 ```bash
 cd <slug>
-omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
 ```
 
 The queries themselves probably don't need changes — they mostly operate on slugs and don't reference enum values. Lint will flag anything that broke.
@@ -220,4 +220,4 @@ Before moving to Phase 6:
 - [ ] Kept Pattern.kind as-is (usually)
 - [ ] Updated `omnigraph.yaml` project name + graph URI
 - [ ] Deleted `industry-intel`'s `seed.jsonl` from the new folder (will regenerate in Phase 6)
-- [ ] `query lint` passes with 0 errors
+- [ ] `lint` passes with 0 errors

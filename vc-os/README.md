@@ -139,20 +139,7 @@ Every node type appears exactly once. Each row lists a node and where its outgoi
 | `Meeting.kind` | `ic, board, partner-1on1, pipeline-review, portfolio-1on1, lp-update, founder-call, dd-call, expert-call, internal, external-other` |
 | `Meeting.status` | `scheduled, occurred, cancelled, rescheduled` |
 
-### What's deliberately *not* a node
-
-- **No "Skill" / "Bot" / "MCP" / "Workflow" nodes.** Operations aren't knowledge.
-- **No separate "Memory" type.** Memory is queries with snapshot-pinned reads.
-- **No "Sighting" type.** A sighting = `Signal{kind=discovery}` with a uniqueness convention on `(organization, source, date)`.
-- **No "Thread" / "Conversation" type.** Artifacts have `thread_id` + `ArtifactDerivedFrom` chains.
-- **No "Memo" type.** A memo = `Insight{kind=memo, aboutDeal=…}` with a blob.
-- **No "PortfolioOrganization" subtype.** It's `Organization.status = portfolio`.
-- **No reified "User" / "Team Member".** Quito itself is `org-quito` (Organization kind=vc-firm); team members `WorksAt org-quito`. Authorship and ownership live on edges (`DecisionByPerson`, `CommitmentAssignedTo`).
-- **No "Protocol" / "Runbook" type.** They're `Lesson{kind=protocol|runbook}`.
-- **No separate "SourceEntity" node.** A source is an `Organization` with `kind` in `(publisher, database, expert-network)` and a `reliability` rating. Reliability-driven revalidation walks the same `published-by-organization` ← Artifact ← `signalSourcedFromArtifact` ← Signal chain that a separate SourceEntity used to.
-- **No `hypothesis` value on `Insight.kind`.** An open uncertainty awaiting evidence is a `Question` - that has the right lifecycle (`open/partial/resolved`) and participates in the `DecisionNeedsAnswer` traversal.
-
-## Reference seed - Fictional Series-A AI-infra fund
+## Reference seed data - Fictional Series-A AI-infra fund
 
 The seed populates a fictional Berlin-based AI-infra fund running Fund III ($250M, vintage 2024). Single coherent narrative; exercises all 16 populated node types (`Chunk` is schema-only). **All names, deals, organizations, and people are fabricated.**
 
@@ -562,7 +549,7 @@ docker run -d --name omnigraph-rustfs-vcos \
   -e RUSTFS_ALLOW_INSECURE_DEFAULT_CREDENTIALS=true \
   -e RUSTFS_ADDRESS=0.0.0.0:9000 -e RUSTFS_CONSOLE_ADDRESS=0.0.0.0:9001 \
   -v /tmp/rustfs-vcos:/data \
-  rustfs/rustfs:latest
+  rustfs/rustfs:1.0.0-beta.4   # pinned: ':latest' floats; beta.4 is the image RUSTFS_ALLOW_INSECURE_DEFAULT_CREDENTIALS targets
 
 # 2. Create .env.omni (these are the local RustFS dev creds; .env.omni is gitignored)
 cat > .env.omni <<'EOF'
@@ -577,7 +564,7 @@ EOF
 set -a && source ./.env.omni && set +a
 
 # 3. Lint the schema and queries (pure file check - no server needed)
-omnigraph query lint --schema ./schema.pg --query ./queries/deals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/deals.gq
 
 # 4. Create the bucket, init the repo, load the seed
 curl -s -X PUT http://127.0.0.1:9000/omnigraph-local/ -H 'Host: omnigraph-local.localhost' \
@@ -586,7 +573,7 @@ omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/vc-os
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/vc-os
 
 # 5. Start the local HTTP server (keep it running - separate terminal)
-omnigraph-server --config ./omnigraph.yaml
+omnigraph-server --config ./omnigraph.yaml --unauthenticated   # local dev; v0.6.0+ refuses to start without auth/policy or this flag
 
 # 6. Query through the server via aliases
 omnigraph read --alias team

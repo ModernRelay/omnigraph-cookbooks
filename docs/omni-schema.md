@@ -123,7 +123,7 @@ types.
 ```sql
 interface Searchable {
     title: String @index
-    embedding: Vector(1536) @embed(title)
+    embedding: Vector(1536) @embed("title")
 }
 ```
 
@@ -183,7 +183,7 @@ node Document {
     slug: String @key
     title: String @index
     body: String
-    embedding: Vector(1536) @embed(body) @index
+    embedding: Vector(1536) @embed("body") @index
 }
 ```
 

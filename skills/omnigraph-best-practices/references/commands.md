@@ -46,6 +46,14 @@ omnigraph commit show $REPO <commit-id>
 
 Inspect graph history. Useful for "what changed between these two points" investigation.
 
+## Graphs (multi-graph servers)
+
+```bash
+omnigraph graphs list --config X --json
+```
+
+Lists the graphs a multi-graph server serves. Remote servers only (rejects local URIs); the server must expose `GET /graphs` via `server.policy.file`. See `references/server-policy.md`.
+
 ## Schema
 
 ```bash
@@ -55,15 +63,15 @@ omnigraph schema apply --schema ./next.pg $REPO
 
 See `references/schema.md` for the full workflow.
 
-## Query Lint
+## Lint
 
 ```bash
-omnigraph query lint --schema ./schema.pg --query ./queries/foo.gq --json
+omnigraph lint --schema ./schema.pg --query ./queries/foo.gq --json
 # or against a live repo:
-omnigraph query lint --query ./queries/foo.gq $REPO --json
+omnigraph lint --query ./queries/foo.gq $REPO --json
 ```
 
-See `references/queries.md`.
+`omnigraph query lint` / `omnigraph query check` still work as deprecated aliases (they rewrite to `omnigraph lint` and warn). See `references/queries.md`.
 
 ## Embed
 
@@ -84,6 +92,8 @@ omnigraph init --schema ./schema.pg $REPO
 
 Creates a new repo at `$REPO` with the given schema. Also scaffolds `omnigraph.yaml` in the current directory if one doesn't exist — review and edit the template before committing (default graph names are placeholders).
 
+**Strict by default (v0.6.0+):** `init` against a URI that already holds schema files errors with `AlreadyInitialized` instead of silently overwriting. Use `omnigraph init --force` to re-init deliberately. `--force` only skips the schema-file preflight — it does **not** purge existing Lance datasets.
+
 **Note:** `init` does not accept `--json`. Drop the flag if you see `unexpected argument --json`.
 
 ## Load vs Ingest
@@ -98,19 +108,48 @@ omnigraph ingest --data ./delta.jsonl --branch feature-x --from main --mode merg
 
 `--mode` values for both: `overwrite`, `merge`, `append`. See `references/data.md`.
 
-## Read / Change
+## Query / Mutate
 
 ```bash
-omnigraph read  --query queries/signals.gq --name get_signal --params '{"slug":"sig-foo"}'
-omnigraph change --query queries/mutations.gq --name add_signal --params '{"slug":"sig-foo",...}'
+omnigraph query  --query queries/signals.gq --name get_signal --params '{"slug":"sig-foo"}'
+omnigraph mutate --query queries/mutations.gq --name add_signal --params '{"slug":"sig-foo",...}'
 ```
 
 With aliases:
 
 ```bash
-omnigraph read  --alias signal sig-foo
-omnigraph change --alias add-signal sig-foo "Name" "Brief" 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z
+omnigraph query  --alias signal sig-foo
+omnigraph mutate --alias add-signal sig-foo "Name" "Brief" 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z
 ```
+
+> `omnigraph read` / `omnigraph change` still work as **deprecated** aliases (they warn to stderr); prefer `query` / `mutate`. Both also accept inline source via `-e/--query-string '<gq>'` instead of `--query <file>`.
+
+## Maintenance: Optimize & Cleanup (v0.6.1)
+
+### `optimize` — non-destructive Lance compaction
+
+```bash
+omnigraph optimize $REPO --json
+```
+
+Compacts fragments and reclaims deleted-row space. Non-destructive — safe to run any time. **Skips tables with a `Blob` property** (Lance blob-v2 compaction decode bug); skipped tables are reported in the `skipped` field of `--json` output and in logs. Non-blob tables compact normally. Blob-table fragment count won't shrink until the upstream Lance fix lands — reads/writes are unaffected.
+
+### `cleanup` — destructive version GC
+
+```bash
+omnigraph cleanup $REPO --keep 5 --older-than 7d --confirm
+```
+
+Garbage-collects old table versions, dropping time-travel reachability for anything pruned. **Destructive** — requires `--confirm`. Duration units for `--older-than`: `s`, `m`, `h`, `d`, `w`. Also reconciles orphaned per-table forks left by an interrupted `branch delete`.
+
+## Stored Queries (v0.6.1)
+
+```bash
+omnigraph queries validate              # type-check the stored-query registry vs the live schema (offline; exits non-zero on drift)
+omnigraph queries list                  # list registry query names, MCP exposure, and typed params
+```
+
+`validate` opens the selected graph and type-checks every query in the `queries:` block — catches schema drift without restarting the server. `list` prints the selected registry. Select the registry with `--target <graph>` or `cli.graph`; with no graph selected, `list` shows only the top-level `queries:` block. Distinct from `lint` (which validates a single `.gq` file). See `references/stored-queries.md`.
 
 ## Config Resolution Order
 
@@ -133,7 +172,7 @@ For params:
 
 ## Output Formats
 
-`--format <fmt>` on read/change:
+`--format <fmt>` on query/mutate:
 
 - `table` (default) — human-readable
 - `kv` — `key: value` per line; good for single rows

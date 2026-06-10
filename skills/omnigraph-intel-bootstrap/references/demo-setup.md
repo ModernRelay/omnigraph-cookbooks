@@ -68,6 +68,8 @@ omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
 ```
 
+If the repo already exists, `init` errors with `AlreadyInitialized` (v0.6.0+) — add `--force` to re-init (it won't purge existing data; the `load --mode overwrite` below replaces the rows).
+
 Expected output from load:
 
 ```
@@ -77,15 +79,15 @@ loaded s3://omnigraph-local/repos/spike-intel on branch main with overwrite: 111
 ### Start the server
 
 ```bash
-omnigraph-server --config ./omnigraph.yaml
+omnigraph-server --config ./omnigraph.yaml --unauthenticated
 ```
 
-Keep it running (separate terminal or background). All queries from here on go through it.
+`--unauthenticated` is required for local dev — since v0.6.0 the server refuses to start without bearer tokens or a policy file. Keep it running (separate terminal or background). All queries from here on go through it.
 
 ### Verify
 
 ```bash
-omnigraph read --config ./omnigraph.yaml --alias patterns disruption
+omnigraph query --config ./omnigraph.yaml --alias patterns disruption
 ```
 
 Should return 2 patterns: SaaSpocalypse, Sovereign AI.
@@ -93,7 +95,7 @@ Should return 2 patterns: SaaSpocalypse, Sovereign AI.
 Try a traversal:
 
 ```bash
-omnigraph read --config ./omnigraph.yaml --alias pattern-signals pat-sovereign-ai
+omnigraph query --config ./omnigraph.yaml --alias pattern-signals pat-sovereign-ai
 ```
 
 Should return 3 signals.

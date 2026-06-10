@@ -77,7 +77,7 @@ Each pattern is backed by ~3 real, dated signals with source URLs. Signals conne
 - Domain is a property, not a node
 - Edges follow `VerbTargetType` naming so direction is obvious
 - `slug` is the external identity everywhere (`sig-`, `pat-`, `el-`, `ins-`, `how-to-`, `co-`, `exp-`, `ia-`, `source-`)
-- Embeddings only on Chunk (`Vector(3072)`, text-embedding-3-large)
+- Embeddings only on Chunk (`Vector(3072)`, produced at ingest by the engine's configured model — default `gemini-embedding-2-preview`)
 
 Full property tables and constraints in `schema.pg`.
 
@@ -100,7 +100,7 @@ cd industry-intel
 set -a && source ./.env.omni && set +a
 
 # Lint the schema and queries (pure file check)
-omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
 
 # Init the repo (one-time — writes to storage)
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
@@ -109,7 +109,7 @@ omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
 
 # Start the local HTTP server (keep it running — separate terminal or background)
-omnigraph-server --config ./omnigraph.yaml
+omnigraph-server --config ./omnigraph.yaml --unauthenticated   # local dev; v0.6.0+ refuses to start without auth/policy or this flag
 
 # All queries go through the server via aliases
 omnigraph read --alias pattern-signals pat-sovereign-ai

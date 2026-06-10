@@ -4,13 +4,13 @@ How to wire Omnigraph operations for agents and scripts.
 
 ## Every Agent Operation Should Be an Alias
 
-Agents calling raw `omnigraph read --query ... --name ... --params ...` drift as queries evolve. Aliases decouple the **operation name** from the **query implementation**:
+Agents calling raw `omnigraph query --query ... --name ... --params ...` drift as queries evolve. Aliases decouple the **operation name** from the **query implementation**:
 
 ```yaml
 # omnigraph.yaml
 aliases:
   signal:
-    command: read
+    command: query
     query: signals.gq
     name: get_signal
     args: [slug]
@@ -20,17 +20,19 @@ aliases:
 The agent calls:
 
 ```bash
-omnigraph read --alias signal sig-kimi-k25
+omnigraph query --alias signal sig-kimi-k25
 ```
 
 When the query changes, the alias stays stable. The agent keeps working.
+
+> **Aliases ≠ stored queries.** A CLI `aliases:` entry is **client-side** — it tells the local `omnigraph` CLI which `.gq` file + query name + params to send; the server never sees it. The v0.6.1 **`queries:`** registry is **server-side** — curated queries the server loads, type-checks at startup, and exposes over `GET /queries` / `POST /queries/{name}` (gated by `invoke_query`). Use aliases for your own CLI/agent ergonomics; use the `queries:` registry to expose a vetted query surface to remote callers or MCP. See [`stored-queries.md`](stored-queries.md).
 
 ## Alias Schema
 
 ```yaml
 aliases:
   <alias-name>:
-    command: read | change    # which subcommand to dispatch
+    command: query | mutate   # which subcommand to dispatch (`read`/`change` still accepted, deprecated)
     query: <filename.gq>      # resolved via query.roots
     name: <query_name>        # the query inside the file
     args: [<name1>, <name2>]  # positional CLI args → named params
@@ -44,7 +46,7 @@ aliases:
 If `args: [slug, name, age]`, then:
 
 ```bash
-omnigraph read --alias foo sig-bar "Some Name" 29
+omnigraph query --alias foo sig-bar "Some Name" 29
 ```
 
 ...maps to `{"slug":"sig-bar","name":"Some Name","age":29}`.
@@ -107,14 +109,14 @@ Credentials go in `.env.omni` referenced via `auth.env_file: .env.omni`. Aliases
 aliases:
   # Lookups (kv format for single-row readability)
   signal:
-    command: read
+    command: query
     query: signals.gq
     name: get_signal
     args: [slug]
     format: kv
 
   pattern:
-    command: read
+    command: query
     query: patterns.gq
     name: get_pattern
     args: [slug]
@@ -122,26 +124,26 @@ aliases:
 
   # Lists (default format inherits from cli.output_format)
   signals:
-    command: read
+    command: query
     query: signals.gq
     name: recent_signals
 
   # Traversals
   pattern-signals:
-    command: read
+    command: query
     query: patterns.gq
     name: pattern_signals
     args: [slug]
 
-  # Mutations (change command)
+  # Mutations (mutate command)
   add-signal:
-    command: change
+    command: mutate
     query: mutations.gq
     name: add_signal
     args: [slug, name, brief, stagingTimestamp, createdAt, updatedAt]
 
   link-forms-pattern:
-    command: change
+    command: mutate
     query: mutations.gq
     name: link_signal_forms_pattern
     args: [signal, pattern]
@@ -151,21 +153,21 @@ aliases:
 
 ```bash
 # Read by alias
-omnigraph read --alias signal sig-kimi-k25
+omnigraph query --alias signal sig-kimi-k25
 
 # Change by alias
-omnigraph change --alias add-signal sig-new "Name" "Brief" \
+omnigraph mutate --alias add-signal sig-new "Name" "Brief" \
   2026-04-14T00:00:00Z 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z
 
 # Override output format
-omnigraph read --alias signals --format jsonl
+omnigraph query --alias signals --format jsonl
 
 # Override target graph
-omnigraph read --alias signal --target local_server sig-kimi-k25
+omnigraph query --alias signal --target local_server sig-kimi-k25
 
 # Override branch
-omnigraph read --alias signals --branch staging-2026-04-14
+omnigraph query --alias signals --branch staging-2026-04-14
 
 # With explicit --params (wins over positional args on key conflict)
-omnigraph read --alias signal --params '{"slug":"sig-override"}'
+omnigraph query --alias signal --params '{"slug":"sig-override"}'
 ```

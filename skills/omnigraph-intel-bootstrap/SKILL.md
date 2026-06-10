@@ -2,10 +2,10 @@
 name: omnigraph-intel-bootstrap
 description: 'Bootstrap a new Omnigraph-based SPIKE industry intelligence graph from scratch. Use this skill whenever a user wants to set up a new SPIKE graph — either with the existing AI industry demo data or for a new domain (biotech, fintech, crypto, geopolitics, macroeconomics, SaaS, climate tech, etc.). The flow presents a demo-vs-custom decision, then for custom setups asks about domain scope, actors, cadence, and sources, adapts schema and enums for the target domain, runs initial web research to generate real seed content, and executes init + load. Apply aggressively when the user says any of: set up Omnigraph, bootstrap a new graph, create a new SPIKE cookbook, I want to track X industry, initialize intel for Y, new graph for Z domain, start a new context graph, or similar phrasing. This skill takes a user from zero to a populated, queryable graph.'
 license: MIT (see LICENSE at repo root)
-compatibility: Requires omnigraph CLI >= 0.3.1 and Docker (for local RustFS).
+compatibility: Requires omnigraph CLI >= 0.6.1 and Docker (for local RustFS).
 metadata:
   author: ModernRelay
-  version: "0.1.0"
+  version: "0.3.0"
   repository: https://github.com/ModernRelay/omnigraph-cookbooks
 ---
 
@@ -44,7 +44,7 @@ curl -s -o /dev/null -w "server:%{http_code}\n" http://127.0.0.1:8080/healthz
 command -v omnigraph >/dev/null || export PATH="$PWD/.omnigraph-rustfs-demo/bin:$PATH"
 command -v omnigraph >/dev/null || { echo "omnigraph not found — install via homebrew or adjust PATH"; exit 1; }
 
-# Require omnigraph >= 0.3.1
+# Require omnigraph >= 0.6.0
 omnigraph version
 
 # Does the cookbook have an .env.omni? If not, seed from the example.
@@ -90,8 +90,8 @@ set -a && source ./.env.omni && set +a
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
 # Start the server (keep running), then query through it:
-omnigraph-server --config ./omnigraph.yaml &
-omnigraph read --config ./omnigraph.yaml --alias patterns disruption
+omnigraph-server --config ./omnigraph.yaml --unauthenticated &   # local dev; v0.6.0+ needs auth/policy or this flag
+omnigraph query --config ./omnigraph.yaml --alias patterns disruption
 ```
 
 After this, point the user at the `omnigraph-best-practices` skill for day-to-day operations.
@@ -182,7 +182,7 @@ After editing:
 
 ```bash
 cd <slug>
-omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
 ```
 
 Fix any lint errors before moving on.
@@ -204,13 +204,13 @@ cd <clone>/<slug>
 set -a && source ./.env.omni && set +a
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/<slug>
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/<slug>
-omnigraph-server --config ./omnigraph.yaml &
+omnigraph-server --config ./omnigraph.yaml --unauthenticated &   # local dev; v0.6.0+ needs auth/policy or this flag
 ```
 
 8. Verify with a sample query (goes through the server):
 
 ```bash
-omnigraph read --config ./omnigraph.yaml --alias patterns <pattern-kind>
+omnigraph query --config ./omnigraph.yaml --alias patterns <pattern-kind>
 ```
 
 ### Phase 7 — Hand-off
@@ -218,7 +218,7 @@ omnigraph read --config ./omnigraph.yaml --alias patterns <pattern-kind>
 Tell the user:
 
 - What got created (cookbook folder, schema, seed counts, repo URI)
-- How to query (via aliases or raw read)
+- How to query (via aliases or raw query)
 - To use the `omnigraph-best-practices` skill for day-to-day ops (adding signals, schema evolution, branches)
 
 ## Deep Dives

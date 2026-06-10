@@ -6,26 +6,26 @@ Repo-wide guidance. Each cookbook also has its own `CLAUDE.md` — read both whe
 
 ## What This Repo Is
 
-A collection of Omnigraph graph cookbooks plus packaged agent skills. Each cookbook is self-contained in its folder; skills live under `skills/` and are installable via `npx skills add`. Currently only `industry-intel/` is shipped (AI/ML intel on the SPIKE framework — Signal, Pattern, Insight, KnowHow, Element). See `README.md` for the full list and planned cookbooks.
+A collection of Omnigraph graph cookbooks plus packaged agent skills. Each cookbook is self-contained in its folder; skills live under `skills/` and are installable via `npx skills add`. Four cookbooks ship today: `industry-intel/` (AI/ML intel on the SPIKE framework — Signal, Pattern, Insight, KnowHow, Element), `pharma-intel/` (pharma competitive intelligence), `second-brain/` (personal-life automation graph), and `vc-os/` (venture-capital operating system). See `README.md` for the full list and planned cookbooks.
 
 ## Architecture
 
 - **Storage**: RustFS (S3-compatible) at `s3://omnigraph-local/repos/<name>`. `init` and `load` write directly to storage — they are one-time setup ops and bypass the server.
-- **Runtime**: `omnigraph-server` reads from storage at startup and exposes HTTP on `127.0.0.1:8080`. Day-to-day CLI calls (`read`, `change`) go through the server.
-- **CLI config**: Per-cookbook `omnigraph.yaml` defines storage URI, server bind, and a library of `aliases` — short names that map to named queries/mutations in `queries/*.gq`. Agents should invoke aliases (e.g. `omnigraph read --alias pattern-signals pat-sovereign-ai`), not raw query files. Alias arg values are JSON-parsed first, then fall back to string — `29` is an integer, `"29"` is a string.
+- **Runtime**: `omnigraph-server` reads from storage at startup and exposes HTTP on `127.0.0.1:8080`. Day-to-day CLI calls (`query`, `mutate`) go through the server. (`read` / `change` still work as deprecated aliases.)
+- **CLI config**: Per-cookbook `omnigraph.yaml` defines storage URI, server bind, and a library of `aliases` — short names that map to named queries/mutations in `queries/*.gq`. Agents should invoke aliases (e.g. `omnigraph query --alias pattern-signals pat-sovereign-ai`), not raw query files. Alias arg values are JSON-parsed first, then fall back to string — `29` is an integer, `"29"` is a string.
 - **Auth**: `.env.omni` holds RustFS AWS creds (not committed). Source before CLI commands: `set -a && source ./.env.omni && set +a`.
 
-**Prerequisite**: RustFS must be running locally (Docker-based) before anything beyond `query lint` will work. Bootstrap once via the script in `docs/best-practices.md` → *Local Setup*. Verify with `curl http://127.0.0.1:9000` (RustFS) and, once the server is up, `curl http://127.0.0.1:8080/healthz`.
+**Prerequisite**: RustFS must be running locally (Docker-based) before anything beyond `lint` will work. Bootstrap once via the script in `docs/best-practices.md` → *Local Setup*. Verify with `curl http://127.0.0.1:9000` (RustFS) and, once the server is up, `curl http://127.0.0.1:8080/healthz`.
 
 ## Canonical Workflow
 
 1. **Edit** `schema.pg` or `queries/*.gq`. Comments in both use `//` not `#`.
-2. **Lint** — `omnigraph query lint --schema ./schema.pg --query ./queries/<file>.gq` validates queries against the schema. Run after any edit. This is a pure file check: no server, no RustFS, no `.env.omni` needed — use it as the tight inner loop while editing. Everything below requires the server running and env vars sourced.
+2. **Lint** — `omnigraph lint --schema ./schema.pg --query ./queries/<file>.gq` validates queries against the schema. Run after any edit. This is a pure file check: no server, no RustFS, no `.env.omni` needed — use it as the tight inner loop while editing. (`omnigraph query lint` still works as a deprecated alias.) Everything below requires the server running and env vars sourced.
 3. **Schema changes** — `omnigraph schema plan` before `schema apply`. Never apply without a successful plan. Use `@rename_from(...)` for property/type renames.
-4. **Data changes** — pick the right write command: `change` for edits, `load --mode merge` for bulk, `load --mode overwrite` only for clean slates. Review bulk ingests on a branch, then merge.
+4. **Data changes** — pick the right write command: `mutate` for edits, `load --mode merge` for bulk, `load --mode overwrite` only for clean slates. Review bulk ingests on a branch, then merge.
 5. **Never string-interpolate** into `.gq` bodies or `--params` — parameterize everything.
 
-There are no repo-level build, test, or lint commands. Validation happens per-cookbook via `omnigraph query lint`. CI is not configured in this repo.
+There are no repo-level build, test, or lint commands. Validation happens per-cookbook via `omnigraph lint`. CI is not configured in this repo.
 
 ## Working in a Cookbook
 
@@ -34,13 +34,13 @@ Always `cd` into the cookbook folder first — configs and paths are relative:
 ```bash
 cd industry-intel
 set -a && source ./.env.omni && set +a
-omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
 ```
 
-Start the server once per session from inside the cookbook folder — `read`, `change`, and `snapshot` all go through it:
+Start the server once per session from inside the cookbook folder — `query`, `mutate`, and `snapshot` all go through it:
 
 ```bash
-omnigraph-server --config ./omnigraph.yaml   # binds 127.0.0.1:8080
+omnigraph-server --config ./omnigraph.yaml --unauthenticated   # binds 127.0.0.1:8080; local dev — v0.6.0+ refuses to start without auth/policy or this flag
 ```
 
 Leave it running in a separate terminal or background process.

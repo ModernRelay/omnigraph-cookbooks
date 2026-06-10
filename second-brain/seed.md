@@ -6,7 +6,7 @@ Everything in this seed is fabricated — names, places, and dates. The point is
 
 **Totals:** 121 nodes across 12 types, 229 edges across 36 types. `Chunk` is declared in the schema but populated by a separate embedding pipeline, not in this seed.
 
-`Knows` and `RelatedToPerson` edges are stored bidirectionally — if A knows B, the seed also loads B knows A; family edges store both `parent → child` and the inverse `child → parent`. This convention is enforced by the loader (the schema can't express pair-uniqueness in Omnigraph 0.4.2, so dedupe lives in the seed).
+`Knows` and `RelatedToPerson` edges are stored bidirectionally — if A knows B, the seed also loads B knows A; family edges store both `parent → child` and the inverse `child → parent`. This bidirectional storage is enforced by the loader — it's about creating the *inverse* edge, which `@unique` doesn't do. (Separately, `@unique(src, dst)` now enforces pair-uniqueness as a true composite key — MR-983 / engine v0.6.3+, intra-batch + at merge — though these edges don't declare it.)
 
 ## Layout
 

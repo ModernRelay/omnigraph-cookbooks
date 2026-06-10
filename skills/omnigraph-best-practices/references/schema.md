@@ -47,7 +47,7 @@ edge PartOfArtifact: Chunk -> InformationArtifact @card(1..1) {
 ### Lint after every edit
 
 ```bash
-omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
 ```
 
 This validates the schema **and** the queries against it. No running repo required. Wire it into a precommit hook.
@@ -62,7 +62,17 @@ omnigraph schema plan --schema ./next.pg s3://bucket/repo --json
 omnigraph schema apply --schema ./next.pg s3://bucket/repo
 ```
 
-If `supported: false`, fix the source before applying. Apply is destructive — there's no undo. Plan is free; run it as often as needed.
+If `supported: false`, fix the source before applying. Plan is free; run it as often as needed.
+
+Plan/apply diagnostics carry stable codes of the form **`OG-XXX-NNN`** (since v0.5.0) — match on the code, not the free-form message text.
+
+**Destructive drops are gated (since v0.5.0).** Dropping a property or type is a soft drop by default (or rejected); to actually lose data you must opt in:
+
+```bash
+omnigraph schema apply --schema ./next.pg s3://bucket/repo --allow-data-loss
+```
+
+Over HTTP the equivalent is `{"allow_data_loss": true}` in the schema-apply body. Without the flag, a destructive drop returns a structured diagnostic instead of silently deleting columns.
 
 ### Apply is main-only
 
@@ -110,7 +120,8 @@ No concurrent mutations during an apply. Plan for a short read-only window.
 - `@key` — primary key (implies index; usually one per node)
 - `@unique` — uniqueness constraint
 - `@index` — query optimization
-- `@range(min, max)` — numeric bounds
+- `@range(min, max)` — numeric bounds (open ranges allowed)
+- `@check(prop, "regex")` — regex pattern validation on a String property
 - `@embed("source_prop")` — embed from a String source into a Vector property
 - `@description("...")` — metadata (no migration impact)
 - `@instruction("...")` — semantic hint for LLMs/operators

@@ -6,7 +6,7 @@ How to modify data safely in Omnigraph.
 
 | Task | Command | Why |
 |------|---------|-----|
-| Add/update a single entity | `change` with a named mutation | typechecked, parameterized, auditable |
+| Add/update a single entity | `mutate` with a named mutation | typechecked, parameterized, auditable |
 | Bulk upsert by `@key` (local repo) | `load --mode merge` | preserves rows not in the file |
 | Bulk upsert (remote repo) | `ingest --mode merge` | server-orchestrated; `load` is rejected on remote URIs |
 | Additive-only bulk | `load` / `ingest --mode append` | fails on key collision |
@@ -14,12 +14,12 @@ How to modify data safely in Omnigraph.
 
 > **Local vs remote**: `load` only works against local repo URIs (`load is only supported against local repo URIs in this milestone`). For remote graphs (HTTP server endpoints, CloudFront-fronted production) use `ingest` — same JSONL format, but the server orchestrates the write and leaves a reviewable branch. See [`references/remote-ops.md`](remote-ops.md) for remote-specific operational concerns including 504 handling and write-verification ritual.
 
-## `change` — Single Edits
+## `mutate` — Single Edits
 
 Goes through the running server via `cli.graph` (or an alias):
 
 ```bash
-omnigraph change \
+omnigraph mutate \
   --query mutations.gq \
   --name add_signal \
   --params '{"slug":"sig-foo","name":"Foo","brief":"...","stagingTimestamp":"2026-04-14T00:00:00Z","createdAt":"2026-04-14T00:00:00Z","updatedAt":"2026-04-14T00:00:00Z"}'
@@ -28,10 +28,10 @@ omnigraph change \
 Or via an alias:
 
 ```bash
-omnigraph change --alias add-signal sig-foo "Foo" "..." 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z
+omnigraph mutate --alias add-signal sig-foo "Foo" "..." 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z
 ```
 
-Prefer `change` for interactive edits, mutations called from agents, and anything you want typechecked at call time.
+Prefer `mutate` for interactive edits, mutations called from agents, and anything you want typechecked at call time.
 
 ## `load` — Bulk JSONL
 
@@ -88,7 +88,7 @@ omnigraph branch create --uri $REPO --from main staging-2026-04-14
 omnigraph ingest --data ./delta.jsonl --branch staging-2026-04-14 --mode merge --uri $REPO
 
 # 3. Verify on the branch (reads can target --branch or --snapshot)
-omnigraph read --alias recent-signals --branch staging-2026-04-14
+omnigraph query --alias recent-signals --branch staging-2026-04-14
 
 # 4. Merge to main when happy
 omnigraph branch merge --uri $REPO staging-2026-04-14 --into main

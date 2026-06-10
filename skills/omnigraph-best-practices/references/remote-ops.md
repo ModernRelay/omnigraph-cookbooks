@@ -4,12 +4,13 @@ When the graph URI is a remote endpoint (`omnigraph-server` behind ALB / CloudFr
 
 ## What's different about remote
 
-A remote graph runs server-side. Every write goes through the server's transactional run engine and is gated by a connection-level idle timeout — CloudFront defaults to ~30s. The local CLI is a thin client; it never sees run state directly, only the HTTP response. That asymmetry is the root of every gotcha below.
+A remote graph runs server-side. Every write executes on the server — staged per touched table, then published atomically as a **single manifest commit** guarded by a compare-and-swap on expected table versions — and is gated by a connection-level idle timeout (CloudFront defaults to ~30s). There is no separate "run" object to poll; the transactional Run state machine was removed in v0.4.0, and write status is implied by the HTTP response (and verifiable via `commit list`). The local CLI is a thin client; it never sees the commit happen, only the HTTP response. That asymmetry is the root of every gotcha below.
 
 | Local repo | Remote repo |
 |---|---|
-| CLI writes S3 directly | Server orchestrates writes via runs |
+| CLI writes S3 directly | Server executes the write, publishes one atomic manifest commit |
 | No connection timeout | ~30s idle timeout (CloudFront) |
+| No admission control | Per-actor `429` + `Retry-After` on writes |
 | `load` works | `load` is rejected — use `ingest` |
 | CLI exit code is authoritative | CLI exit code can lie — verify via `commit list` |
 
@@ -61,7 +62,7 @@ Find them by comparing each branch's head against `main`'s in `omnigraph branch 
 error: load is only supported against local repo URIs in this milestone
 ```
 
-`load` writes S3-backed storage directly — that path doesn't go through the running server. For remote graphs use `ingest` instead. Same JSONL format; the server orchestrates the run, leaves a reviewable branch.
+`load` writes S3-backed storage directly — that path doesn't go through the running server. For remote graphs use `ingest` instead. Same JSONL format; the server executes the write and leaves a reviewable branch.
 
 ## Version drift / `sync_branch()`
 
@@ -74,6 +75,22 @@ version drift on node:<Type>: snapshot pinned vN but dataset is at vM — call s
 - Usually self-resolves on retry — the next call re-pins.
 - Calling `omnigraph snapshot` does **not** reliably re-pin for subsequent `change`s in the same session.
 - If persistent, fall back to `ingest` — feature branches don't suffer from concurrent-commit drift.
+- The cleaner, modern form of this conflict is a structured `manifest_conflict` **409** — see below.
+
+## `manifest_conflict` 409 — stale snapshot, retry
+
+When another actor commits to the same branch between your query's snapshot pin and your write, the server returns a structured **`manifest_conflict` 409** carrying `table_key` / `expected` / `actual`, rather than silently overwriting. Since v0.4.2 this is the form most concurrent update/delete/merge races take.
+
+- **Retry it.** A 409 means your write was computed against a stale view and was rejected *before* committing — there is no partial state and no duplicate risk. Re-issue the same call; it re-pins to the new head.
+- Concurrent `mutate` × branch-merge on the same target branch resolves to either success or a clean 409 depending on who wins the server's per-table queue — both outcomes are safe.
+
+## 429 Too Many Requests — back off, then retry
+
+The server applies **per-actor admission control** to every mutating endpoint (`mutate` / `ingest` / `schema apply` / branch create·delete·merge). An actor that exceeds its in-flight-request or estimated-byte budget gets a structured **HTTP 429** (`code: too_many_requests`) with a `Retry-After` header — instead of blocking unrelated actors behind a global lock.
+
+- This is **not** a failed write — the write never started. Honor `Retry-After` and retry; it is always safe (no partial write, no duplicate risk).
+- It's per-actor, so one noisy automation can't starve others. If you hit it constantly, batch less aggressively or space your calls out.
+- Read-only endpoints are not admission-gated.
 
 ## Duplicate risk on blind retry
 
@@ -105,3 +122,4 @@ Then read the file with offset/limit, not via piped stdout.
 - Always run `commit list` after a 504 before deciding to retry.
 - For destructive or large-batch work, use `ingest` onto a feature branch and verify the branch head before merging.
 - Read large schemas via file redirect, not piped stdout.
+- A `429` (throttle) or a `manifest_conflict` `409` (stale snapshot) is always safe to retry — the write never committed. Honor `Retry-After` on a 429.
