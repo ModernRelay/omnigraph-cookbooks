@@ -213,17 +213,17 @@ Rules:
 
 ```bash
 cd <slug>
-omnigraph lint --schema ./schema.pg --query ./queries/mutations.gq
+omnigraph lint --schema schema.pg --query queries/mutations.gq
 ```
 
 Lint doesn't validate the seed directly, but it confirms the schema accepts every field.
 
-Then load:
+Then converge and load:
 
 ```bash
-set -a && source ./.env.omni && set +a
-omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/<slug>
-omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/<slug>
+omnigraph cluster import --config .
+omnigraph cluster apply  --config . --as <you>     # creates graphs/<slug>.omni
+omnigraph load --data seed.jsonl --mode overwrite graphs/<slug>.omni
 ```
 
 If load fails (missing required field, invalid enum value, unknown type), fix seed.jsonl and retry.
@@ -231,8 +231,8 @@ If load fails (missing required field, invalid enum value, unknown type), fix se
 ### Step 11 — Smoke test
 
 ```bash
-omnigraph query --config ./omnigraph.yaml --alias patterns disruption
-omnigraph query --config ./omnigraph.yaml --alias signals
+omnigraph query --config omnigraph.yaml --alias patterns disruption
+omnigraph query --config omnigraph.yaml --alias signals
 ```
 
 Should return the patterns and signals you seeded.
@@ -240,7 +240,7 @@ Should return the patterns and signals you seeded.
 Try a traversal:
 
 ```bash
-omnigraph query --config ./omnigraph.yaml --alias pattern-signals pat-<your-pattern>
+omnigraph query --config omnigraph.yaml --alias pattern-signals pat-<your-pattern>
 ```
 
 ## Common Pitfalls

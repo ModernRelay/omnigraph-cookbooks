@@ -1,0 +1,10 @@
+version: 1
+metadata:
+  name: pharma-intel
+state:
+  backend: cluster
+  lock: true
+graphs:
+  pharma:
+    schema: schema.pg
+    queries: queries/

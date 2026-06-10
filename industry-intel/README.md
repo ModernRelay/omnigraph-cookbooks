@@ -93,26 +93,56 @@ Full property tables and constraints in `schema.pg`.
 
 All commands run from `industry-intel/`:
 
+The cookbook is a **cluster directory**: `cluster.yaml` declares the graph,
+its schema, and all 66 stored queries; `omnigraph cluster apply` converges it
+(creating the graph at `graphs/spike.omni`); the server serves the applied
+state. No object store or credentials needed to get started.
+
 ```bash
 cd industry-intel
 
-# Source RustFS credentials
-set -a && source ./.env.omni && set +a
+# One-time: record the ledger, preview, converge (creates graphs/spike.omni,
+# applies schema.pg, publishes all stored queries)
+omnigraph cluster import --config .
+omnigraph cluster plan   --config .
+omnigraph cluster apply  --config . --as <you>
 
-# Lint the schema and queries (pure file check)
-omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
+# Load the seed through the data plane (one-time)
+omnigraph load --data seed.jsonl --mode overwrite graphs/spike.omni
 
-# Init the repo (one-time — writes to storage)
-omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
+# Serve the applied state (keep running — separate terminal or background)
+omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated   # local dev
 
-# Load the seed (one-time)
-omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
-
-# Start the local HTTP server (keep it running — separate terminal or background)
-omnigraph-server --config ./omnigraph.yaml --unauthenticated   # local dev; v0.6.0+ refuses to start without auth/policy or this flag
-
-# All queries go through the server via aliases
+# Query via CLI aliases (per-operator omnigraph.yaml sugar) …
 omnigraph read --alias pattern-signals pat-sovereign-ai
+# … or straight HTTP — every declared query is a served endpoint:
+curl -s -X POST http://127.0.0.1:8080/graphs/spike/queries/recent_signals \
+  -H 'content-type: application/json' -d '{"params":{}}'
 ```
+
+Day-2 changes are declarative: edit `schema.pg` / a `.gq` file / `cluster.yaml`,
+then `cluster plan` (schema edits show real migration steps) → `cluster apply`
+→ restart the server. Deleting the graph requires an explicit
+`omnigraph cluster approve graph.spike --as <you>` first.
+
+<details>
+<summary><strong>RustFS / S3 alternative (classic single-graph mode)</strong></summary>
+
+To demo S3-compatible storage instead, skip the cluster flow and run the
+classic path against RustFS (start it via the omnigraph repo's
+`scripts/local-rustfs-bootstrap.sh`):
+
+```bash
+set -a && source .env.omni && set +a
+omnigraph init --schema schema.pg s3://omnigraph-local/repos/spike-intel
+omnigraph load --data seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
+omnigraph-server --config omnigraph.yaml --unauthenticated
+```
+
+Re-point `graphs.local_s3` in `omnigraph.yaml` (commented out by default) and
+set `server.graph: local_s3`. The two boot sources are exclusive — a server
+reads cluster state XOR omnigraph.yaml, never both.
+
+</details>
 
 See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.

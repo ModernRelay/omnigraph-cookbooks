@@ -74,3 +74,22 @@ omnigraph queries list         # print the selected registry: query names, MCP e
 ## Note on per-query authorization
 
 The catalog is **not** Cedar-filtered per query yet: a caller with `read` but not `invoke_query` can *list* a query it cannot *invoke* (invocation would 404). Per-query authorization is future work; for now the catalog is a discovery surface and `invoke_query` is the invocation gate.
+
+## Stored Queries in Cluster Mode
+
+In a cluster deployment, queries are declared in `cluster.yaml` instead:
+
+```yaml
+graphs:
+  knowledge:
+    queries: queries/    # discover every `query <name>` in queries/*.gq
+```
+
+A file list (`[a.gq, b.gq]`) and a fine-grained `name: { file: ... }` map are
+also accepted; with discovery the `.gq` files are the declaration and
+duplicate names across files fail validation. `cluster apply`
+publishes them to a content-addressed catalog; the `--cluster` server
+type-checks and serves every applied query (`GET /graphs/<id>/queries`,
+`POST /graphs/<id>/queries/<name>`). There is no `mcp:`/expose flag in
+cluster mode yet — every applied query is listed (per-query exposure policy
+is a planned phase). Cedar's `invoke_query` gating works identically.

@@ -11,13 +11,13 @@ Writing `.gq` query files in Omnigraph.
 ## Linting
 
 ```bash
-omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema schema.pg --query queries/signals.gq
 ```
 
 Or (lint against a live repo):
 
 ```bash
-omnigraph lint --query ./queries/signals.gq s3://bucket/repo
+omnigraph lint --query queries/signals.gq s3://bucket/repo
 ```
 
 Lint returns:

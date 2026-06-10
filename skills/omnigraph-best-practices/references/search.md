@@ -24,7 +24,7 @@ The schema says **where** embeddings live and **what** they come from. Queries d
 ### First time / refresh missing
 
 ```bash
-omnigraph embed --seed ./embed-config.yaml
+omnigraph embed --seed embed-config.yaml
 ```
 
 Default mode is `fill_missing` — only generates embeddings for rows without one.
@@ -32,7 +32,7 @@ Default mode is `fill_missing` — only generates embeddings for rows without on
 ### Re-embed everything
 
 ```bash
-omnigraph embed --seed ./embed-config.yaml --reembed_all
+omnigraph embed --seed embed-config.yaml --reembed_all
 ```
 
 Use when:
@@ -43,7 +43,7 @@ Use when:
 ### Selective refresh
 
 ```bash
-omnigraph embed --seed ./embed-config.yaml --select "Chunk:chunk_index=42"
+omnigraph embed --seed embed-config.yaml --select "Chunk:chunk_index=42"
 ```
 
 Regenerate only rows matching the selector.
@@ -51,7 +51,7 @@ Regenerate only rows matching the selector.
 ### Clean (delete) embeddings
 
 ```bash
-omnigraph embed --seed ./embed-config.yaml --clean
+omnigraph embed --seed embed-config.yaml --clean
 ```
 
 ## Embeddings + `load --mode merge` Interaction

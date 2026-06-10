@@ -1,0 +1,10 @@
+version: 1
+metadata:
+  name: spike-intel
+state:
+  backend: cluster
+  lock: true
+graphs:
+  spike:
+    schema: schema.pg
+    queries: queries/

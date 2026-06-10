@@ -43,7 +43,7 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 ## Validation
 
 ```bash
-omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema schema.pg --query queries/signals.gq
 ```
 
 The `lint` command validates both queries and schema against each other — use it after any schema or query edit. (`query lint` still works as a deprecated alias.)
@@ -56,3 +56,14 @@ The `lint` command validates both queries and schema against each other — use 
 - Prefer semantic edge names over generic ones (`Enables` not `RelatedTo`)
 - Use the narrowest type that fits (enums over strings, Date over String)
 - Required vs optional is deliberate — don't add `?` without reason
+
+## Cluster control plane (two-file model)
+
+`cluster.yaml` is the deployment: graph `spike`, `schema.pg`, and every
+stored query, converged with `omnigraph cluster import|plan|apply --config .`
+(apply creates `graphs/spike.omni`; schema edits show migration previews in
+plan; graph deletion is approval-gated). `omnigraph.yaml` is per-operator
+only — aliases, CLI defaults, `cli.actor` for `--as` attribution. Serve with
+`omnigraph-server --cluster .` (never reads omnigraph.yaml). Data still flows
+through `omnigraph load/mutate` against `graphs/spike.omni`. Never commit
+`__cluster/` or `graphs/` (gitignored — local state).

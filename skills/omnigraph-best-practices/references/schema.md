@@ -47,7 +47,7 @@ edge PartOfArtifact: Chunk -> InformationArtifact @card(1..1) {
 ### Lint after every edit
 
 ```bash
-omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema schema.pg --query queries/signals.gq
 ```
 
 This validates the schema **and** the queries against it. No running repo required. Wire it into a precommit hook.
@@ -57,9 +57,9 @@ This validates the schema **and** the queries against it. No running repo requir
 ### Plan before apply — always
 
 ```bash
-omnigraph schema plan --schema ./next.pg s3://bucket/repo --json
+omnigraph schema plan --schema next.pg s3://bucket/repo --json
 # inspect "supported": true|false and the step list
-omnigraph schema apply --schema ./next.pg s3://bucket/repo
+omnigraph schema apply --schema next.pg s3://bucket/repo
 ```
 
 If `supported: false`, fix the source before applying. Plan is free; run it as often as needed.
@@ -69,7 +69,7 @@ Plan/apply diagnostics carry stable codes of the form **`OG-XXX-NNN`** (since v0
 **Destructive drops are gated (since v0.5.0).** Dropping a property or type is a soft drop by default (or rejected); to actually lose data you must opt in:
 
 ```bash
-omnigraph schema apply --schema ./next.pg s3://bucket/repo --allow-data-loss
+omnigraph schema apply --schema next.pg s3://bucket/repo --allow-data-loss
 ```
 
 Over HTTP the equivalent is `{"allow_data_loss": true}` in the schema-apply body. Without the flag, a destructive drop returns a structured diagnostic instead of silently deleting columns.
@@ -161,3 +161,22 @@ Most schemas are fine without interfaces. Reach for them only when 3+ node types
 - **Edge semantics matter** — prefer `AuthoredBy` over `RelatedTo`
 - **Constraints live in the schema** — `@unique`, `@range`, `@card` keep invariants out of application code
 - **Schemas are reviewable** — clear names, explicit enums, obvious keys
+
+## Schema Evolution in Cluster Mode
+
+In a cluster deployment there is **no direct `omnigraph schema apply`** — the
+schema is declared (`graphs.<id>.schema:` in `cluster.yaml`) and converged:
+
+```bash
+$EDITOR schema.pg
+omnigraph cluster plan  --config .   # shows the engine's migration steps
+omnigraph cluster apply --config . --as <you>
+# restart the --cluster server to serve the new shape
+```
+
+Differences from the single-graph path: **soft drops only** (`--allow-data-loss`
+is not reachable from cluster apply — prior versions retain dropped columns),
+and out-of-band schema changes on the live graph are *drift* — `cluster
+refresh` flags them and the next `apply` converges the graph back to the
+declared schema. Everything else in this file (`@rename_from`, backfills,
+linting, enum discipline) applies unchanged to the `.pg` you edit.

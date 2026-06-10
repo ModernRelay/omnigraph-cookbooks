@@ -57,8 +57,8 @@ Lists the graphs a multi-graph server serves. Remote servers only (rejects local
 ## Schema
 
 ```bash
-omnigraph schema plan --schema ./next.pg $REPO --json
-omnigraph schema apply --schema ./next.pg $REPO
+omnigraph schema plan --schema next.pg $REPO --json
+omnigraph schema apply --schema next.pg $REPO
 ```
 
 See `references/schema.md` for the full workflow.
@@ -66,9 +66,9 @@ See `references/schema.md` for the full workflow.
 ## Lint
 
 ```bash
-omnigraph lint --schema ./schema.pg --query ./queries/foo.gq --json
+omnigraph lint --schema schema.pg --query queries/foo.gq --json
 # or against a live repo:
-omnigraph lint --query ./queries/foo.gq $REPO --json
+omnigraph lint --query queries/foo.gq $REPO --json
 ```
 
 `omnigraph query lint` / `omnigraph query check` still work as deprecated aliases (they rewrite to `omnigraph lint` and warn). See `references/queries.md`.
@@ -76,10 +76,10 @@ omnigraph lint --query ./queries/foo.gq $REPO --json
 ## Embed
 
 ```bash
-omnigraph embed --seed ./embed-config.yaml                  # fill missing
-omnigraph embed --seed ./embed-config.yaml --reembed_all    # regenerate all
-omnigraph embed --seed ./embed-config.yaml --clean          # delete
-omnigraph embed --seed ./embed-config.yaml --select "Type:field=value"
+omnigraph embed --seed embed-config.yaml                  # fill missing
+omnigraph embed --seed embed-config.yaml --reembed_all    # regenerate all
+omnigraph embed --seed embed-config.yaml --clean          # delete
+omnigraph embed --seed embed-config.yaml --select "Type:field=value"
 ```
 
 See `references/search.md`.
@@ -87,7 +87,7 @@ See `references/search.md`.
 ## Init
 
 ```bash
-omnigraph init --schema ./schema.pg $REPO
+omnigraph init --schema schema.pg $REPO
 ```
 
 Creates a new repo at `$REPO` with the given schema. Also scaffolds `omnigraph.yaml` in the current directory if one doesn't exist — review and edit the template before committing (default graph names are placeholders).
@@ -100,10 +100,10 @@ Creates a new repo at `$REPO` with the given schema. Also scaffolds `omnigraph.y
 
 ```bash
 # load: operates on an existing branch (default main)
-omnigraph load --data ./seed.jsonl --mode merge $REPO
+omnigraph load --data seed.jsonl --mode merge $REPO
 
 # ingest: creates a branch from --from and loads onto it
-omnigraph ingest --data ./delta.jsonl --branch feature-x --from main --mode merge $REPO
+omnigraph ingest --data delta.jsonl --branch feature-x --from main --mode merge $REPO
 ```
 
 `--mode` values for both: `overwrite`, `merge`, `append`. See `references/data.md`.
@@ -189,3 +189,21 @@ curl http://127.0.0.1:8080/healthz
 ```
 
 Returns `200 OK` if the server is up.
+
+## Cluster Control Plane (omnigraph >= 0.7.0)
+
+```bash
+omnigraph cluster validate     --config <dir>          # parse + typecheck the declaration
+omnigraph cluster import       --config <dir>          # one-time: create the state ledger
+omnigraph cluster plan         --config <dir> [--json] # preview (schema changes show migration steps)
+omnigraph cluster apply        --config <dir> --as <actor>   # converge; idempotent
+omnigraph cluster approve <resource> --config <dir> --as <actor>  # gate destructive changes (graph deletes)
+omnigraph cluster status       --config <dir> [--json] # read the ledger (read-only)
+omnigraph cluster refresh      --config <dir>          # re-observe live graphs; flags drift
+omnigraph cluster force-unlock <LOCK_ID> --config <dir>  # clear a crashed run's lock (exact id from status)
+```
+
+Topology rule: `omnigraph schema apply` and `omnigraph init` are single-graph
+commands; in cluster mode their jobs belong to `cluster apply`. Data commands
+(`load`, `ingest`, `mutate`, `read`, branches) are identical in both — point
+them at the derived root (`<dir>/graphs/<id>.omni`). See `references/cluster.md`.
