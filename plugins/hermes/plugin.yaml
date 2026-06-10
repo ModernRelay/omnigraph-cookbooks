@@ -1,0 +1,31 @@
+name: omnigraph
+version: 0.1.0
+description: >-
+  First-class, guardrailed Omnigraph CLI access for Hermes — config discovery,
+  the omnigraph best-practices skill, safe query/schema/mutate/capture tools, a
+  pre_tool_call guard that blocks dangerous raw `omnigraph` calls, and
+  capture-by-default (suggest importing durable info into the graph).
+author: ModernRelay
+
+provides_tools:
+  - omnigraph_doctor
+  - omnigraph_targets
+  - omnigraph_schema
+  - omnigraph_query
+  - omnigraph_search
+  - omnigraph_mutate
+  - omnigraph_capture
+  - omnigraph_lint
+  - omnigraph_schema_plan
+
+provides_hooks:
+  - on_session_start
+  - pre_llm_call
+  - pre_tool_call
+  - transform_tool_result
+
+# NOTE: tokens are intentionally NOT listed under a manifest-level `requires_env:`.
+# Manifest requires_env HARD-DISABLES the whole plugin when a var is missing — but
+# discovery/doctor/read tools must work even without a write token. Token gating is
+# therefore per-tool (register_tool(..., requires_env=[...]) on the write tools), and
+# `omnigraph_doctor` reports any missing tokens. See __init__.py.

@@ -1,0 +1,191 @@
+# Reference Commands
+
+Commands you'll reach for but don't need best-practice rules around. Quick syntax reference.
+
+## Inspect State
+
+### `snapshot` — tables + row counts
+
+```bash
+omnigraph snapshot $REPO --branch main --json
+```
+
+Returns the manifest: all node/edge tables with row counts and versions. Use this to verify a load succeeded or to see what types exist.
+
+### `export` — full JSONL dump
+
+```bash
+omnigraph export $REPO --branch main > graph.jsonl
+```
+
+Streams all nodes and edges as JSONL. The right tool for large-snapshot inspection. Don't try to page through the whole graph with read queries.
+
+Filter by type:
+
+```bash
+omnigraph export $REPO --branch main --type Signal > signals.jsonl
+```
+
+## Branches
+
+```bash
+omnigraph branch create --uri $REPO --from main <branch-name>
+omnigraph branch list --uri $REPO
+omnigraph branch merge --uri $REPO <branch-name> --into main
+omnigraph branch delete --uri $REPO <branch-name>
+```
+
+All support `--json`.
+
+## Commits (History)
+
+```bash
+omnigraph commit list $REPO --branch main
+omnigraph commit show $REPO <commit-id>
+```
+
+Inspect graph history. Useful for "what changed between these two points" investigation.
+
+## Graphs (multi-graph servers)
+
+```bash
+omnigraph graphs list --config X --json
+```
+
+Lists the graphs a multi-graph server serves. Remote servers only (rejects local URIs); the server must expose `GET /graphs` via `server.policy.file`. See `references/server-policy.md`.
+
+## Schema
+
+```bash
+omnigraph schema plan --schema ./next.pg $REPO --json
+omnigraph schema apply --schema ./next.pg $REPO
+```
+
+See `references/schema.md` for the full workflow.
+
+## Lint
+
+```bash
+omnigraph lint --schema ./schema.pg --query ./queries/foo.gq --json
+# or against a live repo:
+omnigraph lint --query ./queries/foo.gq $REPO --json
+```
+
+`omnigraph query lint` / `omnigraph query check` still work as deprecated aliases (they rewrite to `omnigraph lint` and warn). See `references/queries.md`.
+
+## Embed
+
+```bash
+omnigraph embed --seed ./embed-config.yaml                  # fill missing
+omnigraph embed --seed ./embed-config.yaml --reembed_all    # regenerate all
+omnigraph embed --seed ./embed-config.yaml --clean          # delete
+omnigraph embed --seed ./embed-config.yaml --select "Type:field=value"
+```
+
+See `references/search.md`.
+
+## Init
+
+```bash
+omnigraph init --schema ./schema.pg $REPO
+```
+
+Creates a new repo at `$REPO` with the given schema. Also scaffolds `omnigraph.yaml` in the current directory if one doesn't exist — review and edit the template before committing (default graph names are placeholders).
+
+**Strict by default (v0.6.0+):** `init` against a URI that already holds schema files errors with `AlreadyInitialized` instead of silently overwriting. Use `omnigraph init --force` to re-init deliberately. `--force` only skips the schema-file preflight — it does **not** purge existing Lance datasets.
+
+**Note:** `init` does not accept `--json`. Drop the flag if you see `unexpected argument --json`.
+
+## Load vs Ingest
+
+```bash
+# load: operates on an existing branch (default main)
+omnigraph load --data ./seed.jsonl --mode merge $REPO
+
+# ingest: creates a branch from --from and loads onto it
+omnigraph ingest --data ./delta.jsonl --branch feature-x --from main --mode merge $REPO
+```
+
+`--mode` values for both: `overwrite`, `merge`, `append`. See `references/data.md`.
+
+## Query / Mutate
+
+```bash
+omnigraph query  --query queries/signals.gq --name get_signal --params '{"slug":"sig-foo"}'
+omnigraph mutate --query queries/mutations.gq --name add_signal --params '{"slug":"sig-foo",...}'
+```
+
+With aliases:
+
+```bash
+omnigraph query  --alias signal sig-foo
+omnigraph mutate --alias add-signal sig-foo "Name" "Brief" 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z
+```
+
+> `omnigraph read` / `omnigraph change` still work as **deprecated** aliases (they warn to stderr); prefer `query` / `mutate`. Both also accept inline source via `-e/--query-string '<gq>'` instead of `--query <file>`.
+
+## Maintenance: Optimize & Cleanup (v0.6.1)
+
+### `optimize` — non-destructive Lance compaction
+
+```bash
+omnigraph optimize $REPO --json
+```
+
+Compacts fragments and reclaims deleted-row space. Non-destructive — safe to run any time. **Skips tables with a `Blob` property** (Lance blob-v2 compaction decode bug); skipped tables are reported in the `skipped` field of `--json` output and in logs. Non-blob tables compact normally. Blob-table fragment count won't shrink until the upstream Lance fix lands — reads/writes are unaffected.
+
+### `cleanup` — destructive version GC
+
+```bash
+omnigraph cleanup $REPO --keep 5 --older-than 7d --confirm
+```
+
+Garbage-collects old table versions, dropping time-travel reachability for anything pruned. **Destructive** — requires `--confirm`. Duration units for `--older-than`: `s`, `m`, `h`, `d`, `w`. Also reconciles orphaned per-table forks left by an interrupted `branch delete`.
+
+## Stored Queries (v0.6.1)
+
+```bash
+omnigraph queries validate              # type-check the stored-query registry vs the live schema (offline; exits non-zero on drift)
+omnigraph queries list                  # list registry query names, MCP exposure, and typed params
+```
+
+`validate` opens the selected graph and type-checks every query in the `queries:` block — catches schema drift without restarting the server. `list` prints the selected registry. Select the registry with `--target <graph>` or `cli.graph`; with no graph selected, `list` shows only the top-level `queries:` block. Distinct from `lint` (which validates a single `.gq` file). See `references/stored-queries.md`.
+
+## Config Resolution Order
+
+When the CLI decides which graph to target:
+
+1. **Explicit `--uri` or positional URI** wins
+2. **`--target <name>`** selects a named graph from `omnigraph.yaml`
+3. **Config default (`cli.graph`)** wins last
+
+For queries:
+
+1. **Explicit `--query <file>`** wins
+2. Otherwise the **alias's `query`** is used (if `--alias` set)
+3. Relative query paths resolve through **`query.roots`** in config
+
+For params:
+
+1. **Explicit `--params '{...}'`** wins on key conflict
+2. **Positional alias args** map to alias `args` list
+
+## Output Formats
+
+`--format <fmt>` on query/mutate:
+
+- `table` (default) — human-readable
+- `kv` — `key: value` per line; good for single rows
+- `csv` — comma-separated
+- `jsonl` — NDJSON, one per line, with metadata line first
+- `json` — pretty JSON array
+
+For admin commands (branch, commit, schema, policy): use `--json` for structured output, otherwise human text.
+
+## Health Check
+
+```bash
+curl http://127.0.0.1:8080/healthz
+```
+
+Returns `200 OK` if the server is up.
