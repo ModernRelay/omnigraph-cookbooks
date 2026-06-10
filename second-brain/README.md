@@ -173,7 +173,7 @@ cp .env.omni.example .env.omni
 set -a && source ./.env.omni && set +a
 
 # Lint the schema and queries (pure file check)
-omnigraph query lint --schema ./schema.pg --query ./queries/people.gq
+omnigraph lint --schema ./schema.pg --query ./queries/people.gq
 
 # Init the repo (one-time — writes to storage)
 omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/second-brain
@@ -182,7 +182,7 @@ omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/second-brain
 omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/second-brain
 
 # Start the local HTTP server (keep running)
-omnigraph-server --config ./omnigraph.yaml
+omnigraph-server --config ./omnigraph.yaml --unauthenticated   # local dev; v0.6.0+ refuses to start without auth/policy or this flag
 
 # Query through the server via aliases
 omnigraph read --alias close-friends

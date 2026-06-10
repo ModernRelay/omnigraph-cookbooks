@@ -34,6 +34,8 @@ server:
 | `POST /query` | read query execution |
 | `POST /mutate` | mutation execution |
 | `POST /read` / `POST /change` | **deprecated** aliases for `/query` / `/mutate` — still served, but carry `Deprecation: true` and `Link: </query>; rel="successor-version"` response headers. Prefer the canonical names. |
+| `GET /queries` | stored-query catalog (v0.6.1) — lists `mcp.expose` queries as a typed tool catalog; **read**-gated |
+| `POST /queries/{name}` | invoke a named stored query (v0.6.1); **`invoke_query`**-gated (+ `change` for a stored mutation); never accepts ad-hoc `.gq` from the client; deny == 404 |
 | `POST /schema/apply` | schema migration |
 | `GET /branches` | branch list |
 | `GET /commits` | commit history |
@@ -114,6 +116,7 @@ Per-graph actions (evaluated against the graph being addressed):
 | `read` | query execution |
 | `export` | data export |
 | `change` | mutations |
+| `invoke_query` | stored-query invocation via `POST /queries/{name}` (v0.6.1; graph-scoped, not branch-scoped). A stored **mutation** is double-gated — it also passes `change`. For a caller without the grant, a denial and an unknown query name both return the same **404** so the catalog can't be probed. |
 | `schema_apply` | schema migrations |
 | `branch_create` | branch creation |
 | `branch_delete` | branch deletion |
@@ -132,6 +135,20 @@ For any shared repo, gate at least `schema_apply` and `branch_merge`.
 policy:
   file: ./policy.yaml
 ```
+
+> **Config-follows-identity (v0.6.1, breaking).** A top-level `policy:` (and `queries:`) block applies **only** to an anonymous bare-URI single-graph server. A graph served **by name** — `server.graph: <name>` or `--target <name>` — must nest its policy under that graph:
+>
+> ```yaml
+> graphs:
+>   local_s3:
+>     uri: s3://omnigraph-local/repos/spike-intel
+>     policy:
+>       file: ./policy.yaml          # per-graph; required when the graph is named
+> server:
+>   graph: local_s3
+> ```
+>
+> Leaving `policy:` (or `queries:`) at the top level while selecting a named graph now makes the server **refuse to boot** with migration guidance (it used to be silently accepted in v0.6.0). The multi-graph layout below already nests correctly.
 
 ### `policy.yaml` shape
 

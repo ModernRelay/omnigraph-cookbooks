@@ -37,16 +37,16 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 - PatternKind: `challenge, disruption, dynamic`
 - Domain is an enum property on Signal/Element, not a node
 - Edges follow `VerbTargetType` naming (e.g. `FormsPattern`, `DevelopedByCompany`)
-- Embeddings only on Chunk: `Vector(3072) @embed("text")`
+- Embeddings only on Chunk: `Vector(3072) @embed("text")` — produced at ingest by the engine's configured embedding model (default `gemini-embedding-2-preview`, 3072-dim)
 - Chunk is immutable (no `updatedAt`)
 
 ## Validation
 
 ```bash
-omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
 ```
 
-The `query lint` command validates both queries and schema against each other — use it after any schema or query edit.
+The `lint` command validates both queries and schema against each other — use it after any schema or query edit. (`query lint` still works as a deprecated alias.)
 
 ## When Editing
 

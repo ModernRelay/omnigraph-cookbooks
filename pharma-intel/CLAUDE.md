@@ -73,10 +73,10 @@ Use this starter as a decision-intelligence loop, not just a lookup table:
 ## Validation
 
 ```bash
-omnigraph query lint --schema ./schema.pg --query ./queries/signals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
 ```
 
-The `query lint` command validates both queries and schema against each other — use it after any schema or query edit.
+The `lint` command validates both queries and schema against each other — use it after any schema or query edit. (`query lint` still works as a deprecated alias.)
 
 ## When Editing
 

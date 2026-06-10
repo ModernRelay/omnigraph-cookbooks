@@ -83,10 +83,10 @@ v1 seed ships `Chunk` zero (populate via `omnigraph embed --reembed_all`). All o
 
 ## Conventions enforced by load discipline (not the schema)
 
-Omnigraph 0.4.x's `@unique(src, dst)` is two separate per-column constraints, not pair-uniqueness. These conventions therefore live in the loader/reviewer:
+As of MR-983 (PR #133, engine v0.6.3+), `@unique(src, dst)` enforces pair-uniqueness as a true composite key (previously it degraded into two per-column checks) — covering single-batch load/insert/update and branch-merge, but not cross-operation duplicates against already-committed rows. These edges don't declare it yet, so the conventions below still live in the loader/reviewer:
 
-- **`Knows` is stored bidirectionally.** If A knows B, also load B knows A. Symmetric context, since, and strength on both sides. Single-direction storage made network queries quietly wrong.
-- **No duplicate `(src, dst)` pairs per edge type.** Dedupe before insert.
+- **`Knows` is stored bidirectionally.** If A knows B, also load B knows A. Symmetric context, since, and strength on both sides. Single-direction storage made network queries quietly wrong. (Unaffected by the `@unique` fix — it's about storing the inverse edge, not deduping pairs.)
+- **No duplicate `(src, dst)` pairs per edge type.** Now schema-enforceable via `@unique(src, dst)` (within a load/merge); still dedupe across separate write operations.
 - **`Decision` provenance chain.** Every Decision should link to: (1) the Deal it regards, (2) the Assumptions it's based on, (3) the open Questions it still depends on, (4) the Person who decided. The graph snapshot at commit-time is the audit trail.
 
 ## Known gaps
@@ -94,8 +94,8 @@ Omnigraph 0.4.x's `@unique(src, dst)` is two separate per-column constraints, no
 - **Edge-property projections aren't supported in queries** — `Knows.strength`, `WorksAt.role`, `RoleInDeal.role`, `BoardMemberAt.role`, etc. are stored but cannot be returned in `read` results. Filter in the writer; surface via dedicated read-side helpers if needed.
 - **`Chunk` is declared but the seed has zero.** Embeddings come from a separate ingest pipeline (`omnigraph embed --reembed_all`); the static seed can't generate them. Hybrid search is a v1-deferred capability.
 - **Alias args bind to query parameters by *name*, not position.** An alias `args: [slug]` only binds to a query that declares `$slug`. Renaming the alias arg to `[deal_slug]` without also renaming `$slug → $deal_slug` in the query silently drops the filter — the query then matches every row instead of one. If you want clearer arg names, rename in *both* places; otherwise add a comment block above the alias group explaining the input semantics.
-- **Adding values to an existing enum requires a wipe + re-init + reload (as of Omnigraph 0.5.0).** `schema apply` (even with `--allow-data-loss`) rejects enum extensions as destructive type changes (`OG-MF-106` — "changing property type ... not supported in schema migration v1"). The migration path is: kill the server, `aws s3 rm s3://<bucket>/repos/<name>/ --recursive` (run twice — first pass leaves a handful of files), `omnigraph init --schema schema.pg`, `omnigraph load --data <stripped-seed>.jsonl --mode overwrite`. Reload takes ~10–15 min for a 200-node / 400-edge seed. Batch multiple enum or property-type changes into one wipe-reload cycle — single-change wipes aren't worth the cost.
-- **`omnigraph-server` on 0.5.0 requires auth or explicit `--unauthenticated`.** Cedar policy enforcement is now engine-wide and the server refuses to start without bearer tokens, a policy file, or `--unauthenticated` (env: `OMNIGRAPH_UNAUTHENTICATED=1`). For local dev, set the env var. For Railway/production, configure a Cedar policy YAML.
+- **Adding values to an existing enum requires a wipe + re-init + reload (still true as of Omnigraph 0.6.1).** `schema apply` (even with `--allow-data-loss`) rejects enum extensions as destructive type changes (`OG-MF-106` — "changing property type ... not supported in schema migration v1"; `SCHEMA_IR_VERSION` is still 1 in 0.6.1). The migration path is: kill the server, `aws s3 rm s3://<bucket>/repos/<name>/ --recursive` (run twice — first pass leaves a handful of files), `omnigraph init --schema schema.pg`, `omnigraph load --data <stripped-seed>.jsonl --mode overwrite`. Reload takes ~10–15 min for a 200-node / 400-edge seed. Batch multiple enum or property-type changes into one wipe-reload cycle — single-change wipes aren't worth the cost.
+- **`omnigraph-server` (v0.6.0+) requires auth or explicit `--unauthenticated`.** Cedar policy enforcement is now engine-wide and the server refuses to start without bearer tokens, a policy file, or `--unauthenticated` (env: `OMNIGRAPH_UNAUTHENTICATED=1`). For local dev, set the env var. For Railway/production, configure a Cedar policy YAML. Note (v0.6.1): with a **named** graph, the policy file must be nested under `graphs.<name>.policy`, not top-level, or the server refuses to boot.
 - **`Artifact.blob` is declared but the seed uses none.** Same status as Chunks — populate via separate ingest.
 
 ## The Demo "Wow" Queries
@@ -179,10 +179,10 @@ For longer-form captures (transcripts, decks), chunk into `Chunk` records linked
 ## Validation
 
 ```bash
-omnigraph query lint --schema ./schema.pg --query ./queries/deals.gq
+omnigraph lint --schema ./schema.pg --query ./queries/deals.gq
 ```
 
-The `query lint` command validates both queries and schema against each other — use after any schema or query edit. Pure file check; no server needed.
+The `lint` command validates both queries and schema against each other — use after any schema or query edit. Pure file check; no server needed. (`query lint` still works as a deprecated alias.)
 
 ## When Editing
 
