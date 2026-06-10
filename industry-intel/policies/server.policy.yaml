@@ -1,0 +1,11 @@
+# Cluster-bound policy (applies_to: [cluster]) — the server-level gate.
+# Only admins may enumerate the deployment's graphs (GET /graphs).
+version: 1
+kind: server
+groups:
+  admins: ["act-admin"]
+rules:
+  - id: admin-graph-list
+    allow:
+      actors: { group: admins }
+      actions: [graph_list]

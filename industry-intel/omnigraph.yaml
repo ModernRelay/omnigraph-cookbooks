@@ -325,3 +325,39 @@ aliases:
     query: mutations.gq
     name: link_knowhow_references
     args: [knowhow, element]
+
+  # ── Weekly review (operating loop — see README) ──
+  triage:
+    command: read
+    query: workflow.gq
+    name: orphan_signals
+  momentum:
+    command: read
+    query: workflow.gq
+    name: pattern_momentum
+    args: [since]
+  stale:
+    command: read
+    query: workflow.gq
+    name: stale_patterns
+    args: [since]
+  contested:
+    command: read
+    query: workflow.gq
+    name: contested_patterns
+  unsourced:
+    command: read
+    query: workflow.gq
+    name: unsourced_signals
+
+  # ── Hybrid retrieval (requires embeddings — see README) ──
+  related:
+    command: read
+    query: hybrid.gq
+    name: related_chunks
+    args: [q]
+  hybrid-search:
+    command: read
+    query: hybrid.gq
+    name: hybrid_chunks
+    args: [q]
