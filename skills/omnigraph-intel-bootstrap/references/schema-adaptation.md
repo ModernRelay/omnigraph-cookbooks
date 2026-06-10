@@ -180,15 +180,21 @@ This is intentionally abstract and works across domains. **Only change if the us
 
 ## Update omnigraph.yaml
 
-After schema changes, update `<slug>/omnigraph.yaml`:
+After schema changes, update both config files for the new slug:
 
 ```yaml
-project:
-  name: <domain> Intel — SPIKE Framework
-
+# cluster.yaml — the deployment (graph id, schema, queries)
 graphs:
-  local_s3:
-    uri: s3://omnigraph-local/repos/<slug>    # was: repos/spike-intel
+  <slug>:
+    schema: ./schema.pg
+    queries:
+      # one entry per `query <name>` in your .gq files
+      patterns: { file: ./queries/patterns.gq }
+
+# omnigraph.yaml — per-operator CLI sugar only
+graphs:
+  local:
+    uri: ./graphs/<slug>.omni    # the derived root cluster apply creates
   local_server:
     uri: http://127.0.0.1:8080
 ```

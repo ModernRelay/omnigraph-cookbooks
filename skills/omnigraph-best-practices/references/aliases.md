@@ -171,3 +171,9 @@ omnigraph query --alias signals --branch staging-2026-04-14
 # With explicit --params (wins over positional args on key conflict)
 omnigraph query --alias signal --params '{"slug":"sig-override"}'
 ```
+
+> **Cluster note:** aliases are an `omnigraph.yaml` (per-operator) feature
+> and keep working in cluster deployments — point `graphs.<name>.uri` at the
+> derived root (`<dir>/graphs/<id>.omni`). The deployment's stored queries
+> are declared in `cluster.yaml`; aliases remain your CLI sugar over the same
+> `.gq` files.

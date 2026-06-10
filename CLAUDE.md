@@ -21,9 +21,17 @@ A collection of Omnigraph graph cookbooks plus packaged agent skills. Each cookb
 
 1. **Edit** `schema.pg` or `queries/*.gq`. Comments in both use `//` not `#`.
 2. **Lint** — `omnigraph lint --schema ./schema.pg --query ./queries/<file>.gq` validates queries against the schema. Run after any edit. This is a pure file check: no server, no RustFS, no `.env.omni` needed — use it as the tight inner loop while editing. (`omnigraph query lint` still works as a deprecated alias.) Everything below requires the server running and env vars sourced.
-3. **Schema changes** — `omnigraph schema plan` before `schema apply`. Never apply without a successful plan. Use `@rename_from(...)` for property/type renames.
+3. **Schema changes** — plan before apply, always. Cluster-mode cookbooks (industry-intel, pharma-intel — they ship a `cluster.yaml`): edit the `.pg`, then `omnigraph cluster plan --config .` (shows real migration steps) and `omnigraph cluster apply --config . --as <you>`, then restart the `--cluster` server. Classic single-graph: `omnigraph schema plan` before `schema apply`. Use `@rename_from(...)` for property/type renames in both.
 4. **Data changes** — pick the right write command: `mutate` for edits, `load --mode merge` for bulk, `load --mode overwrite` only for clean slates. Review bulk ingests on a branch, then merge.
 5. **Never string-interpolate** into `.gq` bodies or `--params` — parameterize everything.
+
+**Two deployment models.** Cookbooks with a `cluster.yaml` are cluster
+directories: that file declares the deployment (graph, schema, stored
+queries); `omnigraph cluster apply` converges it (creating the graph at
+`./graphs/<id>.omni`) and `omnigraph-server --cluster .` serves it.
+`omnigraph.yaml` is per-operator only (aliases, CLI defaults, `cli.actor`).
+Never commit `graphs/` or `__cluster/` (gitignored). The classic
+single-graph RustFS/S3 path remains in each README as an alternative.
 
 There are no repo-level build, test, or lint commands. Validation happens per-cookbook via `omnigraph lint`. CI is not configured in this repo.
 

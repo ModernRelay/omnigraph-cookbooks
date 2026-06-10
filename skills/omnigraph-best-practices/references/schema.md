@@ -161,3 +161,22 @@ Most schemas are fine without interfaces. Reach for them only when 3+ node types
 - **Edge semantics matter** — prefer `AuthoredBy` over `RelatedTo`
 - **Constraints live in the schema** — `@unique`, `@range`, `@card` keep invariants out of application code
 - **Schemas are reviewable** — clear names, explicit enums, obvious keys
+
+## Schema Evolution in Cluster Mode
+
+In a cluster deployment there is **no direct `omnigraph schema apply`** — the
+schema is declared (`graphs.<id>.schema:` in `cluster.yaml`) and converged:
+
+```bash
+$EDITOR schema.pg
+omnigraph cluster plan  --config .   # shows the engine's migration steps
+omnigraph cluster apply --config . --as <you>
+# restart the --cluster server to serve the new shape
+```
+
+Differences from the single-graph path: **soft drops only** (`--allow-data-loss`
+is not reachable from cluster apply — prior versions retain dropped columns),
+and out-of-band schema changes on the live graph are *drift* — `cluster
+refresh` flags them and the next `apply` converges the graph back to the
+declared schema. Everything else in this file (`@rename_from`, backfills,
+linting, enum discipline) applies unchanged to the `.pg` you edit.

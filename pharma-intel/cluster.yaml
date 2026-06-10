@@ -1,0 +1,220 @@
+version: 1
+metadata:
+  name: pharma-intel
+state:
+  backend: cluster
+  lock: true
+graphs:
+  pharma:
+    schema: ./schema.pg
+    queries:
+      get_compound:
+        file: ./queries/compounds.gq
+      compounds_all:
+        file: ./queries/compounds.gq
+      compounds_by_phase:
+        file: ./queries/compounds.gq
+      compounds_by_mechanism:
+        file: ./queries/compounds.gq
+      compound_sponsor:
+        file: ./queries/compounds.gq
+      compound_trials:
+        file: ./queries/compounds.gq
+      compound_signals:
+        file: ./queries/compounds.gq
+      get_mechanism:
+        file: ./queries/compounds.gq
+      mechanisms_all:
+        file: ./queries/compounds.gq
+      mechanism_compounds:
+        file: ./queries/compounds.gq
+      mechanism_signals:
+        file: ./queries/compounds.gq
+      mechanism_signals_via_compound:
+        file: ./queries/compounds.gq
+      add_compound:
+        file: ./queries/mutations.gq
+      add_mechanism:
+        file: ./queries/mutations.gq
+      add_trial:
+        file: ./queries/mutations.gq
+      add_company:
+        file: ./queries/mutations.gq
+      add_deal:
+        file: ./queries/mutations.gq
+      add_regulatory:
+        file: ./queries/mutations.gq
+      add_signal:
+        file: ./queries/mutations.gq
+      add_pattern:
+        file: ./queries/mutations.gq
+      add_insight:
+        file: ./queries/mutations.gq
+      add_source:
+        file: ./queries/mutations.gq
+      add_artifact:
+        file: ./queries/mutations.gq
+      add_program:
+        file: ./queries/mutations.gq
+      add_assumption:
+        file: ./queries/mutations.gq
+      add_decision:
+        file: ./queries/mutations.gq
+      add_question:
+        file: ./queries/mutations.gq
+      link_forms_pattern:
+        file: ./queries/mutations.gq
+      link_contradicts_pattern:
+        file: ./queries/mutations.gq
+      link_highlights_pattern:
+        file: ./queries/mutations.gq
+      link_drives_pattern:
+        file: ./queries/mutations.gq
+      link_about_compound:
+        file: ./queries/mutations.gq
+      link_about_mechanism:
+        file: ./queries/mutations.gq
+      link_about_trial:
+        file: ./queries/mutations.gq
+      link_relevant_company:
+        file: ./queries/mutations.gq
+      link_compound_mechanism:
+        file: ./queries/mutations.gq
+      link_compound_company:
+        file: ./queries/mutations.gq
+      link_trial_compound:
+        file: ./queries/mutations.gq
+      link_signal_supports_assumption:
+        file: ./queries/mutations.gq
+      link_signal_contradicts_assumption:
+        file: ./queries/mutations.gq
+      link_signal_informs_question:
+        file: ./queries/mutations.gq
+      link_program_assumption:
+        file: ./queries/mutations.gq
+      link_decision_program:
+        file: ./queries/mutations.gq
+      link_decision_question:
+        file: ./queries/mutations.gq
+      link_decision_assumption:
+        file: ./queries/mutations.gq
+      link_artifact_source:
+        file: ./queries/mutations.gq
+      link_signal_artifact:
+        file: ./queries/mutations.gq
+      get_pattern:
+        file: ./queries/patterns.gq
+      patterns_all:
+        file: ./queries/patterns.gq
+      patterns_by_kind:
+        file: ./queries/patterns.gq
+      pattern_signals:
+        file: ./queries/patterns.gq
+      pattern_contradictions:
+        file: ./queries/patterns.gq
+      pattern_drives:
+        file: ./queries/patterns.gq
+      pattern_contradicts_patterns:
+        file: ./queries/patterns.gq
+      pattern_insights:
+        file: ./queries/patterns.gq
+      get_trial:
+        file: ./queries/pipeline.gq
+      trials_by_status:
+        file: ./queries/pipeline.gq
+      trial_sponsor:
+        file: ./queries/pipeline.gq
+      get_deal:
+        file: ./queries/pipeline.gq
+      deals_all:
+        file: ./queries/pipeline.gq
+      deal_parties:
+        file: ./queries/pipeline.gq
+      get_regulatory:
+        file: ./queries/pipeline.gq
+      regulatory_recent:
+        file: ./queries/pipeline.gq
+      regulatory_compound:
+        file: ./queries/pipeline.gq
+      get_company:
+        file: ./queries/pipeline.gq
+      company_compounds:
+        file: ./queries/pipeline.gq
+      get_insight:
+        file: ./queries/pipeline.gq
+      insights_all:
+        file: ./queries/pipeline.gq
+      insight_patterns:
+        file: ./queries/pipeline.gq
+      get_program:
+        file: ./queries/programs.gq
+      programs_all:
+        file: ./queries/programs.gq
+      program_compound:
+        file: ./queries/programs.gq
+      program_mechanism:
+        file: ./queries/programs.gq
+      program_assumptions:
+        file: ./queries/programs.gq
+      program_decisions:
+        file: ./queries/programs.gq
+      program_competitors:
+        file: ./queries/programs.gq
+      program_signals:
+        file: ./queries/programs.gq
+      program_landscape_signals:
+        file: ./queries/programs.gq
+      get_assumption:
+        file: ./queries/programs.gq
+      assumptions_all:
+        file: ./queries/programs.gq
+      assumption_supporting_signals:
+        file: ./queries/programs.gq
+      assumption_contradicting_signals:
+        file: ./queries/programs.gq
+      get_decision:
+        file: ./queries/programs.gq
+      decisions_upcoming:
+        file: ./queries/programs.gq
+      decisions_all:
+        file: ./queries/programs.gq
+      decision_program:
+        file: ./queries/programs.gq
+      decision_questions:
+        file: ./queries/programs.gq
+      decision_assumptions:
+        file: ./queries/programs.gq
+      get_question:
+        file: ./queries/programs.gq
+      questions_open:
+        file: ./queries/programs.gq
+      question_signals:
+        file: ./queries/programs.gq
+      get_signal:
+        file: ./queries/signals.gq
+      recent_signals:
+        file: ./queries/signals.gq
+      search_signals:
+        file: ./queries/signals.gq
+      signals_by_domain:
+        file: ./queries/signals.gq
+      signal_patterns:
+        file: ./queries/signals.gq
+      signal_contradictions:
+        file: ./queries/signals.gq
+      signal_compound:
+        file: ./queries/signals.gq
+      signal_mechanism:
+        file: ./queries/signals.gq
+      signal_trial:
+        file: ./queries/signals.gq
+      signal_companies:
+        file: ./queries/signals.gq
+      signal_supports_assumptions:
+        file: ./queries/signals.gq
+      signal_contradicts_assumptions:
+        file: ./queries/signals.gq
+      signal_informs_questions:
+        file: ./queries/signals.gq
+      signal_artifacts:
+        file: ./queries/signals.gq

@@ -62,7 +62,10 @@ Each cookbook is fully self-contained — `cd` in and follow its README.
 
 1. Pick a cookbook.
 2. Make sure you have a running Omnigraph instance — see the [Omnigraph repo](https://github.com/ModernRelay/omnigraph).
-3. Follow the cookbook's Quick Start.
+3. Follow the cookbook's Quick Start. The SPIKE cookbooks are **cluster
+   directories** (omnigraph >= 0.7.0): `omnigraph cluster apply` creates the
+   graph and publishes the stored queries; `omnigraph-server --cluster .`
+   serves them — no object store needed to get started.
 
 ## SPIKE Framework
 

@@ -1,11 +1,11 @@
 ---
 name: omnigraph-best-practices
-description: Operate a locally or remotely deployed Omnigraph graph database. Use this skill whenever you see Omnigraph CLI commands (omnigraph init/query/mutate/load/ingest/schema/lint/embed/branch/commit), .pg schema files, .gq query files, RustFS S3 URIs (s3://omnigraph-local/...), remote bearer-authed graph endpoints, 504 errors against a graph, or work inside a folder containing omnigraph.yaml. Covers local RustFS setup, project layout, schema authoring and evolution (plan before apply), query linting, data changes (mutate vs load vs ingest, --mode merge vs overwrite), branches for data review, embeddings, aliases for automation, HTTP server operation, Cedar policy, remote graph operations (504 verification ritual, ingest vs load tradeoffs, version drift), and common gotchas. Especially important BEFORE running schema apply (plan first), any load (pick --mode carefully), any .gq/.pg edit (lint afterward), or any write to a remote graph (verify via commit list afterward). Apply this skill aggressively when the user mentions Omnigraph, graph migrations, remote graph deploys, 504 errors, or graph database development.
+description: Operate a locally or remotely deployed Omnigraph graph database. Use this skill whenever you see Omnigraph CLI commands (omnigraph init/query/mutate/load/ingest/schema/lint/embed/branch/commit), .pg schema files, .gq query files, RustFS S3 URIs (s3://omnigraph-local/...), remote bearer-authed graph endpoints, 504 errors against a graph, work inside a folder containing omnigraph.yaml or cluster.yaml, or cluster commands (omnigraph cluster validate/plan/apply/approve, omnigraph-server --cluster). Covers cluster-mode declarative deployments (cluster.yaml, plan/apply loop, approval-gated deletes), local RustFS setup, project layout, schema authoring and evolution (plan before apply), query linting, data changes (mutate vs load vs ingest, --mode merge vs overwrite), branches for data review, embeddings, aliases for automation, HTTP server operation, Cedar policy, remote graph operations (504 verification ritual, ingest vs load tradeoffs, version drift), and common gotchas. Especially important BEFORE running schema apply (plan first), any load (pick --mode carefully), any .gq/.pg edit (lint afterward), or any write to a remote graph (verify via commit list afterward). Apply this skill aggressively when the user mentions Omnigraph, graph migrations, remote graph deploys, 504 errors, or graph database development.
 license: MIT (see LICENSE at repo root)
-compatibility: Requires omnigraph CLI >= 0.6.1 and Docker (for local RustFS).
+compatibility: Requires omnigraph CLI >= 0.6.1; cluster mode requires >= 0.7.0 (edge channel until 0.7.0 tags). Docker only for the optional local RustFS path.
 metadata:
   author: ModernRelay
-  version: "0.4.0"
+  version: "0.5.0"
   repository: https://github.com/ModernRelay/omnigraph-cookbooks
 ---
 
@@ -16,8 +16,8 @@ This skill captures the operational rules for working with a locally deployed Om
 ## The Seven Rules
 
 1. **Lint before commit** — `omnigraph lint --schema schema.pg --query queries/foo.gq` validates both sides against each other. No running repo required. (`omnigraph query lint` still works as a deprecated alias.)
-2. **Plan before apply** — never run `schema apply` without a successful `schema plan` first. Apply is destructive; plan is free.
-3. **Branches are for data; apply is for schema** — review data ingests on a feature branch then merge. Schema changes go straight to `main`.
+2. **Plan before apply** — never run `schema apply` without a successful `schema plan` first. Apply is destructive; plan is free. (Cluster mode has the same rule with different verbs: `cluster plan` before `cluster apply` — the plan embeds the engine's real migration steps.)
+3. **Branches are for data; apply is for schema** — review data ingests on a feature branch then merge. Schema changes go straight to `main` (single-graph: `omnigraph schema apply`; cluster mode: edit the `.pg` and run `cluster apply` — there is no direct `schema apply` in cluster deployments).
 4. **Pick the right write command** — `mutate` for edits (typechecked, parameterized), `load --mode merge` for bulk upsert on local repos, `ingest` for remote, `load --mode overwrite` only for clean slates.
 5. **Parameterize everything** — never string-interpolate values into `.gq` bodies or `--params`. Declare `$var: Type` and pass via `--params`.
 6. **Expose agent operations as aliases** — not raw CLI invocations. Aliases decouple the operation name from the query implementation.
@@ -97,7 +97,20 @@ omnigraph snapshot s3://omnigraph-local/repos/<your-repo> --json
 
 ## Project Layout
 
-### `omnigraph.yaml` is the operational backbone
+### Two deployment models — pick one per project
+
+- **Cluster mode** (omnigraph >= 0.7.0, recommended for new projects): a
+  `cluster.yaml` declares the deployment (graphs, schemas, stored queries,
+  policies); `omnigraph cluster apply` converges it and
+  `omnigraph-server --cluster .` serves it. `omnigraph.yaml` shrinks to
+  per-operator ergonomics (aliases, CLI defaults, `cli.actor`). See
+  `references/cluster.md`.
+- **Single-graph mode** (classic): `omnigraph.yaml` is the operational
+  backbone below. Fully supported; required for S3-hosted graphs today.
+
+A server boots from one source or the other — never a merge of both.
+
+### `omnigraph.yaml` is the operational backbone (single-graph mode)
 
 Run CLI commands from the folder containing `omnigraph.yaml` — relative paths for `queries/`, `schema.pg`, and `.env.omni` resolve from there.
 
@@ -190,6 +203,8 @@ match {
 ```
 
 ## Deep Dives
+
+- `references/cluster.md` — cluster-mode declarative deployments: cluster.yaml, the validate/import/plan/apply loop, approval-gated deletes, `--cluster` serving, the two-file contract, recovery
 
 For anything beyond the basics, load the relevant reference file. Each is self-contained — load only what you need.
 

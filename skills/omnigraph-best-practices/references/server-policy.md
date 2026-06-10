@@ -267,3 +267,16 @@ When the server is running with a policy file:
 3. The CLI doesn't bypass policy when it connects over HTTP — it's enforced at the server. Enforcement is also engine-wide, so CLI direct-engine writes and embedded SDK consumers hit the same gate.
 
 Setup ops (`init`, `load`) write storage directly. With a policy configured they still flow through the engine-layer enforce gate for the actor you pass via `--as` (or `cli.actor` in `omnigraph.yaml`); gate the raw storage layer too (S3 bucket ACLs, object locks) if the bucket is shared.
+
+## Cluster-Booted Servers
+
+`omnigraph-server --cluster <dir>` serves a cluster directory's **applied
+revision** — an exclusive boot source (cannot combine with a URI, `--target`,
+or `--config`; `omnigraph.yaml` is never read). Always multi-graph routing
+(`/graphs/{id}/...`). Policies are declared in `cluster.yaml` with the same
+Cedar YAML format and attach via `applies_to`: `[cluster]` becomes the
+server-level engine (gates `graph_list` / `GET /graphs`), `[<graph-id>]`
+becomes that graph's engine (gates `invoke_query`, `read`, `change`, …).
+Bearer tokens stay process-level (same env vars as below). Applied changes
+serve on the next restart; boot is fail-fast with named remedies. See
+`references/cluster.md`.

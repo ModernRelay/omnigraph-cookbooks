@@ -1,11 +1,11 @@
 ---
 name: omnigraph-intel-bootstrap
-description: 'Bootstrap a new Omnigraph-based SPIKE industry intelligence graph from scratch. Use this skill whenever a user wants to set up a new SPIKE graph — either with the existing AI industry demo data or for a new domain (biotech, fintech, crypto, geopolitics, macroeconomics, SaaS, climate tech, etc.). The flow presents a demo-vs-custom decision, then for custom setups asks about domain scope, actors, cadence, and sources, adapts schema and enums for the target domain, runs initial web research to generate real seed content, and executes init + load. Apply aggressively when the user says any of: set up Omnigraph, bootstrap a new graph, create a new SPIKE cookbook, I want to track X industry, initialize intel for Y, new graph for Z domain, start a new context graph, or similar phrasing. This skill takes a user from zero to a populated, queryable graph.'
+description: 'Bootstrap a new Omnigraph-based SPIKE industry intelligence graph from scratch. Use this skill whenever a user wants to set up a new SPIKE graph — either with the existing AI industry demo data or for a new domain (biotech, fintech, crypto, geopolitics, macroeconomics, SaaS, climate tech, etc.). The flow presents a demo-vs-custom decision, then for custom setups asks about domain scope, actors, cadence, and sources, adapts schema and enums for the target domain, runs initial web research to generate real seed content, and converges the cluster (apply creates the graph) + loads seed data. Apply aggressively when the user says any of: set up Omnigraph, bootstrap a new graph, create a new SPIKE cookbook, I want to track X industry, initialize intel for Y, new graph for Z domain, start a new context graph, or similar phrasing. This skill takes a user from zero to a populated, queryable graph.'
 license: MIT (see LICENSE at repo root)
-compatibility: Requires omnigraph CLI >= 0.6.1 and Docker (for local RustFS).
+compatibility: Requires omnigraph CLI >= 0.7.0 (cluster control plane; edge channel until 0.7.0 tags). Docker only for the optional RustFS/S3 path.
 metadata:
   author: ModernRelay
-  version: "0.3.0"
+  version: "0.4.0"
   repository: https://github.com/ModernRelay/omnigraph-cookbooks
 ---
 
@@ -37,19 +37,17 @@ Before either path, run these checks (and act on the results):
 
 ```bash
 # Are RustFS and any existing server reachable?
-curl -s -o /dev/null -w "rustfs:%{http_code}\n" http://127.0.0.1:9000/
-curl -s -o /dev/null -w "server:%{http_code}\n" http://127.0.0.1:8080/healthz
+# Ensure omnigraph is on PATH
+command -v omnigraph >/dev/null || { echo "omnigraph not found — install via homebrew or the install script"; exit 1; }
 
-# Ensure omnigraph is on PATH (bootstrap installs outside PATH by default)
-command -v omnigraph >/dev/null || export PATH="$PWD/.omnigraph-rustfs-demo/bin:$PATH"
-command -v omnigraph >/dev/null || { echo "omnigraph not found — install via homebrew or adjust PATH"; exit 1; }
-
-# Require omnigraph >= 0.6.0
+# Require omnigraph >= 0.7.0 (cluster control plane)
 omnigraph version
-
-# Does the cookbook have an .env.omni? If not, seed from the example.
-[ -f <clone>/industry-intel/.env.omni ] || cp <clone>/industry-intel/.env.omni.example <clone>/industry-intel/.env.omni
 ```
+
+The default (cluster-first) path needs **no RustFS, no credentials, no
+.env.omni** — graphs live at local derived roots created by `cluster apply`.
+RustFS checks and `.env.omni` only matter for the optional S3 alternative
+(see the cookbook READMEs).
 
 **If `:8080` returns `200` from a server pointed at a different repo** (the bootstrap script auto-starts one), stop it before starting yours, or rebind to a free port via `omnigraph-server --bind 127.0.0.1:8090`.
 
@@ -79,19 +77,19 @@ Branch based on the answer.
 
 ## Path A: Demo Setup
 
-Quick — just clone, init, load.
+Quick — clone, converge, load. The cookbook ships a `cluster.yaml` declaring
+the graph, schema, and all stored queries; `cluster apply` creates the graph.
 
 See [`references/demo-setup.md`](references/demo-setup.md) for the full command list. Summary:
 
 ```bash
 cd <path-to-clone>/omnigraph-cookbooks/industry-intel
-set -a && source ./.env.omni && set +a
-# first time only: aws --endpoint-url http://127.0.0.1:9000 s3 mb s3://omnigraph-local
-omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
-omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
-# Start the server (keep running), then query through it:
-omnigraph-server --config ./omnigraph.yaml --unauthenticated &   # local dev; v0.6.0+ needs auth/policy or this flag
-omnigraph query --config ./omnigraph.yaml --alias patterns disruption
+omnigraph cluster import --config .
+omnigraph cluster apply  --config . --as <you>     # creates ./graphs/spike.omni + publishes queries
+omnigraph load --data ./seed.jsonl --mode overwrite ./graphs/spike.omni
+# Serve the applied state (keep running), then query through it:
+omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated &   # local dev
+omnigraph query --config ./omnigraph.yaml --alias patterns disruption    # CLI alias sugar
 ```
 
 After this, point the user at the `omnigraph-best-practices` skill for day-to-day operations.
@@ -197,14 +195,17 @@ Use web research to build real seed content. **Do not fabricate signals or dates
 4. For each pattern, identify the Elements, Companies, Experts mentioned
 5. Write `<slug>/seed.md` (tabular, human-readable) — **present this to the user for review before generating JSONL**
 6. Generate `<slug>/seed.jsonl` from the confirmed seed.md
-7. From `<clone>/<slug>/`, init, load, then start the server:
+7. From `<clone>/<slug>/`, converge the cluster, load, then start the server
+   (the `cluster.yaml` — copied from industry-intel and re-slugged — declares
+   the graph, schema, and queries):
 
 ```bash
 cd <clone>/<slug>
-set -a && source ./.env.omni && set +a
-omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/<slug>
-omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/<slug>
-omnigraph-server --config ./omnigraph.yaml --unauthenticated &   # local dev; v0.6.0+ needs auth/policy or this flag
+omnigraph cluster import --config .
+omnigraph cluster plan   --config .                # review what apply will do
+omnigraph cluster apply  --config . --as <you>     # creates ./graphs/<slug>.omni
+omnigraph load --data ./seed.jsonl --mode overwrite ./graphs/<slug>.omni
+omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated &   # local dev
 ```
 
 8. Verify with a sample query (goes through the server):
@@ -217,9 +218,15 @@ omnigraph query --config ./omnigraph.yaml --alias patterns <pattern-kind>
 
 Tell the user:
 
-- What got created (cookbook folder, schema, seed counts, repo URI)
-- How to query (via aliases or raw query)
-- To use the `omnigraph-best-practices` skill for day-to-day ops (adding signals, schema evolution, branches)
+- What got created: the cookbook folder (a **cluster directory** —
+  `cluster.yaml` declares graph + schema + queries; the graph lives at
+  `./graphs/<slug>.omni`, created by apply), the seed counts
+- How to query: CLI aliases (per-operator `omnigraph.yaml`), or HTTP —
+  every declared query is served at `POST /graphs/<slug>/queries/<name>`
+- The day-2 loop: edit `.pg`/`.gq`/`cluster.yaml` → `cluster plan` →
+  `cluster apply --as <you>` → restart the server
+- To use the `omnigraph-best-practices` skill for day-to-day ops (adding
+  signals, schema evolution, branches; see its `references/cluster.md`)
 
 ## Deep Dives
 

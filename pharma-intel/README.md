@@ -152,31 +152,57 @@ Full property tables and constraints in `schema.pg`.
 
 All commands run from `pharma-intel/`:
 
+The cookbook is a **cluster directory**: `cluster.yaml` declares the graph,
+its schema, and all 105 stored queries; `omnigraph cluster apply` converges
+it (creating the graph at `./graphs/pharma.omni`); the server serves the
+applied state. No object store or credentials needed to get started.
+
 ```bash
 cd pharma-intel
 
-# Source RustFS credentials
-cp .env.omni.example .env.omni
-set -a && source ./.env.omni && set +a
+# One-time: record the ledger, preview, converge (creates ./graphs/pharma.omni,
+# applies schema.pg, publishes all stored queries)
+omnigraph cluster import --config .
+omnigraph cluster plan   --config .
+omnigraph cluster apply  --config . --as <you>
 
-# Lint the schema and queries (pure file check)
-omnigraph lint --schema ./schema.pg --query ./queries/signals.gq
+# Load the seed through the data plane (one-time)
+omnigraph load --data ./seed.jsonl --mode overwrite ./graphs/pharma.omni
 
-# Init the repo (one-time — writes to storage)
-omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/pharma-intel
+# Serve the applied state (keep running — separate terminal or background)
+omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated   # local dev
 
-# Load the seed (one-time)
-omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/pharma-intel
-
-# Start the local HTTP server (keep it running — separate terminal or background)
-omnigraph-server --config ./omnigraph.yaml --unauthenticated   # local dev; v0.6.0+ refuses to start without auth/policy or this flag
-
-# All queries go through the server via aliases
+# Query via CLI aliases (per-operator omnigraph.yaml sugar) …
 omnigraph read --alias assumption-contradictions asmp-oral-displaces-injectable
 omnigraph read --alias decision-questions dec-vanquish-interim-readout
 omnigraph read --alias pattern-contradictions pat-oral-glp1-thesis
 omnigraph read --alias decisions-upcoming
+# … or straight HTTP — every declared query is a served endpoint:
+curl -s -X POST http://127.0.0.1:8080/graphs/pharma/queries/decisions_upcoming \
+  -H 'content-type: application/json' -d '{"params":{}}'
 ```
+
+Day-2 changes are declarative: edit `schema.pg` / a `.gq` file / `cluster.yaml`,
+then `cluster plan` (schema edits show real migration steps) → `cluster apply`
+→ restart the server. Deleting the graph requires an explicit
+`omnigraph cluster approve graph.pharma --as <you>` first.
+
+<details>
+<summary><strong>RustFS / S3 alternative (classic single-graph mode)</strong></summary>
+
+```bash
+cp .env.omni.example .env.omni
+set -a && source ./.env.omni && set +a
+omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/pharma-intel
+omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/pharma-intel
+omnigraph-server --config ./omnigraph.yaml --unauthenticated
+```
+
+Re-point `graphs.local_s3` in `omnigraph.yaml` (commented out by default) and
+set `server.graph: local_s3`. The two boot sources are exclusive — a server
+reads cluster state XOR omnigraph.yaml, never both.
+
+</details>
 
 ## Demo Walkthrough
 

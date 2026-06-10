@@ -4,6 +4,14 @@ Operational guide for working with Omnigraph: project layout, schema evolution, 
 
 For schema **design** principles (identity, types, edges, constraints) see [`omni-schema.md`](./omni-schema.md). This doc is about how to **operate** an Omnigraph project day-to-day.
 
+> **Cluster mode (omnigraph >= 0.7.0):** new projects should prefer the
+> declarative cluster control plane — `cluster.yaml` + `omnigraph cluster
+> plan/apply` + `omnigraph-server --cluster .` — over hand-managed
+> `omnigraph.yaml` deployments. See the omnigraph repo's
+> `docs/user/cluster.md` and the `omnigraph-best-practices` skill's
+> `references/cluster.md`. Everything below remains valid for the classic
+> single-graph path and for all data-plane operations.
+
 ## TL;DR
 
 1. **Lint before commit** — `omnigraph lint --schema schema.pg --query queries/foo.gq` (`query lint` still works as a deprecated alias)

@@ -29,3 +29,6 @@
 
 # Customer-specific migration / mapping docs — kept locally, never committed
 vc-os/P9_MIGRATION.md
+
+# Cluster control-plane local state (ledger, catalog, approvals)
+__cluster/

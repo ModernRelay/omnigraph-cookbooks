@@ -53,36 +53,38 @@ All commands below run from `industry-intel/`. If the clone is somewhere else, s
 
 ### First-time bucket creation
 
-If this is a fresh RustFS instance (no `omnigraph-local` bucket yet):
+### Converge the cluster + load
+
+The cookbook ships a `cluster.yaml` declaring the graph (`spike`), the
+schema, and all 66 stored queries. One-time setup:
 
 ```bash
-aws --endpoint-url http://127.0.0.1:9000 s3 mb s3://omnigraph-local
+omnigraph cluster import --config .                # create the state ledger
+omnigraph cluster plan   --config .                # preview (optional but wise)
+omnigraph cluster apply  --config . --as <you>     # creates ./graphs/spike.omni, applies schema, publishes queries
+omnigraph load --data ./seed.jsonl --mode overwrite ./graphs/spike.omni
 ```
 
-### Init + load
-
-These are one-time setup ops that write directly to storage:
-
-```bash
-omnigraph init --schema ./schema.pg s3://omnigraph-local/repos/spike-intel
-omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
-```
-
-If the repo already exists, `init` errors with `AlreadyInitialized` (v0.6.0+) — add `--force` to re-init (it won't purge existing data; the `load --mode overwrite` below replaces the rows).
+Apply is idempotent — re-running it on a converged cluster is a no-op. No
+RustFS, bucket, or credentials are involved on this path.
 
 Expected output from load:
 
 ```
-loaded s3://omnigraph-local/repos/spike-intel on branch main with overwrite: 111 nodes across 9 node types, 148 edges across 16 edge types
+loaded ./graphs/spike.omni on branch main with overwrite: 109 nodes across 9 node types, 154 edges across 17 edge types
 ```
 
 ### Start the server
 
 ```bash
-omnigraph-server --config ./omnigraph.yaml --unauthenticated
+omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated
 ```
 
-`--unauthenticated` is required for local dev — since v0.6.0 the server refuses to start without bearer tokens or a policy file. Keep it running (separate terminal or background). All queries from here on go through it.
+`--cluster` serves the applied revision and never reads `omnigraph.yaml`
+(exclusive boot source). `--unauthenticated` is for local dev — the server
+refuses to start without bearer tokens, a policy, or this flag. Keep it
+running (separate terminal or background). Every declared query is also a
+direct HTTP endpoint: `POST /graphs/spike/queries/<name>`.
 
 ### Verify
 
@@ -124,10 +126,10 @@ Plus 148 edges wiring the graph together.
 
 ## Optional: Reset
 
-To wipe and reload the demo from scratch:
+To wipe and reload the demo data from scratch:
 
 ```bash
-omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/spike-intel
+omnigraph load --data ./seed.jsonl --mode overwrite ./graphs/spike.omni
 ```
 
 `overwrite` truncates the branch before loading — safe for a demo repo, not for production.

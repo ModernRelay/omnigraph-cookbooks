@@ -1,19 +1,23 @@
+# Per-operator CLI config. The DEPLOYMENT (graph, schema, stored queries) is
+# declared in cluster.yaml and converged with `omnigraph cluster apply`; this
+# file holds only your CLI ergonomics — aliases, defaults, identity. A
+# cluster-booted server (`omnigraph-server --cluster .`) never reads it.
 project:
   name: Pharma Intel — Viking Therapeutics (GLP-1 Obesity)
 
-auth:
-  env_file: ./.env.omni
-
 graphs:
-  local_s3:
-    uri: s3://omnigraph-local/repos/pharma-intel
+  local:
+    uri: ./graphs/pharma.omni         # the derived root cluster apply creates
   local_server:
-    uri: http://127.0.0.1:8080
+    # NB: graph-scoped base — cluster servers are multi-graph
+    uri: http://127.0.0.1:8080/graphs/pharma
     bearer_token_env: OMNIGRAPH_BEARER_TOKEN
+  # Classic single-graph S3 alternative (see README "RustFS / S3 alternative"):
+  # local_s3:
+  #   uri: s3://omnigraph-local/repos/pharma-intel
 
-server:
-  graph: local_s3
-  bind: 127.0.0.1:8080
+# auth:
+#   env_file: ./.env.omni   # only needed for the S3 alternative / embeddings
 
 cli:
   graph: local_server
@@ -21,6 +25,7 @@ cli:
   output_format: table
   table_max_column_width: 80
   table_cell_layout: truncate
+  # actor: <you>   # default for --as (cluster apply/approve attribution)
 
 query:
   roots:

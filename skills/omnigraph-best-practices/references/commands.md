@@ -189,3 +189,21 @@ curl http://127.0.0.1:8080/healthz
 ```
 
 Returns `200 OK` if the server is up.
+
+## Cluster Control Plane (omnigraph >= 0.7.0)
+
+```bash
+omnigraph cluster validate     --config <dir>          # parse + typecheck the declaration
+omnigraph cluster import       --config <dir>          # one-time: create the state ledger
+omnigraph cluster plan         --config <dir> [--json] # preview (schema changes show migration steps)
+omnigraph cluster apply        --config <dir> --as <actor>   # converge; idempotent
+omnigraph cluster approve <resource> --config <dir> --as <actor>  # gate destructive changes (graph deletes)
+omnigraph cluster status       --config <dir> [--json] # read the ledger (read-only)
+omnigraph cluster refresh      --config <dir>          # re-observe live graphs; flags drift
+omnigraph cluster force-unlock <LOCK_ID> --config <dir>  # clear a crashed run's lock (exact id from status)
+```
+
+Topology rule: `omnigraph schema apply` and `omnigraph init` are single-graph
+commands; in cluster mode their jobs belong to `cluster apply`. Data commands
+(`load`, `ingest`, `mutate`, `read`, branches) are identical in both — point
+them at the derived root (`<dir>/graphs/<id>.omni`). See `references/cluster.md`.

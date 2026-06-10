@@ -143,3 +143,8 @@ omnigraph commit list $REPO --branch main --json        # history
 ```
 
 `export` is the right tool for large-snapshot inspection — don't try to page through the whole graph with read queries.
+
+> **Cluster note:** everything in this file applies unchanged in cluster
+> deployments — the control plane owns schema/queries/policies; rows, loads,
+> ingests, and branches stay on the data plane against the derived graph
+> roots (`<dir>/graphs/<id>.omni`).

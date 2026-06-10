@@ -86,3 +86,14 @@ The `lint` command validates both queries and schema against each other — use 
 - Prefer semantic edge names over generic ones (`ContradictsAssumption` not `RelatedTo`)
 - Required vs optional is deliberate — don't add `?` without reason
 - No embeddings in v1 — the narrative surfaces are graph-structured, not vector-search-driven
+
+## Cluster control plane (two-file model)
+
+`cluster.yaml` is the deployment: graph `pharma`, `schema.pg`, and every
+stored query, converged with `omnigraph cluster import|plan|apply --config .`
+(apply creates `./graphs/pharma.omni`; schema edits show migration previews
+in plan; graph deletion is approval-gated). `omnigraph.yaml` is per-operator
+only — aliases, CLI defaults, `cli.actor` for `--as` attribution. Serve with
+`omnigraph-server --cluster .` (never reads omnigraph.yaml). Data still flows
+through `omnigraph load/mutate` against `./graphs/pharma.omni`. Never commit
+`__cluster/` or `graphs/` (gitignored — local state).
