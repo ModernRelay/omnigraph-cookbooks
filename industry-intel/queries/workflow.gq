@@ -1,0 +1,61 @@
+// ── SPIKE operating-loop queries ──
+// The weekly review: triage unattached signals, watch pattern momentum,
+// spot stale patterns, check provenance gaps. See README "Weekly review".
+
+// Triage queue: signals not yet attached to any pattern (neither forming
+// nor contradicting one). Work this list down to zero each review.
+query orphan_signals() {
+    match {
+        $s: Signal
+        not { $s formsPattern $_ }
+        not { $s contradictsPattern $_ }
+    }
+    return { $s.slug, $s.name, $s.brief, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+}
+
+// Momentum: how many signals each pattern attracted since a cutoff.
+// Params: since — e.g. {"since": "2026-05-01T00:00:00Z"}
+query pattern_momentum($since: DateTime) {
+    match {
+        $p: Pattern
+        $s formsPattern $p
+        $s.stagingTimestamp >= $since
+    }
+    return { $p.slug, $p.name, count($s) as recent_signals }
+}
+
+// Staleness: patterns with no new signal since the cutoff — prune them or
+// push research. Params: since — e.g. {"since": "2026-05-01T00:00:00Z"}
+query stale_patterns($since: DateTime) {
+    match {
+        $p: Pattern
+        not {
+            $s formsPattern $p
+            $s.stagingTimestamp >= $since
+        }
+    }
+    return { $p.slug, $p.name }
+}
+
+// Tension: patterns with contradicting evidence — where the thesis is
+// actively contested. High counts deserve an Insight.
+query contested_patterns() {
+    match {
+        $p: Pattern
+        $s contradictsPattern $p
+    }
+    return { $p.slug, $p.name, count($s) as contradictions }
+}
+
+// Provenance gaps: signals with no artifact and no source — claims an
+// agent cannot verify. Fix with attach mutations or drop the signal.
+query unsourced_signals() {
+    match {
+        $s: Signal
+        not { $s spottedInArtifact $_ }
+        not { $s sourcedFromSource $_ }
+    }
+    return { $s.slug, $s.name, $s.stagingTimestamp }
+    order { $s.stagingTimestamp desc }
+}

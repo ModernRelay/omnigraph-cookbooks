@@ -1,0 +1,22 @@
+// ── Hybrid retrieval over chunk embeddings ──
+// Requires embeddings (see README "Enable embeddings"): query-time text
+// embedding needs an embedding API key (e.g. GEMINI_API_KEY) and the
+// Chunk.embedding column populated. Without the key, invocation fails with
+// a clear error naming it; the queries type-check and serve regardless.
+
+// Semantic neighbors: embed the question at query time, k-NN over chunks.
+query related_chunks($q: String) {
+    match { $c: Chunk }
+    return { $c.text, $c.chunk_index }
+    order { nearest($c.embedding, $q) }
+    limit 10
+}
+
+// Hybrid: Reciprocal Rank Fusion of semantic similarity and BM25 over the
+// same chunk text — the robust default for agent retrieval.
+query hybrid_chunks($q: String) {
+    match { $c: Chunk }
+    return { $c.text, $c.chunk_index }
+    order { rrf(nearest($c.embedding, $q), bm25($c.text, $q)) }
+    limit 10
+}

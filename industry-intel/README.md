@@ -125,6 +125,23 @@ then `cluster plan` (schema edits show real migration steps) → `cluster apply`
 → restart the server. Deleting the graph requires an explicit
 `omnigraph cluster approve graph.spike --as <you>` first.
 
+### Serving with policy (drop `--unauthenticated`)
+
+The cookbook declares two Cedar bundles in `cluster.yaml`: `policies/intel.policy.yaml`
+(graph-bound — `readers` invoke stored read queries, `analysts` can also run
+the stored mutations) and `policies/server.policy.yaml` (cluster-bound — only
+`admins` may enumerate graphs). Serve secured:
+
+```bash
+OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-reader":"<tok>","act-analyst":"<tok>","act-admin":"<tok>"}' \
+  omnigraph-server --cluster . --bind 127.0.0.1:8080
+```
+
+What the gates do (verified): `GET /graphs` → admin 200 / reader 403 /
+anonymous 401; stored reads → reader 200; stored mutations (`add_signal`,
+…) → reader 403, analyst 200 — stored mutations are double-gated
+(`invoke_query` at the boundary, `change` inside the engine).
+
 <details>
 <summary><strong>RustFS / S3 alternative (classic single-graph mode)</strong></summary>
 
@@ -144,5 +161,38 @@ set `server.graph: local_s3`. The two boot sources are exclusive — a server
 reads cluster state XOR omnigraph.yaml, never both.
 
 </details>
+
+## The weekly review (operating loop)
+
+The graph earns its keep through a recurring loop, supported by the
+`queries/workflow.gq` set (aliases in parentheses):
+
+1. **Triage** (`triage`) — `orphan_signals`: every signal not yet attached to
+   a pattern, newest first. Work it to zero: attach with the `link_*`
+   mutations, or drop the signal.
+2. **Momentum** (`momentum`, takes `since`) — `pattern_momentum`: signals per
+   pattern since the cutoff. Rising counts are where insights come from.
+3. **Staleness** (`stale`, takes `since`) — `stale_patterns`: patterns with
+   no new evidence since the cutoff. Prune, or push research at them.
+4. **Tension** (`contested`) — `contested_patterns`: patterns accumulating
+   contradicting signals. High counts deserve an Insight either way.
+5. **Provenance** (`unsourced`) — `unsourced_signals`: claims with no
+   artifact or source attached — an agent cannot verify them. Fix or drop.
+
+```bash
+omnigraph read --alias triage
+omnigraph read --alias momentum 2026-05-01T00:00:00Z
+```
+
+## Enable embeddings (hybrid retrieval)
+
+`queries/hybrid.gq` adds semantic and hybrid search over chunk embeddings
+(`related_chunks`, `hybrid_chunks` — RRF of `nearest` + `bm25`). They
+type-check and serve out of the box, but invocation needs an embedding key
+(query-time text embedding): without one the server returns a clear error
+(`GEMINI_API_KEY is required when nearest() needs a string embedding`). To
+enable: export your embedding key (e.g. `GEMINI_API_KEY`), populate
+`Chunk.embedding` (`omnigraph embed graphs/spike.omni`), and restart the
+server with the key in its environment.
 
 See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.

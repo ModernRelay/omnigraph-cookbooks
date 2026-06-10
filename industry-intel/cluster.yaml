@@ -8,3 +8,10 @@ graphs:
   spike:
     schema: schema.pg
     queries: queries/
+policies:
+  intel:
+    file: policies/intel.policy.yaml
+    applies_to: [spike]
+  server:
+    file: policies/server.policy.yaml
+    applies_to: [cluster]
