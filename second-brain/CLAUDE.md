@@ -55,14 +55,16 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 
 ## Conventions enforced by load discipline (not the schema)
 
-Omnigraph's `@unique(src, dst)` on an edge has historically been parsed as two separate
-per-column uniqueness constraints, not pair-uniqueness — so it can't enforce "one edge
-between A and B." This was the observed behavior through 0.4.2 and no fix is noted in the
-0.6.x release notes; re-verify against your engine version before relying on schema-level
-pair-uniqueness. Until confirmed, these conventions live in the loader and reviewer, not in `schema.pg`:
+As of MR-983 (PR #133, engine v0.6.3+), `@unique(src, dst)` on an edge **is** enforced as a
+true composite key — pair-uniqueness now works (it was previously degraded into two
+independent per-column checks). Enforcement covers single-batch `load` / `insert` / `update`
+and branch-merge, but **not** a duplicate written in a *separate* operation against
+already-committed rows on the same branch (intra-batch only at the direct-write path). The
+edges here don't declare `@unique(src, dst)` yet, so the conventions below still live in the
+loader and reviewer — add the constraint if you want the schema to enforce dedupe within a load:
 
-- **`Knows` and `RelatedToPerson` are stored bidirectionally.** If `A knows B`, also load `B knows A`. For `RelatedToPerson`, invert the `relation`: `parent ⇄ child`, `grandparent ⇄ grandchild`. Symmetric relations (`spouse`, `sibling`, `in-law`, `ex`, `partner`) get the same enum on both sides. Single-direction storage made stale-friend / family-tree queries quietly wrong.
-- **No duplicate `(src, dst)` pairs per edge type.** Dedupe before insert; the schema won't catch it.
+- **`Knows` and `RelatedToPerson` are stored bidirectionally.** If `A knows B`, also load `B knows A`. For `RelatedToPerson`, invert the `relation`: `parent ⇄ child`, `grandparent ⇄ grandchild`. Symmetric relations (`spouse`, `sibling`, `in-law`, `ex`, `partner`) get the same enum on both sides. Single-direction storage made stale-friend / family-tree queries quietly wrong. (Unaffected by the `@unique` fix — this is about storing the *inverse* edge, not deduping pairs; `@unique` won't auto-create it.)
+- **No duplicate `(src, dst)` pairs per edge type.** Now schema-enforceable by declaring `@unique(src, dst)` on the edge (catches dupes within a load/merge); still dedupe across separate write operations, which intake doesn't cross-check.
 - **`AttendedBy` vs. `EventForPerson` are not redundant**:
   - `AttendedBy` = the person was physically present (any role)
   - `EventForPerson` = the event is *about* them — honoree, subject, milestone

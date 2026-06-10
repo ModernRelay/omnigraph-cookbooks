@@ -459,9 +459,10 @@ edge RelevantMarket: Deal -> Market
 edge LeadInvestor: Deal -> Organization
 edge ParticipantInvestor: Deal -> Organization
 
-// Knows is stored bidirectionally by load discipline (Omnigraph @unique(src,dst)
-// is two separate per-column constraints, not pair-uniqueness). The link_knows
-// mutation creates both directions; the seed loads both. See CLAUDE.md.
+// Knows is stored bidirectionally by load discipline — the link_knows mutation
+// creates both directions and the seed loads both (the inverse edge; @unique doesn't
+// auto-create it). `@unique(src,dst)` now enforces pair-uniqueness as a true composite
+// key (MR-983 / engine v0.6.3+), intra-batch + at merge; not declared here. See CLAUDE.md.
 edge Knows: Person -> Person {
     context: String?
     since: Date?

@@ -83,10 +83,10 @@ v1 seed ships `Chunk` zero (populate via `omnigraph embed --reembed_all`). All o
 
 ## Conventions enforced by load discipline (not the schema)
 
-Omnigraph 0.4.x's `@unique(src, dst)` is two separate per-column constraints, not pair-uniqueness. These conventions therefore live in the loader/reviewer:
+As of MR-983 (PR #133, engine v0.6.3+), `@unique(src, dst)` enforces pair-uniqueness as a true composite key (previously it degraded into two per-column checks) — covering single-batch load/insert/update and branch-merge, but not cross-operation duplicates against already-committed rows. These edges don't declare it yet, so the conventions below still live in the loader/reviewer:
 
-- **`Knows` is stored bidirectionally.** If A knows B, also load B knows A. Symmetric context, since, and strength on both sides. Single-direction storage made network queries quietly wrong.
-- **No duplicate `(src, dst)` pairs per edge type.** Dedupe before insert.
+- **`Knows` is stored bidirectionally.** If A knows B, also load B knows A. Symmetric context, since, and strength on both sides. Single-direction storage made network queries quietly wrong. (Unaffected by the `@unique` fix — it's about storing the inverse edge, not deduping pairs.)
+- **No duplicate `(src, dst)` pairs per edge type.** Now schema-enforceable via `@unique(src, dst)` (within a load/merge); still dedupe across separate write operations.
 - **`Decision` provenance chain.** Every Decision should link to: (1) the Deal it regards, (2) the Assumptions it's based on, (3) the open Questions it still depends on, (4) the Person who decided. The graph snapshot at commit-time is the audit trail.
 
 ## Known gaps
