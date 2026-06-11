@@ -50,13 +50,14 @@ def build_banner() -> str | None:
     target_hint = f" (default target: {dflt})" if dflt else ""
 
     lines = [
-        f"[omnigraph] Your Omnigraph graph is the source of truth for people, tasks, projects, "
-        f"commitments, places and relationships. Graphs: {graphs}{target_hint}. Config: {cfg.path}.",
-        f"Before answering factual questions about any of those, CONSULT the graph: run `omnigraph` "
-        f"through the terminal — always pass `--config {cfg.path} --target <graph>` — and fetch the "
-        f"schema first (`omnigraph schema show --config {cfg.path} --target <graph>`). If unsure how, "
-        f'load skill_view("omnigraph-best-practices"). Use canonical verbs `query`/`mutate` (not '
-        f"`read`/`change`); don't guess fields; don't `load --mode overwrite` a populated graph.",
+        f"[omnigraph] Your Omnigraph graph is the source of truth for the entities and facts it models. "
+        f"Graphs: {graphs}{target_hint}. Config: {cfg.path}.",
+        f"Before answering a factual question the graph could answer, CONSULT it: run `omnigraph` "
+        f"through the terminal — always pass `--config {cfg.path} --target <graph>` — and read the "
+        f"schema first (`omnigraph schema show --config {cfg.path} --target <graph>`) so you use its real "
+        f'types. If unsure how, load skill_view("omnigraph-best-practices"). Use canonical verbs '
+        f"`query`/`mutate` (not `read`/`change`); don't guess fields; don't `load --mode overwrite` a "
+        f"populated graph.",
     ]
 
     mode = settings.autocapture()
@@ -64,9 +65,9 @@ def build_banner() -> str | None:
         where = ("a NEW feature branch and suggest a merge (never write directly to main)"
                  if mode == "branch" else "the main branch")
         lines.append(
-            f"If this turn contains durable info worth keeping (a task, person, note, decision, plan, "
-            f"place, or something the user read/watched), SAVE it to the graph: write it to {where}. "
-            f"Resolve a person via their existing ExternalID before creating a new one (avoid duplicates)."
+            f"If this turn contains durable information the graph should hold, SAVE it: write it to {where}. "
+            f"Read the schema first to use the right types, and avoid duplicates by checking for an existing "
+            f"matching record before creating one."
         )
     return "\n".join(lines)
 
