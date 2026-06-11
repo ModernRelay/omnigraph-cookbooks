@@ -1,0 +1,90 @@
+graphs:
+  local_s3:
+    uri: s3://omnigraph-local/repos/gtm-brain
+  local_server:
+    uri: http://127.0.0.1:8080
+    bearer_token_env: OMNIGRAPH_BEARER_TOKEN
+
+server:
+  graph: local_s3
+  bind: 127.0.0.1:8080
+
+cli:
+  graph: local_s3
+  branch: main
+  output_format: jsonl
+
+auth:
+  env_file: .env.omni
+
+query:
+  roots: [queries, .]
+
+aliases:
+  # --- reads ---
+  account-signals:          # judge payload 1/2
+    command: query
+    query: queries.gq
+    name: account_signals
+    args: [account]
+  account-touches:          # judge payload 2/2
+    command: query
+    query: queries.gq
+    name: account_touches
+    args: [account]
+  rank-prospects:           # prospecting queue: pass ICP prose or a won account's profile text
+    command: query
+    query: queries.gq
+    name: rank_prospects
+    args: [q]
+  bucket-outcomes:          # learn-loop input: win rates by signal bucket
+    command: query
+    query: queries.gq
+    name: bucket_outcomes
+
+  # --- writes ---
+  add-account:
+    command: mutate
+    query: mutations.gq
+    name: add_account
+    args: [slug, name, status, discovered_via, created_at]
+  add-enrichment:           # evidence record + Account projection, atomic
+    command: mutate
+    query: mutations.gq
+    name: add_enrichment
+    args: [slug, account, source, kind, summary, fields_updated, industry, employee_count, location, profile_summary, observed_at]
+  add-person:
+    command: mutate
+    query: mutations.gq
+    name: add_person
+    args: [slug, name, email, email_status, account, title, created_at]
+  add-signal:
+    command: mutate
+    query: mutations.gq
+    name: add_signal
+    args: [slug, bucket, summary, source, source_ref, account, observed_at, recorded_at]
+  add-verdict:              # verdict + Account.status projection, atomic
+    command: mutate
+    query: mutations.gq
+    name: add_verdict
+    args: [slug, account, kind, score, play, why_now, rationale, icp_version, status, judged_at]
+  link-weighed:             # attach evidence to a verdict (call 0..n times)
+    command: mutate
+    query: mutations.gq
+    name: link_weighed
+    args: [verdict, signal]
+  add-touch:
+    command: mutate
+    query: mutations.gq
+    name: add_touch
+    args: [slug, verdict, person, channel, subject, body, variant, sent_at, dry_run]
+  set-outcome:
+    command: mutate
+    query: mutations.gq
+    name: set_outcome
+    args: [touch, outcome, outcome_at]
+  set-email-status:         # bounce hygiene: outcome=bounced -> email_status=invalid
+    command: mutate
+    query: mutations.gq
+    name: set_email_status
+    args: [person, email_status, updated_at]

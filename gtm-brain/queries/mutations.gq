@@ -1,0 +1,99 @@
+// GTM Brain — mutations. One per loop step; every write that needs an edge
+// inserts it in the same mutation so cardinality constraints always hold.
+// Evidence + projection stay atomic: add_enrichment writes the Enrichment
+// record AND the Account's current-best properties; add_verdict writes the
+// Verdict AND projects Account.status.
+
+// Prospecting: a new account enters the universe.
+query add_account($slug: String, $name: String, $status: String,
+                  $discovered_via: String, $created_at: DateTime) {
+    insert Account {
+        slug: $slug, name: $name, status: $status,
+        discovered_via: $discovered_via,
+        created_at: $created_at, updated_at: $created_at
+    }
+}
+
+// Enrichment: append the evidence record and project current-best values
+// onto the Account in one atomic write.
+query add_enrichment($slug: String, $account: String, $source: String,
+                     $kind: String, $summary: String, $fields_updated: [String],
+                     $industry: String, $employee_count: I32, $location: String,
+                     $profile_summary: String, $observed_at: DateTime) {
+    insert Enrichment {
+        slug: $slug, source: $source, kind: $kind, summary: $summary,
+        fields_updated: $fields_updated, observed_at: $observed_at
+    }
+    insert EnrichmentOf { from: $slug, to: $account }
+    update Account set {
+        industry: $industry, employee_count: $employee_count,
+        location: $location, profile_summary: $profile_summary,
+        updated_at: $observed_at
+    } where slug = $account
+}
+
+// People prospecting: a contact lands in a seat at an account.
+query add_person($slug: String, $name: String, $email: String,
+                 $email_status: String, $account: String, $title: String,
+                 $created_at: DateTime) {
+    insert Person {
+        slug: $slug, name: $name, email: $email, email_status: $email_status,
+        created_at: $created_at, updated_at: $created_at
+    }
+    insert WorksAt { from: $slug, to: $account, title: $title }
+}
+
+// Sense: record one signal against its account.
+query add_signal($slug: String, $bucket: String, $summary: String,
+                 $source: String, $source_ref: String, $account: String,
+                 $observed_at: DateTime, $recorded_at: DateTime) {
+    insert Signal {
+        slug: $slug, bucket: $bucket, summary: $summary,
+        source: $source, source_ref: $source_ref,
+        observed_at: $observed_at, recorded_at: $recorded_at
+    }
+    insert SignalAbout { from: $slug, to: $account }
+}
+
+// Judge: record the verdict and project the account's status in the same
+// write. $status must follow from the verdict (e.g. skip on a prospect
+// leaves "prospect"; a first_touch play moves it to "engaged").
+query add_verdict($slug: String, $account: String, $kind: String, $score: I32,
+                  $play: String, $why_now: String, $rationale: String,
+                  $icp_version: String, $status: String, $judged_at: DateTime) {
+    insert Verdict {
+        slug: $slug, kind: $kind, score: $score, play: $play,
+        why_now: $why_now, rationale: $rationale,
+        icp_version: $icp_version, judged_at: $judged_at
+    }
+    insert VerdictOn { from: $slug, to: $account }
+    update Account set { status: $status, updated_at: $judged_at } where slug = $account
+}
+
+// Judge: attach each piece of evidence the verdict weighed (call 0..n times).
+query link_weighed($verdict: String, $signal: String) {
+    insert Weighed { from: $verdict, to: $signal }
+}
+
+// Act: record the draft/send, bound to its authorizing verdict and target.
+query add_touch($slug: String, $verdict: String, $person: String,
+                $channel: String, $subject: String, $body: String,
+                $variant: String, $sent_at: DateTime, $dry_run: Bool) {
+    insert Touch {
+        slug: $slug, channel: $channel, subject: $subject, body: $body,
+        variant: $variant, sent_at: $sent_at, dry_run: $dry_run
+    }
+    insert Executes { from: $slug, to: $verdict }
+    insert TouchTargets { from: $slug, to: $person }
+}
+
+// Learn: a result came back for a touch.
+query set_outcome($touch: String, $outcome: String, $outcome_at: DateTime) {
+    update Touch set { outcome: $outcome, outcome_at: $outcome_at } where slug = $touch
+}
+
+// Learn → enrichment feedback: degrade or upgrade a contact's email status
+// (call with "invalid" after a bounced outcome).
+query set_email_status($person: String, $email_status: String, $updated_at: DateTime) {
+    update Person set { email_status: $email_status, updated_at: $updated_at } where slug = $person
+}

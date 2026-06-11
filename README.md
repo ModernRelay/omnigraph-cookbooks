@@ -10,6 +10,7 @@ Opinionated, ready-to-run graph cookbooks built on [Omnigraph](https://github.co
 | [`pharma-intel/`](./pharma-intel) | ✅ ready | Pharma competitive intelligence |
 | [`second-brain/`](./second-brain) | ✅ ready | Personal life automation graph |
 | [`vc-os/`](./vc-os) | ✅ ready | Venture-capital operating system |
+| [`gtm-brain/`](./gtm-brain) | ✅ ready | Autonomous GTM loop — sense/remember/judge/act/learn with prospecting & enrichment |
 | `company-context/` | 🚧 planned | Internal decisions, traces, actors, artifacts |
 | `biomed-research/` | 🚧 planned | Biotech & medical research tracking |
 | `competitor-intel/` | 🚧 planned | Competitor launches, pricing, positioning |

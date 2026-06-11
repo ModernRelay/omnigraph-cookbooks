@@ -1,0 +1,98 @@
+// GTM Brain — lean v1 ontology.
+//
+// Four layers:
+//   universe  — Account, Person            (who exists, who works where)
+//   evidence  — Signal, Enrichment         (append-only, provenance-carrying)
+//   judgment  — Verdict                    (the model's claims about evidence)
+//   action    — Touch                      (what we sent, what came back)
+//
+// Standing rules:
+// - Evidence is append-only: never update a Signal or Enrichment, add a new one.
+// - Account.status is a projection of the latest Verdict. It is written only by
+//   the add_verdict mutation, never hand-edited.
+// - Deferred reifications live as slug-disciplined strings for now:
+//   source, variant, icp_version, discovered_via. Promote to nodes when they
+//   grow properties (see CLAUDE.md).
+
+node Account {
+    slug: String @key                   // the company domain, e.g. "acme.com"
+    name: String
+    status: enum(prospect, qualified, engaged, customer, disqualified, do_not_contact) @index
+    industry: String? @index
+    employee_count: I32?
+    location: String?
+    discovered_via: String? @index      // how it entered the universe (source slug)
+    profile_summary: String?            // one synthesized paragraph; feeds the embedding
+    profile_embedding: Vector(3072)? @embed("profile_summary") @index
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+node Person {
+    slug: String @key                   // "<given>-<family>-<account>", e.g. "jane-doe-acme.com"
+    name: String
+    email: String? @index
+    email_status: enum(unverified, valid, risky, invalid) @index
+    linkedin_url: String?
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+node Signal {
+    slug: String @key                   // "<source>:<source_ref>" — makes re-ingest idempotent
+    bucket: enum(job, social, company, funding) @index
+    summary: String
+    source: String @index               // source slug, e.g. "sortlist-radar"
+    source_ref: String                  // the vendor's stable id for this event
+    url: String?
+    observed_at: DateTime @index        // when it happened (event time)
+    recorded_at: DateTime               // when we ingested it
+    embedding: Vector(3072)? @embed("summary") @index
+}
+
+node Enrichment {
+    slug: String @key                   // "<source>:<account>:<date>"
+    source: String @index
+    kind: enum(firmographic, contact, technographic, other)
+    summary: String                     // human-readable: what this run learned
+    fields_updated: [String]            // which Account properties this run set
+    observed_at: DateTime @index
+}
+
+node Verdict {
+    slug: String @key                   // "v:<account>:<date>"
+    kind: enum(fit, action) @index      // fit = prospecting qualification, action = why-now
+    score: I32 @range(score, 0..100)
+    play: enum(first_touch, follow_up, nurture, skip)
+    why_now: String
+    rationale: String
+    icp_version: String                 // which ICP definition this was judged against
+    model: String?                      // model id that produced the verdict
+    judged_at: DateTime @index
+}
+
+node Touch {
+    slug: String @key                   // "t:<account>:<date>"
+    channel: enum(email, linkedin, other)
+    subject: String?
+    body: String
+    variant: String @index              // copy/prompt variant slug — assignment is unrecoverable later
+    sent_at: DateTime @index
+    dry_run: Bool
+    outcome: enum(replied, meeting, no_reply, bounced)?
+    outcome_at: DateTime?
+}
+
+edge WorksAt: Person -> Account {
+    title: String?
+    seniority: enum(c_level, vp, director, manager, ic)?
+    since: Date?
+    until: Date?                        // null = current seat; set when a champion moves on
+}
+
+edge SignalAbout: Signal -> Account @card(1..1)
+edge EnrichmentOf: Enrichment -> Account @card(1..1)
+edge VerdictOn: Verdict -> Account @card(1..1)
+edge Weighed: Verdict -> Signal                       // which evidence the judge considered
+edge Executes: Touch -> Verdict @card(1..1)           // every touch is authorized by a verdict
+edge TouchTargets: Touch -> Person @card(0..1)

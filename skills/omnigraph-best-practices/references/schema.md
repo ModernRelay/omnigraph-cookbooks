@@ -120,7 +120,7 @@ No concurrent mutations during an apply. Plan for a short read-only window.
 - `@key` — primary key (implies index; usually one per node)
 - `@unique` — uniqueness constraint
 - `@index` — query optimization
-- `@range(min, max)` — numeric bounds (open ranges allowed)
+- `@range(prop, min..max)` — numeric bounds, e.g. `score: I32 @range(score, 0..100)`; the property name is required even property-level (`@range(min, max)` and `@range(min..max)` fail to parse, verified on v0.6.2)
 - `@check(prop, "regex")` — regex pattern validation on a String property
 - `@embed("source_prop")` — embed from a String source into a Vector property
 - `@description("...")` — metadata (no migration impact)

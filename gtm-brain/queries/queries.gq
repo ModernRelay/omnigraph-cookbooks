@@ -1,0 +1,51 @@
+// GTM Brain — read queries.
+// account_signals + account_touches together are the judge's payload
+// (the post's history() in two calls). rank_prospects is the prospecting
+// queue. bucket_outcomes feeds the weekly learn loop.
+
+// Judge payload 1/2: every signal we have seen for an account.
+query account_signals($account: String) {
+    match {
+        $a: Account { slug: $account }
+        $s signalAbout $a
+    }
+    return { $s.slug, $s.bucket, $s.summary, $s.source, $s.observed_at }
+    order { $s.observed_at desc }
+    limit 50
+}
+
+// Judge payload 2/2: touch history with outcomes, via the verdict that
+// authorized each touch.
+query account_touches($account: String) {
+    match {
+        $a: Account { slug: $account }
+        $v verdictOn $a
+        $t executes $v
+    }
+    return { $t.slug, $t.channel, $t.variant, $t.sent_at, $t.outcome, $t.outcome_at, $v.play }
+    order { $t.sent_at desc }
+    limit 50
+}
+
+// Ranked prospecting queue: prospects by semantic similarity to free text.
+// Pass the ICP prose for ICP-fit ranking, or a won account's profile_summary
+// for lookalike search. The server auto-embeds the string.
+query rank_prospects($q: String) {
+    match {
+        $a: Account { status: "prospect" }
+    }
+    return { $a.slug, $a.name, $a.industry, $a.employee_count, $a.profile_summary }
+    order { nearest($a.profile_embedding, $q) }
+    limit 25
+}
+
+// Learn loop input: touches grouped by signal bucket and outcome.
+// Win rate per bucket = (replied + meeting) / total, computed by the caller.
+query bucket_outcomes() {
+    match {
+        $s: Signal
+        $v weighed $s
+        $t executes $v
+    }
+    return { $s.bucket, $t.outcome, count($t) as touches }
+}
