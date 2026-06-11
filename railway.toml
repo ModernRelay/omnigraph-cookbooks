@@ -1,0 +1,38 @@
+# Railway config-as-code for omnigraph cookbook deploys.
+# https://docs.railway.com/config-as-code/reference
+
+[build]
+builder        = "DOCKERFILE"
+dockerfilePath = "deploy/railway/Dockerfile"
+
+[deploy]
+# Positional URI overrides the config's `server.graph` lookup, so the
+# bundled /etc/omnigraph/omnigraph.yaml only contributes its `policy.file`
+# pointer; the target itself is driven by Railway Bucket env wiring.
+#
+# `exec` is load-bearing: a Dockerfile/image start command is run in exec
+# form, so the shell wrapper (needed for $PORT expansion) becomes PID 1.
+# Without `exec`, that shell — not omnigraph-server — receives Railway's
+# SIGTERM on redeploy/teardown, so the server never drains and gets
+# SIGKILLed. Railway's own docs use `/bin/sh -c "exec ..."` for this.
+startCommand = "sh -c 'exec omnigraph-server \"$OMNIGRAPH_TARGET_URI\" --config /etc/omnigraph/omnigraph.yaml --bind \"0.0.0.0:$PORT\"'"
+
+# Runs between build and start. The script is idempotent — it skips when
+# the graph at $OMNIGRAPH_TARGET_URI already has a manifest, so re-deploys
+# are no-ops. First deploy runs `omnigraph init` (+ optional seed load).
+preDeployCommand = ["/usr/local/bin/omnigraph-railway-init.sh"]
+
+healthcheckPath         = "/healthz"
+healthcheckTimeout      = 300
+restartPolicyType       = "ON_FAILURE"
+restartPolicyMaxRetries = 5
+
+# REGION (critical): this service must run in the SAME Railway region as the
+# Bucket. omnigraph-server makes many sequential S3 calls per operation, so a
+# cross-region service↔Bucket hop is brutal — a single write measured ~46s
+# cross-region vs ~3.3s in-region. This file deliberately does NOT pin a
+# region (the Bucket's region is chosen at deploy time, and hardcoding one
+# would force every deploy there): set the service region to match the Bucket
+# in the Railway dashboard (Settings → Region), or add a
+# `[deploy.multiRegionConfig.<region-id>]` block. See deploy/railway/README.md
+# → "Service region" for the Bucket-code ↔ service-region-id mapping.
