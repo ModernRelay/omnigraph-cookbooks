@@ -12,10 +12,20 @@ set -e
 : "${OMNIGRAPH_TARGET_URI:?OMNIGRAPH_TARGET_URI must be set}"
 : "${OMNIGRAPH_SCHEMA_URL:?OMNIGRAPH_SCHEMA_URL must be set (e.g. https://raw.githubusercontent.com/ModernRelay/omnigraph-cookbooks/main/industry-intel/schema.pg)}"
 
-if omnigraph snapshot "$OMNIGRAPH_TARGET_URI" --json >/dev/null 2>&1; then
+# Idempotency guard. A non-zero `snapshot` means either "not initialized
+# yet" (first deploy) or a transient failure (e.g. S3/credential error). We
+# capture the output instead of discarding it (no `>/dev/null 2>&1`) and log
+# it before falling through, so a transient failure shows its real cause
+# rather than resurfacing later as a confusing `init` error. `omnigraph init`
+# is the data-safety backstop: without `--force` it refuses a URI that
+# already holds schema artifacts, so a misfired guard fails the deploy
+# loudly rather than overwriting an existing graph.
+if snapshot_out=$(omnigraph snapshot "$OMNIGRAPH_TARGET_URI" --json 2>&1); then
   echo "init: graph at $OMNIGRAPH_TARGET_URI already initialized; skipping"
   exit 0
 fi
+echo "init: snapshot did not report an initialized graph — proceeding to init"
+echo "init: snapshot output: $(printf '%s' "$snapshot_out" | tr '\n' ' ' | cut -c1-300)"
 
 SCHEMA_PATH=/tmp/omnigraph-schema.pg
 echo "init: downloading schema from $OMNIGRAPH_SCHEMA_URL"

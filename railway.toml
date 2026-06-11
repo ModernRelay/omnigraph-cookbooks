@@ -26,3 +26,13 @@ healthcheckPath         = "/healthz"
 healthcheckTimeout      = 300
 restartPolicyType       = "ON_FAILURE"
 restartPolicyMaxRetries = 5
+
+# REGION (critical): this service must run in the SAME Railway region as the
+# Bucket. omnigraph-server makes many sequential S3 calls per operation, so a
+# cross-region service↔Bucket hop is brutal — a single write measured ~46s
+# cross-region vs ~3.3s in-region. This file deliberately does NOT pin a
+# region (the Bucket's region is chosen at deploy time, and hardcoding one
+# would force every deploy there): set the service region to match the Bucket
+# in the Railway dashboard (Settings → Region), or add a
+# `[deploy.multiRegionConfig.<region-id>]` block. See deploy/railway/README.md
+# → "Service region" for the Bucket-code ↔ service-region-id mapping.

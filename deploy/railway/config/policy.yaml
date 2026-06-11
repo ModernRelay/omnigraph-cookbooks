@@ -32,17 +32,21 @@ protected_branches:
   - main
 
 rules:
-  - id: admins-full-access
+  # Split into two rules so each carries the scope key that governs its
+  # action kind — branch_scope for read/export/change, target_branch_scope
+  # for schema_apply/branch_*. Both are `any` (admins act on every branch),
+  # stated explicitly rather than relying on an unspecified default.
+  - id: admins-read-change-any-branch
     allow:
       actors: { group: admins }
-      actions:
-        - read
-        - export
-        - change
-        - schema_apply
-        - branch_create
-        - branch_delete
-        - branch_merge
+      actions: [read, export, change]
+      branch_scope: any
+
+  - id: admins-structural-any-branch
+    allow:
+      actors: { group: admins }
+      actions: [schema_apply, branch_create, branch_delete, branch_merge]
+      target_branch_scope: any
 
   - id: writers-read-any-branch
     allow:
