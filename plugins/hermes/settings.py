@@ -13,8 +13,6 @@ try:
 except Exception:  # pragma: no cover
     yaml = None
 
-_HERMES_CONFIG = Path(os.path.expanduser("~/.hermes/config.yaml"))
-
 _DEFAULTS = {
     "config_path": None,          # explicit path to omnigraph.yaml (no folder hunting)
     "autocapture": "branch",      # off | branch | main
@@ -23,11 +21,18 @@ _DEFAULTS = {
 }
 
 
+def _hermes_config() -> Path:
+    """The active Hermes config — honors HERMES_HOME (profiles/sandboxes), not just ~/.hermes."""
+    home = os.environ.get("HERMES_HOME") or "~/.hermes"
+    return Path(os.path.expanduser(home)) / "config.yaml"
+
+
 def _entry() -> dict:
-    if yaml is None or not _HERMES_CONFIG.is_file():
+    cfg = _hermes_config()
+    if yaml is None or not cfg.is_file():
         return {}
     try:
-        with open(_HERMES_CONFIG, "r", encoding="utf-8") as fh:
+        with open(cfg, "r", encoding="utf-8") as fh:
             data = yaml.safe_load(fh) or {}
         return ((data.get("plugins") or {}).get("entries") or {}).get("omnigraph") or {}
     except Exception:

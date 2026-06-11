@@ -73,6 +73,20 @@ def test_autocapture_default_and_normalization():
     settings._entry = lambda: {}                        # reset
 
 
+# --- settings honor HERMES_HOME (profiles/sandboxes), not just ~/.hermes ----
+
+def test_settings_hermes_config_honors_home():
+    old = os.environ.get("HERMES_HOME")
+    os.environ["HERMES_HOME"] = "/some/sandbox"
+    try:
+        assert str(settings._hermes_config()) == "/some/sandbox/config.yaml"
+    finally:
+        if old is None:
+            os.environ.pop("HERMES_HOME", None)
+        else:
+            os.environ["HERMES_HOME"] = old
+
+
 # --- hooks: banner content per autocapture --------------------------------
 
 def _fake_cfg():

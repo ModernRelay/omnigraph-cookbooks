@@ -14,17 +14,23 @@ Hook signatures verified against Hermes source (`hermes_cli/plugins.py` / `hooks
 
 from __future__ import annotations
 
+import logging
+
 try:
     from . import discovery, settings
 except ImportError:  # standalone dev tests
     import discovery, settings
 
+logger = logging.getLogger(__name__)
 _cache: dict = {"cfg": None}
 
 
 def on_session_start(session_id=None, **kwargs):
     try:
         _cache["cfg"] = discovery.resolve_config()
+        cfg = _cache["cfg"]
+        logger.info("[omnigraph hook] on_session_start: config=%s graphs=%s",
+                    cfg.path if cfg else None, cfg.graphs if cfg else None)
     except Exception:
         _cache["cfg"] = None
     return None
@@ -77,6 +83,10 @@ def pre_llm_call(session_id=None, user_message="", is_first_turn=False, **kwargs
         if not is_first_turn and not settings.remind_every_turn():
             return None
         text = build_banner()
-        return {"context": text} if text else None
+        if text:
+            logger.info("[omnigraph hook] pre_llm_call: injected banner (autocapture=%s, first_turn=%s, %d chars)",
+                        settings.autocapture(), is_first_turn, len(text))
+            return {"context": text}
+        return None
     except Exception:
         return None
