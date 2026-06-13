@@ -1,27 +1,224 @@
 ---
 name: omnigraph-best-practices
-description: Operate a locally or remotely deployed Omnigraph graph database. Use this skill whenever you see Omnigraph CLI commands (omnigraph init/query/mutate/load/ingest/schema/lint/embed/branch/commit), .pg schema files, .gq query files, RustFS S3 URIs (s3://omnigraph-local/...), remote bearer-authed graph endpoints, 504 errors against a graph, work inside a folder containing omnigraph.yaml or cluster.yaml, or cluster commands (omnigraph cluster validate/plan/apply/approve, omnigraph-server --cluster). Covers cluster-mode declarative deployments (cluster.yaml, plan/apply loop, approval-gated deletes), local RustFS setup, project layout, schema authoring and evolution (plan before apply), query linting, data changes (mutate vs load vs ingest, --mode merge vs overwrite), branches for data review, embeddings, aliases for automation, HTTP server operation, Cedar policy, remote graph operations (504 verification ritual, ingest vs load tradeoffs, version drift), and common gotchas. Especially important BEFORE running schema apply (plan first), any load (pick --mode carefully), any .gq/.pg edit (lint afterward), or any write to a remote graph (verify via commit list afterward). Apply this skill aggressively when the user mentions Omnigraph, graph migrations, remote graph deploys, 504 errors, or graph database development.
+description: Operate a locally or remotely deployed Omnigraph graph database. Use whenever you see Omnigraph CLI commands (omnigraph init/query/mutate/load/schema/lint/embed/branch/commit/login/config migrate/cluster), .pg schema files, .gq query files, S3 graph URIs (s3://...), bearer-authed graph endpoints, 504 errors, or a folder with cluster.yaml, omnigraph.yaml, or ~/.omnigraph/config.yaml. Covers cluster-mode declarative deployments (cluster.yaml plan/apply, S3 object storage, omnigraph-server --cluster), the two config surfaces (team cluster.yaml + operator ~/.omnigraph/config.yaml — identity, servers, login, --server), schema evolution, query linting, data writes (mutate for edits; load with required --mode + --from for branches), branches, embeddings, Cedar policy, and remote ops (504 verification, version drift). Especially important before schema apply (plan first), any load (--mode required), any .gq/.pg edit (lint after), or any remote write (verify via commit list).
 license: MIT (see LICENSE at repo root)
-compatibility: Requires omnigraph CLI >= 0.6.1; cluster mode requires >= 0.7.0 (edge channel until 0.7.0 tags). Docker only for the optional local RustFS path.
+compatibility: Requires omnigraph CLI >= 0.7.0 — the unified `load`, the two config surfaces (cluster.yaml + ~/.omnigraph/config.yaml), and cluster apply/serve all require 0.7.0.
 metadata:
   author: ModernRelay
-  version: "0.5.0"
+  version: "0.6.0"
   repository: https://github.com/ModernRelay/omnigraph-cookbooks
 ---
 
 # Operating Omnigraph Locally
 
-This skill captures the operational rules for working with a locally deployed Omnigraph (RustFS-backed or remote S3). Follow them when authoring schema, writing queries, loading data, evolving schema, or automating graph operations.
+This skill captures the operational rules for working with a locally or remotely deployed Omnigraph. Follow them when authoring schema, writing queries, loading data, evolving schema, or automating graph operations.
 
 ## The Seven Rules
 
-1. **Lint before commit** — `omnigraph lint --schema schema.pg --query queries/foo.gq` validates both sides against each other. No running repo required. (`omnigraph query lint` still works as a deprecated alias.)
+1. **Lint before commit** — `omnigraph lint --schema schema.pg --query queries/foo.gq` validates both sides against each other. No running repo required.
 2. **Plan before apply** — never run `schema apply` without a successful `schema plan` first. Apply is destructive; plan is free. (Cluster mode has the same rule with different verbs: `cluster plan` before `cluster apply` — the plan embeds the engine's real migration steps.)
-3. **Branches are for data; apply is for schema** — review data ingests on a feature branch then merge. Schema changes go straight to `main` (single-graph: `omnigraph schema apply`; cluster mode: edit the `.pg` and run `cluster apply` — there is no direct `schema apply` in cluster deployments).
-4. **Pick the right write command** — `mutate` for edits (typechecked, parameterized), `load --mode merge` for bulk upsert on local repos, `ingest` for remote, `load --mode overwrite` only for clean slates.
+3. **Branches are for data; apply is for schema** — review bulk data loads on a feature branch then merge. Schema changes go straight to `main` (single-graph: `omnigraph schema apply`; cluster mode: edit the `.pg` and run `cluster apply` — there is no direct `schema apply` in cluster deployments).
+4. **Pick the right write command** — `mutate` for edits (typechecked, parameterized); `load` for bulk JSONL, local **or** remote, with a **required** `--mode` (`merge` upsert · `append` strict-insert · `overwrite` clean-slate). `load --from <base>` forks a review branch in one shot; bare `load` needs an existing target branch.
 5. **Parameterize everything** — never string-interpolate values into `.gq` bodies or `--params`. Declare `$var: Type` and pass via `--params`.
 6. **Expose agent operations as aliases** — not raw CLI invocations. Aliases decouple the operation name from the query implementation.
 7. **Verify after every remote write** — compare `commit list --branch main` head before and after. The CLI's exit code is not authoritative on remote graphs; proxies can drop the response while the write commits server-side. See `references/remote-ops.md` for the verification ritual and how to recover from 504s.
+
+## Essentials: Queries, Mutations, Loads
+
+The patterns below cover the daily 80% — enough to write correct `.gq` and JSONL without leaving this file. The long tail (multi-hop, negation, aggregations, hybrid search, every decorator) is in [`references/queries.md`](references/queries.md) and [`references/schema.md`](references/schema.md).
+
+**Comments in `.pg` and `.gq` are `//`, never `#`** (the #1 parse error).
+
+### Read query (`.gq`)
+
+```gq
+query get_signal($slug: String) {
+    match {
+        $s: Signal { slug: $slug }   // inline property filter goes in the match block
+        $s formsPattern $p           // edge FormsPattern declared PascalCase, traversed lowerCamelCase
+    }
+    return { $s.slug, $s.name, $p.slug }
+}
+```
+
+- **Parameterize, never interpolate.** Declare `$var: Type` in the signature; pass via `--params '{"slug":"sig-foo"}'`. An empty signature still needs parens: `query foo() { ... }`.
+- **Edge traversal is lowerCamelCase** even though the schema declares edges PascalCase (`FormsPattern` → `formsPattern`).
+- **List/sort** by appending `order { $s.stagingTimestamp desc } limit 50` after `return`.
+- **Ranking ops (`nearest`/`bm25`/`rrf`) require a trailing `limit N`** — omitting it is a compile error. They live in `order { }`, not as filters. Scope with `match`/filters first, then rank (`order { nearest($d.embedding, $q) } limit 10`).
+
+### Mutation (`.gq`)
+
+There is **no top-level `mutation { }`** — every block is a named `query`; the verb (`insert`/`update`/`delete`) makes it a write. Dispatch with `omnigraph mutate` (not `query`).
+
+```gq
+query add_signal($slug: String, $name: String, $brief: String, $createdAt: DateTime) {
+    insert Signal { slug: $slug, name: $name, brief: $brief,
+                    stagingTimestamp: $createdAt, createdAt: $createdAt, updatedAt: $createdAt }
+}
+query link($from: String, $to: String) { insert FormsPattern { from: $from, to: $to } }
+query retitle($slug: String, $t: String) { update Signal set { name: $t } where slug = $slug }
+query remove($slug: String)              { delete Signal where slug = $slug }
+```
+
+- **Every non-nullable property must be supplied** or lint fails (`T12: insert for 'Signal' must provide non-nullable property 'X'`).
+- A single mutation is insert/update-only **or** delete-only — never both (parse-time D₂ rule); split them.
+- Edges have no `@key`: give `from`/`to` slugs; the property block is `{}` when the edge has none.
+
+### Bulk load (JSONL)
+
+```jsonl
+{"type":"Signal","data":{"slug":"sig-foo","name":"Foo","brief":"…","stagingTimestamp":"2026-04-14T00:00:00Z","createdAt":"2026-04-14T00:00:00Z","updatedAt":"2026-04-14T00:00:00Z"}}
+{"edge":"FormsPattern","from":"sig-foo","to":"pat-bar","data":{}}
+```
+
+```bash
+omnigraph load --data seed.jsonl --mode merge $GRAPH                                  # --mode is REQUIRED (no default)
+omnigraph load --data delta.jsonl --from main --branch review --mode merge $GRAPH     # fork a review branch in one shot
+```
+
+- `--mode`: `merge` (upsert by `@key`) · `append` (fails on collision) · `overwrite` (destructive, staged). `--from <base>` forks a missing `--branch`; bare `load` needs an existing branch. Works local **and** remote.
+- **Date footgun**: `mutate --params` takes ISO strings (`Date` `"2026-04-29"`, `DateTime` `"…T00:00:00Z"`); `load` JSONL takes **integer days since epoch** for `Date` (`20572`) but ISO for `DateTime`.
+
+### Dispatching
+
+```bash
+omnigraph query  --alias signal sig-foo          # or: --query file.gq --name get_signal --params '{...}'
+omnigraph mutate --alias add-signal sig-foo "Foo" "brief" 2026-04-14T00:00:00Z
+omnigraph lint   --schema schema.pg --query queries/foo.gq    # after EVERY .gq/.pg edit (no server needed)
+```
+
+### `.gq` grammar
+
+The non-obvious facts that bite, then the full grammar:
+
+- **Scalar param types**: `String Bool I32 I64 U32 U64 F32 F64 DateTime Date Blob`. Modifiers: `T?` (optional), `[T]` (list), `Vector(N)`. There is **no `Int`** — use `I64`.
+- **A read query needs `match` *and* `return`** (`order`/`limit` optional); a mutation has neither — only `insert`/`update`/`delete`.
+- **`limit` takes an integer literal, not a param** — `limit 50`, never `limit $n`.
+- **Variable-hop traversal**: `$p knows{1,3} $f` (`{1,}` = unbounded).
+- **Literals & calls**: `now()`, `date("2026-04-29")`, `datetime("…T00:00:00Z")`, list `[…]`.
+- **Filters** `= != > < >= <= contains`; **aggregates** `count/sum/avg/min/max` (`count($f) as n`).
+- **Stored-query metadata**: `@description("…")` / `@instruction("…")` may follow the param list.
+- **Casing**: type names uppercase-initial (`Signal`); idents/edges lowercase-initial (`formsPattern`); variables `$`-prefixed. `//` and `/* */` comments only.
+
+Authoritative PEG grammar (pest) for `.gq` files ("NanoGraph" is the legacy engine name):
+
+```pest
+// NanoGraph Query Grammar (.gq files)
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = _{ LINE_COMMENT | BLOCK_COMMENT }
+LINE_COMMENT = _{ "//" ~ (!"\n" ~ ANY)* }
+BLOCK_COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+
+query_file = { SOI ~ query_decl* ~ EOI }
+
+query_decl = {
+    "query" ~ ident ~ "(" ~ param_list? ~ ")" ~ query_annotation* ~ "{"
+        ~ query_body
+    ~ "}"
+}
+query_annotation = { description_annotation | instruction_annotation }
+description_annotation = { "@description" ~ "(" ~ string_lit ~ ")" }
+instruction_annotation = { "@instruction" ~ "(" ~ string_lit ~ ")" }
+
+query_body = { read_query_body | mutation_body }
+mutation_body = { mutation_stmt+ }
+read_query_body = {
+    match_clause
+    ~ return_clause
+    ~ order_clause?
+    ~ limit_clause?
+}
+
+mutation_stmt = { insert_stmt | update_stmt | delete_stmt }
+insert_stmt = { "insert" ~ type_name ~ "{" ~ mutation_assignment+ ~ "}" }
+update_stmt = { "update" ~ type_name ~ "set" ~ "{" ~ mutation_assignment+ ~ "}" ~ "where" ~ mutation_predicate }
+delete_stmt = { "delete" ~ type_name ~ "where" ~ mutation_predicate }
+mutation_assignment = { ident ~ ":" ~ match_value ~ ","? }
+mutation_predicate = { ident ~ comp_op ~ match_value }
+
+param_list = { param ~ ("," ~ param)* }
+param = { variable ~ ":" ~ type_ref }
+
+type_ref = { (list_type | base_type | vector_type) ~ "?"? }
+list_type = { "[" ~ base_type ~ "]" }
+vector_type = { "Vector" ~ "(" ~ integer ~ ")" }
+base_type = { "String" | "Blob" | "Bool" | "I32" | "I64" | "U32" | "U64" | "F32" | "F64" | "DateTime" | "Date" }
+
+match_clause = { "match" ~ "{" ~ clause+ ~ "}" }
+
+clause = { negation | binding | traversal | filter | text_search_clause }
+text_search_clause = { search_call | fuzzy_call | match_text_call }
+
+// Binding: $p: Person { name: "Alice" }
+binding = { variable ~ ":" ~ type_name ~ ("{" ~ prop_match_list ~ "}")? }
+
+prop_match_list = { prop_match ~ ("," ~ prop_match)* ~ ","? }
+prop_match = { ident ~ ":" ~ match_value }
+match_value = { literal | variable | now_call }
+
+// Traversal: $p knows $f
+traversal = { variable ~ edge_ident ~ traversal_bounds? ~ variable }
+traversal_bounds = { "{" ~ integer ~ "," ~ integer? ~ "}" }
+
+// Filter: $f.age > 25
+filter = { expr ~ filter_op ~ expr }
+
+// Negation: not { ... }
+negation = { "not" ~ "{" ~ clause+ ~ "}" }
+
+// Return clause — projections separated by commas or newlines
+return_clause = { "return" ~ "{" ~ projection+ ~ "}" }
+projection = { expr ~ ("as" ~ ident)? ~ ","? }
+
+// Order clause
+order_clause = { "order" ~ "{" ~ ordering ~ ("," ~ ordering)* ~ "}" }
+ordering = { nearest_ordering | (expr ~ order_dir?) }
+nearest_ordering = { "nearest" ~ "(" ~ prop_access ~ "," ~ expr ~ ")" }
+order_dir = { "asc" | "desc" }
+
+// Limit clause
+limit_clause = { "limit" ~ integer }
+
+// Expressions
+expr = { now_call | nearest_ordering | search_call | fuzzy_call | match_text_call | bm25_call | rrf_call | agg_call | prop_access | variable | literal | ident }
+now_call = { "now" ~ "(" ~ ")" }
+search_call = { "search" ~ "(" ~ expr ~ "," ~ expr ~ ")" }
+fuzzy_call = { "fuzzy" ~ "(" ~ expr ~ "," ~ expr ~ ("," ~ expr)? ~ ")" }
+match_text_call = { "match_text" ~ "(" ~ expr ~ "," ~ expr ~ ")" }
+bm25_call = { "bm25" ~ "(" ~ expr ~ "," ~ expr ~ ")" }
+rank_expr = { nearest_ordering | bm25_call }
+rrf_call = { "rrf" ~ "(" ~ rank_expr ~ "," ~ rank_expr ~ ("," ~ expr)? ~ ")" }
+
+prop_access = { variable ~ "." ~ ident }
+
+agg_call = { agg_func ~ "(" ~ expr ~ ")" }
+agg_func = { "count" | "sum" | "avg" | "min" | "max" }
+
+comp_op = { ">=" | "<=" | "!=" | ">" | "<" | "=" }
+filter_op = { "contains" | comp_op }
+
+// Terminals
+variable = @{ "$" ~ (ident_chars | "_") }
+ident_chars = @{ (ASCII_ALPHA_LOWER | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+// Edge identifier — lowercase start, same as ident but used in traversal context
+// Must not match keywords
+edge_ident = @{ !("not" ~ !ASCII_ALPHANUMERIC) ~ (ASCII_ALPHA_LOWER | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+type_name = @{ ASCII_ALPHA_UPPER ~ (ASCII_ALPHANUMERIC | "_")* }
+ident = @{ (ASCII_ALPHA_LOWER | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+literal = { list_lit | datetime_lit | date_lit | string_lit | float_lit | integer | bool_lit }
+date_lit = { "date" ~ "(" ~ string_lit ~ ")" }
+datetime_lit = { "datetime" ~ "(" ~ string_lit ~ ")" }
+list_lit = { "[" ~ (literal ~ ("," ~ literal)*)? ~ "]" }
+string_lit = @{ "\"" ~ string_char* ~ "\"" }
+string_char = @{ !("\"" | "\\") ~ ANY | "\\" ~ ANY }
+float_lit = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
+integer = @{ ASCII_DIGIT+ }
+bool_lit = { "true" | "false" }
+```
 
 ## Five Ontology Design Criteria (Gruber 1993)
 
@@ -49,110 +246,80 @@ Without structural provenance, agents cannot reconcile contradictory assertions,
 
 **In Omnigraph:** model provenance as a `Claim`-style interface (or a separate `Claim` node linked to each sourced fact) with required fields — `asserted_by: Actor`, `asserted_at: DateTime`, `evidence_source: Source`, optionally `confidence: F64`. Don't stash provenance into a free-text `source: String` or a `metadata: JSON` dump — structured provenance is queryable, indexable, and migratable; free-form is none of these.
 
-## Local Setup
+## Storage & Credentials
 
-### Bootstrap a local RustFS + Omnigraph in one command
+A graph's bytes live in one of two backends:
 
-**Requires Docker.** RustFS runs in a container — install [Docker](https://docs.docker.com/get-docker/) and verify before running the bootstrap:
-
-```bash
-docker version >/dev/null 2>&1 || { echo "Install Docker first: https://docs.docker.com/get-docker/"; exit 1; }
-curl -fsSL https://raw.githubusercontent.com/ModernRelay/omnigraph/main/scripts/local-rustfs-bootstrap.sh | bash
-```
-
-Defaults: RustFS S3 on `127.0.0.1:9000`, console on `:9001`, `omnigraph-server` on `:8080`, bucket `omnigraph-local`. Override with `BUCKET=foo PREFIX=repos/bar BIND=127.0.0.1:8080 curl ...`.
-
-**Heads up — port :8080 is in use after bootstrap.** The bootstrap auto-starts an `omnigraph-server` against its own demo repo. If you start a second server (e.g. for a different cookbook) without stopping the first, you'll get a silent port collision. Either stop the bootstrap server or start yours with `--bind 127.0.0.1:8090`.
-
-Bootstrap also installs `omnigraph` and `omnigraph-server` binaries under `<workdir>/.omnigraph-rustfs-demo/bin/` — **not on PATH by default**. Add it or invoke binaries by absolute path.
-
-### AWS env vars (for `init`, `load`, and the server)
-
-`init` and `load` write S3-backed storage directly, and `omnigraph-server` reads from it. Both need AWS credentials pointed at RustFS. Keep them in `.env.omni` (git-ignored):
-
-```bash
-AWS_ACCESS_KEY_ID=rustfsadmin
-AWS_SECRET_ACCESS_KEY=rustfsadmin
-AWS_REGION=us-east-1
-AWS_ENDPOINT_URL=http://127.0.0.1:9000
-AWS_ENDPOINT_URL_S3=http://127.0.0.1:9000
-AWS_ALLOW_HTTP=true
-AWS_S3_FORCE_PATH_STYLE=true
-```
-
-Source before running CLI commands:
+- **Local filesystem** — a path or `file://` URI. In cluster mode `storage:` defaults to the config directory, so local dev needs no object store.
+- **S3-compatible object storage** — AWS, Railway, Tigris, etc. (`s3://bucket/prefix`). Authenticate with the standard `AWS_*` environment contract; keep dev creds in a git-ignored `.env.omni` and source it before CLI calls:
 
 ```bash
 set -a && source .env.omni && set +a
 ```
 
-Or reference `auth.env_file: .env.omni` in `omnigraph.yaml` for automatic loading.
-
-### Validate the setup
-
-```bash
-curl http://127.0.0.1:8080/healthz
-omnigraph snapshot s3://omnigraph-local/repos/<your-repo> --json
-```
+`init` and `load` write storage directly (bypassing the server); the server reads from it. Validate with `curl http://127.0.0.1:8080/healthz`, then `omnigraph snapshot <graph-uri> --json`.
 
 ## Project Layout
 
 ### Two deployment models — pick one per project
 
 - **Cluster mode** (omnigraph >= 0.7.0, recommended for new projects): a
-  `cluster.yaml` declares the deployment (graphs, schemas, stored queries,
-  policies); `omnigraph cluster apply` converges it and
-  `omnigraph-server --cluster .` serves it. `omnigraph.yaml` shrinks to
-  per-operator ergonomics (aliases, CLI defaults, `cli.actor`). See
+  `cluster.yaml` declares the whole deployment (graphs, schemas, stored
+  queries, policies, and optionally an S3 `storage:` root);
+  `omnigraph cluster apply` converges it and `omnigraph-server --cluster .`
+  (or `--cluster s3://bucket/prefix` for config-free serving) serves it. See
   `references/cluster.md`.
-- **Single-graph mode** (classic): `omnigraph.yaml` is the operational
-  backbone below. Fully supported; required for S3-hosted graphs today.
+- **Single-graph mode** (classic): one server, one graph, selected by a bare
+  URI or a named graph. Fully supported; the only path for an individually
+  S3-hosted graph today.
 
 A server boots from one source or the other — never a merge of both.
 
-### `omnigraph.yaml` is the operational backbone (single-graph mode)
+### The two config surfaces (omnigraph >= 0.7.0)
 
-Run CLI commands from the folder containing `omnigraph.yaml` — relative paths for `queries/`, `schema.pg`, and `.env.omni` resolve from there.
+Configuration has two single-owner homes (RFC-007/008), plus an
+everything-explicit flag/env tier:
+
+| Surface | Owner | Location | Declares |
+|---|---|---|---|
+| **Cluster config** | the team, in the repo | `cluster.yaml` + the `.pg`/`.gq`/policy files it references | what the system **is**: graphs, schemas, queries, policies, storage |
+| **Operator config** | one person | `~/.omnigraph/config.yaml` (`$OMNIGRAPH_HOME` relocates it) | who **I** am: identity, named servers, output defaults, personal aliases |
+| Flags / env | per invocation | — | everything, explicitly |
 
 ```yaml
-graphs:
-  local_s3:
-    uri: s3://omnigraph-local/repos/spike-intel
-  local_server:
-    uri: http://127.0.0.1:8080
-    bearer_token_env: OMNIGRAPH_BEARER_TOKEN
-
-server:
-  graph: local_s3
-  bind: 127.0.0.1:8080
-
-cli:
-  graph: local_s3
-  branch: main
-  output_format: jsonl      # use `table` for human reading; `jsonl` for automation
-
-auth:
-  env_file: .env.omni
-
-query:
-  roots: [queries, .]
-
-aliases:
-  signal:
-    command: query        # `read` still accepted (deprecated)
-    query: signals.gq
-    name: get_signal
-    args: [slug]
-    format: kv
+# ~/.omnigraph/config.yaml — per operator, never committed
+operator:
+  actor: act-andrew          # default --as identity (last hop: --as > legacy cli.actor > operator.actor)
+servers:
+  intel-dev:
+    url: https://graph.example.com    # no tokens here, ever
+defaults:
+  output: table              # read-format default
+aliases:                     # personal bindings to TEAM stored queries (see references/aliases.md)
+  triage: { server: intel-dev, graph: spike, query: weekly_triage, args: [since] }
 ```
 
-Key naming: the config field is `graphs:` (not `targets:` — that's the old schema). `cli.graph` and `server.graph` replaced `cli.target` / `server.target`. The CLI flag is still `--target <name>` though.
+The operator config and credentials are **auto-discovered — no flag points at them**: the CLI reads `$OMNIGRAPH_HOME/config.yaml` (default `~/.omnigraph/config.yaml`), and an absent file is just an empty layer (zero-config). `$OMNIGRAPH_HOME` relocates the *directory* only, not a specific file. (`--config`/`$OMNIGRAPH_CONFIG` is a separate flag for the cluster/legacy/server config — not this.)
+
+Credentials live outside config: `echo $TOKEN | omnigraph login intel-dev`
+writes `~/.omnigraph/credentials` (`0600`). Address a server with
+`--server intel-dev` (`--graph <id>` for multi-graph); the matching token
+resolves via `OMNIGRAPH_TOKEN_INTEL_DEV` → the credentials file → the legacy
+chain. Run data-plane CLI commands from a graph's project folder so relative
+`queries/`, `schema.pg`, and `.env.omni` paths resolve.
+
+> **Legacy `omnigraph.yaml` is deprecated (RFC-008).** It still works through
+> the deprecation window (loading it prints a deprecation notice; silence with
+> `OMNIGRAPH_SUPPRESS_YAML_DEPRECATION=1`). Run `omnigraph config migrate
+> [--write]` to split it — team half → `cluster.yaml`, personal half →
+> `~/.omnigraph/config.yaml`. `omnigraph init` no longer scaffolds it; new work
+> uses the two surfaces above.
 
 ### What to commit
 
-**Commit:** `schema.pg`, `queries/*.gq`, `omnigraph.yaml`, `seed.md`, `seed.jsonl`, per-cookbook `README.md` and `CLAUDE.md`.
+**Commit:** `schema.pg`, `queries/*.gq`, `cluster.yaml`, `seed.md`, `seed.jsonl`, per-cookbook `README.md` and `CLAUDE.md`.
 
-**Ignore:** `.env.omni` (credentials), `.claude/` (local agent state), `*.omni/` (local repo artifacts), `.omnigraph-rustfs-demo/` (bootstrap state).
+**Ignore:** `.env.omni` (credentials), `.claude/` (local agent state), `*.omni/` (local graph artifacts), `__cluster/` and `graphs/` (cluster state + derived graph roots).
 
 ### Give agents a `CLAUDE.md`
 
@@ -173,7 +340,6 @@ These are the traps most likely to bite. Scan this table before debugging any pa
 | `schema apply` with feature branches open | rejected | Merge or delete branches first |
 | `nearest(...)` / `bm25(...)` / `rrf(...)` without `limit` | compile error | Add `limit N` |
 | Adding non-nullable property without backfill | unsupported migration | Make optional → backfill → tighten in follow-up apply |
-| Config uses `targets:` / `target:` | `graph 'X' not found in omnigraph.yaml` | Rename to `graphs:` / `graph:` |
 | `omnigraph init --json` | `unexpected argument --json` | `init` doesn't support `--json`; drop the flag |
 | `omnigraph init` on an already-initialized URI | `AlreadyInitialized` error (v0.6.0+) | `--force` to re-init (skips the schema preflight; does **not** purge data) |
 | `schema apply` dropping a property/type | soft-dropped or rejected (no data loss) | add `--allow-data-loss` to actually drop the column |
@@ -184,23 +350,15 @@ These are the traps most likely to bite. Scan this table before debugging any pa
 | `mutation { ... }` wrapper in `.gq` | `parse error: expected query_file` at line 1 | Use `query <name>(...) { insert T { ... } }`; there is no top-level `mutation` keyword |
 | `--config` placed before subcommand | `unexpected argument --config` | Put `--config` **after** the subcommand (e.g. `omnigraph schema show --config X`) |
 | Reading a large schema via stdout-capped tool | Truncated, garbled, or duplicated output | `omnigraph schema show > /tmp/schema.pg` first; then read the file with offset/limit |
-| `omnigraph load` against a remote URI | `load is only supported against local repo URIs in this milestone` | Use `ingest` for remote graphs |
+| `omnigraph load` without `--mode` | error: `--mode` is required | Pass `--mode merge\|append\|overwrite` — there is no default (overwrite is destructive, so it is never implicit). `load` works against remote URIs now; the old "local repo URIs only" rejection is gone |
 | Blind retry after 504 | Duplicate Signal/Decision/Claim (append-only types lack `@key` dedup) | `commit list --branch main --json` first; head advanced means it landed; only retry if unchanged |
-| `sync_branch()` mentioned in version-drift error | Searching for nonexistent CLI command | Server-internal directive in error text; retry once, fall back to `ingest` if persistent |
-| Stale `ingest/<name>` branches at `main`'s head | 504-orphaned empty branches; eventually block writes | List branches, find ones at `main`'s `graph_commit_id`, `omnigraph branch delete --config X <name>` |
+| `sync_branch()` mentioned in version-drift error | Searching for nonexistent CLI command | Server-internal directive in error text; just retry — the next call re-pins to the new head |
+| Stale empty branches at `main`'s head | 504-orphaned forks from a timed-out `load --from` (or the legacy `ingest`); eventually block writes | List branches, find ones at `main`'s `graph_commit_id`, `omnigraph branch delete --config X <name>` |
 | Top-level `policy:`/`queries:` with a **named** graph (`server.graph`/`--target`) | server refuses to boot with migration guidance (v0.6.1) | Nest under `graphs.<name>.policy` / `graphs.<name>.queries`. Top-level is valid **only** for an anonymous bare-URI single-graph server |
 | `omnigraph optimize` against a table with a `Blob` property | table is **skipped**, not failed (Lance blob-v2 compaction bug) | Expected — `--json` reports it under `skipped`; non-blob tables still compact |
-
-## Edge Traversal Casing
-
-Schema declares edges in **PascalCase** (`FormsPattern`), but queries traverse them in **lowerCamelCase**:
-
-```gq
-match {
-    $s: Signal
-    $s formsPattern $p       // edge FormsPattern: Signal -> Pattern
-}
-```
+| `omnigraph init` writes no `omnigraph.yaml` | expected (RFC-008) — `init` stopped scaffolding it | Start a `cluster.yaml` from the `references/cluster.md` template, or `omnigraph config migrate` an existing legacy file |
+| Legacy `omnigraph.yaml` prints a deprecation block on load | expected (RFC-008); the file still works | `OMNIGRAPH_SUPPRESS_YAML_DEPRECATION=1` to silence in CI; `config migrate` to split it; `OMNIGRAPH_NO_LEGACY_CONFIG=1` to hard-error |
+| `@unique` on a `[List]`/`Blob` column | `load` now errors loudly (was silently un-enforced before #160) | Use `@unique` only on scalar columns (and composite `@unique(a, b)`, now keyed as a true tuple) — uniqueness needs a type that reduces to a scalar key |
 
 ## Deep Dives
 
@@ -212,8 +370,8 @@ For anything beyond the basics, load the relevant reference file. Each is self-c
 |-----------|--------------|
 | [`references/schema.md`](references/schema.md) | Editing `.pg` files, running `schema plan`/`apply`, renaming types, backfilling required fields |
 | [`references/queries.md`](references/queries.md) | Writing or linting `.gq` files, search functions, aggregations, multi-hop patterns |
-| [`references/data.md`](references/data.md) | Choosing between `mutate`, `load`, and `ingest`; branch review workflow; destructive ops |
-| [`references/remote-ops.md`](references/remote-ops.md) | Operating against a remote/CloudFront-fronted graph: 504 verification ritual, version drift, ingest fingerprints, append-only retry safety |
+| [`references/data.md`](references/data.md) | Choosing between `mutate` and `load` (required `--mode`, `--from` to fork a review branch); branch review workflow; destructive ops |
+| [`references/remote-ops.md`](references/remote-ops.md) | Operating against a remote/CloudFront-fronted graph: 504 verification ritual, version drift, fork-branch 504 fingerprints, append-only retry safety, operator `--server`/`login` targeting |
 | [`references/search.md`](references/search.md) | Embeddings, `@embed`, vector/text ranking, scope-then-rank pattern |
 | [`references/aliases.md`](references/aliases.md) | Defining aliases for agents, structured output, JSON args |
 | [`references/stored-queries.md`](references/stored-queries.md) | Server-side stored-query registry (v0.6.1): `queries:` config, `omnigraph queries validate/list`, `GET /queries` + `POST /queries/{name}`, `invoke_query` Cedar gating, MCP exposure |

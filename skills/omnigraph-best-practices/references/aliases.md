@@ -1,45 +1,56 @@
 # Aliases & Agent Automation
 
+## Contents
+- What an alias is
+- Operator alias schema
+- Args binding & JSON-first parsing
+- Default to structured output
+- Alias naming convention
+- Secrets don't belong in aliases
+- Example alias set
+- Invocation patterns
+
 How to wire Omnigraph operations for agents and scripts.
 
-## Every Agent Operation Should Be an Alias
+## What an alias is
 
-Agents calling raw `omnigraph query --query ... --name ... --params ...` drift as queries evolve. Aliases decouple the **operation name** from the **query implementation**:
+An **operator alias** decouples a stable **operation name** from its implementation, so an agent calling `omnigraph query --alias signal …` keeps working as the query evolves. Aliases live in `~/.omnigraph/config.yaml` and are personal *bindings* to a **stored query on a named server** — they carry no query content; the stored query in the cluster catalog is the team's contract.
 
 ```yaml
-# omnigraph.yaml
+# ~/.omnigraph/config.yaml
 aliases:
-  signal:
-    command: query
-    query: signals.gq
-    name: get_signal
-    args: [slug]
-    format: kv
+  triage:
+    server: intel-dev      # an entry under servers:
+    graph: spike           # optional (multi-graph servers)
+    query: weekly_triage   # the STORED query's name — never a file
+    args: [since]          # positional args → params, in order
+    params: { limit: 20 }  # fixed defaults; positionals/--params win
+    format: table
 ```
-
-The agent calls:
 
 ```bash
-omnigraph query --alias signal sig-kimi-k25
+omnigraph query --alias triage 2026-06-01
+# → POST <intel-dev>/graphs/spike/queries/weekly_triage with the keyed credential
 ```
 
-When the query changes, the alias stays stable. The agent keeps working.
+> **Alias vs stored query.** The alias is *yours* (a personal name + defaults); the **stored query** it points at is the *team's* — declared in `cluster.yaml`, type-checked and served by the cluster (`GET /graphs/<id>/queries`, `POST /graphs/<id>/queries/<name>`, gated by `invoke_query`). See [`stored-queries.md`](stored-queries.md).
+>
+> **Legacy `omnigraph.yaml` aliases are deprecated** (RFC-008). Run `omnigraph config migrate` to move them into `~/.omnigraph/config.yaml`.
 
-> **Aliases ≠ stored queries.** A CLI `aliases:` entry is **client-side** — it tells the local `omnigraph` CLI which `.gq` file + query name + params to send; the server never sees it. The v0.6.1 **`queries:`** registry is **server-side** — curated queries the server loads, type-checks at startup, and exposes over `GET /queries` / `POST /queries/{name}` (gated by `invoke_query`). Use aliases for your own CLI/agent ergonomics; use the `queries:` registry to expose a vetted query surface to remote callers or MCP. See [`stored-queries.md`](stored-queries.md).
-
-## Alias Schema
+## Operator Alias Schema
 
 ```yaml
 aliases:
   <alias-name>:
-    command: query | mutate   # which subcommand to dispatch (`read`/`change` still accepted, deprecated)
-    query: <filename.gq>      # resolved via query.roots
-    name: <query_name>        # the query inside the file
-    args: [<name1>, <name2>]  # positional CLI args → named params
-    graph: <graph-name>       # optional: override the default graph
-    branch: main              # optional: override the default branch
+    server: <server-name>     # an entry under servers: in ~/.omnigraph/config.yaml
+    graph: <graph-id>         # optional: for multi-graph servers
+    query: <stored-query>     # the stored query's NAME (never a file path)
+    args: [<name1>, <name2>]  # positional CLI args → named params, in order
+    params: { <k>: <v> }      # fixed default params; positionals / --params win
     format: table|kv|csv|jsonl|json   # optional: output format
 ```
+
+Dispatch with `omnigraph query --alias <name> [args]` (or `omnigraph mutate --alias <name>` when the stored query is a mutation — double-gated by `invoke_query` + `change`).
 
 ### `args` bind to query parameters
 
@@ -64,29 +75,20 @@ Explicit `--params '{...}'` wins on key conflict.
 
 ## Default to Structured Output
 
-For scripts and agents, set `jsonl` or `json`. `table` is for humans.
+For scripts and agents, prefer `jsonl` or `json`; `table` is for humans. Set a default in `~/.omnigraph/config.yaml`:
 
 ```yaml
-cli:
-  output_format: jsonl
+defaults:
+  output: jsonl
 ```
 
-Or per-alias:
-
-```yaml
-aliases:
-  signal:
-    ...
-    format: jsonl
-```
-
-Or per-call: `--format jsonl`.
+Or per-alias (`format: jsonl`), or per-call (`--format jsonl`).
 
 ### When to use which
 
 - **`jsonl`** — one JSON object per line, first line is metadata; streams; ideal for agents
 - **`json`** — pretty-printed JSON array; smaller results; human-readable
-- **`kv`** — `key: value` per line; good for single-row lookups (`get_signal slug=foo`)
+- **`kv`** — `key: value` per line; good for single-row lookups
 - **`csv`** — for spreadsheets or line-count-heavy analysis
 - **`table`** — default human view; don't use in automation
 
@@ -101,53 +103,28 @@ Short, hyphenated, matches the conceptual operation:
 
 ## Secrets Don't Belong in Aliases
 
-Credentials go in `.env.omni` referenced via `auth.env_file: .env.omni`. Aliases should only contain query names and parameter bindings — never tokens, passwords, or API keys.
+Credentials never live in an alias or any config file. For remote servers, `omnigraph login <server>` stores the bearer token in `~/.omnigraph/credentials` (`0600`); for S3-backed storage, AWS creds go in `.env.omni`. Aliases should only contain query names and parameter bindings — never tokens, passwords, or API keys.
 
 ## Example Alias Set
 
 ```yaml
+# ~/.omnigraph/config.yaml
+servers:
+  intel-dev: { url: https://graph.example.com }
 aliases:
   # Lookups (kv format for single-row readability)
-  signal:
-    command: query
-    query: signals.gq
-    name: get_signal
-    args: [slug]
-    format: kv
-
-  pattern:
-    command: query
-    query: patterns.gq
-    name: get_pattern
-    args: [slug]
-    format: kv
-
-  # Lists (default format inherits from cli.output_format)
-  signals:
-    command: query
-    query: signals.gq
-    name: recent_signals
-
+  signal:   { server: intel-dev, graph: spike, query: get_signal,  args: [slug], format: kv }
+  pattern:  { server: intel-dev, graph: spike, query: get_pattern, args: [slug], format: kv }
+  # Lists
+  signals:  { server: intel-dev, graph: spike, query: recent_signals }
   # Traversals
-  pattern-signals:
-    command: query
-    query: patterns.gq
-    name: pattern_signals
-    args: [slug]
-
-  # Mutations (mutate command)
-  add-signal:
-    command: mutate
-    query: mutations.gq
-    name: add_signal
-    args: [slug, name, brief, stagingTimestamp, createdAt, updatedAt]
-
-  link-forms-pattern:
-    command: mutate
-    query: mutations.gq
-    name: link_signal_forms_pattern
-    args: [signal, pattern]
+  pattern-signals: { server: intel-dev, graph: spike, query: pattern_signals, args: [slug] }
+  # Mutations (stored mutation; invoke_query + change)
+  add-signal:         { server: intel-dev, graph: spike, query: add_signal, args: [slug, name, brief, stagingTimestamp, createdAt, updatedAt] }
+  link-forms-pattern: { server: intel-dev, graph: spike, query: link_signal_forms_pattern, args: [signal, pattern] }
 ```
+
+Each `query:` names a stored query the cluster serves — declare them in `cluster.yaml` and `cluster apply` first (see [`stored-queries.md`](stored-queries.md)).
 
 ## Invocation Patterns
 
@@ -155,25 +132,19 @@ aliases:
 # Read by alias
 omnigraph query --alias signal sig-kimi-k25
 
-# Change by alias
+# Mutate by alias
 omnigraph mutate --alias add-signal sig-new "Name" "Brief" \
   2026-04-14T00:00:00Z 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z
 
 # Override output format
 omnigraph query --alias signals --format jsonl
 
-# Override target graph
-omnigraph query --alias signal --target local_server sig-kimi-k25
+# Override the server / graph
+omnigraph query --alias signal --server intel-prod --graph spike sig-kimi-k25
 
-# Override branch
+# Read a branch / snapshot
 omnigraph query --alias signals --branch staging-2026-04-14
 
 # With explicit --params (wins over positional args on key conflict)
 omnigraph query --alias signal --params '{"slug":"sig-override"}'
 ```
-
-> **Cluster note:** aliases are an `omnigraph.yaml` (per-operator) feature
-> and keep working in cluster deployments — point `graphs.<name>.uri` at the
-> derived root (`<dir>/graphs/<id>.omni`). The deployment's stored queries
-> are declared in `cluster.yaml`; aliases remain your CLI sugar over the same
-> `.gq` files.

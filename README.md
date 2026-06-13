@@ -21,7 +21,7 @@ Packaged agent skills live under [`skills/`](skills) and can be installed with t
 | Skill | Description |
 |-------|-------------|
 | [`omnigraph-intel-bootstrap`](skills/omnigraph-intel-bootstrap) | Bootstrap a new SPIKE graph from scratch — choose demo or custom, elicit domain + sources, adapt schema, research seed content, init + load |
-| [`omnigraph-best-practices`](skills/omnigraph-best-practices) | Operate a locally deployed Omnigraph — schema authoring and evolution, query linting, data changes, branches, embeddings, aliases, server, policy, and common gotchas |
+| [`omnigraph-best-practices`](skills/omnigraph-best-practices) | Operate a locally or remotely deployed Omnigraph — cluster mode, the two config surfaces, schema evolution, query linting, data changes, branches, embeddings, aliases, server, policy, and common gotchas |
 
 Install:
 

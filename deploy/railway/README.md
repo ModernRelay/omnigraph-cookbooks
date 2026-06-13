@@ -306,7 +306,7 @@ docker run --rm \
 ## Pinning + maintenance
 
 The Dockerfile pins the omnigraph engine to a specific tag via
-`ARG OMNIGRAPH_REF=v0.6.2`. Bump that on every omnigraph release that
+`ARG OMNIGRAPH_REF=v0.7.0`. Bump that on every omnigraph release that
 changes server behavior, the policy schema, or the CLI surface. Schemas
 are **not** baked into the image — `init.sh` fetches whatever
 `OMNIGRAPH_SCHEMA_URL` points at, so a new cookbook needs no image

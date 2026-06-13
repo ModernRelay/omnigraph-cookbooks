@@ -1,5 +1,13 @@
 # Search & Embeddings
 
+## Contents
+- Embeddings are schema-declared
+- Generating embeddings
+- Embeddings + `load --mode merge` interaction
+- Search functions in queries
+- The key pattern: scope first, rank second
+- Model / config
+
 Vector embeddings and text search in Omnigraph.
 
 ## Embeddings are Schema-Declared
@@ -136,7 +144,7 @@ Omnigraph uses **two distinct embedding clients** — don't conflate them:
 
 | Client | When it runs | Default model | Configured via |
 |--------|--------------|---------------|----------------|
-| **Engine / ingest** | At load, when an `@embed("source")` field is populated (and `omnigraph embed`) | `gemini-embedding-2-preview` (3072-dim) | `GEMINI_API_KEY`, `OMNIGRAPH_GEMINI_BASE_URL`, `OMNIGRAPH_EMBED_*`, `OMNIGRAPH_EMBEDDINGS_MOCK` |
+| **Engine / load-time** | At load, when an `@embed("source")` field is populated (and `omnigraph embed`) | `gemini-embedding-2-preview` (3072-dim) | `GEMINI_API_KEY`, `OMNIGRAPH_GEMINI_BASE_URL`, `OMNIGRAPH_EMBED_*`, `OMNIGRAPH_EMBEDDINGS_MOCK` |
 | **Compiler / query-time** | When a query passes a *string* to a ranking op (e.g. `nearest($c.embedding, "some text")`) and the server auto-embeds it | `text-embedding-3-small` (OpenAI-style) | `NANOGRAPH_EMBED_MODEL`, `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `NANOGRAPH_EMBEDDINGS_MOCK` |
 
-The vector stored in the schema is produced by the **ingest** client, so `Vector(N)` must match that model's output dimension — `Vector(3072)` for `gemini-embedding-2-preview`. If you point the query-time client at a model with a different dimension than your stored vectors, similarity search returns garbage or errors — keep both sides on the same dimension. Vectors are stored L2-normalized.
+The vector stored in the schema is produced by the **load-time (engine)** client, so `Vector(N)` must match that model's output dimension — `Vector(3072)` for `gemini-embedding-2-preview`. If you point the query-time client at a model with a different dimension than your stored vectors, similarity search returns garbage or errors — keep both sides on the same dimension. Vectors are stored L2-normalized.

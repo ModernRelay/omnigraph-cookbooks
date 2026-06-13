@@ -1,5 +1,18 @@
 # Reference Commands
 
+## Contents
+- Inspect state (snapshot, export)
+- Branches · commits · graphs
+- Schema · lint · embed · init
+- Load (bulk JSONL)
+- Query / mutate
+- Maintenance (optimize, cleanup)
+- Stored queries
+- Operator config & credentials
+- Config resolution order
+- Output formats · health check
+- Cluster control plane
+
 Commands you'll reach for but don't need best-practice rules around. Quick syntax reference.
 
 ## Inspect State
@@ -71,7 +84,7 @@ omnigraph lint --schema schema.pg --query queries/foo.gq --json
 omnigraph lint --query queries/foo.gq $REPO --json
 ```
 
-`omnigraph query lint` / `omnigraph query check` still work as deprecated aliases (they rewrite to `omnigraph lint` and warn). See `references/queries.md`.
+`lint` is the single query-validation command. See `references/queries.md`.
 
 ## Embed
 
@@ -90,23 +103,23 @@ See `references/search.md`.
 omnigraph init --schema schema.pg $REPO
 ```
 
-Creates a new repo at `$REPO` with the given schema. Also scaffolds `omnigraph.yaml` in the current directory if one doesn't exist — review and edit the template before committing (default graph names are placeholders).
+Creates a new repo at `$REPO` with the given schema. **It no longer scaffolds a config file** (RFC-008, 0.7.0) — start a `cluster.yaml` from the `references/cluster.md` template, or run `omnigraph config migrate` against an existing legacy `omnigraph.yaml`.
 
 **Strict by default (v0.6.0+):** `init` against a URI that already holds schema files errors with `AlreadyInitialized` instead of silently overwriting. Use `omnigraph init --force` to re-init deliberately. `--force` only skips the schema-file preflight — it does **not** purge existing Lance datasets.
 
 **Note:** `init` does not accept `--json`. Drop the flag if you see `unexpected argument --json`.
 
-## Load vs Ingest
+## Load (bulk JSONL)
 
 ```bash
-# load: operates on an existing branch (default main)
+# bare load: operates on an existing branch (default main); --mode is required
 omnigraph load --data seed.jsonl --mode merge $REPO
 
-# ingest: creates a branch from --from and loads onto it
-omnigraph ingest --data delta.jsonl --branch feature-x --from main --mode merge $REPO
+# --from forks a missing branch from <base>, then loads onto it (one-shot review branch)
+omnigraph load --data delta.jsonl --branch feature-x --from main --mode merge $REPO
 ```
 
-`--mode` values for both: `overwrite`, `merge`, `append`. See `references/data.md`.
+`--mode` is **required** (no default): `merge`, `append`, or `overwrite`. `load` works against local **and** remote URIs. (`ingest` is a deprecated alias of `load --from main --mode merge`.) See `references/data.md`.
 
 ## Query / Mutate
 
@@ -122,7 +135,7 @@ omnigraph query  --alias signal sig-foo
 omnigraph mutate --alias add-signal sig-foo "Name" "Brief" 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z 2026-04-14T00:00:00Z
 ```
 
-> `omnigraph read` / `omnigraph change` still work as **deprecated** aliases (they warn to stderr); prefer `query` / `mutate`. Both also accept inline source via `-e/--query-string '<gq>'` instead of `--query <file>`.
+> `query` and `mutate` also accept inline source via `-e/--query-string '<gq>'` instead of `--query <file>`.
 
 ## Maintenance: Optimize & Cleanup (v0.6.1)
 
@@ -151,13 +164,24 @@ omnigraph queries list                  # list registry query names, MCP exposur
 
 `validate` opens the selected graph and type-checks every query in the `queries:` block — catches schema drift without restarting the server. `list` prints the selected registry. Select the registry with `--target <graph>` or `cli.graph`; with no graph selected, `list` shows only the top-level `queries:` block. Distinct from `lint` (which validates a single `.gq` file). See `references/stored-queries.md`.
 
+## Operator Config & Credentials (0.7.0)
+
+```bash
+echo "$TOKEN" | omnigraph login <server>   # store a bearer token in ~/.omnigraph/credentials (0600)
+omnigraph logout <server>                  # remove it (idempotent)
+omnigraph config migrate [--write]         # split a legacy omnigraph.yaml → cluster.yaml + ~/.omnigraph/config.yaml
+```
+
+The operator config and `~/.omnigraph/credentials` are **auto-discovered — there is no flag to point at them.** `$OMNIGRAPH_HOME` relocates the `~/.omnigraph` *directory* (mainly for test isolation; not a way to pass a specific file path), and an absent file is just an empty layer (zero-config). Separately, `$OMNIGRAPH_CONFIG` stands in for the `--config` flag — which targets the **cluster directory / legacy `omnigraph.yaml` / server config**, never the operator config. See SKILL.md → *The two config surfaces*.
+
 ## Config Resolution Order
 
 When the CLI decides which graph to target:
 
 1. **Explicit `--uri` or positional URI** wins
-2. **`--target <name>`** selects a named graph from `omnigraph.yaml`
-3. **Config default (`cli.graph`)** wins last
+2. **`--server <name>`** (with optional `--graph <id>`) selects an operator-defined endpoint from `~/.omnigraph/config.yaml` — the modern remote path
+3. **`--target <name>`** selects a named graph from a legacy `omnigraph.yaml`
+4. **Config default (`cli.graph`)** wins last
 
 For queries:
 
@@ -205,5 +229,6 @@ omnigraph cluster force-unlock <LOCK_ID> --config <dir>  # clear a crashed run's
 
 Topology rule: `omnigraph schema apply` and `omnigraph init` are single-graph
 commands; in cluster mode their jobs belong to `cluster apply`. Data commands
-(`load`, `ingest`, `mutate`, `read`, branches) are identical in both — point
-them at the derived root (`<dir>/graphs/<id>.omni`). See `references/cluster.md`.
+(`load`, `mutate`, branches) are identical in both — point them at the derived
+root (`<dir>/graphs/<id>.omni`, or `<storage>/graphs/<id>.omni` for an
+S3-backed cluster). See `references/cluster.md`.

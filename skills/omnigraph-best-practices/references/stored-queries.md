@@ -15,7 +15,7 @@ A graph served by name (`server.graph` / `--target`) carries its registry under 
 ```yaml
 graphs:
   local_s3:
-    uri: s3://omnigraph-local/repos/spike-intel
+    uri: s3://my-bucket/repos/spike-intel
     queries:
       get_signal:                  # MUST match `query get_signal(...)` in the .gq
         file: queries/signals.gq   # relative to this config's directory

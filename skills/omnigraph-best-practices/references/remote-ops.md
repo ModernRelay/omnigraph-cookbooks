@@ -1,6 +1,19 @@
 # Remote Graph Operations
 
-When the graph URI is a remote endpoint (`omnigraph-server` behind ALB / CloudFront, bearer-authenticated) instead of a local S3 path, several CLI behaviors change in ways the local-RustFS workflow never exposes. This reference covers the failures and operational rituals specific to remote graphs.
+## Contents
+- What's different about remote
+- Verify after every write
+- 504 Gateway Timeout
+- Fork-branch 504 fingerprint
+- Targeting a remote graph (`--server`, `login`)
+- Version drift / `sync_branch()`
+- `manifest_conflict` 409
+- 429 Too Many Requests
+- Duplicate risk on blind retry
+- Reading large schemas safely
+- Prevention checklist
+
+When the graph URI is a remote endpoint (`omnigraph-server` behind ALB / CloudFront, bearer-authenticated) instead of a local S3 path, several CLI behaviors change in ways the local-storage workflow never exposes. This reference covers the failures and operational rituals specific to remote graphs.
 
 ## What's different about remote
 
@@ -11,7 +24,7 @@ A remote graph runs server-side. Every write executes on the server — staged p
 | CLI writes S3 directly | Server executes the write, publishes one atomic manifest commit |
 | No connection timeout | ~30s idle timeout (CloudFront) |
 | No admission control | Per-actor `429` + `Retry-After` on writes |
-| `load` works | `load` is rejected — use `ingest` |
+| `load` writes S3-backed storage directly | `load` is server-orchestrated — same command, one atomic commit |
 | CLI exit code is authoritative | CLI exit code can lie — verify via `commit list` |
 
 ## Verify after every write
@@ -21,7 +34,7 @@ The CLI's exit code is **not authoritative on remote graphs**. The proxy can dro
 ```bash
 HEAD_BEFORE=$(omnigraph commit list --config X --branch main --json | jq -r '.commits[0].graph_commit_id')
 
-# … run your change / ingest …
+# … run your load / mutate …
 
 HEAD_AFTER=$(omnigraph commit list --config X --branch main --json | jq -r '.commits[0].graph_commit_id')
 
@@ -32,7 +45,7 @@ else
 fi
 ```
 
-For `ingest`, also compare the `ingest/<name>` branch head's `graph_commit_id` against `main`'s. **Identical means the load didn't land — empty branch left behind.**
+For a `load --from` that forks a review branch, also compare the new branch head's `graph_commit_id` against `main`'s. **Identical means the load didn't land — empty fork left behind.**
 
 For pointed verification of a single record:
 
@@ -50,19 +63,23 @@ A 504 from the proxy means the server didn't respond within the idle timeout. Tw
 
 Always verify via `commit list` before retrying. Blind retry on append-only types creates duplicates.
 
-## `ingest` 504 fingerprint
+## Fork-branch 504 fingerprint
 
-`ingest` creates the branch **before** loading data. A timed-out ingest where the load didn't land leaves an empty `ingest/<name>` branch at `main`'s head. Stale numbered branches (`feature-v2`, `-v3`, `-v4` …) all sitting at the same `graph_commit_id` as `main` are the fingerprint of prior 504-blocked attempts.
+`load --from <base>` (and the legacy `ingest`) creates the branch **before** loading data. A timed-out fork-load where the data didn't land leaves an empty branch at `<base>`'s head. Stale numbered branches (`feature-v2`, `-v3`, `-v4` …) all sitting at the same `graph_commit_id` as `main` are the fingerprint of prior 504-blocked attempts.
 
 Find them by comparing each branch's head against `main`'s in `omnigraph branch list --config X --json`, then delete the empty ones.
 
-## `load` rejects remote URIs
+## Targeting a remote graph: `--server` and `login`
 
-```
-error: load is only supported against local repo URIs in this milestone
+`load`, `query`, and `mutate` all run against a remote `omnigraph-server` endpoint — there is no local-only restriction as of 0.7.0. Address an operator-defined server by name instead of pasting URLs and juggling tokens:
+
+```bash
+echo "$TOKEN" | omnigraph login intel-dev          # stores it in ~/.omnigraph/credentials (0600)
+omnigraph load --server intel-dev --graph spike \
+  --data delta.jsonl --from main --mode merge --branch staging
 ```
 
-`load` writes S3-backed storage directly — that path doesn't go through the running server. For remote graphs use `ingest` instead. Same JSONL format; the server executes the write and leaves a reviewable branch.
+`--server <name>` resolves the URL from `~/.omnigraph/config.yaml` and the token via `OMNIGRAPH_TOKEN_<NAME>` → the credentials file → the legacy `bearer_token_env` chain. A token is only ever sent to the server it is keyed to. `--graph <id>` selects the graph on a multi-graph server.
 
 ## Version drift / `sync_branch()`
 
@@ -71,10 +88,10 @@ version drift on node:<Type>: snapshot pinned vN but dataset is at vM — call s
 ```
 
 - `sync_branch()` is **not a CLI command** — it's a server-internal directive that leaked into the error text. Don't go looking for it.
-- Cause: another actor committed to `main` between your CLI's snapshot pin and your `change` attempt.
+- Cause: another actor committed to `main` between your CLI's snapshot pin and your `mutate` attempt.
 - Usually self-resolves on retry — the next call re-pins.
-- Calling `omnigraph snapshot` does **not** reliably re-pin for subsequent `change`s in the same session.
-- If persistent, fall back to `ingest` — feature branches don't suffer from concurrent-commit drift.
+- Calling `omnigraph snapshot` does **not** reliably re-pin for subsequent `mutate`s in the same session.
+- If persistent, fall back to `load --from main` onto a fresh branch — a forked branch doesn't suffer from concurrent-commit drift on `main`.
 - The cleaner, modern form of this conflict is a structured `manifest_conflict` **409** — see below.
 
 ## `manifest_conflict` 409 — stale snapshot, retry
@@ -86,7 +103,7 @@ When another actor commits to the same branch between your query's snapshot pin 
 
 ## 429 Too Many Requests — back off, then retry
 
-The server applies **per-actor admission control** to every mutating endpoint (`mutate` / `ingest` / `schema apply` / branch create·delete·merge). An actor that exceeds its in-flight-request or estimated-byte budget gets a structured **HTTP 429** (`code: too_many_requests`) with a `Retry-After` header — instead of blocking unrelated actors behind a global lock.
+The server applies **per-actor admission control** to every mutating endpoint (`mutate` / `load` / `schema apply` / branch create·delete·merge). An actor that exceeds its in-flight-request or estimated-byte budget gets a structured **HTTP 429** (`code: too_many_requests`) with a `Retry-After` header — instead of blocking unrelated actors behind a global lock.
 
 - This is **not** a failed write — the write never started. Honor `Retry-After` and retry; it is always safe (no partial write, no duplicate risk).
 - It's per-actor, so one noisy automation can't starve others. If you hit it constantly, batch less aggressively or space your calls out.
@@ -118,8 +135,8 @@ Then read the file with offset/limit, not via piped stdout.
 ## Prevention checklist
 
 - Keep mutations small. Single-node inserts finish well under the timeout.
-- Prefer `change` over `ingest` for ≤ a handful of records.
+- Prefer `mutate` over `load` for ≤ a handful of records.
 - Always run `commit list` after a 504 before deciding to retry.
-- For destructive or large-batch work, use `ingest` onto a feature branch and verify the branch head before merging.
+- For destructive or large-batch work, use `load --from main` onto a feature branch and verify the branch head before merging.
 - Read large schemas via file redirect, not piped stdout.
 - A `429` (throttle) or a `manifest_conflict` `409` (stale snapshot) is always safe to retry — the write never committed. Honor `Retry-After` on a 429.

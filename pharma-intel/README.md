@@ -173,10 +173,10 @@ omnigraph load --data seed.jsonl --mode overwrite graphs/pharma.omni
 omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated   # local dev
 
 # Query via CLI aliases (per-operator omnigraph.yaml sugar) …
-omnigraph read --alias assumption-contradictions asmp-oral-displaces-injectable
-omnigraph read --alias decision-questions dec-vanquish-interim-readout
-omnigraph read --alias pattern-contradictions pat-oral-glp1-thesis
-omnigraph read --alias decisions-upcoming
+omnigraph query --alias assumption-contradictions asmp-oral-displaces-injectable
+omnigraph query --alias decision-questions dec-vanquish-interim-readout
+omnigraph query --alias pattern-contradictions pat-oral-glp1-thesis
+omnigraph query --alias decisions-upcoming
 # … or straight HTTP — every declared query is a served endpoint:
 curl -s -X POST http://127.0.0.1:8080/graphs/pharma/queries/decisions_upcoming \
   -H 'content-type: application/json' -d '{"params":{}}'
@@ -210,23 +210,23 @@ Four queries that show the three-layer model in action:
 
 ```bash
 # 1. Cross-silo contradiction: a regulatory-domain signal hits a strategic assumption
-omnigraph read --alias assumption-contradictions asmp-oral-displaces-injectable
+omnigraph query --alias assumption-contradictions asmp-oral-displaces-injectable
 # → Pfizer danuglipron discontinued + Structure GSBR-209 Phase 2a disappoints
 
 # 2. Pre-committee briefing: what rests on the upcoming Phase 3 start decision?
-omnigraph read --alias decision-assumptions dec-oral-phase3-start
+omnigraph query --alias decision-assumptions dec-oral-phase3-start
 # → asmp-oral-displaces-injectable (now contradicted) + asmp-mechanism-safe-at-scale
 
 # 3. Competitive landscape: all compounds targeting the same mechanism
-omnigraph read --alias program-competitors prog-vk2735-sc
+omnigraph query --alias program-competitors prog-vk2735-sc
 # → tirzepatide, VK2735 oral (self), VK2735 SC — mechanism peers across phase
 
 # 4. Proactive alert: what internal questions does a new signal inform?
-omnigraph read --alias signal-informs-questions sig-pfizer-danuglipron-discontinued
+omnigraph query --alias signal-informs-questions sig-pfizer-danuglipron-discontinued
 # → q-pfizer-failure-mechanism-risk (Viking clinical team)
 
 # 5. Landscape feed: every signal touching any compound in my mechanism
-omnigraph read --alias program-landscape-signals prog-vk2735-sc
+omnigraph query --alias program-landscape-signals prog-vk2735-sc
 # → 5 signals across VK2735 (SC + oral) + tirzepatide, time-sorted
 ```
 
@@ -236,17 +236,17 @@ Agents should operate the graph in this order:
 
 ```bash
 # 1. Pick a decision and expand its dependencies
-omnigraph read --alias decisions-upcoming
-omnigraph read --alias decision-assumptions dec-oral-phase3-start
-omnigraph read --alias decision-questions dec-oral-phase3-start
+omnigraph query --alias decisions-upcoming
+omnigraph query --alias decision-assumptions dec-oral-phase3-start
+omnigraph query --alias decision-questions dec-oral-phase3-start
 
 # 2. Gather evidence for the key assumptions
-omnigraph read --alias assumption-supports asmp-oral-displaces-injectable
-omnigraph read --alias assumption-contradictions asmp-oral-displaces-injectable
+omnigraph query --alias assumption-supports asmp-oral-displaces-injectable
+omnigraph query --alias assumption-contradictions asmp-oral-displaces-injectable
 
 # 3. Trace a new or existing signal into internal impact
-omnigraph read --alias signal-contradicts-assumptions sig-pfizer-danuglipron-discontinued
-omnigraph read --alias signal-informs-questions sig-pfizer-danuglipron-discontinued
+omnigraph query --alias signal-contradicts-assumptions sig-pfizer-danuglipron-discontinued
+omnigraph query --alias signal-informs-questions sig-pfizer-danuglipron-discontinued
 ```
 
 For fresh web findings, first map the signal to existing companies, compounds, patterns, assumptions, and open questions; then propose the minimal seed or mutation update.
