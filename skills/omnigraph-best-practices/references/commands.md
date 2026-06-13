@@ -172,7 +172,7 @@ omnigraph logout <server>                  # remove it (idempotent)
 omnigraph config migrate [--write]         # split a legacy omnigraph.yaml → cluster.yaml + ~/.omnigraph/config.yaml
 ```
 
-`$OMNIGRAPH_CONFIG` stands in for `--config`; `$OMNIGRAPH_HOME` relocates `~/.omnigraph`. See SKILL.md → *The two config surfaces*.
+The operator config and `~/.omnigraph/credentials` are **auto-discovered — there is no flag to point at them.** `$OMNIGRAPH_HOME` relocates the `~/.omnigraph` *directory* (mainly for test isolation; not a way to pass a specific file path), and an absent file is just an empty layer (zero-config). Separately, `$OMNIGRAPH_CONFIG` stands in for the `--config` flag — which targets the **cluster directory / legacy `omnigraph.yaml` / server config**, never the operator config. See SKILL.md → *The two config surfaces*.
 
 ## Config Resolution Order
 
