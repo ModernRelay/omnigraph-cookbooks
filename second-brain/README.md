@@ -116,41 +116,41 @@ Full property tables and constraints in [`schema.pg`](./schema.pg).
 
 ```bash
 # Close friends and their preferred cadence
-omnigraph read --alias close-friends
+omnigraph query --alias close-friends
 
 # What did Theo and I do recently, and what do I owe him
-omnigraph read --alias person-recent-events per-theo
-omnigraph read --alias person-tasks-i-owe per-theo
-omnigraph read --alias preferences-for-person per-theo
+omnigraph query --alias person-recent-events per-theo
+omnigraph query --alias person-tasks-i-owe per-theo
+omnigraph query --alias preferences-for-person per-theo
 
 # Open relationship debts across everyone
-omnigraph read --alias tasks-i-owe
-omnigraph read --alias tasks-they-owe
+omnigraph query --alias tasks-i-owe
+omnigraph query --alias tasks-they-owe
 
 # My operating principles + the habits motivated by them
-omnigraph read --alias principles
-omnigraph read --alias habit-principle hab-morning-pages
+omnigraph query --alias principles
+omnigraph query --alias habit-principle hab-morning-pages
 
 # What's on my mind right now
-omnigraph read --alias open-questions
-omnigraph read --alias notes-by-kind reflection
+omnigraph query --alias open-questions
+omnigraph query --alias notes-by-kind reflection
 
 # Project rollups: what tasks are open for Quiet Coach, what events are coming up
-omnigraph read --alias project-tasks proj-quietcoach
-omnigraph read --alias project-events proj-quietcoach
+omnigraph query --alias project-tasks proj-quietcoach
+omnigraph query --alias project-events proj-quietcoach
 
 # Area drill-down: everything attached to Family
-omnigraph read --alias area-projects area-family
-omnigraph read --alias area-tasks area-family
-omnigraph read --alias area-habits area-family
+omnigraph query --alias area-projects area-family
+omnigraph query --alias area-tasks area-family
+omnigraph query --alias area-habits area-family
 
 # Reading queue + who recommended what
-omnigraph read --alias reading-queue
-omnigraph read --alias person-recommendations per-kenji
+omnigraph query --alias reading-queue
+omnigraph query --alias person-recommendations per-kenji
 
 # Life events affecting people I care about
-omnigraph read --alias person-recent-events per-maya
-omnigraph read --alias events-recent
+omnigraph query --alias person-recent-events per-maya
+omnigraph query --alias events-recent
 ```
 
 ## Files
@@ -185,9 +185,9 @@ omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/s
 omnigraph-server --config ./omnigraph.yaml --unauthenticated   # local dev; v0.6.0+ refuses to start without auth/policy or this flag
 
 # Query through the server via aliases
-omnigraph read --alias close-friends
-omnigraph read --alias person-recent-events per-theo
-omnigraph read --alias tasks-i-owe
+omnigraph query --alias close-friends
+omnigraph query --alias person-recent-events per-theo
+omnigraph query --alias tasks-i-owe
 ```
 
 See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.

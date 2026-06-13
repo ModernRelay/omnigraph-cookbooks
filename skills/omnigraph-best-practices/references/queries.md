@@ -1,5 +1,17 @@
 # Query Authoring & Linting
 
+## Contents
+- File organization
+- Linting
+- Parameterization
+- Query structure
+- Search functions
+- Aggregations
+- Filter operators
+- Mutations
+- Naming convention
+- Aliases over raw queries
+
 Writing `.gq` query files in Omnigraph.
 
 ## File Organization
@@ -263,12 +275,12 @@ There's no `upsert` keyword at the query level — use `load --mode merge` for b
 
 ### Date and DateTime values
 
-Date format is asymmetric between `mutate` (parameter values) and `ingest` / `load` (JSONL):
+Date format is asymmetric between `mutate` (parameter values) and `load` (JSONL):
 
 | Path | Date | DateTime |
 |---|---|---|
 | `mutate --params` | ISO string `"2026-04-29"` | ISO string `"2026-04-29T10:00:00Z"` |
-| `ingest` / `load` JSONL | Integer days since epoch `20572` | ISO string `"2026-04-29T10:00:00Z"` |
+| `load` JSONL | Integer days since epoch `20572` | ISO string `"2026-04-29T10:00:00Z"` |
 
 Compute integer days form for a given date `d`:
 

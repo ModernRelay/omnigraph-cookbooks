@@ -182,7 +182,7 @@ For longer-form captures (transcripts, decks), chunk into `Chunk` records linked
 omnigraph lint --schema ./schema.pg --query ./queries/deals.gq
 ```
 
-The `lint` command validates both queries and schema against each other — use after any schema or query edit. Pure file check; no server needed. (`query lint` still works as a deprecated alias.)
+The `lint` command validates both queries and schema against each other — use after any schema or query edit. Pure file check; no server needed.
 
 ## When Editing
 

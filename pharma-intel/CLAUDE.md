@@ -76,7 +76,7 @@ Use this starter as a decision-intelligence loop, not just a lookup table:
 omnigraph lint --schema schema.pg --query queries/signals.gq
 ```
 
-The `lint` command validates both queries and schema against each other — use it after any schema or query edit. (`query lint` still works as a deprecated alias.)
+The `lint` command validates both queries and schema against each other — use it after any schema or query edit.
 
 ## When Editing
 

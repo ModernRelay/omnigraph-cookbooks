@@ -46,7 +46,7 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 omnigraph lint --schema schema.pg --query queries/signals.gq
 ```
 
-The `lint` command validates both queries and schema against each other — use it after any schema or query edit. (`query lint` still works as a deprecated alias.)
+The `lint` command validates both queries and schema against each other — use it after any schema or query edit.
 
 ## When Editing
 

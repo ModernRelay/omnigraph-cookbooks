@@ -1,8 +1,15 @@
 # Cluster Mode — Declarative Deployments
 
-The cluster control plane (omnigraph >= 0.7.0; edge channel until 0.7.0 tags)
-manages a whole deployment — graphs, schemas, stored queries, Cedar policies —
-as **declared files in one directory**, converged Terraform-style. It is
+## Contents
+- The model
+- The loop (validate → import → plan → apply → serve)
+- The config contract (`cluster.yaml` vs `~/.omnigraph/config.yaml`)
+- Serving (`--cluster`, config-free bucket boot)
+- Recovery cheat-sheet
+
+The cluster control plane (omnigraph >= 0.7.0) manages a whole deployment —
+graphs, schemas, stored queries, Cedar policies — as **declared files in one
+directory**, converged Terraform-style. It is
 opt-in: everything in the other references (single-graph `omnigraph.yaml`
 deployments, data-plane operations) remains fully supported.
 
@@ -21,6 +28,8 @@ company-brain/
 ```yaml
 # cluster.yaml
 version: 1
+# storage: s3://my-bucket/clusters/company-brain   # optional — put ledger,
+#   catalog, and graph roots on S3 object storage (default: this folder)
 state: { backend: cluster, lock: true }
 graphs:
   knowledge:
@@ -51,6 +60,13 @@ omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated  # serve (l
   migrates the live graph. **Soft drops only** — data-loss migrations are not
   reachable from cluster apply (prior versions retain dropped columns).
 - **Applied = serving on the next server restart.** No hot reload.
+- **`storage: s3://bucket/prefix`** (optional) puts the entire cluster — state
+  ledger, lock, content-addressed catalog, recovery sidecars, approval
+  artifacts, and the derived graph roots (`<storage>/graphs/<id>.omni`) — on
+  S3-compatible object storage. The ledger CAS uses S3 conditional writes and
+  the lock becomes genuinely cross-machine. Absent, everything defaults to the
+  config directory (byte-compatible with pre-existing clusters). Credentials
+  come from the standard `AWS_*` env contract, never `cluster.yaml`.
 - **`--as <actor>` attributes every run** (sidecars, audit, engine commits).
   Defaults from your per-operator `omnigraph.yaml`'s `cli.actor`; required for
   `approve`.
@@ -60,22 +76,25 @@ omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated  # serve (l
   digest-bound approval. Any config/state drift after approving invalidates it.
 - **Drift**: `cluster refresh` re-observes live graphs and marks out-of-band
   changes `drifted`; the next `apply` converges them back to the declaration.
-- **Data is NOT cluster's job**: rows flow through `omnigraph load / ingest /
-  mutate` against the derived roots, with branches as usual.
+- **Data is NOT cluster's job**: rows flow through `omnigraph load / mutate`
+  against the derived roots, with branches as usual.
 
-## The two-file contract (do not blur this)
+## The config contract (do not blur this)
 
 | File | Owns | Read by |
 |---|---|---|
-| `cluster.yaml` | the deployment: graph set, schemas, stored queries, policy bindings | `cluster` commands; the `--cluster` server |
-| `omnigraph.yaml` | per-operator ergonomics: aliases, CLI defaults, `cli.actor`, credentials | data-plane CLI commands |
+| `cluster.yaml` | the deployment: graph set, schemas, stored queries, policy bindings, storage | `cluster` commands; the `--cluster` server |
+| `~/.omnigraph/config.yaml` | per-operator: identity (`operator.actor`), named `servers:`, output defaults, personal aliases | data-plane CLI commands (tokens live in `~/.omnigraph/credentials` via `omnigraph login`) |
 
-Cluster commands read `omnigraph.yaml` for **exactly one thing**: the
-`cli.actor` default when `--as` is omitted. A `--cluster` server reads it for
-**nothing** — boot from cluster state XOR `omnigraph.yaml`, never a merge.
-Point `graphs.<name>.uri` at a derived root in your `omnigraph.yaml` so
-aliases and `--target` work against cluster-managed graphs — that is
-ergonomics, not coupling.
+The operator surface used to be the legacy combined `omnigraph.yaml`
+(deprecated, RFC-008 — its `cli.actor` and aliases still resolve through the
+deprecation window). Cluster commands read the operator config for **exactly
+one thing**: the actor default when `--as` is omitted (`--as` > legacy
+`cli.actor` > `operator.actor`). A `--cluster` server reads it for
+**nothing** — boot from cluster state XOR the operator file, never a merge.
+Point a `graphs.<name>.uri` (or use `--server`) at a derived root so aliases
+and targeting work against cluster-managed graphs — that is ergonomics, not
+coupling.
 
 ## Serving
 
@@ -86,8 +105,17 @@ declared query is exposed (`GET /graphs/<id>/queries`, `POST
 /graphs/<id>/queries/<name>`); Cedar bundles attach via `applies_to`
 (`cluster` → server-level gate incl. `graph_list`; `graph.<id>` → that
 graph's gate incl. `invoke_query`). Bearer tokens and bind stay process-level
-(env/flags). In containers: `OMNIGRAPH_CLUSTER=<mounted dir>` (the image
-ships the CLI for in-container `cluster apply`).
+(env/flags).
+
+**Config-free serving.** `--cluster` also accepts the storage-root URI
+directly — `omnigraph-server --cluster s3://bucket/prefix` boots from the
+applied revision on the bucket with **no checkout of the config repo**. The
+ledger and catalog on the bucket are the whole deployment artifact; policy
+bundles serve as digest-verified content from the catalog. The preferred
+container shape is **bucket, no volume** (AWS ECS / Railway recipes in the
+omnigraph repo's `docs/user/deployment.md`). For a mounted config directory
+instead, `OMNIGRAPH_CLUSTER=<dir>` works and the image ships the CLI for
+in-container `cluster apply`.
 
 ## Recovery cheat-sheet
 

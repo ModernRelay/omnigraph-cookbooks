@@ -161,15 +161,15 @@ The seed populates a fictional Berlin-based AI-infra fund running Fund III ($250
 
 ## Example queries - with live output
 
-The seed is shaped to light these up. Each is a single graph traversal that would otherwise require hand-stitching across 4+ systems. Output below is verbatim from `omnigraph read --alias <name> [args]` against the loaded seed.
+The seed is shaped to light these up. Each is a single graph traversal that would otherwise require hand-stitching across 4+ systems. Output below is verbatim from `omnigraph query --alias <name> [args]` against the loaded seed.
 
 ### Pre-IC brief for a deal
 
 ```bash
-omnigraph read --alias pre-ic-brief-thesis    deal-helix-series-a
-omnigraph read --alias pre-ic-brief-evidence  deal-helix-series-a
-omnigraph read --alias pre-ic-brief-questions deal-helix-series-a
-omnigraph read --alias debate-stances         deal-helix-series-a
+omnigraph query --alias pre-ic-brief-thesis    deal-helix-series-a
+omnigraph query --alias pre-ic-brief-evidence  deal-helix-series-a
+omnigraph query --alias pre-ic-brief-questions deal-helix-series-a
+omnigraph query --alias debate-stances         deal-helix-series-a
 ```
 
 **`pre-ic-brief-thesis`** - relevant thesis + grounding assumptions:
@@ -208,7 +208,7 @@ ins-helix-bear | memo   | bear     | AWS Bedrock on-prem appliance launched in M
 ### Post-signal portfolio impact
 
 ```bash
-omnigraph read --alias signal-portfolio-impact sig-vector-forge-aws-deal
+omnigraph query --alias signal-portfolio-impact sig-vector-forge-aws-deal
 ```
 
 Walks `Signal → contradicts → Assumption → basedOn(inv) → Decision → regarding → Deal → forOrganization(status=portfolio)`. A new external signal arrives - which committed portfolio decisions just got destabilized?
@@ -222,8 +222,8 @@ org-aetherbrick | Aetherbrick | dec-aetherbrick-follow-on-eval | follow-on | Ver
 ### Exit landscape for a portfolio organization
 
 ```bash
-omnigraph read --alias exit-landscape                  org-pinion-infer
-omnigraph read --alias exit-landscape-decision-makers  org-pinion-infer
+omnigraph query --alias exit-landscape                  org-pinion-infer
+omnigraph query --alias exit-landscape-decision-makers  org-pinion-infer
 ```
 
 **`exit-landscape`** - plausible acquirers:
@@ -246,11 +246,11 @@ org-microsoft | Microsoft | per-acq-microsoft-priti | Priti Joshi
 ### Board-prep pack
 
 ```bash
-omnigraph read --alias board-prep-pack                  org-aetherbrick
-omnigraph read --alias board-prep-open-questions        org-aetherbrick
-omnigraph read --alias board-prep-commitments           org-aetherbrick
-omnigraph read --alias board-prep-meeting-history       org-aetherbrick   # prior board meetings
-omnigraph read --alias board-prep-next-meeting          org-aetherbrick   # scheduled next board
+omnigraph query --alias board-prep-pack                  org-aetherbrick
+omnigraph query --alias board-prep-open-questions        org-aetherbrick
+omnigraph query --alias board-prep-commitments           org-aetherbrick
+omnigraph query --alias board-prep-meeting-history       org-aetherbrick   # prior board meetings
+omnigraph query --alias board-prep-next-meeting          org-aetherbrick   # scheduled next board
 ```
 
 **`board-prep-pack`** - recent signals since last board:
@@ -278,9 +278,9 @@ mtg-aetherbrick-board-q2-2026 | Aetherbrick - Q2 2026 board | 2026-07-09T15:00:0
 ### Meeting history with a deal or organization
 
 ```bash
-omnigraph read --alias meetings-with-deal               deal-helix-series-a
-omnigraph read --alias ic-prep-meeting-history          deal-helix-series-a
-omnigraph read --alias ic-prep-open-commitments         deal-helix-series-a
+omnigraph query --alias meetings-with-deal               deal-helix-series-a
+omnigraph query --alias ic-prep-meeting-history          deal-helix-series-a
+omnigraph query --alias ic-prep-open-commitments         deal-helix-series-a
 ```
 
 **`ic-prep-open-commitments`** - what's still owed before Helix IC:
@@ -294,8 +294,8 @@ cmt-helix-customer-refs  | Helix - 3 customer reference calls | high         | 2
 ### Intro path to a founder
 
 ```bash
-omnigraph read --alias direct-team-knowers     per-helix-elena   # 1-hop
-omnigraph read --alias intro-path-to-founder   per-helix-yuki    # 2-hop via bridge
+omnigraph query --alias direct-team-knowers     per-helix-elena   # 1-hop
+omnigraph query --alias intro-path-to-founder   per-helix-yuki    # 2-hop via bridge
 ```
 
 **`direct-team-knowers per-helix-elena`** - who on the firm already knows her:
@@ -317,7 +317,7 @@ CJ → Jens (Aetherbrick founder + Quito portfolio board member) → Yuki. The s
 ### Contradicted theses
 
 ```bash
-omnigraph read --alias contradicted-active-theses
+omnigraph query --alias contradicted-active-theses
 ```
 ```
 t.slug                   | t.name                                     | t.confidence | s.slug                         | s.date     | s.brief
@@ -331,7 +331,7 @@ Run weekly to catch belief drift before a quarterly review.
 ### Reserve pressure check
 
 ```bash
-omnigraph read --alias reserve-pressure fund-iii
+omnigraph query --alias reserve-pressure fund-iii
 ```
 ```
 c.slug           | d.slug               | q.slug                 | q.name                                          | q.description
@@ -344,11 +344,11 @@ Tactyc says *how much* dry powder; the graph says *which organizations are about
 ### Source-reliability revalidation
 
 ```bash
-omnigraph read --alias publishers                                # TechCrunch, anon blog
-omnigraph read --alias databases                                 # PitchBook
-omnigraph read --alias expert-networks                           # Tegus
-omnigraph read --alias sources-by-reliability low                # who to flag
-omnigraph read --alias source-downstream-signals org-techcrunch  # what to revalidate
+omnigraph query --alias publishers                                # TechCrunch, anon blog
+omnigraph query --alias databases                                 # PitchBook
+omnigraph query --alias expert-networks                           # Tegus
+omnigraph query --alias sources-by-reliability low                # who to flag
+omnigraph query --alias source-downstream-signals org-techcrunch  # what to revalidate
 ```
 
 **`publishers`**:
@@ -374,7 +374,7 @@ That walk - `Organization{reliability=low/medium} ← publishedByOrganization �
 ### Active lessons (firm protocols)
 
 ```bash
-omnigraph read --alias lessons-active
+omnigraph query --alias lessons-active
 ```
 ```
 l.slug                         | l.name                                                            | l.kind        | l.confidence
@@ -387,8 +387,8 @@ lsn-vertical-data-moat-eval    | Score vertical data moat with 5 customer interv
 ### Team + recent decisions
 
 ```bash
-omnigraph read --alias team
-omnigraph read --alias decisions-recent
+omnigraph query --alias team
+omnigraph query --alias decisions-recent
 ```
 
 **`team`** - 5 partners + 2 VPs, all derived from `WorksAt org-quito`:
@@ -576,21 +576,21 @@ omnigraph load --data ./seed.jsonl --mode overwrite s3://omnigraph-local/repos/v
 omnigraph-server --config ./omnigraph.yaml --unauthenticated   # local dev; v0.6.0+ refuses to start without auth/policy or this flag
 
 # 6. Query through the server via aliases
-omnigraph read --alias team
-omnigraph read --alias founders-enriched
-omnigraph read --alias pre-ic-brief-thesis      deal-helix-series-a
-omnigraph read --alias signal-portfolio-impact  sig-vector-forge-aws-deal
-omnigraph read --alias exit-landscape           org-pinion-infer
-omnigraph read --alias debate-stances           deal-helix-series-a
-omnigraph read --alias board-prep-pack          org-aetherbrick
-omnigraph read --alias contradicted-active-theses
-omnigraph read --alias intro-path-to-founder    per-helix-yuki
-omnigraph read --alias reserve-pressure         fund-iii
-omnigraph read --alias lessons-active
-omnigraph read --alias publishers                                  # publisher/database/expert-network sources
-omnigraph read --alias source-downstream-signals org-techcrunch    # downstream-signal revalidation
-omnigraph read --alias person-insights          per-helix-yuki     # founder assessment
-omnigraph read --alias observed-organizations                      # PitchBook-imported (no Quito engagement)
+omnigraph query --alias team
+omnigraph query --alias founders-enriched
+omnigraph query --alias pre-ic-brief-thesis      deal-helix-series-a
+omnigraph query --alias signal-portfolio-impact  sig-vector-forge-aws-deal
+omnigraph query --alias exit-landscape           org-pinion-infer
+omnigraph query --alias debate-stances           deal-helix-series-a
+omnigraph query --alias board-prep-pack          org-aetherbrick
+omnigraph query --alias contradicted-active-theses
+omnigraph query --alias intro-path-to-founder    per-helix-yuki
+omnigraph query --alias reserve-pressure         fund-iii
+omnigraph query --alias lessons-active
+omnigraph query --alias publishers                                  # publisher/database/expert-network sources
+omnigraph query --alias source-downstream-signals org-techcrunch    # downstream-signal revalidation
+omnigraph query --alias person-insights          per-helix-yuki     # founder assessment
+omnigraph query --alias observed-organizations                      # PitchBook-imported (no Quito engagement)
 ```
 
 The aliases are also grouped by meeting view in `omnigraph.yaml` - `VIEW: IC Meeting`, `VIEW: Weekly Pipeline Meeting`, `VIEW: Portfolio Support Meeting`, `VIEW: LPAC / Fund Reporting` - so dashboards map 1:1 to alias bundles.

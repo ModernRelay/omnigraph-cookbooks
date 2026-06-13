@@ -1,5 +1,14 @@
 # Schema Authoring & Evolution
 
+## Contents
+- Authoring (.pg files)
+- Evolution (schema plan/apply)
+- Supported types
+- Decorators (quick reference)
+- Interfaces
+- Design principles
+- Schema evolution in cluster mode
+
 How to write and evolve `.pg` schemas in Omnigraph.
 
 ## Authoring (.pg files)
@@ -96,7 +105,7 @@ Adding a non-nullable property to an existing node is rejected as unsupported. P
 
 1. Add as optional: `new_prop: String?`
 2. Apply
-3. Backfill via `change` mutation or `load --mode merge`
+3. Backfill via a `mutate` or `load --mode merge`
 4. Tighten to required in a follow-up apply: `new_prop: String`
 
 ### Keep `@key` stable
@@ -133,7 +142,7 @@ No concurrent mutations during an apply. Plan for a short read-only window.
 - `@rename_from("OldName")` — migration-aware rename
 
 **Group-level (inside body block):**
-- `@unique(prop1, prop2)` — composite uniqueness (works on edges too: `@unique(src, dst)`)
+- `@unique(prop1, prop2)` — composite uniqueness, enforced as a true tuple key at both intake and merge (works on edges too: `@unique(src, dst)`). Columns must reduce to a scalar key: `@unique` on a `[List]`/`Blob` column is rejected loudly at `load` (it used to be silently un-enforced — fixed in #160).
 - `@index(prop1, prop2)` — composite index
 
 ## Interfaces

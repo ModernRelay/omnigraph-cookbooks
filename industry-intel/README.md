@@ -114,7 +114,7 @@ omnigraph load --data seed.jsonl --mode overwrite graphs/spike.omni
 omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated   # local dev
 
 # Query via CLI aliases (per-operator omnigraph.yaml sugar) …
-omnigraph read --alias pattern-signals pat-sovereign-ai
+omnigraph query --alias pattern-signals pat-sovereign-ai
 # … or straight HTTP — every declared query is a served endpoint:
 curl -s -X POST http://127.0.0.1:8080/graphs/spike/queries/recent_signals \
   -H 'content-type: application/json' -d '{"params":{}}'
@@ -180,8 +180,8 @@ The graph earns its keep through a recurring loop, supported by the
    artifact or source attached — an agent cannot verify them. Fix or drop.
 
 ```bash
-omnigraph read --alias triage
-omnigraph read --alias momentum 2026-05-01T00:00:00Z
+omnigraph query --alias triage
+omnigraph query --alias momentum 2026-05-01T00:00:00Z
 ```
 
 ## Enable embeddings (hybrid retrieval)
