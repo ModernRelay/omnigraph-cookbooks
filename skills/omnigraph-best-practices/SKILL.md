@@ -308,20 +308,16 @@ resolves via `OMNIGRAPH_TOKEN_INTEL_DEV` → the credentials file → the legacy
 chain. Run data-plane CLI commands from a graph's project folder so relative
 `queries/`, `schema.pg`, and `.env.omni` paths resolve.
 
-> **Legacy `omnigraph.yaml` (deprecated, RFC-008).** The old combined file
-> still works through the deprecation window but now prints a per-key
-> deprecation notice on load (silence with
-> `OMNIGRAPH_SUPPRESS_YAML_DEPRECATION=1`; `OMNIGRAPH_NO_LEGACY_CONFIG=1`
-> turns any legacy-file load into a hard error). `omnigraph config migrate
-> [--write]` splits it — team half → `cluster.yaml`, personal half →
-> `~/.omnigraph/config.yaml` (key-level merge, existing entries win).
-> `omnigraph init` no longer scaffolds it. New work should use the two
-> surfaces above. Config field naming in the legacy file: `graphs:` (not the
-> old `targets:`); `cli.graph`/`server.graph` (not `cli.target`/`server.target`).
+> **Legacy `omnigraph.yaml` is deprecated (RFC-008).** It still works through
+> the deprecation window (loading it prints a deprecation notice; silence with
+> `OMNIGRAPH_SUPPRESS_YAML_DEPRECATION=1`). Run `omnigraph config migrate
+> [--write]` to split it — team half → `cluster.yaml`, personal half →
+> `~/.omnigraph/config.yaml`. `omnigraph init` no longer scaffolds it; new work
+> uses the two surfaces above.
 
 ### What to commit
 
-**Commit:** `schema.pg`, `queries/*.gq`, `omnigraph.yaml`, `seed.md`, `seed.jsonl`, per-cookbook `README.md` and `CLAUDE.md`.
+**Commit:** `schema.pg`, `queries/*.gq`, `cluster.yaml`, `seed.md`, `seed.jsonl`, per-cookbook `README.md` and `CLAUDE.md`.
 
 **Ignore:** `.env.omni` (credentials), `.claude/` (local agent state), `*.omni/` (local graph artifacts), `__cluster/` and `graphs/` (cluster state + derived graph roots).
 
@@ -344,7 +340,6 @@ These are the traps most likely to bite. Scan this table before debugging any pa
 | `schema apply` with feature branches open | rejected | Merge or delete branches first |
 | `nearest(...)` / `bm25(...)` / `rrf(...)` without `limit` | compile error | Add `limit N` |
 | Adding non-nullable property without backfill | unsupported migration | Make optional → backfill → tighten in follow-up apply |
-| Config uses `targets:` / `target:` | `graph 'X' not found in omnigraph.yaml` | Rename to `graphs:` / `graph:` |
 | `omnigraph init --json` | `unexpected argument --json` | `init` doesn't support `--json`; drop the flag |
 | `omnigraph init` on an already-initialized URI | `AlreadyInitialized` error (v0.6.0+) | `--force` to re-init (skips the schema preflight; does **not** purge data) |
 | `schema apply` dropping a property/type | soft-dropped or rejected (no data loss) | add `--allow-data-loss` to actually drop the column |

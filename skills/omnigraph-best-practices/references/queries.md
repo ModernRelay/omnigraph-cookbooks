@@ -18,7 +18,7 @@ Writing `.gq` query files in Omnigraph.
 
 - One `.gq` file per primary node type (`signals.gq`, `patterns.gq`, `elements.gq`)
 - One `mutations.gq` file for all insert/update/delete queries
-- Put query files in `queries/` and reference via `query.roots: [queries, .]` in `omnigraph.yaml`
+- Put query files in `queries/` — cluster mode discovers `queries/*.gq` automatically
 
 ## Linting
 
@@ -299,4 +299,4 @@ This asymmetry is one of the most common silent type errors when bulk-loading da
 
 ## Aliases Over Raw Queries
 
-For anything an agent or script will call repeatedly, define an alias in `omnigraph.yaml`. See `references/aliases.md`.
+For anything an agent or script will call repeatedly, define an operator alias. See `references/aliases.md`.

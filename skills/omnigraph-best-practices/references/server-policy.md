@@ -24,18 +24,6 @@ omnigraph-server --config omnigraph.yaml             # legacy combined file (dep
 
 The boot sources are mutually exclusive — a server boots from one, never a merge. `--config omnigraph.yaml` reads `server.graph`/`server.bind` from the file; `--cluster` reads the applied ledger (see *Cluster-Booted Servers* below). Run the server in a separate terminal or background process.
 
-### `omnigraph.yaml` server block
-
-```yaml
-graphs:
-  local_s3:
-    uri: s3://my-bucket/repos/spike-intel
-
-server:
-  graph: local_s3          # which graph to serve (single-graph mode)
-  bind: 127.0.0.1:8080     # where to listen
-```
-
 ## HTTP Routes
 
 | Route | Purpose |
@@ -80,8 +68,8 @@ omnigraph query --server remote --graph spike --alias signal sig-foo
 You can no longer just "leave auth off." Since v0.6.0 the server **refuses to start** when it has neither bearer tokens nor a policy file, unless you explicitly opt in:
 
 ```bash
-omnigraph-server --config omnigraph.yaml --unauthenticated
-# or: OMNIGRAPH_UNAUTHENTICATED=1 omnigraph-server --config omnigraph.yaml
+omnigraph-server --cluster . --unauthenticated
+# or: OMNIGRAPH_UNAUTHENTICATED=1 omnigraph-server --cluster .
 ```
 
 This is a guardrail against accidentally shipping an open server. For pure local dev, pass `--unauthenticated` deliberately.
@@ -134,13 +122,9 @@ Per-graph actions (evaluated against the graph being addressed):
 
 For any shared repo, gate at least `schema_apply` and `branch_merge`.
 
-### Policy file reference
+### Where policy is declared
 
-```yaml
-# omnigraph.yaml
-policy:
-  file: policy.yaml
-```
+In **cluster mode** (recommended), Cedar bundles are declared in `cluster.yaml` and attach via `applies_to` (`[cluster]` server-level, `[<graph-id>]` per graph) — see *Cluster-Booted Servers* below. The `policy.yaml` rule format is identical in both modes. The classic single-graph server instead points at a policy file from the now-deprecated `omnigraph.yaml`:
 
 > **Config-follows-identity (v0.6.1, breaking).** A top-level `policy:` (and `queries:`) block applies **only** to an anonymous bare-URI single-graph server. A graph served **by name** — `server.graph: <name>` or `--target <name>` — must nest its policy under that graph:
 >
@@ -263,7 +247,7 @@ graphs:
 - `server.policy.file` — server-level rules (`graph_list`).
 - Top-level `policy.file` is **rejected** in multi mode (ambiguous across graphs); it stays valid for single-graph / CLI-local use. The loaders reject a `graph_list` rule in a per-graph file (or a `read` rule in the server file) at startup.
 
-Runtime add/remove of graphs is **not** in v0.6.0 — operators edit `omnigraph.yaml` and restart.
+Runtime add/remove of graphs is **not** in v0.6.0 — operators edit the config and restart.
 
 ## Server + Policy Together
 
@@ -272,7 +256,7 @@ When the server is running with a policy file:
 2. Unauthorized requests return `403 Forbidden`.
 3. The CLI doesn't bypass policy when it connects over HTTP — it's enforced at the server. Enforcement is also engine-wide, so CLI direct-engine writes and embedded SDK consumers hit the same gate.
 
-Setup ops (`init`, `load`) write storage directly. With a policy configured they still flow through the engine-layer enforce gate for the actor you pass via `--as` (or `cli.actor` in `omnigraph.yaml`); gate the raw storage layer too (S3 bucket ACLs, object locks) if the bucket is shared.
+Setup ops (`init`, `load`) write storage directly. With a policy configured they still flow through the engine-layer enforce gate for the actor you pass via `--as` (or `operator.actor` in `~/.omnigraph/config.yaml`); gate the raw storage layer too (S3 bucket ACLs, object locks) if the bucket is shared.
 
 ## Cluster-Booted Servers
 

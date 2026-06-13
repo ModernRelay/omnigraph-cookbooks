@@ -68,8 +68,8 @@ omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated  # serve (l
   config directory (byte-compatible with pre-existing clusters). Credentials
   come from the standard `AWS_*` env contract, never `cluster.yaml`.
 - **`--as <actor>` attributes every run** (sidecars, audit, engine commits).
-  Defaults from your per-operator `omnigraph.yaml`'s `cli.actor`; required for
-  `approve`.
+  Defaults from your operator config's `operator.actor` (or legacy `cli.actor`);
+  required for `approve`.
 - **Destructive changes are gated**: removing a graph from `cluster.yaml`
   blocks with `approval_required` until
   `omnigraph cluster approve graph.<id> --config . --as <you>` records a
