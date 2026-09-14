@@ -21,6 +21,19 @@ For general Omnigraph ops — schema language, queries, loading, branches,
 cluster commands, CLI — see the **omnigraph** skill and
 `../CLAUDE.md`. This file covers only what's specific to Second Brain.
 
+## Answering and writing (agents)
+
+- **Answer from the graph, not the files.** Use the aliases / stored queries against the running server; never assemble an answer by reading `seed.jsonl` or `seed.md` — they are load inputs, not the live state.
+- **Alias args bind by name to the query's `$params`** (`args: [slug]` fills `$slug`): `omnigraph alias person-tasks-i-owe per-theo` is `omnigraph query person_tasks_i_owe --graph brain --params '{"slug":"per-theo"}'`.
+- **Mutations are not aliasable on 0.10** (`'add_x' is a mutation — use omnigraph mutate add_x`). Run them with `omnigraph mutate <name> --params '<json>'`, every non-optional property supplied; signatures live in `queries/mutations.gq`. Working example:
+
+  ```bash
+  omnigraph mutate add_task --graph brain --params '{"slug":"tk-theo-whisky","name":"Bring Theo the Lagavulin 16","status":"next","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+  omnigraph mutate link_task_for_person --graph brain --params '{"task":"tk-theo-whisky","person":"per-theo"}'
+  ```
+
+  With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
+
 ## Cluster control plane (two-file model)
 
 This cookbook is a **filesystem-backed cluster** — no object store, no

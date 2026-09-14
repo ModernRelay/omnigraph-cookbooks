@@ -19,6 +19,20 @@ The reference seed is a **fictional Berlin-based AI-infra fund** ("Quito Capital
 
 Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).
 
+## Answering and writing (agents)
+
+- **Answer from the graph, not the files.** Use the aliases / stored queries against the running server; never assemble an answer by reading `seed.jsonl` or `seed.md` — they are load inputs, not the live state.
+- **Alias args bind by name to the query's `$params`** (`args: [slug]` fills `$slug`): `omnigraph alias pre-ic-brief-thesis deal-helix-series-a` is `omnigraph query pre_ic_brief_thesis --graph vcos --params '{"slug":"deal-helix-series-a"}'`.
+- **Mutations are not aliasable on 0.10** (`'add_x' is a mutation — use omnigraph mutate add_x`). Run them with `omnigraph mutate <name> --params '<json>'`, every non-optional property supplied; signatures live in `queries/mutations.gq`. Working example:
+
+  ```bash
+  omnigraph mutate add_lesson --graph vcos --params '{"slug":"lsn-ref-calls-before-ic","name":"Finish customer reference calls before IC","kind":"rule-of-thumb","body":"No IC vote while a reference call is still open.","status":"tentative","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+  omnigraph mutate link_lesson_distilled_from --graph vcos --params '{"lesson":"lsn-ref-calls-before-ic","pattern":"pat-on-prem-shift"}'
+  ```
+
+  With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
+- **Full-text `search()` is case-sensitive** (the `search_*` queries behind the `search-*` aliases): the term must match the stored casing — `Series` matches, `series` returns 0 rows with no error.
+
 ## Cluster control plane (two-file model)
 
 This cookbook is a **filesystem-backed cluster** — no object store, no S3 creds.

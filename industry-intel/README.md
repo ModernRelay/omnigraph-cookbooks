@@ -109,7 +109,7 @@ cd industry-intel
 # applies schema.pg, publishes all stored queries)
 omnigraph cluster import --config .
 omnigraph cluster plan   --config .
-omnigraph cluster apply  --config . --as <you>
+omnigraph cluster apply  --config . --as <you>   # any id — recorded in the cluster ledger as who applied; set operator.actor in ~/.omnigraph/config.yaml to make it the default
 
 # Load the seed through the data plane (one-time)
 omnigraph load --data seed.jsonl --mode overwrite graphs/spike.omni

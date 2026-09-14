@@ -5,7 +5,8 @@
 # --cluster .`); alias invocation needs the server up.
 #
 # Read aliases bind to served stored queries by name; run with
-# `omnigraph alias <name> [args]`. Operator aliases are READ-ONLY — run stored
+# `omnigraph alias <name> [args]` — args bind by NAME to the query's $params
+# (`args: [slug]` fills `$slug`). Operator aliases are READ-ONLY — run stored
 # *mutations* with `omnigraph mutate <name> --params '{…}'` (see the bottom), not
 # via an alias.
 servers:

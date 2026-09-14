@@ -29,6 +29,19 @@ All names are fabricated; the seed exists to shape the demo queries.
 - `omnigraph-config.example.yaml` — example operator aliases; merge into
   `~/.omnigraph/config.yaml` (per-user, never committed).
 
+## Answering and writing (agents)
+
+- **Answer from the graph, not the files.** Use the aliases / stored queries against the running server; never assemble an answer by reading `seed.jsonl` or `seed.md` — they are load inputs, not the live state.
+- **Alias args bind by name to the query's `$params`** (`args: [slug]` fills `$slug`): `omnigraph alias issue iss-rate-limit` is `omnigraph query issue_lookup --graph dev --params '{"slug":"iss-rate-limit"}'`.
+- **Mutations are not aliasable on 0.10** (`'add_x' is a mutation — use omnigraph mutate add_x`). Run them with `omnigraph mutate <name> --params '<json>'`, every non-optional property supplied; signatures live at the bottom of `queries/queries.gq`. Working example:
+
+  ```bash
+  omnigraph mutate create_issue --graph dev --params '{"slug":"iss-flaky-presence-test","title":"Presence integration test is flaky","status":"todo","issueType":"bug","actor":"act-admin","at":"2026-09-14"}'
+  omnigraph mutate add_issue_to_epic --graph dev --params '{"issue":"iss-flaky-presence-test","epic":"epc-observability"}'
+  ```
+
+  With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
+
 ## Cluster control plane (two-file model)
 
 Filesystem-backed cluster — no object store, no S3 creds.

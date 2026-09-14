@@ -18,6 +18,20 @@ The reference seed is **Viking Therapeutics** (NASDAQ: VKTX), a public GLP-1/GIP
 
 Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).
 
+## Answering and writing (agents)
+
+- **Answer from the graph, not the files.** Use the aliases / stored queries against the running server; never assemble an answer by reading `seed.jsonl` or `seed.md` — they are load inputs, not the live state.
+- **Alias args bind by name to the query's `$params`** (`args: [slug]` fills `$slug`): `omnigraph alias assumption-contradictions asmp-oral-displaces-injectable` is `omnigraph query assumption_contradicting_signals --graph pharma --params '{"slug":"asmp-oral-displaces-injectable"}'`.
+- **Mutations are not aliasable on 0.10** (`'add_x' is a mutation — use omnigraph mutate add_x`). Run them with `omnigraph mutate <name> --params '<json>'`, every non-optional property supplied; signatures live in `queries/mutations.gq`. Working example:
+
+  ```bash
+  omnigraph mutate add_signal --graph pharma --params '{"slug":"sig-orforglipron-approval","name":"FDA approves orforglipron","brief":"First oral small-molecule GLP-1 approved for obesity.","stagingTimestamp":"2026-09-14T00:00:00Z","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+  omnigraph mutate link_about_compound --graph pharma --params '{"signal":"sig-orforglipron-approval","compound":"comp-vk2735-sc"}'
+  ```
+
+  With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
+- **Full-text `search()` is case-sensitive** (the `search_*` queries behind the `search-signals` alias): the term must match the stored casing — `Medicare` matches, `medicare` returns 0 rows with no error.
+
 ## Schema Language (`.pg`)
 
 - `node` defines entity types; `edge` defines typed relationships (`edge Name: Source -> Target`)

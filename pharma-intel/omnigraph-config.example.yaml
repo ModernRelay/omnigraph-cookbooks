@@ -3,6 +3,12 @@
 # Merge the `aliases:` below into it for short names over this graph's stored
 # queries. Point `local` at your running cluster server (`omnigraph-server
 # --cluster .`); alias invocation needs the server up.
+#
+# Alias args bind by NAME to the stored query's $params (`args: [slug]` fills
+# `$slug`), so `omnigraph alias signal sig-x` == `omnigraph query get_signal
+# --params '{"slug":"sig-x"}'`. Aliases are READ-ONLY on omnigraph 0.10: run the
+# stored *mutations* with `omnigraph mutate <name> --params '{…}'` (see the
+# bottom of this file), never through an alias.
 servers:
   local:
     url: http://127.0.0.1:8080
@@ -13,6 +19,7 @@ aliases:
   # ── Signals ──
   signal: { server: local, graph: pharma, query: get_signal, args: [slug], format: kv }
   signals: { server: local, graph: pharma, query: recent_signals }
+  # search-* run full-text search(), which is case-sensitive: the term must match the stored casing (`Medicare` matches, `medicare` returns 0 rows).
   search-signals: { server: local, graph: pharma, query: search_signals, args: [q] }
   signals-by-domain: { server: local, graph: pharma, query: signals_by_domain, args: [domain] }
   signal-patterns: { server: local, graph: pharma, query: signal_patterns, args: [slug] }
@@ -90,57 +97,8 @@ aliases:
   questions: { server: local, graph: pharma, query: questions_open }
   question-signals: { server: local, graph: pharma, query: question_signals, args: [slug] }
 
-  # ── Mutations: pipeline nodes ──
-  add-compound: { server: local, graph: pharma, query: add_compound, args: [slug, name, phase, createdAt, updatedAt] }
-  add-mechanism: { server: local, graph: pharma, query: add_mechanism, args: [slug, name, createdAt, updatedAt] }
-  add-trial: { server: local, graph: pharma, query: add_trial, args: [slug, name, status, createdAt, updatedAt] }
-  add-company: { server: local, graph: pharma, query: add_company, args: [slug, name] }
-  add-deal: { server: local, graph: pharma, query: add_deal, args: [slug, name, createdAt, updatedAt] }
-  add-regulatory: { server: local, graph: pharma, query: add_regulatory, args: [slug, name, createdAt, updatedAt] }
-
-  # ── Mutations: SPIKE nodes ──
-  add-signal: { server: local, graph: pharma, query: add_signal, args: [slug, name, brief, stagingTimestamp, createdAt, updatedAt] }
-  add-pattern: { server: local, graph: pharma, query: add_pattern, args: [slug, name, kind, createdAt, updatedAt] }
-  add-insight: { server: local, graph: pharma, query: add_insight, args: [slug, name, createdAt, updatedAt] }
-
-  # ── Mutations: provenance ──
-  add-source: { server: local, graph: pharma, query: add_source, args: [slug, name] }
-  add-artifact: { server: local, graph: pharma, query: add_artifact, args: [slug, name, artifactType, stagingTimestamp, createdAt, updatedAt] }
-
-  # ── Mutations: internal context ──
-  add-program: { server: local, graph: pharma, query: add_program, args: [slug, name, createdAt, updatedAt] }
-  add-assumption: { server: local, graph: pharma, query: add_assumption, args: [slug, name, level, createdAt, updatedAt] }
-  add-decision: { server: local, graph: pharma, query: add_decision, args: [slug, name, status, createdAt, updatedAt] }
-  add-question: { server: local, graph: pharma, query: add_question, args: [slug, name, status, createdAt, updatedAt] }
-
-  # ── Mutations: SPIKE analytical edges ──
-  link-forms-pattern: { server: local, graph: pharma, query: link_forms_pattern, args: [signal, pattern] }
-  link-contradicts-pattern: { server: local, graph: pharma, query: link_contradicts_pattern, args: [signal, pattern] }
-  link-highlights-pattern: { server: local, graph: pharma, query: link_highlights_pattern, args: [insight, pattern] }
-  link-drives-pattern: { server: local, graph: pharma, query: link_drives_pattern, args: [from, to] }
-
-  # ── Mutations: signal → pipeline classification ──
-  link-about-compound: { server: local, graph: pharma, query: link_about_compound, args: [signal, compound] }
-  link-about-mechanism: { server: local, graph: pharma, query: link_about_mechanism, args: [signal, mechanism] }
-  link-about-trial: { server: local, graph: pharma, query: link_about_trial, args: [signal, trial] }
-  link-relevant-company: { server: local, graph: pharma, query: link_relevant_company, args: [signal, company] }
-
-  # ── Mutations: pipeline structure ──
-  link-compound-mechanism: { server: local, graph: pharma, query: link_compound_mechanism, args: [compound, mechanism] }
-  link-compound-company: { server: local, graph: pharma, query: link_compound_company, args: [compound, company] }
-  link-trial-compound: { server: local, graph: pharma, query: link_trial_compound, args: [trial, compound] }
-
-  # ── Mutations: internal ↔ external (the value bridge) ──
-  link-signal-supports-assumption: { server: local, graph: pharma, query: link_signal_supports_assumption, args: [signal, assumption] }
-  link-signal-contradicts-assumption: { server: local, graph: pharma, query: link_signal_contradicts_assumption, args: [signal, assumption] }
-  link-signal-informs-question: { server: local, graph: pharma, query: link_signal_informs_question, args: [signal, question] }
-
-  # ── Mutations: internal structure ──
-  link-program-assumption: { server: local, graph: pharma, query: link_program_assumption, args: [program, assumption] }
-  link-decision-program: { server: local, graph: pharma, query: link_decision_program, args: [decision, program] }
-  link-decision-question: { server: local, graph: pharma, query: link_decision_question, args: [decision, question] }
-  link-decision-assumption: { server: local, graph: pharma, query: link_decision_assumption, args: [decision, assumption] }
-
-  # ── Mutations: provenance edges ──
-  link-artifact-source: { server: local, graph: pharma, query: link_artifact_source, args: [artifact, source] }
-  link-signal-artifact: { server: local, graph: pharma, query: link_signal_artifact, args: [signal, artifact] }
+# ── Mutations (served stored mutations in queries/mutations.gq; NOT aliasable) ──
+#   omnigraph mutate add_signal --params '{"slug":"sig-new","name":"…","brief":"…",
+#     "stagingTimestamp":"2026-09-14T00:00:00Z","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+#   omnigraph mutate link_about_compound --params '{"signal":"sig-new","compound":"comp-vk2735-sc"}'
+# (with defaults.server/default_graph set, --server/--graph can be omitted.)

@@ -16,6 +16,21 @@ An Omnigraph schema + seed modeling AI/ML industry intelligence using the SPIKE 
 
 Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).
 
+## Answering and writing (agents)
+
+- **Answer from the graph, not the files.** Use the aliases / stored queries against the running server; never assemble an answer by reading `seed.jsonl` or `seed.md` — they are load inputs, not the live state.
+- **Alias args bind by name to the query's `$params`** (`args: [slug]` fills `$slug`): `omnigraph alias pattern-signals pat-sovereign-ai` is `omnigraph query pattern_signals --graph spike --params '{"slug":"pat-sovereign-ai"}'`.
+- **Mutations are not aliasable on 0.10** (`'add_x' is a mutation — use omnigraph mutate add_x`). Run them with `omnigraph mutate <name> --params '<json>'`, every non-optional property supplied; signatures live in `queries/mutations.gq`. Working example:
+
+  ```bash
+  printf '%s' 'local-writer-token' | omnigraph login local   # mutations need the writer token, not the reader one
+  omnigraph mutate add_signal --graph spike --params '{"slug":"sig-eu-sovereign-cloud","name":"EU mandates sovereign cloud for public-sector AI","brief":"Public-sector AI workloads must run on EU-controlled infrastructure.","stagingTimestamp":"2026-09-14T00:00:00Z","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+  omnigraph mutate link_signal_forms_pattern --graph spike --params '{"signal":"sig-eu-sovereign-cloud","pattern":"pat-sovereign-ai"}'
+  ```
+
+  With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
+- **Full-text `search()` is case-sensitive** (the `search_*` queries, invoked via `omnigraph query search_signals --graph spike --params '{"q":"Zylon"}'`): the term must match the stored casing — `Zylon` matches, `zylon` returns 0 rows with no error.
+
 ## Schema Language (`.pg`)
 
 - `node` defines entity types; `edge` defines typed relationships (`edge Name: Source -> Target`)
