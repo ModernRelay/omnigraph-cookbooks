@@ -42,6 +42,60 @@ All names are fabricated; the seed exists to shape the demo queries.
 
   With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
 
+## Setup, in order (verified against 0.10)
+
+`cluster import` comes **before** the first `apply` — without it `apply` exits 1
+with `state_missing __cluster/state.json: apply requires an existing state.json`.
+
+```bash
+cd dev-graph
+omnigraph cluster import --config .                # once: bootstraps __cluster/state.json
+omnigraph cluster apply  --config . --as <you>     # creates graphs/dev.omni, applies schema + stored queries
+omnigraph load --data seed.jsonl --mode overwrite graphs/dev.omni
+omnigraph-server --cluster . --unauthenticated &   # 127.0.0.1:8080 — refuses to start without this flag or auth
+curl -s http://127.0.0.1:8080/healthz              # {"status":"ok",…}; the path is /healthz, /health is 404
+```
+
+### `load` addressing
+
+`--data` is the **seed file**; the **graph** is the positional URI. Both are
+required, as is `--mode` (`overwrite` | `append` | `merge`).
+
+| Target | Command |
+|---|---|
+| Local storage, no server | `omnigraph load --data seed.jsonl --mode overwrite graphs/dev.omni` |
+| A running server | `omnigraph load --data seed.jsonl --mode overwrite --server http://127.0.0.1:8080 --graph dev --yes` |
+
+One address per command. The engine's own refusals:
+
+- `--graph` next to a positional URI or `--store` → *"--graph selects a graph
+  within a server or cluster scope; a positional URI / --store is already a
+  single graph"*. `--graph` pairs with `--server`, nothing else.
+- `--cluster` on `load` → *"`load` is a data command; --cluster addresses a
+  cluster-scoped command and does not apply."*
+- `omnigraph load seed.jsonl …` — the positional slot is the **graph**, never the data file.
+- `overwrite` through a server prompts, so non-interactive callers add `--yes`.
+
+### Find the query instead of guessing it
+
+- **`omnigraph queries list --cluster . --graph dev`** prints every stored query
+  and mutation *with its parameter names*, offline, no server needed. Read the
+  signature before writing `--params`: `query epic_issues($epic: String)` takes
+  `{"epic":…}`, not `{"slug":…}`.
+- `omnigraph query <name>` resolves a **stored query by name** and needs a
+  server — passing query text there fails with *"by-name invocation needs a
+  server (the stored-query catalog is server-owned)"*. For ad-hoc GQL use
+  `-e`, and note the empty parameter list is required:
+
+  ```bash
+  omnigraph query -e 'query q() { match { $i: Issue } return { $i.slug, $i.title } }' --store file://$PWD/graphs/dev.omni
+  ```
+
+- `omnigraph alias <name> [args]` carries its own server and graph — adding
+  `--graph`/`--server` errors with *"remove global scope flag(s)"*. There is no
+  `--list`; the alias names are the keys under `aliases:` in
+  `omnigraph-config.example.yaml`.
+
 ## Cluster control plane (two-file model)
 
 Filesystem-backed cluster — no object store, no S3 creds.

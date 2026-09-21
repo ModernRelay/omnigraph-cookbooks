@@ -31,6 +31,66 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
   With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
 - **Full-text `search()` is case-sensitive** (the `search_*` queries, invoked via `omnigraph query search_signals --graph spike --params '{"q":"Zylon"}'`): the term must match the stored casing — `Zylon` matches, `zylon` returns 0 rows with no error.
 
+## Setup, in order (verified against 0.10)
+
+`cluster import` comes **before** the first `apply` — without it `apply` exits 1
+with `state_missing __cluster/state.json: apply requires an existing state.json`.
+This cookbook ships a Cedar policy, so the server takes **tokens**, never
+`--unauthenticated`.
+
+```bash
+cd industry-intel
+omnigraph cluster import --config .                # once: bootstraps __cluster/state.json
+omnigraph cluster apply  --config . --as <you>     # creates graphs/spike.omni, applies schema + stored queries
+omnigraph load --data seed.jsonl --mode overwrite graphs/spike.omni
+
+export OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-admin":"local-admin-token","act-writer":"local-writer-token","act-reader":"local-reader-token"}'
+omnigraph-server --cluster . --bind 127.0.0.1:8080 &
+curl -s http://127.0.0.1:8080/healthz              # {"status":"ok",…}; the path is /healthz, /health is 404
+
+printf '%s' 'local-reader-token' | omnigraph login local   # writer token for mutations
+```
+
+### `load` addressing
+
+`--data` is the **seed file**; the **graph** is the positional URI. Both are
+required, as is `--mode` (`overwrite` | `append` | `merge`).
+
+| Target | Command |
+|---|---|
+| Local storage, no server | `omnigraph load --data seed.jsonl --mode overwrite graphs/spike.omni` |
+| A running server | `omnigraph load --data seed.jsonl --mode overwrite --server http://127.0.0.1:8080 --graph spike --yes` |
+
+One address per command. The engine's own refusals:
+
+- `--graph` next to a positional URI or `--store` → *"--graph selects a graph
+  within a server or cluster scope; a positional URI / --store is already a
+  single graph"*. `--graph` pairs with `--server`, nothing else.
+- `--cluster` on `load` → *"`load` is a data command; --cluster addresses a
+  cluster-scoped command and does not apply."*
+- `omnigraph load seed.jsonl …` — the positional slot is the **graph**, never the data file.
+- `overwrite` through a server prompts, so non-interactive callers add `--yes`.
+
+### Find the query instead of guessing it
+
+- **`omnigraph queries list --cluster . --graph spike`** prints every stored
+  query and mutation *with its parameter names*, offline, no server and no token
+  needed. Read the signature before writing `--params`: `query
+  elements_by_kind($kind: String)` takes `{"kind":…}`, not `{"slug":…}`.
+- `omnigraph query <name>` resolves a **stored query by name** and needs a
+  server — passing query text there fails with *"by-name invocation needs a
+  server (the stored-query catalog is server-owned)"*. For ad-hoc GQL use
+  `-e`, and note the empty parameter list is required:
+
+  ```bash
+  omnigraph query -e 'query q() { match { $s: Signal } return { $s.slug, $s.name } }' --store file://$PWD/graphs/spike.omni
+  ```
+
+- `omnigraph alias <name> [args]` carries its own server and graph — adding
+  `--graph`/`--server` errors with *"remove global scope flag(s)"*. There is no
+  `--list`; the alias names are the keys under `aliases:` in
+  `omnigraph-config.example.yaml`.
+
 ## Schema Language (`.pg`)
 
 - `node` defines entity types; `edge` defines typed relationships (`edge Name: Source -> Target`)
