@@ -76,17 +76,25 @@ One address per command. The engine's own refusals:
   takes `{"kind":…}`, not `{"slug":…}`.
 - `omnigraph query <name>` resolves a **stored query by name** and needs a
   server — passing query text there fails with *"by-name invocation needs a
-  server (the stored-query catalog is server-owned)"*. For ad-hoc GQL use
-  `-e`, and note the empty parameter list is required:
+  server (the stored-query catalog is server-owned)"*. Ad-hoc GQL goes through
+  `-e`, in the same dialect as the `.gq` files:
 
   ```bash
-  omnigraph query -e 'query q() { match { $p: Person } return { $p.slug, $p.name } }' --store file://$PWD/graphs/brain.omni
+  omnigraph query -e 'query q($slug: String) { match { $p: Person { slug: $slug } } return { $p.slug, $p.name } }' \
+    --params '{"slug":"per-self"}' --store file://$PWD/graphs/brain.omni
   ```
 
+  Filters bind **inside the node's braces** (`$p: Person { slug: $slug }`) — there
+  is no `where`, no `filter { … }`, no `Person[slug=="…"]`. The parameter list is
+  required even when empty (`query q()`), and `limit N` / `order { … }` sit
+  inside the outer braces after `return`, never trailing the string.
+
 - `omnigraph alias <name> [args]` carries its own server and graph — adding
-  `--graph`/`--server` errors with *"remove global scope flag(s)"*. There is no
-  `--list`; the alias names are the keys under `aliases:` in
-  `omnigraph-config.example.yaml`.
+  `--graph`/`--server` errors with *"remove global scope flag(s)"*. **An alias
+  name is not a query name:** `queries list` prints `get_person` and
+  `people_all`, whose aliases are `person` and `people` — hyphenated, and often
+  dropping a `get_` prefix. They are the keys under `aliases:` in
+  `omnigraph-config.example.yaml`; there is no `--list`.
 
 ## Cluster control plane (two-file model)
 
