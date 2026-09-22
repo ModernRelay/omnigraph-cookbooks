@@ -75,10 +75,12 @@ One address per command. The engine's own refusals:
 
   ```bash
   omnigraph query -e 'query q($slug: String) { match { $p: Pattern { slug: $slug } $s formsPattern $p } return { $s.slug, $s.name } }' \
-    --params '{"slug":"pat-sovereign-ai"}' --store file://$PWD/graphs/spike.omni
+    --params '{"slug":"pat-sovereign-ai"}' --server http://127.0.0.1:8080 --graph spike
   ```
 
-  The parameter list is required even when empty (`query q()`). Property filters bind inside the node's braces (`$p: Pattern { slug: $slug }`) or as predicate lines in `match` (`$p.age > 30`); an edge is traversed as its name in lowerCamelCase between two bound variables (`$s formsPattern $p` for `FormsPattern`); `limit N` and `order { … }` sit inside the query block after `return`. The full dialect — traversal, search, aggregation, mutations — is in the vendored **omnigraph** skill (`.claude/skills/omnigraph/references/queries.md`).
+  Against a server, `--graph <id>` is required — without it the server answers `404 Not Found`.
+  With no server, address the storage instead: `--store file://$PWD/graphs/<id>.omni` (no
+  `--graph`). The parameter list is required even when empty (`query q()`). Property filters bind inside the node's braces (`$p: Pattern { slug: $slug }`) or as predicate lines in `match` (`$p.age > 30`); an edge is traversed as its name in lowerCamelCase between two bound variables (`$s formsPattern $p` for `FormsPattern`); `limit N` and `order { … }` sit inside the query block after `return`. The full dialect — traversal, search, aggregation, mutations — is in the vendored **omnigraph** skill (`.claude/skills/omnigraph/references/queries.md`).
 - **Full-text `search()` is case-sensitive**: the term must match the stored casing — `Zylon` matches, `zylon` returns 0 rows with no error.
 
 ## Skills and Docs
