@@ -1,4 +1,4 @@
-# Graph-bound Cedar policy for the Railway template (0.10 cluster bundle).
+# Graph-bound Cedar policy for the Railway template (0.11 cluster bundle).
 #
 # Injected by init.sh into the assembled cluster config for cookbooks that do
 # not declare their own `policies:` (industry-intel ships its own bundle but

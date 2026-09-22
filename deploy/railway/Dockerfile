@@ -4,7 +4,7 @@
 # GitHub release (no Rust toolchain, no source build) onto a
 # debian:trixie-slim runtime, alongside the bundled cookbook cluster
 # configs, the template policy bundles, and an idempotent cluster-apply
-# init script that runs as Railway's preDeployCommand (OmniGraph 0.10
+# init script that runs as Railway's preDeployCommand (OmniGraph 0.11
 # is cluster-only — RFC-011).
 #
 # Base is trixie (Debian 13, glibc 2.41), not bookworm (2.36): the release
@@ -14,7 +14,7 @@
 # railway.toml so Railway picks this file up while keeping the cookbook
 # directories visible to COPY at the repo root.
 
-ARG OMNIGRAPH_REF=v0.10.0
+ARG OMNIGRAPH_REF=v0.11.0
 # The release publishes linux-x86_64 and (since v0.8.0) linux-arm64.
 # Railway runs amd64, so we pin the platform and the x86_64 asset for
 # determinism (and so the binary matches the image arch even when built

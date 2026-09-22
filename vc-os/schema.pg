@@ -462,7 +462,7 @@ edge ParticipantInvestor: Deal -> Organization
 
 // Knows is stored bidirectionally by load discipline — the link_knows mutation
 // creates both directions and the seed loads both (the inverse edge; @unique doesn't
-// auto-create it). `@unique(src,dst)` now enforces pair-uniqueness as a true composite
+// auto-create it). `@unique(@src, @dst)` now enforces pair-uniqueness as a true composite
 // key, intra-batch + at merge; not declared here. See CLAUDE.md.
 edge Knows: Person -> Person {
     context: String?

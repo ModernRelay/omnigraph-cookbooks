@@ -57,19 +57,23 @@ self-contained — `cd` in and follow its README.
 ## Getting Started
 
 1. Pick a cookbook.
-2. Install the OmniGraph v0.10.0 CLI and server — see the [OmniGraph repo](https://github.com/ModernRelay/omnigraph). No server or object store is needed for the initial cluster apply and seed load.
+2. Install the OmniGraph v0.11.0 CLI and server — see the [OmniGraph repo](https://github.com/ModernRelay/omnigraph). No server or object store is needed for the initial cluster apply and seed load.
 3. Follow the cookbook's Quick Start. Every cookbook is a **cluster
-   directory** (aligned to OmniGraph 0.10.0): `omnigraph cluster apply`
+   directory** (aligned to OmniGraph 0.11.0): `omnigraph cluster apply`
    creates the graph and publishes the stored queries;
    `omnigraph-server --cluster .` serves them — no object store needed to
    get started.
 
-Upgrading an existing v0.9 graph to v0.10 keeps graph format v6, but moves
-from Lance 9 to Lance 11. Stop traffic, back up the whole graph root, upgrade
-CLI/server/client integrations together, and rebuild full-text indexes on every
-live branch that uses search. Follow the engine's
-[v0.10 upgrade guide](https://github.com/ModernRelay/omnigraph/blob/v0.10.0/docs/user/operations/upgrade.md#v09-to-v010);
-never run mixed old/new processes against one graph.
+OmniGraph 0.11 writes graph format v9 and cannot open a v0.10 (format v6)
+graph. A cookbook checkout carries no data of its own — `cluster apply` plus
+the seed load rebuild it — so upgrading one is: install 0.11, delete the
+cookbook's `graphs/` and `__cluster/`, run its Quick Start again. A graph that
+holds real data is different: cluster-managed roots cannot be upgraded in
+place, so export it with the 0.10 CLI, apply the cluster fresh with 0.11 and
+load the export, following the engine's
+[v0.11 upgrade guide](https://github.com/ModernRelay/omnigraph/blob/v0.11.0/docs/user/operations/upgrade.md).
+Stop traffic and keep a verified whole-root backup first; never run mixed
+old/new processes against one graph.
 
 ## SPIKE Framework
 

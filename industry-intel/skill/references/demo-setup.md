@@ -4,7 +4,7 @@ The quickest path to a populated SPIKE graph. Uses the existing `industry-intel`
 
 ## Prerequisites
 
-Install the OmniGraph CLI and server v0.10.0. The default filesystem-backed
+Install the OmniGraph CLI and server v0.11.0. The default filesystem-backed
 demo needs no object store, credentials, or Docker. RustFS is optional and is
 covered by the S3 alternative in the cookbook README.
 

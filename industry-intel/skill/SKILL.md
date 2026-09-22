@@ -2,7 +2,7 @@
 name: omnigraph-intel-bootstrap
 description: 'Bootstrap a new Omnigraph-based SPIKE industry intelligence graph from scratch. Use this skill whenever a user wants to set up a new SPIKE graph — either with the existing AI industry demo data or for a new domain (biotech, fintech, crypto, geopolitics, macroeconomics, SaaS, climate tech, etc.). The flow presents a demo-vs-custom decision, then for custom setups asks about domain scope, actors, cadence, and sources, adapts schema and enums for the target domain, runs initial web research to generate real seed content, and converges the cluster (apply creates the graph) + loads seed data. Apply aggressively when the user says any of: set up Omnigraph, bootstrap a new graph, create a new SPIKE cookbook, I want to track X industry, initialize intel for Y, new graph for Z domain, start a new context graph, or similar phrasing. This skill takes a user from zero to a populated, queryable graph.'
 license: MIT (see LICENSE at repo root)
-compatibility: Validated with OmniGraph CLI and server v0.10.0 (graph format v6, Lance 11). Docker is needed only for the optional RustFS/S3 path.
+compatibility: Validated with OmniGraph CLI and server v0.11.0 (graph format v9). Docker is needed only for the optional RustFS/S3 path.
 metadata:
   author: ModernRelay
   version: "0.5.0"
@@ -18,7 +18,7 @@ This skill takes a user from zero to a populated, queryable SPIKE graph. Two pat
 
 **Prerequisites:**
 
-1. OmniGraph CLI and server v0.10.0.
+1. OmniGraph CLI and server v0.11.0.
 
 2. The `omnigraph-cookbooks` repo cloned somewhere on disk. Ask the user where (or default to the current directory):
    ```bash
@@ -34,16 +34,16 @@ Before either path, run these checks (and act on the results):
 # Ensure the exact supported CLI is on PATH
 command -v omnigraph >/dev/null || { echo "omnigraph not found — install via homebrew or the install script"; exit 1; }
 
-# Require v0.10.0; upgrade CLI and server together.
-test "$(omnigraph --version)" = "omnigraph 0.10.0" || { echo "this skill requires omnigraph 0.10.0"; exit 1; }
+# Require v0.11.0; upgrade CLI and server together.
+test "$(omnigraph --version)" = "omnigraph 0.11.0" || { echo "this skill requires omnigraph 0.11.0"; exit 1; }
 omnigraph version
 ```
 
 The default (cluster-first) path needs **no RustFS, no credentials, no
 .env.omni** — graphs live at local derived roots created by `cluster apply`.
 RustFS checks and `.env.omni` only matter for the optional S3 alternative (see
-the cookbook READMEs). A 0.9 graph needs the engine's coordinated 0.9→0.10
-upgrade procedure and full-text-index rebuild before this skill operates it.
+the cookbook READMEs). A 0.10 graph cannot be opened by 0.11 — rebuild it from
+its export or its seed (engine upgrade guide) before this skill operates it.
 
 **If `:8080` returns `200` from a server pointed at a different repo** (the bootstrap script auto-starts one), stop it before starting yours, or rebind to a free port via `omnigraph-server --bind 127.0.0.1:8090`.
 

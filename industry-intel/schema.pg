@@ -180,7 +180,7 @@ edge EnablesPattern: Element -> Pattern
 edge PublishedBySource: InformationArtifact -> SourceEntity @card(0..1)
 edge ContributedByExpert: InformationArtifact -> Expert
 edge PartOfArtifact: Chunk -> InformationArtifact @card(1..1) {
-    @unique(src)
+    @unique(@src)
 }
 edge SpottedInArtifact: Signal -> InformationArtifact
 edge IdentifiedInArtifact: Element -> InformationArtifact
