@@ -19,90 +19,35 @@ The reference seed is a **fictional Berlin-based AI-infra fund** ("Quito Capital
 
 Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).
 
-## Answering and writing (agents)
+## Setup
 
-- **Answer from the graph, not the files.** Use the aliases / stored queries against the running server; never assemble an answer by reading `seed.jsonl` or `seed.md` — they are load inputs, not the live state.
-- **Alias args bind by name to the query's `$params`** (`args: [slug]` fills `$slug`): `omnigraph alias pre-ic-brief-thesis deal-helix-series-a` is `omnigraph query pre_ic_brief_thesis --graph vcos --params '{"slug":"deal-helix-series-a"}'`.
-- **Mutations are not aliasable** (`'add_x' is a mutation — use omnigraph mutate add_x`). Run them with `omnigraph mutate <name> --params '<json>'`, every non-optional property supplied; signatures live in `queries/mutations.gq`. Working example:
-
-  ```bash
-  omnigraph mutate add_lesson --graph vcos --params '{"slug":"lsn-ref-calls-before-ic","name":"Finish customer reference calls before IC","kind":"rule-of-thumb","body":"No IC vote while a reference call is still open.","status":"tentative","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
-  omnigraph mutate link_lesson_distilled_from --graph vcos --params '{"lesson":"lsn-ref-calls-before-ic","pattern":"pat-on-prem-shift"}'
-  ```
-
-  With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
-- **Full-text `search()` is case-sensitive** (the `search_*` queries behind the `search-*` aliases): the term must match the stored casing — `Series` matches, `series` returns 0 rows with no error.
-
-## Setup, in order (verified against 0.11)
-
-`cluster import` comes **before** the first `apply` — without it `apply` exits 1
-with `state_missing __cluster/state.json: apply requires an existing state.json`.
+The rules — `import` before the first `apply`, `load` addressing, `/healthz`, how aliases and
+stored queries behave — are in `../CLAUDE.md`. This is that sequence with vc-os's names filled in:
 
 ```bash
 cd vc-os
-omnigraph cluster import --config .                # once: bootstraps __cluster/state.json
-omnigraph cluster apply  --config . --as <you>     # creates graphs/vcos.omni, applies schema + stored queries
+omnigraph cluster import --config .
+omnigraph cluster plan   --config .
+omnigraph cluster apply  --config . --as <you>     # creates graphs/vcos.omni
 omnigraph load --data seed.jsonl --mode overwrite graphs/vcos.omni
-omnigraph-server --cluster . --unauthenticated &   # 127.0.0.1:8080 — refuses to start without this flag or auth
-curl -s http://127.0.0.1:8080/healthz              # {"status":"ok",…}; the path is /healthz, /health is 404
+omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated &
+curl -s http://127.0.0.1:8080/healthz
 ```
 
-### `load` addressing
+Graph id `vcos`. Stored queries and their parameters: `omnigraph queries list --cluster . --graph vcos`.
+Alias args bind by name to `$params`: `omnigraph alias pre-ic-brief-thesis deal-helix-series-a` is `omnigraph query pre_ic_brief_thesis --graph vcos --params '{"slug":"deal-helix-series-a"}'`.
 
-`--data` is the **seed file**; the **graph** is the positional URI. Both are
-required, as is `--mode` (`overwrite` | `append` | `merge`).
+## Writing
 
-| Target | Command |
-|---|---|
-| Local storage, no server | `omnigraph load --data seed.jsonl --mode overwrite graphs/vcos.omni` |
-| A running server | `omnigraph load --data seed.jsonl --mode overwrite --server http://127.0.0.1:8080 --graph vcos --yes` |
+Aliases are read-only; mutations run as `omnigraph mutate <name> --params '<json>'` with every
+non-optional property supplied. Signatures live in `queries/mutations.gq`. Working example:
 
-One address per command. The engine's own refusals:
+```bash
+omnigraph mutate add_lesson --graph vcos --params '{"slug":"lsn-ref-calls-before-ic","name":"Finish customer reference calls before IC","kind":"rule-of-thumb","body":"No IC vote while a reference call is still open.","status":"tentative","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+omnigraph mutate link_lesson_distilled_from --graph vcos --params '{"lesson":"lsn-ref-calls-before-ic","pattern":"pat-on-prem-shift"}'
+```
 
-- `--graph` next to a positional URI or `--store` → *"--graph selects a graph
-  within a server or cluster scope; a positional URI / --store is already a
-  single graph"*. `--graph` pairs with `--server`, nothing else.
-- `--cluster` on `load` → *"`load` is a data command; --cluster addresses a
-  cluster-scoped command and does not apply."*
-- `omnigraph load seed.jsonl …` — the positional slot is the **graph**, never the data file.
-- `overwrite` through a server prompts, so non-interactive callers add `--yes`.
-
-### Find the query instead of guessing it
-
-- **`omnigraph queries list --cluster . --graph vcos`** prints every stored query
-  and mutation *with its parameter names*, offline, no server needed. Read the
-  signature before writing `--params`: `query search_signals($q: String)` takes
-  `{"q":…}` — not `term`, not `query`.
-- `omnigraph query <name>` resolves a **stored query by name** and needs a
-  server — passing query text there fails with *"by-name invocation needs a
-  server (the stored-query catalog is server-owned)"*. Ad-hoc GQL goes through
-  `-e`, in the same dialect as the `.gq` files:
-
-  ```bash
-  omnigraph query -e 'query q($slug: String) { match { $d: Deal { slug: $slug } } return { $d.slug, $d.name } }' \
-    --params '{"slug":"deal-aetherbrick-seed"}' --store file://$PWD/graphs/vcos.omni
-  ```
-
-  Filters bind **inside the node's braces** (`$d: Deal { slug: $slug }`) — there
-  is no `where`, no `filter { … }`, no `Deal[slug=="…"]`. The parameter list is
-  required even when empty (`query q()`), and `limit N` / `order { … }` sit
-  inside the outer braces after `return`, never trailing the string.
-
-- `omnigraph alias <name> [args]` carries its own server and graph — adding
-  `--graph`/`--server` errors with *"remove global scope flag(s)"*. **An alias
-  name is not a query name:** `queries list` prints `pre_ic_brief_thesis`, whose
-  alias is `pre-ic-brief-thesis` — aliases are hyphenated, and often shorter than
-  the query. They are the keys under `aliases:` in
-  `omnigraph-config.example.yaml`; there is no `--list`.
-
-## Cluster control plane (two-file model)
-
-This cookbook is a **filesystem-backed cluster** — no object store, no S3 creds.
-
-- `cluster.yaml` is the **deployment**: graph `vcos`, `schema.pg`, and every stored query. Converge it with `omnigraph cluster import|plan|apply --config .` — `apply` creates the graph at `graphs/vcos.omni`, applies the schema (plan previews migration steps), and publishes the queries.
-- The **operator config** is **per-operator only** — aliases, CLI defaults, identity — and lives per-user at `~/.omnigraph/config.yaml` (never committed). The cookbook ships `omnigraph-config.example.yaml`; merge its aliases in. A cluster-booted server (`omnigraph-server --cluster .`) never reads operator config.
-- **Data** flows through `omnigraph load` / `omnigraph mutate` against `graphs/vcos.omni`. Invoke aliases with `omnigraph alias <name> [args]` (aliases come from `omnigraph-config.example.yaml` — merge into `~/.omnigraph/config.yaml`, or invoke a stored query directly: `omnigraph query <name> --graph vcos [--params …]`).
-- Never commit `__cluster/` or `graphs/` (gitignored — local state).
+With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
 
 ## Schema Language (`.pg`)
 
@@ -256,14 +201,6 @@ Use this cookbook as a decision-intelligence + audit loop, not a lookup table:
 7. **Distill into Lessons** — when a Pattern emerges across multiple Decisions, capture as a `Lesson` on a branch; merge after human review.
 
 For longer-form captures (transcripts, decks), chunk into `Chunk` records linked via `ChunkOfArtifact`. Hybrid search runs on those once embeddings are populated.
-
-## Validation
-
-```bash
-omnigraph lint --schema ./schema.pg --query ./queries/deals.gq
-```
-
-The `lint` command validates both queries and schema against each other — use after any schema or query edit. Pure file check; no server needed.
 
 ## When Editing
 

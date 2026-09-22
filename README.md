@@ -29,7 +29,7 @@ Install (direct-path form):
 npx skills add https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/industry-intel/skill
 ```
 
-> **Day-to-day operations** are covered by the **`omnigraph` skill**, which ships in the engine repo (co-versioned with the CLI): `npx skills add ModernRelay/omnigraph@omnigraph` ([ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph/tree/main/skills/omnigraph)). The operating guide and schema-design docs live in that repo and on the docs site.
+> **Day-to-day operations** are covered by the **`omnigraph` skill** from the engine repo ([ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph/tree/main/skills/omnigraph)). It is **vendored here** at `.claude/skills/omnigraph/` (Claude Code) and `.agents/skills/omnigraph` (Codex), pinned to the engine release in `deploy/railway/Dockerfile`, so both clients pick it up in a checkout with no install step; `scripts/sync-skill.sh` refreshes it after a pin bump. Other clients: `npx skills add ModernRelay/omnigraph@omnigraph`. The operating guide and schema-design docs live in that repo and on the docs site.
 
 Typical flow: use the bootstrap skill once to set up a new graph, then the `omnigraph` skill for day-to-day operations.
 

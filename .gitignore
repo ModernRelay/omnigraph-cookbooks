@@ -17,8 +17,9 @@
 *.swp
 *.swo
 
-# Claude Code local state
-.claude/
+# Claude Code local state — except the vendored omnigraph skill, which ships with the repo
+.claude/*
+!.claude/skills/
 .docs/
 
 # Logs
