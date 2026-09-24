@@ -59,7 +59,7 @@ curl -s http://127.0.0.1:8080/healthz               # {"status":"ok",…}; the p
 
 One address per command. The engine's own refusals:
 
-- `--graph` next to a positional URI or `--store` → *"--graph selects a graph within a server or cluster scope; a positional URI / --store is already a single graph"*. `--graph` selects **within** a `--server` or `--cluster` scope; a positional URI or `--store` already names one graph.
+- `--graph` next to a positional URI or `--store` → *"--graph selects a graph within a server or cluster scope; a positional URI / --store is already a single graph"*. On `load`, `--graph` pairs only with `--server` (`--cluster` is refused, see the next bullet); a positional URI or `--store` already names one graph.
 - `--cluster` on `load` → *"`load` is a data command; --cluster addresses a cluster-scoped command and does not apply."*
 - `omnigraph load seed.jsonl …` — the positional slot is the **graph**, never the data file.
 - `overwrite` through a server prompts, so non-interactive callers add `--yes`.

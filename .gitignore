@@ -20,6 +20,8 @@
 # Claude Code local state — except the vendored omnigraph skill, which ships with the repo
 .claude/*
 !.claude/skills/
+.claude/skills/*
+!.claude/skills/omnigraph/
 .docs/
 
 # Logs
