@@ -192,7 +192,7 @@ Each row:
 
 **Node:**
 ```json
-{"type":"NodeType","data":{"id":"slug","slug":"slug","name":"...","kind":"...",...,"createdAt":"2026-04-14T00:00:00Z","updatedAt":"2026-04-14T00:00:00Z"}}
+{"type":"NodeType","data":{"slug":"slug","name":"...","kind":"...",...,"createdAt":"2026-04-14T00:00:00Z","updatedAt":"2026-04-14T00:00:00Z"}}
 ```
 
 **Edge:**
@@ -201,7 +201,7 @@ Each row:
 ```
 
 Rules:
-- `id` equals `slug`
+- No `data.id` — the `@key` `slug` is the row's identity (0.11 rejects `data.id` with `unknown input field 'id'`)
 - DateTime format: `YYYY-MM-DDT00:00:00Z`
 - `createdAt` / `updatedAt` default to today (or `stagingTimestamp` if set)
 - Include every required (non-nullable) property from the schema
