@@ -3,6 +3,12 @@
 # Merge the `aliases:` below into it for short names over this graph's stored
 # queries. Point `local` at your running cluster server (`omnigraph-server
 # --cluster .`); alias invocation needs the server up.
+#
+# Alias args bind by NAME to the stored query's $params (`args: [slug]` fills
+# `$slug`), so `omnigraph alias signal sig-x` == `omnigraph query get_signal
+# --params '{"slug":"sig-x"}'`. Aliases are READ-ONLY on omnigraph 0.10: run the
+# stored *mutations* with `omnigraph mutate <name> --params '{…}'` (see the
+# bottom of this file), never through an alias.
 servers:
   local:
     url: http://127.0.0.1:8080
@@ -38,52 +44,6 @@ aliases:
   knowhows: { server: local, graph: spike, query: recent_knowhow }
   knowhow-elements: { server: local, graph: spike, query: knowhow_elements, args: [slug] }
 
-  # Mutations: SPIKE nodes
-  add-signal: { server: local, graph: spike, query: add_signal, args: [slug, name, brief, stagingTimestamp, createdAt, updatedAt] }
-  add-element: { server: local, graph: spike, query: add_element, args: [slug, name, kind, createdAt, updatedAt] }
-  add-pattern: { server: local, graph: spike, query: add_pattern, args: [slug, name, kind, createdAt, updatedAt] }
-  add-insight: { server: local, graph: spike, query: add_insight, args: [slug, name, createdAt, updatedAt] }
-  add-knowhow: { server: local, graph: spike, query: add_knowhow, args: [slug, name, stagingTimestamp, createdAt, updatedAt] }
-
-  # Mutations: Supportive nodes
-  add-company: { server: local, graph: spike, query: add_company, args: [slug, name] }
-  add-source: { server: local, graph: spike, query: add_source, args: [slug, name] }
-  add-expert: { server: local, graph: spike, query: add_expert, args: [slug, name] }
-  add-artifact: { server: local, graph: spike, query: add_artifact, args: [slug, name, artifactType, stagingTimestamp, createdAt, updatedAt] }
-
-  # Mutations: Core analytical edges
-  link-forms-pattern: { server: local, graph: spike, query: link_signal_forms_pattern, args: [signal, pattern] }
-  link-contradicts-pattern: { server: local, graph: spike, query: link_signal_contradicts_pattern, args: [signal, pattern] }
-  link-highlights-pattern: { server: local, graph: spike, query: link_insight_highlights_pattern, args: [insight, pattern] }
-  link-relies-on-element: { server: local, graph: spike, query: link_insight_relies_on_element, args: [insight, element] }
-
-  # Mutations: Signal → Element
-  link-on-element: { server: local, graph: spike, query: link_signal_on_element, args: [signal, element] }
-
-  # Mutations: Element edges
-  link-enables-element: { server: local, graph: spike, query: link_element_enables, args: [from, to] }
-  link-uses-element: { server: local, graph: spike, query: link_element_uses, args: [from, to] }
-  link-exemplifies-pattern: { server: local, graph: spike, query: link_element_exemplifies_pattern, args: [element, pattern] }
-  link-enables-pattern: { server: local, graph: spike, query: link_element_enables_pattern, args: [element, pattern] }
-
-  # Mutations: Development & affiliation
-  link-developed-by: { server: local, graph: spike, query: link_element_developed_by, args: [element, company] }
-  link-affiliated-with: { server: local, graph: spike, query: link_expert_affiliated_with, args: [expert, company] }
-
-  # Mutations: Classification
-  link-relevant-company: { server: local, graph: spike, query: link_signal_relevant_company, args: [signal, company] }
-
-  # Mutations: Provenance — artifacts + sources
-  link-published-by: { server: local, graph: spike, query: link_artifact_published_by, args: [artifact, source] }
-  link-contributed-by: { server: local, graph: spike, query: link_artifact_contributed_by, args: [artifact, expert] }
-  link-spotted-in: { server: local, graph: spike, query: link_signal_spotted_in, args: [signal, artifact] }
-  link-identified-in: { server: local, graph: spike, query: link_element_identified_in, args: [element, artifact] }
-  link-knowhow-sourced-from: { server: local, graph: spike, query: link_knowhow_sourced_from, args: [knowhow, artifact] }
-  link-signal-sourced-from: { server: local, graph: spike, query: link_signal_sourced_from, args: [signal, source] }
-
-  # Mutations: KnowHow references
-  link-references-element: { server: local, graph: spike, query: link_knowhow_references, args: [knowhow, element] }
-
   # ── Weekly review (operating loop — see README) ──
   triage: { server: local, graph: spike, query: orphan_signals }
   momentum: { server: local, graph: spike, query: pattern_momentum, args: [since] }
@@ -94,3 +54,10 @@ aliases:
   # ── Hybrid retrieval (requires embeddings — see README) ──
   related: { server: local, graph: spike, query: related_chunks, args: [q] }
   hybrid-search: { server: local, graph: spike, query: hybrid_chunks, args: [q] }
+
+# ── Mutations (served stored mutations in queries/mutations.gq; NOT aliasable) ──
+# Log in with the writer token first (`printf '%s' 'local-writer-token' | omnigraph login local`).
+#   omnigraph mutate add_signal --params '{"slug":"sig-new","name":"…","brief":"…",
+#     "stagingTimestamp":"2026-09-14T00:00:00Z","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+#   omnigraph mutate link_signal_forms_pattern --params '{"signal":"sig-new","pattern":"pat-sovereign-ai"}'
+# (with defaults.server/default_graph set, --server/--graph can be omitted.)

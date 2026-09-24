@@ -3,6 +3,12 @@
 # Merge the `aliases:` below into it for short names over this graph's stored
 # queries. Point `local` at your running cluster server (`omnigraph-server
 # --cluster .`); alias invocation needs the server up.
+#
+# Alias args bind by NAME to the stored query's $params (`args: [slug]` fills
+# `$slug`), so `omnigraph alias signal sig-x` == `omnigraph query get_signal
+# --params '{"slug":"sig-x"}'`. Aliases are READ-ONLY on omnigraph 0.10: run the
+# stored *mutations* with `omnigraph mutate <name> --params '{…}'` (see the
+# bottom of this file), never through an alias.
 servers:
   local:
     url: http://127.0.0.1:8080
@@ -79,6 +85,7 @@ aliases:
   deal: { server: local, graph: vcos, query: get_deal, args: [slug], format: kv }
   deals-by-stage: { server: local, graph: vcos, query: deals_by_stage, args: [stage] }
   deals-by-outcome: { server: local, graph: vcos, query: deals_by_outcome, args: [outcome] }
+  # search-* run full-text search(), which is case-sensitive: the term must match the stored casing (`Series` matches, `series` returns 0 rows).
   search-deals: { server: local, graph: vcos, query: search_deals, args: [q] }
   deal-organization: { server: local, graph: vcos, query: deal_organization, args: [slug] }
   deal-fund: { server: local, graph: vcos, query: deal_fund, args: [slug] }
@@ -287,97 +294,8 @@ aliases:
   source-downstream-signals: { server: local, graph: vcos, query: source_downstream_signals, args: [slug] }
   artifact-source: { server: local, graph: vcos, query: artifact_source, args: [slug] }
 
-  # ══════════════════════════════════════════════════════════════════
-  # MUTATIONS — nodes
-  # ══════════════════════════════════════════════════════════════════
-  add-organization: { server: local, graph: vcos, query: add_organization, args: [slug, name, kind, createdAt, updatedAt] }
-  add-person: { server: local, graph: vcos, query: add_person, args: [slug, name, createdAt, updatedAt] }
-  add-market: { server: local, graph: vcos, query: add_market, args: [slug, name, createdAt, updatedAt] }
-  add-deal: { server: local, graph: vcos, query: add_deal, args: [slug, name, stage, outcome, createdAt, updatedAt] }
-  add-fund: { server: local, graph: vcos, query: add_fund, args: [slug, name, createdAt, updatedAt] }
-  add-artifact: { server: local, graph: vcos, query: add_artifact, args: [slug, name, kind, source, source_app, date, captured_at, createdAt, updatedAt] }
-  add-meeting: { server: local, graph: vcos, query: add_meeting, args: [slug, name, kind, scheduled_at, status, createdAt, updatedAt] }
-  add-markdown-artifact: { server: local, graph: vcos, query: add_markdown_artifact, args: [slug, name, kind, source, repo, path, commit_sha, branch, url, body, date, captured_at, last_synced_at, createdAt, updatedAt] }
-  add-thesis: { server: local, graph: vcos, query: add_thesis, args: [slug, name, status, createdAt, updatedAt] }
-  add-assumption: { server: local, graph: vcos, query: add_assumption, args: [slug, name, level, createdAt, updatedAt] }
-  add-question: { server: local, graph: vcos, query: add_question, args: [slug, name, status, createdAt, updatedAt] }
-  add-signal: { server: local, graph: vcos, query: add_signal, args: [slug, name, kind, date, stagingTimestamp, createdAt, updatedAt] }
-  add-insight: { server: local, graph: vcos, query: add_insight, args: [slug, name, kind, createdAt, updatedAt] }
-  add-insight-with-stance: { server: local, graph: vcos, query: add_insight_with_stance, args: [slug, name, kind, stance, summary, createdAt, updatedAt] }
-  add-publisher-organization: { server: local, graph: vcos, query: add_publisher_organization, args: [slug, name, kind, reliability, createdAt, updatedAt] }
-  add-chunk: { server: local, graph: vcos, query: add_chunk, args: [slug, text, chunk_index, createdAt] }
-  add-decision: { server: local, graph: vcos, query: add_decision, args: [slug, name, kind, createdAt, updatedAt] }
-  add-commitment: { server: local, graph: vcos, query: add_commitment, args: [slug, name, status, createdAt, updatedAt] }
-  add-pattern: { server: local, graph: vcos, query: add_pattern, args: [slug, name, kind, createdAt, updatedAt] }
-  add-lesson: { server: local, graph: vcos, query: add_lesson, args: [slug, name, kind, body, status, createdAt, updatedAt] }
-
-  # ══════════════════════════════════════════════════════════════════
-  # MUTATIONS — edges
-  # ══════════════════════════════════════════════════════════════════
-  link-deal-organization: { server: local, graph: vcos, query: link_deal_organization, args: [deal, organization] }
-  link-deal-fund: { server: local, graph: vcos, query: link_deal_fund, args: [deal, fund] }
-  link-deal-lead: { server: local, graph: vcos, query: link_deal_lead, args: [deal, person] }
-  link-deal-thesis: { server: local, graph: vcos, query: link_deal_thesis, args: [deal, thesis] }
-  link-deal-market: { server: local, graph: vcos, query: link_deal_market, args: [deal, market] }
-  link-deal-lead-investor: { server: local, graph: vcos, query: link_deal_lead_investor, args: [deal, organization] }
-  link-deal-participant: { server: local, graph: vcos, query: link_deal_participant, args: [deal, organization] }
-  link-knows: { server: local, graph: vcos, query: link_knows, args: [from, to] }
-  link-works-at: { server: local, graph: vcos, query: link_works_at, args: [from, to] }
-  link-founder-of: { server: local, graph: vcos, query: link_founder_of, args: [person, organization] }
-  link-board-member-at: { server: local, graph: vcos, query: link_board_member_at, args: [person, organization] }
-  link-role-in-deal: { server: local, graph: vcos, query: link_role_in_deal, args: [person, deal, role] }
-  link-decision-maker-at: { server: local, graph: vcos, query: link_decision_maker_at, args: [person, organization] }
-  link-would-acquire: { server: local, graph: vcos, query: link_would_acquire, args: [from, to] }
-  link-lp-in-fund: { server: local, graph: vcos, query: link_lp_in_fund, args: [organization, fund] }
-  link-organization-in-market: { server: local, graph: vcos, query: link_organization_in_market, args: [organization, market] }
-  link-signal-about-organization: { server: local, graph: vcos, query: link_signal_about_organization, args: [signal, organization] }
-  link-signal-about-person: { server: local, graph: vcos, query: link_signal_about_person, args: [signal, person] }
-  link-signal-about-market: { server: local, graph: vcos, query: link_signal_about_market, args: [signal, market] }
-  link-signal-about-deal: { server: local, graph: vcos, query: link_signal_about_deal, args: [signal, deal] }
-  link-supports-thesis: { server: local, graph: vcos, query: link_supports_thesis, args: [signal, thesis] }
-  link-contradicts-thesis: { server: local, graph: vcos, query: link_contradicts_thesis, args: [signal, thesis] }
-  link-supports-assumption: { server: local, graph: vcos, query: link_supports_assumption, args: [signal, assumption] }
-  link-contradicts-assumption: { server: local, graph: vcos, query: link_contradicts_assumption, args: [signal, assumption] }
-  link-informs-question: { server: local, graph: vcos, query: link_informs_question, args: [signal, question] }
-  link-thesis-relies-on-assumption: { server: local, graph: vcos, query: link_thesis_relies_on_assumption, args: [thesis, assumption] }
-  link-thesis-about-market: { server: local, graph: vcos, query: link_thesis_about_market, args: [thesis, market] }
-  link-thesis-about-organization: { server: local, graph: vcos, query: link_thesis_about_organization, args: [thesis, organization] }
-  link-question-about-deal: { server: local, graph: vcos, query: link_question_about_deal, args: [question, deal] }
-  link-insight-about-deal: { server: local, graph: vcos, query: link_insight_about_deal, args: [insight, deal] }
-  link-insight-about-organization: { server: local, graph: vcos, query: link_insight_about_organization, args: [insight, organization] }
-  link-insight-about-person: { server: local, graph: vcos, query: link_insight_about_person, args: [insight, person] }
-  link-insight-highlights-pattern: { server: local, graph: vcos, query: link_insight_highlights_pattern, args: [insight, pattern] }
-  link-insight-relies-on-signal: { server: local, graph: vcos, query: link_insight_relies_on_signal, args: [insight, signal] }
-  link-signal-sourced-from-artifact: { server: local, graph: vcos, query: link_signal_sourced_from_artifact, args: [signal, artifact] }
-  link-published-by-organization: { server: local, graph: vcos, query: link_published_by_organization, args: [artifact, organization] }
-  link-artifact-from-person: { server: local, graph: vcos, query: link_artifact_from_person, args: [artifact, person] }
-  link-artifact-about-deal: { server: local, graph: vcos, query: link_artifact_about_deal, args: [artifact, deal] }
-  link-artifact-about-organization: { server: local, graph: vcos, query: link_artifact_about_organization, args: [artifact, organization] }
-  link-artifact-mentions-person: { server: local, graph: vcos, query: link_artifact_mentions_person, args: [artifact, person] }
-  link-artifact-derived-from: { server: local, graph: vcos, query: link_artifact_derived_from, args: [from, to] }
-  link-artifact-documents-thesis: { server: local, graph: vcos, query: link_artifact_documents_thesis, args: [artifact, thesis] }
-  link-artifact-documents-lesson: { server: local, graph: vcos, query: link_artifact_documents_lesson, args: [artifact, lesson] }
-  link-artifact-documents-pattern: { server: local, graph: vcos, query: link_artifact_documents_pattern, args: [artifact, pattern] }
-  link-chunk-of-artifact: { server: local, graph: vcos, query: link_chunk_of_artifact, args: [chunk, artifact] }
-  link-decision-regarding-deal: { server: local, graph: vcos, query: link_decision_regarding_deal, args: [decision, deal] }
-  link-decision-regarding-thesis: { server: local, graph: vcos, query: link_decision_regarding_thesis, args: [decision, thesis] }
-  link-decision-based-on-assumption: { server: local, graph: vcos, query: link_decision_based_on_assumption, args: [decision, assumption] }
-  link-decision-needs-answer: { server: local, graph: vcos, query: link_decision_needs_answer, args: [decision, question] }
-  link-decision-by-person: { server: local, graph: vcos, query: link_decision_by_person, args: [decision, person] }
-  link-commitment-for-person: { server: local, graph: vcos, query: link_commitment_for_person, args: [commitment, person] }
-  link-commitment-regarding-deal: { server: local, graph: vcos, query: link_commitment_regarding_deal, args: [commitment, deal] }
-  link-commitment-assigned-to: { server: local, graph: vcos, query: link_commitment_assigned_to, args: [commitment, person] }
-  link-commitment-from-artifact: { server: local, graph: vcos, query: link_commitment_from_artifact, args: [commitment, artifact] }
-  link-pattern-across-decision: { server: local, graph: vcos, query: link_pattern_across_decision, args: [pattern, decision] }
-  link-pattern-across-signal: { server: local, graph: vcos, query: link_pattern_across_signal, args: [pattern, signal] }
-  link-pattern-across-organization: { server: local, graph: vcos, query: link_pattern_across_organization, args: [pattern, organization] }
-  link-lesson-distilled-from: { server: local, graph: vcos, query: link_lesson_distilled_from, args: [lesson, pattern] }
-  link-lesson-applies-to-market: { server: local, graph: vcos, query: link_lesson_applies_to_market, args: [lesson, market] }
-  link-meeting-about-deal: { server: local, graph: vcos, query: link_meeting_about_deal, args: [meeting, deal] }
-  link-meeting-about-organization: { server: local, graph: vcos, query: link_meeting_about_organization, args: [meeting, organization] }
-  link-meeting-about-thesis: { server: local, graph: vcos, query: link_meeting_about_thesis, args: [meeting, thesis] }
-  link-meeting-about-market: { server: local, graph: vcos, query: link_meeting_about_market, args: [meeting, market] }
-  link-meeting-attended-by: { server: local, graph: vcos, query: link_meeting_attended_by, args: [meeting, person] }
-  link-artifact-from-meeting: { server: local, graph: vcos, query: link_artifact_from_meeting, args: [artifact, meeting] }
-  link-decision-from-meeting: { server: local, graph: vcos, query: link_decision_from_meeting, args: [decision, meeting] }
-  link-commitment-from-meeting: { server: local, graph: vcos, query: link_commitment_from_meeting, args: [commitment, meeting] }
+# ── Mutations (served stored mutations in queries/mutations.gq; NOT aliasable) ──
+#   omnigraph mutate add_lesson --params '{"slug":"lsn-new","name":"…","kind":"rule-of-thumb","body":"…",
+#     "status":"tentative","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+#   omnigraph mutate link_lesson_distilled_from --params '{"lesson":"lsn-new","pattern":"pat-on-prem-shift"}'
+# (with defaults.server/default_graph set, --server/--graph can be omitted.)

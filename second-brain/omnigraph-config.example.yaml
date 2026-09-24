@@ -3,6 +3,12 @@
 # Merge the `aliases:` below into it for short names over this graph's stored
 # queries. Point `local` at your running cluster server (`omnigraph-server
 # --cluster .`); alias invocation needs the server up.
+#
+# Alias args bind by NAME to the stored query's $params (`args: [slug]` fills
+# `$slug`), so `omnigraph alias signal sig-x` == `omnigraph query get_signal
+# --params '{"slug":"sig-x"}'`. Aliases are READ-ONLY on omnigraph 0.10: run the
+# stored *mutations* with `omnigraph mutate <name> --params '{…}'` (see the
+# bottom of this file), never through an alias.
 servers:
   local:
     url: http://127.0.0.1:8080
@@ -92,44 +98,8 @@ aliases:
   artifact-people: { server: local, graph: brain, query: artifact_mentions, args: [slug] }
   artifact-derived-from: { server: local, graph: brain, query: artifact_derived_from, args: [slug] }
 
-  # ── Mutations: node creation ──
-  add-person: { server: local, graph: brain, query: add_person, args: [slug, name, relation, createdAt, updatedAt] }
-  add-event: { server: local, graph: brain, query: add_event, args: [slug, name, kind, when, createdAt, updatedAt] }
-  add-place: { server: local, graph: brain, query: add_place, args: [slug, name, kind, createdAt, updatedAt] }
-  add-organization: { server: local, graph: brain, query: add_organization, args: [slug, name, kind, createdAt, updatedAt] }
-  add-note: { server: local, graph: brain, query: add_note, args: [slug, name, kind, createdAt, updatedAt] }
-  add-task: { server: local, graph: brain, query: add_task, args: [slug, name, status, createdAt, updatedAt] }
-  add-project: { server: local, graph: brain, query: add_project, args: [slug, name, kind, status, createdAt, updatedAt] }
-  add-area: { server: local, graph: brain, query: add_area, args: [slug, name, kind, status, createdAt, updatedAt] }
-  add-goal: { server: local, graph: brain, query: add_goal, args: [slug, name, status, createdAt, updatedAt] }
-  add-habit: { server: local, graph: brain, query: add_habit, args: [slug, name, status, frequency, createdAt, updatedAt] }
-  add-media: { server: local, graph: brain, query: add_media, args: [slug, name, kind, createdAt, updatedAt] }
-  add-artifact: { server: local, graph: brain, query: add_artifact, args: [slug, name, kind, source, timestamp, createdAt, updatedAt] }
-
-  # ── Mutations: edges ──
-  link-knows: { server: local, graph: brain, query: link_knows, args: [from, to] }
-  link-related: { server: local, graph: brain, query: link_related, args: [from, to, relation] }
-  link-lives-in: { server: local, graph: brain, query: link_lives_in, args: [from, to] }
-  link-works-at: { server: local, graph: brain, query: link_works_at, args: [from, to] }
-  link-attended-by: { server: local, graph: brain, query: link_attended_by, args: [event, person] }
-  link-event-for-person: { server: local, graph: brain, query: link_event_for_person, args: [event, person] }
-  link-event-for-project: { server: local, graph: brain, query: link_event_for_project, args: [event, project] }
-  link-happened-at: { server: local, graph: brain, query: link_happened_at, args: [event, place] }
-  link-note-about-person: { server: local, graph: brain, query: link_note_about_person, args: [note, person] }
-  link-note-about-project: { server: local, graph: brain, query: link_note_about_project, args: [note, project] }
-  link-note-from-artifact: { server: local, graph: brain, query: link_note_from_artifact, args: [note, artifact] }
-  link-related-note: { server: local, graph: brain, query: link_related_note, args: [from, to] }
-  link-task-for-person: { server: local, graph: brain, query: link_task_for_person, args: [task, person] }
-  link-task-for-project: { server: local, graph: brain, query: link_task_for_project, args: [task, project] }
-  link-task-for-area: { server: local, graph: brain, query: link_task_for_area, args: [task, area] }
-  link-task-for-goal: { server: local, graph: brain, query: link_task_for_goal, args: [task, goal] }
-  link-project-in-area: { server: local, graph: brain, query: link_project_in_area, args: [project, area] }
-  link-goal-for-area: { server: local, graph: brain, query: link_goal_for_area, args: [goal, area] }
-  link-habit-for-area: { server: local, graph: brain, query: link_habit_for_area, args: [habit, area] }
-  link-habit-from-principle: { server: local, graph: brain, query: link_habit_from_principle, args: [habit, note] }
-  link-media-authored-by: { server: local, graph: brain, query: link_media_authored_by, args: [media, person] }
-  link-media-recommended-by: { server: local, graph: brain, query: link_media_recommended_by, args: [media, person] }
-  link-mentions-person: { server: local, graph: brain, query: link_mentions_person, args: [artifact, person] }
-  link-artifact-from-person: { server: local, graph: brain, query: link_artifact_from_person, args: [artifact, person] }
-  link-record-of: { server: local, graph: brain, query: link_record_of, args: [artifact, event] }
-  link-derived-from: { server: local, graph: brain, query: link_derived_from, args: [from, to, activity, createdAt] }
+# ── Mutations (served stored mutations in queries/mutations.gq; NOT aliasable) ──
+#   omnigraph mutate add_person --params '{"slug":"per-new","name":"…","relation":"close-friend",
+#     "createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+#   omnigraph mutate link_task_for_person --params '{"task":"tk-x","person":"per-theo"}'
+# (with defaults.server/default_graph set, --server/--graph can be omitted.)
