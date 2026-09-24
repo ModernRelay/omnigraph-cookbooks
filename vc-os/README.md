@@ -448,7 +448,7 @@ For each agent below: the natural-language **prompt** you'd send it, concrete **
 ### 2. Scout-pick triage · daily 08:00 (cron)
 
 **Prompt:**
-> For each new external mention since yesterday's run (HN top launches, scout-list inbox, Twitter watches, founder DMs): triage per `Organization.status`. New → create on a tentative branch, enrich with market hub + links to relevant Patterns/Lessons + any open question this is data for. Resurface → tie to the prior pass Decision. Don't fabricate founder names. Respect the daily cap (Cedar policy on `add-signal{kind=discovery}`). Output: digest with one branch per pick.
+> For each new external mention since yesterday's run (HN top launches, scout-list inbox, Twitter watches, founder DMs): triage per `Organization.status`. New → create on a tentative branch, enrich with market hub + links to relevant Patterns/Lessons + any open question this is data for. Resurface → tie to the prior pass Decision. Don't fabricate founder names. Respect the daily cap (Cedar policy on the `add_signal` mutation with `kind=discovery`). Output: digest with one branch per pick.
 
 **External:** HN launches feed · scout-list email inbox · Twitter `@`/keyword watches · founder DM channels.
 
@@ -474,7 +474,7 @@ For each agent below: the natural-language **prompt** you'd send it, concrete **
 ### 4. Multi-agent IC simulation · calendar webhook 48h before a high-conviction IC
 
 **Prompt** (one per agent - bull / bear / neutral fork):
-> An IC is in 48h. You are the {bull | bear | neutral} agent. Read the deal's Thesis + Assumptions + recent Signals + related Patterns. Pick the evidence that genuinely supports your stance - overlap with the other agents is expected, that's the point. Write one `Insight{stance=…}` with `add-insight-with-stance` on the shared debate branch, citing Signals via `InsightReliesOnSignal` and any Pattern via `InsightHighlightsPattern`. Don't invent. Neutral agent: name what new evidence would resolve the disagreement.
+> An IC is in 48h. You are the {bull | bear | neutral} agent. Read the deal's Thesis + Assumptions + recent Signals + related Patterns. Pick the evidence that genuinely supports your stance - overlap with the other agents is expected, that's the point. Write one `Insight{stance=…}` with `omnigraph mutate add_insight_with_stance --params '{…}'` on the shared debate branch, citing Signals via `InsightReliesOnSignal` and any Pattern via `InsightHighlightsPattern`. Don't invent. Neutral agent: name what new evidence would resolve the disagreement.
 
 **External:** the calendar invite for the IC.
 

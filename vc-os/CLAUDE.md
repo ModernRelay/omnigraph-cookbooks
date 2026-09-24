@@ -23,7 +23,7 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 
 - **Answer from the graph, not the files.** Use the aliases / stored queries against the running server; never assemble an answer by reading `seed.jsonl` or `seed.md` — they are load inputs, not the live state.
 - **Alias args bind by name to the query's `$params`** (`args: [slug]` fills `$slug`): `omnigraph alias pre-ic-brief-thesis deal-helix-series-a` is `omnigraph query pre_ic_brief_thesis --graph vcos --params '{"slug":"deal-helix-series-a"}'`.
-- **Mutations are not aliasable on 0.10** (`'add_x' is a mutation — use omnigraph mutate add_x`). Run them with `omnigraph mutate <name> --params '<json>'`, every non-optional property supplied; signatures live in `queries/mutations.gq`. Working example:
+- **Mutations are not aliasable** (`'add_x' is a mutation — use omnigraph mutate add_x`). Run them with `omnigraph mutate <name> --params '<json>'`, every non-optional property supplied; signatures live in `queries/mutations.gq`. Working example:
 
   ```bash
   omnigraph mutate add_lesson --graph vcos --params '{"slug":"lsn-ref-calls-before-ic","name":"Finish customer reference calls before IC","kind":"rule-of-thumb","body":"No IC vote while a reference call is still open.","status":"tentative","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
@@ -33,7 +33,7 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
   With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
 - **Full-text `search()` is case-sensitive** (the `search_*` queries behind the `search-*` aliases): the term must match the stored casing — `Series` matches, `series` returns 0 rows with no error.
 
-## Setup, in order (verified against 0.10)
+## Setup, in order (verified against 0.11)
 
 `cluster import` comes **before** the first `apply` — without it `apply` exits 1
 with `state_missing __cluster/state.json: apply requires an existing state.json`.
@@ -173,7 +173,7 @@ v1 seed ships `Chunk` zero. Create raw Chunk JSONL, run the offline `omnigraph e
 
 ## Known gaps
 
-- **Edge-property projections use a bound edge variable in v0.10** — for example, `$p $r:roleInDeal $d` and `return { $r.role }`. `deal_role_participants` demonstrates the syntax.
+- **Edge-property projections use a bound edge variable (since 0.10)** — for example, `$p $r:roleInDeal $d` and `return { $r.role }`. `deal_role_participants` demonstrates the syntax.
 - **`Chunk` is declared but the seed has zero.** Embeddings come from an offline JSONL-to-JSONL pipeline; the static seed cannot generate them and `omnigraph embed` does not mutate a graph. Hybrid search is a v1-deferred capability.
 - **Alias args bind to query parameters by *name*, not position.** An alias `args: [slug]` only binds to a query that declares `$slug`. Renaming the alias arg to `[deal_slug]` without also renaming `$slug → $deal_slug` in the query silently drops the filter — the query then matches every row instead of one. If you want clearer arg names, rename in *both* places; otherwise add a comment block above the alias group explaining the input semantics.
 - **Adding values to an existing enum is a destructive type change.** `cluster apply` / `schema apply` reject in-place enum extensions, so widening an enum means rebuilding the graph: stop the server, delete `graphs/vcos.omni`, re-run `omnigraph cluster apply --config .`, then `omnigraph load --data seed.jsonl --mode overwrite graphs/vcos.omni`. Batch multiple enum/property-type changes into one rebuild — single-change rebuilds aren't worth the cost. (General migration mechanics live in the **omnigraph** skill.)

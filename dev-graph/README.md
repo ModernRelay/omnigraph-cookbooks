@@ -272,7 +272,7 @@ To turn semantic search on:
 
    `omnigraph embed` never opens or mutates the graph, and ordinary load does
    not synthesize `@embed` fields. The engine's
-   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.10.0/docs/user/search/embeddings.md#offline-file-pipeline)
+   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.11.0/docs/user/search/embeddings.md#offline-file-pipeline)
    defines the spec shape.
 4. Restart `omnigraph-server --cluster .` with the provider secret.
 

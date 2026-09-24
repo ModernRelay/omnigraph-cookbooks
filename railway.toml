@@ -6,7 +6,7 @@ builder        = "DOCKERFILE"
 dockerfilePath = "deploy/railway/Dockerfile"
 
 [deploy]
-# Cluster-only boot (OmniGraph 0.10, RFC-011): the server's single boot
+# Cluster-only boot (OmniGraph 0.11, RFC-011): the server's single boot
 # source is `--cluster`, here the Bucket storage root itself — config-free
 # serving of the state that preDeploy's `cluster apply` converged. Bearer
 # tokens arrive via OMNIGRAPH_SERVER_BEARER_TOKENS_JSON; policy is applied

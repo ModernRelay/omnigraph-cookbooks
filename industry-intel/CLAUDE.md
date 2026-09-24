@@ -20,7 +20,7 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 
 - **Answer from the graph, not the files.** Use the aliases / stored queries against the running server; never assemble an answer by reading `seed.jsonl` or `seed.md` — they are load inputs, not the live state.
 - **Alias args bind by name to the query's `$params`** (`args: [slug]` fills `$slug`): `omnigraph alias pattern-signals pat-sovereign-ai` is `omnigraph query pattern_signals --graph spike --params '{"slug":"pat-sovereign-ai"}'`.
-- **Mutations are not aliasable on 0.10** (`'add_x' is a mutation — use omnigraph mutate add_x`). Run them with `omnigraph mutate <name> --params '<json>'`, every non-optional property supplied; signatures live in `queries/mutations.gq`. Working example:
+- **Mutations are not aliasable** (`'add_x' is a mutation — use omnigraph mutate add_x`). Run them with `omnigraph mutate <name> --params '<json>'`, every non-optional property supplied; signatures live in `queries/mutations.gq`. Working example:
 
   ```bash
   printf '%s' 'local-writer-token' | omnigraph login local   # mutations need the writer token, not the reader one
@@ -31,7 +31,7 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
   With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
 - **Full-text `search()` is case-sensitive** (the `search_*` queries, invoked via `omnigraph query search_signals --graph spike --params '{"q":"Zylon"}'`): the term must match the stored casing — `Zylon` matches, `zylon` returns 0 rows with no error.
 
-## Setup, in order (verified against 0.10)
+## Setup, in order (verified against 0.11)
 
 `cluster import` comes **before** the first `apply` — without it `apply` exits 1
 with `state_missing __cluster/state.json: apply requires an existing state.json`.
@@ -120,7 +120,7 @@ One address per command. The engine's own refusals:
 - PatternKind: `challenge, disruption, dynamic`
 - Domain is an enum property on Signal/Element, not a node
 - Edges follow `VerbTargetType` naming (e.g. `FormsPattern`, `DevelopedByCompany`)
-- Embeddings only on Chunk: `Vector(3072) @embed("text")`. OmniGraph 0.10 does not populate `@embed` fields during load; prepare vectors with the offline JSONL-to-JSONL `omnigraph embed` pipeline, then load that output. The query-time provider must use the same model and dimension.
+- Embeddings only on Chunk: `Vector(3072) @embed("text")`. OmniGraph does not populate `@embed` fields during load; prepare vectors with the offline JSONL-to-JSONL `omnigraph embed` pipeline, then load that output. The query-time provider must use the same model and dimension.
 - Chunk is immutable (no `updatedAt`)
 
 ## Validation

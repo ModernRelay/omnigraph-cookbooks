@@ -261,7 +261,7 @@ node Chunk {
 
 // Knows is stored bidirectionally by convention — if A knows B, you also load
 // B knows A (the inverse edge; @unique can't auto-create it, so this stays load
-// discipline). `@unique(src, dst)` now enforces pair-uniqueness as a true composite
+// discipline). `@unique(@src, @dst)` now enforces pair-uniqueness as a true composite
 // key, intra-batch + at merge; not declared here yet.
 edge Knows: Person -> Person {
     context: String?
@@ -371,5 +371,5 @@ edge DerivedFromArtifact: Artifact -> Artifact {
     createdAt: DateTime
 }
 edge ChunkOf: Chunk -> Artifact @card(1..1) {
-    @unique(src)
+    @unique(@src)
 }

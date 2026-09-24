@@ -189,7 +189,7 @@ curl -fsS -H "Authorization: Bearer $TOKEN" \
 
 ## Authorization model
 
-Policy is **applied cluster state** in OmniGraph 0.10, not a server flag.
+Policy is **applied cluster state** (since OmniGraph 0.10), not a server flag.
 Cookbooks without their own `policies:` get the template bundles
 (`deploy/railway/config/*.railway.yaml`), which define three roles wired
 to the token JSON's actor ids:
@@ -257,40 +257,45 @@ cluster config is the single owner of the schema.
 
 ## Upgrading the engine (`OMNIGRAPH_REF` bumps)
 
-The image is pinned to v0.10.0. Upgrade the CLI, server, and client
+The image is pinned to v0.11.0. Upgrade the CLI, server, and client
 integrations together; never run mixed release fleets against one graph.
 
-The v0.9→v0.10 upgrade keeps graph format v6, so entities, branches, and
-history do not need export/import. It does move from Lance 9 to Lance 11 and
-changes the full-text analyzer:
+The v0.10→v0.11 upgrade changes the graph format (v6 → v9), and a
+cluster-managed root — which is what this template deploys — **cannot be
+upgraded in place**: `omnigraph upgrade` refuses cluster roots. The path is
+export with the old release, apply fresh with the new one, load the export:
 
-1. Stop application traffic and inventory every live branch that uses
-   full-text search.
-2. Preserve a verified backup of the entire cluster root, deployment bundle,
-   and configuration. A branch export is not a rollback backup.
-3. Stop all old servers, writers, and maintenance jobs. Build or pull the
-   v0.10 image and use its CLI in an in-region one-off maintenance run; keep
-   the serving service stopped.
-4. Rebuild each live search branch directly against its derived graph root:
+1. Stop application traffic. Preserve a verified backup of the entire cluster
+   root (the Bucket prefix), deployment bundle, and configuration. A branch
+   export is not a rollback backup.
+2. With the **v0.10** CLI, in-region, export every branch you keep:
 
    ```bash
-   omnigraph rebuild-full-text-indexes \
-     s3://<bucket>/<cluster>/graphs/<graph-id>.omni \
-     --branch main --as operator --json
+   omnigraph export s3://<bucket>/<cluster>/graphs/<graph-id>.omni \
+     --branch main --as operator > main.jsonl
    ```
 
-5. Verify representative searches and entity counts on every rebuilt branch,
-   then deploy/start only the v0.10 fleet. Historical snapshots are retained
-   but are not rewritten and may refuse full-text search.
+   A 0.10 export carries identity as `data.id`; 0.11 reads it from the
+   top-level `id` and treats `data.id` as a user property — move it before
+   loading (`jq -c 'if (.data|type)=="object" and (.data|has("id")) then .id = .data.id | del(.data.id) else . end'`).
+3. Stop all old servers, writers, and maintenance jobs. Point the service at
+   a fresh Bucket prefix (or clear the old one after the backup is verified),
+   deploy the v0.11 image: `init.sh` runs `validate → import → apply` against
+   the empty root and creates a v9 graph.
+4. Load each export through the new server (`omnigraph load --data main.jsonl
+   --mode overwrite --server <url> --graph <graph-id> --yes`), then verify
+   representative queries and entity counts against the pre-upgrade numbers.
+5. Only then route traffic to the v0.11 fleet. Historical snapshots of the old
+   root stay readable by the old release only.
 
 Rollback means restoring the whole pre-upgrade backup with the old fleet, not
-pointing v0.9 at the upgraded store. If v0.10 has persisted `external_blobs`
-cluster state, follow the engine's cluster rollback procedure as well.
+pointing v0.10 at the new store. Full-text indexes built for Lance 11 need no
+extra rebuild for v0.11.
 
-For a future graph-format change, follow that release's engine upgrade guide;
-do not infer an export/rebuild procedure from this v0.9→v0.10 case.
-The complete v0.10 procedure and refusal cases live in the engine's
-[upgrade guide](https://github.com/ModernRelay/omnigraph/blob/v0.10.0/docs/user/operations/upgrade.md#v09-to-v010).
+The complete v0.11 procedure — admission checks, interrupted upgrades, the
+standalone-graph in-place path this template does not use — lives in the
+engine's
+[upgrade guide](https://github.com/ModernRelay/omnigraph/blob/v0.11.0/docs/user/operations/upgrade.md).
 
 Write preflight remains strict: keyed `append`/`merge` operations admit at
 most 8,192 rows and 32 MiB of Arrow data per table. `overwrite` escapes the row
@@ -359,7 +364,7 @@ docker run --rm \
 ## Pinning + maintenance
 
 The Dockerfile pins the OmniGraph engine to a specific tag via
-`ARG OMNIGRAPH_REF=v0.10.0`. Bump that on every OmniGraph release that
+`ARG OMNIGRAPH_REF=v0.11.0`. Bump that on every OmniGraph release that
 changes server behavior, the policy schema, or the CLI surface — and if
 the release changes the storage format, follow
 [Upgrading the engine](#upgrading-the-engine-omnigraph_ref-bumps) above:

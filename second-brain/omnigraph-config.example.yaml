@@ -5,8 +5,8 @@
 # --cluster .`); alias invocation needs the server up.
 #
 # Alias args bind by NAME to the stored query's $params (`args: [slug]` fills
-# `$slug`), so `omnigraph alias signal sig-x` == `omnigraph query get_signal
-# --params '{"slug":"sig-x"}'`. Aliases are READ-ONLY on omnigraph 0.10: run the
+# `$slug`), so `omnigraph alias person per-self` == `omnigraph query get_person
+# --params '{"slug":"per-self"}'`. Aliases are READ-ONLY: run the
 # stored *mutations* with `omnigraph mutate <name> --params '{…}'` (see the
 # bottom of this file), never through an alias.
 servers:

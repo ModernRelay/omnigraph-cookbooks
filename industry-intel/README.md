@@ -217,7 +217,7 @@ omnigraph alias momentum 2026-05-01T00:00:00Z
    or mutates a graph; `--reembed-all` replaces selected vectors only in its
    output file. The offline and server providers must use the same model and
    vector dimension. See the engine's
-   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.10.0/docs/user/search/embeddings.md#offline-file-pipeline)
+   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.11.0/docs/user/search/embeddings.md#offline-file-pipeline)
    for the spec format.
 
 See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.

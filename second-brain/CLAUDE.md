@@ -25,7 +25,7 @@ cluster commands, CLI — see the **omnigraph** skill and
 
 - **Answer from the graph, not the files.** Use the aliases / stored queries against the running server; never assemble an answer by reading `seed.jsonl` or `seed.md` — they are load inputs, not the live state.
 - **Alias args bind by name to the query's `$params`** (`args: [slug]` fills `$slug`): `omnigraph alias person-tasks-i-owe per-theo` is `omnigraph query person_tasks_i_owe --graph brain --params '{"slug":"per-theo"}'`.
-- **Mutations are not aliasable on 0.10** (`'add_x' is a mutation — use omnigraph mutate add_x`). Run them with `omnigraph mutate <name> --params '<json>'`, every non-optional property supplied; signatures live in `queries/mutations.gq`. Working example:
+- **Mutations are not aliasable** (`'add_x' is a mutation — use omnigraph mutate add_x`). Run them with `omnigraph mutate <name> --params '<json>'`, every non-optional property supplied; signatures live in `queries/mutations.gq`. Working example:
 
   ```bash
   omnigraph mutate add_task --graph brain --params '{"slug":"tk-theo-whisky","name":"Bring Theo the Lagavulin 16","status":"next","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
@@ -34,7 +34,7 @@ cluster commands, CLI — see the **omnigraph** skill and
 
   With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
 
-## Setup, in order (verified against 0.10)
+## Setup, in order (verified against 0.11)
 
 `cluster import` comes **before** the first `apply` — without it `apply` exits 1
 with `state_missing __cluster/state.json: apply requires an existing state.json`.
@@ -134,7 +134,7 @@ load` / `omnigraph mutate` against `graphs/brain.omni`; invoke aliases with
 - **`Task.waiting_on` is intentionally absent.** "Who I'm waiting on" is expressed by `status=waiting` + `TaskForPerson`. Don't reintroduce a string slug-shaped property.
 - **Habit completions are a `[Date]` array** on the Habit node. No `HabitCompletion` node.
 - **Email and Conversation collapse into `Artifact`** with `thread_id` property and `InReplyTo` edges. No separate types.
-- **`Person.cadence_days`** is a single number — desired contact frequency *from me to them*. v0.10 can project a bound edge property (`$me $k:knows $person`, then `$k.context`), but cadence remains on `Person` as a single-user shortcut. Re-evaluate if the cookbook ever serves more than one user.
+- **`Person.cadence_days`** is a single number — desired contact frequency *from me to them*. the engine (since 0.10) can project a bound edge property (`$me $k:knows $person`, then `$k.context`), but cadence remains on `Person` as a single-user shortcut. Re-evaluate if the cookbook ever serves more than one user.
 - **Edges follow `VerbTargetType` naming** (`NoteAboutPerson`, `TaskForProject`, `HabitFromPrinciple`).
 - **Embeddings only on `Chunk`**: `Vector(3072) @embed("text")`. `Chunk` is immutable (no `updatedAt`).
 - **Health / finance / hobby tracking lives as `Area` + `Note`** — not new node types. Specialty cookbooks can extend.
