@@ -277,7 +277,7 @@ export with the old release, apply fresh with the new one, load the export:
 
    A 0.10 export carries identity as `data.id`; 0.11 reads it from the
    top-level `id` and treats `data.id` as a user property — move it before
-   loading (`jq -c 'if has("id") then . else .id = .data.id | del(.data.id) end'`).
+   loading (`jq -c 'if (.data|type)=="object" and (.data|has("id")) then .id = .data.id | del(.data.id) else . end'`).
 3. Stop all old servers, writers, and maintenance jobs. Point the service at
    a fresh Bucket prefix (or clear the old one after the backup is verified),
    deploy the v0.11 image: `init.sh` runs `validate → import → apply` against
