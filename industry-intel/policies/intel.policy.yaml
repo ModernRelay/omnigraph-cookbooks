@@ -1,12 +1,14 @@
 # Graph-bound Cedar policy for the spike graph (cluster.yaml applies_to).
 # Readers invoke stored read queries; writers can also run the
 # stored mutations (invoke_query + change — stored mutations are double-
-# gated) and direct data-plane writes. act-analyst remains a compatible alias
+# gated) and direct data-plane writes, and create branches; only admins merge
+# into main, the protected branch. act-analyst remains a compatible alias
 # for existing local deployments; Railway's generated identity is act-writer.
 version: 1
 groups:
   readers: ["act-admin", "act-writer", "act-analyst", "act-reader"]
   writers: ["act-admin", "act-writer", "act-analyst"]
+  admins: ["act-admin"]
 protected_branches: [main]
 rules:
   - id: invoke-stored-queries
@@ -23,3 +25,13 @@ rules:
       actors: { group: writers }
       actions: [change]
       branch_scope: any
+  - id: writer-branches
+    allow:
+      actors: { group: writers }
+      actions: [branch_create]
+      target_branch_scope: unprotected
+  - id: admin-merges-into-protected
+    allow:
+      actors: { group: admins }
+      actions: [branch_merge]
+      target_branch_scope: protected

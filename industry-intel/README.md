@@ -139,8 +139,9 @@ then `cluster plan` (schema edits show real migration steps) → `cluster apply`
 
 The cookbook declares two Cedar bundles in `cluster.yaml`: `policies/intel.policy.yaml`
 (graph-bound — `readers` invoke stored read queries, `writers` can also run
-the stored mutations) and `policies/server.policy.yaml` (cluster-bound — only
-`admins` may enumerate graphs). Production uses the same actor ids as Railway:
+the stored mutations and create branches, `admins` merge into `main`) and
+`policies/server.policy.yaml` (cluster-bound — only `admins` may enumerate
+graphs). Production uses the same actor ids as Railway:
 
 ```bash
 OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-reader":"<reader-token>","act-writer":"<writer-token>","act-admin":"<admin-token>"}' \
@@ -150,7 +151,8 @@ OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-reader":"<reader-token>","act-writer"
 What the gates do (verified): `GET /graphs` → admin 200 / reader 403 /
 anonymous 401; stored reads → reader 200; stored mutations (`add_signal`,
 …) → reader 403, writer 200 — stored mutations are double-gated
-(`invoke_query` at the boundary, `change` inside the engine).
+(`invoke_query` at the boundary, `change` inside the engine); `branch create`
+→ writer ok; `branch merge … --into main` → writer denied, admin ok.
 
 `act-analyst` remains accepted as a backwards-compatible writer identity, but
 new deployments should use `act-writer`.

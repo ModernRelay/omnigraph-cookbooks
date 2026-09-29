@@ -309,16 +309,16 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `ia-cloudian-93pct-survey` | Enterprise Survey: 93% Repatriating AI | article | https://www.enterprisenews.com/press-release/story/83547 | 2026-02-01 |
 | `ia-kimi-k25-release` | Kimi K2.5 Release | article | https://www.kimi.com/blog/kimi-k2-5.html | 2026-01-26 |
 | `ia-zylon-deployment-options` | Zylon Deployment Options | article | https://www.zylon.ai/deployment-options | 2026-03-01 |
-| `ia-reuters-830b-selloff` | Selloff wipes $830B from software stocks | article | https://www.reuters.com/business/media-telecom/global-software-stocks-hit-2026-02-04 | 2026-02-04 |
-| `ia-bloomberg-sap-pricing` | SAP Shifts to AI-Based Pricing | article | https://www.bloomberg.com/news/articles/2026-03-18/sap-ceo-pushes-ai | 2026-03-18 |
-| `ia-techcrunch-klarna-salesforce` | Klarna Replaces Salesforce | article | https://techcrunch.com/2026/03/01/saas-in-saas-out | 2026-03-01 |
-| `ia-techcrunch-edra-stealth` | Two Palantir veterans out of stealth with $30M | article | https://techcrunch.com/2026/03/18/two-palantir-veterans | 2026-03-18 |
-| `ia-forbes-context-graphs` | VCs say context graphs might be the next big thing | article | https://www.forbes.com/sites/josipamajic/2026/04/03 | 2026-04-03 |
+| `ia-reuters-830b-selloff` | Selloff wipes $830B from software stocks | article | https://www.reuters.com/business/media-telecom/global-software-stocks-hit-by-anthropic-wake-up-call-ai-disruption-2026-02-04 | 2026-02-04 |
+| `ia-bloomberg-sap-pricing` | SAP Shifts to AI-Based Pricing | article | https://www.bloomberg.com/news/articles/2026-03-18/sap-ceo-pushes-ai-turnaround-with-new-teams-use-based-pricing | 2026-03-18 |
+| `ia-techcrunch-klarna-salesforce` | Klarna Replaces Salesforce | article | https://techcrunch.com/2026/03/01/saas-in-saas-out-heres-whats-driving-the-saaspocalypse/ | 2026-03-01 |
+| `ia-techcrunch-edra-stealth` | Two Palantir veterans out of stealth with $30M | article | https://techcrunch.com/2026/03/18/two-palantir-veterans-just-came-out-of-stealth-with-30-million-and-a-sequoia-stamp-of-approval/ | 2026-03-18 |
+| `ia-forbes-context-graphs` | VCs say context graphs might be the next big thing | article | https://www.forbes.com/sites/josipamajic/2026/04/03/vcs-say-context-graphs-might-be-the-next-big-thing-in-ai/ | 2026-04-03 |
 | `ia-mythos-preview-assessment` | Assessing Claude Mythos Preview cybersecurity capabilities | article | https://red.anthropic.com/2026/mythos-preview | 2026-04-07 |
-| `ia-techcrunch-meta-rogue-agent` | Meta is having trouble with rogue AI agents | article | https://techcrunch.com/2026/03/18/meta-is-having-trouble | 2026-03-18 |
-| `ia-bloomberg-openclaw-china-ban` | China Moves to Curb OpenClaw AI Use at Banks | article | https://www.bloomberg.com/news/articles/2026-03-11 | 2026-03-11 |
-| `ia-fortune-karpathy-loop` | The Karpathy Loop: 700 experiments, 2 days | article | https://fortune.com/2026/03/17/andrej-karpathy-loop | 2026-03-17 |
-| `ia-deepmind-alphaevolve` | AlphaEvolve: Gemini-powered coding agent | article | https://deepmind.google/blog/alphaevolve | 2025-06-16 |
+| `ia-techcrunch-meta-rogue-agent` | Meta is having trouble with rogue AI agents | article | https://techcrunch.com/2026/03/18/meta-is-having-trouble-with-rogue-ai-agents/ | 2026-03-18 |
+| `ia-bloomberg-openclaw-china-ban` | China Moves to Curb OpenClaw AI Use at Banks | article | https://www.bloomberg.com/news/articles/2026-03-11/china-moves-to-limit-use-of-openclaw-ai-at-banks-government-agencies | 2026-03-11 |
+| `ia-fortune-karpathy-loop` | The Karpathy Loop: 700 experiments, 2 days | article | https://fortune.com/2026/03/17/andrej-karpathy-loop-autonomous-ai-agents-future/ | 2026-03-17 |
+| `ia-deepmind-alphaevolve` | AlphaEvolve: Gemini-powered coding agent | article | https://deepmind.google/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/ | 2025-06-16 |
 | `ia-tao-erdos-728` | Terence Tao on AI solving Erdos problem #728 | article | https://mathstodon.xyz/@tao/115855840223258103 | 2026-01-07 |
 | `ia-sequoia-services-new-software` | Services: The New Software | article | https://sequoiacap.com/article/services-the-new-software | 2026-03-25 |
 | `ia-snyk-openclaw-security` | Your OpenClaw AI Assistant Has Shell Access | article | https://snyk.io/articles/clawdbot-ai-assistant/ | 2026-01-27 |
