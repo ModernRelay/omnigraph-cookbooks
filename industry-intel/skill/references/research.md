@@ -1,6 +1,6 @@
 # Initial Research Workflow
 
-Phase 6: turn the elicited domain + source list into real seed content.
+Turn the agreed domain and source list into real seed content.
 
 **Rule #1: do not fabricate signals, dates, URLs, or quotes.** Every signal must have a real dated source. If you can't find one, leave the signal out. A smaller seed with real sources beats a larger seed with plausible-sounding fiction.
 
@@ -16,8 +16,8 @@ For a new cookbook, aim for:
 | Insight | 2–4 | Non-obvious observations |
 | KnowHow | 1–3 | Actionable practices (optional) |
 | Company | 10–20 | Real entities with briefs |
-| Expert | 3–8 | From Phase 3 |
-| SourceEntity | 8–15 | From Phase 3 |
+| Expert | 3–8 | From the source list |
+| SourceEntity | 8–15 | From the source list |
 | InformationArtifact | 15–25 | One per signal roughly |
 
 Totals: ~80–120 nodes, ~100–150 edges. Matches `industry-intel` scale.
@@ -26,7 +26,7 @@ Totals: ~80–120 nodes, ~100–150 edges. Matches `industry-intel` scale.
 
 ### Step 1 — Gather source material
 
-For each source from Phase 3's source list, pull recent items:
+For each selected source, pull items within the agreed time horizon:
 
 ```
 WebFetch https://endpts.com (for example) → extract dated articles from last N months
@@ -192,7 +192,7 @@ Each row:
 
 **Node:**
 ```json
-{"type":"NodeType","data":{"slug":"slug","name":"...","kind":"...",...,"createdAt":"2026-04-14T00:00:00Z","updatedAt":"2026-04-14T00:00:00Z"}}
+{"type":"Signal","data":{"slug":"sig-example","name":"Source-backed event","brief":"Replace with verified details.","stagingTimestamp":"2026-04-14T00:00:00Z","createdAt":"2026-04-14T00:00:00Z","updatedAt":"2026-04-14T00:00:00Z"}}
 ```
 
 **Edge:**
@@ -201,32 +201,41 @@ Each row:
 ```
 
 Rules:
-- No `data.id` — the `@key` `slug` is the row's identity (0.11 rejects `data.id` with `unknown input field 'id'`)
+- Keyed nodes derive identity from `slug`; omit top-level `id`. `data` holds
+  declared user properties, not system identity. This template has no user
+  property named `id`. For unkeyed edges, a supplied top-level `id` is their
+  stable identity; omitting it generates a fresh one. The unkeyed Chunk type
+  also needs stable top-level IDs for repeatable loads.
 - DateTime format: `YYYY-MM-DDT00:00:00Z`
 - `createdAt` / `updatedAt` default to today (or `stagingTimestamp` if set)
 - Include every required (non-nullable) property from the schema
 - Omit optional properties when not set — don't emit `null`
 - Edge names in `"edge":` field must match schema exactly (PascalCase)
-- Emit nodes first, then edges (makes load deterministic)
+- Emit nodes before edges for readability and verify every endpoint exists.
+- Deduplicate node keys and constrained edges within the batch.
+- Required Chunk embeddings must be supplied or generated offline before load;
+  a server provider and `@embed` do not generate them.
 
-### Step 10 — Validate
+### Step 10 — Validate and load
 
-```bash
-cd <slug>
-omnigraph lint --schema schema.pg --query queries/mutations.gq
-```
-
-Lint doesn't validate the seed directly, but it confirms the schema accepts every field.
-
-Then converge and load:
+Lint all query files against the new schema, then validate the cluster bundle:
 
 ```bash
-omnigraph cluster import --config .
-omnigraph cluster apply  --config . --as <you>     # creates graphs/<slug>.omni
-omnigraph load --data seed.jsonl --mode overwrite graphs/<slug>.omni
+for query_file in queries/*.gq; do
+  omnigraph lint --schema schema.pg --query "$query_file" || exit 1
+done
+omnigraph cluster validate --config .
 ```
 
-If load fails (missing required field, invalid enum value, unknown type), fix seed.jsonl and retry.
+These checks validate schema/query compatibility and configuration, not seed
+rows. Follow the root README's
+[local setup](https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#local-setup)
+for initial apply, writer-lock handoff, server startup, and served seed loading.
+
+If load reports a deterministic pre-effect validation refusal, correct the
+input before retrying. A timeout or lost response may hide a committed write;
+inspect its receipt and graph state before replaying. In particular, an
+unkeyed edge without a stable top-level `id` would be a new edge on replay.
 
 ### Step 11 — Smoke test
 

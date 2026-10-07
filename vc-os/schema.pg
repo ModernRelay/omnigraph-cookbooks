@@ -614,7 +614,7 @@ edge MeetingAboutMarket: Meeting -> Market
 
 // Meeting attendance. The `role` discriminates host/attendee/optional/declined
 // so the same edge type covers invites and acceptances. Bind the edge in a
-// v0.10 query (`$meeting $attendance:meetingAttendedBy $person`) to project or
+// query (`$meeting $attendance:meetingAttendedBy $person`) to project or
 // filter on `$attendance.role`.
 edge MeetingAttendedBy: Meeting -> Person {
     role: enum(host, attendee, optional, declined)?

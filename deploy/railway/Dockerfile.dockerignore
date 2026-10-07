@@ -1,31 +1,6 @@
-# .dockerignore applied to the cookbooks repo root when building from
-# deploy/railway/Dockerfile.
-#
-# Goal: keep the runtime image small by excluding files that aren't
-# needed by the server or the init script.
-
-.git
-.gitignore
-LICENSE
-
-# Repo-wide documentation
-docs/
-**/README.md
-**/CLAUDE.md
-
-# Per-cookbook prose seed write-ups (the deploy is schema-only; seed.jsonl
-# stays in the image so operators can seed from inside the container)
-**/seed.md
-
-# Local dev credentials — never bake into an image
-**/.env.omni
-**/.env.omni.example
-
-# Agent skill packaging — installed via `npx skills`, not deploy artifact
-skills/
-**/skill/
-
-# Build / editor noise
-**/.DS_Store
-**/.idea
-**/.vscode
+# The runtime downloads its release; no repository files belong in the image.
+**
+!deploy/
+!deploy/railway/
+!deploy/railway/Dockerfile
+!deploy/railway/Dockerfile.dockerignore

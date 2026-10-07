@@ -1,152 +1,101 @@
-# Migration and Retired Vocabulary
+# Upgrading to 0.13
 
-The rest of this skill targets OmniGraph 0.11.0. Read this page before replacing
-an older binary, rebuilding a graph, or translating earlier API examples.
+Upgrade the CLI, server and integrations together. The only HTTP contract is
+`Omnigraph-Http-Api: 0.13`; the only served storage format is 14. Normal open
+never converts storage. Preserve the old executable and a verified whole-root
+backup until the upgrade and cutover are proven.
 
-## Upgrade v0.10 to v0.11
+## Choose the storage path
 
-v0.10 writes storage format v6; v0.11 creates v9 and serves v8 and v9 without
-migrating them on open. Keep application traffic stopped while coordinating the
-CLI, server, queries, loaders and client bindings. Matching package version
-numbers alone do not establish client compatibility.
+| Source | Action |
+|---|---|
+| Format 14, including release 0.12 | No graph-format migration. Update clients and check whether cluster ledger conversion is required. |
+| Standalone format 8 or 9 (0.11.x), or 13 | Offline `omnigraph upgrade --check`, then `omnigraph upgrade`; preserves data, branches, commit IDs and retained history. |
+| Cluster-managed graph below format 14 | Export with the source-compatible binary; rebuild in a new graph ID or parallel cluster. |
+| Other storage formats | Rebuild with a source-compatible export, subject to the predecessor option below. |
 
-For a qualified **standalone** graph, stop every writer, server and maintenance
-process, retain the source-compatible executable, and verify a whole-root backup:
+A standalone format-6 graph from 0.9/0.10 can first use the **0.11 binary's**
+qualified upgrade to format 8, then use 0.13's upgrade to 14. Pass
+`--to-format 8` to both the 0.11 check and execution to keep live branches and
+legacy system-column spellings; its default target 9 has additional restrictions.
+Read the [0.11 procedure](https://github.com/ModernRelay/omnigraph/blob/v0.11.0/docs/user/operations/upgrade.md)
+before using that intermediate executable. Do not run those older flags against
+0.13, whose only upgrade target is 14.
+
+For current qualification, limits, interrupted attempts and recovery findings,
+use the [storage upgrade guide](https://github.com/ModernRelay/omnigraph/blob/v0.13.0/docs/user/operations/upgrade.md#storage-upgrade).
+
+## Offline standalone conversion
+
+Stop every reader, writer, server and maintenance process using the graph;
+keep them stopped until completion. With the 0.13 binary:
 
 ```bash
 omnigraph upgrade ./graph.omni --check --json
 omnigraph upgrade ./graph.omni --json
+omnigraph commit list ./graph.omni --json
 ```
 
-The default route is v6→v7→v8→v9 (or its remaining suffix). It preserves data,
-identity, retained commits and snapshots, but ending at v9 requires only `main`
-and no user property beginning with `_`. Merge/delete unneeded branches or
-rename offending properties with compatible tooling first. To preserve live
-branches and legacy system spellings, use `--to-format 8` on both check and
-execution; v0.11 serves the result. Explicit target 7 is an intermediate format
-that v0.11 refuses on ordinary open. Checks are advisory and execution validates
-again; inspect findings, deferred checks and any required recovery action.
+A pending upgrade refuses ordinary opens. Resume an interrupted conversion with
+the same command and executable; never delete its markers or history objects.
+Rollback restores the whole backup with the source-compatible binary.
 
-Already-v8 graphs can use `omnigraph schema upgrade-system-columns
-./graph.omni --check --json` and then omit `--check` for the v9 step. This is
-irreversible; retain the backup and stop overlapping processes. Follow an
-interruption's recovery instructions without deleting protocol markers. Rollback
-restores the entire pre-upgrade backup with the old executable.
+Physical `id`/`src`/`dst` spellings survive this conversion. GQ always uses
+`@id`/`@src`/`@dst`. The optional `schema upgrade-system-columns` step requires a
+standalone format-14 graph with only `main` and no `_`-prefixed user properties;
+it preserves data/history and stays at format 14.
 
-Cluster-managed roots and unqualified sources refuse in-place upgrade. Rebuild
-with a source-compatible export into a newly applied graph or parallel cluster,
-then verify and cut over. Do not point `init --force` at the old root. The
-[upgrade guide](https://github.com/ModernRelay/omnigraph/blob/v0.11.0/docs/user/operations/upgrade.md) owns qualification,
-interruption handling, external Blob caveats and cluster cutover details.
+## Rebuild and cutover
 
-### Identity and response changes
+Export with the binary that can read the source. Preserve top-level JSONL `id`s;
+for predecessor exports whose identity lived in `data.id`, follow the canonical
+[rebuild procedure](https://github.com/ModernRelay/omnigraph/blob/v0.13.0/docs/user/operations/upgrade.md#rebuild)
+rather than rewriting every `id` property indiscriminately. Update old GQ system
+field references and lint all schemas and stored queries before deployment.
 
-- GQ system fields are `$p.@id`, `$e.@src`, and `$e.@dst`. Bare `id`, `src`
-  and `dst` are user properties. New v9 schemas reserve leading `_`; new edge
-  endpoint constraints use `@unique(@src, @dst)`. `GET /schema` and
-  `schema show --json` report each graph's `system_columns`.
-- JSONL identity is top-level `id`, beside `type` or `edge`. On v9, `data.id`
-  is a declared user property and `data.__id` is refused. v8 also accepts legacy
-  `data.id` when top-level `id` is absent. Move predecessor export identity out
-  of `data` before loading it into a new graph; preserve exports already using
-  top-level `id` and any user property named `id`.
-- Bare-node projection returns an object with `@id` and non-Blob/non-Vector
-  properties. Query and export JSON omit null-valued property keys; change
-  images keep explicit nulls because absence means outside that commit's schema.
-  `Date` is a calendar date; `DateTime` output has no trailing `Z`. F32 values
-  use 32-bit rendering, and integers of every width are JSON numbers: JavaScript
-  consumers must account for precision above their safe integer range.
-- `/readyz` reports the replica's applied revision and served/quarantined
-  counts. Branch statements can use canonical `/query` and `/mutate`; inspect
-  their `outcome` instead of treating zero affected counts or `commit: null`
-  as a data no-op. See [server routes](server-policy.md) and
-  [write positions](changes.md).
+For a cluster, create the replacement with `cluster apply`: graph roots are
+managed by the declaration, so direct `init` is not the rebuild entry point.
+Load and verify the replacement before moving clients. Export/import preserves
+entities and their values, including vectors and managed Blobs, but does not
+reconstruct old commit IDs, snapshots or shared branch history. Export each
+needed branch separately. External Blob references need an applied allow-list
+and a policy-aware load through the server.
 
-Full-text compatibility is independent of the storage conversion. Existing
-Lance-11-compatible indexes do not need a new rebuild solely for v0.11. Indexes
-from the older Lance transition still need the explicit procedure below.
+Removing the old graph from the declaration and applying deletes its entire
+managed root and retained history. Keep the source until the replacement is
+verified and that deletion is intended. See the
+[cluster cutover guide](https://github.com/ModernRelay/omnigraph/blob/v0.13.0/docs/user/operations/upgrade.md#cluster-cutover).
 
-## Upgrade v0.9 to v0.10
+## Cluster ledger
 
-v0.10 moves from Lance 9 to Lance 11 but retains graph storage format v6, so
-existing entities, branches, and retained history do not need entity
-export/import. The interface boundary is not rolling-compatible: stop traffic
-and upgrade CLI, server, and client bindings together. Do not mix Lance 9/10 and
-Lance 11 readers or writers on one graph root.
-
-Preserve a verified backup of the whole graph root and the cluster deployment
-state. Then rebuild every full-text index on every live branch that needs
-full-text search:
+An explicit `ledger_upgrade_required` refusal names a supported ledger
+conversion. With every server, writer and maintenance process stopped:
 
 ```bash
-omnigraph branch list --store graph.omni --json
-omnigraph rebuild-full-text-indexes --store graph.omni \
-  --branch main --as operator --json
+omnigraph --cluster <root> cluster upgrade-ledger --writers-stopped
 ```
 
-The rebuild uses the default English analyzer and replaces custom tokenizer
-settings. It does not rewrite historical snapshots. Ordinary traversal and
-vector search remain available without it; full-text search refuses indexes
-whose analyzer compatibility cannot be proved. An unknown physical index kind
-is a fail-closed migration case—use compatible old tooling for a controlled
-export/import rather than editing index metadata.
+This converts the ledger, not graph storage; rows, branches and history remain.
+Use [cluster recovery](cluster.md#recovery) for retained writer locks and an
+outstanding deployment. Do not edit the ledger by hand or submit a new deployment
+ID to replace an uncertain attempt.
 
-Before reopening traffic, verify representative full-text searches and entity
-counts on every rebuilt branch, then check the upgraded CLI/API integrations
-against the new response fields. Resume only with the new fleet.
+## Integration cutover
 
-Rollback means restoring the whole pre-upgrade graph and cluster-state backup
-with the old fleet. v0.9 cannot read applied `external_blobs` state and also
-lacks v0.10's default-deny external ingress, so do not downgrade when that
-boundary is required.
+Use current `query`, `mutate`, `load` and `lint` CLI commands and
+`cluster <command> --managed` for the service API. HTTP uses `/query`, `/mutate`
+and `/load` under `/graphs/{id}`; schema/config changes go through cluster
+plan/deployment routes. Removed route aliases and the graph schema-apply route
+are unavailable. Signed data credentials are version-2 identities; applied
+Cedar policy supplies all permissions.
 
-v0.10 also removes ambiguous client vocabulary such as `table_key`, `row_id`,
-`manifest_version`, `rows_loaded`, and `export --table`. Use node/edge, type,
-entity, property, graph-manifest, and published-dataset terms plus
-`export --type`. See the [v0.10.0 upgrade procedure](https://github.com/ModernRelay/omnigraph/blob/v0.10.0/docs/user/operations/upgrade.md).
+Before switching traffic, verify contract discovery, representative query/load
+results, stored-query invocation, policy grants and refusals, complete exports
+and deployment observation by exact ID. Readiness is `/readyz`; `/healthz` only
+proves the process is alive. See [server contract](server-policy.md) and
+[remote outcomes](remote-ops.md).
 
-## Pre-0.7 configuration
-
-| Before | v0.10 |
-|---|---|
-| `omnigraph.yaml` | `cluster.yaml` for team deployment plus `~/.omnigraph/config.yaml` for operator settings |
-| `cli.actor` | `operator.actor` |
-| `cli.graph` / `server.graph` | `defaults.default_graph` plus optional `defaults.server` |
-| `targets:` / `target:` | `graphs:` / `graph:` |
-
-`omnigraph.yaml` is removed and there is no automatic config migration. Move
-schema/query/policy declarations into `cluster.yaml`; move identity, named
-servers, output defaults, profiles, and aliases into the operator file.
-
-## Retired addressing and verbs
-
-| Before | v0.10 |
-|---|---|
-| `--target <name>` | `--server`, `--store`, `--cluster`, or `--profile`, as the command permits |
-| positional HTTP URL | `--server <name|url>` |
-| `--cluster-graph <id>` | `--cluster <dir|uri> --graph <id>` |
-| query `--name <q>` | positional query name plus `--query`/`-e` for ad-hoc source |
-| `ingest` | `load --mode <append|merge|overwrite>` |
-| `read` / `change` | `query` / `mutate` |
-| `query lint` / `query check` | `lint` |
-| query/mutate `--alias` | dedicated `alias <name>` command |
-
-The server is cluster-only: start it with `omnigraph-server --cluster
-<dir|file://|s3://|az://>`. Data-plane commands do not take the cluster
-control-plane `--config` flag. `policy` and the stored-query registry use
-`--cluster` plus optional `--graph`.
-
-Direct `schema apply` remains available for a non-cluster store. A cluster-only
-server rejects the legacy schema-apply route with `409`; edit the declared `.pg`
-and use `cluster plan`/`cluster apply`.
-
-## HTTP compatibility aliases
-
-Canonical routes are `/query`, `/mutate`, and `/load`. `/read`, `/change`, and
-`/ingest` remain deprecated compatibility aliases and identify their successor
-in response headers. Per-graph routes are nested below `/graphs/{id}`; old flat
-single-graph routes are gone.
-
-The pre-v0.4 transactional Run state machine, `/runs`, and the `run_publish` /
-`run_abort` policy actions are removed. Writes publish directly; use exact write
-receipts, commit history, and the `change` action.
+A storage upgrade does not rebuild incompatible full-text indexes. If a query
+reports `FullTextIndexRebuildRequired`, follow the
+[full-text upgrade procedure](https://github.com/ModernRelay/omnigraph/blob/v0.13.0/docs/user/operations/upgrade.md#full-text-index-upgrade)
+on each live branch that needs search.

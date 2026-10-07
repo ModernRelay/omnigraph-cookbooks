@@ -12,19 +12,31 @@ omnigraph-server --cluster s3://bucket/prefix --bind 0.0.0.0:8080
 ```
 
 The server loads the cluster's applied revision and serves each graph under
-`/graphs/{id}`. Apply changes, then restart; there is no hot reload or
-single-graph server mode.
+`/graphs/{id}`. `cluster apply --server` activates schema, stored-query, policy,
+provider and external-Blob changes, plus graph creation/deletion, without a
+restart. Direct apply requires serving to be stopped. There is no single-graph server mode. A stopped server, even
+after a clean exit, leaves the cluster lock: once its writes have settled,
+clear it with `cluster force-unlock <LOCK_ID>` before the next start (see
+[cluster mode](cluster.md)).
+
+Shutdown is bounded by `--shutdown-grace-seconds` (else
+`OMNIGRAPH_SHUTDOWN_GRACE_SECONDS`, default 25; `0` cuts off immediately). At
+SIGTERM readiness turns off and in-flight requests drain; a clean drain exits
+0 and reaching the deadline exits 2. Give the orchestrator a longer
+termination grace. Check rollout readiness with `GET /readyz`, not `/healthz`.
 
 ## Route families
 
 | Route family | Purpose |
 |---|---|
 | `GET /healthz`, `/openapi.json` | Process metadata |
-| `GET /readyz` | Replica readiness, applied revision and served/quarantined counts |
-| `GET /graphs` | List served graphs (`graph_list`) |
+| `GET /readyz` | Replica readiness, applied revision and served/ready/loading/blocked counts |
+| `GET /graphs` | List graphs with their availability (`graph_list`) |
+| `POST /cluster/plan` | Preview the submitted configuration without effects (`config_manage`) |
+| `POST /cluster/deployments`, `GET /cluster/deployments[/{id}]` | Submit once and inspect a deployment; exact-ID observation survives caller disconnect |
 | `/graphs/{id}/query`, `/mutate` | Inline GQ reads and writes |
-| `/graphs/{id}/mutate/if-graph-commit` | Conditional inline mutation |
-| `/graphs/{id}/queries` | List/invoke stored queries, including conditional writes |
+| `/graphs/{id}/mutate/if-graph-commit` | Conditional inline mutation (header `Omnigraph-If-Graph-Commit`) |
+| `/graphs/{id}/queries` | List/invoke stored queries; `/queries/{name}/if-graph-commit` for conditional writes |
 | `/graphs/{id}/load`, `/load/ndjson` | Bounded atomic loads |
 | `/graphs/{id}/blob` | GET/HEAD one Blob cell |
 | `/graphs/{id}/branches` | Branch operations and merge |
@@ -34,16 +46,21 @@ single-graph server mode.
 | `/graphs/{id}/schema` | Read the accepted schema |
 | `/graphs/{id}/export` | Stream a branch snapshot |
 
-`/read`, `/change`, and `/ingest` are deprecated compatibility routes. A
-cluster-only server retains `POST /graphs/{id}/schema/apply` for wire
-compatibility but rejects it with `409`; use `cluster plan`/`cluster apply`.
+Every request to a graph, registry or deployment route must carry exactly one
+`Omnigraph-Http-Api: 0.13` header; a missing, repeated or other value is
+refused with `400 api_contract_mismatch` before graph access. Responses carry
+the same header. `/healthz`, `/readyz` and `/openapi.json` need none. Upgrade
+the CLI, server and HTTP clients together.
+
+Graph schema changes use cluster plan/apply. There is no graph schema-apply
+endpoint and no alias routes for older HTTP contracts. Discover the contract
+with `/healthz` before sending protected requests; redirects and mismatched
+responses are not permission to replay an effectful request.
 
 Canonical `/query` JSON includes the graph commit pinned with its rows when the
 read snapshot has an effective graph head; a fresh pre-commit graph can omit it. Exact
 write receipts and conditional semantics are summarized in
 [commit changes and feeds](changes.md). Blob delivery is in [Blob values](blobs.md).
-The deprecated `/read` response does not carry that commit position; consumers
-that need conditional writes must use `/query`.
 
 Canonical `/query` accepts `branch list`; `/mutate` accepts `branch create`,
 `branch delete` and `branch merge` with no request target, name or params. These
@@ -52,12 +69,16 @@ return branch outcomes, not ordinary data-mutation receipts; see
 physical `system_columns`; GQ uses `@id`/`@src`/`@dst` on either storage vintage.
 
 `/readyz` is unauthenticated and contains no graph names. It identifies the
-applied revision this process booted from, reports `ready: false`/HTTP 503 while
-draining, and includes served/quarantined graph counts. Authorized `GET /graphs`
-identifies quarantined graphs. Healthy graphs keep serving unless startup uses
-`--require-all-graphs`; an applied empty cluster can be ready, while a nonempty
-cluster with every graph failed refuses startup. Applied revisions activate on
-restart, not through the readiness request.
+booted applied revision, reports `ready: false`/HTTP 503 while
+a graph is loading, when a nonempty inventory has no ready graph, and while
+draining, and includes `served_graph_count`, `ready_graph_count`,
+`loading_graph_count` and `blocked_graph_count`. Authorized `GET /graphs`
+returns one `graphs` list with each graph's `state`, availability, `action`
+and, when blocked, `failure`; an authorized request to a blocked graph answers
+`503 graph_unavailable`, not `404`. Healthy graphs keep serving unless startup
+uses `--require-all-graphs`; an applied empty cluster can be ready, while a
+nonempty cluster with every graph failed refuses startup. A readiness request
+never activates a revision.
 
 ## Authentication and actor identity
 
@@ -70,16 +91,22 @@ echo "$TOKEN" | omnigraph login production
 omnigraph query get_person --server production --graph knowledge
 ```
 
-A server with neither tokens nor policy refuses to start unless explicitly
+A server with no credential source (static tokens or signed-token trust) and no
+policy refuses to start unless explicitly
 given `--unauthenticated` (or `OMNIGRAPH_UNAUTHENTICATED=1`). Use that only on a
 trusted development network. Tokens without a policy allow only `read`; other
 actions remain denied.
 
 Managed signed data credentials are a separate token source, enabled with
 `--data-token-trust <file>`. The trust file binds keys to the exact deployment;
-tokens select an immutable principal actor and only narrow current Cedar grants.
+tokens select an immutable principal actor. An identity credential carries no
+permissions; only version-2 identity credentials are accepted.
+That actor (`principal:<immutable-id>`) must itself be permitted by the applied
+Cedar policy, or every graph request is denied; an identity credential can
+still list graph ids through `GET /graphs/discovery`. Trust changes need a
+restart.
 Control-plane login does not grant data access. See
-[managed data credentials](https://github.com/ModernRelay/omnigraph/blob/v0.11.0/docs/user/cli/managed-data.md).
+[managed data credentials](https://github.com/ModernRelay/omnigraph/blob/main/docs/user/cli/managed-data.md).
 
 ## Cedar actions
 
@@ -90,15 +117,20 @@ Graph-scoped actions are:
 | `read` | Queries, snapshots, branches, commits, Blob reads, and change polling |
 | `export` | Export and change-feed baseline capture |
 | `change` | Mutations and loads |
-| `schema_apply` | Schema changes in an engine host that exposes them |
+| `schema_apply` | Served schema changes and graph deletion: required on each affected existing graph |
 | `branch_create`, `branch_delete`, `branch_merge` | Corresponding branch operation |
 | `invoke_query` | Entry to a stored query |
 | `admin` | Reserved; no current public operation |
 
-`graph_list` is cluster-scoped and controls `GET /graphs`. A stored read needs
+`graph_list` is cluster-scoped and controls `GET /graphs`. `config_manage` is
+cluster-scoped too and authorizes served cluster planning and deployment; put
+it in a rule of its own. Current policy authorizes configuration changes; a
+proposed policy cannot authorize its own installation. A stored read needs
 `invoke_query` plus `read`; a stored mutation needs `invoke_query` plus
 `change`. A denied and unknown stored-query name both appear as `404` to a
-caller lacking `invoke_query`.
+caller lacking `invoke_query`. A load with `from` also needs `branch_create`
+for the fork, and a merge with `delete_branch` needs `branch_delete` for the
+cleanup step (a denied deletion leaves the merge successful).
 
 ## Declare and test policy
 
@@ -133,9 +165,12 @@ rules:
       actions: [invoke_query]
 ```
 
-`branch_scope` protects source branches; `target_branch_scope` protects
-destinations. Values are `any`, `protected`, or `unprotected`; one rule cannot
-set both scopes. `invoke_query` and server actions take no branch scope.
+`branch_scope` is valid only with `read`, `export`, and `change`;
+`target_branch_scope` only with `branch_create`, `branch_delete`,
+`branch_merge`, and `schema_apply`. Any other pairing, or both scopes on one
+rule, is refused. Values are `any`, `protected`, or `unprotected`, where
+protected branches are the bundle's top-level `protected_branches: [main, …]`
+list. `invoke_query`, `graph_list` and `config_manage` take no branch scope.
 
 ```bash
 omnigraph policy validate --cluster . --graph knowledge
@@ -144,7 +179,16 @@ omnigraph policy explain --cluster . --graph knowledge \
   --actor act-alice --action read --branch main
 ```
 
-Run `cluster apply` and restart servers after policy changes.
+The `policy` commands evaluate applied bundles, not draft files. Validate the
+source with `cluster validate`, preview with `cluster plan --server …`, then
+apply. Live policy changes drain admitted work before later requests use the
+new HTTP and engine permissions. Process token sources and signed-token trust
+remain startup settings.
+
+The CLI policy selector currently requires exactly one matching bundle. With
+both a graph bundle and a `cluster` bundle applied, `--graph <id>` refuses with
+"matches 2 policy bundles"; this inspection limitation does not prevent the
+server from applying or enforcing those bundles.
 
 ## Direct access is a separate trust boundary
 
@@ -158,5 +202,5 @@ does not recreate server authorization. Protect raw graph storage with object
 store IAM/ACLs and restrict who can run direct maintenance. Served writes reject
 client-supplied actor identity because only the token may select it.
 
-Canonical contracts: [server operations](https://github.com/ModernRelay/omnigraph/blob/v0.11.0/docs/user/operations/server.md)
-and [authorization](https://github.com/ModernRelay/omnigraph/blob/v0.11.0/docs/user/operations/policy.md).
+Canonical contracts: [server operations](https://github.com/ModernRelay/omnigraph/blob/main/docs/user/operations/server.md)
+and [authorization](https://github.com/ModernRelay/omnigraph/blob/main/docs/user/operations/policy.md).

@@ -167,39 +167,20 @@ omnigraph alias events-recent
 
 ## Quick Start
 
-This cookbook is a **filesystem-backed cluster directory** — no object store,
-no credentials. `cluster.yaml` declares the graph (`brain`), its schema, and
-all stored queries; `omnigraph cluster apply` converges it (creating the graph
-at `graphs/brain.omni`); the server serves the applied state. All commands run
-from `second-brain/`:
-
-```bash
-cd second-brain
-omnigraph cluster import --config .   # one-time: create the state ledger
-omnigraph cluster plan   --config .
-omnigraph cluster apply  --config .   # creates graphs/brain.omni, applies schema, publishes queries
-omnigraph load --data seed.jsonl --mode overwrite graphs/brain.omni   # one-time seed
-omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated  # serve (local dev)
-```
-
-Then query through the server via aliases:
+Follow the shared [0.13 local setup](../README.md#local-setup) with
+`second-brain` and graph ID `brain`. Merge this cookbook's
+`omnigraph-config.example.yaml` into your operator config, then query:
 
 ```bash
 omnigraph alias close-friends
 omnigraph alias person-recent-events per-theo
 omnigraph alias tasks-i-owe
+omnigraph query close_friends --server local --graph brain
 ```
 
-> Aliases come from `omnigraph-config.example.yaml` — merge into
-> `~/.omnigraph/config.yaml` (or invoke a stored query directly: `omnigraph
-> query <name> --graph brain [--params …]`). The per-user operator config is
-> never committed; a `--cluster` server never reads it.
-
-Day-2 changes are declarative: edit `schema.pg` / a `.gq` file / `cluster.yaml`,
-then `cluster plan` (schema edits show real migration steps) → `cluster apply`
-→ restart the server. Data still flows through `omnigraph load` / `omnigraph
-mutate` against `graphs/brain.omni`. See the **omnigraph** skill
-for the full ops loop.
+Apply schema and stored query edits with the [live update workflow](../README.md#live-updates).
+Send ongoing data changes through the server with `mutate` or `load`; the seed
+is only the initial demo dataset.
 
 ## Extending
 

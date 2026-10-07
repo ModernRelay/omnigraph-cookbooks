@@ -10,17 +10,15 @@
 - Aggregations
 - Filter operators
 - Mutations
-- Naming convention
-- Aliases over raw queries
+- Branch statements
 
 Writing `.gq` query files in Omnigraph.
 
 ## File Organization
 
-- One `.gq` file per primary node type (`signals.gq`, `patterns.gq`, `elements.gq`)
-- One `mutations.gq` file for all insert/update/delete queries
-- Put query files in `queries/`, then declare `graphs.<id>.queries: queries/` in
-  `cluster.yaml`; cluster mode does not scan an undeclared directory.
+Group related query declarations in `.gq` files and declare them under
+`graphs.<id>.queries` in `cluster.yaml`. The server does not scan undeclared
+directories. See [stored queries](stored-queries.md) for deployment.
 
 ## Linting
 
@@ -60,7 +58,7 @@ omnigraph query get_signal --query signals.gq --params '{"slug":"sig-foo"}'
 
 The compiler typechecks parameter values against declared types.
 
-> For one-off/ad-hoc execution, pass the query inline instead of a file with `-e/--query-string`: `omnigraph query -e 'query q($slug: String){ match { $s: Signal { slug: $slug } } return { $s.name } }' --params '{"slug":"sig-foo"}'` (and `omnigraph mutate -e '...'`). `-e` is mutually exclusive with `--query <file>` — exactly one of the two is required. (Operator aliases are invoked via the separate `omnigraph alias <name>` subcommand.)
+> For one-off/ad-hoc execution, pass the query inline instead of a file with `-e/--query-string`: `omnigraph query -e 'query q($slug: String){ match { $s: Signal { slug: $slug } } return { $s.name } }' --params '{"slug":"sig-foo"}'` (and `omnigraph mutate -e '...'`). `-e` is mutually exclusive with `--query <file>`; ad-hoc execution uses one of them, and omitting both invokes the served stored query named by the positional `<name>`. (Operator aliases are invoked via the separate `omnigraph alias <name>` subcommand.)
 
 ## Query Structure
 
@@ -102,6 +100,15 @@ query friends_of_friends($name: String) {
     return { $fof.name }
 }
 ```
+
+Hop counts are shortest-path distances from the start node (`{2,2}` returns
+nodes exactly two hops away); a node is not re-reached through a cycle, and
+only the start node's own self-loop counts, as one hop. Each `$_` is a distinct
+anonymous node. Binding `$p` again adds constraints on the same rows rather
+than introducing a second `$p`. Variable names beginning `__` are reserved.
+
+Without `order`, `limit n` may return any `n` valid rows, and the subset can
+change between releases. Add `order { … }` when a stable page matters.
 
 ### Reverse traversal
 
@@ -161,7 +168,13 @@ Composes with hop bounds (`$a <knows>{1,3} $b`) and `not { }` ("no edge in
 either direction"). Asymmetric edges (e.g. `Comment -> Issue`) are rejected at
 typecheck (T22) — use the directional form there.
 
-### Negation
+### Correlated blocks
+
+A block matches its pattern once per outer row and keeps the row by a
+comparison on the aggregate of its matches: `not { ... }` (no match),
+`exists { ... }` (at least one), `count { ... } > 2`, and
+`sum($d.size) { ... } > 100` (also `min`, `max`, `avg`). The block must read
+at least one outer variable; the right side is a literal, `now()` or a parameter.
 
 ```gq
 query orphan_signals() {
@@ -171,7 +184,30 @@ query orphan_signals() {
     }
     return { $s.slug }
 }
+
+query busy_signals($least: I64) {
+    match {
+        $s: Signal
+        count { $s formsPattern $p } >= $least
+    }
+    return { $s.slug }
+}
 ```
+
+### Typed edge selections
+
+GQ 2.1 supports `$a (knows | likes) $b` to select named edge types and `$a * $b`
+to select compatible types from the captured schema. Wildcards require declared
+endpoint node types. Omitted bounds mean `{1,1}`; recursion needs finite bounds
+such as `{1,3}`. `$a $e:(knows | likes) $b` binds one-hop concrete edges and
+exposes `$e.@type` and `$e.@id`. Common properties must exist with compatible
+base types on every member; nullability and enum domains widen.
+
+`set traversal_work_limit = 1000000;` sets the shared traversal row-work cap for
+statements using selections. Selected-table sizes count before scans; a result
+limit does not replace this cap. Exhaustion fails the query, never partial
+success. Historical wildcard targets are refused. Stored-query validation can
+refuse a schema addition that invalidates wildcard common-property references.
 
 ## System Fields and Result Values
 
@@ -188,70 +224,29 @@ bindings cannot be projected.
 
 Each projection needs a distinct result column name (`T25`): use aliases when
 expressions would collide. Aliases can be used in `order`, but cannot be
-projected again in `return` (`T36`).
+projected again in `return` (`T36`), and alias ordering cannot be combined with
+a `nearest` ordering (`T18`). Order an aggregate by its alias or by repeating
+the returned expression (`order { count($f) desc }`); an order key that is not
+a property, a system field, the leading search key, a `return` item, or an
+alias is refused at type checking (`T42`).
 
 In JSON results, null fields are omitted from rows and node objects; null
 elements within lists remain `null`. Dates are `"2026-04-29"`; DateTime values
 are UTC strings such as `"2026-04-29T10:00:00"`, without a trailing `Z` and
 with a fractional part only when nonzero. Read the `columns` in the JSON
 envelope to retain fields that are null in every row. Integers remain JSON
-numbers, so JavaScript consumers must account for values beyond 2^53.
+numbers, so JavaScript consumers must account for values beyond 2^53. `F32`
+and vector values print at 32-bit width (`0.99`); integral floats carry `.0`;
+magnitudes from 1e10 up or below 1e-5 use exponent form (`1.0e20`); a
+non-finite computed float is `null`. A stored date count outside the writer's
+range fails the read instead of printing.
 
 ## Search Functions
 
-### Text search
-
-```gq
-match {
-    $d: Doc
-    search($d.title, $q)       // full-text on @index'd String
-}
-```
-
-```gq
-match {
-    $d: Doc
-    fuzzy($d.title, $q, 2)     // fuzzy match, max 2 edits
-}
-```
-
-```gq
-match {
-    $d: Doc
-    match_text($d.body, $q)    // regular full-text match (not phrase search)
-}
-```
-
-### Vector/ranking
-
-```gq
-query vector_search($q: Vector(3072)) {
-    match { $d: Doc }
-    return { $d.slug, $d.title }
-    order { nearest($d.embedding, $q) }
-    limit 10
-}
-```
-
-`nearest`, `bm25`, and `rrf` are ranking operators, not filters. `nearest` and
-`rrf` require `limit N`; BM25 alone does not, though a limit is recommended for
-bounded output.
-
-`nearest(...)` and `bm25(...)` can also be projected as scores when the
-expression exactly repeats the leading `order` key; see
-[`search.md`](search.md#projecting-scores). `rrf(...)` and search predicates
-cannot be projected.
-
-### Hybrid (reciprocal rank fusion)
-
-```gq
-query hybrid_search($vq: Vector(3072), $tq: String) {
-    match { $d: Doc }
-    return { $d.slug, $d.title }
-    order { rrf(nearest($d.embedding, $vq), bm25($d.title, $tq)) }
-    limit 10
-}
-```
+`search`, `fuzzy` and `match_text` filter text matches. `nearest`, `bm25` and
+`rrf` lead the `order` clause and also restrict rows; `nearest` and `rrf` need a
+finite `limit N`. Score projection repeats the leading ranking expression.
+Read [search](search.md) for query examples, scoping, providers and exact limits.
 
 ## Aggregations
 
@@ -272,13 +267,27 @@ query friend_counts() {
 
 Supported: `count`, `sum`, `avg`, `min`, `max`. Grouping is implicit on non-aggregated return fields.
 
+- `min`/`max` accept numeric, String, Bool (`false` before `true`), Date, and
+  DateTime values and return the column's own type; lists, vectors, and Blobs
+  are refused (`T8`).
+- `sum`/`avg`/`min`/`max` over a bare node binding are refused (`T8`);
+  `count($f)` is fine.
+- An all-aggregate query over zero rows returns one row: `count` is 0 and the
+  other aggregates are null, so JSON omits their keys.
+- An unaliased aggregate takes its argument's column name, so
+  `return { $a.name, count($a.name) }` collides (`T25`). Alias aggregates.
+
 ## Filter Operators
 
-`starts_with`, `contains`, `>=`, `<=`, `!=`, `>`, `<`, `=`
+`starts_with`, `contains`, `in`, `>=`, `<=`, `!=`, `>`, `<`, `=`
 
 Both String predicates are exact and case-sensitive: `contains` matches a
 substring and `starts_with` matches a prefix. They remain correct without an
 index; a free-text String index does not accelerate these exact predicates.
+
+`$m.number in $numbers` keeps the rows whose value is a member of a list
+parameter or literal, one query instead of one per candidate; the right side
+must be a list of the value's type.
 
 ```gq
 match {
@@ -313,8 +322,10 @@ query add_signal($slug: String, $name: String, $brief: String,
 ones as:
 
 ```
-error: T12: insert for 'Signal' must provide non-nullable property 'brief'
+type error: T12: insert for `Signal` must provide non-nullable property `brief`
 ```
+
+For an `@embed` target the message ends ``… property `embedding` or @embed source `text` ``.
 
 Lint permits omission of a non-null Vector target annotated with
 `@embed(source)` when its source is supplied, but mutation execution does not
@@ -366,7 +377,7 @@ edge twice creates two edges. Use `load --mode merge` for bulk upsert. Edge
 `update` is unsupported; reinsert a keyed edge to change non-key properties,
 or delete and reinsert an unkeyed edge.
 
-> **Insert/update-only OR delete-only (the D₂ rule).** A single mutation query may contain inserts and updates, **or** deletes — never both. Mixing a `delete` with an `insert`/`update` in the same query is rejected at parse time. The split is deliberate: one mutation query is constructive XOR destructive. Split a delete-then-insert into two separate mutations.
+> **Insert/update-only OR delete-only (the D₂ rule).** A single mutation query may contain inserts and updates, **or** deletes — never both. Mixing a `delete` with an `insert`/`update` in the same query is refused when the mutation executes, before any effect — `lint` does not catch it. The split is deliberate: one mutation query is constructive XOR destructive. Split a delete-then-insert into two separate mutations.
 
 ### Date and DateTime values
 
@@ -380,16 +391,31 @@ Prefer ISO strings on both paths:
 Integer epoch days remain useful for generated Arrow-oriented input, but are
 not required for hand-authored JSONL. A `Date` string must name a calendar day;
 a string containing a time of day is refused, even at midnight. Use `DateTime`
-for an instant. Loads refuse floats, booleans, and objects for either date
+for an instant. A `DateTime` holds milliseconds: a string with a non-zero digit
+past the third fractional digit (`"2026-04-29T10:00:00.123456Z"`) is refused on
+both paths and in `datetime(...)` literals; trailing zeros (`.123000`) are
+accepted. Loads refuse floats, booleans, and objects for either date
 type, and refuse counts outside the JSON writer's supported calendar range.
 
-## Naming Convention
+## Branch Statements
 
-`verb_object`:
-- `get_signal`, `recent_signals`, `search_signals`
-- `signal_patterns`, `signal_elements` (traversal queries)
-- `add_signal`, `link_signal_forms_pattern` (mutations)
+A `.gq` source may instead hold exactly one branch statement, never beside a
+query declaration:
 
-## Aliases Over Raw Queries
+```text
+branch create "review/add-benchmark" from main
+branch merge "review/add-benchmark" into main
+branch delete "review/abandoned"
+branch list
+```
 
-For anything an agent or script will call repeatedly, define an operator alias. See `references/aliases.md`.
+`from` and `into` default to `main`. Quote a name that is not a bare
+identifier (a lowercase letter or `_`, then letters, digits, or `_`), such as
+one containing `/`, `-`, or `.`. Run the control writes with
+`omnigraph mutate -e '…'` (HTTP `POST /mutate`) and `branch list` with
+`omnigraph query -e 'branch list'` (`POST /query`); the wrong verb is refused.
+A statement takes no name, `--params`, `--branch`, `--snapshot`, or
+`--if-commit`, and has no `--delete-branch` form: follow a merge with
+`branch delete`. `lint` and stored-query registries reject statement files.
+Outcome and receipt semantics differ from data mutations; see
+[`changes.md`](changes.md#branch-statements).

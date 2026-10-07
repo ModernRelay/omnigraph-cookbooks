@@ -20,18 +20,10 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 
 ## Setup
 
-The rules — `import` before the first `apply`, `load` addressing, `/healthz`, how aliases and
-stored queries behave — are in `../CLAUDE.md`. This is that sequence with pharma-intel's names filled in:
-
-```bash
-cd pharma-intel
-omnigraph cluster import --config .
-omnigraph cluster plan   --config .
-omnigraph cluster apply  --config . --as <you>     # creates graphs/pharma.omni
-omnigraph load --data seed.jsonl --mode overwrite graphs/pharma.omni
-omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated &
-curl -s http://127.0.0.1:8080/healthz
-```
+Use the shared [0.13 local setup](../README.md#local-setup) with cookbook
+`pharma-intel` and graph `pharma`. It owns authentication, the bootstrap writer-lock
+handoff, readiness, and served seed loading. Apply later configuration edits with
+the [live update workflow](../README.md#live-updates).
 
 Graph id `pharma`. Stored queries and their parameters: `omnigraph queries list --cluster . --graph pharma`.
 Alias args bind by name to `$params`: `omnigraph alias assumption-contradictions asmp-oral-displaces-injectable` is `omnigraph query assumption_contradicting_signals --graph pharma --params '{"slug":"asmp-oral-displaces-injectable"}'`.
@@ -99,4 +91,4 @@ Use this starter as a decision-intelligence loop, not just a lookup table:
 - Keep README.md in sync with schema.pg
 - Prefer semantic edge names over generic ones (`ContradictsAssumption` not `RelatedTo`)
 - Required vs optional is deliberate — don't add `?` without reason
-- No embeddings in v1 — the narrative surfaces are graph-structured, not vector-search-driven
+- No embeddings in this cookbook — the narrative surfaces are graph-structured, not vector-search-driven

@@ -136,7 +136,7 @@ Viking Therapeutics (NASDAQ: VKTX) is a real public company with a GLP-1/GIP dua
 - Assumption / Decision / OpenQuestion are **first-class nodes**, not just properties — so they can be queried, traced, and edged to signals
 - `slug` is external identity everywhere (`comp-`, `mech-`, `trial-`, `co-`, `deal-`, `reg-`, `sig-`, `pat-`, `ins-`, `src-`, `art-`, `prog-`, `asmp-`, `dec-`, `q-`)
 - Flat `kind` / `level` / `status` enums — no interfaces or subtypes
-- No embeddings in v1 — narrative surfaces are graph-structured, not vector-search-driven
+- No embeddings in this cookbook — narrative surfaces are graph-structured, not vector-search-driven
 
 Full property tables and constraints in `schema.pg`.
 
@@ -145,68 +145,25 @@ Full property tables and constraints in `schema.pg`.
 - `schema.pg` — Executable Omnigraph schema (source of truth)
 - `seed.md` / `seed.jsonl` — Seed dataset (human-readable / loadable)
 - `queries/*.gq` — Read queries (5 files, 70 queries) + mutations (1 file, 35 queries)
-- `omnigraph-config.example.yaml` — Example operator config: aliases for all reads + mutations. Merge its `aliases:` into your per-user `~/.omnigraph/config.yaml` (never committed).
+- `omnigraph-config.example.yaml` — Example operator config: aliases for reads and examples for stored mutations. Merge its `aliases:` into your per-user `~/.omnigraph/config.yaml` (never committed).
 - `.env.omni` — RustFS credentials (not committed; see `.env.omni.example`)
 
 ## Quick Start
 
-All commands run from `pharma-intel/`:
-
-The cookbook is a **cluster directory**: `cluster.yaml` declares the graph,
-its schema, and all 105 stored queries; `omnigraph cluster apply` converges
-it (creating the graph at `graphs/pharma.omni`); the server serves the
-applied state. No object store or credentials needed to get started.
+Follow the shared [0.13 local setup](../README.md#local-setup) with
+`pharma-intel` and graph ID `pharma`. Merge this cookbook's
+`omnigraph-config.example.yaml` into your operator config for the aliases below.
+The setup uses a filesystem-backed cluster and loads the reference seed through
+the running server.
 
 ```bash
-cd pharma-intel
-
-# One-time: record the ledger, preview, converge (creates graphs/pharma.omni,
-# applies schema.pg, publishes all stored queries)
-omnigraph cluster import --config .
-omnigraph cluster plan   --config .
-omnigraph cluster apply  --config . --as <you>   # any id — recorded in the cluster ledger as who applied; set operator.actor in ~/.omnigraph/config.yaml to make it the default
-
-# Load the seed through the data plane (one-time)
-omnigraph load --data seed.jsonl --mode overwrite graphs/pharma.omni
-
-# Serve the applied state (keep running — separate terminal or background)
-omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated   # local dev
-
-# Query via CLI aliases (per-operator config sugar) …
 omnigraph alias assumption-contradictions asmp-oral-displaces-injectable
 omnigraph alias decision-questions dec-vanquish-interim-readout
-omnigraph alias pattern-contradictions pat-oral-glp1-thesis
-omnigraph alias decisions-upcoming
-# Aliases come from `omnigraph-config.example.yaml` — merge into
-# `~/.omnigraph/config.yaml` (or invoke a stored query directly:
-# `omnigraph query <name> --graph pharma [--params …]`).
-# … or straight HTTP — every declared query is a served endpoint:
-curl -s -X POST http://127.0.0.1:8080/graphs/pharma/queries/decisions_upcoming \
-  -H 'content-type: application/json' -d '{"params":{}}'
+omnigraph query decisions_upcoming --server local --graph pharma
 ```
 
-Day-2 changes are declarative: edit `schema.pg` / a `.gq` file / `cluster.yaml`,
-then `cluster plan` (schema edits show real migration steps) → `cluster apply`
-→ restart the server. Deleting the graph requires an explicit
-`omnigraph cluster approve graph.pharma --as <you>` first.
-
-<details>
-<summary><strong>RustFS / S3 alternative (cluster on object storage)</strong></summary>
-
-Root the cluster on S3 by setting `storage: s3://omnigraph-local/clusters/pharma` in `cluster.yaml`, then serve config-free from the bucket:
-
-```bash
-cp .env.omni.example .env.omni
-set -a && source .env.omni && set +a
-omnigraph cluster apply --config . --as <you>
-omnigraph load --data seed.jsonl --mode overwrite s3://omnigraph-local/clusters/pharma/graphs/pharma.omni
-omnigraph-server --cluster s3://omnigraph-local/clusters/pharma --unauthenticated
-```
-
-Point the server at the S3 graph URI directly (as above). The two boot sources
-are exclusive — a server reads cluster state XOR a single graph URI, never both.
-
-</details>
+Use the [live update workflow](../README.md#live-updates) for schema and stored
+query edits. For S3 hosting, see the [Railway deployment guide](../deploy/railway/README.md).
 
 ## Demo Walkthrough
 

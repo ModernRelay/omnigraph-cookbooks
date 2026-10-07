@@ -18,20 +18,10 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 
 ## Setup
 
-The rules — `import` before the first `apply`, `load` addressing, `/healthz`, how aliases and
-stored queries behave — are in `../CLAUDE.md`. This is that sequence with industry-intel's names filled in:
-
-```bash
-cd industry-intel
-omnigraph cluster import --config .
-omnigraph cluster plan   --config .
-omnigraph cluster apply  --config . --as <you>     # creates graphs/spike.omni
-omnigraph load --data seed.jsonl --mode overwrite graphs/spike.omni
-export OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-admin":"local-admin-token","act-writer":"local-writer-token","act-reader":"local-reader-token"}'
-omnigraph-server --cluster . --bind 127.0.0.1:8080 &      # this cookbook ships a policy: tokens, not --unauthenticated
-curl -s http://127.0.0.1:8080/healthz
-printf '%s' 'local-reader-token' | omnigraph login local
-```
+Use the shared [0.13 local setup](../README.md#local-setup) with cookbook
+`industry-intel` and graph `spike`. It owns authentication, the bootstrap writer-lock
+handoff, readiness, and served seed loading. Apply later configuration edits with
+the [live update workflow](../README.md#live-updates).
 
 Graph id `spike`. Stored queries and their parameters: `omnigraph queries list --cluster . --graph spike`.
 Alias args bind by name to `$params`: `omnigraph alias pattern-signals pat-sovereign-ai` is `omnigraph query pattern_signals --graph spike --params '{"slug":"pat-sovereign-ai"}'`.
@@ -42,7 +32,7 @@ Aliases are read-only; mutations run as `omnigraph mutate <name> --params '<json
 non-optional property supplied. Signatures live in `queries/mutations.gq`. Working example:
 
 ```bash
-printf '%s' 'local-writer-token' | omnigraph login local   # mutations need the writer token, not the reader one
+# Use the admin or writer identity from the shared setup.
 omnigraph mutate add_signal --graph spike --params '{"slug":"sig-eu-sovereign-cloud","name":"EU mandates sovereign cloud for public-sector AI","brief":"Public-sector AI workloads must run on EU-controlled infrastructure.","stagingTimestamp":"2026-09-14T00:00:00Z","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
 omnigraph mutate link_signal_forms_pattern --graph spike --params '{"signal":"sig-eu-sovereign-cloud","pattern":"pat-sovereign-ai"}'
 ```
