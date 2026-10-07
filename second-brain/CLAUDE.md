@@ -23,18 +23,10 @@ cluster commands, CLI — see the **omnigraph** skill and
 
 ## Setup
 
-The rules — `import` before the first `apply`, `load` addressing, `/healthz`, how aliases and
-stored queries behave — are in `../CLAUDE.md`. This is that sequence with second-brain's names filled in:
-
-```bash
-cd second-brain
-omnigraph cluster import --config .
-omnigraph cluster plan   --config .
-omnigraph cluster apply  --config . --as <you>     # creates graphs/brain.omni
-omnigraph load --data seed.jsonl --mode overwrite graphs/brain.omni
-omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated &
-curl -s http://127.0.0.1:8080/healthz
-```
+Use the shared [0.13 local setup](../README.md#local-setup) with cookbook
+`second-brain` and graph `brain`. It owns authentication, the bootstrap writer-lock
+handoff, readiness, and served seed loading. Apply later configuration edits with
+the [live update workflow](../README.md#live-updates).
 
 Graph id `brain`. Stored queries and their parameters: `omnigraph queries list --cluster . --graph brain`.
 Alias args bind by name to `$params`: `omnigraph alias person-tasks-i-owe per-theo` is `omnigraph query person_tasks_i_owe --graph brain --params '{"slug":"per-theo"}'`.
@@ -73,23 +65,18 @@ With `defaults.server` / `default_graph` from the operator config, `--graph` can
 - **`Task.waiting_on` is intentionally absent.** "Who I'm waiting on" is expressed by `status=waiting` + `TaskForPerson`. Don't reintroduce a string slug-shaped property.
 - **Habit completions are a `[Date]` array** on the Habit node. No `HabitCompletion` node.
 - **Email and Conversation collapse into `Artifact`** with `thread_id` property and `InReplyTo` edges. No separate types.
-- **`Person.cadence_days`** is a single number — desired contact frequency *from me to them*. the engine (since 0.10) can project a bound edge property (`$me $k:knows $person`, then `$k.context`), but cadence remains on `Person` as a single-user shortcut. Re-evaluate if the cookbook ever serves more than one user.
+- **`Person.cadence_days`** is a single number — desired contact frequency *from me to them*. The engine can project a bound edge property (`$me $k:knows $person`, then `$k.context`), but cadence remains on `Person` as a single-user shortcut. Re-evaluate if the cookbook ever serves more than one user.
 - **Edges follow `VerbTargetType` naming** (`NoteAboutPerson`, `TaskForProject`, `HabitFromPrinciple`).
 - **Embeddings only on `Chunk`**: `Vector(3072) @embed("text")`. `Chunk` is immutable (no `updatedAt`).
 - **Health / finance / hobby tracking lives as `Area` + `Note`** — not new node types. Specialty cookbooks can extend.
 
-## Conventions enforced by load discipline (not the schema)
+## Data conventions
 
-`@unique(src, dst)` on an edge **is** enforced as a
-true composite key — pair-uniqueness now works (it was previously degraded into two
-independent per-column checks). Enforcement covers single-batch `load` / `insert` / `update`
-and branch-merge, but **not** a duplicate written in a *separate* operation against
-already-committed rows on the same branch (intra-batch only at the direct-write path). The
-edges here don't declare `@unique(src, dst)` yet, so the conventions below still live in the
-loader and reviewer — add the constraint if you want the schema to enforce dedupe within a load:
+These edges do not declare pair-uniqueness constraints, so loaders and reviewers
+must preserve the following conventions:
 
-- **`Knows` and `RelatedToPerson` are stored bidirectionally.** If `A knows B`, also load `B knows A`. For `RelatedToPerson`, invert the `relation`: `parent ⇄ child`, `grandparent ⇄ grandchild`. Symmetric relations (`spouse`, `sibling`, `in-law`, `ex`, `partner`) get the same enum on both sides. Single-direction storage made stale-friend / family-tree queries quietly wrong. (Unaffected by the `@unique` fix — this is about storing the *inverse* edge, not deduping pairs; `@unique` won't auto-create it.)
-- **No duplicate `(src, dst)` pairs per edge type.** Now schema-enforceable by declaring `@unique(src, dst)` on the edge (catches dupes within a load/merge); still dedupe across separate write operations, which intake doesn't cross-check.
+- **`Knows` and `RelatedToPerson` are stored bidirectionally.** If `A knows B`, also load `B knows A`. For `RelatedToPerson`, invert the `relation`: `parent ⇄ child`, `grandparent ⇄ grandchild`. Symmetric relations (`spouse`, `sibling`, `in-law`, `ex`, `partner`) get the same enum on both sides. Single-direction storage made stale-friend / family-tree queries quietly wrong.
+- **No duplicate `(src, dst)` pairs per edge type.** Check existing edges before inserting a new relationship.
 - **`AttendedBy` vs. `EventForPerson` are not redundant**:
   - `AttendedBy` = the person was physically present (any role)
   - `EventForPerson` = the event is *about* them — honoree, subject, milestone

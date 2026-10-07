@@ -60,8 +60,14 @@ Ranking functions lead the `order` clause. `nearest` and `rrf` require `limit N`
 BM25 alone does not, though a limit keeps output bounded. `nearest` sorts by
 ascending distance and `bm25` by descending relevance; secondary keys follow
 the score, then entity IDs break ties. This order also holds through traversals.
-A bounded BM25 scan with no secondary keys may select equal-score rows at its
-cutoff by scan order before the final sort.
+A `bm25` ordering reads every text match before the final sort, so equal-score
+rows at a `limit` cutoff are chosen by the secondary keys and then entity ID,
+not by scan order.
+
+Omit a direction on a search key: `bm25(...)` always ranks by descending score
+(`asc`/`desc` are ignored), and a direction after `nearest(...)` is a parse
+error. Only one search function may lead `order`; one in a later position is
+refused at type checking (`T42`), so `lint` reports it.
 
 ### Vector similarity
 
@@ -73,6 +79,10 @@ query nearest_chunks($q: Vector(1536)) {
     limit 10
 }
 ```
+
+The query value may also be a `String` (`$q: String`): the configured embedding
+provider embeds it at query time. When `@embed(..., model=...)` records a
+model, the resolved provider model must match it exactly.
 
 ### BM25 text ranking
 
@@ -104,7 +114,7 @@ Repeat the leading order expression to return its score:
 query scored_titles($q: String) {
     match { $d: Doc }
     return { $d.slug, bm25($d.title, $q) as score }
-    order { bm25($d.title, $q) desc }
+    order { bm25($d.title, $q) }
     limit 10
 }
 ```
@@ -114,7 +124,12 @@ Without an alias, the result column is `d._score` or `d._distance`. A different
 expression or one without the matching leading order key is refused (`T33`).
 Ranks under aggregates (`T32`), `rrf(...)` (`T37`), and full-text predicates
 (`T35`) cannot be projected; an expression used only as an `rrf` arm is not a
-projectable score either. Aggregated queries cannot use search ordering (`T9`).
+projectable score either.
+
+A search ordering may accompany aggregates, but it only selects the rows that
+are aggregated: the top-`limit` window under `nearest`, every text match under
+`bm25`. Groups are not score-ranked, and projecting a score beside an aggregate
+is refused (`T9`).
 
 ### Text filter (not ranking — no `limit` required)
 
@@ -134,8 +149,9 @@ Filter with graph traversal before invoking vector or text ranking. Ranking over
 ```gq
 query related_chunks($artifact_slug: String, $q: Vector(1536)) {
     match {
-        $a: InformationArtifact { slug: $artifact_slug }
+        $c: Chunk                                 // declare the ranked binding first
         $c partOfArtifact $a                      // scope: only this artifact's chunks
+        $a.slug = $artifact_slug
     }
     return { $c.text }
     order { nearest($c.embedding, $q) }           // rank: vector similarity within scope
@@ -145,12 +161,35 @@ query related_chunks($artifact_slug: String, $q: Vector(1536)) {
 
 Don't rank over the entire chunk set if you know a traversal can narrow it first.
 
+Declare the ranked binding first and reach the scoping node through the
+traversal. A `nearest` or `bm25` order, alone or as an `rrf` arm, on a variable
+that a traversal introduces (`$a: InformationArtifact { … }` first, then
+`$c partOfArtifact $a`, ranked on `$c`) is refused when the query runs:
+"a traversal destination, which engine v2 does not support".
+
 A standalone `nearest` ordering widens an underfilled candidate set, finally
 using an exact scan if needed to fill the limit with available survivors.
 An `rrf` vector arm retains a top-k window: an entity outside that window has
 no vector contribution, so filtering through a traversal can shorten or change
 the fused answer. Full-text arms in `rrf` remain unbounded over their eligible
 matches.
+
+An indexed `nearest` scan reads a bounded number of partitions per index delta
+(`OMNIGRAPH_ANN_NPROBES`, default 20; `0` removes the cap) and widens only to
+fill the limit, so a filled limit does not make the ANN ranking exact. A scoped
+`nearest` whose survivors are always fewer than `limit` pays an exact
+whole-type pass on every execution. `OMNIGRAPH_RRF_GATE_RATIO` and
+`OMNIGRAPH_RRF_GATE_MAX_IDS` tune the prefilter that a selective traversal
+pushes into a `nearest` or `rrf` scan; leave them unset in normal operation.
+
+`OMNIGRAPH_ANN_NPROBES` and `OMNIGRAPH_RRF_PLAN` are not free tunables. Each is
+the process default of a session setting (`ann_nprobes`, `request` scope;
+`rrf_plan`, `process` scope): the server reads it once at startup and the CLI once per run, a
+value outside the setting's row refuses that start instead of running a
+default, and `show all;` reports the setting with its value and source. An
+ad-hoc query may set `ann_nprobes` for itself (`set ann_nprobes = 40;` before
+the declaration, `--set ann_nprobes=40`, or the `settings` field of
+`POST /query`); `rrf_plan` is refused in a served request.
 
 ## Model / Config
 
@@ -174,9 +213,12 @@ are `OMNIGRAPH_EMBED_DEADLINE_MS`, `OMNIGRAPH_EMBED_TIMEOUT_MS`,
 
 For a served graph, declare a named provider under `providers.embedding` in
 `cluster.yaml` and bind it with `graphs.<id>.embedding_provider`. API keys must
-be `${ENV_VAR}` references and are resolved by the server at startup. Generated
-vectors are finite, nonzero, and L2-normalized.
+be `${ENV_VAR}` references. The server resolves them when building a provider
+at startup or live deployment; source validation does not expose secret values.
+Update definitions/bindings through `cluster apply --server …`; changing the
+provider never regenerates stored vectors. Generated vectors are finite,
+nonzero, and L2-normalized.
 
-After upgrading a Lance 9/10 store, full-text queries can require
-`rebuild-full-text-indexes` on each live branch. Ordinary reads and vector
-search do not depend on that rebuild; see [`commands.md`](commands.md#rebuild-full-text-indexes--explicit-analyzer-upgrade).
+For `FullTextIndexRebuildRequired`, rebuild the affected live branches explicitly;
+ordinary reads and vector search do not depend on it. See
+[`commands.md`](commands.md#rebuild-full-text-indexes--explicit-analyzer-upgrade).

@@ -5,8 +5,6 @@
 - `mutate` — single edits
 - `load` — bulk JSONL (`--mode`, `--from`)
 - Branches: review before merge
-- Destructive ops go through a branch
-- Branch commands
 - Inspecting state after changes
 
 How to modify data safely in Omnigraph.
@@ -20,7 +18,7 @@ edits.
 | Task | Command | Why |
 |------|---------|-----|
 | Add/update a single entity | `mutate` with a named mutation | typechecked, parameterized, auditable |
-| Bulk upsert by logical entity ID | `load --mode merge` | preserves rows not in the file; keyed node IDs derive from `@key` |
+| Bulk upsert by logical entity ID | `load --mode merge` | preserves rows not in the file; keyed node and edge IDs derive from `@key` |
 | Additive-only bulk | `load --mode append` | fails on key collision |
 | Replace complete batches by type | `load --mode overwrite` | **destructive for represented types**; absent types remain |
 | Bulk load onto a fresh review branch | `load --from main --mode merge --branch <name>` | forks `<name>` from `main`, loads onto it, leaves it for review |
@@ -31,7 +29,12 @@ edits.
 > **Per-load bounds.** One keyed load (`append`/`merge`)
 > stages at most **8,192 entities and 32 MiB of Arrow memory per touched type**; a larger
 > batch is refused up front (HTTP 413, typed `resource_limit`) with no durable
-> effect — split it into chunks, each an atomic graph commit. The strict NDJSON
+> effect — split it into chunks, each an atomic graph commit. Two further
+> 32 MiB limits apply to the whole keyed load, summed over every touched type:
+> the staged Arrow memory and the parsed-payload estimate. Separately, the ids
+> an `overwrite` or a delete removes share one 32 MiB limit per operation (each
+> id counts its UTF-8 length plus 24 bytes); an `overwrite` that removes more
+> ids than that is refused and cannot be split. The strict NDJSON
 > input path also limits its request body and decoded Arrow memory to 32 MiB,
 > including `overwrite`; ordinary streamed overwrite can exceed the keyed
 > envelope. Check the selected transport's limits before splitting an import.
@@ -43,7 +46,7 @@ edits.
 > (writing storage directly) *and* an `omnigraph-server` endpoint (the
 > server orchestrates the write and publishes one atomic commit). See
 > [`references/remote-ops.md`](remote-ops.md) for remote-specific concerns
-> (504 handling, write-verification ritual).
+> (lost responses and safe retry decisions).
 
 ## `mutate` — Single Edits
 
@@ -75,20 +78,30 @@ JSONL format:
 
 - Nodes: `{"type":"<NodeType>","id":"<optional-id>","data":{...props...}}`.
   A keyed node derives identity from its complete typed key tuple; omit top-level
-  `id` in hand-authored keyed input. An unkeyed node gets a generated id unless
+  `id` in hand-authored keyed input (a supplied `id` that differs from the
+  derived value is refused). An unkeyed node gets a generated id unless
   top-level `id` supplies one.
-- Edges: `{"edge":"<EdgeType>","from":"<src_id>","to":"<dst_id>","data":{...edge_props...}}`.
-  Edges also use generated or top-level supplied `id` values.
+- Edges: `{"edge":"<EdgeType>","id":"<optional-id>","from":"<src_id>","to":"<dst_id>","data":{...edge_props...}}`.
+  An edge type declaring `@key(@src, @dst, …)` derives its id as a JSON array
+  string such as `["alice","bob"]`; omit `id` or supply exactly that value. An
+  unkeyed edge gets a generated id unless top-level `id` supplies one.
 
-`data` holds user properties. On new v9 graphs, `data.id` is a declared user
-property and `data.__id` is refused. v8 also accepts legacy `data.id` as identity
-when top-level `id` is absent; supplying both identity placements is refused.
+`data` holds user properties. On new graphs, `data.id` is a declared user
+property and `data.__id` is refused. A legacy graph (physical `id`/`src`/`dst`)
+also accepts `data.id` as identity when top-level `id` is absent; supplying
+both identity placements is refused.
 Exports put entity `id` at the top level on both vintages. Before loading a
 predecessor export into a new graph, relocate its identity as described in
 [migration guidance](migrations.md).
 
 `Date` accepts integer day counts or calendar-date strings; a datetime string is
-refused. `DateTime` accepts integer millisecond counts or datetime strings.
+refused. `DateTime` accepts integer millisecond counts or datetime strings; a
+string with a non-zero digit past the third fractional digit (`.123456`) is
+refused, here and in `mutate --params`, and trailing zeros (`.123000`) are
+accepted. Whole-number floats (`19723.0`), booleans, objects, and counts outside the
+renderable calendar range are refused; `mutate --params` takes date strings
+only. Rows stored with out-of-range counts by an earlier release fail reads and
+exports of that column until corrected.
 Query/export JSON uses date strings, renders `DateTime` without a trailing `Z`,
 and omits null-valued property keys; change images keep explicit nulls.
 
@@ -109,8 +122,11 @@ one-shot review-branch flow below). Without `--from`, the target `--branch`
   The loader validates constraints and referential integrity before publication.
   Use a review branch for an established graph.
 - **`merge`** (upsert) — inserts or updates each row by logical entity `id`
-  (derived from the typed `@key` tuple for keyed nodes). Rows not in the file
-  are preserved. The safe default for incremental bulk updates.
+  (derived from the typed `@key` tuple for keyed nodes and keyed edges). Rows
+  not in the file are preserved. The safe default for incremental bulk updates.
+  An unkeyed edge without a supplied `id` never matches an existing row, so
+  re-running the same merge file duplicates it; declare `@key(@src, @dst)` when
+  creating the edge type if repeated loads must converge.
 - **`append`** (strict insert) — fails on entity-ID collision. Use when you're
   certain every row is new.
 
@@ -127,12 +143,6 @@ branch operation had no effect. See [branch outcome details](changes.md#branch-s
 `@embed` does not populate vectors during `merge` or `overwrite`. Supply
 vectors in the JSONL, or run the offline `omnigraph embed` file transformation
 and load its output. See [`search.md`](search.md).
-
-### `overwrite` is scoped but destructive
-
-It removes existing entities of every type represented in the batch. Use it
-for a complete type replacement, preferably on a review branch. Do not assume
-that it clears unrelated types or the whole branch.
 
 ## Branches: Review Before Merge
 
@@ -171,37 +181,25 @@ happens after a successful merge publication.
 
 Deleting a parent branch is supported while descendants remain. Logical deletion
 retains the native history descendants need; only explicit `cleanup` reclaims
-unneeded table forks and retired refs. `optimize` does not perform that collection.
+unretained table versions and retired refs. `optimize` does not perform that
+collection.
+
+### Merge conflicts
+
+A conflicting merge publishes nothing and returns typed conflicts
+(`divergent_insert`, `divergent_update`, `delete_vs_update`, `orphan_edge`,
+`unique_violation`, `cardinality_violation`, `value_constraint_violation`;
+HTTP `409`). The same edge inserted on both branches depends on its identity:
+unkeyed edges are both kept; `@unique(@src, @dst)` reports `unique_violation`;
+`@key(@src, @dst)` converges identical inserts to one row and reports
+`divergent_insert` (with the derived id) when non-key properties differ —
+re-insert the agreed values on one branch, then merge again. A branch both
+sides merged earlier stays their merge base after it is deleted, and `cleanup`
+keeps the history that base needs.
 
 ### Schema apply blocks non-main branches
 
-`omnigraph schema apply` rejects the request if any non-main branches exist. Merge or delete them first. This is enforced — it's not just a guideline.
-
-## Destructive Ops Go Through a Branch
-
-For any bulk load that could disrupt downstream queries (overwriting a
-heavily-referenced node type, removing edges en masse, or reseeding a core
-type), use a feature branch:
-
-```bash
-omnigraph load --data risky.jsonl --branch recovery-2026-04-14 \
-  --from main --mode overwrite $REPO
-# inspect, diff, verify reads
-omnigraph branch merge recovery-2026-04-14 --into main --delete-branch --store $REPO
-```
-
-## Branch Commands (quick reference)
-
-```bash
-omnigraph branch create --from main <branch-name> --store $REPO
-omnigraph branch list --store $REPO
-omnigraph branch merge <branch-name> --into main --delete-branch --store $REPO
-omnigraph branch delete <branch-name> --store $REPO
-```
-
-All support `--json` for automation-friendly output. Address the graph with a
-positional `file://`/`s3://`/preview `az://` URI (shown), `--store <uri>`, or
-`--server <name>`.
+`omnigraph schema apply` rejects the request if any non-main branches exist. Delete them first (`branch merge … --delete-branch` or `branch delete`); a merge alone leaves the source branch live. This is enforced — it's not just a guideline.
 
 ## Inspecting State After Changes
 
@@ -214,7 +212,6 @@ omnigraph commit list $REPO --branch main --json        # history
 `export` is the right tool for large-snapshot inspection — don't try to page through the whole graph with read queries.
 
 > **Cluster note:** everything in this file applies unchanged in cluster
-> deployments — the control plane owns schema/queries/policies; rows, loads,
-> and branches stay on the data plane against the derived graph roots
-> (`<dir>/graphs/<id>.omni`, or `<storage>/graphs/<id>.omni` for an S3-backed
-> cluster).
+> deployments. Use `--server <name|url> --graph <id>` for rows, loads and
+> branches while the server owns writer admission; live configuration goes
+> through cluster apply.

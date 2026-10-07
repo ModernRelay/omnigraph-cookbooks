@@ -26,8 +26,9 @@ the exact `graph_commit_id` and metadata published by that attempt. A successful
 mutation that matches nothing returns `"commit": null`.
 
 GQ branch statements are different: inspect `outcome`. Creation/deletion return
-null commits despite their branch effects, and a merge's optional commit is a
-later target-head lookup, not an exact receipt. See [branch statements](changes.md#branch-statements).
+null commits despite their branch effects. A merge returns the exact commit it
+published, or `"commit": null` when the target was already up to date. See
+[branch statements](changes.md#branch-statements).
 
 Persist the receipt with downstream state when a workflow needs an audit or
 resume position. Do not infer the published commit by listing history after the
@@ -54,7 +55,8 @@ omnigraph export --server production --graph knowledge \
 For `load --from <base> --branch <review>`, inspect the review branch rather
 than assuming branch creation means the load landed. Strict inserts of unkeyed
 nodes and edges can duplicate on a blind retry. Mutation `insert` and
-`load --mode merge` upsert keyed nodes by their derived logical IDs;
+`load --mode merge` upsert keyed nodes and keyed edges (`@key(@src, @dst, …)`)
+by their derived logical IDs;
 `load --mode append` remains strict and reports an ID collision. Verification
 is still safer when the requested value matters.
 
@@ -70,13 +72,21 @@ omnigraph mutate update_person --server production --graph knowledge \
 ```
 
 Any intervening branch commit makes the condition fail without effects. The CLI
-exits `4`; HTTP returns `412` with the expected and actual positions. Re-read
-and decide again. Fetching a head id after the read does not close the race.
+exits `4`; HTTP returns `412` with `precondition_failure: {expected, actual?}`.
+Re-read and decide again. Fetching a head id after the read does not close the
+race.
+
+Over HTTP, beside the `Omnigraph-Http-Api: 0.13` header every graph request
+needs, send the raw id in the `Omnigraph-If-Graph-Commit` header to
+`POST /graphs/{id}/mutate/if-graph-commit` or
+`POST /graphs/{id}/queries/{name}/if-graph-commit`. The plain routes reject that
+header; never fall back to the unconditional route after a refusal.
 
 ## Typed failures and recovery
 
 - `429 Too Many Requests`: the write did not start. Honor `Retry-After`, then
-  retry.
+  retry. The CLI marks this case with exit `75` and a `command_outcome` whose
+  `action` is `retry`, only when no earlier step of the command took effect.
 - Structured `read_set_conflict` means an input changed before publication.
   Refresh and reconsider the operation, including schema/table identity changes;
   an unchanged retry need not succeed. Commit conflicts use generic `conflict`,
@@ -84,16 +94,19 @@ and decide again. Fetching a head id after the read does not close the race.
 - `key_conflict`: an append or strict insert found an existing id. Decide
   whether that entity is the intended one; do not silently turn the operation
   into an upsert.
-- `recovery_required`: durable work needs reconciliation; effects may be absent,
-  partial, or already published. Write entry can heal some proven cases even on
-  a running server, but an unresolved intent remains a refusal. Follow its
-  recovery action, using operator recovery/reopen when needed, and reconcile the
-  original outcome before replaying. A failed branch merge now cleans up work it
-  can prove safe; cancellation and ambiguous ownership still require recovery.
+- `recovery_required` (HTTP `503` with `recovery_required.operation_id`):
+  follow the named operation's remedy. This is a completion requirement, not
+  proof that the attempted write had no effect. Do not replay it or clear
+  storage/locks to bypass the refusal.
+- `graph_unavailable` (HTTP `503`): inspect graph availability and the active
+  deployment. A loading, transitioning or blocked graph does not authorize
+  replay of an earlier uncertain write.
 
 The effect-free conflict details are distinct from a lost response or a recovery
 requirement. Neither HTTP `409`/`503` nor the CLI's generic failure exit `1` is
-a universal retry signal; conditional precondition failure has its own exit `4`.
+a universal retry signal; conditional precondition failure has its own exit `4`
+on data-plane commands (managed `cluster plan`/`apply` use exit `4` for
+recovery required instead).
 
 ## Read large output safely
 

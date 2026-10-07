@@ -1,241 +1,118 @@
 ---
 name: omnigraph-intel-bootstrap
-description: 'Bootstrap a new Omnigraph-based SPIKE industry intelligence graph from scratch. Use this skill whenever a user wants to set up a new SPIKE graph — either with the existing AI industry demo data or for a new domain (biotech, fintech, crypto, geopolitics, macroeconomics, SaaS, climate tech, etc.). The flow presents a demo-vs-custom decision, then for custom setups asks about domain scope, actors, cadence, and sources, adapts schema and enums for the target domain, runs initial web research to generate real seed content, and converges the cluster (apply creates the graph) + loads seed data. Apply aggressively when the user says any of: set up Omnigraph, bootstrap a new graph, create a new SPIKE cookbook, I want to track X industry, initialize intel for Y, new graph for Z domain, start a new context graph, or similar phrasing. This skill takes a user from zero to a populated, queryable graph.'
+description: Bootstrap a SPIKE industry intelligence graph with the AI industry demo or a custom domain. Use for initial domain/source elicitation, schema adaptation, researched seed data, and cookbook setup; use the omnigraph skill for routine graph operations.
 license: MIT (see LICENSE at repo root)
-compatibility: Validated with OmniGraph CLI and server v0.11.0 (graph format v9). Docker is needed only for the optional RustFS/S3 path.
 metadata:
   author: ModernRelay
-  version: "0.5.0"
+  version: "0.6.0"
   repository: https://github.com/ModernRelay/omnigraph-cookbooks
 ---
 
 # SPIKE Cookbook Bootstrap
 
-This skill takes a user from zero to a populated, queryable SPIKE graph. Two paths:
+Create a populated, queryable intelligence graph. Use the existing AI industry
+**demo**, or adapt it to a **custom domain**. Follow the user's stated choice;
+ask only when it is unclear.
 
-- **Demo** — use the existing `industry-intel` cookbook (AI/ML signals as of early 2026). Good for demos, exploration, and understanding what SPIKE looks like populated.
-- **Custom** — set up a new domain (biotech, crypto, fintech, geopolitics, etc.). Takes ~30–60 minutes including initial research and user review.
+## Start with the environment
 
-**Prerequisites:**
+Locate or clone `ModernRelay/omnigraph-cookbooks`, then read its root README and
+the selected cookbook's guidance. Check `omnigraph version`; these instructions
+target CLI and server 0.13. Use matching release binaries. The filesystem
+setup needs no object store or Docker. Existing data follows
+the repository's [upgrade procedure][upgrading], never an automatic reset.
 
-1. OmniGraph CLI and server v0.11.0.
+The root README owns [local setup][local-setup]: initial apply, exact writer-lock
+handoff, server identities, readiness, login, and seed loading. Read and follow
+that sequence. A filesystem deployment needs no storage credentials; the server
+still uses bearer identities for policy and live configuration management. Pick
+a free port if another server is running; do not stop an unrelated process.
 
-2. The `omnigraph-cookbooks` repo cloned somewhere on disk. Ask the user where (or default to the current directory):
-   ```bash
-   git clone https://github.com/ModernRelay/omnigraph-cookbooks.git
-   ```
-   Record the absolute path to the clone — the **Demo** path runs from `<clone>/industry-intel/`, the **Custom** path runs from `<clone>/` (repo root) so it can copy `industry-intel/` as a template.
+## Demo
 
-## Step 0: Pre-flight checks
+Use `industry-intel/` unchanged. See [demo setup](references/demo-setup.md) for
+verification queries. Its seed is a fixed example dataset, not a current market
+report. Report the loaded counts and query results, then hand off to the
+`omnigraph` skill for everyday operations.
 
-Before either path, run these checks (and act on the results):
+## Custom domain
 
-```bash
-# Ensure the exact supported CLI is on PATH
-command -v omnigraph >/dev/null || { echo "omnigraph not found — install via homebrew or the install script"; exit 1; }
+### 1. Define the scope and sources
 
-# Require v0.11.0; upgrade CLI and server together.
-test "$(omnigraph --version)" = "omnigraph 0.11.0" || { echo "this skill requires omnigraph 0.11.0"; exit 1; }
-omnigraph version
-```
+Collect the domain, geographic scope, project slug, actors, time horizon,
+update cadence, and intended consumer. Reuse answers already given. The
+[elicitation guide](references/custom-domain.md) supplies prompts and source
+categories; [domain examples](references/domain-examples.md) offer starting
+points when the user wants defaults.
 
-The default (cluster-first) path needs **no RustFS, no credentials, no
-.env.omni** — graphs live at local derived roots created by `cluster apply`.
-RustFS checks and `.env.omni` only matter for the optional S3 alternative (see
-the cookbook READMEs). A 0.10 graph cannot be opened by 0.11 — rebuild it from
-its export or its seed (engine upgrade guide) before this skill operates it.
+Record the scope and sources in `<slug>/setup-notes.md`. Resolve missing decisions
+that would materially change the schema or research. A cadence preference does
+not itself authorize scheduling an automation.
 
-**If `:8080` returns `200` from a server pointed at a different repo** (the bootstrap script auto-starts one), stop it before starting yours, or rebind to a free port via `omnigraph-server --bind 127.0.0.1:8090`.
+### 2. Adapt the template
 
-For the optional local S3 path only, follow the engine deployment guide and
-source all seven `AWS_*` variables from the gitignored `.env.omni`; the default
-filesystem path ignores that file.
+Create a new cookbook directory. Copy only declarative files from
+`industry-intel/`: `schema.pg`, `queries/`, `cluster.yaml`, `policies/`, and
+`omnigraph-config.example.yaml`. Do not copy local graph roots, ledgers,
+credentials, or runtime state. Write the new cookbook's README and guidance for
+its domain instead of carrying over the demo's counts and examples.
 
-## Step 1: Ask the user which path
+Follow [schema adaptation](references/schema-adaptation.md). Keep the SPIKE
+analytical relationships; adapt domain enums, actor classifications, and
+Element properties. Update the graph id everywhere it is referenced:
+`graphs`, graph-policy `applies_to`, operator `default_graph`, and aliases.
+Keep the cluster policy's `applies_to: [cluster]` binding.
 
-Ask the user (use whatever structured-question primitive your runtime offers, or a plain prompt):
-
-> Do you want to:
-> - **Demo** — set up the AI industry intel demo (5 patterns, 15 signals, ~110 nodes, ready to query in ~30 seconds)
-> - **Custom** — set up a graph for a new domain (I'll ask about your domain + sources, adapt the schema, research real seed data, and wire it up)
-
-Branch based on the answer.
-
-## Path A: Demo Setup
-
-Quick — clone, converge, load. The cookbook ships a `cluster.yaml` declaring
-the graph, schema, and all stored queries; `cluster apply` creates the graph.
-
-See [`references/demo-setup.md`](references/demo-setup.md) for the full command list. Summary:
+Lint every query file against the adapted schema, then validate the bundle:
 
 ```bash
-cd <path-to-clone>/omnigraph-cookbooks/industry-intel
-# First merge omnigraph-config.example.yaml's servers/defaults/aliases into
-# ~/.omnigraph/config.yaml; login stores the token separately.
-omnigraph cluster import --config .
-omnigraph cluster apply  --config . --as <you>     # creates graphs/spike.omni + publishes queries
-omnigraph load --data seed.jsonl --mode overwrite graphs/spike.omni
-# Serve with the cookbook policy, then authenticate the CLI:
-OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-admin":"local-admin-token","act-writer":"local-writer-token","act-reader":"local-reader-token"}' \
-  omnigraph-server --cluster . --bind 127.0.0.1:8080 &
-printf '%s' 'local-reader-token' | omnigraph login local
-omnigraph alias patterns disruption    # CLI alias sugar
+for query_file in queries/*.gq; do
+  omnigraph lint --schema schema.pg --query "$query_file" || exit 1
+done
+omnigraph cluster validate --config .
 ```
 
-After this, point the user at the `omnigraph` skill (`npx skills add ModernRelay/omnigraph@omnigraph`) for day-to-day operations.
+### 3. Research and produce the seed
 
-## Path B: Custom Domain Setup
+Follow [research](references/research.md): gather dated sources, identify
+signals, group supported patterns, and connect actors and provenance. Keep
+observed facts distinct from analytical insights. Never invent dates or URLs.
 
-Six phases, in order. Don't skip ahead — each phase's output feeds the next.
+Write `seed.md` for review, then produce `seed.jsonl` from the agreed content.
+Supply every required property, deduplicate node keys and constrained edges,
+and validate references. `Chunk.embedding` is required: generate real vectors
+with the offline `omnigraph embed` pipeline before loading chunks. Declaring
+`@embed` or a server provider does not generate vectors on load or mutation.
+An initial seed may omit Chunk entirely, as the demo does.
 
-### Phase 1 — Domain identification
+### 4. Serve and verify
 
-Ask the user which domain they want to track. Present these as options:
+Follow [local setup][local-setup] with the new directory and graph id. Query the
+running graph to verify patterns, signals, and at least one traversal. Merge
+only the relevant named-server and alias entries into the user's operator
+configuration; preserve unrelated settings and keep credentials separate.
 
-- Biotech
-- Fintech
-- Manufacturing
-- Crypto / web3
-- Geopolitics
-- Other (user specifies)
+Report the cookbook location, loaded counts, server/graph target, and a working
+query. Keep exact write receipts. After a lost or timed-out response, establish
+the outcome before replaying; for an accepted deployment, observe its original
+deployment ID.
 
-Then narrow:
-- Scope: "all of X" or "only Y within X"?
-- Global or regional?
+## Later changes
 
-Capture a **project slug** for the new cookbook: `bio-intel`, `crypto-intel`, `geo-intel`, etc. This becomes the folder name and the repo prefix (`s3://omnigraph-local/repos/<slug>`).
+Use [live updates][live-updates]: edit the declared schema, queries or policies,
+then `cluster plan --server …` and `cluster apply --server …`. Successful served
+apply activates the changes without restarting. Do not write the same cluster
+directly while its server owns the writer lock.
 
-### Phase 2 — Key questions
+Schema changes require `main` to be the only live branch. Supported renames use
+`@rename_from`; enum widening and nullable property additions are supported,
+but arbitrary type/key changes and nullable-to-required tightening are not.
+Plan before apply. Removing a graph from `cluster.yaml` permanently deletes its
+managed storage and retained history; it is not a way to pause serving.
 
-Ask each in turn (multi-select where noted). See [`references/custom-domain.md`](references/custom-domain.md) for full phrasing and option lists.
+Use the repository's vendored `omnigraph` skill for command details, bulk data
+review, embedding preparation, and uncertain write outcomes.
 
-- **Actors to track** (multi-select): companies, labs, regulators, individuals, protocols, investors
-- **Time horizon**: recent only (3mo), medium (12mo), or full historical
-- **Update cadence**: daily, weekly, monthly, ad-hoc
-- **Primary consumer**: human analysts, internal dashboard, AI agents, mixed
-
-### Phase 3 — Sources (most important)
-
-Sources are the lifeblood of a SPIKE graph. The quality of the output is bounded by the quality of the sources. Spend time here.
-
-Ask in order (see [`references/custom-domain.md`](references/custom-domain.md) for exact wording):
-
-1. **Primary reading list** — newsletters, blogs, publications the user already reads (free-form, 5–15 entries)
-2. **Priority analysts / experts** — 3–10 people whose takes should be first-class entities
-3. **Regulatory / authoritative sources** — governmental, self-regulatory (FDA, SEC, IMF, etc.)
-4. **Academic / primary sources** — journals, preprint servers, research aggregators
-5. **Social / community** — X accounts, podcasts, forums
-
-### Phase 4 — Confirm summary
-
-Before making changes, echo what you captured back to the user:
-
-- Domain + scope + project slug
-- Actor types to track
-- Horizon + cadence + consumer
-- Source list (grouped by category)
-
-Write this to `<slug>/setup-notes.md` in the new cookbook folder. Confirming now is cheap; rework later isn't.
-
-### Phase 5 — Adapt the schema
-
-From the **repo root** (`<clone>/`), copy `industry-intel/` as a template into `<slug>/`:
-
-```bash
-cd <clone>          # repo root, parent of industry-intel/
-cp -r industry-intel <slug>
-rm <slug>/seed.jsonl    # regenerated in Phase 6
-```
-
-Update in `<slug>/schema.pg`:
-
-- `Element.kind` enum — replace with domain-appropriate kinds
-- `Signal.domain` / `Element.domain` enum — replace with domain slices
-- `Company.type` enum — match the ecosystem
-- `SourceEntity.type` enum — match how sources publish
-- `ArtifactType` enum — include domain-relevant formats
-- Kind-specific Element properties (biotech wants `phase`, `moa`; crypto wants `chain`, `token_symbol`; etc.)
-
-Update in `<slug>/cluster.yaml`:
-
-- `metadata.name` → domain-appropriate name
-- the `graphs:` entry id → `<slug>` (its derived root becomes `graphs/<slug>.omni`)
-
-Update `<slug>/omnigraph-config.example.yaml` too: change `default_graph` and
-every alias `graph:` from `spike` to `<slug>`, and adjust aliases if query names
-changed. Before verification, merge its `servers`, `defaults`, and `aliases`
-into `~/.omnigraph/config.yaml`.
-
-**Pattern.kind** (`challenge`, `disruption`, `dynamic`) is usually domain-agnostic. Don't change it unless the user has strong reasons.
-
-See [`references/schema-adaptation.md`](references/schema-adaptation.md) for the full keep-vs-change rules. See [`references/domain-examples.md`](references/domain-examples.md) for worked examples across biotech, crypto, fintech, geopolitics.
-
-After editing:
-
-```bash
-cd <slug>
-omnigraph lint --schema schema.pg --query queries/signals.gq
-```
-
-Fix any lint errors before moving on.
-
-### Phase 6 — Research, seed, init, load
-
-Use web research to build real seed content. **Do not fabricate signals or dates.** See [`references/research.md`](references/research.md) for the workflow. High-level:
-
-1. For each source from Phase 3, pull recent items (WebFetch / WebSearch)
-2. Extract candidate signals (dated, URL-backed, specific)
-3. Cluster into 3–5 patterns (recurring themes)
-4. For each pattern, identify the Elements, Companies, Experts mentioned
-5. Write `<slug>/seed.md` (tabular, human-readable) — **present this to the user for review before generating JSONL**
-6. Generate `<slug>/seed.jsonl` from the confirmed seed.md. **Every `slug`
-   must appear exactly once in the file** — since omnigraph 0.8.0 a `@key`
-   repeated within one load batch fails the whole load (nothing is
-   partially applied); dedupe and re-run if it does. Duplicate edge rows
-   on `@unique(src)` or `@unique(src,dst)` edges fail the same way.
-7. From `<clone>/<slug>/`, converge the cluster, load, then start the server
-   (the `cluster.yaml` — copied from industry-intel and re-slugged — declares
-   the graph, schema, and queries):
-
-```bash
-cd <clone>/<slug>
-omnigraph cluster import --config .
-omnigraph cluster plan   --config .                # review what apply will do
-omnigraph cluster apply  --config . --as <you>     # creates graphs/<slug>.omni
-omnigraph load --data seed.jsonl --mode overwrite graphs/<slug>.omni
-OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-admin":"local-admin-token","act-writer":"local-writer-token","act-reader":"local-reader-token"}' \
-  omnigraph-server --cluster . --bind 127.0.0.1:8080 &
-printf '%s' 'local-reader-token' | omnigraph login local
-```
-
-8. Verify with a sample query (goes through the server):
-
-```bash
-omnigraph alias patterns <pattern-kind>
-```
-
-### Phase 7 — Hand-off
-
-Tell the user:
-
-- What got created: the cookbook folder (a **cluster directory** —
-  `cluster.yaml` declares graph + schema + queries; the graph lives at
-  `graphs/<slug>.omni`, created by apply), the seed counts
-- How to query: CLI aliases (per-operator `~/.omnigraph/config.yaml`), or HTTP —
-  every declared query is served at `POST /graphs/<slug>/queries/<name>`
-- The day-2 loop: edit `.pg`/`.gq`/`cluster.yaml` → `cluster plan` →
-  `cluster apply --as <you>` → restart the server
-- To use the `omnigraph` skill for day-to-day ops (adding
-  signals, schema evolution, branches; see its `references/cluster.md`)
-
-## Deep Dives
-
-Load these only when you reach the relevant phase.
-
-| Reference | When to load |
-|-----------|--------------|
-| [`references/demo-setup.md`](references/demo-setup.md) | User picked Demo path |
-| [`references/custom-domain.md`](references/custom-domain.md) | Phases 1–4: elicitation question bank and source patterns |
-| [`references/schema-adaptation.md`](references/schema-adaptation.md) | Phase 5: what stays vs changes in the schema |
-| [`references/domain-examples.md`](references/domain-examples.md) | Phase 5: ready-made enum sets for biotech, crypto, fintech, geopolitics |
-| [`references/research.md`](references/research.md) | Phase 6: web research → seed.md → seed.jsonl workflow |
+[local-setup]: https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#local-setup
+[live-updates]: https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#live-updates
+[upgrading]: https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#upgrading

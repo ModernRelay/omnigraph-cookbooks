@@ -81,7 +81,7 @@ query acquirer_decision_makers() {
 }
 
 // Persons playing any role on a deal (founder, customer-ref, expert, co-investor, …).
-// v0.10 binds the traversed edge so its role can be projected and filtered.
+// Bind the traversed edge so its role can be projected and filtered.
 query deal_role_participants() {
     match {
         $p: Person

@@ -82,8 +82,8 @@ aliases:
   sem-incident:  { server: local, graph: dev, query: search_incidents,    args: [q] }
 
 # ── Mutations (served stored mutations; NOT aliasable) ───────────────────────
-# Run on a branch; the actor resolves server-side from your bearer token (or is
-# passed as the $actor param on a local unauthenticated server). Examples:
+# Run on a branch. The bearer identity determines authorization and commit attribution.
+# The $actor parameter is application provenance stored in rows, not authority. Examples:
 #   omnigraph mutate create_issue --graph dev --branch review/x \
 #     --params '{"slug":"iss-new","title":"…","status":"todo","issueType":"task","actor":"act-you","at":"2026-07-09"}'
 #   omnigraph mutate update_issue_status --graph dev \

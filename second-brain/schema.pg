@@ -31,7 +31,7 @@
 // "Me" is the Person with slug "per-self" and relation = self.
 //
 // `cadence_days` is the desired contact frequency *from me to them*. Semantically
-// it belongs on a Knows edge or a per-relationship intent node. v0.10 can bind
+// it belongs on a Knows edge or a per-relationship intent node. Queries can bind
 // and project edge properties, but cadence stays on Person as a pragmatic
 // single-user shortcut. Re-evaluate if the cookbook ever serves more than one
 // user.

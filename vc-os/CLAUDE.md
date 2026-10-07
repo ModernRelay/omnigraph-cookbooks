@@ -21,18 +21,10 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 
 ## Setup
 
-The rules — `import` before the first `apply`, `load` addressing, `/healthz`, how aliases and
-stored queries behave — are in `../CLAUDE.md`. This is that sequence with vc-os's names filled in:
-
-```bash
-cd vc-os
-omnigraph cluster import --config .
-omnigraph cluster plan   --config .
-omnigraph cluster apply  --config . --as <you>     # creates graphs/vcos.omni
-omnigraph load --data seed.jsonl --mode overwrite graphs/vcos.omni
-omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated &
-curl -s http://127.0.0.1:8080/healthz
-```
+Use the shared [0.13 local setup](../README.md#local-setup) with cookbook
+`vc-os` and graph `vcos`. It owns authentication, the bootstrap writer-lock
+handoff, readiness, and served seed loading. Apply later configuration edits with
+the [live update workflow](../README.md#live-updates).
 
 Graph id `vcos`. Stored queries and their parameters: `omnigraph queries list --cluster . --graph vcos`.
 Alias args bind by name to `$params`: `omnigraph alias pre-ic-brief-thesis deal-helix-series-a` is `omnigraph query pre_ic_brief_thesis --graph vcos --params '{"slug":"deal-helix-series-a"}'`.
@@ -76,7 +68,7 @@ Schema-language reference (node/edge syntax, `@key`/`@index`/`@unique`/`@embed`,
 | Action | `Decision`, `Commitment` | What we do. Decisions are one-shot (`decided_at`); Commitments are deferred actions with deadlines. Schedule-another-meeting and flag-at-next-board are Commitments, not Decisions. |
 | Reflexive | `Pattern`, `Lesson` | What we learn |
 
-v1 seed ships `Chunk` zero. Create raw Chunk JSONL, run the offline `omnigraph embed --input ... --output ... --spec ... --reembed-all` file pipeline, then load the output. All other 16 node types are active.
+The seed contains no `Chunk` records. Create raw Chunk JSONL, run the offline `omnigraph embed --input ... --output ... --spec ... --reembed-all` file pipeline, then load the output. All other 16 node types are active.
 
 **Core analytical loops:**
 
@@ -101,27 +93,28 @@ v1 seed ships `Chunk` zero. Create raw Chunk JSONL, run the offline `omnigraph e
 - **`Lesson.kind=protocol`** is the runtime-rules use case (declarative behavior rules the team wants agents to follow). `Lesson.status=tentative` lives on a review branch awaiting human merge.
 - **Edges follow `VerbTargetType` naming** (`SignalAboutOrganization`, `DecisionBasedOnAssumption`, `LessonDistilledFromPattern`).
 - **Edge traversal in queries is lowerCamelCase** even though the schema declares PascalCase (`$d forOrganization $c`).
-- **`Chunk` is implementation detail for hybrid search**, not an ontological commitment. v1 seed has zero Chunks; populate via separate ingest.
-- **Native `Blob` on `Artifact`** — collapses Drive into the graph. v1 seed has zero blob payloads; populate via separate ingest.
+- **`Chunk` is implementation detail for hybrid search**, not an ontological commitment. The seed has zero Chunks; populate via separate ingest.
+- **Native `Blob` on `Artifact`** — collapses Drive into the graph. The seed has zero Blob payloads; populate via separate ingest.
 - **USD-denominated financial fields** (`*_usd_m`) bake in a bias. Convert at recording time. Document if EUR/GBP-native sources require it.
 - **`Meeting` is the operational primitive, not a duplicate of `Artifact`.** The transcript / board notes are still `Artifact{kind=transcript|meeting-note}`. The Meeting carries the things an Artifact can't: scheduled time, attendee set, status (scheduled / occurred / cancelled), and the outputs (`DecisionFromMeeting`, `CommitmentFromMeeting`) the meeting produced. When ingesting a Granola call, create the `Meeting` first, then attach the transcript via `ArtifactFromMeeting`.
 - **`Meeting` outputs follow the inbound-edge convention** — `Artifact → Meeting`, `Decision → Meeting`, `Commitment → Meeting` (the dependent points to the source), mirroring `ArtifactFromPerson` and `CommitmentFromArtifact`. Don't add reverse `MeetingProduces*` edges; they'd double-count.
 - **A `Meeting` can be about multiple subjects.** A partner 1:1 covering 3 deals should load 3 `MeetingAboutDeal` edges, not be split into 3 meetings.
 
-## Conventions enforced by load discipline (not the schema)
+## Data conventions
 
-`@unique(src, dst)` enforces pair-uniqueness as a true composite key — covering single-batch load/insert/update and branch-merge, but not cross-operation duplicates against already-committed rows. These edges don't declare it yet, so the conventions below still live in the loader/reviewer:
+These edges do not declare pair-uniqueness constraints, so loaders and reviewers
+must preserve the following conventions:
 
-- **`Knows` is stored bidirectionally.** If A knows B, also load B knows A. Symmetric context, since, and strength on both sides. Single-direction storage made network queries quietly wrong. (Unaffected by the `@unique` fix — it's about storing the inverse edge, not deduping pairs.)
-- **No duplicate `(src, dst)` pairs per edge type.** Now schema-enforceable via `@unique(src, dst)` (within a load/merge); still dedupe across separate write operations.
+- **`Knows` is stored bidirectionally.** If A knows B, also load B knows A. Symmetric context, since, and strength on both sides. Single-direction storage made network queries quietly wrong.
+- **No duplicate `(src, dst)` pairs per edge type.** Check existing edges before inserting a new relationship.
 - **`Decision` provenance chain.** Every Decision should link to: (1) the Deal it regards, (2) the Assumptions it's based on, (3) the open Questions it still depends on, (4) the Person who decided. The graph snapshot at commit-time is the audit trail.
 
 ## Known gaps
 
-- **Edge-property projections use a bound edge variable (since 0.10)** — for example, `$p $r:roleInDeal $d` and `return { $r.role }`. `deal_role_participants` demonstrates the syntax.
-- **`Chunk` is declared but the seed has zero.** Embeddings come from an offline JSONL-to-JSONL pipeline; the static seed cannot generate them and `omnigraph embed` does not mutate a graph. Hybrid search is a v1-deferred capability.
-- **Alias args bind to query parameters by *name*, not position.** An alias `args: [slug]` only binds to a query that declares `$slug`. Renaming the alias arg to `[deal_slug]` without also renaming `$slug → $deal_slug` in the query silently drops the filter — the query then matches every row instead of one. If you want clearer arg names, rename in *both* places; otherwise add a comment block above the alias group explaining the input semantics.
-- **Adding values to an existing enum is a destructive type change.** `cluster apply` / `schema apply` reject in-place enum extensions, so widening an enum means rebuilding the graph: stop the server, delete `graphs/vcos.omni`, re-run `omnigraph cluster apply --config .`, then `omnigraph load --data seed.jsonl --mode overwrite graphs/vcos.omni`. Batch multiple enum/property-type changes into one rebuild — single-change rebuilds aren't worth the cost. (General migration mechanics live in the **omnigraph** skill.)
+- **Edge-property projections use a bound edge variable** — for example, `$p $r:roleInDeal $d` and `return { $r.role }`. `deal_role_participants` demonstrates the syntax.
+- **`Chunk` is declared but the seed has zero.** Embeddings come from an offline JSONL-to-JSONL pipeline; the static seed cannot generate them and `omnigraph embed` does not mutate a graph. Hybrid search needs a separate ingest.
+- **Alias args bind to query parameters by name.** Keep each alias `args` entry equal to the corresponding query parameter name.
+- **Preview schema edits through served `cluster plan`.** Apply supported changes live. If planning refuses a type change, design a data migration or rebuild into a separate fresh cluster; never delete a managed graph root behind its ledger. See [upgrading](../README.md#upgrading).
 - **`Artifact.blob` is declared but the seed uses none.** Same status as Chunks — populate via separate ingest.
 
 ## The Demo "Wow" Queries

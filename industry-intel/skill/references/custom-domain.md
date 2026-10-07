@@ -1,199 +1,62 @@
-# Custom Domain Setup — Elicitation
+# Custom Domain — Elicitation
 
-Full elicitation flow for Phase 1–4 of the custom path. Use whatever structured-question primitive your runtime provides (Claude Code's `AskUserQuestion`, a picker UI, or plain-text prompts) — the questions are the same either way.
+Collect only decisions not already supplied. Group related questions so setup
+does not become a long interview. When the user delegates a choice, use a
+reasonable default and record it.
 
-## Phase 1 — Domain Identification
+## Scope
 
-### 1a. Pick the domain
+- **Domain:** biotech, fintech, crypto, geopolitics, macroeconomics, SaaS,
+  climate tech, or the user's own domain.
+- **Breadth:** for example, all biotech versus oncology therapeutics, or all
+  crypto versus DeFi on Ethereum L2s.
+- **Geography:** global or selected regions.
+- **Project slug:** a filesystem-safe name such as `bio-intel`, `crypto-intel`,
+  or `geo-intel`. It names the cookbook folder and the graph declaration;
+  apply derives `graphs/<slug>.omni`.
 
-Ask (single-select with "Other"):
+## Use
 
-> **Which domain do you want to track?**
->
-> - Biotech / therapeutics
-> - Fintech / financial services
-> - Crypto / web3
-> - Geopolitics / policy
-> - Macroeconomics
-> - SaaS / enterprise software
-> - Climate tech / energy transition
-> - Other (I'll describe it)
+| Question | Why it matters |
+|----------|----------------|
+| Which actors matter: companies, labs, regulators, experts, protocols, investors? | Choose useful Company classifications and Element kinds. |
+| How much history: recent months or foundational events too? | Bound research and timestamp coverage. |
+| How often will the graph be updated? | Describe the ongoing research and review routine. |
+| Who consumes it: analysts, dashboards, agents, or a mix? | Select useful queries and aliases. |
 
-### 1b. Narrow the scope
-
-Free-form follow-ups:
-
-> **How wide is the scope?**
-> Examples: "all of biotech" vs "only oncology therapeutics"; "all crypto" vs "only DeFi on Ethereum L2s".
-
-> **Geographic focus?**
-> Global, or a specific region (US, EU, APAC, LATAM, etc.)?
-
-### 1c. Project slug
-
-Generate a project slug from the domain. Examples:
-- Biotech → `bio-intel`
-- Crypto → `crypto-intel`
-- Geopolitics → `geo-intel`
-- Macroeconomics → `macro-intel`
-- SaaS → `saas-intel`
-
-This becomes:
-- The cookbook folder name: `<slug>/`
-- The graph root: `graphs/<slug>.omni` (derived — created by `cluster apply`)
-- The project name in `cluster.yaml` (`metadata.name`)
-
-Confirm with the user before proceeding.
-
-## Phase 2 — Key Questions (Multi-Select)
-
-### 2a. Actors to track
-
-Ask (multi-select):
-
-> **Which kinds of actors matter most in this domain?**
->
-> - Companies (commercial entities)
-> - Labs / research institutions
-> - Regulators / government bodies
-> - Individuals (experts, founders, analysts)
-> - Protocols / standards bodies
-> - Investors (VCs, funds, allocators)
-> - DAOs / community orgs (crypto-specific)
-
-The selection drives which `Company.type` enum values are needed and whether you add an `Investor` or `DAO` node type.
-
-### 2b. Time horizon
-
-Ask (single-select):
-
-> **Are we tracking only recent signals, or also historical context?**
->
-> - Recent only (last 3 months)
-> - Medium (last 12 months)
-> - Full historical (multi-year, including foundational events)
-
-Drives how much research depth to aim for in Phase 6.
-
-### 2c. Update cadence
-
-Ask (single-select):
-
-> **How often will the graph be updated and consumed?**
->
-> - Daily
-> - Weekly
-> - Monthly
-> - Ad-hoc (on demand)
-
-Drives whether to set up branch-review flow in later docs.
-
-### 2d. Primary consumer
-
-Ask (single-select):
-
-> **Who or what consumes the graph's output?**
->
-> - Human analysts (briefings, newsletters)
-> - Internal dashboard
-> - Other AI agents (via queries)
-> - Mixed
-
-Drives `cli.output_format` default and whether to emphasize aliases for agent consumers.
-
-## Phase 3 — Sources (Most Important)
-
-**Sources are the lifeblood of a SPIKE graph. The quality of everything downstream is bounded by source quality.** Spend time here — don't rush.
-
-Ask each question sequentially. Free-form answers are fine for open-ended lists.
-
-### 3a. Primary reading list
-
-> **What sources do you already read regularly in this domain? Newsletters, blogs, publications, major outlets, podcasts.**
->
-> Aim for 5–15 entries. Don't stop at 3.
-
-Capture each as: `name | url | type (blog/newsletter/podcast/publication) | why it matters`.
-
-### 3b. Priority analysts / experts
-
-> **Which individual analysts, researchers, or practitioners whose takes you want to track?**
->
-> Aim for 3–10 people. First-class Expert entities in the graph.
-
-Capture: `name | affiliation | platform (X, Substack, blog) | url`.
-
-### 3c. Regulatory / authoritative sources
-
-> **Which regulatory, governmental, or authoritative bodies publish in this domain?**
-
-Examples to prompt with:
-- Biotech: FDA, EMA, NIH, PMDA, clinicaltrials.gov
-- Fintech: SEC, CFPB, Federal Reserve, OCC, FCA, BIS
-- Crypto: SEC, CFTC, FinCEN, MAS, MiCA regulators
-- Geopolitics: State Department, Foreign Ministries, UN agencies, major think tanks
-- Macroecon: BLS, Fed, BEA, ECB, BOJ, major central banks
-
-### 3d. Academic / primary sources
-
-> **Are there academic venues or primary research sources to track?**
-
-Examples:
-- Biotech: Nature, Science, Cell, NEJM, JAMA, bioRxiv
-- Crypto: protocol governance forums, Messari research, DefiLlama
-- Macro: BIS papers, NBER, Fed research, IMF WEO
-- Geopolitics: Foreign Affairs, CFR, CSIS, RAND
-
-### 3e. Social / community
-
-> **Any X/Twitter accounts, podcasts, Discord/Telegram forums, or community sources?**
-
-Capture: `name | platform | handle_or_url`.
-
-## Phase 4 — Confirm Summary
-
-Before touching any code, echo the captured info back:
-
-```markdown
-# Setup notes — <domain>
-
-**Project slug:** <slug>
-**Graph root:** graphs/<slug>.omni (created by `cluster apply`; cluster.yaml is the deployment file)
-**Scope:** <narrow/broad + geographic focus>
-
-## Actors
-- <list>
-
-## Horizon + cadence
-- Horizon: <recent/medium/full>
-- Cadence: <daily/weekly/...>
-- Consumer: <humans/dashboard/agents/mixed>
+Keep the SPIKE core narrow. An actor category does not automatically require a
+new node type; start with the existing Company, Expert, and Element types.
 
 ## Sources
 
-### Primary reading list
-| Name | URL | Type | Notes |
+Start with the user's own reading list, then fill the relevant gaps. Capture
+source name, URL, format, and why it matters. For experts, also record their
+affiliation and publishing venue.
 
-### Priority experts
-| Name | Affiliation | Platform | URL |
+| Category | Prompts and examples |
+|----------|---------------------|
+| Regular reading | Newsletters, blogs, publications, and podcasts the user already follows. |
+| Experts | Analysts, researchers, or practitioners whose work should be attributable to an Expert node. |
+| Regulatory or authoritative | FDA/EMA/clinicaltrials.gov for biotech; SEC/CFPB/FCA/BIS for finance; government and UN publications for geopolitics. |
+| Primary research | Papers, trial registries, statistical releases, protocol proposals, and first-party technical reports. |
+| Community | Forums, social accounts, podcasts, and governance discussions; verify factual claims against primary evidence. |
 
-### Regulatory / authoritative
-| Name | URL | Type |
+The [domain examples](domain-examples.md) provide starter lists. Offer a small
+relevant subset if the user has no preferences; verify actual URLs and recent
+material during research. Do not treat a source list as current evidence.
 
-### Academic / primary
-| Name | URL | Type |
+Deduplicate sources. An author and their outlet can be separate Expert and
+SourceEntity nodes, connected through the artifacts they produce.
 
-### Social / community
-| Name | Platform | Handle |
-```
+## Record the result
 
-Save this as `<slug>/setup-notes.md`. Commit it — it's also documentation.
+Write `<slug>/setup-notes.md` with:
 
-**Explicitly ask the user to review and confirm before Phase 5.** Reworking the schema is cheaper than reworking the seed, so catch errors here.
+- Domain, scope, geography, and project slug.
+- Actors, historical horizon, cadence, and consumers.
+- Sources grouped by category, with URLs and attribution.
+- Any assumptions that influenced schema or research choices.
 
-## Tips
-
-- **Don't accept "just pick what makes sense"** — the domain expert has context you don't. Push back gently with examples.
-- **Treat source lists as incomplete by default.** After the first pass, ask: "anything else? any sources that don't fit the categories above?"
-- **Deduplicate** — if a source appears in both "primary reading" and "analyst accounts", pick one canonical entry (usually the analyst as an Expert, with the outlet as a SourceEntity).
-- **If the user is vague about sources**, offer a starter set based on the domain (see `references/domain-examples.md`) and ask which to add/remove.
+Resolve consequential ambiguities before researching a full seed. Use the
+notes as the schema and research brief; keep later corrections there rather
+than appending a second setup narrative elsewhere.

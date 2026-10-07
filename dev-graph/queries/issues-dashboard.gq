@@ -1,6 +1,6 @@
 // Issue-triage dashboard queries (dash-book "Dev · issues by epic").
 // Registered via cluster.yaml `queries: queries/`. Apply with `omnigraph cluster
-// apply` + reload the served `dev` graph for these to go live.
+// apply --server URL --config .` to activate these on the running server.
 // Edge verb = schema edge name, lowercased first letter (IssueOwnedBy → issueOwnedBy).
 
 // ═══════════════════════════ EPIC ═══════════════════════════════

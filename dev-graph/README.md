@@ -195,46 +195,29 @@ See [`seed.md`](seed.md) for the full human-readable inventory (kept in sync wit
 
 ## Quick start
 
-Prerequisite: the `omnigraph` / `omnigraph-server` binaries (no object store).
+Follow the shared [0.13 local setup](../README.md#local-setup) with
+`dev-graph` and graph ID `dev`. Merge this cookbook's
+`omnigraph-config.example.yaml` into your operator config, then explore:
 
 ```bash
-cd dev-graph
-
-# 1. Converge the cluster (creates graphs/dev.omni, applies schema, registers queries).
-#    First time only: `import` bootstraps cluster state before the first apply.
-omnigraph cluster import --config .
-omnigraph cluster apply  --config . --as act-you
-
-# 2. Load the reference seed (clean slate). Use --mode overwrite for the seed
-#    (see "Loading" below — merge/append trip a case-sensitivity check on the
-#    camelCase `versionTag @unique` column in the current engine build).
-omnigraph load --data seed.jsonl --mode overwrite graphs/dev.omni
-
-# 3. Serve it (leave running in its own terminal).
-omnigraph-server --cluster . --unauthenticated      # binds 127.0.0.1:8080
-curl -s http://127.0.0.1:8080/healthz               # {"status":"ok",...}
-
-# 4. Query it. Merge omnigraph-config.example.yaml's aliases into
-#    ~/.omnigraph/config.yaml, then:
 omnigraph alias ready
 omnigraph alias blocked-upstream
 omnigraph alias incident-cause inc-presence-leak
 omnigraph alias gaps
-#    …or hit a stored query directly without aliases:
-omnigraph query ready --server http://127.0.0.1:8080 --graph dev
+omnigraph query ready --server local --graph dev
 ```
+
+Use the [live update workflow](../README.md#live-updates) for schema, stored
+queries and optional provider configuration.
 
 ### Loading
 
-- **Seed load → `--mode overwrite`** (clean slate). This is the natural mode for
-  a reproducible seed. In the current engine build, `--mode merge`/`append` fail
-  on this schema because the camelCase `versionTag @unique` column trips a
-  case-sensitivity check in the loader's uniqueness lookup.
-- **Incremental changes → `mutate`, not bulk `load`.** The stored mutations in
-  `queries/queries.gq` (`create_issue`, `update_issue_status`, `add_comment_on_issue`,
-  `record_decision`, …) are typechecked and parameterized, sidestep the above,
-  and respect the mutability model (pointer nodes update in place; append-only
-  nodes insert + link by `Supersedes`). Review bulk writes on a branch, then merge.
+- **Reference seed:** load once into a fresh demo graph through the server,
+  following the shared setup. Do not overwrite a working graph from this seed.
+- **Ongoing changes:** use the stored mutations in `queries/queries.gq`
+  (`create_issue`, `update_issue_status`, `add_comment_on_issue`, `record_decision`,
+  …) to preserve the pointer/append-only conventions. Review bulk loads on a
+  branch before merging.
 - **Dates are ISO strings** (`"2026-07-09"`); `load` accepts ISO for the `Date`
   columns and stores day-granularity. There is no `DateTime` in this schema — the
   mutations take a `$at: Date`, so `now()` (a DateTime) can't be assigned.
@@ -246,38 +229,33 @@ The prose-bearing nodes (`Issue`, `Epic`, `SpecFile`, `Decision`, `Learning`,
 `Comment`) declare an embedding column with its source and index:
 `embedding: Vector(3072)? @embed("title"|"statement"|"name"|"body") @index`. The
 column stays **null until vectors are supplied in input data** — so the seed
-loads with zero dependencies and the `search_*` stored queries /
-`sem-*` aliases simply return nothing.
+loads without a provider. Semantic retrieval needs populated vectors and a
+configured query provider.
 
-To turn semantic search on:
+To enable semantic search:
 
-1. Uncomment the `providers:` block **and** the `embedding_provider: default`
-   line under `graphs.dev` in `cluster.yaml`, then `omnigraph cluster apply --config .`.
-2. Export the configured provider's secret and select the same provider/model
-   for the offline pipeline:
+1. Provide `GEMINI_API_KEY` in the server environment before starting it.
+   Uncomment `providers:` and `graphs.dev.embedding_provider` in `cluster.yaml`,
+   then [plan and apply live](../README.md#live-updates). Exporting a new secret
+   in a client shell does not change the running server's environment.
+2. Prepare JSONL containing the current node rows and an embedding spec for their
+   source/target fields. Select the same provider and model for the offline
+   pipeline:
 
    ```bash
-   export GEMINI_API_KEY='<key>'
    export OMNIGRAPH_EMBED_PROVIDER=gemini
    export OMNIGRAPH_EMBED_MODEL=gemini-embedding-2
-   ```
-3. Prepare an embedding spec for the declared source/target fields, then run
-   the offline file pipeline and load its complete output:
-
-   ```bash
-   omnigraph embed --input seed.jsonl --output seed.embedded.jsonl \
+   omnigraph embed --input rows.jsonl --output rows.embedded.jsonl \
      --spec /path/to/embeddings.json --reembed-all
-   omnigraph load --data seed.embedded.jsonl --mode overwrite graphs/dev.omni
+   omnigraph load --data rows.embedded.jsonl --mode merge --server local --graph dev
    ```
 
-   `omnigraph embed` never opens or mutates the graph, and ordinary load does
-   not synthesize `@embed` fields. The engine's
-   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.11.0/docs/user/search/embeddings.md#offline-file-pipeline)
-   defines the spec shape.
-4. Restart `omnigraph-server --cluster .` with the provider secret.
-
-Now `omnigraph alias sem-issue "tenant isolation"` (etc.) ranks by
-`nearest($x.embedding, $q)`. Everything structural works without any of this.
+   Set `GEMINI_API_KEY` for this command too. `omnigraph embed` transforms files;
+   ordinary load preserves supplied vectors and does not generate them. See the
+   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.13.0/docs/user/search/embeddings.md#offline-file-pipeline)
+   for the spec format. Use `seed.jsonl` only for a fresh demo.
+3. Run `omnigraph alias sem-issue "tenant isolation"`. Structural queries also
+   work without embeddings; text-vector queries require the configured provider.
 
 ## Identifier scheme
 

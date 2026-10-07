@@ -1,10 +1,8 @@
 # dev-graph deployment, declared as code (omnigraph cluster model).
 #
-# Filesystem-backed cluster — no object store, no S3 creds. `storage:` is
-# omitted, so it defaults to this config directory: `omnigraph cluster apply
-# --config .` creates the graph at `graphs/dev.omni` and `omnigraph-server
-# --cluster .` serves it. Per-operator settings (identity, servers, aliases)
-# live per-user in `~/.omnigraph/config.yaml` — see omnigraph-config.example.yaml.
+# Filesystem-backed cluster; storage defaults to this directory.
+# Follow ../README.md#local-setup for bootstrap and writer-lock handoff.
+# Later configuration updates go through cluster plan/apply --server.
 version: 1
 
 metadata:
@@ -20,17 +18,11 @@ graphs:
     queries: queries/        # registers every `query <name>` in queries/*.gq as a stored query
     # embedding_provider: default   # uncomment WITH the `providers:` block below to enable semantic search
 
-# Semantic search (the search_* stored queries / sem-* aliases) needs an
-# embedding provider so the server can embed query strings in the SAME space as
-# the stored vectors (gemini-embedding-2, 3072-dim — the columns in
-# schema.pg declare their source via @embed(...) @index). It's OPTIONAL: the seed
-# ships no embeddings, so the structural queries work with nothing extra. To turn
-# it on: (1) uncomment the `providers:` block below AND the `embedding_provider:
-# default` line under graphs.dev above (do NOT add a second `graphs:` key — YAML
-# would reject/override it); (2) export GEMINI_API_KEY; (3) generate embedded
-# JSONL with the offline `omnigraph embed` pipeline and load that file; (4)
-# re-serve. Ordinary load does not synthesize @embed fields. See README.md →
-# "Semantic search (optional)".
+# Optional query-time embeddings. Supply GEMINI_API_KEY in the server
+# environment, uncomment both the provider below and the graph binding above,
+# then plan/apply through the running server. Generate stored vectors with
+# the offline omnigraph embed pipeline and load the resulting JSONL;
+# load never generates @embed fields. See README.md#semantic-search-optional.
 #
 # providers:
 #   embedding:
@@ -39,3 +31,11 @@ graphs:
 #       base_url: https://generativelanguage.googleapis.com/v1beta
 #       model: gemini-embedding-2
 #       api_key: ${GEMINI_API_KEY}
+
+policies:
+  graph-access:
+    file: policies/graph.policy.yaml
+    applies_to: [dev]
+  cluster-access:
+    file: policies/server.policy.yaml
+    applies_to: [cluster]

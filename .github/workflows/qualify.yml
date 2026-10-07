@@ -1,0 +1,36 @@
+name: Cookbook qualification
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cookbooks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      - name: Install the pinned release
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(sed -n 's/^ARG OMNIGRAPH_REF=//p' deploy/railway/Dockerfile)
+          [[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          asset=omnigraph-linux-x86_64
+          archive=$(mktemp -d)
+          base="https://github.com/ModernRelay/omnigraph/releases/download/$version"
+          curl -fsSL "$base/$asset.tar.gz" -o "$archive/$asset.tar.gz"
+          curl -fsSL "$base/$asset.sha256" -o "$archive/$asset.sha256"
+          (cd "$archive" && sha256sum -c "$asset.sha256")
+          mkdir -p "$RUNNER_TEMP/omnigraph-bin"
+          tar -xzf "$archive/$asset.tar.gz" -C "$RUNNER_TEMP/omnigraph-bin" omnigraph omnigraph-server
+          echo "$RUNNER_TEMP/omnigraph-bin" >> "$GITHUB_PATH"
+      - name: Qualify all five local journeys
+        run: python3 scripts/check-cookbooks.py
+      - name: Verify deployment preparation stays effect-free
+        run: python3 -m unittest discover -s deploy/railway/tests -v

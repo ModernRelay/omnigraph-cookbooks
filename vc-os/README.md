@@ -497,17 +497,18 @@ For each agent below: the natural-language **prompt** you'd send it, concrete **
 
 **Why graph:** `Pattern.acrossDecision` aggregation makes "this shape recurred N times with consistent outcome" a deterministic query, not a vibes call. The duplicate-check against active Lessons is the same primitive - a sweep that always produces a Lesson would be a hallucinating sweep.
 
-## v1 scope
+## Included and extensions
 
 **Ships:**
 - Full 17-node schema with native `Blob` on `Artifact` and `Vector(3072) @embed("text")` on `Chunk`
 - Reference seed: 207 nodes, 460 edges across 65 edge types, no embeddings, no blob payloads
-- 294 aliases covering reads + mutations for every node/edge type (291 named queries across 12 `.gq` files)
+- Read aliases and stored mutations across 12 `.gq` files
 - Example queries enumerated above
 
 **Deferred (extensions, not blockers):**
 - **Real blob + embedding examples in seed.** Schema declares the capability. Attach real PDFs/transcripts as `Artifact.blob`; prepare raw `Chunk` JSONL, pass it through offline `omnigraph embed --reembed-all`, then load the output before running hybrid `nearest()` / `bm25()` / `rrf()` queries.
-- **Cedar policies** (`policies/`) - per-role access control (team / lp / read-only-portfolio) collapses application-layer permission code into the graph server.
+- **Firm-specific authorization.** Extend the included admin/writer/reader
+  policies for team, LP and portfolio access.
 - **Sector-specialist Pattern/Lesson packs.** AI-infra Patterns ship with the reference seed; talent-tech / climate / B2B-SaaS variants are sibling cookbooks.
 - **`Measurement` node** for time-series KPIs/cash/runway (currently captured loosely via `Signal{kind=portfolio-update}`).
 
@@ -537,24 +538,12 @@ vc-os/
     └── wiki.gq           # 14 reads (markdown artifacts pinned to git commits)
 ```
 
-Total: 291 named queries, 294 aliases.
-
 ## Quick Start
 
-This cookbook is a **filesystem-backed cluster** — no object store, no
-credentials. `cluster.yaml` declares the graph (`vcos`), its schema, and all
-stored queries; `omnigraph cluster apply` converges it (creating the graph at
-`graphs/vcos.omni`); the server serves the applied state. All commands run
-from `vc-os/`:
-
-```bash
-cd vc-os
-omnigraph cluster import --config .   # one-time: create the state ledger
-omnigraph cluster plan   --config .
-omnigraph cluster apply  --config .   # creates graphs/vcos.omni, applies schema, publishes queries
-omnigraph load --data seed.jsonl --mode overwrite graphs/vcos.omni   # one-time seed
-omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated  # serve (local dev)
-```
+Follow the shared [0.13 local setup](../README.md#local-setup) with
+`vc-os` and graph ID `vcos`. Merge this cookbook's
+`omnigraph-config.example.yaml` into your operator config. Later schema and
+stored query edits use the [live update workflow](../README.md#live-updates).
 
 Then query through the server via aliases (in a separate terminal):
 

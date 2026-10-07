@@ -91,90 +91,28 @@ Full property tables and constraints in `schema.pg`.
 
 ## Quick Start
 
-All commands run from `industry-intel/`:
-
-The cookbook is a **cluster directory**: `cluster.yaml` declares the graph,
-its schema, and all 73 stored queries; `omnigraph cluster apply` converges it
-(creating the graph at `graphs/spike.omni`); the server serves the applied
-state. No object store or credentials needed to get started.
-
-First merge the `servers`, `defaults`, and `aliases` from
-`omnigraph-config.example.yaml` into `~/.omnigraph/config.yaml`; the token is
-stored separately by `omnigraph login` below.
+Follow the shared [0.13 local setup](../README.md#local-setup) with
+`industry-intel` and graph ID `spike`. It creates the filesystem-backed cluster,
+starts the authenticated server, and loads the seed through HTTP. Merge this
+cookbook's `omnigraph-config.example.yaml` into your operator config for aliases.
 
 ```bash
-cd industry-intel
-
-# One-time: record the ledger, preview, converge (creates graphs/spike.omni,
-# applies schema.pg, publishes all stored queries)
-omnigraph cluster import --config .
-omnigraph cluster plan   --config .
-omnigraph cluster apply  --config . --as <you>   # any id — recorded in the cluster ledger as who applied; set operator.actor in ~/.omnigraph/config.yaml to make it the default
-
-# Load the seed through the data plane (one-time)
-omnigraph load --data seed.jsonl --mode overwrite graphs/spike.omni
-
-# Serve with the cookbook policy and three local-only development tokens
-export OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-admin":"local-admin-token","act-writer":"local-writer-token","act-reader":"local-reader-token"}'
-omnigraph-server --cluster . --bind 127.0.0.1:8080 &
-
-# Query via CLI aliases (operator-config sugar) …
-printf '%s' 'local-reader-token' | omnigraph login local
 omnigraph alias pattern-signals pat-sovereign-ai
-# … or straight HTTP — every declared query is a served endpoint:
-curl -s -X POST http://127.0.0.1:8080/graphs/spike/queries/recent_signals \
-  -H 'authorization: Bearer local-reader-token' \
-  -H 'content-type: application/json' -d '{"params":{}}'
+omnigraph query recent_signals --server local --graph spike
 ```
 
-> Or invoke a stored query directly:
-> `omnigraph query <name> --graph spike [--params …]`.
-
-Day-2 changes are declarative: edit `schema.pg` / a `.gq` file / `cluster.yaml`,
-then `cluster plan` (schema edits show real migration steps) → `cluster apply`
-→ restart the server. Deleting the graph requires an explicit
-`omnigraph cluster approve graph.spike --as <you>` first.
+Schema, query, policy and provider edits use the [live update workflow](../README.md#live-updates).
 
 ### Authorization
 
-The cookbook declares two Cedar bundles in `cluster.yaml`: `policies/intel.policy.yaml`
-(graph-bound — `readers` invoke stored read queries, `writers` can also run
-the stored mutations) and `policies/server.policy.yaml` (cluster-bound — only
-`admins` may enumerate graphs). Production uses the same actor ids as Railway:
+`cluster.yaml` binds `policies/intel.policy.yaml` to `spike` and
+`policies/server.policy.yaml` to the cluster. The shared setup's `act-admin`
+identity administers the deployment; `act-writer` can run stored mutations and
+`act-reader` can read. Use distinct private credentials for these actors outside
+the local demo. Stored mutations require both query invocation and write
+permission.
 
-```bash
-OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-reader":"<reader-token>","act-writer":"<writer-token>","act-admin":"<admin-token>"}' \
-  omnigraph-server --cluster . --bind 127.0.0.1:8080
-```
-
-What the gates do (verified): `GET /graphs` → admin 200 / reader 403 /
-anonymous 401; stored reads → reader 200; stored mutations (`add_signal`,
-…) → reader 403, writer 200 — stored mutations are double-gated
-(`invoke_query` at the boundary, `change` inside the engine).
-
-`act-analyst` remains accepted as a backwards-compatible writer identity, but
-new deployments should use `act-writer`.
-
-<details>
-<summary><strong>RustFS / S3 alternative (cluster on object storage)</strong></summary>
-
-To demo S3-compatible storage, start a local RustFS (see the omnigraph repo's
-`docs/user/deployment.md` → *Testing against S3 locally*), root the cluster on
-S3 with `storage: s3://omnigraph-local/clusters/spike` in `cluster.yaml`, then
-serve config-free from the bucket:
-
-```bash
-set -a && source .env.omni && set +a
-omnigraph cluster import --config .                 # fresh S3 root only
-omnigraph cluster apply --config . --as <you>
-omnigraph load --data seed.jsonl --mode overwrite s3://omnigraph-local/clusters/spike/graphs/spike.omni
-OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-reader":"<reader-token>","act-writer":"<writer-token>","act-admin":"<admin-token>"}' \
-  omnigraph-server --cluster s3://omnigraph-local/clusters/spike
-```
-
-The cluster's ledger, catalog, and graph data all live under the S3 root.
-
-</details>
+For S3 hosting, use the [Railway deployment guide](../deploy/railway/README.md).
 
 ## The weekly review (operating loop)
 
@@ -203,8 +141,10 @@ omnigraph alias momentum 2026-05-01T00:00:00Z
 `queries/hybrid.gq` adds semantic and hybrid search over chunk embeddings
 (`related_chunks`, `hybrid_chunks` — RRF of `nearest` + `bm25`). To enable it:
 
-1. Declare a named embedding provider in `cluster.yaml`, bind it to `spike`,
-   apply the cluster, and run the server with that provider's secret.
+1. Make the provider secret available in the server environment. Declare the
+   provider in `cluster.yaml`, bind it to `spike`, and use
+   [live apply](../README.md#live-updates). A shell export cannot change an
+   already running process; provision new secrets before starting that process.
 2. Prepare raw `Chunk` JSONL and a matching embedding spec, then run the
    offline file pipeline:
 
@@ -213,11 +153,12 @@ omnigraph alias momentum 2026-05-01T00:00:00Z
      --spec /path/to/embeddings.json --reembed-all
    ```
 
-3. Load `chunks.embedded.jsonl` into the graph. `omnigraph embed` never opens
+3. Load `chunks.embedded.jsonl` through the running server with `--mode append`
+   for new chunks or `--mode merge` for updates. `omnigraph embed` never opens
    or mutates a graph; `--reembed-all` replaces selected vectors only in its
    output file. The offline and server providers must use the same model and
    vector dimension. See the engine's
-   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.11.0/docs/user/search/embeddings.md#offline-file-pipeline)
+   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.13.0/docs/user/search/embeddings.md#offline-file-pipeline)
    for the spec format.
 
 See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.
