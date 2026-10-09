@@ -22,6 +22,7 @@ COOKBOOKS = {
     "second-brain": ("brain", "people_all"),
     "vc-os": ("vcos", "deals_open"),
     "dev-graph": ("dev", "open_epics"),
+    "beads": ("beads", "ready"),
 }
 TOKENS = {actor: f"cookbook-test-{actor}" for actor in ("act-admin", "act-writer", "act-reader")}
 HTTP = urllib.request.build_opener(urllib.request.ProxyHandler({}))
@@ -191,7 +192,7 @@ def main():
         raise
     else:
         shutil.rmtree(workspace)
-        print("All five cookbooks passed against OmniGraph 0.13.0.")
+        print(f"All {len(COOKBOOKS)} cookbooks passed against OmniGraph 0.13.0.")
 
 
 if __name__ == "__main__":

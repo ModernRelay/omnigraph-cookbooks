@@ -1,0 +1,344 @@
+// Reads. In served mode every query here is a stored query, so agents reach
+// them as typed tools without sending query source.
+
+// Readiness is derived, never stored, with beads' rules: an issue is ready
+// when it is open, not deferred into the future, no open issue blocks it, and
+// no ancestor passes a block down. An ancestor passes one down when it is not
+// closed, no closed issue sits between it and the issue, and at least one of
+// its open blockers lies outside its own subtree (an epic waiting on its own
+// child must not block that child). The parent and the deeper ancestors are
+// separate blocks so that only the deeper ones pay for the closed-in-between
+// check; the meaning is the single rule over childOf{1,8}.
+query ready() @description("Claimable work, highest priority first: open, not deferred, and no open blocker on the issue or any ancestor.") {
+    match {
+        $i: Issue { status: "open" }
+        $i.defer_until is null or $i.defer_until <= now()
+        not { $i blockedBy $b  $b.status != "closed" }
+        not { $i childOf $a  $a.status != "closed"  $a blockedBy $c  $c.status != "closed"
+              not { $c childOf{1,8} $a } }
+        not { $i childOf $p  $p.status != "closed"  $p childOf{1,7} $a  $a.status != "closed"
+              $a blockedBy $c  $c.status != "closed"
+              not { $c childOf{1,8} $a }
+              not { $p childOf{1,7} $x  $x.status = "closed"  $x childOf{1,7} $a } }
+    }
+    return { $i.slug, $i.title, $i.kind, $i.priority, $i.assignee, $i.labels, $i.created_at }
+    order { $i.priority asc, $i.created_at asc, $i.slug asc }
+    limit 500
+}
+
+query ready_count() @description("How many issues are ready; `ready` itself returns at most 500.") {
+    match {
+        $i: Issue { status: "open" }
+        $i.defer_until is null or $i.defer_until <= now()
+        not { $i blockedBy $b  $b.status != "closed" }
+        not { $i childOf $a  $a.status != "closed"  $a blockedBy $c  $c.status != "closed"
+              not { $c childOf{1,8} $a } }
+        not { $i childOf $p  $p.status != "closed"  $p childOf{1,7} $a  $a.status != "closed"
+              $a blockedBy $c  $c.status != "closed"
+              not { $c childOf{1,8} $a }
+              not { $p childOf{1,7} $x  $x.status = "closed"  $x childOf{1,7} $a } }
+    }
+    return { count($i) as ready }
+}
+
+query unblocked_open_count() @description("Open issues with no open blocker on themselves or an ancestor; the rest of the open issues are blocked.") {
+    match {
+        $i: Issue { status: "open" }
+        not { $i blockedBy $b  $b.status != "closed" }
+        not { $i childOf $a  $a.status != "closed"  $a blockedBy $c  $c.status != "closed"
+              not { $c childOf{1,8} $a } }
+        not { $i childOf $p  $p.status != "closed"  $p childOf{1,7} $a  $a.status != "closed"
+              $a blockedBy $c  $c.status != "closed"
+              not { $c childOf{1,8} $a }
+              not { $p childOf{1,7} $x  $x.status = "closed"  $x childOf{1,7} $a } }
+    }
+    return { count($i) as unblocked }
+}
+
+query ready_labeled($label: String) @description("Ready work carrying one label.") {
+    match {
+        $i: Issue { status: "open" }
+        $label in $i.labels
+        $i.defer_until is null or $i.defer_until <= now()
+        not { $i blockedBy $b  $b.status != "closed" }
+        not { $i childOf $a  $a.status != "closed"  $a blockedBy $c  $c.status != "closed"
+              not { $c childOf{1,8} $a } }
+        not { $i childOf $p  $p.status != "closed"  $p childOf{1,7} $a  $a.status != "closed"
+              $a blockedBy $c  $c.status != "closed"
+              not { $c childOf{1,8} $a }
+              not { $p childOf{1,7} $x  $x.status = "closed"  $x childOf{1,7} $a } }
+    }
+    return { $i.slug, $i.title, $i.kind, $i.priority, $i.assignee, $i.labels, $i.created_at }
+    order { $i.priority asc, $i.created_at asc, $i.slug asc }
+    limit 500
+}
+
+query blocked() @description("Unfinished issues with an open direct blocker, one row per blocker.") {
+    match {
+        $i: Issue
+        $i.status != "closed"
+        $i blockedBy $b
+        $b.status != "closed"
+    }
+    return { $i.slug, $i.title, $i.status, $i.priority, $b.slug as blocker, $b.status as blocker_status }
+    order { $i.priority asc, $i.slug asc, $b.slug asc }
+    limit 10000
+}
+
+query blocked_by_ancestor() @description("Unfinished issues blocked because an ancestor passes a block down.") {
+    match {
+        $i: Issue
+        $i.status != "closed"
+        $i childOf{1,8} $a
+        $a.status != "closed"
+        $a blockedBy $b
+        $b.status != "closed"
+        not { $b childOf{1,8} $a }
+        not { $i childOf{1,8} $x  $x.status = "closed"  $x childOf{1,8} $a }
+    }
+    return { $i.slug, $i.title, $i.status, $i.priority, $a.slug as ancestor, $b.slug as blocker }
+    order { $i.priority asc, $i.slug asc, $b.slug asc }
+    limit 10000
+}
+
+query ancestor_blockers($id: String) @description("Blocks an issue inherits from its ancestors.") {
+    match {
+        $i: Issue { slug: $id }
+        $i childOf{1,8} $a
+        $a.status != "closed"
+        $a blockedBy $b
+        $b.status != "closed"
+        not { $b childOf{1,8} $a }
+        not { $i childOf{1,8} $x  $x.status = "closed"  $x childOf{1,8} $a }
+    }
+    return { $a.slug as ancestor, $b.slug as blocker, $b.title, $b.status }
+    order { $b.slug asc }
+    limit 500
+}
+
+query show($id: String) @description("One issue with every property except its embedding.") {
+    match { $i: Issue { slug: $id } }
+    return { $i }
+}
+
+query show_many($ids: [String]) @description("Several issues by slug.") {
+    match {
+        $i: Issue
+        $i.slug in $ids
+    }
+    return { $i }
+    order { $i.slug asc }
+    limit 8192
+}
+
+query out_links($id: String) @description("Edges leaving an issue: what it depends on, its parent, and annotations.") {
+    match {
+        $i: Issue { slug: $id }
+        $i $e:(blockedBy | childOf | relatesTo | discoveredFrom | duplicates | supersedes) $o
+    }
+    return { $e.@type as link, $o.slug, $o.title, $o.status }
+    order { $o.slug asc }
+    limit 2000
+}
+
+query in_links($id: String) @description("Edges arriving at an issue: what it blocks, its children, and annotations.") {
+    match {
+        $i: Issue { slug: $id }
+        $o $e:(blockedBy | childOf | relatesTo | discoveredFrom | duplicates | supersedes) $i
+    }
+    return { $e.@type as link, $o.slug, $o.title, $o.status }
+    order { $o.slug asc }
+    limit 2000
+}
+
+query comments($id: String) @description("Comments on an issue, oldest first.") {
+    match {
+        $i: Issue { slug: $id }
+        $c commentOn $i
+    }
+    return { $c.slug, $c.body, $c.author, $c.created_at }
+    order { $c.created_at asc, $c.slug asc }
+    limit 2000
+}
+
+query list($statuses: [String]) @description("Issues in the given statuses, highest priority first.") {
+    match {
+        $i: Issue
+        $i.status in $statuses
+    }
+    return { $i.slug, $i.title, $i.kind, $i.status, $i.priority, $i.assignee, $i.labels, $i.updated_at }
+    order { $i.priority asc, $i.updated_at desc, $i.slug asc }
+    limit 8192
+}
+
+query assigned($who: String) @description("Issues claimed by one actor that are still in progress.") {
+    match { $i: Issue { status: "in_progress", assignee: $who } }
+    return { $i.slug, $i.title, $i.kind, $i.priority, $i.lease_expires_at, $i.started_at }
+    order { $i.priority asc, $i.slug asc }
+    limit 500
+}
+
+query expired_leases() @description("In-progress issues whose claim lease has run out.") {
+    match {
+        $i: Issue { status: "in_progress" }
+        $i.lease_expires_at < now()
+    }
+    return { $i.slug, $i.title, $i.assignee, $i.lease_expires_at }
+    order { $i.lease_expires_at asc }
+    limit 2000
+}
+
+query children($id: String) @description("Direct children of an issue.") {
+    match {
+        $p: Issue { slug: $id }
+        $c childOf $p
+    }
+    return { $c.slug, $c.title, $c.status, $c.priority }
+    order { $c.priority asc, $c.slug asc }
+    limit 2000
+}
+
+query upstream($id: String) @description("Everything an issue transitively waits on, nearest first.") {
+    match {
+        $i: Issue { slug: $id }
+        $i blockedBy{1,16} $b
+    }
+    return { $b.slug, $b.title, $b.status, $b.priority }
+    order { $b.slug asc }
+    limit 2000
+}
+
+query downstream($id: String) @description("Everything transitively waiting on an issue.") {
+    match {
+        $i: Issue { slug: $id }
+        $d blockedBy{1,16} $i
+    }
+    return { $d.slug, $d.title, $d.status, $d.priority }
+    order { $d.slug asc }
+    limit 2000
+}
+
+query reaches($from: String, $to: String) @description("Whether a BlockedBy path leads from one issue to another; adding the reverse edge would form a cycle.") {
+    match {
+        $a: Issue { slug: $from }
+        $a blockedBy{1,32} $b
+        $b.slug = $to
+    }
+    return { $b.slug }
+    limit 1
+}
+
+query search($q: String) @description("Full-text search over titles and descriptions.") {
+    match { $i: Issue }
+    return { $i.slug, $i.title, $i.status, $i.priority }
+    order { rrf(bm25($i.title, $q), bm25($i.description, $q)) }
+    limit 25
+}
+
+query similar($q: String) @description("Issues whose title is semantically closest to the text. Needs embeddings.") {
+    match { $i: Issue }
+    return { $i.slug, $i.title, $i.status, nearest($i.embedding, $q) as distance }
+    order { nearest($i.embedding, $q) }
+    limit 10
+}
+
+query stats() @description("Issue counts by status.") {
+    match { $i: Issue }
+    return { $i.status, count($i) as issues }
+    order { $i.status asc }
+}
+
+query memories() @description("Every memory, most recently updated first.") {
+    match { $m: Memory }
+    return { $m.slug, $m.body, $m.created_by, $m.updated_at }
+    order { $m.updated_at desc, $m.slug asc }
+    limit 1000
+}
+
+query recall($q: String) @description("Memories ranked by full-text relevance.") {
+    match { $m: Memory }
+    return { $m.slug, $m.body, $m.updated_at }
+    order { bm25($m.body, $q) }
+    limit 20
+}
+
+query recall_semantic($q: String) @description("Memories ranked by meaning. Needs embeddings.") {
+    match { $m: Memory }
+    return { $m.slug, $m.body, $m.updated_at }
+    order { nearest($m.embedding, $q) }
+    limit 20
+}
+
+query memories_about($id: String) @description("Memories linked to one issue.") {
+    match {
+        $i: Issue { slug: $id }
+        $m memoryAbout $i
+    }
+    return { $m.slug, $m.body, $m.updated_at }
+    order { $m.updated_at desc }
+    limit 200
+}
+
+query all_links() @description("Every link between issues, for export.") {
+    match {
+        $a: Issue
+        $a $e:(blockedBy | childOf | relatesTo | discoveredFrom | duplicates | supersedes) $b
+    }
+    return { $e.@type as link, $a.slug as src, $b.slug as dst }
+    order { $a.slug asc, $b.slug asc }
+    limit 100000
+}
+
+query open_blockers_of($ids: [String]) @description("Open blockers of the given issues.") {
+    match {
+        $i: Issue
+        $i.slug in $ids
+        $i blockedBy $b
+        $b.status != "closed"
+    }
+    return { $i.slug, $b.slug as other }
+    limit 10000
+}
+
+query open_children_of($ids: [String]) @description("Unfinished children of the given issues.") {
+    match {
+        $i: Issue
+        $i.slug in $ids
+        $c childOf $i
+        $c.status != "closed"
+    }
+    return { $i.slug, $c.slug as other }
+    limit 10000
+}
+
+query lineage($id: String) @description("An issue's ancestors, nearest first.") {
+    match {
+        $i: Issue { slug: $id }
+        $i childOf{1,8} $a
+    }
+    return { $a.slug }
+    limit 8
+}
+
+query waits_on_root($ids: [String], $root: String) @description("Which of the given issues wait directly on one issue.") {
+    match {
+        $a: Issue
+        $a.slug in $ids
+        $a blockedBy $b
+        $b.slug = $root
+    }
+    return { $a.slug, $b.slug as other }
+    limit 100
+}
+
+query waits_on_subtree($ids: [String], $root: String) @description("Which of the given issues wait on a descendant of one issue.") {
+    match {
+        $a: Issue
+        $a.slug in $ids
+        $a blockedBy $b
+        $r: Issue { slug: $root }
+        $b childOf{1,8} $r
+    }
+    return { $a.slug, $b.slug as other }
+    limit 100
+}

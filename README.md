@@ -11,6 +11,7 @@ and a cluster declaration. Local examples use filesystem storage.
 | [Second brain](second-brain/) | `brain` | Personal projects, relationships and notes |
 | [VC operating system](vc-os/) | `vcos` | Deals, portfolio, relationships and investment beliefs |
 | [Development graph](dev-graph/) | `dev` | Issues, decisions, specifications and releases |
+| [Beads](beads/) | `beads` | A beads-style work queue for coding agents, with the `ob` client |
 
 ## Local setup
 

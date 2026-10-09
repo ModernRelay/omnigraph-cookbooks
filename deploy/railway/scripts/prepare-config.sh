@@ -13,7 +13,7 @@ case "$OMNIGRAPH_CLUSTER_URI" in
   *) echo "cluster root must be s3://bucket/prefix" >&2; exit 1 ;;
 esac
 case "$1" in
-  industry-intel|pharma-intel|second-brain|vc-os|dev-graph) ;;
+  industry-intel|pharma-intel|second-brain|vc-os|dev-graph|beads) ;;
   *) echo "unknown cookbook: $1" >&2; exit 1 ;;
 esac
 

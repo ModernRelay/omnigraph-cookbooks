@@ -1,0 +1,174 @@
+// Writes. Each query publishes at most one graph commit, and each `where`
+// re-checks the state it depends on, so a write retried after a concurrent
+// commit can never apply twice. Issues are created by `ob create` through a
+// strict JSONL append, which refuses an existing slug instead of upserting.
+
+// The claim is one conditional update on one row: of several agents racing
+// for the same issue, exactly one matches `status = "open"`.
+query claim($id: String, $who: String, $lease: DateTime?) @description("Atomically claim an open issue for an actor. Affects 0 nodes when someone else holds it.") {
+    update Issue set {
+        status: "in_progress",
+        assignee: $who,
+        started_at: now(),
+        updated_at: now(),
+        lease_expires_at: $lease
+    } where slug = $id and status = "open" and (assignee is null or assignee = $who)
+}
+
+query renew($id: String, $who: String, $lease: DateTime) @description("Extend the lease on an issue the actor holds.") {
+    update Issue set { lease_expires_at: $lease, updated_at: now() }
+    where slug = $id and status = "in_progress" and assignee = $who
+}
+
+query release($id: String, $who: String, $none: String?, $never: DateTime?) @description("Give back an issue the actor holds; it becomes open and unassigned.") {
+    update Issue set { status: "open", assignee: $none, lease_expires_at: $never, updated_at: now() }
+    where slug = $id and status = "in_progress" and assignee = $who
+}
+
+query reclaim_expired($none: String?, $never: DateTime?) @description("Reopen every in-progress issue whose lease has run out.") {
+    update Issue set { status: "open", assignee: $none, lease_expires_at: $never, updated_at: now() }
+    where status = "in_progress" and lease_expires_at < now()
+}
+
+query close($ids: [String], $reason: String?, $never: DateTime?) @description("Close issues in one commit. Their dependents become ready.") {
+    update Issue set {
+        status: "closed",
+        closed_at: now(),
+        close_reason: $reason,
+        lease_expires_at: $never,
+        updated_at: now()
+    } where slug in $ids and status != "closed"
+}
+
+query reopen($ids: [String], $none: String?, $never: DateTime?) @description("Reopen closed issues.") {
+    update Issue set { status: "open", closed_at: $never, close_reason: $none, updated_at: now() }
+    where slug in $ids and status = "closed"
+}
+
+query defer($ids: [String], $until: DateTime?) @description("Put issues on ice, optionally until a time.") {
+    update Issue set { status: "deferred", defer_until: $until, updated_at: now() }
+    where slug in $ids and status != "closed"
+}
+
+query undefer($ids: [String], $never: DateTime?) @description("Bring deferred issues back to open.") {
+    update Issue set { status: "open", defer_until: $never, updated_at: now() }
+    where slug in $ids and status = "deferred"
+}
+
+// Links. Every edge type is keyed by its endpoints, so adding a link twice is
+// a no-op rather than a duplicate.
+query link_blocks($src: String, $dst: String) @description("The first issue cannot start until the second is closed.") {
+    insert BlockedBy { from: $src, to: $dst }
+}
+
+query link_parent($src: String, $dst: String) @description("Make the second issue the parent of the first.") {
+    insert ChildOf { from: $src, to: $dst }
+}
+
+query link_related($src: String, $dst: String) {
+    insert RelatesTo { from: $src, to: $dst }
+}
+
+query link_discovered_from($src: String, $dst: String) {
+    insert DiscoveredFrom { from: $src, to: $dst }
+}
+
+query link_duplicates($src: String, $dst: String) {
+    insert Duplicates { from: $src, to: $dst }
+}
+
+query link_supersedes($src: String, $dst: String) {
+    insert Supersedes { from: $src, to: $dst }
+}
+
+query unlink_blocks($src: String, $dst: String) {
+    delete BlockedBy where @src = $src and @dst = $dst
+}
+
+query unlink_parent($src: String, $dst: String) {
+    delete ChildOf where @src = $src and @dst = $dst
+}
+
+query unlink_related($src: String, $dst: String) {
+    delete RelatesTo where @src = $src and @dst = $dst
+}
+
+query unlink_discovered_from($src: String, $dst: String) {
+    delete DiscoveredFrom where @src = $src and @dst = $dst
+}
+
+query unlink_duplicates($src: String, $dst: String) {
+    delete Duplicates where @src = $src and @dst = $dst
+}
+
+query unlink_supersedes($src: String, $dst: String) {
+    delete Supersedes where @src = $src and @dst = $dst
+}
+
+query comment($slug: String, $id: String, $body: String, $author: String?) @description("Add a comment to an issue.") {
+    insert Comment { slug: $slug, body: $body, author: $author, created_at: now() }
+    insert CommentOn { from: $slug, to: $id }
+}
+
+query remember($slug: String, $body: String, $who: String?) @description("Store or replace a memory under a key.") {
+    insert Memory { slug: $slug, body: $body, created_by: $who, updated_at: now() }
+}
+
+query remember_about($slug: String, $body: String, $who: String?, $id: String) @description("Store or replace a memory and link it to an issue.") {
+    insert Memory { slug: $slug, body: $body, created_by: $who, updated_at: now() }
+    insert MemoryAbout { from: $slug, to: $id }
+}
+
+query forget($slug: String) @description("Delete a memory.") {
+    delete Memory where slug = $slug
+}
+
+// Field edits are a per-issue compare-and-swap: every write stamps
+// `updated_at`, so `ob update` sends back the value it read, and a concurrent
+// edit makes this match nothing instead of losing the other writer's change.
+query edit($id: String, $expected: DateTime, $title: String, $description: String?, $design: String?,
+           $acceptance: String?, $notes: String?, $kind: String, $status: String, $priority: I32,
+           $labels: [String]?, $assignee: String?, $defer_until: DateTime?, $due_at: DateTime?,
+           $external_ref: String?, $metadata: String?) @description("Replace an issue's editable fields if it is unchanged since it was read.") {
+    update Issue set {
+        title: $title,
+        description: $description,
+        design: $design,
+        acceptance: $acceptance,
+        notes: $notes,
+        kind: $kind,
+        status: $status,
+        priority: $priority,
+        labels: $labels,
+        assignee: $assignee,
+        defer_until: $defer_until,
+        due_at: $due_at,
+        external_ref: $external_ref,
+        metadata: $metadata,
+        updated_at: now()
+    } where slug = $id and updated_at = $expected
+}
+
+query edit_embedded($id: String, $expected: DateTime, $title: String, $description: String?, $design: String?,
+                    $acceptance: String?, $notes: String?, $kind: String, $status: String, $priority: I32,
+                    $labels: [String]?, $assignee: String?, $defer_until: DateTime?, $due_at: DateTime?,
+                    $external_ref: String?, $metadata: String?, $embedding: Vector(1536)?) @description("As edit, also replacing the title embedding.") {
+    update Issue set {
+        title: $title,
+        description: $description,
+        design: $design,
+        acceptance: $acceptance,
+        notes: $notes,
+        kind: $kind,
+        status: $status,
+        priority: $priority,
+        labels: $labels,
+        assignee: $assignee,
+        defer_until: $defer_until,
+        due_at: $due_at,
+        external_ref: $external_ref,
+        metadata: $metadata,
+        embedding: $embedding,
+        updated_at: now()
+    } where slug = $id and updated_at = $expected
+}
