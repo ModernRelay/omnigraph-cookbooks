@@ -1,0 +1,61 @@
+# Operator-config example for the beads cookbook.
+# Your operator config lives at ~/.omnigraph/config.yaml (per-user, NOT committed).
+# Merge the `aliases:` below into it for short names over this graph's stored
+# queries. Point `local` at your running cluster server (`omnigraph-server
+# --cluster .`); alias invocation needs the server up.
+#
+# Read aliases bind to served stored queries by name; run with
+# `omnigraph alias <name> [args]` — args bind by NAME to the query's $params
+# (`args: [id]` fills `$id`). Operator aliases are READ-ONLY — run stored
+# *mutations* with `omnigraph mutate <name> --params '{…}'` (see the bottom), or
+# use the `ob` client in client/, which also retries lost races for you.
+servers:
+  local:
+    url: http://127.0.0.1:8080
+defaults:
+  server: local
+  default_graph: beads
+  output: table
+
+aliases:
+  # ── Work state (derived on every read) ───────────────────────
+  ready:          { server: local, graph: beads, query: ready }
+  ready-label:    { server: local, graph: beads, query: ready_labeled,        args: [label] }
+  ready-count:    { server: local, graph: beads, query: ready_count }
+  blocked:        { server: local, graph: beads, query: blocked }
+  blocked-parent: { server: local, graph: beads, query: blocked_by_ancestor }
+  mine:           { server: local, graph: beads, query: assigned,             args: [who] }
+  expired:        { server: local, graph: beads, query: expired_leases }
+  stats:          { server: local, graph: beads, query: stats }
+
+  # ── One issue ────────────────────────────────────────────────
+  issue:          { server: local, graph: beads, query: show,                 args: [id] }
+  waits-on:       { server: local, graph: beads, query: out_links,            args: [id] }
+  waited-on-by:   { server: local, graph: beads, query: in_links,             args: [id] }
+  inherited:      { server: local, graph: beads, query: ancestor_blockers,    args: [id] }
+  children:       { server: local, graph: beads, query: children,             args: [id] }
+  upstream:       { server: local, graph: beads, query: upstream,             args: [id] }
+  downstream:     { server: local, graph: beads, query: downstream,           args: [id] }
+  comments:       { server: local, graph: beads, query: comments,             args: [id] }
+  issue-memories: { server: local, graph: beads, query: memories_about,       args: [id] }
+
+  # ── Search and memory ────────────────────────────────────────
+  search:         { server: local, graph: beads, query: search,               args: [q] }
+  memories:       { server: local, graph: beads, query: memories }
+  recall:         { server: local, graph: beads, query: recall,               args: [q] }
+  # Semantic (needs an embedding provider + stored vectors; see README):
+  similar:        { server: local, graph: beads, query: similar,              args: [q] }
+  recall-meaning: { server: local, graph: beads, query: recall_semantic,      args: [q] }
+
+# ── Mutations (served stored mutations; NOT aliasable) ───────────────────────
+# The bearer identity determines authorization and commit attribution; $who is
+# application provenance stored in the row, not authority. A write that loses
+# the race for the branch head is refused before any effect (read_set_conflict):
+# rerun it. Every mutation here re-checks its own condition, so a rerun cannot
+# apply twice. Examples:
+#   omnigraph mutate claim --graph beads \
+#     --params '{"id":"lk-acl","who":"act-writer","lease":"2026-12-01T00:00:00Z"}'
+#   omnigraph mutate close --graph beads \
+#     --params '{"ids":["lk-acl"],"reason":"ACLs enforced server-side","never":null}'
+#   omnigraph mutate link_blocks --graph beads --params '{"src":"lk-search","dst":"lk-acl"}'
+# (with defaults.server/default_graph set, --server/--graph can be omitted.)

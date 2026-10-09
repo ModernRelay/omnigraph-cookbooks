@@ -5,8 +5,9 @@ links to the corresponding `CLAUDE.md`; edit the target once.
 
 ## Scope and sources
 
-These are five self-contained OmniGraph **0.13.0** bundles: schemas, seed data,
-stored queries and applied policies. There is no application code. The root
+These are six self-contained OmniGraph **0.13.0** bundles: schemas, seed data,
+stored queries and applied policies. The only application code is the beads
+cookbook's `ob` client in `beads/client/`, with its own tests. The root
 [README](README.md) owns setup, live updates and upgrades; individual cookbook
 guides own their domain model and worked queries.
 
@@ -17,6 +18,7 @@ guides own their domain model and worked queries.
 | `second-brain` | `brain` |
 | `vc-os` | `vcos` |
 | `dev-graph` | `dev` |
+| `beads` | `beads` |
 
 The graph ID is the key in `cluster.yaml`, not the folder name. Configurations
 omit `storage`, so local roots default to their directory. Explicit storage
@@ -29,10 +31,11 @@ from the released binary pin in `deploy/railway/Dockerfile`. Refresh with
 
 ## Changes and validation
 
-- Run `python3 scripts/check-cookbooks.py` for all five local journeys. It uses
+- Run `python3 scripts/check-cookbooks.py` for all six local journeys. It uses
   the released CLI/server, isolated operator homes and disposable roots; it
   never touches a deployed graph. The Railway config preparer has its own tests
-  under `deploy/railway/tests/`.
+  under `deploy/railway/tests/`. The beads client's
+  end-to-end tests run with `python3 -m unittest discover -s beads/client/tests`.
 - For a query edit, start with `omnigraph lint --schema schema.pg --query
   queries/<file>.gq`. This is an offline check. Comments in `.pg`/`.gq` use `//`.
 - Keep `seed.md` and `seed.jsonl` consistent. Preserve the domain examples and

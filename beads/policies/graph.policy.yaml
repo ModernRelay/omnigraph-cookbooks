@@ -1,0 +1,38 @@
+# Example roles. Tokens select actors; permissions come from this applied policy.
+# Agents that file, claim and close work run as writers; dashboards and
+# auditors run as readers, which can invoke stored reads but not mutations.
+version: 1
+groups:
+  readers: [act-admin, act-writer, act-reader]
+  writers: [act-admin, act-writer]
+  admins: [act-admin]
+protected_branches: [main]
+rules:
+  - id: read-data
+    allow:
+      actors: { group: readers }
+      actions: [read, export]
+      branch_scope: any
+  - id: invoke-stored-queries
+    allow:
+      actors: { group: readers }
+      actions: [invoke_query]
+  - id: write-data
+    allow:
+      actors: { group: writers }
+      actions: [change]
+      branch_scope: any
+  - id: plan-on-branches
+    allow:
+      actors: { group: writers }
+      actions: [branch_create, branch_delete]
+      target_branch_scope: any
+  - id: merge-plans
+    allow:
+      actors: { group: admins }
+      actions: [branch_merge]
+      target_branch_scope: any
+  - id: change-schema
+    allow:
+      actors: { group: admins }
+      actions: [schema_apply]
