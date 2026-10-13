@@ -1,7 +1,8 @@
 # Reference seed: "Larkspur" (fictional note-taking app)
 
 Human-readable twin of `seed.jsonl`. Every name is made up. Change both files
-together.
+together; `client/tests/test_ob.py` (`SeedTests`) checks the sets below. Dates
+are either past or far ahead, so the sets do not change with the calendar.
 
 **The project:** *Larkspur*, a note-taking app whose offline sync, shared
 notebooks and 0.9 release are being built by three agents: `agent-planner`
@@ -28,7 +29,7 @@ files work, `agent-builder` implements it, `agent-reviewer` tests it.
 |---|---|---|---|---|---|
 | `lk-sync` | epic | open | 0 | | |
 | `lk-schema` | task | closed | 1 | `lk-sync` | |
-| `lk-queue` | feature | in_progress (`agent-builder`, leased) | 1 | `lk-sync` | `lk-schema` (closed) |
+| `lk-queue` | feature | in_progress (`agent-builder`, lease lapsed 2026-09-30) | 1 | `lk-sync` | `lk-schema` (closed) |
 | `lk-conflict` | feature | open | 1 | `lk-sync` | `lk-queue` |
 | `lk-sync-docs` | task | open | 3 | `lk-sync` | `lk-conflict` |
 | `lk-crash-empty` | bug | open | 0 | | |
@@ -46,7 +47,7 @@ files work, `agent-builder` implements it, `agent-reviewer` tests it.
 | `lk-version` | chore | open | 3 | `lk-release` | |
 | `lk-queue-v1` | task | closed | 2 | | |
 | `lk-mobile-perf` | task | deferred | 3 | | |
-| `lk-telemetry` | feature | open, hidden until 2027-01-15 | 3 | | |
+| `lk-telemetry` | feature | open, hidden until 2099-01-01 | 3 | | |
 | `lk-search` | feature | open | 2 | | |
 
 Annotations: `lk-crash-empty` was discovered from `lk-queue`; `lk-crash-dup`
@@ -78,7 +79,10 @@ Each rule appears once:
   ready to claim, but `ob close lk-release` refuses while `lk-changelog` and
   `lk-version` are open.
 - **Deferral:** `lk-mobile-perf` is deferred and `lk-telemetry` is hidden until
-  2027, so neither is ready.
+  2099, so neither is ready.
+- **A lapsed lease waits for reclaim:** `agent-builder`'s lease on `lk-queue`
+  ran out on 2026-09-30, so the `expired` alias lists it. It stays in progress
+  until `ob reclaim` reopens it; then it is ready, and the sets above change.
 
 Loaded into beads (`bd` 1.3.1) through `ob export`, the same issues give the
 same ready and blocked sets.

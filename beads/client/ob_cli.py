@@ -36,9 +36,11 @@ ID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"  # Crockford base32, lowercase
 KINDS = ["bug", "feature", "task", "epic", "chore", "decision", "spike", "story", "milestone"]
 STATUSES = ["open", "in_progress", "deferred", "closed"]
 OPEN_STATUSES = ["open", "in_progress", "deferred"]
+# The fields the CAS edit writes back. ob has no flag for the lease; `ob update`
+# carries it so that moving an issue out of in_progress can clear it.
 EDITABLE = [
     "title", "description", "design", "acceptance", "notes", "kind", "status", "priority",
-    "labels", "assignee", "defer_until", "due_at", "external_ref", "metadata",
+    "labels", "assignee", "defer_until", "due_at", "external_ref", "metadata", "lease_expires_at",
 ]
 # `ob dep add --type` spelling -> (link mutation suffix, schema edge name).
 LINK_TYPES = {
@@ -62,12 +64,20 @@ EDGE_LABELS = {
 ICONS = {"open": "○", "in_progress": "◐", "deferred": "❄", "closed": "✓", "blocked": "●"}
 
 # A write that loses the race for the branch head is refused before it has
-# any effect ("reprepare from the current branch state"). Every ob write is
-# conditional or idempotent, so retrying from fresh state is always safe.
+# any effect ("reprepare from the current branch state"). Every ob write
+# re-checks its own condition, so rerunning it against fresh state is safe.
+# A write whose response is lost (a timeout, a dropped connection, a 502/503/
+# 504) is different: it may have landed, so ob reads before deciding, or stops
+# and says so; it never resends one blindly.
 CONFLICT_RETRIES = 24
 CONFLICT_BACKOFF_MAX = 0.4
 TRANSPORT_RETRIES = 5
 HTTP_API = "0.13"
+# Readiness follows parent links up to eight levels (queries/issues.gq), so ob
+# refuses a parent link that would make a hierarchy deeper than that.
+MAX_DEPTH = 8
+# Hop bound of `reaches`, `upstream` and the frontier queries.
+WALK_HOPS = 32
 
 
 class ObError(Exception):
@@ -82,6 +92,10 @@ class KeyConflict(ObError):
 
 class Conflict(ObError):
     pass
+
+
+class UnknownOutcome(ObError):
+    """A write was sent but no answer came back, so it may have landed."""
 
 
 # ---------------------------------------------------------------------------
@@ -145,9 +159,14 @@ def new_id(prefix: str, length: int = 6) -> str:
     return f"{prefix}-" + "".join(secrets.choice(ID_ALPHABET) for _ in range(length))
 
 
-def slugify(text: str, words: int = 5) -> str:
+def memory_key(text: str, words: int = 5) -> str:
+    """A readable key that differs whenever the text does: the first words
+    plus a short hash, so two memories that start alike never share a key and
+    remembering the same text twice stays one memory."""
+    import hashlib
+
     tokens = re.findall(r"[a-z0-9]+", text.lower())[:words]
-    return "-".join(tokens) or new_id("m")
+    return "-".join([*tokens, hashlib.sha256(text.strip().encode()).hexdigest()[:6]])
 
 
 def strip_row(row: dict) -> dict:
@@ -253,9 +272,6 @@ class Graph:
             store = str((cfg_dir / store).resolve())
         self.store = store
         self.embed = bool(cfg.get("embed"))
-        # Set when a request was resent after a lost response, so its first
-        # attempt may have landed. A conflict refusal never has an effect.
-        self.resent = False
         self.queries = query_index()
         if not self.server and not self.store:
             raise ObError("no graph configured: run `ob init` (or set OB_DIR, OB_STORE or OB_SERVER)")
@@ -283,7 +299,12 @@ class Graph:
         return ["--query", str(self.queries[name])]
 
     # -- HTTP transport --------------------------------------------------
-    def _request(self, method: str, path: str, body=None, query: dict | None = None) -> dict:
+    def _request(self, method: str, path: str, body=None, query: dict | None = None,
+                 replay_safe: bool = True) -> dict:
+        """One HTTP call. A read is resent after a lost response; a write
+        (`replay_safe=False`) only when it provably never started: a 429, or a
+        connection that was refused. Otherwise it raises UnknownOutcome."""
+        import socket
         import urllib.error  # imported lazily: ssl alone costs ~100 ms at startup
         import urllib.parse
         import urllib.request
@@ -300,6 +321,7 @@ class Graph:
             headers["Authorization"] = f"Bearer {self.token}"
         import random
 
+        last = TRANSPORT_RETRIES - 1
         delay = 0.05
         for attempt in range(TRANSPORT_RETRIES):
             try:
@@ -310,14 +332,19 @@ class Graph:
             except urllib.error.HTTPError as exc:
                 raw = exc.read()
                 payload = _parse_json(raw.decode(errors="replace")) or {}
-                if exc.code in (429, 502, 503, 504) and attempt < TRANSPORT_RETRIES - 1:
-                    self.resent = True  # every ob write is conditional or idempotent: resend
-                else:
-                    raise _classify(payload, f"HTTP {exc.code} from {method} {path}") from None
+                message = f"HTTP {exc.code} from {method} {path}"
+                gateway = exc.code in (502, 503, 504)
+                if gateway and not replay_safe:
+                    raise UnknownOutcome(payload.get("error") or message, payload) from None
+                if not (exc.code == 429 or gateway) or attempt == last:
+                    raise _classify(payload, message) from None
             except (urllib.error.URLError, TimeoutError, ConnectionError) as exc:
-                if attempt == TRANSPORT_RETRIES - 1:
-                    raise ObError(f"cannot reach {self.http}: {exc}") from None
-                self.resent = True
+                reason = exc.reason if isinstance(exc, urllib.error.URLError) else exc
+                never_sent = isinstance(reason, (ConnectionRefusedError, socket.gaierror))
+                if not (replay_safe or never_sent):
+                    raise UnknownOutcome(f"no response from {self.http} for {method} {path}: {reason}") from None
+                if attempt == last:
+                    raise ObError(f"cannot reach {self.http}: {reason}") from None
             time.sleep(delay + random.random() * delay)
             delay = min(delay * 2, 2.0)
         raise AssertionError("unreachable")
@@ -342,7 +369,7 @@ class Graph:
             body = {"params": params, "expect_mutation": mutation}
             if self.branch:
                 body["branch"] = self.branch
-            return self._request("POST", f"/queries/{name}", body)
+            return self._request("POST", f"/queries/{name}", body, replay_safe=not mutation)
         argv = ["mutate" if mutation else "query", name, *self._source(name), *self.address(),
                 "--params", json.dumps(params), "--json"]
         if self.branch:
@@ -371,7 +398,7 @@ class Graph:
                 body = {"data": path.read_text(), "mode": mode}
                 if self.branch:
                     body["branch"] = self.branch
-                return self._retrying(lambda: self._request("POST", "/load", body))
+                return self._retrying(lambda: self._request("POST", "/load", body, replay_safe=False))
             argv = ["load", "--data", str(path), "--mode", mode, *self.address(), "--json", "--quiet"]
             if self.branch:
                 argv += ["--branch", self.branch]
@@ -395,12 +422,13 @@ class Graph:
             if action == "list":
                 return self._request("GET", "/branches")
             if action == "create":
-                return self._request("POST", "/branches", {"name": name, "from": base})
+                return self._request("POST", "/branches", {"name": name, "from": base}, replay_safe=False)
             if action == "merge":
-                return self._request("POST", "/branches/merge", {"source": name, "target": base})
+                return self._request("POST", "/branches/merge", {"source": name, "target": base},
+                                     replay_safe=False)
             from urllib.parse import quote
 
-            return self._request("DELETE", f"/branches/{quote(name, safe='')}")
+            return self._request("DELETE", f"/branches/{quote(name, safe='')}", replay_safe=False)
         argv = ["branch", action, *([name] if name else []), *self.address(), "--json"]
         if action == "create":
             argv += ["--from", base]
@@ -586,34 +614,48 @@ def cmd_create(args, out: Out, g: Graph, cfg: dict):
             raise ObError(f"unknown dependency type {kind!r}")
         edges.append((edge, target))
     if args.parent:
-        waits = {target for edge, target in edges if edge == "BlockedBy"}
-        if waits:
-            above = {args.parent} | {r["slug"] for r in g.query("lineage", {"id": args.parent})}
-            if waits & above:
-                raise ObError(_ANCESTOR_BLOCK.format(child="a new issue", ancestor=sorted(waits & above)[0]))
         edges.append(("ChildOf", args.parent))
     if args.discovered_from:
         edges.append(("DiscoveredFrom", args.discovered_from))
+    # --parent and --deps parent:<id> are the same link, so one check covers both.
+    parents = sorted({target for edge, target in edges if edge == "ChildOf"})
+    if len(parents) > 1:
+        raise ObError(f"an issue has at most one parent; got {', '.join(parents)}")
+    if parents:
+        above = _above(g, parents[0])
+        waits = {target for edge, target in edges if edge == "BlockedBy"} & above
+        if waits:
+            raise ObError(_ANCESTOR_BLOCK.format(child="a new issue", ancestor=sorted(waits)[0]))
+
+    def ours(slug: str) -> bool:
+        existing = g.query("show", {"id": slug})
+        return bool(existing) and existing[0]["i"].get("created_at", "").startswith(created[:19]) \
+            and existing[0]["i"].get("title") == args.title
 
     # One strict append: the issue and all of its links publish as one commit,
-    # and an id that already exists is refused rather than overwritten.
+    # and an id that already exists is refused rather than overwritten. After
+    # a lost response the row itself says whether the append landed; resending
+    # the same id is safe because a second append of it is refused.
+    slug = args.id or new_id(prefix)
     for _ in range(5):
-        slug = args.id or new_id(prefix)
         rows = [{"type": "Issue", "data": {"slug": slug, **data}}]
         rows += [{"edge": edge, "from": slug, "to": target} for edge, target in edges]
         try:
             receipt = g.load(rows, "append")
             break
+        except UnknownOutcome:
+            if ours(slug):
+                receipt = {"commit": None}
+                break
         except KeyConflict:
-            existing = g.query("show", {"id": slug})
-            if existing and existing[0]["i"].get("created_at", "").startswith(created[:19]) \
-                    and existing[0]["i"].get("title") == args.title:
+            if ours(slug):
                 receipt = {"commit": None}  # an earlier attempt of ours landed
                 break
             if args.id:
                 raise ObError(f"issue {slug} already exists")
+            slug = new_id(prefix)
     else:
-        raise ObError("could not allocate an unused id")
+        raise ObError(f"could not create {slug}; check `ob show {slug}` before trying again")
     out.emit({"id": slug, "commit": (receipt.get("commit") or {}).get("graph_commit_id")},
              f"created {slug}: {args.title}")
 
@@ -693,10 +735,31 @@ def _filter_rows(rows: list[dict], args, me: str) -> list[dict]:
     return kept
 
 
+READY_LIMIT = 500  # the row limit of `ready` and `ready_filtered`
+
+
 def cmd_ready(args, out: Out, g: Graph, cfg: dict):
+    kinds = split_csv(args.type) or KINDS
+    excluded = set(split_csv(args.exclude_type))
     labels = split_csv(args.label)
-    rows = g.query("ready_labeled", {"label": labels[0]}) if labels else g.query("ready")
-    rows = _filter_rows(rows, args, g.actor)
+    assignee = args.assignee
+    if kinds == KINDS and not excluded and not labels and assignee is None and args.priority_max is None:
+        rows = g.query("ready")
+    else:
+        # Filter on the server, so the row limit applies to matching issues.
+        rows = g.query("ready_filtered", {
+            "kinds": [k for k in kinds if k not in excluded],
+            "max_priority": 4 if args.priority_max is None else args.priority_max,
+            "any_label": not labels, "label": labels[0] if labels else "",
+            "any_assignee": assignee is None, "unassigned": assignee == "none",
+            "assignees": [g.actor] if assignee == "me" else [assignee] if assignee not in (None, "none") else [],
+        })
+        if len(labels) > 1:  # GQ matches one list member per parameter; check the rest here
+            full = len(rows) == READY_LIMIT
+            rows = [r for r in rows if set(labels) <= set(r.get("labels") or [])]
+            if full:
+                print(f"ob: matched the first {READY_LIMIT} ready issues labeled {labels[0]}; "
+                      "more may carry every label", file=sys.stderr)
     if args.claim:
         # Take the oldest top-priority issue. Agents that lose that race would
         # all chase the next one too, so after a loss each walks the rest of
@@ -723,7 +786,11 @@ def cmd_ready(args, out: Out, g: Graph, cfg: dict):
 
 def cmd_list(args, out: Out, g: Graph, cfg: dict):
     statuses = split_csv(args.status) or (STATUSES if args.all else OPEN_STATUSES)
-    rows = _filter_rows(g.query("list", {"statuses": statuses}), args, g.actor)[: args.limit]
+    listed = g.query("list", {"statuses": statuses})
+    rows = _filter_rows(listed, args, g.actor)
+    if len(listed) == 8192 and len(rows) < len(listed):
+        print("ob: filtered the first 8192 issues the list query returns; more may match", file=sys.stderr)
+    rows = rows[: args.limit]
     out.emit(rows, lambda: "\n".join(issue_line(r) for r in rows) or "no issues")
 
 
@@ -761,19 +828,31 @@ def cmd_blocked(args, out: Out, g: Graph, cfg: dict):
 
 
 def _claim(g: Graph, slug: str, lease: str | None, confirm: bool = True) -> bool:
-    g.resent = False
-    receipt = g.mutate("claim", {"id": slug, "who": g.actor, "lease": parse_when(lease)})
-    if receipt.get("affected_nodes"):
-        return True
-    if not confirm and not g.resent:
-        return False  # someone else holds it; nothing of ours can have landed
-    # Zero rows: someone else holds it, it is ours already, or a resent
-    # request's first attempt landed. The row says which.
-    rows = g.query("show", {"id": slug})
-    if not rows:
-        raise ObError(f"no issue {slug}")
-    issue = rows[0]["i"]
-    return issue.get("status") == "in_progress" and issue.get("assignee") == g.actor
+    expires = parse_when(lease)
+    for _ in range(3):
+        try:
+            receipt = g.mutate("claim", {"id": slug, "who": g.actor, "lease": expires})
+        except UnknownOutcome:
+            receipt = None  # the row says whether it landed
+        if receipt and receipt.get("affected_nodes"):
+            return True
+        if receipt is not None and not confirm:
+            return False  # someone else holds it, or it is not open
+        # Zero rows: someone else holds it, it is ours already, or a lost
+        # response hides whether our claim landed. The row says which.
+        rows = g.query("show", {"id": slug})
+        if not rows:
+            raise ObError(f"no issue {slug}")
+        issue = rows[0]["i"]
+        if issue.get("status") == "in_progress" and issue.get("assignee") == g.actor:
+            if expires and receipt is not None:  # claiming again with a lease renews it
+                g.mutate("renew", {"id": slug, "who": g.actor, "lease": expires})
+            return True
+        claimable = issue.get("status") == "open" and issue.get("assignee") in (None, g.actor)
+        if receipt is not None or not claimable:
+            return False
+        # The claim did not land and the issue is still free: claim again.
+    raise UnknownOutcome(f"no answer to the claim on {slug}")
 
 
 def cmd_claim(args, out: Out, g: Graph, cfg: dict):
@@ -831,7 +910,7 @@ def cmd_reopen(args, out: Out, g: Graph, cfg: dict):
 
 
 def cmd_defer(args, out: Out, g: Graph, cfg: dict):
-    receipt = g.mutate("defer", {"ids": args.ids, "until": parse_when(args.until)})
+    receipt = g.mutate("defer", {"ids": args.ids, "until": parse_when(args.until), "none": None, "never": None})
     out.emit({"deferred": receipt.get("affected_nodes", 0)}, f"deferred {receipt.get('affected_nodes', 0)}")
 
 
@@ -840,25 +919,42 @@ def cmd_undefer(args, out: Out, g: Graph, cfg: dict):
     out.emit({"undeferred": receipt.get("affected_nodes", 0)}, f"undeferred {receipt.get('affected_nodes', 0)}")
 
 
+TIME_FIELDS = ("defer_until", "due_at", "lease_expires_at")
+
+
 def _edit(g: Graph, slug: str, change) -> dict:
-    """Read-modify-write guarded by the issue's own updated_at (per-issue CAS)."""
+    """Read-modify-write guarded by the issue's own updated_at (per-issue CAS).
+
+    The guard also makes a lost response safe to retry: if the first write
+    landed, `updated_at` moved and the re-read shows the change already made.
+    """
     import random
 
+    sent = None
     for _ in range(CONFLICT_RETRIES):
         issue = _require_issue(g, slug)
         fields = {k: issue.get(k) for k in EDITABLE}
+        for key in TIME_FIELDS:
+            if fields[key]:
+                fields[key] = as_param_time(fields[key])
         before = dict(fields)
         change(fields)
         if fields == before:
-            return {"changed": False}
+            return sent or {"changed": False}
         params = {"id": slug, "expected": as_param_time(issue["updated_at"]), **fields}
         name = "edit"
         if g.embed and fields["title"] != before["title"]:
             params["embedding"] = g.embed_text(slug, fields["title"])
             name = "edit_embedded"
-        if g.mutate(name, params).get("affected_nodes"):
-            return {"changed": True, "before": before, "after": fields}
+        try:
+            if g.mutate(name, params).get("affected_nodes"):
+                return {"changed": True, "before": before, "after": fields}
+        except UnknownOutcome:
+            sent = {"changed": True, "before": before, "after": fields}
+            continue  # the re-read shows whether it landed
         time.sleep(random.random() * 0.02)  # someone edited it first: re-read
+    if sent:
+        raise UnknownOutcome(f"no answer to the edit of {slug}")
     raise ObError(f"{slug} kept changing underneath the edit; try again")
 
 
@@ -883,20 +979,41 @@ def cmd_update(args, out: Out, g: Graph, cfg: dict):
     if args.metadata is not None:
         sets["metadata"] = check_json(args.metadata) if args.metadata else None
     add, remove = split_csv(args.add_label), set(split_csv(args.remove_label))
+    # In progress means held: `--status in_progress` claims the issue for you
+    # unless it names who holds it, and a claim sets both status and assignee,
+    # so it runs first and alone decides them.
+    claim = args.claim or (sets.get("status") == "in_progress" and "assignee" not in sets)
+    if claim:
+        if sets.get("assignee", g.actor) != g.actor:
+            raise ObError("--claim assigns the issue to you; drop --assignee or --claim")
+        if sets.get("status", "in_progress") != "in_progress":
+            raise ObError(f"--claim sets the status to in_progress, not {sets['status']}")
+        sets.pop("status", None)
+        sets.pop("assignee", None)
 
     def change(fields):
+        was = fields["status"]
         fields.update(sets)
         labels = [l for l in (fields.get("labels") or []) if l not in remove]
         labels += [l for l in add if l not in labels]
         fields["labels"] = labels or None
+        if was == "in_progress" and fields["status"] != "in_progress":
+            fields["lease_expires_at"] = None  # the claim ends with the status
+            if "assignee" not in sets:
+                fields["assignee"] = None
+        held = fields["status"] != "in_progress" or fields["assignee"]
+        if not held and ("status" in sets or "assignee" in sets):
+            raise ObError(f"an in-progress issue needs an assignee; use `ob release {args.id}` to give it back")
 
     result = {"changed": False}
-    if sets or add or remove:
-        result = _edit(g, args.id, change)
-    if args.claim:
+    if claim:
         if not _claim(g, args.id, args.lease):
-            raise ObError(f"could not claim {args.id}")
+            issue = _require_issue(g, args.id)
+            raise ObError(f"could not claim {args.id}: it is {issue.get('status')}"
+                          + (f", held by {issue['assignee']}" if issue.get("assignee") else ""), issue)
         result["claimed"] = True
+    if sets or add or remove:
+        result.update(_edit(g, args.id, change))
     out.emit({"id": args.id, **result}, f"updated {args.id}" if result.get("changed") or result.get("claimed")
              else f"{args.id} unchanged")
 
@@ -922,7 +1039,12 @@ def cmd_dep(args, out: Out, g: Graph, cfg: dict):
                 + [f"{EDGE_LABELS[l['link']][1]}: {l['slug']} [{l['status']}] {l['title']}" for l in ins])
                 or "no links")
         else:
-            up, down = g.parallel([("upstream", {"id": slug}), ("downstream", {"id": slug})])
+            up, down, up_far, down_far = g.parallel([
+                ("upstream", {"id": slug}), ("downstream", {"id": slug}),
+                ("waits_frontier", {"ids": [slug]}), ("waited_frontier", {"ids": [slug]})])
+            if up_far or down_far:
+                print(f"ob: the tree stops {WALK_HOPS} links from {slug}; the dependency chain goes on",
+                      file=sys.stderr)
             out.emit({"waits_on": up, "waited_on_by": down}, lambda: "\n".join(
                 [f"waits on   {r['slug']} [{r['status']}] {r['title']}" for r in up]
                 + [f"blocks     {r['slug']} [{r['status']}] {r['title']}" for r in down]) or "no dependencies")
@@ -937,25 +1059,15 @@ def cmd_dep(args, out: Out, g: Graph, cfg: dict):
         if src == dst:
             raise ObError("an issue cannot depend on itself")
         if edge == "BlockedBy":
-            cycle, above_src, above_dst = g.parallel([("reaches", {"from": dst, "to": src}),
-                                                      ("lineage", {"id": src}), ("lineage", {"id": dst})])
-            if cycle:
-                raise ObError(f"{dst} already waits on {src}; adding this dependency would form a cycle")
+            above_src, above_dst = g.parallel([("lineage", {"id": src}), ("lineage", {"id": dst})])
             if dst in {r["slug"] for r in above_src}:
                 raise ObError(_ANCESTOR_BLOCK.format(child=src, ancestor=dst))
             if src in {r["slug"] for r in above_dst}:
                 raise ObError(_DESCENDANT_BLOCK.format(parent=src, descendant=dst))
+            if _waits_on(g, dst, src):
+                raise ObError(f"{dst} already waits on {src}; adding this dependency would form a cycle")
         if edge == "ChildOf":
-            lineage, outs = g.parallel([("lineage", {"id": dst}), ("out_links", {"id": src})])
-            above = {dst} | {r["slug"] for r in lineage}
-            waits = {o["slug"] for o in outs if o["link"] == "BlockedBy"} & above
-            if waits:
-                raise ObError(_ANCESTOR_BLOCK.format(child=src, ancestor=sorted(waits)[0]))
-            on_root, on_subtree = g.parallel([("waits_on_root", {"ids": sorted(above), "root": src}),
-                                              ("waits_on_subtree", {"ids": sorted(above), "root": src})])
-            if on_root or on_subtree:
-                hit = (on_root or on_subtree)[0]
-                raise ObError(_DESCENDANT_BLOCK.format(parent=hit["slug"], descendant=hit["other"]))
+            _check_parent_link(g, src, dst)
         receipt = g.mutate(f"link_{mutation}", {"src": src, "dst": dst})
         verb = "linked"
     else:
@@ -963,6 +1075,70 @@ def cmd_dep(args, out: Out, g: Graph, cfg: dict):
         verb = "unlinked" if receipt.get("affected_edges") else "no such link"
     out.emit({"action": args.action, "type": edge, "from": src, "to": dst,
               "affected": receipt.get("affected_edges", 0)}, f"{verb}: {src} {EDGE_LABELS[edge][0]} {dst}")
+
+
+def _waits_on(g: Graph, start: str, target: str) -> bool:
+    """Whether `start` transitively waits on `target`, however long the chain.
+
+    `reaches` looks 32 links ahead. Hop counts are shortest distances, so
+    anything further lies beyond an issue exactly 32 links out, and the walk
+    goes on from those until no issue is left unvisited.
+    """
+    frontier, seen = [start], {start}
+    while frontier:
+        hit, beyond = g.parallel([("reaches", {"from": frontier, "to": target}),
+                                  ("waits_frontier", {"ids": frontier})])
+        if hit:
+            return True
+        if len(beyond) >= 10000:
+            raise ObError(f"too many issues lie more than {WALK_HOPS} links beyond {start} to check for a cycle")
+        frontier = [r["slug"] for r in beyond if r["slug"] not in seen]
+        seen.update(frontier)
+    return False
+
+
+def _above(g: Graph, parent: str) -> set[str]:
+    """`parent` and its ancestors: what a new child of `parent` sits under."""
+    lineage = [r["slug"] for r in g.query("lineage", {"id": parent})]
+    if len(lineage) + 1 > MAX_DEPTH:
+        raise ObError(_TOO_DEEP.format(depth=MAX_DEPTH))
+    return {parent, *lineage}
+
+
+def _check_parent_link(g: Graph, child: str, parent: str) -> None:
+    """Refuse a ChildOf link that would loop, nest deeper than readiness
+    follows, or make anything wait on its own ancestor or descendant.
+
+    The link puts every issue below `child`, and `child` itself, under
+    `parent` and everything above it. Both sets are complete because ob keeps
+    hierarchies within MAX_DEPTH, which `lineage` and `subtree` cover.
+    """
+    lineage, below = g.parallel([("lineage", {"id": parent}), ("subtree", {"id": child})])
+    above = {parent} | {r["slug"] for r in lineage}
+    if child in above:
+        raise ObError(f"{child} is already above {parent}; making it a child of {parent} would form a cycle")
+    if len(below) >= 10000:
+        raise ObError(f"{child} has too many descendants to check")
+    up = {r["slug"]: r["parent"] for r in below}
+
+    def depth(slug: str) -> int:  # levels below `child`
+        n = 0
+        while slug != child and n <= MAX_DEPTH:
+            slug, n = up.get(slug, child), n + 1
+        return n
+
+    height = max((depth(s) for s in up), default=0)
+    if len(above) + height > MAX_DEPTH:
+        raise ObError(_TOO_DEEP.format(depth=MAX_DEPTH))
+    moved = sorted({child, *up})
+    waits_up, waits_down = g.parallel([("waits_among", {"ids": moved, "targets": sorted(above)}),
+                                       ("waits_among", {"ids": sorted(above), "targets": moved})])
+    if waits_up:
+        hit = waits_up[0]
+        raise ObError(_ANCESTOR_BLOCK.format(child=hit["slug"], ancestor=hit["other"]))
+    if waits_down:
+        hit = waits_down[0]
+        raise ObError(_DESCENDANT_BLOCK.format(parent=hit["slug"], descendant=hit["other"]))
 
 
 # An ancestor cannot close while a descendant is open, so a descendant that
@@ -973,6 +1149,8 @@ _ANCESTOR_BLOCK = ("{child} cannot wait on its own ancestor {ancestor}: the ance
 # an explicit block from a parent onto its own descendant is refused too.
 _DESCENDANT_BLOCK = ("{parent} cannot wait on its own descendant {descendant}: a parent already "
                      "waits for its children to close")
+_TOO_DEEP = ("this would nest issues more than {depth} levels deep; readiness follows parent "
+             "links only that far")
 
 
 def cmd_comment(args, out: Out, g: Graph, cfg: dict):
@@ -999,7 +1177,7 @@ def cmd_similar(args, out: Out, g: Graph, cfg: dict):
 
 
 def cmd_remember(args, out: Out, g: Graph, cfg: dict):
-    key = args.key or slugify(args.text)
+    key = args.key or memory_key(args.text)
     params = {"slug": key, "body": args.text, "who": g.actor}
     if g.embed:
         row = {"type": "Memory", "data": {"slug": key, "body": args.text, "created_by": g.actor,
@@ -1218,16 +1396,26 @@ def cmd_import(args, out: Out, g: Graph, cfg: dict):
 
 
 def cmd_export(args, out: Out, g: Graph, cfg: dict):
-    issues, links = g.parallel([("list", {"statuses": STATUSES}), ("all_links", {})])
-    full = g.query("show_many", {"ids": [r["slug"] for r in issues]}) if issues else []
+    # Page through every issue by slug, with each page's links, so that no
+    # query limit can cut the export short.
+    full: list[dict] = []
+    outgoing: dict[str, list[dict]] = {}
+    after = ""
+    while True:
+        page = [row["i"] for row in g.query("export_issues", {"after": after})]
+        if not page:
+            break
+        links = g.query("links_from", {"ids": [i["slug"] for i in page]})
+        if len(links) >= 100000:
+            raise ObError(f"issues after {after or 'the start'} have too many links to export in one page")
+        for link in links:
+            outgoing.setdefault(link["src"], []).append({"slug": link["dst"], "link": link["link"]})
+        full += page
+        after = page[-1]["slug"]
     reverse = {edge: name for name, (_, edge) in LINK_TYPES.items()
                if name in ("blocks", "parent-child", "related", "discovered-from", "duplicates", "supersedes")}
-    outgoing: dict[str, list[dict]] = {}
-    for link in links:
-        outgoing.setdefault(link["src"], []).append({"slug": link["dst"], "link": link["link"]})
     beads = []
-    for row in full:
-        issue = row["i"]
+    for issue in full:
         outs = outgoing.get(issue["slug"], [])
         beads.append({
             "id": issue["slug"], "title": issue["title"], "description": issue.get("description"),
@@ -1282,16 +1470,25 @@ def build_parser() -> argparse.ArgumentParser:
     plain = {"color": False} if sys.version_info >= (3, 14) else {}
     p = argparse.ArgumentParser(prog="ob", description="Beads on OmniGraph: issue tracking for coding agents.",
                                 **plain)
-    p.add_argument("--json", action="store_true", help="machine-readable output")
-    p.add_argument("--dir", help="ob directory (default: nearest .ob/, or $OB_DIR)")
-    p.add_argument("--as", dest="actor", help="actor for this command (default: $OB_ACTOR, config, git email)")
-    p.add_argument("--branch", help="read and write a graph branch instead of main")
+    def global_flags(parser, suppress=False):
+        unset = {"default": argparse.SUPPRESS} if suppress else {}
+        parser.add_argument("--json", action="store_true", help="machine-readable output", **unset)
+        parser.add_argument("--dir", help="ob directory (default: nearest .ob/, or $OB_DIR)", **unset)
+        parser.add_argument("--as", dest="actor", help="actor for this command (default: $OB_ACTOR, config, git email)",
+                            **unset)
+        parser.add_argument("--branch", help="read and write a graph branch instead of main", **unset)
+
+    global_flags(p)
+    # The same flags after the subcommand (`ob ready --json`), as bd accepts
+    # them. SUPPRESS leaves the value parsed before the subcommand alone.
+    common = argparse.ArgumentParser(add_help=False, **plain)
+    global_flags(common, suppress=True)
     subparsers = p.add_subparsers(dest="command", required=True)
 
     class _Sub:  # every subcommand parser opts out of color too
         @staticmethod
         def add_parser(name, **kw):
-            return subparsers.add_parser(name, **plain, **kw)
+            return subparsers.add_parser(name, parents=[common], **plain, **kw)
 
     sub = _Sub()
 
@@ -1492,11 +1689,17 @@ def main(argv: list[str] | None = None) -> int:
         args.fn(args, out, g, cfg)
         return 0
     except ObError as exc:
+        message = str(exc)
+        unknown = isinstance(exc, UnknownOutcome)
+        if unknown:
+            message += ("; the write may have landed. Read the issue (`ob show <id>`) before running "
+                        "the command again")
         if args.json:
-            print(json.dumps({"error": str(exc), **({"detail": exc.payload} if exc.payload else {})}, indent=2))
+            print(json.dumps({"error": message, **({"outcome": "unknown"} if unknown else {}),
+                              **({"detail": exc.payload} if exc.payload else {})}, indent=2))
         else:
-            print(f"ob: {exc}", file=sys.stderr)
-        return 1
+            print(f"ob: {message}", file=sys.stderr)
+        return 3 if unknown else 1
 
 
 if __name__ == "__main__":

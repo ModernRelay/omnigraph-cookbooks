@@ -29,14 +29,21 @@ that concurrent agents need. The seed is a fictional note-taking app,
   `omnigraph queries list --server URL --graph beads`.
 - Readiness lives only in the queries. Do not add a stored `blocked` status or
   flag. If you change the `ready` rule, change `ready`, `ready_labeled`,
-  `ready_count` and `unblocked_open_count` together, and the positive forms
-  `blocked_by_ancestor` and `ancestor_blockers`.
+  `ready_filtered`, `ready_count` and `unblocked_open_count` together, and the
+  positive forms `blocked_by_ancestor` and `ancestor_blockers`.
 - A claim must stay one conditional `update` on the `Issue` row; an edge insert
   cannot re-check state.
 - A write refused with `read_set_conflict` had no effect; rerun it. Do not rerun
-  after a timeout or an unknown outcome without reading the issue first.
+  after a timeout or an unknown outcome without reading the issue first. `ob`
+  never resends such a write: it exits 3 with `"outcome": "unknown"`. Only
+  `claim`, `update` and `create` read the row and finish on their own.
+- A claim ends when its issue leaves `in_progress`: keep `release`,
+  `reclaim_expired`, `reopen` and `defer` clearing the assignee and lease.
 - Do not link an issue to wait on its own ancestor or descendant; `ob` refuses
-  both, as `bd` does.
+  both, as `bd` does. It also refuses parent loops and hierarchies deeper than
+  the eight levels readiness follows, so `lineage` and `subtree` see whole
+  trees.
 - After a query or client change, run `python3 -m unittest discover -s tests`
-  from `client/` (it needs the 0.13.0 `omnigraph`, and `omnigraph-server` for
-  the served test) as well as `../scripts/check-cookbooks.py`.
+  from `client/` (local graphs; it needs the 0.13.0 `omnigraph`) and
+  `../scripts/check-cookbooks.py`, which also drives `ob` against the served
+  cookbook. `SeedTests` pins the ready and blocked sets in `seed.md`.

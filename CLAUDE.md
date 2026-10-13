@@ -34,8 +34,9 @@ from the released binary pin in `deploy/railway/Dockerfile`. Refresh with
 - Run `python3 scripts/check-cookbooks.py` for all six local journeys. It uses
   the released CLI/server, isolated operator homes and disposable roots; it
   never touches a deployed graph. The Railway config preparer has its own tests
-  under `deploy/railway/tests/`. The beads client's
-  end-to-end tests run with `python3 -m unittest discover -s beads/client/tests`.
+  under `deploy/railway/tests/`. For beads the checker also drives the `ob`
+  client against the served graph; the client's local tests run with
+  `python3 -m unittest discover -s beads/client/tests`.
 - For a query edit, start with `omnigraph lint --schema schema.pg --query
   queries/<file>.gq`. This is an offline check. Comments in `.pg`/`.gq` use `//`.
 - Keep `seed.md` and `seed.jsonl` consistent. Preserve the domain examples and

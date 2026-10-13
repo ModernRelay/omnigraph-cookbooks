@@ -163,9 +163,12 @@ def qualify(name, graph, stored_query, workspace, env):
             assert request(url, f"/graphs/{graph}/queries/cookbook_check", "act-reader",
                            {"params": {}})["rows"] == [{"total": 1}]
             count()
+            if name == "beads":
+                beads_client_journey(url, env)
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
-            print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation", flush=True)
+            print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
+                  + (", ob client" if name == "beads" else ""), flush=True)
         finally:
             process.terminate()
             try:
@@ -173,6 +176,34 @@ def qualify(name, graph, stored_query, workspace, env):
             except subprocess.TimeoutExpired:
                 process.kill()
                 process.wait()
+
+
+def beads_client_journey(url, env):
+    """Drive beads' `ob` client over HTTP against the served graph: stored
+    queries only, the token's actor in history, and the reader's refusal."""
+    base = {k: v for k, v in env.items() if not k.startswith("OB_")}
+    base.update(OB_OMNIGRAPH=CLI, OB_SERVER=url, OB_GRAPH="beads")
+
+    def ob(actor, *args, ok=True):
+        result = subprocess.run([str(ROOT / "beads/client/ob"), "--json", *args], capture_output=True, text=True,
+                                timeout=120, env={**base, "OB_ACTOR": actor, "OB_TOKEN": TOKENS[actor]})
+        if (result.returncode == 0) != ok:
+            raise AssertionError(f"ob {args} as {actor}: exit {result.returncode}\n{result.stdout}{result.stderr}")
+        return json.loads(result.stdout) if ok else result
+
+    def ready(actor):
+        return [row["slug"] for row in ob(actor, "ready", "-n", "500")]
+
+    blocker = ob("act-admin", "create", "served blocker")["id"]
+    work = ob("act-admin", "create", "served work", "--deps", blocker)["id"]
+    assert blocker in ready("act-writer") and work not in ready("act-writer")
+    ob("act-writer", "claim", blocker)
+    ob("act-writer", "close", blocker)
+    assert work in ready("act-reader")
+    ob("act-reader", "claim", work, ok=False)
+    events = [(e["actor"], e["type"]) for e in ob("act-reader", "history", blocker)]
+    assert events == [("act-admin", "Issue"), ("act-admin", "BlockedBy"), ("act-writer", "Issue"),
+                      ("act-writer", "Issue")], events
 
 
 def main():

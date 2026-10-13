@@ -1,11 +1,18 @@
 """Measure ob on a synthetic project: command latency and parallel agents.
 
     python3 tests/bench_ob.py --issues 2000 --agents 8 --seconds 20
+    OB_TOKEN=... python3 tests/bench_ob.py --server http://127.0.0.1:8080
 
 Builds a random dependency DAG (with epics and parent links) in bd's JSONL
 format, imports it through `ob import`, then times each command and runs
 parallel agents that loop `ready --claim` / `close`. Every claim is checked:
 no issue may be claimed by two agents.
+
+By default it uses a scratch local graph. `--server` measures a running
+beads server instead (see ../README.md#local-setup) with a writer token in
+OB_TOKEN; everything happens on a scratch branch, deleted afterwards, so the
+graph's main branch is untouched. The benchmark never starts or bootstraps a
+server itself.
 """
 
 from __future__ import annotations
@@ -25,7 +32,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HERE / "tests"))
-from test_ob import OMNIGRAPH, SERVER, free_port, _lock_id  # noqa: E402
+from test_ob import OMNIGRAPH, clean_env  # noqa: E402
 
 OB = str(HERE / "ob")
 
@@ -60,23 +67,21 @@ LABELS = ["backend", "frontend", "infra", "docs", "urgent", "agent"]
 
 
 class Runner:
-    def __init__(self, workdir: str, server_url: str | None = None, token: str | None = None):
-        self.env = {**os.environ, "OB_OMNIGRAPH": OMNIGRAPH, "OB_DIR": f"{workdir}/.ob", "OB_ACTOR": "bench"}
-        for key in ("OB_STORE", "OB_SERVER"):
-            self.env.pop(key, None)
+    def __init__(self, workdir: str, server_url: str | None = None, token: str | None = None,
+                 branch: str | None = None):
         if server_url:
-            self.env.update({"OB_SERVER": server_url, "OB_GRAPH": "beads", "OB_TOKEN": token})
-            self.env.pop("OB_DIR")
+            self.env = clean_env(OB_OMNIGRAPH=OMNIGRAPH, OB_SERVER=server_url, OB_GRAPH="beads", OB_TOKEN=token,
+                                 OB_ACTOR="bench")
+        else:
+            self.env = clean_env(OB_OMNIGRAPH=OMNIGRAPH, OB_DIR=f"{workdir}/.ob", OB_ACTOR="bench")
+        self.branch = ["--branch", branch] if branch else []
 
-    served = False
-
-    def ob(self, *args, actor: str | None = None, check: bool = True):
+    def ob(self, *args, actor: str | None = None, check: bool = True, on_branch: bool = True):
         env = dict(self.env)
         if actor:
-            env["OB_ACTOR"] = actor
-            if self.served:
-                env["OB_TOKEN"] = f"{actor}-secret"
-        proc = subprocess.run([OB, "--json", *args], capture_output=True, text=True, env=env)
+            env["OB_ACTOR"] = actor  # one token for all agents: the claims still carry each name
+        branch = self.branch if on_branch else []
+        proc = subprocess.run([OB, "--json", *branch, *args], capture_output=True, text=True, env=env)
         if check and proc.returncode != 0:
             raise RuntimeError(f"ob {' '.join(args)}: {proc.stdout}{proc.stderr}")
         return json.loads(proc.stdout) if proc.stdout.strip() else None
@@ -90,40 +95,6 @@ class Runner:
         return statistics.median(samples) * 1000, result
 
 
-def start_server(workdir: str):
-    """Apply this directory's cluster into the scratch dir and serve it."""
-    cluster = Path(workdir) / "cluster"
-    cluster.mkdir()
-    bundle = HERE.parent
-    for name in ("cluster.yaml", "schema.pg"):
-        shutil.copy(bundle / name, cluster / name)
-    for directory in ("queries", "policies"):
-        shutil.copytree(bundle / directory, cluster / directory)
-    actors = ["bench"] + [f"agent-{i}" for i in range(64)]
-    listed = ", ".join(actors)
-    policy = cluster / "policies" / "graph.policy.yaml"
-    policy.write_text(policy.read_text()
-                      .replace("readers: [act-admin, act-writer, act-reader]", f"readers: [{listed}]")
-                      .replace("writers: [act-admin, act-writer]", f"writers: [{listed}]")
-                      .replace("admins: [act-admin]", "admins: [bench]"))
-    env = {**os.environ, "OMNIGRAPH_HOME": workdir}
-    applied = subprocess.run([OMNIGRAPH, "cluster", "apply", "--config", str(cluster), "--as", "bench", "--json"],
-                             capture_output=True, text=True, env=env, check=True)
-    subprocess.run([OMNIGRAPH, "cluster", "force-unlock", _lock_id(applied.stderr), "--config", str(cluster)],
-                   capture_output=True, env=env, check=True)
-    port = free_port()
-    tokens = {actor: f"{actor}-secret" for actor in actors}  # the server maps each token to its actor
-    server = subprocess.Popen([SERVER, "--cluster", str(cluster), "--bind", f"127.0.0.1:{port}"],
-                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                              env={**env, "OMNIGRAPH_SERVER_BEARER_TOKENS_JSON": json.dumps(tokens)})
-    for _ in range(300):
-        if subprocess.run(["curl", "-sf", f"http://127.0.0.1:{port}/readyz"], capture_output=True).returncode == 0:
-            return server, f"http://127.0.0.1:{port}"
-        time.sleep(0.2)
-    server.kill()
-    raise RuntimeError("server did not become ready")
-
-
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--issues", type=int, default=2000)
@@ -131,17 +102,20 @@ def main() -> int:
     parser.add_argument("--seconds", type=float, default=20)
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--keep", action="store_true", help="keep the scratch graph")
-    parser.add_argument("--served", action="store_true", help="serve the cluster and use ob's HTTP transport")
+    parser.add_argument("--server", help="URL of a running beads server; needs a writer token in OB_TOKEN")
     args = parser.parse_args()
 
     workdir = tempfile.mkdtemp(prefix="ob-bench-")
-    server = None
+    branch = None
     rows = []
     try:
-        if args.served:
-            server, url = start_server(workdir)
-            run = Runner(workdir, url, "bench-secret")
-            run.served = True
+        if args.server:
+            if not os.environ.get("OB_TOKEN"):
+                parser.error("--server needs a writer token in OB_TOKEN")
+            name = f"bench-{os.getpid()}"
+            run = Runner(workdir, args.server, os.environ["OB_TOKEN"], name)
+            run.ob("branch", "create", name, on_branch=False)
+            branch = name  # delete it afterwards
         else:
             run = Runner(workdir)
             run.ob("init", "--prefix", "bench")
@@ -222,7 +196,7 @@ def main() -> int:
                      f"{len(claims)} issues done, {len(claims) / elapsed:.1f}/s, "
                      f"{len(doubles)} double claims, {len(errors)} errors"))
 
-        mode = "served over HTTP" if args.served else "local store"
+        mode = f"served over HTTP, branch {branch}" if args.server else "local store"
         print(f"\nob on OmniGraph, {mode}: {args.issues} issues, {links} links "
               f"({subprocess.run([OMNIGRAPH, 'version'], capture_output=True, text=True).stdout.splitlines()[0]})\n")
         print("| operation | median ms | detail |")
@@ -233,11 +207,10 @@ def main() -> int:
             print("\nerrors:", *errors[:3], sep="\n  ")
         return 1 if doubles or errors else 0
     finally:
-        if server:
-            server.terminate()
-            server.wait(timeout=30)
+        if branch and not args.keep:
+            run.ob("branch", "delete", branch, on_branch=False, check=False)
         if args.keep:
-            print(f"\ngraph kept in {workdir}")
+            print(f"\ngraph kept in {branch or workdir}")
         else:
             shutil.rmtree(workdir, ignore_errors=True)
 

@@ -1,7 +1,13 @@
 // Writes. Each query publishes at most one graph commit, and each `where`
-// re-checks the state it depends on, so a write retried after a concurrent
-// commit can never apply twice. Issues are created by `ob create` through a
-// strict JSONL append, which refuses an existing slug instead of upserting.
+// re-checks the state it depends on, so a write refused by a concurrent
+// commit (`read_set_conflict`, no effect) can be rerun. A write whose response
+// was lost is different: it may have landed, so read before rerunning it.
+// Issues are created by `ob create` through a strict JSONL append, which
+// refuses an existing slug instead of upserting.
+//
+// A claim ends when its issue leaves `in_progress`: every such write clears
+// the lease, and release, reclaim, reopen and defer also clear the assignee,
+// so `claim` never meets a stale holder.
 
 // The claim is one conditional update on one row: of several agents racing
 // for the same issue, exactly one matches `status = "open"`.
@@ -40,14 +46,30 @@ query close($ids: [String], $reason: String?, $never: DateTime?) @description("C
     } where slug in $ids and status != "closed"
 }
 
-query reopen($ids: [String], $none: String?, $never: DateTime?) @description("Reopen closed issues.") {
-    update Issue set { status: "open", closed_at: $never, close_reason: $none, updated_at: now() }
-    where slug in $ids and status = "closed"
+query reopen($ids: [String], $none: String?, $never: DateTime?) @description("Reopen closed issues, unassigned, so anyone can claim them.") {
+    update Issue set {
+        status: "open",
+        closed_at: $never,
+        close_reason: $none,
+        assignee: $none,
+        lease_expires_at: $never,
+        updated_at: now()
+    } where slug in $ids and status = "closed"
 }
 
-query defer($ids: [String], $until: DateTime?) @description("Put issues on ice, optionally until a time.") {
+// Deferring an open issue keeps its assignee (work reserved for someone);
+// deferring one in progress ends the claim. Neither statement matches what
+// the other one changed.
+query defer($ids: [String], $until: DateTime?, $none: String?, $never: DateTime?) @description("Put issues on ice, optionally until a time; a claim on them ends.") {
     update Issue set { status: "deferred", defer_until: $until, updated_at: now() }
-    where slug in $ids and status != "closed"
+    where slug in $ids and status != "closed" and status != "in_progress"
+    update Issue set {
+        status: "deferred",
+        defer_until: $until,
+        assignee: $none,
+        lease_expires_at: $never,
+        updated_at: now()
+    } where slug in $ids and status = "in_progress"
 }
 
 query undefer($ids: [String], $never: DateTime?) @description("Bring deferred issues back to open.") {
@@ -129,7 +151,7 @@ query forget($slug: String) @description("Delete a memory.") {
 query edit($id: String, $expected: DateTime, $title: String, $description: String?, $design: String?,
            $acceptance: String?, $notes: String?, $kind: String, $status: String, $priority: I32,
            $labels: [String]?, $assignee: String?, $defer_until: DateTime?, $due_at: DateTime?,
-           $external_ref: String?, $metadata: String?) @description("Replace an issue's editable fields if it is unchanged since it was read.") {
+           $external_ref: String?, $metadata: String?, $lease_expires_at: DateTime?) @description("Replace an issue's editable fields if it is unchanged since it was read.") {
     update Issue set {
         title: $title,
         description: $description,
@@ -145,6 +167,7 @@ query edit($id: String, $expected: DateTime, $title: String, $description: Strin
         due_at: $due_at,
         external_ref: $external_ref,
         metadata: $metadata,
+        lease_expires_at: $lease_expires_at,
         updated_at: now()
     } where slug = $id and updated_at = $expected
 }
@@ -152,7 +175,8 @@ query edit($id: String, $expected: DateTime, $title: String, $description: Strin
 query edit_embedded($id: String, $expected: DateTime, $title: String, $description: String?, $design: String?,
                     $acceptance: String?, $notes: String?, $kind: String, $status: String, $priority: I32,
                     $labels: [String]?, $assignee: String?, $defer_until: DateTime?, $due_at: DateTime?,
-                    $external_ref: String?, $metadata: String?, $embedding: Vector(1536)?) @description("As edit, also replacing the title embedding.") {
+                    $external_ref: String?, $metadata: String?, $lease_expires_at: DateTime?,
+                    $embedding: Vector(1536)?) @description("As edit, also replacing the title embedding.") {
     update Issue set {
         title: $title,
         description: $description,
@@ -168,6 +192,7 @@ query edit_embedded($id: String, $expected: DateTime, $title: String, $descripti
         due_at: $due_at,
         external_ref: $external_ref,
         metadata: $metadata,
+        lease_expires_at: $lease_expires_at,
         embedding: $embedding,
         updated_at: now()
     } where slug = $id and updated_at = $expected

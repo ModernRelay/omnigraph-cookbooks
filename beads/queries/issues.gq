@@ -73,6 +73,31 @@ query ready_labeled($label: String) @description("Ready work carrying one label.
     limit 500
 }
 
+// `ob ready` filters on the server, so the 500-row limit applies to the
+// matching issues rather than to all ready work. A filter that is off passes
+// every value it would test (all kinds, priority 4) or sets its `$any_` flag.
+query ready_filtered($kinds: [String], $max_priority: I32, $any_label: Bool, $label: String,
+                     $any_assignee: Bool, $unassigned: Bool, $assignees: [String]) @description("Ready work of the given kinds and priorities, optionally with one label and an assignee (or none).") {
+    match {
+        $i: Issue { status: "open" }
+        $i.kind in $kinds
+        $i.priority <= $max_priority
+        $any_label = true or $label in $i.labels
+        $any_assignee = true or $i.assignee in $assignees or ($unassigned = true and $i.assignee is null)
+        $i.defer_until is null or $i.defer_until <= now()
+        not { $i blockedBy $b  $b.status != "closed" }
+        not { $i childOf $a  $a.status != "closed"  $a blockedBy $c  $c.status != "closed"
+              not { $c childOf{1,8} $a } }
+        not { $i childOf $p  $p.status != "closed"  $p childOf{1,7} $a  $a.status != "closed"
+              $a blockedBy $c  $c.status != "closed"
+              not { $c childOf{1,8} $a }
+              not { $p childOf{1,7} $x  $x.status = "closed"  $x childOf{1,7} $a } }
+    }
+    return { $i.slug, $i.title, $i.kind, $i.priority, $i.assignee, $i.labels, $i.created_at }
+    order { $i.priority asc, $i.created_at asc, $i.slug asc }
+    limit 500
+}
+
 query blocked() @description("Unfinished issues with an open direct blocker, one row per blocker.") {
     match {
         $i: Issue
@@ -119,16 +144,6 @@ query ancestor_blockers($id: String) @description("Blocks an issue inherits from
 query show($id: String) @description("One issue with every property except its embedding.") {
     match { $i: Issue { slug: $id } }
     return { $i }
-}
-
-query show_many($ids: [String]) @description("Several issues by slug.") {
-    match {
-        $i: Issue
-        $i.slug in $ids
-    }
-    return { $i }
-    order { $i.slug asc }
-    limit 8192
 }
 
 query out_links($id: String) @description("Edges leaving an issue: what it depends on, its parent, and annotations.") {
@@ -198,34 +213,61 @@ query children($id: String) @description("Direct children of an issue.") {
     limit 2000
 }
 
-query upstream($id: String) @description("Everything an issue transitively waits on, nearest first.") {
+// GQ needs a finite hop bound. `ob dep tree` says when a chain runs past it
+// (waits_frontier / waited_frontier), and the cycle guard walks on from there.
+query upstream($id: String) @description("What an issue transitively waits on, up to 32 links away.") {
     match {
         $i: Issue { slug: $id }
-        $i blockedBy{1,16} $b
+        $i blockedBy{1,32} $b
     }
     return { $b.slug, $b.title, $b.status, $b.priority }
     order { $b.slug asc }
     limit 2000
 }
 
-query downstream($id: String) @description("Everything transitively waiting on an issue.") {
+query downstream($id: String) @description("What transitively waits on an issue, up to 32 links away.") {
     match {
         $i: Issue { slug: $id }
-        $d blockedBy{1,16} $i
+        $d blockedBy{1,32} $i
     }
     return { $d.slug, $d.title, $d.status, $d.priority }
     order { $d.slug asc }
     limit 2000
 }
 
-query reaches($from: String, $to: String) @description("Whether a BlockedBy path leads from one issue to another; adding the reverse edge would form a cycle.") {
+query reaches($from: [String], $to: String) @description("Whether a BlockedBy path of at most 32 links leads from any of the given issues to another; adding the reverse edge would form a cycle.") {
     match {
-        $a: Issue { slug: $from }
+        $a: Issue
+        $a.slug in $from
         $a blockedBy{1,32} $b
         $b.slug = $to
     }
     return { $b.slug }
     limit 1
+}
+
+// Hop counts are shortest distances, so every issue further away than 32
+// links lies beyond one of these; `ob dep add` continues `reaches` from them.
+query waits_frontier($ids: [String]) @description("Issues exactly 32 BlockedBy links beyond the given issues.") {
+    match {
+        $a: Issue
+        $a.slug in $ids
+        $a blockedBy{32,32} $b
+    }
+    return { $b.slug }
+    order { $b.slug asc }
+    limit 10000
+}
+
+query waited_frontier($ids: [String]) @description("Issues exactly 32 BlockedBy links before the given issues.") {
+    match {
+        $a: Issue
+        $a.slug in $ids
+        $d blockedBy{32,32} $a
+    }
+    return { $d.slug }
+    order { $d.slug asc }
+    limit 10000
 }
 
 query search($q: String) @description("Full-text search over titles and descriptions.") {
@@ -279,9 +321,21 @@ query memories_about($id: String) @description("Memories linked to one issue.") 
     limit 200
 }
 
-query all_links() @description("Every link between issues, for export.") {
+// Export pages through issues by slug, so no result limit truncates it.
+query export_issues($after: String) @description("Issues after a slug, in slug order, 1,000 at a time.") {
+    match {
+        $i: Issue
+        $i.slug > $after
+    }
+    return { $i }
+    order { $i.slug asc }
+    limit 1000
+}
+
+query links_from($ids: [String]) @description("Every link leaving the given issues, for export.") {
     match {
         $a: Issue
+        $a.slug in $ids
         $a $e:(blockedBy | childOf | relatesTo | discoveredFrom | duplicates | supersedes) $b
     }
     return { $e.@type as link, $a.slug as src, $b.slug as dst }
@@ -311,7 +365,9 @@ query open_children_of($ids: [String]) @description("Unfinished children of the 
     limit 10000
 }
 
-query lineage($id: String) @description("An issue's ancestors, nearest first.") {
+// `ob` keeps every hierarchy within the eight levels readiness follows, so
+// these walks see whole lineages and subtrees.
+query lineage($id: String) @description("An issue's ancestors, up to eight levels.") {
     match {
         $i: Issue { slug: $id }
         $i childOf{1,8} $a
@@ -320,25 +376,25 @@ query lineage($id: String) @description("An issue's ancestors, nearest first.") 
     limit 8
 }
 
-query waits_on_root($ids: [String], $root: String) @description("Which of the given issues wait directly on one issue.") {
+query subtree($id: String) @description("An issue's descendants, up to eight levels, each with its parent.") {
     match {
-        $a: Issue
-        $a.slug in $ids
-        $a blockedBy $b
-        $b.slug = $root
+        $r: Issue { slug: $id }
+        $d childOf{1,8} $r
+        $d childOf $p
     }
-    return { $a.slug, $b.slug as other }
-    limit 100
+    return { $d.slug, $p.slug as parent }
+    order { $d.slug asc }
+    limit 10000
 }
 
-query waits_on_subtree($ids: [String], $root: String) @description("Which of the given issues wait on a descendant of one issue.") {
+query waits_among($ids: [String], $targets: [String]) @description("Which of the given issues wait directly on any of the targets.") {
     match {
         $a: Issue
         $a.slug in $ids
         $a blockedBy $b
-        $r: Issue { slug: $root }
-        $b childOf{1,8} $r
+        $b.slug in $targets
     }
     return { $a.slug, $b.slug as other }
+    order { $a.slug asc, $b.slug asc }
     limit 100
 }

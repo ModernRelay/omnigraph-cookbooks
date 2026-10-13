@@ -2,20 +2,20 @@
 
 Run from beads/client:  python3 -m unittest discover -s tests -v
 The omnigraph binary comes from $OB_OMNIGRAPH, else PATH (the cookbooks pin
-the 0.13.0 release). Served-mode tests also need omnigraph-server and skip
-without it.
+the 0.13.0 release). The tests use local graphs only; ob against the served
+cookbook is part of the repository checker, scripts/check-cookbooks.py.
 """
 
 from __future__ import annotations
 
 import concurrent.futures
+import http.server
 import json
 import os
 import shutil
-import socket
 import subprocess
 import tempfile
-import time
+import threading
 import unittest
 from pathlib import Path
 
@@ -26,7 +26,7 @@ REPO = BUNDLE.parent
 
 
 def find_binary(name: str) -> str | None:
-    env = os.environ.get("OB_OMNIGRAPH" if name == "omnigraph" else "OB_OMNIGRAPH_SERVER")
+    env = os.environ.get("OB_OMNIGRAPH")
     if env:
         return env
     for build in ("release", "debug"):
@@ -37,7 +37,14 @@ def find_binary(name: str) -> str | None:
 
 
 OMNIGRAPH = find_binary("omnigraph")
-SERVER = find_binary("omnigraph-server")
+
+
+def clean_env(**extra: str) -> dict:
+    """The caller's environment without any ob or OmniGraph setting, so that a
+    shell configured for a real graph (OB_TOKEN, OB_SERVER, ...) cannot leak in."""
+    env = {k: v for k, v in os.environ.items() if not k.startswith(("OB_", "OMNIGRAPH_"))}
+    env.update(extra)
+    return env
 
 
 class ObCase(unittest.TestCase):
@@ -49,9 +56,8 @@ class ObCase(unittest.TestCase):
         if not OMNIGRAPH:
             self.skipTest("omnigraph binary not found")
         self.tmp = tempfile.mkdtemp(prefix="ob-test-")
-        self.env = {**os.environ, "OB_OMNIGRAPH": OMNIGRAPH, "OB_DIR": f"{self.tmp}/.ob", "OB_ACTOR": "alice"}
-        for key in ("OB_STORE", "OB_SERVER", "OB_GRAPH"):
-            self.env.pop(key, None)
+        self.env = clean_env(OB_OMNIGRAPH=OMNIGRAPH, OB_DIR=f"{self.tmp}/.ob", OB_ACTOR="alice",
+                             OMNIGRAPH_HOME=f"{self.tmp}/home")
         if self.embed:
             self.env["OMNIGRAPH_EMBEDDINGS_MOCK"] = "1"
         args = ["init"] + (["--embed"] if self.embed else [])
@@ -83,6 +89,12 @@ class ObCase(unittest.TestCase):
 
     def ready(self, *args) -> list[str]:
         return [r["slug"] for r in self.ob("ready", *args)]
+
+    def import_beads(self, beads: list[dict]) -> dict:
+        path = Path(self.tmp) / "import.jsonl"
+        path.write_text("".join(json.dumps({"status": "open", "priority": 2, "created_at": "2026-01-01T00:00:00Z",
+                                            **b}) + "\n" for b in beads))
+        return self.ob("import", str(path))
 
     def commits(self) -> int:
         proc = subprocess.run([OMNIGRAPH, "commit", "list", "--store", f"{self.tmp}/.ob/graph.omni", "--json"],
@@ -159,6 +171,22 @@ class ReadinessTests(ObCase):
         self.assertEqual(len(self.ready("--exclude-type", "bug")), 1)
         self.assertEqual(self.ready("--priority-max", "1"), [bug])
 
+    def test_filters_apply_before_the_ready_limit(self):
+        tasks = [{"id": f"t-{i:04d}", "title": f"task {i}", "priority": 0} for i in range(520)]
+        bugs = [{"id": "bug-1", "title": "a bug", "issue_type": "bug", "priority": 3, "labels": ["backend", "urgent"]},
+                {"id": "bug-2", "title": "bob's bug", "issue_type": "bug", "priority": 3, "labels": ["backend"],
+                 "assignee": "bob"}]
+        self.import_beads(tasks + bugs)
+        self.assertEqual(len(self.ob("ready", "-n", "1000")), 500)
+        self.assertEqual(self.ready("-t", "bug"), ["bug-1", "bug-2"])
+        self.assertEqual(self.ready("--exclude-type", "task"), ["bug-1", "bug-2"])
+        self.assertEqual(self.ready("-t", "bug", "--priority-max", "2"), [])
+        self.assertEqual(self.ready("-l", "backend", "-l", "urgent"), ["bug-1"])
+        self.assertEqual(self.ready("-t", "bug", "-a", "none"), ["bug-1"])
+        self.assertEqual(self.ready("-a", "bob"), ["bug-2"])
+        self.assertEqual(self.ready("-a", "me"), [])
+        self.assertEqual(self.ob("ready", "--claim", "-t", "bug", actor="carol")["claimed"], "bug-1")
+
 
 class WriteTests(ObCase):
     def test_create_with_links_is_one_strict_commit(self):
@@ -209,6 +237,36 @@ class WriteTests(ObCase):
         self.assertEqual(self.ob("close", epic, child, grandchild)["closed"], 3)
         stray = self.create("stray", "--deps", other)
         self.assertEqual(self.ob("close", stray, "--force")["closed"], 1)
+
+    def test_parent_links_cannot_loop_or_trap_descendants(self):
+        a = self.create("a", "-t", "epic")
+        b = self.create("b", "--parent", a)
+        self.assertIn("cycle", self.ob_fails("dep", "add", a, b, "--type", "parent"))
+        # Moving x under p would leave x's child c waiting on its new ancestor.
+        p = self.create("p", "-t", "epic")
+        x = self.create("x", "-t", "epic")
+        c = self.create("c", "--parent", x, "--deps", p)
+        self.assertIn(f"{c} cannot wait on its own ancestor {p}", self.ob_fails("dep", "add", x, p, "--type", "parent"))
+        # q waits on c, so x (and c with it) cannot move below q.
+        q = self.create("q", "-t", "epic")
+        self.ob("dep", "add", q, c)
+        self.assertIn("own descendant", self.ob_fails("dep", "add", x, q, "--type", "parent"))
+        # The rules hold however the parent is spelled.
+        e = self.create("e", "-t", "epic")
+        self.assertIn("own ancestor", self.ob_fails("create", "x2", "--deps", e, "--deps", f"parent-child:{e}"))
+        self.assertIn("at most one parent", self.ob_fails("create", "x3", "--parent", e, "--deps", f"parent:{a}"))
+        self.assertEqual(self.ob("close", a, b)["closed"], 2)
+
+    def test_hierarchies_stay_within_eight_levels(self):
+        chain = [self.create("level 0", "-t", "epic")]
+        for depth in range(1, 9):
+            chain.append(self.create(f"level {depth}", "--parent", chain[-1]))
+        self.assertIn("8 levels", self.ob_fails("create", "level 9", "--parent", chain[-1]))
+        loose = self.create("loose")
+        self.assertIn("8 levels", self.ob_fails("dep", "add", loose, chain[-1], "--type", "parent"))
+        top = self.create("new top", "-t", "epic")
+        self.assertIn("8 levels", self.ob_fails("dep", "add", chain[0], top, "--type", "parent"))
+        self.ob("dep", "add", loose, chain[-2], "--type", "parent")
 
     def test_close_and_reopen_batch(self):
         a, b = self.create("a"), self.create("b")
@@ -265,13 +323,60 @@ class ClaimTests(ObCase):
         self.ob("release", a, actor="carol")
         self.assertEqual(self.ob("show", a).get("assignee"), None)
 
+    def test_claiming_again_with_a_lease_renews_it(self):
+        a = self.create("a")
+        self.ob("claim", a, "--lease", "1h", actor="bob")
+        first = self.ob("show", a)["lease_expires_at"]
+        self.ob("claim", a, "--lease", "4h", actor="bob")
+        self.assertGreater(self.ob("show", a)["lease_expires_at"], first)
+
+    def test_a_claim_ends_when_its_issue_leaves_in_progress(self):
+        a = self.create("a")
+        self.ob("claim", a, "--lease", "1h", actor="bob")
+        self.ob("close", a, actor="bob")
+        self.ob("reopen", a)
+        self.assertEqual(self.ob("show", a).get("assignee"), None)
+        self.ob("claim", a, "--lease", "1h", actor="carol")
+        self.ob("defer", a)
+        shown = self.ob("show", a)
+        self.assertEqual((shown["status"], shown.get("assignee"), shown.get("lease_expires_at")),
+                         ("deferred", None, None))
+        self.ob("undefer", a)
+        self.ob("claim", a, "--lease", "1h", actor="dave")
+        self.ob("update", a, "--status", "open", actor="dave")
+        shown = self.ob("show", a)
+        self.assertEqual((shown["status"], shown.get("assignee"), shown.get("lease_expires_at")), ("open", None, None))
+        self.assertEqual(self.ob("ready", "--claim", actor="erin")["claimed"], a)
+        reserved = self.create("reserved for frank", "-a", "frank")
+        self.ob("defer", reserved)
+        self.ob("undefer", reserved)
+        self.assertEqual(self.ob("show", reserved)["assignee"], "frank")  # a reservation is not a claim
+
+    def test_update_claims_rather_than_leaving_work_ownerless(self):
+        a = self.create("a")
+        self.ob("update", a, "--status", "in_progress", "--claim", "--lease", "1h", actor="bob")
+        shown = self.ob("show", a)
+        self.assertEqual((shown["status"], shown["assignee"]), ("in_progress", "bob"))
+        self.assertTrue(shown["lease_expires_at"])
+        b = self.create("b")
+        self.ob("update", b, "--status", "in_progress", "--notes", "started", actor="bob")
+        shown = self.ob("show", b)
+        self.assertEqual((shown["status"], shown["assignee"], shown["notes"]), ("in_progress", "bob", "started"))
+        c = self.create("c")
+        self.ob("claim", c, actor="carol")
+        self.assertIn("held by carol", self.ob_fails("update", c, "--claim", "--notes", "x", actor="bob"))
+        self.assertIsNone(self.ob("show", c).get("notes"))  # nothing landed
+        self.assertIn("--claim assigns", self.ob_fails("update", a, "--claim", "--assignee", "zed", actor="bob"))
+        self.assertIn("needs an assignee", self.ob_fails("update", a, "--assignee", "", actor="bob"))
+
 
 class KnowledgeTests(ObCase):
     def test_comments_memories_and_prime(self):
         a = self.create("auth bug")
         self.ob("comment", a, "reproduced on staging")
         self.ob("remember", "Session tokens live in redis", "--key", "tokens", "--about", a)
-        self.ob("remember", "Run migrations before tests")
+        migrations = self.ob("remember", "Run migrations before tests")["key"]
+        self.assertTrue(migrations.startswith("run-migrations-before-tests-"))
         shown = self.ob("show", a)
         self.assertEqual([c["body"] for c in shown["comments"]], ["reproduced on staging"])
         self.assertEqual([m["slug"] for m in shown["memories"]], ["tokens"])
@@ -282,7 +387,14 @@ class KnowledgeTests(ObCase):
         self.ob("remember", "Session tokens live in valkey now", "--key", "tokens")
         self.assertEqual(self.ob("recall", "valkey")[0]["slug"], "tokens")
         self.ob("forget", "tokens")
-        self.assertEqual([m["slug"] for m in self.ob("memories")], ["run-migrations-before-tests"])
+        self.assertEqual([m["slug"] for m in self.ob("memories")], [migrations])
+
+    def test_memories_that_start_alike_keep_separate_keys(self):
+        first = self.ob("remember", "Do not push to main without review")["key"]
+        second = self.ob("remember", "Do not push to main on Fridays")["key"]
+        self.assertNotEqual(first, second)
+        self.assertEqual(self.ob("remember", "Do not push to main on Fridays")["key"], second)
+        self.assertEqual(len(self.ob("memories")), 2)
 
     def test_history_comes_from_commits_with_actors(self):
         a = self.create("a")
@@ -334,6 +446,27 @@ class InterchangeTests(ObCase):
                          [("bd-a1", "parent-child"), ("bd-b2", "blocks")])
         self.assertEqual(self.ob("import", str(bd))["issues"], 4)  # re-import converges
 
+    def test_export_pages_past_query_limits(self):
+        self.import_beads([{"id": f"e-{i:04d}", "title": f"issue {i}",
+                            "dependencies": [{"depends_on_id": f"e-{i - 1:04d}", "type": "blocks"}] if i else []}
+                           for i in range(1100)])
+        out = Path(self.tmp) / "out.jsonl"
+        self.run_ob("export", "-o", str(out))
+        exported = {b["id"]: b for b in map(json.loads, out.read_text().splitlines())}
+        self.assertEqual(len(exported), 1100)
+        self.assertEqual(exported["e-1099"]["dependencies"], [{"issue_id": "e-1099", "depends_on_id": "e-1098",
+                                                               "type": "blocks"}])
+
+    def test_cycle_guard_and_tree_see_past_the_hop_bound(self):
+        n = 70  # more than two frontier steps of 32 links
+        self.import_beads([{"id": f"a-{i:02d}", "title": f"step {i}",
+                            "dependencies": [{"depends_on_id": f"a-{i + 1:02d}", "type": "blocks"}] if i < n - 1 else []}
+                           for i in range(n)])
+        self.assertIn("cycle", self.ob_fails("dep", "add", f"a-{n - 1}", "a-00"))
+        proc = self.run_ob("dep", "tree", "a-00")
+        self.assertIn("stops 32 links", proc.stderr)
+        self.assertEqual(len(json.loads(proc.stdout)["waits_on"]), 32)
+
     def test_plan_on_a_branch_then_merge(self):
         base = self.create("existing")
         self.ob("branch", "create", "plan")
@@ -364,89 +497,104 @@ class EmbeddingTests(ObCase):
         self.assertEqual(self.ob("recall", "Deploys go through the staging gate", "--semantic")[0]["slug"], "deploys")
 
 
-def free_port() -> int:
-    with socket.socket() as s:
-        s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1]
+class CliTests(ObCase):
+    def test_global_flags_work_after_the_subcommand(self):
+        a = self.create("a")
+
+        def raw(*args):
+            return subprocess.run([str(OB), *args], capture_output=True, text=True, env=self.env, cwd=self.tmp,
+                                  check=True).stdout
+
+        self.assertEqual(json.loads(raw("ready", "--json"))[0]["slug"], a)
+        raw("claim", a, "--as", "bob")
+        self.assertEqual(self.ob("show", a)["assignee"], "bob")
+        self.assertEqual(json.loads(raw("--json", "show", a))["assignee"], "bob")
 
 
-@unittest.skipUnless(OMNIGRAPH and SERVER, "omnigraph-server binary not found")
-class ServedModeTests(unittest.TestCase):
-    """The cluster in this directory, served, with stored queries and policy."""
+class SeedTests(ObCase):
+    """The seed must produce exactly the sets seed.md lists, whatever the date."""
 
-    @classmethod
-    def setUpClass(cls):
-        cls.tmp = tempfile.mkdtemp(prefix="ob-served-")
-        cluster = Path(cls.tmp) / "cluster"
-        cluster.mkdir()
-        for name in ("cluster.yaml", "schema.pg"):
-            shutil.copy(BUNDLE / name, cluster / name)
-        for directory in ("queries", "policies"):
-            shutil.copytree(BUNDLE / directory, cluster / directory)
-        env = {**os.environ, "OMNIGRAPH_HOME": cls.tmp}
-        apply = subprocess.run([OMNIGRAPH, "cluster", "apply", "--config", str(cluster), "--as", "act-admin", "--json"],
-                               capture_output=True, text=True, env=env)
-        if apply.returncode != 0:
-            raise RuntimeError(f"cluster apply failed: {apply.stdout}{apply.stderr}")
-        lock = _lock_id(apply.stderr + apply.stdout)
-        if lock:
-            subprocess.run([OMNIGRAPH, "cluster", "force-unlock", lock, "--config", str(cluster)],
-                           capture_output=True, text=True, env=env)
-        cls.port = free_port()
-        cls.tokens = {"act-admin": "admin-secret", "act-writer": "writer-secret", "act-reader": "reader-secret"}
-        server_env = {**env, "OMNIGRAPH_SERVER_BEARER_TOKENS_JSON": json.dumps(cls.tokens)}
-        cls.server = subprocess.Popen([SERVER, "--cluster", str(cluster), "--bind", f"127.0.0.1:{cls.port}"],
-                                      stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=server_env)
-        deadline = time.time() + 60
-        while time.time() < deadline:
-            probe = subprocess.run(["curl", "-sf", f"http://127.0.0.1:{cls.port}/readyz"], capture_output=True)
-            if probe.returncode == 0:
-                break
-            time.sleep(0.2)
-        else:
-            cls.server.kill()
-            raise RuntimeError("server did not become ready: " + cls.server.stdout.read().decode()[-2000:])
+    def test_seed_matches_seed_md(self):
+        subprocess.run([OMNIGRAPH, "load", "--data", str(BUNDLE / "seed.jsonl"), "--mode", "append", "--store",
+                        f"{self.tmp}/.ob/graph.omni", "--quiet"], check=True, capture_output=True)
+        self.assertEqual(self.ready(), ["lk-sync", "lk-crash-empty", "lk-acl", "lk-release", "lk-import-md",
+                                        "lk-changelog", "lk-search", "lk-version"])
+        self.assertEqual(sorted(r["slug"] for r in self.ob("blocked")),
+                         ["lk-conflict", "lk-share", "lk-share-api", "lk-share-ui", "lk-sync-docs"])
+        self.assertIn("open child", self.ob_fails("close", "lk-release"))
+        self.assertEqual([r["slug"] for r in self.ob("reclaim")["issues"]], ["lk-queue"])
+        self.assertIn("lk-queue", self.ready())
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.server.terminate()
-        cls.server.wait(timeout=30)
-        shutil.rmtree(cls.tmp, ignore_errors=True)
 
-    def run_ob(self, actor: str, *args):
-        env = {**os.environ, "OB_OMNIGRAPH": OMNIGRAPH, "OB_SERVER": f"http://127.0.0.1:{self.port}",
-               "OB_GRAPH": "beads", "OB_ACTOR": actor, "OMNIGRAPH_HOME": self.tmp,
-               "OMNIGRAPH_BEARER_TOKEN": self.tokens[actor]}
-        env.pop("OB_DIR", None)
-        env.pop("OB_STORE", None)
+class TransportTests(unittest.TestCase):
+    """ob over HTTP against a scripted server: which requests it sends again."""
+
+    def serve(self, script: dict[str, list[tuple[int, dict]]]):
+        calls: list[str] = []
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def do_POST(self):
+                self.rfile.read(int(self.headers["Content-Length"]))
+                name = self.path.rsplit("/", 1)[-1]
+                calls.append(name)
+                status, payload = script[name].pop(0)
+                data = json.dumps(payload).encode()
+                self.send_response(status)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def log_message(self, *args):
+                pass
+
+        server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+        return f"http://127.0.0.1:{server.server_address[1]}", calls
+
+    def run_ob(self, url: str, *args):
+        env = clean_env(OB_SERVER=url, OB_GRAPH="beads", OB_ACTOR="alice")
         return subprocess.run([str(OB), "--json", *args], capture_output=True, text=True, env=env)
 
-    def ob(self, actor: str, *args):
-        proc = self.run_ob(actor, *args)
-        if proc.returncode != 0:
-            self.fail(f"ob {' '.join(args)} as {actor} failed: {proc.stdout}{proc.stderr}")
-        return json.loads(proc.stdout)
+    def test_a_write_without_an_answer_is_not_sent_again(self):
+        url, calls = self.serve({"close": [(504, {})]})
+        proc = self.run_ob(url, "close", "ob-1", "--force")
+        self.assertEqual(proc.returncode, 3, proc.stdout + proc.stderr)
+        self.assertEqual(json.loads(proc.stdout)["outcome"], "unknown")
+        self.assertEqual(calls, ["close"])
 
-    def test_served_workflow_records_token_actor_and_enforces_policy(self):
-        a = self.ob("act-admin", "create", "served blocker")["id"]
-        b = self.ob("act-admin", "create", "served work", "--deps", a)["id"]
-        self.assertIn(a, [r["slug"] for r in self.ob("act-writer", "ready")])
-        self.assertNotIn(b, [r["slug"] for r in self.ob("act-writer", "ready")])
-        self.ob("act-writer", "claim", a)
-        self.ob("act-writer", "close", a)
-        self.assertIn(b, [r["slug"] for r in self.ob("act-reader", "ready")])
-        denied = self.run_ob("act-reader", "claim", b)
-        self.assertNotEqual(denied.returncode, 0)
-        events = self.ob("act-reader", "history", a)
-        self.assertEqual([(e["actor"], e["type"]) for e in events],
-                         [("act-admin", "Issue"), ("act-admin", "BlockedBy"), ("act-writer", "Issue"),
-                          ("act-writer", "Issue")])
+    def test_a_write_refused_before_it_started_is_sent_again(self):
+        url, calls = self.serve({"close": [(429, {}), (200, {"affected_nodes": 1})]})
+        proc = self.run_ob(url, "close", "ob-1", "--force")
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertEqual(calls, ["close", "close"])
 
+    def test_reads_are_sent_again(self):
+        row = {"slug": "ob-1", "title": "t", "kind": "task", "priority": 2}
+        url, calls = self.serve({"ready": [(503, {}), (200, {"rows": [row]})]})
+        proc = self.run_ob(url, "ready")
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertEqual(calls, ["ready", "ready"])
 
-def _lock_id(text: str) -> str | None:
-    import re
-    match = re.search(r"Admission lock: ([0-9A-Z]+)", text)
-    return match.group(1) if match else None
+    def test_a_claim_reads_the_issue_before_claiming_again(self):
+        url, calls = self.serve({
+            "claim": [(504, {}), (200, {"affected_nodes": 1})],
+            "show": [(200, {"rows": [{"i": {"slug": "ob-1", "status": "open"}}]})],
+        })
+        proc = self.run_ob(url, "claim", "ob-1")
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertEqual(calls, ["claim", "show", "claim"])
+
+    def test_a_claim_that_landed_is_not_sent_again(self):
+        url, calls = self.serve({
+            "claim": [(504, {})],
+            "show": [(200, {"rows": [{"i": {"slug": "ob-1", "status": "in_progress", "assignee": "alice"}}]})],
+        })
+        proc = self.run_ob(url, "claim", "ob-1")
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertEqual(calls, ["claim", "show"])
 
 
 if __name__ == "__main__":

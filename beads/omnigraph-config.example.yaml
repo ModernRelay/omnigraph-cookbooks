@@ -54,7 +54,7 @@ aliases:
 # rerun it. Every mutation here re-checks its own condition, so a rerun cannot
 # apply twice. Examples:
 #   omnigraph mutate claim --graph beads \
-#     --params '{"id":"lk-acl","who":"act-writer","lease":"2026-12-01T00:00:00Z"}'
+#     --params '{"id":"lk-acl","who":"act-writer","lease":null}'   # or a future UTC time
 #   omnigraph mutate close --graph beads \
 #     --params '{"ids":["lk-acl"],"reason":"ACLs enforced server-side","never":null}'
 #   omnigraph mutate link_blocks --graph beads --params '{"src":"lk-search","dst":"lk-acl"}'

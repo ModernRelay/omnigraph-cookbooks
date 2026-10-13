@@ -50,8 +50,9 @@ ob ready
 ob onboard >> AGENTS.md        # tell agents how to use it
 ```
 
-Add `--json` to any `ob` command for machine-readable output. `ob` needs only
-Python 3.10+ and the `omnigraph` CLI on `PATH` (or `OB_OMNIGRAPH`).
+Add `--json` to any `ob` command, before or after the subcommand, for
+machine-readable output. `ob` needs only Python 3.10+ and the `omnigraph` CLI
+on `PATH` (or `OB_OMNIGRAPH`).
 
 ## Model
 
@@ -97,7 +98,8 @@ alone: `ob close` refuses an issue with an open child or an open blocker unless
 they close together or `--force` is given. So `ob` refuses a link that makes an
 issue wait on its own ancestor (it would wait forever) or a parent wait on its
 own descendant (the link already says so), and `ob import` skips both, as `bd`
-does.
+does. Moving an issue under a new parent is checked for its whole subtree, and
+`ob` refuses parent loops and hierarchies deeper than eight levels.
 
 ## Writes for many agents
 
@@ -113,13 +115,22 @@ does.
   when it touched a different issue. Rerun it: every mutation here re-checks its
   own condition, so a rerun cannot apply twice. `ob` does this with jittered
   backoff, and spreads agents over the ready list after a lost claim.
+- **Never replay a lost response.** A timeout, a dropped connection or a
+  502/503/504 leaves a write's outcome unknown. `ob` resends reads, but not
+  writes: it exits 3 with `"outcome": "unknown"`, and the issue has to be read
+  before the command runs again. `ob claim`, `ob update` and `ob create` do that
+  read themselves, since the row shows whether their write landed.
 - **Per-issue compare-and-swap edits.** Every write stamps `updated_at`.
   `ob update` writes back with `where slug = $id and updated_at = $expected`
   and re-reads if someone edited the issue in between, so concurrent label
   edits both survive.
 - **Leases, not heartbeats.** A claim can carry a lease (`--lease 2h`);
-  `ob renew` extends it and `ob reclaim` reopens every expired one in one
-  update. A heartbeat every few seconds would be a commit every few seconds.
+  `ob renew` (or claiming again with `--lease`) extends it and `ob reclaim`
+  reopens every expired one in one update. A heartbeat every few seconds would
+  be a commit every few seconds. A claim ends when its issue leaves
+  `in_progress`: release, reclaim, reopen, defer and `ob update --status` clear
+  the lease and the assignee (close keeps the assignee as a record), so a
+  reopened issue is free for anyone to claim.
 - **History from commits.** `ob history <id>` reads the change feed; each
   commit records its actor, which in served mode comes from the bearer token.
 
@@ -176,22 +187,30 @@ starting up.
 | `seed.jsonl`, `seed.md` | A fictional project and its description |
 | `omnigraph-config.example.yaml` | Read aliases and mutation examples |
 | `client/ob`, `client/ob_cli.py` | The client |
-| `client/tests/test_ob.py` | End-to-end tests, local and served |
+| `client/tests/test_ob.py` | End-to-end tests on local graphs; the served run is in `../scripts/check-cookbooks.py` |
 | `client/tests/bench_ob.py` | Latency and concurrent-agent benchmark |
 | `client/tests/compare_bd.py` | Side-by-side run against `bd` |
 
 ```bash
 cd client
-python3 -m unittest discover -s tests -v                  # needs omnigraph (and omnigraph-server for served mode)
-python3 tests/bench_ob.py --issues 2000 --agents 8 [--served]
+python3 -m unittest discover -s tests -v                  # needs omnigraph
+python3 tests/bench_ob.py --issues 2000 --agents 8        # a scratch local graph
+OB_TOKEN=local-writer-token python3 tests/bench_ob.py --server http://127.0.0.1:8080  # a running server, on a scratch branch
 python3 tests/compare_bd.py --issues 2000 --agents 8      # needs bd
 ```
 
 ## Limits
 
 - `ready` lists at most 500 issues and `blocked` at most 10,000; `ob stats` and
-  `ob prime` count with aggregates.
+  `ob prime` count with aggregates. `ob ready` filters on the server, so the
+  limit applies to matching issues; only a second `-l` label is checked in the
+  client.
 - Readiness follows parent links up to eight levels; GQ needs a finite bound.
+  `ob` keeps hierarchies within that depth, but data loaded directly can go
+  deeper.
+- `upstream`, `downstream` and `ob dep tree` reach 32 links, and `ob dep tree`
+  says when a chain goes on. The cycle check before `ob dep add` follows chains
+  of any length.
 - The close guard and the link rules read before they write; unlike the claim
   they are not atomic with the write.
 - A claim does not re-check blockers atomically; a blocker added between
