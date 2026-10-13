@@ -1,0 +1,46 @@
+# Example roles. Tokens select actors; permissions come from this applied policy.
+# Engineers run as writers and own `main`. An AI agent runs as act-agent: it
+# reads everything and invokes stored queries, but writes only on unprotected
+# branches and cannot merge, so every agent change reaches the program through
+# an engineer's review and merge.
+version: 1
+groups:
+  readers: [act-admin, act-writer, act-reader, act-agent]
+  writers: [act-admin, act-writer]
+  agents: [act-agent]
+  admins: [act-admin]
+protected_branches: [main]
+rules:
+  - id: read-data
+    allow:
+      actors: { group: readers }
+      actions: [read, export]
+      branch_scope: any
+  - id: invoke-stored-queries
+    allow:
+      actors: { group: readers }
+      actions: [invoke_query]
+  - id: write-data
+    allow:
+      actors: { group: writers }
+      actions: [change]
+      branch_scope: any
+  - id: manage-branches
+    allow:
+      actors: { group: writers }
+      actions: [branch_create, branch_delete, branch_merge]
+      target_branch_scope: any
+  - id: agents-write-on-branches
+    allow:
+      actors: { group: agents }
+      actions: [change]
+      branch_scope: unprotected
+  - id: agents-open-branches
+    allow:
+      actors: { group: agents }
+      actions: [branch_create, branch_delete]
+      target_branch_scope: unprotected
+  - id: change-schema
+    allow:
+      actors: { group: admins }
+      actions: [schema_apply]

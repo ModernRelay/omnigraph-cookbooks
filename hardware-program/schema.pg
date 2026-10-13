@@ -1,0 +1,301 @@
+// hardware-program — requirements, architecture and verification for a
+// hardware program as one typed graph
+//
+// The graph holds what engineers decide and observe: requirements and how they
+// flow down, the architecture blocks and interfaces they constrain, the design
+// values that feed budgets, the tests that verify them, and the assumptions,
+// risks, decisions and standards around them. Everything engineers ask of it —
+// is the mass budget closed, what does this change touch, which passing tests
+// are stale, what blocks the next design review — is derived by the stored
+// queries on every read, never stored as a status that can drift.
+//
+// The reference seed (seed.jsonl / seed.md) is a fictional Earth-observation
+// smallsat program, "Petrel". Every name and number is made up.
+//
+// 15 node classes:
+//   Requirements — Requirement, Assumption, Standard
+//   Architecture — Block, Interface, Parameter, Variant
+//   Verification — TestCase, TestRun, Iteration, Milestone
+//   Program      — Risk, Decision, Finding, Engineer
+
+// ── People and agents ─────────────────────────────────────────────
+
+node Engineer @description("A person or an AI agent who owns work, records results and raises findings.") {
+    slug: String @key
+    name: String
+    team: String?
+    kind: enum(human, agent)
+}
+
+// ── Requirements ──────────────────────────────────────────────────
+
+node Requirement @description("A need the system must meet: a mission goal, a system requirement, or a subsystem design criterion.")
+                 @instruction("Write a design criterion as a checkable limit (quantity, comparator, limit_value, unit) rather than a paragraph. Every requirement except a mission goal derives from a parent, has one owner and names a verification method. Anything an agent drafts stays review_status ai_generated until a person reviews it.") {
+    slug: String @key
+    title: String @index
+    statement: String @index
+    // mission: customer outcome; system: whole-vehicle; design_criterion:
+    // a subsystem target its owner may renegotiate as evidence arrives.
+    tier: enum(mission, system, design_criterion) @index
+    source: enum(customer, launch_provider, regulatory, internal, derived)
+    // How much the number can be trusted; it narrows as evidence arrives.
+    maturity: enum(assumed, proposed, verified, frozen) @index
+    method: enum(analysis, inspection, demonstration, test, simulation)
+    rationale: String?
+    safety_critical: Bool
+    // A checkable limit. Budgets add up every Parameter of this quantity
+    // under the block the requirement is allocated to.
+    quantity: String?
+    comparator: enum(max, min)?
+    limit_value: F64?
+    unit: String?
+    review_status: enum(ai_generated, human_reviewed, approved) @index
+    updated_at: DateTime
+    embedding: Vector(3072)? @embed("statement") @index
+}
+
+node Assumption @description("A placeholder the design depends on until evidence confirms or replaces it.") {
+    slug: String @key
+    statement: String
+    confidence: enum(low, medium, high)
+    rationale: String?
+    revisit_by: Date?
+}
+
+node Standard @description("An external standard or document requirements must comply with, referenced by its public identifier.") {
+    slug: String @key
+    identifier: String
+    title: String
+}
+
+// ── Architecture ──────────────────────────────────────────────────
+
+node Block @description("An architecture element: the system, a subsystem, an assembly or a component.") {
+    slug: String @key
+    name: String
+    level: enum(system, subsystem, assembly, component)
+    // tentative: still being explored; stable: internally consistent;
+    // frozen: locked for integration or formal review.
+    maturity: enum(tentative, stable, frozen)
+    description: String?
+}
+
+node Interface @description("A contract between two blocks: what flows across it and within which limits.") {
+    slug: String @key
+    name: String
+    kind: enum(electrical, data, mechanical, thermal, rf)
+    definition: String
+    maturity: enum(tentative, stable, frozen)
+}
+
+node Parameter @description("A design value of one block, such as its mass or power draw. Budgets add these up.") {
+    slug: String @key
+    name: String
+    quantity: String @index
+    value: F64
+    unit: String
+    // How the value was obtained; estimates usually carry more margin.
+    basis: enum(assumed, estimated, calculated, measured)
+}
+
+node Variant @description("A product configuration. A requirement with no AppliesTo link applies to every variant.") {
+    slug: String @key
+    name: String
+    description: String?
+}
+
+// ── Verification ──────────────────────────────────────────────────
+
+node TestCase @description("A verification activity. Its status is the outcome of its latest run, written in the same commit as that run.") {
+    slug: String @key
+    title: String
+    method: enum(analysis, inspection, demonstration, test, simulation)
+    environment: String?
+    status: enum(not_run, pass, fail)
+    last_run_at: DateTime?
+    last_measured: F64?
+    unit: String?
+}
+
+node TestRun @description("One execution of a test case, with its evidence.") {
+    slug: String @key
+    outcome: enum(pass, fail, aborted)
+    measured_value: F64?
+    unit: String?
+    run_at: DateTime
+    notes: String?
+    report: Blob?
+}
+
+node Iteration @description("A bounded design-build-test loop with a learning goal and exit criteria.") {
+    slug: String @key
+    name: String
+    learning_goal: String
+    exit_criteria: String
+    status: enum(planned, active, done)
+}
+
+node Milestone @description("A design review or gate. Passing it records the graph commit it baselined.") {
+    slug: String @key
+    name: String
+    kind: enum(srr, pdr, cdr, trr, frr, internal)
+    date: Date
+    status: enum(planned, passed, passed_with_actions)
+    baseline_commit: String?
+}
+
+// ── Program ───────────────────────────────────────────────────────
+
+node Risk @description("A failure mode, scored 1-5 for severity and likelihood.") {
+    slug: String @key
+    title: String
+    failure_mode: String
+    effect: String
+    severity: I32
+    likelihood: I32
+    status: enum(open, mitigated, accepted, closed)
+    @range(severity, 1..5)
+    @range(likelihood, 1..5)
+}
+
+node Decision @description("A trade or design decision, with its rationale and whether it can be undone cheaply.") {
+    slug: String @key
+    question: String
+    choice: String
+    rationale: String
+    reversible: Bool
+    decided_at: Date
+    status: enum(proposed, decided, superseded)
+}
+
+node Finding @description("The result of a check on a requirement, raised by a person or an agent and resolved by a person.") {
+    slug: String @key
+    check: String
+    severity: enum(info, warning, error)
+    message: String
+    status: enum(open, accepted, dismissed)
+    raised_at: DateTime
+}
+
+// ── Requirement flow-down and allocation ──────────────────────────
+
+edge DerivesFrom: Requirement -> Requirement @description("The source requirement was derived from the target. Requirements form a web, not a tree.") {
+    @key(@src, @dst)
+}
+
+edge Supersedes: Requirement -> Requirement {
+    @key(@src, @dst)
+}
+
+edge AllocatedTo: Requirement -> Block @description("The block that must meet the requirement; budgets add up the parameters beneath it.") {
+    @key(@src, @dst)
+}
+
+edge Constrains: Requirement -> Interface {
+    @key(@src, @dst)
+}
+
+edge Bounds: Requirement -> Parameter @description("The requirement sets the limit on this design value.") {
+    @key(@src, @dst)
+}
+
+edge AppliesTo: Requirement -> Variant {
+    @key(@src, @dst)
+}
+
+edge InScope: Requirement -> Iteration @description("The iteration must verify this requirement.") {
+    @key(@src, @dst)
+}
+
+edge CompliesWith: Requirement -> Standard @description("The requirement's stance on one clause of a standard.") {
+    clause: String
+    stance: enum(comply, deviate, not_applicable)
+    justification: String?
+    @key(@src, @dst, clause)
+}
+
+edge Mitigates: Requirement -> Risk {
+    @key(@src, @dst)
+}
+
+edge RequirementAssumes: Requirement -> Assumption {
+    @key(@src, @dst)
+}
+
+edge RequirementOwner: Requirement -> Engineer @card(0..1) {
+    @key(@src, @dst)
+}
+
+// ── Architecture structure ────────────────────────────────────────
+
+edge PartOf: Block -> Block @card(0..1) {
+    @key(@src, @dst)
+}
+
+edge Connects: Interface -> Block @card(2..2) @description("Each interface joins exactly two blocks.") {
+    @key(@src, @dst)
+}
+
+edge Characterizes: Parameter -> Block @card(1..1) {
+    @key(@src, @dst)
+}
+
+edge ParameterAssumes: Parameter -> Assumption {
+    @key(@src, @dst)
+}
+
+edge InterfaceAssumes: Interface -> Assumption {
+    @key(@src, @dst)
+}
+
+edge BlockOwner: Block -> Engineer @card(0..1) {
+    @key(@src, @dst)
+}
+
+edge InterfaceOwner: Interface -> Engineer @card(0..1) {
+    @key(@src, @dst)
+}
+
+edge RiskOn: Risk -> Block {
+    @key(@src, @dst)
+}
+
+// ── Verification ──────────────────────────────────────────────────
+
+edge Verifies: TestCase -> Requirement {
+    @key(@src, @dst)
+}
+
+edge Measures: TestCase -> Parameter @card(0..1) @description("The design value the test actually measures; it should be one its requirements bound.") {
+    @key(@src, @dst)
+}
+
+edge TestOwner: TestCase -> Engineer @card(0..1) {
+    @key(@src, @dst)
+}
+
+edge RunOf: TestRun -> TestCase @card(1..1) {
+    @key(@src, @dst)
+}
+
+edge RunIn: TestRun -> Iteration @card(0..1) {
+    @key(@src, @dst)
+}
+
+edge Closes: Milestone -> Iteration @card(0..1) @description("The review that ends this iteration.") {
+    @key(@src, @dst)
+}
+
+// ── Decisions and findings ────────────────────────────────────────
+
+edge Affects: Decision -> Requirement {
+    @key(@src, @dst)
+}
+
+edge FindingOn: Finding -> Requirement @card(1..1) {
+    @key(@src, @dst)
+}
+
+edge RaisedBy: Finding -> Engineer @card(1..1) {
+    @key(@src, @dst)
+}

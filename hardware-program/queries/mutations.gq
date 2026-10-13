@@ -1,0 +1,156 @@
+// Writes. Each query publishes one graph commit. Updates re-check the state
+// they depend on in their `where`, so a write retried after a concurrent
+// commit changes nothing instead of applying twice.
+//
+// Agents run these on their own branches; the graph policy refuses their
+// writes on `main`, so every agent change reaches the program through a
+// person's merge. `insert` on an existing slug replaces that node: read the
+// slug first, or create rows with `omnigraph load --mode append`, which
+// refuses a slug that already exists.
+
+// ── Requirements ──────────────────────────────────────────────────
+
+query propose_requirement($slug: String, $title: String, $statement: String, $tier: String,
+                          $source: String, $method: String, $rationale: String?,
+                          $safety_critical: Bool, $quantity: String?, $comparator: String?,
+                          $limit_value: F64?, $unit: String?, $review_status: String,
+                          $parent: String, $block: String, $owner: String)
+    @description("Add a proposed requirement derived from a parent, allocated to a block and owned by one engineer.")
+    @instruction("An agent passes review_status ai_generated. Write a design criterion as a checkable limit: quantity, comparator (max or min), limit_value and unit.") {
+    insert Requirement {
+        slug: $slug, title: $title, statement: $statement, tier: $tier, source: $source,
+        maturity: "proposed", method: $method, rationale: $rationale,
+        safety_critical: $safety_critical, quantity: $quantity, comparator: $comparator,
+        limit_value: $limit_value, unit: $unit, review_status: $review_status, updated_at: now()
+    }
+    insert DerivesFrom { from: $slug, to: $parent }
+    insert AllocatedTo { from: $slug, to: $block }
+    insert RequirementOwner { from: $slug, to: $owner }
+}
+
+// Every requirement write stamps `updated_at`, so a revision sends back the
+// value it read and a concurrent edit makes it match nothing. The new stamp
+// is also what `stale_verification` compares test runs against.
+query revise_requirement($slug: String, $expected: DateTime, $title: String, $statement: String,
+                         $rationale: String?, $quantity: String?, $comparator: String?,
+                         $limit_value: F64?, $unit: String?, $review_status: String)
+    @description("Replace a requirement's wording and limit if it is unchanged since it was read. Passing tests that ran before the change become stale.")
+    @instruction("Send every field, unchanged ones included: an omitted optional field is cleared.") {
+    update Requirement set {
+        title: $title, statement: $statement, rationale: $rationale, quantity: $quantity,
+        comparator: $comparator, limit_value: $limit_value, unit: $unit,
+        review_status: $review_status, updated_at: now()
+    } where slug = $slug and updated_at = $expected
+}
+
+query set_maturity($slug: String, $expected: DateTime, $maturity: String)
+    @description("Move a requirement between assumed, proposed, verified and frozen if it is unchanged since it was read.") {
+    update Requirement set { maturity: $maturity, updated_at: now() }
+    where slug = $slug and updated_at = $expected
+}
+
+query review_requirement($slug: String, $expected: DateTime, $review_status: String)
+    @description("Record a person's review (human_reviewed or approved) of a requirement if it is unchanged since it was read.") {
+    update Requirement set { review_status: $review_status, updated_at: now() }
+    where slug = $slug and updated_at = $expected
+}
+
+query link_derivation($child: String, $parent: String) @description("Record that one requirement derives from another.") {
+    insert DerivesFrom { from: $child, to: $parent }
+}
+
+query allocate($requirement: String, $block: String) @description("Allocate a requirement to an architecture block.") {
+    insert AllocatedTo { from: $requirement, to: $block }
+}
+
+query constrain_interface($requirement: String, $interface: String) {
+    insert Constrains { from: $requirement, to: $interface }
+}
+
+query bound_parameter($requirement: String, $parameter: String) @description("Record that a requirement sets the limit on a design value.") {
+    insert Bounds { from: $requirement, to: $parameter }
+}
+
+query scope_to_iteration($requirement: String, $iteration: String) @description("Put a requirement in scope of an iteration; the review that closes it checks it.") {
+    insert InScope { from: $requirement, to: $iteration }
+}
+
+query set_compliance($requirement: String, $standard: String, $clause: String, $stance: String, $justification: String?)
+    @description("Record or replace a requirement's stance (comply, deviate, not_applicable) on one clause of a standard.") {
+    insert CompliesWith { from: $requirement, to: $standard, clause: $clause, stance: $stance, justification: $justification }
+}
+
+// ── Design values and interfaces ──────────────────────────────────
+
+query set_parameter($slug: String, $value: F64, $basis: String) @description("Update a design value and how it was obtained (assumed, estimated, calculated, measured).") {
+    update Parameter set { value: $value, basis: $basis } where slug = $slug
+}
+
+query set_interface_maturity($slug: String, $maturity: String) @description("Move an interface between tentative, stable and frozen.") {
+    update Interface set { maturity: $maturity } where slug = $slug
+}
+
+query set_assumption($slug: String, $confidence: String, $revisit_by: Date?) @description("Update how far an assumption can be trusted and when to revisit it.") {
+    update Assumption set { confidence: $confidence, revisit_by: $revisit_by } where slug = $slug
+}
+
+// ── Verification ──────────────────────────────────────────────────
+
+// The run and its test case's latest status land in one commit, so the
+// status a read sees always matches the newest run.
+query record_test_run($run: String, $test: String, $iteration: String, $outcome: String,
+                      $measured_value: F64?, $unit: String?, $notes: String?, $run_at: DateTime,
+                      $report: Blob?)
+    @description("Record a pass or fail run of a test case in an iteration, with its report, and update the test case's status.")
+    @instruction("outcome is pass or fail; record an aborted run with record_aborted_run, which leaves the status alone. Pass the report file as base64:<bytes>.") {
+    insert TestRun { slug: $run, outcome: $outcome, measured_value: $measured_value, unit: $unit, run_at: $run_at, notes: $notes, report: $report }
+    insert RunOf { from: $run, to: $test }
+    insert RunIn { from: $run, to: $iteration }
+    update TestCase set { status: $outcome, last_run_at: $run_at, last_measured: $measured_value, unit: $unit }
+    where slug = $test
+}
+
+query record_aborted_run($run: String, $test: String, $iteration: String, $notes: String?, $run_at: DateTime)
+    @description("Record a run that did not complete; the test case keeps its status.") {
+    insert TestRun { slug: $run, outcome: "aborted", run_at: $run_at, notes: $notes }
+    insert RunOf { from: $run, to: $test }
+    insert RunIn { from: $run, to: $iteration }
+}
+
+query link_verification($test: String, $requirement: String) @description("Record that a test case verifies a requirement.") {
+    insert Verifies { from: $test, to: $requirement }
+}
+
+// ── Reviews, findings, decisions ──────────────────────────────────
+
+// A passed review records the commit it baselined; `--snapshot <commit>`
+// reads the program exactly as the review saw it.
+query record_baseline($milestone: String, $status: String, $commit: String)
+    @description("Mark a planned review passed (passed or passed_with_actions) and record the graph commit it baselined.") {
+    update Milestone set { status: $status, baseline_commit: $commit }
+    where slug = $milestone and status = "planned"
+}
+
+query raise_finding($slug: String, $check: String, $severity: String, $message: String,
+                    $requirement: String, $raised_by: String)
+    @description("Raise a finding (info, warning, error) against a requirement.") {
+    insert Finding { slug: $slug, check: $check, severity: $severity, message: $message, status: "open", raised_at: now() }
+    insert FindingOn { from: $slug, to: $requirement }
+    insert RaisedBy { from: $slug, to: $raised_by }
+}
+
+query resolve_finding($slug: String, $status: String) @description("Accept or dismiss an open finding.") {
+    update Finding set { status: $status } where slug = $slug and status = "open"
+}
+
+query record_decision($slug: String, $question: String, $choice: String, $rationale: String,
+                      $reversible: Bool, $decided_at: Date, $status: String, $requirement: String)
+    @description("Record a trade or design decision and the requirement it affects.") {
+    insert Decision { slug: $slug, question: $question, choice: $choice, rationale: $rationale,
+                      reversible: $reversible, decided_at: $decided_at, status: $status }
+    insert Affects { from: $slug, to: $requirement }
+}
+
+query set_risk_status($slug: String, $status: String) @description("Move a risk between open, mitigated, accepted and closed.") {
+    update Risk set { status: $status } where slug = $slug
+}

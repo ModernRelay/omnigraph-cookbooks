@@ -22,8 +22,12 @@ COOKBOOKS = {
     "second-brain": ("brain", "people_all"),
     "vc-os": ("vcos", "deals_open"),
     "dev-graph": ("dev", "open_epics"),
+    "hardware-program": ("program", "budget_rollup"),
 }
-TOKENS = {actor: f"cookbook-test-{actor}" for actor in ("act-admin", "act-writer", "act-reader")}
+# Cookbooks whose policy lets act-agent write only on unprotected branches.
+BRANCH_ONLY_AGENTS = {"hardware-program"}
+TOKENS = {actor: f"cookbook-test-{actor}"
+          for actor in ("act-admin", "act-writer", "act-reader", "act-agent")}
 HTTP = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 
@@ -156,6 +160,19 @@ def qualify(name, graph, stored_query, workspace, env):
                           "--data", str(sample), "--mode", "append", "--json", ok=False)
             assert "403" in refused.stdout + refused.stderr or "denied" in (refused.stdout + refused.stderr).lower(), (refused.stdout, refused.stderr)
             assert run(env, "query", "cookbook_check", *scope, "--json")["rows"] == [{"total": 0}]
+            if name in BRANCH_ONLY_AGENTS:
+                # An agent drafts on its own branch; only a person merges into main.
+                agent = {**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-agent"]}
+                refused = run(agent, "load", *scope, "--data", str(sample), "--mode", "append", "--json", ok=False)
+                assert "403" in refused.stdout + refused.stderr, (refused.stdout, refused.stderr)
+                run(agent, "branch", "create", "agent-draft", *scope, "--json")
+                drafted = run(agent, "load", *scope, "--branch", "agent-draft", "--data", str(sample),
+                              "--mode", "append", "--json")
+                assert drafted["commit"]["graph_commit_id"]
+                refused = run(agent, "branch", "merge", "agent-draft", "--into", "main", *scope, "--json", ok=False)
+                assert "403" in refused.stdout + refused.stderr, (refused.stdout, refused.stderr)
+                run(agent, "branch", "delete", "agent-draft", *scope, "--yes", "--json")
+                assert run(env, "query", "cookbook_check", *scope, "--json")["rows"] == [{"total": 0}]
             written = run(writer, "load", *scope, "--data", str(sample), "--mode", "append", "--json")
             verify_receipt(written["commit"])
             expected_counts[("node", "CookbookCheck")] = 1
@@ -191,7 +208,7 @@ def main():
         raise
     else:
         shutil.rmtree(workspace)
-        print("All five cookbooks passed against OmniGraph 0.13.0.")
+        print(f"All {len(COOKBOOKS)} cookbooks passed against OmniGraph 0.13.0.")
 
 
 if __name__ == "__main__":
