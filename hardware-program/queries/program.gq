@@ -1,0 +1,424 @@
+// Reads for the hardware-program cookbook. Every status here is derived on
+// each read from the requirements, links and test results, never stored.
+
+// ── Requirements and traceability ─────────────────────────────────
+
+query requirement($slug: String) @description("One requirement with every property except its embedding.") {
+    match { $r: Requirement { slug: $slug } }
+    return { $r }
+}
+
+query requirements_by_tier($tier: String) @description("Requirements of one tier (mission, system or design_criterion), most recently changed first.") {
+    match {
+        $r: Requirement
+        $r.tier = $tier
+    }
+    return { $r.slug, $r.title, $r.maturity, $r.review_status, $r.updated_at }
+    order { $r.updated_at desc, $r.slug asc }
+    limit 1000
+}
+
+query trace_up($slug: String) @description("Every requirement this one derives from, up to the mission goals it serves.") {
+    match {
+        $r: Requirement { slug: $slug }
+        $r derivesFrom{1,8} $p
+    }
+    return { $p.slug, $p.tier, $p.title }
+    order { $p.slug asc }
+    limit 200
+}
+
+query why_exists($block: String) @description("Why a block exists: the requirements allocated to it and the mission goals they derive from.") {
+    match {
+        $b: Block { slug: $block }
+        $r allocatedTo $b
+        $r derivesFrom{1,8} $m
+        $m.tier = "mission"
+    }
+    return { $r.slug as requirement, $r.title, $m.slug as mission_goal, $m.title as mission_title }
+    order { $r.slug asc, $m.slug asc }
+    limit 200
+}
+
+// ── Impact of a change ────────────────────────────────────────────
+
+query impacted_requirements($slug: String) @description("Requirements derived, directly or transitively, from the one being changed, with their owners.") {
+    match {
+        $r: Requirement { slug: $slug }
+        $d derivesFrom{1,8} $r
+        $d requirementOwner $o
+    }
+    return { $d.slug, $d.title, $d.maturity, $o.name as owner }
+    order { $d.slug asc }
+    limit 500
+}
+
+query impacted_tests($slug: String) @description("Test cases verifying the changed requirement or anything derived from it: their results may no longer hold.") {
+    match {
+        $r: Requirement { slug: $slug }
+        $d derivesFrom{1,8} $r
+        $t verifies $d
+    }
+    return { $t.slug, $t.title, $t.status, $d.slug as verifies }
+    order { $t.slug asc }
+    limit 500
+}
+
+query impacted_interfaces($slug: String) @description("Interfaces constrained by the changed requirement or anything derived from it.") {
+    match {
+        $r: Requirement { slug: $slug }
+        $d derivesFrom{1,8} $r
+        $d constrains $i
+    }
+    return { $i.slug, $i.name, $i.maturity, $d.slug as via }
+    order { $i.slug asc }
+    limit 500
+}
+
+query requirement_tests($slug: String) @description("Test cases that verify one requirement directly.") {
+    match {
+        $r: Requirement { slug: $slug }
+        $t verifies $r
+    }
+    return { $t.slug, $t.title, $t.status, $t.last_measured, $t.unit, $t.last_run_at }
+    order { $t.slug asc }
+    limit 200
+}
+
+// ── Budgets ───────────────────────────────────────────────────────
+
+// A budget is a requirement with a quantity and a limit, allocated to a block;
+// it adds up every Parameter of that quantity on blocks beneath that block.
+query budget_rollup() @description("Each budget requirement's limit beside the total of the design values beneath its block.") {
+    match {
+        $r: Requirement
+        $r.quantity is not null
+        $r allocatedTo $b
+        $c partOf{1,8} $b
+        $p characterizes $c
+        $p.quantity = $r.quantity
+    }
+    return { $r.slug, $r.quantity, $r.comparator, $r.limit_value, $r.unit, sum($p.value) as allocated, count($p) as contributors }
+    order { $r.slug asc }
+    limit 200
+}
+
+query budget_contributors($slug: String) @description("The design values that add up to one budget, largest first.") {
+    match {
+        $r: Requirement { slug: $slug }
+        $r allocatedTo $b
+        $c partOf{1,8} $b
+        $p characterizes $c
+        $p.quantity = $r.quantity
+    }
+    return { $p.slug, $c.name as block, $p.value, $p.unit, $p.basis }
+    order { $p.value desc, $p.slug asc }
+    limit 500
+}
+
+query limit_check() @description("Each single-value limit beside the design value it bounds.") {
+    match {
+        $r: Requirement
+        $r.limit_value is not null
+        $r bounds $p
+    }
+    return { $r.slug, $r.quantity, $r.comparator, $r.limit_value, $r.unit, $p.slug as parameter, $p.value, $p.basis }
+    order { $r.slug asc }
+    limit 500
+}
+
+// ── Verification health ───────────────────────────────────────────
+
+query unverified_requirements() @description("Requirements below mission level that no test case verifies.") {
+    match {
+        $r: Requirement
+        $r.tier != "mission"
+        not { $t verifies $r }
+    }
+    return { $r.slug, $r.title, $r.tier, $r.method }
+    order { $r.slug asc }
+    limit 1000
+}
+
+query failing_requirements() @description("Requirements with a test case whose latest run failed.") {
+    match {
+        $r: Requirement
+        $t verifies $r
+        $t.status = "fail"
+    }
+    return { $r.slug, $r.title, $t.slug as test, $t.last_measured, $t.unit, $r.limit_value, $r.unit as limit_unit }
+    order { $r.slug asc }
+    limit 1000
+}
+
+query stale_verification() @description("Passing tests that ran before their requirement last changed: the pass may no longer hold.") {
+    match {
+        $t: TestCase { status: "pass" }
+        $t verifies $r
+        $t.last_run_at < $r.updated_at
+    }
+    return { $t.slug as test, $r.slug as requirement, $t.last_run_at, $r.updated_at }
+    order { $r.slug asc }
+    limit 1000
+}
+
+query measurement_mismatch() @description("Tests that verify a requirement but measure a design value that requirement does not bound.") {
+    match {
+        $t: TestCase
+        $t verifies $r
+        exists { $r bounds $_ }
+        $t measures $p
+        not { $r bounds $p }
+    }
+    return { $t.slug as test, $r.slug as requirement, $p.slug as measures }
+    order { $t.slug asc }
+    limit 1000
+}
+
+query test_status_summary() @description("How many test cases are passing, failing or not yet run.") {
+    match { $t: TestCase }
+    return { $t.status, count($t) as tests }
+    order { $t.status asc }
+}
+
+query test_history($test: String) @description("Every run of one test case, newest first.") {
+    match {
+        $t: TestCase { slug: $test }
+        $run runOf $t
+    }
+    return { $run.slug, $run.outcome, $run.measured_value, $run.unit, $run.run_at, $run.notes }
+    order { $run.run_at desc }
+    limit 500
+}
+
+// ── Design review readiness ───────────────────────────────────────
+
+query gate_unverified($milestone: String) @description("Requirements in scope of the iteration a review closes that no test case verifies yet.") {
+    match {
+        $m: Milestone { slug: $milestone }
+        $m closes $it
+        $r inScope $it
+        not { $t verifies $r }
+    }
+    return { $r.slug, $r.title }
+    order { $r.slug asc }
+    limit 1000
+}
+
+query gate_not_passing($milestone: String) @description("Requirements in scope of the review's iteration with a verifying test that has failed or not run.") {
+    match {
+        $m: Milestone { slug: $milestone }
+        $m closes $it
+        $r inScope $it
+        $t verifies $r
+        $t.status != "pass"
+    }
+    return { $r.slug, $t.slug as test, $t.status }
+    order { $r.slug asc, $t.slug asc }
+    limit 1000
+}
+
+query gate_unfrozen_interfaces($milestone: String) @description("Interfaces constrained by requirements in the review's scope that are not yet frozen.") {
+    match {
+        $m: Milestone { slug: $milestone }
+        $m closes $it
+        $r inScope $it
+        $r constrains $i
+        $i.maturity != "frozen"
+    }
+    return { $i.slug, $i.name, $i.maturity, $r.slug as constrained_by }
+    order { $i.slug asc }
+    limit 1000
+}
+
+query gate_stale_verification($milestone: String) @description("Requirements in scope of the review's iteration whose passing test ran before the requirement last changed.") {
+    match {
+        $m: Milestone { slug: $milestone }
+        $m closes $it
+        $r inScope $it
+        $t verifies $r
+        $t.status = "pass"
+        $t.last_run_at < $r.updated_at
+    }
+    return { $r.slug, $t.slug as test, $t.last_run_at, $r.updated_at }
+    order { $r.slug asc }
+    limit 1000
+}
+
+query open_risks() @description("Open risks, most severe and most likely first, with the block they sit on.") {
+    match {
+        $k: Risk { status: "open" }
+        $k riskOn $b
+    }
+    return { $k.slug, $k.title, $k.severity, $k.likelihood, $b.name as block }
+    order { $k.severity desc, $k.likelihood desc, $k.slug asc }
+    limit 500
+}
+
+query unmitigated_risks() @description("Open or accepted risks that no requirement mitigates.") {
+    match {
+        $k: Risk
+        $k.status != "closed"
+        $k.status != "mitigated"
+        not { $r mitigates $k }
+    }
+    return { $k.slug, $k.title, $k.severity, $k.likelihood }
+    order { $k.severity desc, $k.slug asc }
+    limit 500
+}
+
+// ── Interfaces and assumptions ────────────────────────────────────
+
+query interfaces() @description("Every interface with the blocks it joins and its maturity.") {
+    match {
+        $i: Interface
+        $i connects $b
+    }
+    return { $i.slug, $i.name, $i.kind, $i.maturity, $b.name as block }
+    order { $i.slug asc, $b.name asc }
+    limit 1000
+}
+
+query untested_interfaces() @description("Interfaces whose constraining requirements have no passing test.") {
+    match {
+        $i: Interface
+        $r constrains $i
+        not { $t verifies $r  $t.status = "pass" }
+    }
+    return { $i.slug, $i.name, $i.maturity, $r.slug as requirement }
+    order { $i.slug asc }
+    limit 1000
+}
+
+query assumptions_under_frozen_work() @description("Low- or medium-confidence assumptions that frozen requirements still rest on.") {
+    match {
+        $a: Assumption
+        $a.confidence != "high"
+        $r requirementAssumes $a
+        $r.maturity = "frozen"
+    }
+    return { $a.slug, $a.statement, $a.confidence, $a.revisit_by, $r.slug as requirement }
+    order { $a.slug asc }
+    limit 1000
+}
+
+query assumptions_due($today: Date) @description("Assumptions whose revisit date has passed.") {
+    match {
+        $a: Assumption
+        $a.revisit_by < $today
+    }
+    return { $a.slug, $a.statement, $a.confidence, $a.revisit_by }
+    order { $a.revisit_by asc }
+    limit 1000
+}
+
+// ── Ownership and hygiene ─────────────────────────────────────────
+
+query unowned_requirements() @description("Requirements with no owner.") {
+    match {
+        $r: Requirement
+        not { $r requirementOwner $_ }
+    }
+    return { $r.slug, $r.title, $r.tier }
+    order { $r.slug asc }
+    limit 1000
+}
+
+// Customer, launch-provider and regulatory requirements arrive from outside
+// the program; a derived or internal one must trace to a parent.
+query untraced_requirements() @description("Derived or internal requirements with no parent requirement.") {
+    match {
+        $r: Requirement
+        $r.source in ["derived", "internal"]
+        not { $r derivesFrom $_ }
+    }
+    return { $r.slug, $r.title, $r.tier, $r.source }
+    order { $r.slug asc }
+    limit 1000
+}
+
+// Whole-vehicle requirements sit on the system block and would explain every
+// component, so only allocations below the system level count.
+query unexplained_components() @description("Components with no requirement allocated to them or to the subsystem or assembly above them.") {
+    match {
+        $b: Block { level: "component" }
+        not { $r allocatedTo $b }
+        not { $b partOf{1,8} $a  $a.level != "system"  $r allocatedTo $a }
+    }
+    return { $b.slug, $b.name }
+    order { $b.slug asc }
+    limit 1000
+}
+
+query awaiting_review() @description("Requirements an agent drafted that no person has reviewed yet.") {
+    match { $r: Requirement { review_status: "ai_generated" } }
+    return { $r.slug, $r.title, $r.updated_at }
+    order { $r.updated_at desc }
+    limit 1000
+}
+
+query open_findings() @description("Unresolved findings, oldest first, with who raised them.") {
+    match {
+        $f: Finding { status: "open" }
+        $f findingOn $r
+        $f raisedBy $e
+    }
+    return { $f.slug, $f.severity, $f.check, $f.message, $r.slug as requirement, $e.name as raised_by, $e.kind as raiser_kind }
+    order { $f.raised_at asc, $f.slug asc }
+    limit 1000
+}
+
+// ── Compliance, variants, decisions ───────────────────────────────
+
+query compliance_matrix($standard: String) @description("Every requirement's stance on the clauses of one standard, with its justification.") {
+    match {
+        $s: Standard { slug: $standard }
+        $r $c:compliesWith $s
+    }
+    return { $r.slug, $r.title, $c.clause, $c.stance, $c.justification }
+    order { $c.clause asc, $r.slug asc }
+    limit 1000
+}
+
+query variant_requirements($variant: String) @description("Requirements that apply only to one variant; requirements with no variant link apply to all.") {
+    match {
+        $v: Variant { slug: $variant }
+        $r appliesTo $v
+    }
+    return { $r.slug, $r.title, $r.tier }
+    order { $r.slug asc }
+    limit 1000
+}
+
+query decisions_affecting($slug: String) @description("Decisions that changed or justified a requirement.") {
+    match {
+        $r: Requirement { slug: $slug }
+        $d affects $r
+    }
+    return { $d.slug, $d.question, $d.choice, $d.status, $d.decided_at, $d.reversible }
+    order { $d.decided_at desc }
+    limit 200
+}
+
+query milestones() @description("Design reviews with their status and the commit each one baselined.") {
+    match { $m: Milestone }
+    return { $m.slug, $m.name, $m.kind, $m.date, $m.status, $m.baseline_commit }
+    order { $m.date asc }
+    limit 200
+}
+
+// ── Search ────────────────────────────────────────────────────────
+
+query search_requirements($q: String) @description("Requirements matching words in their title or statement.") {
+    match { $r: Requirement }
+    return { $r.slug, $r.title, $r.tier }
+    order { rrf(bm25($r.title, $q), bm25($r.statement, $q)) }
+    limit 25
+}
+
+query similar_requirements($q: String) @description("Requirements closest in meaning to the text. Needs embeddings.") {
+    match { $r: Requirement }
+    return { $r.slug, $r.title, nearest($r.embedding, $q) as distance }
+    order { nearest($r.embedding, $q) }
+    limit 10
+}

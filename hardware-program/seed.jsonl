@@ -1,0 +1,449 @@
+{"type": "Engineer", "data": {"slug": "eng-amara", "name": "Amara Okafor", "team": "systems", "kind": "human"}}
+{"type": "Engineer", "data": {"slug": "eng-jonas", "name": "Jonas Berg", "team": "structures and propulsion", "kind": "human"}}
+{"type": "Engineer", "data": {"slug": "eng-priya", "name": "Priya Raman", "team": "power", "kind": "human"}}
+{"type": "Engineer", "data": {"slug": "eng-tomas", "name": "Tomás Ruiz", "team": "avionics and communications", "kind": "human"}}
+{"type": "Engineer", "data": {"slug": "eng-lena", "name": "Lena Vogel", "team": "payload", "kind": "human"}}
+{"type": "Engineer", "data": {"slug": "eng-kofi", "name": "Kofi Mensah", "team": "thermal", "kind": "human"}}
+{"type": "Engineer", "data": {"slug": "eng-mei", "name": "Mei Lin", "team": "assembly, integration and test", "kind": "human"}}
+{"type": "Engineer", "data": {"slug": "agent-checker", "name": "Requirements checker", "team": "systems", "kind": "agent"}}
+{"type": "Variant", "data": {"slug": "var-demo", "name": "Demonstrator", "description": "One unit flown to prove the imaging chain; flies without propulsion."}}
+{"type": "Variant", "data": {"slug": "var-prod", "name": "Production", "description": "Constellation unit with propulsion for orbit keeping and disposal."}}
+{"type": "Block", "data": {"slug": "blk-petrel", "name": "Petrel spacecraft", "level": "system", "maturity": "stable", "description": "150 kg-class Earth-observation smallsat in a 500 km sun-synchronous orbit."}}
+{"type": "Block", "data": {"slug": "blk-launch-vehicle", "name": "Launch vehicle", "level": "system", "maturity": "frozen", "description": "External: the rideshare launch vehicle, owned by the launch provider."}}
+{"type": "Block", "data": {"slug": "blk-ground-station", "name": "Ground station network", "level": "system", "maturity": "stable", "description": "External: the X-band and S-band ground stations."}}
+{"type": "Block", "data": {"slug": "blk-structure", "name": "Structure", "level": "subsystem", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-eps", "name": "Electrical power", "level": "subsystem", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-obc", "name": "On-board computer", "level": "subsystem", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-payload", "name": "Imaging payload", "level": "subsystem", "maturity": "tentative"}}
+{"type": "Block", "data": {"slug": "blk-thermal", "name": "Thermal control", "level": "subsystem", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-comms", "name": "Communications", "level": "subsystem", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-adcs", "name": "Attitude control", "level": "subsystem", "maturity": "tentative"}}
+{"type": "Block", "data": {"slug": "blk-propulsion", "name": "Propulsion", "level": "subsystem", "maturity": "tentative", "description": "Production variant only."}}
+{"type": "Block", "data": {"slug": "blk-primary-structure", "name": "Primary structure", "level": "component", "maturity": "frozen"}}
+{"type": "Block", "data": {"slug": "blk-harness", "name": "Harness", "level": "component", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-solar-array", "name": "Solar array", "level": "component", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-battery", "name": "Battery", "level": "component", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-pcdu", "name": "Power conditioning and distribution unit", "level": "component", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-obc-board", "name": "Processor board", "level": "component", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-imager-optics", "name": "Imager optics", "level": "component", "maturity": "tentative"}}
+{"type": "Block", "data": {"slug": "blk-imager-electronics", "name": "Imager electronics", "level": "component", "maturity": "tentative"}}
+{"type": "Block", "data": {"slug": "blk-radiators", "name": "Radiators", "level": "component", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-heaters", "name": "Heaters", "level": "component", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-xband-tx", "name": "X-band transmitter", "level": "component", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-sband-ttc", "name": "S-band command and telemetry radio", "level": "component", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-reaction-wheels", "name": "Reaction wheels", "level": "component", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-star-tracker", "name": "Star tracker", "level": "component", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-sun-sensors", "name": "Sun sensors", "level": "component", "maturity": "stable"}}
+{"type": "Block", "data": {"slug": "blk-thruster", "name": "Thruster", "level": "component", "maturity": "tentative"}}
+{"type": "Block", "data": {"slug": "blk-propellant-tank", "name": "Propellant tank", "level": "component", "maturity": "tentative"}}
+{"type": "Assumption", "data": {"slug": "asm-cell-efficiency", "statement": "Solar cells deliver 29.5% efficiency at beginning of life.", "confidence": "high", "rationale": "Datasheet value confirmed by the lot acceptance test.", "revisit_by": "2026-11-30"}}
+{"type": "Assumption", "data": {"slug": "asm-launch-env", "statement": "Launch random vibration stays within the provider's published envelope for 150 kg passengers.", "confidence": "medium", "rationale": "The provider has not yet released the coupled-loads results for this mission.", "revisit_by": "2026-09-30"}}
+{"type": "Assumption", "data": {"slug": "asm-optics-mass", "statement": "The imager optics weigh 24.5 kg.", "confidence": "low", "rationale": "Preliminary vendor quote; the optical design is not closed.", "revisit_by": "2026-10-31"}}
+{"type": "Assumption", "data": {"slug": "asm-orbit", "statement": "The operational orbit is 500 km sun-synchronous with a 10:30 local time of descending node.", "confidence": "high", "rationale": "Fixed by the rideshare slot."}}
+{"type": "Standard", "data": {"slug": "std-iso-24113", "identifier": "ISO 24113", "title": "Space systems: space debris mitigation requirements"}}
+{"type": "Standard", "data": {"slug": "std-ecss-testing", "identifier": "ECSS-E-ST-10-03C", "title": "Space engineering: testing"}}
+{"type": "Requirement", "data": {"slug": "mg-imaging", "title": "Image at 1.5 m ground sample distance", "statement": "Petrel shall deliver panchromatic imagery at a ground sample distance of 1.5 m or finer from its operational orbit.", "tier": "mission", "source": "customer", "maturity": "frozen", "method": "analysis", "safety_critical": false, "review_status": "approved", "updated_at": "2026-01-20T09:00:00Z", "rationale": "The customer's change-detection product needs 1.5 m to resolve vehicles.", "quantity": "gsd", "comparator": "max", "limit_value": 1.5, "unit": "m"}}
+{"type": "Requirement", "data": {"slug": "mg-life", "title": "Five-year operational life", "statement": "A production Petrel shall operate for at least five years in orbit.", "tier": "mission", "source": "customer", "maturity": "frozen", "method": "analysis", "safety_critical": false, "review_status": "approved", "updated_at": "2026-01-20T09:00:00Z", "quantity": "operational_life", "comparator": "min", "limit_value": 5.0, "unit": "years"}}
+{"type": "Requirement", "data": {"slug": "mg-delivery", "title": "Deliver imagery within three hours", "statement": "Petrel shall deliver each image to the customer within three hours of capture.", "tier": "mission", "source": "customer", "maturity": "frozen", "method": "demonstration", "safety_critical": false, "review_status": "approved", "updated_at": "2026-01-20T09:00:00Z", "quantity": "delivery_latency", "comparator": "max", "limit_value": 3.0, "unit": "hours"}}
+{"type": "Requirement", "data": {"slug": "req-demo-life", "title": "Twelve-month demonstrator life", "statement": "The demonstrator shall operate for at least twelve months in orbit.", "tier": "mission", "source": "customer", "maturity": "frozen", "method": "analysis", "safety_critical": false, "review_status": "approved", "updated_at": "2026-01-20T09:00:00Z", "quantity": "operational_life", "comparator": "min", "limit_value": 1.0, "unit": "years"}}
+{"type": "Requirement", "data": {"slug": "req-lv-mass", "title": "Launch mass at most 150 kg", "statement": "The spacecraft shall have a launch mass of 150 kg or less, including propellant.", "tier": "system", "source": "launch_provider", "maturity": "frozen", "method": "test", "safety_critical": false, "review_status": "approved", "updated_at": "2026-09-29T10:00:00Z", "rationale": "Rideshare slot allowance; reduced from 155 kg when the slot changed.", "quantity": "mass", "comparator": "max", "limit_value": 150.0, "unit": "kg"}}
+{"type": "Requirement", "data": {"slug": "req-lv-frequency", "title": "First lateral frequency at least 40 Hz", "statement": "The spacecraft's first lateral natural frequency, hard-mounted at the separation plane, shall be 40 Hz or higher.", "tier": "system", "source": "launch_provider", "maturity": "frozen", "method": "test", "safety_critical": false, "review_status": "approved", "updated_at": "2026-02-01T09:00:00Z", "quantity": "first_frequency", "comparator": "min", "limit_value": 40.0, "unit": "Hz"}}
+{"type": "Requirement", "data": {"slug": "dc-adapter", "title": "Clamp-band separation interface", "statement": "The spacecraft shall attach to the launch vehicle through a 15-inch clamp-band separation system with two breakwire connectors.", "tier": "system", "source": "launch_provider", "maturity": "frozen", "method": "inspection", "safety_critical": false, "review_status": "approved", "updated_at": "2026-02-01T09:00:00Z"}}
+{"type": "Requirement", "data": {"slug": "req-debris", "title": "Re-enter within five years of end of mission", "statement": "A production Petrel shall re-enter the atmosphere within five years after the end of its mission.", "tier": "system", "source": "regulatory", "maturity": "frozen", "method": "analysis", "safety_critical": true, "review_status": "approved", "updated_at": "2026-02-15T09:00:00Z", "quantity": "orbital_lifetime", "comparator": "max", "limit_value": 5.0, "unit": "years"}}
+{"type": "Requirement", "data": {"slug": "req-passivation", "title": "Passivate stored energy at end of mission", "statement": "At the end of its mission the spacecraft shall discharge its battery and vent its propellant.", "tier": "system", "source": "regulatory", "maturity": "proposed", "method": "inspection", "safety_critical": true, "review_status": "approved", "updated_at": "2026-02-15T09:00:00Z"}}
+{"type": "Requirement", "data": {"slug": "req-protoflight", "title": "Protoflight verification approach", "statement": "The flight model shall be tested at qualification levels for acceptance durations; no separate qualification model is built.", "tier": "system", "source": "internal", "maturity": "frozen", "method": "inspection", "safety_critical": false, "review_status": "approved", "updated_at": "2026-05-12T09:00:00Z", "rationale": "One flight unit per variant; a qualification model would add five months."}}
+{"type": "Requirement", "data": {"slug": "req-sys-power", "title": "Imaging-mode power at most 160 W", "statement": "The spacecraft's total power draw in imaging mode shall not exceed 160 W.", "tier": "system", "source": "derived", "maturity": "verified", "method": "analysis", "safety_critical": false, "review_status": "approved", "updated_at": "2026-07-15T09:00:00Z", "quantity": "power", "comparator": "max", "limit_value": 160.0, "unit": "W"}}
+{"type": "Requirement", "data": {"slug": "req-pointing", "title": "Pointing error at most 0.05 deg", "statement": "During imaging the payload boresight pointing error shall not exceed 0.05 deg (3 sigma).", "tier": "system", "source": "derived", "maturity": "proposed", "method": "simulation", "safety_critical": false, "review_status": "human_reviewed", "updated_at": "2026-07-01T09:00:00Z", "quantity": "pointing_error", "comparator": "max", "limit_value": 0.05, "unit": "deg"}}
+{"type": "Requirement", "data": {"slug": "req-obc-temp", "title": "Processor board at most 70 degC", "statement": "The on-board computer's processor board shall stay at or below 70 degC in the worst hot operating case.", "tier": "system", "source": "derived", "maturity": "proposed", "method": "test", "safety_critical": false, "review_status": "approved", "updated_at": "2026-04-20T09:00:00Z", "rationale": "The board's derating rules for a five-year life.", "quantity": "obc_temperature", "comparator": "max", "limit_value": 70.0, "unit": "degC"}}
+{"type": "Requirement", "data": {"slug": "dc-pl-mass", "title": "Payload mass at most 28 kg", "statement": "The imaging payload, optics and electronics together, shall weigh 28 kg or less.", "tier": "design_criterion", "source": "derived", "maturity": "proposed", "method": "test", "safety_critical": false, "review_status": "approved", "updated_at": "2026-06-01T09:00:00Z", "quantity": "mass", "comparator": "max", "limit_value": 28.0, "unit": "kg"}}
+{"type": "Requirement", "data": {"slug": "dc-str-mass", "title": "Structure mass at most 40 kg", "statement": "The structure, primary structure and harness together, shall weigh 40 kg or less.", "tier": "design_criterion", "source": "derived", "maturity": "verified", "method": "test", "safety_critical": false, "review_status": "approved", "updated_at": "2026-06-01T09:00:00Z", "quantity": "mass", "comparator": "max", "limit_value": 40.0, "unit": "kg"}}
+{"type": "Requirement", "data": {"slug": "dc-eps-generation", "title": "Array generation at least 180 W", "statement": "The solar array shall generate at least 180 W at end of life in the worst-case sun angle.", "tier": "design_criterion", "source": "derived", "maturity": "proposed", "method": "analysis", "safety_critical": false, "review_status": "human_reviewed", "updated_at": "2026-07-15T09:00:00Z", "quantity": "power_generated", "comparator": "min", "limit_value": 180.0, "unit": "W"}}
+{"type": "Requirement", "data": {"slug": "dc-batt-dod", "title": "Battery depth of discharge at most 30%", "statement": "The battery's depth of discharge shall not exceed 30% in any orbit.", "tier": "design_criterion", "source": "derived", "maturity": "verified", "method": "analysis", "safety_critical": false, "review_status": "approved", "updated_at": "2026-03-10T09:00:00Z", "rationale": "Keeps cycle wear inside the five-year life.", "quantity": "depth_of_discharge", "comparator": "max", "limit_value": 30.0, "unit": "%"}}
+{"type": "Requirement", "data": {"slug": "dc-batt-temp", "title": "Battery between 0 and 35 degC", "statement": "The battery cells shall stay between 0 degC and 35 degC in every operating and non-operating mode.", "tier": "design_criterion", "source": "derived", "maturity": "proposed", "method": "test", "safety_critical": true, "review_status": "human_reviewed", "updated_at": "2026-06-20T09:00:00Z", "rationale": "Charging outside this range risks lithium plating and thermal runaway."}}
+{"type": "Requirement", "data": {"slug": "dc-xband-rate", "title": "X-band rate at least 400 Mbit/s", "statement": "The X-band downlink shall deliver at least 400 Mbit/s of information to the ground station at 5 deg elevation.", "tier": "design_criterion", "source": "derived", "maturity": "verified", "method": "test", "safety_critical": false, "review_status": "approved", "updated_at": "2026-06-10T09:00:00Z", "quantity": "downlink_rate", "comparator": "min", "limit_value": 400.0, "unit": "Mbit/s"}}
+{"type": "Requirement", "data": {"slug": "dc-can-bus", "title": "Payload commanding over CAN at 1 Mbit/s", "statement": "The on-board computer shall command the payload over a CAN 2.0B bus at 1 Mbit/s.", "tier": "design_criterion", "source": "derived", "maturity": "verified", "method": "test", "safety_critical": false, "review_status": "approved", "updated_at": "2026-03-01T09:00:00Z"}}
+{"type": "Requirement", "data": {"slug": "dc-bus-voltage", "title": "Main bus at 28 V plus or minus 4 V", "statement": "The power conditioning unit shall hold the main bus between 24 V and 32 V at every load.", "tier": "design_criterion", "source": "derived", "maturity": "verified", "method": "test", "safety_critical": false, "review_status": "approved", "updated_at": "2026-03-01T09:00:00Z"}}
+{"type": "Requirement", "data": {"slug": "dc-adcs-jitter", "title": "Low jitter during imaging", "statement": "The ADCS should keep jitter low during imaging so that images are sharp.", "tier": "design_criterion", "source": "derived", "maturity": "assumed", "method": "simulation", "safety_critical": false, "review_status": "ai_generated", "updated_at": "2026-09-24T15:30:00Z"}}
+{"type": "Requirement", "data": {"slug": "req-prop-deltav", "title": "Delta-v at least 60 m/s", "statement": "A production Petrel shall carry propellant for at least 60 m/s of delta-v for orbit keeping and disposal.", "tier": "system", "source": "derived", "maturity": "proposed", "method": "analysis", "safety_critical": false, "review_status": "approved", "updated_at": "2026-05-02T09:00:00Z", "quantity": "delta_v", "comparator": "min", "limit_value": 60.0, "unit": "m/s"}}
+{"type": "Interface", "data": {"slug": "if-eps-obc", "name": "Power to on-board computer", "kind": "electrical", "definition": "28 V plus or minus 4 V regulated supply, 3 A maximum, with current telemetry over I2C.", "maturity": "frozen"}}
+{"type": "Interface", "data": {"slug": "if-obc-payload", "name": "On-board computer to payload", "kind": "data", "definition": "CAN 2.0B at 1 Mbit/s for commanding; LVDS at 800 Mbit/s for image data.", "maturity": "tentative"}}
+{"type": "Interface", "data": {"slug": "if-payload-structure", "name": "Payload mounting", "kind": "mechanical", "definition": "Three titanium bipods to the payload deck; mounted stiffness above 120 Hz.", "maturity": "frozen"}}
+{"type": "Interface", "data": {"slug": "if-lv-adapter", "name": "Launch vehicle separation", "kind": "mechanical", "definition": "15-inch clamp band with separation springs and two breakwire connectors.", "maturity": "frozen"}}
+{"type": "Interface", "data": {"slug": "if-xband-ground", "name": "X-band downlink", "kind": "rf", "definition": "8.025 to 8.4 GHz, DVB-S2 with adaptive coding; 400 Mbit/s minimum at 5 deg elevation.", "maturity": "stable"}}
+{"type": "Interface", "data": {"slug": "if-battery-thermal", "name": "Battery thermal path", "kind": "thermal", "definition": "Battery box conductively coupled to the radiator panel; two heater circuits on the box.", "maturity": "tentative"}}
+{"type": "Parameter", "data": {"slug": "p-mass-primary-structure", "name": "Primary structure mass", "quantity": "mass", "value": 31.0, "unit": "kg", "basis": "calculated"}}
+{"type": "Parameter", "data": {"slug": "p-mass-harness", "name": "Harness mass", "quantity": "mass", "value": 7.2, "unit": "kg", "basis": "estimated"}}
+{"type": "Parameter", "data": {"slug": "p-mass-solar-array", "name": "Solar array mass", "quantity": "mass", "value": 12.6, "unit": "kg", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-mass-battery", "name": "Battery mass", "quantity": "mass", "value": 9.4, "unit": "kg", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-mass-pcdu", "name": "PCDU mass", "quantity": "mass", "value": 5.1, "unit": "kg", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-mass-obc-board", "name": "Processor board mass", "quantity": "mass", "value": 2.6, "unit": "kg", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-mass-optics", "name": "Imager optics mass", "quantity": "mass", "value": 24.5, "unit": "kg", "basis": "estimated"}}
+{"type": "Parameter", "data": {"slug": "p-mass-imager-electronics", "name": "Imager electronics mass", "quantity": "mass", "value": 6.3, "unit": "kg", "basis": "estimated"}}
+{"type": "Parameter", "data": {"slug": "p-mass-radiators", "name": "Radiator mass", "quantity": "mass", "value": 4.2, "unit": "kg", "basis": "calculated"}}
+{"type": "Parameter", "data": {"slug": "p-mass-heaters", "name": "Heater mass", "quantity": "mass", "value": 1.1, "unit": "kg", "basis": "estimated"}}
+{"type": "Parameter", "data": {"slug": "p-mass-xband", "name": "X-band transmitter mass", "quantity": "mass", "value": 2.4, "unit": "kg", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-mass-sband", "name": "S-band radio mass", "quantity": "mass", "value": 1.5, "unit": "kg", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-mass-wheels", "name": "Reaction wheel mass", "quantity": "mass", "value": 8.4, "unit": "kg", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-mass-star-tracker", "name": "Star tracker mass", "quantity": "mass", "value": 2.2, "unit": "kg", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-mass-sun-sensors", "name": "Sun sensor mass", "quantity": "mass", "value": 0.6, "unit": "kg", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-mass-thruster", "name": "Thruster mass", "quantity": "mass", "value": 4.6, "unit": "kg", "basis": "estimated"}}
+{"type": "Parameter", "data": {"slug": "p-mass-tank", "name": "Propellant tank mass, wet", "quantity": "mass", "value": 18.9, "unit": "kg", "basis": "calculated"}}
+{"type": "Parameter", "data": {"slug": "p-power-obc", "name": "Processor board power", "quantity": "power", "value": 12.0, "unit": "W", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-power-imager", "name": "Imager electronics power", "quantity": "power", "value": 38.0, "unit": "W", "basis": "estimated"}}
+{"type": "Parameter", "data": {"slug": "p-power-xband", "name": "X-band transmitter power", "quantity": "power", "value": 46.0, "unit": "W", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-power-sband", "name": "S-band radio power", "quantity": "power", "value": 8.0, "unit": "W", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-power-wheels", "name": "Reaction wheel power", "quantity": "power", "value": 24.0, "unit": "W", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-power-star-tracker", "name": "Star tracker power", "quantity": "power", "value": 6.0, "unit": "W", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-power-heaters", "name": "Heater power, imaging mode", "quantity": "power", "value": 14.0, "unit": "W", "basis": "calculated"}}
+{"type": "Parameter", "data": {"slug": "p-power-pcdu-loss", "name": "PCDU conversion loss", "quantity": "power", "value": 9.0, "unit": "W", "basis": "calculated"}}
+{"type": "Parameter", "data": {"slug": "p-array-generation", "name": "Array generation, end of life", "quantity": "power_generated", "value": 186.0, "unit": "W", "basis": "calculated"}}
+{"type": "Parameter", "data": {"slug": "p-obc-temp", "name": "Processor board peak temperature, hot case", "quantity": "obc_temperature", "value": 73.4, "unit": "degC", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-first-frequency", "name": "First lateral mode", "quantity": "first_frequency", "value": 46.2, "unit": "Hz", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-xband-rate", "name": "X-band information rate", "quantity": "downlink_rate", "value": 452.0, "unit": "Mbit/s", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-pointing-error", "name": "Pointing error, 3 sigma", "quantity": "pointing_error", "value": 0.03, "unit": "deg", "basis": "calculated"}}
+{"type": "Parameter", "data": {"slug": "p-jitter", "name": "Line-of-sight jitter during imaging", "quantity": "jitter", "value": 1.9, "unit": "arcsec", "basis": "calculated"}}
+{"type": "Parameter", "data": {"slug": "p-dod", "name": "Battery depth of discharge per orbit", "quantity": "depth_of_discharge", "value": 24.0, "unit": "%", "basis": "calculated"}}
+{"type": "Parameter", "data": {"slug": "p-bus-voltage", "name": "Main bus voltage", "quantity": "bus_voltage", "value": 28.3, "unit": "V", "basis": "measured"}}
+{"type": "Parameter", "data": {"slug": "p-deltav", "name": "Delta-v capacity", "quantity": "delta_v", "value": 72.0, "unit": "m/s", "basis": "calculated"}}
+{"type": "Iteration", "data": {"slug": "it-v0", "name": "V0 breadboard", "learning_goal": "Prove that the power chain and the avionics work together on the bench.", "exit_criteria": "Battery sizing analysed and disposal analysis closed on breadboard hardware.", "status": "done"}}
+{"type": "Iteration", "data": {"slug": "it-v1", "name": "V1 engineering model", "learning_goal": "Find out whether the structure, thermal design and avionics survive launch and orbit environments.", "exit_criteria": "Vibration, thermal vacuum, mass properties, EMC and the X-band link pass on the engineering model.", "status": "active"}}
+{"type": "Iteration", "data": {"slug": "it-v2", "name": "V2 flight model", "learning_goal": "Qualify the flight model at protoflight levels.", "exit_criteria": "Every system requirement verified on the flight model.", "status": "planned"}}
+{"type": "Milestone", "data": {"slug": "ms-pdr", "name": "Preliminary design review", "kind": "pdr", "date": "2026-05-12", "status": "passed"}}
+{"type": "Milestone", "data": {"slug": "ms-cdr", "name": "Critical design review", "kind": "cdr", "date": "2026-11-17", "status": "planned"}}
+{"type": "Milestone", "data": {"slug": "ms-trr", "name": "Flight model test readiness review", "kind": "trr", "date": "2027-03-02", "status": "planned"}}
+{"type": "TestCase", "data": {"slug": "tc-tvac", "title": "Thermal vacuum cycling of the avionics stack", "method": "test", "status": "fail", "environment": "Thermal vacuum chamber, eight cycles between -20 degC and +60 degC", "last_run_at": "2026-09-18T14:00:00Z", "last_measured": 73.4, "unit": "degC"}}
+{"type": "TestRun", "data": {"slug": "run-tvac-v0", "outcome": "pass", "run_at": "2026-04-02T16:00:00Z", "measured_value": 64.1, "unit": "degC", "notes": "Breadboard in a thermal chamber at ambient pressure."}}
+{"type": "TestRun", "data": {"slug": "run-tvac-v1", "outcome": "fail", "run_at": "2026-09-18T14:00:00Z", "measured_value": 73.4, "unit": "degC", "notes": "Hot spot at the FPGA; the conduction path from the board to the radiator is too long."}}
+{"type": "TestCase", "data": {"slug": "tc-vibration", "title": "Sine and random vibration of the engineering model", "method": "test", "status": "pass", "environment": "Shaker table, three axes, qualification levels", "last_run_at": "2026-08-27T11:00:00Z", "last_measured": 46.2, "unit": "Hz"}}
+{"type": "TestRun", "data": {"slug": "run-vib-v1", "outcome": "pass", "run_at": "2026-08-27T11:00:00Z", "measured_value": 46.2, "unit": "Hz", "notes": "First lateral mode at 46.2 Hz."}}
+{"type": "TestCase", "data": {"slug": "tc-xband", "title": "X-band end-to-end link test", "method": "test", "status": "pass", "environment": "RF test set with a ground-station emulator", "last_run_at": "2026-09-05T10:00:00Z", "last_measured": 452.0, "unit": "Mbit/s"}}
+{"type": "TestRun", "data": {"slug": "run-xband-v1a", "outcome": "aborted", "run_at": "2026-09-03T10:00:00Z", "notes": "The ground-station emulator lost lock; rerun scheduled."}}
+{"type": "TestRun", "data": {"slug": "run-xband-v1b", "outcome": "pass", "run_at": "2026-09-05T10:00:00Z", "measured_value": 452.0, "unit": "Mbit/s"}}
+{"type": "TestCase", "data": {"slug": "tc-mass-props", "title": "Mass properties measurement", "method": "test", "status": "pass", "environment": "Mass properties table", "last_run_at": "2026-08-20T09:00:00Z", "last_measured": 141.9, "unit": "kg"}}
+{"type": "TestRun", "data": {"slug": "run-mass-v1", "outcome": "pass", "run_at": "2026-08-20T09:00:00Z", "measured_value": 141.9, "unit": "kg", "notes": "Measured against the 155 kg allowance in force at the time."}}
+{"type": "TestCase", "data": {"slug": "tc-str-weigh", "title": "Structure weighing", "method": "test", "status": "pass", "environment": "Calibrated scale", "last_run_at": "2026-08-19T09:00:00Z", "last_measured": 37.9, "unit": "kg"}}
+{"type": "TestRun", "data": {"slug": "run-str-weigh-v1", "outcome": "pass", "run_at": "2026-08-19T09:00:00Z", "measured_value": 37.9, "unit": "kg"}}
+{"type": "TestCase", "data": {"slug": "tc-dod-analysis", "title": "Battery depth-of-discharge analysis", "method": "analysis", "status": "pass", "last_run_at": "2026-04-20T09:00:00Z", "last_measured": 24.0, "unit": "%"}}
+{"type": "TestRun", "data": {"slug": "run-dod-v0", "outcome": "pass", "run_at": "2026-04-20T09:00:00Z", "measured_value": 24.0, "unit": "%"}}
+{"type": "TestCase", "data": {"slug": "tc-can-loopback", "title": "CAN bus loopback between computer and payload", "method": "test", "status": "pass", "environment": "Bench, flight harness", "last_run_at": "2026-03-28T09:00:00Z", "last_measured": 1.0, "unit": "Mbit/s"}}
+{"type": "TestRun", "data": {"slug": "run-can-v0", "outcome": "pass", "run_at": "2026-03-28T09:00:00Z", "measured_value": 1.0, "unit": "Mbit/s"}}
+{"type": "TestCase", "data": {"slug": "tc-bus-voltage", "title": "Main bus regulation across load steps", "method": "test", "status": "pass", "environment": "Bench, electronic load", "last_run_at": "2026-03-25T09:00:00Z", "last_measured": 28.3, "unit": "V"}}
+{"type": "TestRun", "data": {"slug": "run-bus-v0", "outcome": "pass", "run_at": "2026-03-25T09:00:00Z", "measured_value": 28.3, "unit": "V"}}
+{"type": "TestCase", "data": {"slug": "tc-pointing-sim", "title": "Pointing performance simulation", "method": "simulation", "status": "pass", "environment": "Attitude simulator with flight software", "last_run_at": "2026-09-10T09:00:00Z", "last_measured": 1.9, "unit": "arcsec"}}
+{"type": "TestRun", "data": {"slug": "run-pointing-v1", "outcome": "pass", "run_at": "2026-09-10T09:00:00Z", "measured_value": 1.9, "unit": "arcsec"}}
+{"type": "TestCase", "data": {"slug": "tc-deorbit-analysis", "title": "Orbital lifetime analysis", "method": "analysis", "status": "pass", "last_run_at": "2026-04-15T09:00:00Z", "last_measured": 3.6, "unit": "years"}}
+{"type": "TestRun", "data": {"slug": "run-deorbit-v0", "outcome": "pass", "run_at": "2026-04-15T09:00:00Z", "measured_value": 3.6, "unit": "years"}}
+{"type": "TestCase", "data": {"slug": "tc-power-analysis", "title": "Imaging-mode power analysis", "method": "analysis", "status": "pass", "last_run_at": "2026-09-01T09:00:00Z", "last_measured": 157.0, "unit": "W"}}
+{"type": "TestRun", "data": {"slug": "run-power-v1", "outcome": "pass", "run_at": "2026-09-01T09:00:00Z", "measured_value": 157.0, "unit": "W"}}
+{"type": "TestCase", "data": {"slug": "tc-emc", "title": "Conducted emissions on the main bus", "method": "test", "status": "not_run", "environment": "EMC chamber"}}
+{"type": "TestCase", "data": {"slug": "tc-batt-thermal", "title": "Battery thermal balance", "method": "test", "status": "not_run", "environment": "Thermal vacuum chamber"}}
+{"type": "Risk", "data": {"slug": "risk-obc-overheat", "title": "Processor board overheats in the hot case", "failure_mode": "The FPGA hot spot exceeds the board's derated limit during long imaging passes.", "effect": "Processor resets interrupt imaging; accelerated ageing shortens life.", "severity": 4, "likelihood": 4, "status": "open"}}
+{"type": "Risk", "data": {"slug": "risk-optics-mass", "title": "Optics mass grows", "failure_mode": "The vendor's mass grows as the optical design closes.", "effect": "The payload and launch mass budgets no longer close.", "severity": 3, "likelihood": 4, "status": "open"}}
+{"type": "Risk", "data": {"slug": "risk-battery-runaway", "title": "Battery thermal runaway", "failure_mode": "A cell overheats while charging in the hot case.", "effect": "Loss of the spacecraft and a debris event.", "severity": 5, "likelihood": 2, "status": "open"}}
+{"type": "Risk", "data": {"slug": "risk-xband-license", "title": "Frequency coordination is late", "failure_mode": "The X-band filing is not granted before launch.", "effect": "No imagery downlink at the start of operations.", "severity": 4, "likelihood": 2, "status": "accepted"}}
+{"type": "Risk", "data": {"slug": "risk-wheel-life", "title": "Reaction wheel bearing wear", "failure_mode": "Lubricant loss wears the bearings before five years.", "effect": "Degraded pointing late in life.", "severity": 3, "likelihood": 2, "status": "mitigated"}}
+{"type": "Risk", "data": {"slug": "risk-sep-shock", "title": "Separation shock damages the star tracker", "failure_mode": "The clamp-band release shock exceeds the star tracker's rating.", "effect": "No fine attitude determination.", "severity": 3, "likelihood": 1, "status": "closed"}}
+{"type": "Decision", "data": {"slug": "dec-lv-mass", "question": "Accept the launch provider's reduced 150 kg allowance?", "choice": "Accept the 150 kg allowance and carry the margin at system level.", "rationale": "The rideshare slot changed; keeping 155 kg would move the launch by nine months.", "reversible": false, "decided_at": "2026-09-29", "status": "decided"}}
+{"type": "Decision", "data": {"slug": "dec-battery-cells", "question": "Which battery cells?", "choice": "Cylindrical 18650 cells in a 4s8p pack.", "rationale": "Flight heritage and stock available within the schedule.", "reversible": true, "decided_at": "2026-03-10", "status": "decided"}}
+{"type": "Decision", "data": {"slug": "dec-obc-heatsink", "question": "How to close the processor board's thermal margin?", "choice": "Add a copper heat spreader from the FPGA to the radiator panel (+0.3 kg).", "rationale": "The thermal vacuum run measured 73.4 degC against 70 degC; analysis predicts 66 degC with the spreader.", "reversible": true, "decided_at": "2026-09-22", "status": "proposed"}}
+{"type": "Finding", "data": {"slug": "fnd-pl-mass-over", "check": "budget_rollup", "severity": "error", "message": "Payload mass adds up to 30.8 kg against its 28 kg allocation.", "status": "accepted", "raised_at": "2026-09-12T08:00:00Z"}}
+{"type": "Finding", "data": {"slug": "fnd-tvac-fail", "check": "failing_requirements", "severity": "error", "message": "The thermal vacuum run of 2026-09-18 measured 73.4 degC against the 70 degC limit.", "status": "open", "raised_at": "2026-09-18T16:05:00Z"}}
+{"type": "Finding", "data": {"slug": "fnd-jitter-vague", "check": "requirement_quality", "severity": "warning", "message": "Not checkable: no quantity, limit or unit, and 'low' and 'sharp' are undefined.", "status": "open", "raised_at": "2026-09-24T15:35:00Z"}}
+{"type": "Finding", "data": {"slug": "fnd-mass-stale", "check": "stale_verification", "severity": "warning", "message": "The mass properties pass of 2026-08-20 predates the 150 kg limit set on 2026-09-29.", "status": "open", "raised_at": "2026-09-29T10:05:00Z"}}
+{"type": "Finding", "data": {"slug": "fnd-power-margin", "check": "budget_rollup", "severity": "info", "message": "Imaging-mode power margin is 3 W, under 2%.", "status": "open", "raised_at": "2026-10-01T09:00:00Z"}}
+{"edge": "BlockOwner", "from": "blk-petrel", "to": "eng-amara", "data": {}}
+{"edge": "PartOf", "from": "blk-structure", "to": "blk-petrel", "data": {}}
+{"edge": "BlockOwner", "from": "blk-structure", "to": "eng-jonas", "data": {}}
+{"edge": "PartOf", "from": "blk-eps", "to": "blk-petrel", "data": {}}
+{"edge": "BlockOwner", "from": "blk-eps", "to": "eng-priya", "data": {}}
+{"edge": "PartOf", "from": "blk-obc", "to": "blk-petrel", "data": {}}
+{"edge": "BlockOwner", "from": "blk-obc", "to": "eng-tomas", "data": {}}
+{"edge": "PartOf", "from": "blk-payload", "to": "blk-petrel", "data": {}}
+{"edge": "BlockOwner", "from": "blk-payload", "to": "eng-lena", "data": {}}
+{"edge": "PartOf", "from": "blk-thermal", "to": "blk-petrel", "data": {}}
+{"edge": "BlockOwner", "from": "blk-thermal", "to": "eng-kofi", "data": {}}
+{"edge": "PartOf", "from": "blk-comms", "to": "blk-petrel", "data": {}}
+{"edge": "BlockOwner", "from": "blk-comms", "to": "eng-tomas", "data": {}}
+{"edge": "PartOf", "from": "blk-adcs", "to": "blk-petrel", "data": {}}
+{"edge": "BlockOwner", "from": "blk-adcs", "to": "eng-amara", "data": {}}
+{"edge": "PartOf", "from": "blk-propulsion", "to": "blk-petrel", "data": {}}
+{"edge": "BlockOwner", "from": "blk-propulsion", "to": "eng-jonas", "data": {}}
+{"edge": "PartOf", "from": "blk-primary-structure", "to": "blk-structure", "data": {}}
+{"edge": "BlockOwner", "from": "blk-primary-structure", "to": "eng-jonas", "data": {}}
+{"edge": "PartOf", "from": "blk-harness", "to": "blk-structure", "data": {}}
+{"edge": "BlockOwner", "from": "blk-harness", "to": "eng-jonas", "data": {}}
+{"edge": "PartOf", "from": "blk-solar-array", "to": "blk-eps", "data": {}}
+{"edge": "BlockOwner", "from": "blk-solar-array", "to": "eng-priya", "data": {}}
+{"edge": "PartOf", "from": "blk-battery", "to": "blk-eps", "data": {}}
+{"edge": "BlockOwner", "from": "blk-battery", "to": "eng-priya", "data": {}}
+{"edge": "PartOf", "from": "blk-pcdu", "to": "blk-eps", "data": {}}
+{"edge": "BlockOwner", "from": "blk-pcdu", "to": "eng-priya", "data": {}}
+{"edge": "PartOf", "from": "blk-obc-board", "to": "blk-obc", "data": {}}
+{"edge": "BlockOwner", "from": "blk-obc-board", "to": "eng-tomas", "data": {}}
+{"edge": "PartOf", "from": "blk-imager-optics", "to": "blk-payload", "data": {}}
+{"edge": "BlockOwner", "from": "blk-imager-optics", "to": "eng-lena", "data": {}}
+{"edge": "PartOf", "from": "blk-imager-electronics", "to": "blk-payload", "data": {}}
+{"edge": "BlockOwner", "from": "blk-imager-electronics", "to": "eng-lena", "data": {}}
+{"edge": "PartOf", "from": "blk-radiators", "to": "blk-thermal", "data": {}}
+{"edge": "BlockOwner", "from": "blk-radiators", "to": "eng-kofi", "data": {}}
+{"edge": "PartOf", "from": "blk-heaters", "to": "blk-thermal", "data": {}}
+{"edge": "BlockOwner", "from": "blk-heaters", "to": "eng-kofi", "data": {}}
+{"edge": "PartOf", "from": "blk-xband-tx", "to": "blk-comms", "data": {}}
+{"edge": "BlockOwner", "from": "blk-xband-tx", "to": "eng-tomas", "data": {}}
+{"edge": "PartOf", "from": "blk-sband-ttc", "to": "blk-comms", "data": {}}
+{"edge": "BlockOwner", "from": "blk-sband-ttc", "to": "eng-tomas", "data": {}}
+{"edge": "PartOf", "from": "blk-reaction-wheels", "to": "blk-adcs", "data": {}}
+{"edge": "BlockOwner", "from": "blk-reaction-wheels", "to": "eng-amara", "data": {}}
+{"edge": "PartOf", "from": "blk-star-tracker", "to": "blk-adcs", "data": {}}
+{"edge": "BlockOwner", "from": "blk-star-tracker", "to": "eng-amara", "data": {}}
+{"edge": "PartOf", "from": "blk-sun-sensors", "to": "blk-adcs", "data": {}}
+{"edge": "BlockOwner", "from": "blk-sun-sensors", "to": "eng-amara", "data": {}}
+{"edge": "PartOf", "from": "blk-thruster", "to": "blk-propulsion", "data": {}}
+{"edge": "BlockOwner", "from": "blk-thruster", "to": "eng-jonas", "data": {}}
+{"edge": "PartOf", "from": "blk-propellant-tank", "to": "blk-propulsion", "data": {}}
+{"edge": "BlockOwner", "from": "blk-propellant-tank", "to": "eng-jonas", "data": {}}
+{"edge": "RequirementOwner", "from": "mg-imaging", "to": "eng-amara", "data": {}}
+{"edge": "AllocatedTo", "from": "mg-imaging", "to": "blk-petrel", "data": {}}
+{"edge": "RequirementOwner", "from": "mg-life", "to": "eng-amara", "data": {}}
+{"edge": "AllocatedTo", "from": "mg-life", "to": "blk-petrel", "data": {}}
+{"edge": "RequirementOwner", "from": "mg-delivery", "to": "eng-amara", "data": {}}
+{"edge": "AllocatedTo", "from": "mg-delivery", "to": "blk-petrel", "data": {}}
+{"edge": "RequirementOwner", "from": "req-demo-life", "to": "eng-amara", "data": {}}
+{"edge": "AllocatedTo", "from": "req-demo-life", "to": "blk-petrel", "data": {}}
+{"edge": "RequirementOwner", "from": "req-lv-mass", "to": "eng-amara", "data": {}}
+{"edge": "AllocatedTo", "from": "req-lv-mass", "to": "blk-petrel", "data": {}}
+{"edge": "RequirementOwner", "from": "req-lv-frequency", "to": "eng-jonas", "data": {}}
+{"edge": "AllocatedTo", "from": "req-lv-frequency", "to": "blk-petrel", "data": {}}
+{"edge": "RequirementOwner", "from": "dc-adapter", "to": "eng-jonas", "data": {}}
+{"edge": "AllocatedTo", "from": "dc-adapter", "to": "blk-structure", "data": {}}
+{"edge": "RequirementOwner", "from": "req-debris", "to": "eng-amara", "data": {}}
+{"edge": "AllocatedTo", "from": "req-debris", "to": "blk-petrel", "data": {}}
+{"edge": "AllocatedTo", "from": "req-passivation", "to": "blk-eps", "data": {}}
+{"edge": "AllocatedTo", "from": "req-passivation", "to": "blk-propulsion", "data": {}}
+{"edge": "RequirementOwner", "from": "req-protoflight", "to": "eng-mei", "data": {}}
+{"edge": "AllocatedTo", "from": "req-protoflight", "to": "blk-petrel", "data": {}}
+{"edge": "RequirementOwner", "from": "req-sys-power", "to": "eng-priya", "data": {}}
+{"edge": "DerivesFrom", "from": "req-sys-power", "to": "mg-imaging", "data": {}}
+{"edge": "AllocatedTo", "from": "req-sys-power", "to": "blk-petrel", "data": {}}
+{"edge": "RequirementOwner", "from": "req-pointing", "to": "eng-amara", "data": {}}
+{"edge": "DerivesFrom", "from": "req-pointing", "to": "mg-imaging", "data": {}}
+{"edge": "AllocatedTo", "from": "req-pointing", "to": "blk-adcs", "data": {}}
+{"edge": "RequirementOwner", "from": "req-obc-temp", "to": "eng-kofi", "data": {}}
+{"edge": "DerivesFrom", "from": "req-obc-temp", "to": "mg-life", "data": {}}
+{"edge": "AllocatedTo", "from": "req-obc-temp", "to": "blk-obc", "data": {}}
+{"edge": "RequirementOwner", "from": "dc-pl-mass", "to": "eng-lena", "data": {}}
+{"edge": "DerivesFrom", "from": "dc-pl-mass", "to": "req-lv-mass", "data": {}}
+{"edge": "AllocatedTo", "from": "dc-pl-mass", "to": "blk-payload", "data": {}}
+{"edge": "RequirementOwner", "from": "dc-str-mass", "to": "eng-jonas", "data": {}}
+{"edge": "DerivesFrom", "from": "dc-str-mass", "to": "req-lv-mass", "data": {}}
+{"edge": "AllocatedTo", "from": "dc-str-mass", "to": "blk-structure", "data": {}}
+{"edge": "RequirementOwner", "from": "dc-eps-generation", "to": "eng-priya", "data": {}}
+{"edge": "DerivesFrom", "from": "dc-eps-generation", "to": "req-sys-power", "data": {}}
+{"edge": "AllocatedTo", "from": "dc-eps-generation", "to": "blk-eps", "data": {}}
+{"edge": "RequirementOwner", "from": "dc-batt-dod", "to": "eng-priya", "data": {}}
+{"edge": "DerivesFrom", "from": "dc-batt-dod", "to": "mg-life", "data": {}}
+{"edge": "AllocatedTo", "from": "dc-batt-dod", "to": "blk-battery", "data": {}}
+{"edge": "RequirementOwner", "from": "dc-batt-temp", "to": "eng-kofi", "data": {}}
+{"edge": "DerivesFrom", "from": "dc-batt-temp", "to": "mg-life", "data": {}}
+{"edge": "AllocatedTo", "from": "dc-batt-temp", "to": "blk-battery", "data": {}}
+{"edge": "AllocatedTo", "from": "dc-batt-temp", "to": "blk-thermal", "data": {}}
+{"edge": "RequirementOwner", "from": "dc-xband-rate", "to": "eng-tomas", "data": {}}
+{"edge": "DerivesFrom", "from": "dc-xband-rate", "to": "mg-delivery", "data": {}}
+{"edge": "AllocatedTo", "from": "dc-xband-rate", "to": "blk-xband-tx", "data": {}}
+{"edge": "RequirementOwner", "from": "dc-can-bus", "to": "eng-tomas", "data": {}}
+{"edge": "DerivesFrom", "from": "dc-can-bus", "to": "mg-imaging", "data": {}}
+{"edge": "AllocatedTo", "from": "dc-can-bus", "to": "blk-obc", "data": {}}
+{"edge": "RequirementOwner", "from": "dc-bus-voltage", "to": "eng-priya", "data": {}}
+{"edge": "DerivesFrom", "from": "dc-bus-voltage", "to": "req-sys-power", "data": {}}
+{"edge": "AllocatedTo", "from": "dc-bus-voltage", "to": "blk-pcdu", "data": {}}
+{"edge": "RequirementOwner", "from": "dc-adcs-jitter", "to": "eng-amara", "data": {}}
+{"edge": "DerivesFrom", "from": "dc-adcs-jitter", "to": "req-pointing", "data": {}}
+{"edge": "AllocatedTo", "from": "dc-adcs-jitter", "to": "blk-adcs", "data": {}}
+{"edge": "RequirementOwner", "from": "req-prop-deltav", "to": "eng-jonas", "data": {}}
+{"edge": "DerivesFrom", "from": "req-prop-deltav", "to": "mg-life", "data": {}}
+{"edge": "DerivesFrom", "from": "req-prop-deltav", "to": "req-debris", "data": {}}
+{"edge": "AllocatedTo", "from": "req-prop-deltav", "to": "blk-propulsion", "data": {}}
+{"edge": "AppliesTo", "from": "mg-life", "to": "var-prod", "data": {}}
+{"edge": "AppliesTo", "from": "req-prop-deltav", "to": "var-prod", "data": {}}
+{"edge": "AppliesTo", "from": "req-debris", "to": "var-prod", "data": {}}
+{"edge": "AppliesTo", "from": "req-demo-life", "to": "var-demo", "data": {}}
+{"edge": "RequirementAssumes", "from": "req-lv-frequency", "to": "asm-launch-env", "data": {}}
+{"edge": "RequirementAssumes", "from": "dc-pl-mass", "to": "asm-optics-mass", "data": {}}
+{"edge": "RequirementAssumes", "from": "mg-imaging", "to": "asm-orbit", "data": {}}
+{"edge": "RequirementAssumes", "from": "dc-eps-generation", "to": "asm-cell-efficiency", "data": {}}
+{"edge": "RequirementAssumes", "from": "req-debris", "to": "asm-orbit", "data": {}}
+{"edge": "CompliesWith", "from": "req-debris", "to": "std-iso-24113", "data": {"clause": "Disposal from low Earth orbit", "stance": "comply"}}
+{"edge": "CompliesWith", "from": "req-debris", "to": "std-iso-24113", "data": {"clause": "Disposal of launch vehicle orbital stages", "stance": "not_applicable", "justification": "Applies to the launch provider's upper stage, not the spacecraft."}}
+{"edge": "CompliesWith", "from": "req-passivation", "to": "std-iso-24113", "data": {"clause": "Passivation of stored energy at end of life", "stance": "comply"}}
+{"edge": "CompliesWith", "from": "req-protoflight", "to": "std-ecss-testing", "data": {"clause": "Qualification and acceptance test approach", "stance": "deviate", "justification": "Protoflight approach: the flight model is tested at qualification levels for acceptance durations. Risk accepted at the preliminary design review."}}
+{"edge": "CompliesWith", "from": "req-lv-frequency", "to": "std-ecss-testing", "data": {"clause": "Sine and random vibration testing", "stance": "comply"}}
+{"edge": "Connects", "from": "if-eps-obc", "to": "blk-eps", "data": {}}
+{"edge": "Connects", "from": "if-eps-obc", "to": "blk-obc", "data": {}}
+{"edge": "InterfaceOwner", "from": "if-eps-obc", "to": "eng-priya", "data": {}}
+{"edge": "Constrains", "from": "dc-bus-voltage", "to": "if-eps-obc", "data": {}}
+{"edge": "Connects", "from": "if-obc-payload", "to": "blk-obc", "data": {}}
+{"edge": "Connects", "from": "if-obc-payload", "to": "blk-payload", "data": {}}
+{"edge": "InterfaceOwner", "from": "if-obc-payload", "to": "eng-tomas", "data": {}}
+{"edge": "Constrains", "from": "dc-can-bus", "to": "if-obc-payload", "data": {}}
+{"edge": "Connects", "from": "if-payload-structure", "to": "blk-payload", "data": {}}
+{"edge": "Connects", "from": "if-payload-structure", "to": "blk-structure", "data": {}}
+{"edge": "InterfaceOwner", "from": "if-payload-structure", "to": "eng-jonas", "data": {}}
+{"edge": "Constrains", "from": "req-lv-frequency", "to": "if-payload-structure", "data": {}}
+{"edge": "Connects", "from": "if-lv-adapter", "to": "blk-structure", "data": {}}
+{"edge": "Connects", "from": "if-lv-adapter", "to": "blk-launch-vehicle", "data": {}}
+{"edge": "InterfaceOwner", "from": "if-lv-adapter", "to": "eng-jonas", "data": {}}
+{"edge": "Constrains", "from": "dc-adapter", "to": "if-lv-adapter", "data": {}}
+{"edge": "Connects", "from": "if-xband-ground", "to": "blk-xband-tx", "data": {}}
+{"edge": "Connects", "from": "if-xband-ground", "to": "blk-ground-station", "data": {}}
+{"edge": "InterfaceOwner", "from": "if-xband-ground", "to": "eng-tomas", "data": {}}
+{"edge": "Constrains", "from": "dc-xband-rate", "to": "if-xband-ground", "data": {}}
+{"edge": "Connects", "from": "if-battery-thermal", "to": "blk-battery", "data": {}}
+{"edge": "Connects", "from": "if-battery-thermal", "to": "blk-radiators", "data": {}}
+{"edge": "InterfaceOwner", "from": "if-battery-thermal", "to": "eng-kofi", "data": {}}
+{"edge": "Constrains", "from": "dc-batt-temp", "to": "if-battery-thermal", "data": {}}
+{"edge": "InterfaceAssumes", "from": "if-xband-ground", "to": "asm-orbit", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-primary-structure", "to": "blk-primary-structure", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-harness", "to": "blk-harness", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-solar-array", "to": "blk-solar-array", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-battery", "to": "blk-battery", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-pcdu", "to": "blk-pcdu", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-obc-board", "to": "blk-obc-board", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-optics", "to": "blk-imager-optics", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-imager-electronics", "to": "blk-imager-electronics", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-radiators", "to": "blk-radiators", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-heaters", "to": "blk-heaters", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-xband", "to": "blk-xband-tx", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-sband", "to": "blk-sband-ttc", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-wheels", "to": "blk-reaction-wheels", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-star-tracker", "to": "blk-star-tracker", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-sun-sensors", "to": "blk-sun-sensors", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-thruster", "to": "blk-thruster", "data": {}}
+{"edge": "Characterizes", "from": "p-mass-tank", "to": "blk-propellant-tank", "data": {}}
+{"edge": "Characterizes", "from": "p-power-obc", "to": "blk-obc-board", "data": {}}
+{"edge": "Characterizes", "from": "p-power-imager", "to": "blk-imager-electronics", "data": {}}
+{"edge": "Characterizes", "from": "p-power-xband", "to": "blk-xband-tx", "data": {}}
+{"edge": "Characterizes", "from": "p-power-sband", "to": "blk-sband-ttc", "data": {}}
+{"edge": "Characterizes", "from": "p-power-wheels", "to": "blk-reaction-wheels", "data": {}}
+{"edge": "Characterizes", "from": "p-power-star-tracker", "to": "blk-star-tracker", "data": {}}
+{"edge": "Characterizes", "from": "p-power-heaters", "to": "blk-heaters", "data": {}}
+{"edge": "Characterizes", "from": "p-power-pcdu-loss", "to": "blk-pcdu", "data": {}}
+{"edge": "Characterizes", "from": "p-array-generation", "to": "blk-solar-array", "data": {}}
+{"edge": "Characterizes", "from": "p-obc-temp", "to": "blk-obc", "data": {}}
+{"edge": "Characterizes", "from": "p-first-frequency", "to": "blk-petrel", "data": {}}
+{"edge": "Characterizes", "from": "p-xband-rate", "to": "blk-xband-tx", "data": {}}
+{"edge": "Characterizes", "from": "p-pointing-error", "to": "blk-adcs", "data": {}}
+{"edge": "Characterizes", "from": "p-jitter", "to": "blk-adcs", "data": {}}
+{"edge": "Characterizes", "from": "p-dod", "to": "blk-battery", "data": {}}
+{"edge": "Characterizes", "from": "p-bus-voltage", "to": "blk-pcdu", "data": {}}
+{"edge": "Characterizes", "from": "p-deltav", "to": "blk-propulsion", "data": {}}
+{"edge": "ParameterAssumes", "from": "p-mass-optics", "to": "asm-optics-mass", "data": {}}
+{"edge": "ParameterAssumes", "from": "p-array-generation", "to": "asm-cell-efficiency", "data": {}}
+{"edge": "Bounds", "from": "req-obc-temp", "to": "p-obc-temp", "data": {}}
+{"edge": "Bounds", "from": "req-lv-frequency", "to": "p-first-frequency", "data": {}}
+{"edge": "Bounds", "from": "dc-xband-rate", "to": "p-xband-rate", "data": {}}
+{"edge": "Bounds", "from": "req-pointing", "to": "p-pointing-error", "data": {}}
+{"edge": "Bounds", "from": "dc-batt-dod", "to": "p-dod", "data": {}}
+{"edge": "Bounds", "from": "dc-bus-voltage", "to": "p-bus-voltage", "data": {}}
+{"edge": "Bounds", "from": "req-prop-deltav", "to": "p-deltav", "data": {}}
+{"edge": "Bounds", "from": "dc-eps-generation", "to": "p-array-generation", "data": {}}
+{"edge": "InScope", "from": "dc-batt-dod", "to": "it-v0", "data": {}}
+{"edge": "InScope", "from": "req-debris", "to": "it-v0", "data": {}}
+{"edge": "InScope", "from": "req-lv-frequency", "to": "it-v1", "data": {}}
+{"edge": "InScope", "from": "req-obc-temp", "to": "it-v1", "data": {}}
+{"edge": "InScope", "from": "req-lv-mass", "to": "it-v1", "data": {}}
+{"edge": "InScope", "from": "dc-xband-rate", "to": "it-v1", "data": {}}
+{"edge": "InScope", "from": "dc-pl-mass", "to": "it-v1", "data": {}}
+{"edge": "InScope", "from": "dc-str-mass", "to": "it-v1", "data": {}}
+{"edge": "InScope", "from": "dc-can-bus", "to": "it-v1", "data": {}}
+{"edge": "InScope", "from": "req-pointing", "to": "it-v1", "data": {}}
+{"edge": "InScope", "from": "dc-bus-voltage", "to": "it-v1", "data": {}}
+{"edge": "InScope", "from": "dc-batt-temp", "to": "it-v1", "data": {}}
+{"edge": "InScope", "from": "req-prop-deltav", "to": "it-v2", "data": {}}
+{"edge": "InScope", "from": "req-passivation", "to": "it-v2", "data": {}}
+{"edge": "InScope", "from": "dc-eps-generation", "to": "it-v2", "data": {}}
+{"edge": "InScope", "from": "req-protoflight", "to": "it-v2", "data": {}}
+{"edge": "InScope", "from": "dc-adapter", "to": "it-v2", "data": {}}
+{"edge": "Closes", "from": "ms-pdr", "to": "it-v0", "data": {}}
+{"edge": "Closes", "from": "ms-cdr", "to": "it-v1", "data": {}}
+{"edge": "Closes", "from": "ms-trr", "to": "it-v2", "data": {}}
+{"edge": "Verifies", "from": "tc-tvac", "to": "req-obc-temp", "data": {}}
+{"edge": "Measures", "from": "tc-tvac", "to": "p-obc-temp", "data": {}}
+{"edge": "TestOwner", "from": "tc-tvac", "to": "eng-mei", "data": {}}
+{"edge": "RunOf", "from": "run-tvac-v0", "to": "tc-tvac", "data": {}}
+{"edge": "RunIn", "from": "run-tvac-v0", "to": "it-v0", "data": {}}
+{"edge": "RunOf", "from": "run-tvac-v1", "to": "tc-tvac", "data": {}}
+{"edge": "RunIn", "from": "run-tvac-v1", "to": "it-v1", "data": {}}
+{"edge": "Verifies", "from": "tc-vibration", "to": "req-lv-frequency", "data": {}}
+{"edge": "Measures", "from": "tc-vibration", "to": "p-first-frequency", "data": {}}
+{"edge": "TestOwner", "from": "tc-vibration", "to": "eng-jonas", "data": {}}
+{"edge": "RunOf", "from": "run-vib-v1", "to": "tc-vibration", "data": {}}
+{"edge": "RunIn", "from": "run-vib-v1", "to": "it-v1", "data": {}}
+{"edge": "Verifies", "from": "tc-xband", "to": "dc-xband-rate", "data": {}}
+{"edge": "Measures", "from": "tc-xband", "to": "p-xband-rate", "data": {}}
+{"edge": "TestOwner", "from": "tc-xband", "to": "eng-tomas", "data": {}}
+{"edge": "RunOf", "from": "run-xband-v1a", "to": "tc-xband", "data": {}}
+{"edge": "RunIn", "from": "run-xband-v1a", "to": "it-v1", "data": {}}
+{"edge": "RunOf", "from": "run-xband-v1b", "to": "tc-xband", "data": {}}
+{"edge": "RunIn", "from": "run-xband-v1b", "to": "it-v1", "data": {}}
+{"edge": "Verifies", "from": "tc-mass-props", "to": "req-lv-mass", "data": {}}
+{"edge": "TestOwner", "from": "tc-mass-props", "to": "eng-mei", "data": {}}
+{"edge": "RunOf", "from": "run-mass-v1", "to": "tc-mass-props", "data": {}}
+{"edge": "RunIn", "from": "run-mass-v1", "to": "it-v1", "data": {}}
+{"edge": "Verifies", "from": "tc-str-weigh", "to": "dc-str-mass", "data": {}}
+{"edge": "TestOwner", "from": "tc-str-weigh", "to": "eng-jonas", "data": {}}
+{"edge": "RunOf", "from": "run-str-weigh-v1", "to": "tc-str-weigh", "data": {}}
+{"edge": "RunIn", "from": "run-str-weigh-v1", "to": "it-v1", "data": {}}
+{"edge": "Verifies", "from": "tc-dod-analysis", "to": "dc-batt-dod", "data": {}}
+{"edge": "Measures", "from": "tc-dod-analysis", "to": "p-dod", "data": {}}
+{"edge": "TestOwner", "from": "tc-dod-analysis", "to": "eng-priya", "data": {}}
+{"edge": "RunOf", "from": "run-dod-v0", "to": "tc-dod-analysis", "data": {}}
+{"edge": "RunIn", "from": "run-dod-v0", "to": "it-v0", "data": {}}
+{"edge": "Verifies", "from": "tc-can-loopback", "to": "dc-can-bus", "data": {}}
+{"edge": "TestOwner", "from": "tc-can-loopback", "to": "eng-tomas", "data": {}}
+{"edge": "RunOf", "from": "run-can-v0", "to": "tc-can-loopback", "data": {}}
+{"edge": "RunIn", "from": "run-can-v0", "to": "it-v0", "data": {}}
+{"edge": "Verifies", "from": "tc-bus-voltage", "to": "dc-bus-voltage", "data": {}}
+{"edge": "Measures", "from": "tc-bus-voltage", "to": "p-bus-voltage", "data": {}}
+{"edge": "TestOwner", "from": "tc-bus-voltage", "to": "eng-priya", "data": {}}
+{"edge": "RunOf", "from": "run-bus-v0", "to": "tc-bus-voltage", "data": {}}
+{"edge": "RunIn", "from": "run-bus-v0", "to": "it-v0", "data": {}}
+{"edge": "Verifies", "from": "tc-pointing-sim", "to": "req-pointing", "data": {}}
+{"edge": "Measures", "from": "tc-pointing-sim", "to": "p-jitter", "data": {}}
+{"edge": "TestOwner", "from": "tc-pointing-sim", "to": "eng-amara", "data": {}}
+{"edge": "RunOf", "from": "run-pointing-v1", "to": "tc-pointing-sim", "data": {}}
+{"edge": "RunIn", "from": "run-pointing-v1", "to": "it-v1", "data": {}}
+{"edge": "Verifies", "from": "tc-deorbit-analysis", "to": "req-debris", "data": {}}
+{"edge": "TestOwner", "from": "tc-deorbit-analysis", "to": "eng-amara", "data": {}}
+{"edge": "RunOf", "from": "run-deorbit-v0", "to": "tc-deorbit-analysis", "data": {}}
+{"edge": "RunIn", "from": "run-deorbit-v0", "to": "it-v0", "data": {}}
+{"edge": "Verifies", "from": "tc-power-analysis", "to": "req-sys-power", "data": {}}
+{"edge": "TestOwner", "from": "tc-power-analysis", "to": "eng-priya", "data": {}}
+{"edge": "RunOf", "from": "run-power-v1", "to": "tc-power-analysis", "data": {}}
+{"edge": "RunIn", "from": "run-power-v1", "to": "it-v1", "data": {}}
+{"edge": "Verifies", "from": "tc-emc", "to": "dc-bus-voltage", "data": {}}
+{"edge": "TestOwner", "from": "tc-emc", "to": "eng-mei", "data": {}}
+{"edge": "Verifies", "from": "tc-batt-thermal", "to": "dc-batt-temp", "data": {}}
+{"edge": "TestOwner", "from": "tc-batt-thermal", "to": "eng-kofi", "data": {}}
+{"edge": "RiskOn", "from": "risk-obc-overheat", "to": "blk-obc", "data": {}}
+{"edge": "Mitigates", "from": "req-obc-temp", "to": "risk-obc-overheat", "data": {}}
+{"edge": "RiskOn", "from": "risk-optics-mass", "to": "blk-imager-optics", "data": {}}
+{"edge": "Mitigates", "from": "dc-pl-mass", "to": "risk-optics-mass", "data": {}}
+{"edge": "RiskOn", "from": "risk-battery-runaway", "to": "blk-battery", "data": {}}
+{"edge": "Mitigates", "from": "dc-batt-temp", "to": "risk-battery-runaway", "data": {}}
+{"edge": "Mitigates", "from": "req-passivation", "to": "risk-battery-runaway", "data": {}}
+{"edge": "RiskOn", "from": "risk-xband-license", "to": "blk-comms", "data": {}}
+{"edge": "RiskOn", "from": "risk-wheel-life", "to": "blk-reaction-wheels", "data": {}}
+{"edge": "RiskOn", "from": "risk-sep-shock", "to": "blk-star-tracker", "data": {}}
+{"edge": "Affects", "from": "dec-lv-mass", "to": "req-lv-mass", "data": {}}
+{"edge": "Affects", "from": "dec-battery-cells", "to": "dc-batt-dod", "data": {}}
+{"edge": "Affects", "from": "dec-obc-heatsink", "to": "req-obc-temp", "data": {}}
+{"edge": "FindingOn", "from": "fnd-pl-mass-over", "to": "dc-pl-mass", "data": {}}
+{"edge": "RaisedBy", "from": "fnd-pl-mass-over", "to": "agent-checker", "data": {}}
+{"edge": "FindingOn", "from": "fnd-tvac-fail", "to": "req-obc-temp", "data": {}}
+{"edge": "RaisedBy", "from": "fnd-tvac-fail", "to": "agent-checker", "data": {}}
+{"edge": "FindingOn", "from": "fnd-jitter-vague", "to": "dc-adcs-jitter", "data": {}}
+{"edge": "RaisedBy", "from": "fnd-jitter-vague", "to": "agent-checker", "data": {}}
+{"edge": "FindingOn", "from": "fnd-mass-stale", "to": "req-lv-mass", "data": {}}
+{"edge": "RaisedBy", "from": "fnd-mass-stale", "to": "agent-checker", "data": {}}
+{"edge": "FindingOn", "from": "fnd-power-margin", "to": "req-sys-power", "data": {}}
+{"edge": "RaisedBy", "from": "fnd-power-margin", "to": "eng-amara", "data": {}}

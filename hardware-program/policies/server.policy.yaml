@@ -1,0 +1,12 @@
+version: 1
+groups:
+  admins: [act-admin]
+rules:
+  - id: list-graphs
+    allow:
+      actors: { group: admins }
+      actions: [graph_list]
+  - id: manage-configuration
+    allow:
+      actors: { group: admins }
+      actions: [config_manage]

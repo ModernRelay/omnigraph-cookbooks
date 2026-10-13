@@ -1,0 +1,90 @@
+# Operator-config example for the hardware-program cookbook.
+# Your operator config lives at ~/.omnigraph/config.yaml (per-user, NOT committed).
+# Merge the blocks below into it. Point `local` at your running cluster server
+# (`omnigraph-server --cluster .`); alias invocation needs the server up. With
+# these defaults, `omnigraph query`, `mutate`, `branch`, `commit` and `changes`
+# address graph `program` on `local` without --server/--graph.
+#
+# Read aliases bind to served stored queries by name; run with
+# `omnigraph alias <name> [args]` — args bind by NAME to the query's $params
+# (`args: [slug]` fills `$slug`). Operator aliases are READ-ONLY — run stored
+# *mutations* with `omnigraph mutate <name> --params '{…}'` (see the bottom).
+servers:
+  local:
+    url: http://127.0.0.1:8080
+defaults:
+  server: local
+  default_graph: program
+  output: table
+
+aliases:
+  # ── Requirements and traceability ────────────────────────────
+  req:        { server: local, graph: program, query: requirement,          args: [slug] }
+  reqs:       { server: local, graph: program, query: requirements_by_tier, args: [tier] }
+  trace:      { server: local, graph: program, query: trace_up,             args: [slug] }
+  why:        { server: local, graph: program, query: why_exists,           args: [block] }
+  req-tests:  { server: local, graph: program, query: requirement_tests,    args: [slug] }
+  decisions:  { server: local, graph: program, query: decisions_affecting,  args: [slug] }
+
+  # ── Change impact ────────────────────────────────────────────
+  impact:             { server: local, graph: program, query: impacted_requirements, args: [slug] }
+  impact-tests:       { server: local, graph: program, query: impacted_tests,        args: [slug] }
+  impact-interfaces:  { server: local, graph: program, query: impacted_interfaces,   args: [slug] }
+
+  # ── Budgets and limits ───────────────────────────────────────
+  budgets:      { server: local, graph: program, query: budget_rollup }
+  contributors: { server: local, graph: program, query: budget_contributors, args: [slug] }
+  limits:       { server: local, graph: program, query: limit_check }
+
+  # ── Verification ─────────────────────────────────────────────
+  unverified:  { server: local, graph: program, query: unverified_requirements }
+  failing:     { server: local, graph: program, query: failing_requirements }
+  stale:       { server: local, graph: program, query: stale_verification }
+  mismatch:    { server: local, graph: program, query: measurement_mismatch }
+  tests:       { server: local, graph: program, query: test_status_summary }
+  runs:        { server: local, graph: program, query: test_history, args: [test] }
+
+  # ── Review readiness (pass a milestone slug, e.g. ms-cdr) ────
+  gate-unverified: { server: local, graph: program, query: gate_unverified,          args: [milestone] }
+  gate-failing:    { server: local, graph: program, query: gate_not_passing,         args: [milestone] }
+  gate-interfaces: { server: local, graph: program, query: gate_unfrozen_interfaces, args: [milestone] }
+  gate-stale:      { server: local, graph: program, query: gate_stale_verification,  args: [milestone] }
+  milestones:      { server: local, graph: program, query: milestones }
+
+  # ── Interfaces, assumptions, risks ───────────────────────────
+  interfaces:        { server: local, graph: program, query: interfaces }
+  untested-ifaces:   { server: local, graph: program, query: untested_interfaces }
+  fragile:           { server: local, graph: program, query: assumptions_under_frozen_work }
+  assumptions-due:   { server: local, graph: program, query: assumptions_due, args: [today] }
+  risks:             { server: local, graph: program, query: open_risks }
+  unmitigated:       { server: local, graph: program, query: unmitigated_risks }
+
+  # ── Hygiene and review ───────────────────────────────────────
+  unowned:     { server: local, graph: program, query: unowned_requirements }
+  untraced:    { server: local, graph: program, query: untraced_requirements }
+  unexplained: { server: local, graph: program, query: unexplained_components }
+  to-review:   { server: local, graph: program, query: awaiting_review }
+  findings:    { server: local, graph: program, query: open_findings }
+
+  # ── Compliance, variants, search ─────────────────────────────
+  compliance: { server: local, graph: program, query: compliance_matrix,    args: [standard] }
+  variant:    { server: local, graph: program, query: variant_requirements, args: [variant] }
+  search:     { server: local, graph: program, query: search_requirements,  args: [q] }
+  similar:    { server: local, graph: program, query: similar_requirements, args: [q] }
+
+# ── Stored mutations (use `omnigraph mutate`, not an alias) ───────
+# Each publishes one commit. Agents run them on a branch (`--branch <name>`);
+# the policy refuses agent writes on main.
+#
+#   omnigraph mutate record_test_run --params '{"run":"run-tvac-v1b","test":"tc-tvac",
+#     "iteration":"it-v1","outcome":"pass","measured_value":66.2,"unit":"degC",
+#     "notes":"With the copper heat spreader.","run_at":"2026-10-08T15:00:00.000Z",
+#     "report":"base64:<report bytes>"}'
+#   omnigraph mutate set_parameter --branch trade-optics-light \
+#     --params '{"slug":"p-mass-optics","value":21.4,"basis":"estimated"}'
+#   omnigraph mutate raise_finding --branch agent-review --params '{"slug":"fnd-x",
+#     "check":"requirement_quality","severity":"warning","message":"No limit.",
+#     "requirement":"dc-adcs-jitter","raised_by":"agent-checker"}'
+#   omnigraph mutate resolve_finding --params '{"slug":"fnd-x","status":"accepted"}'
+#   omnigraph mutate record_baseline --params '{"milestone":"ms-cdr",
+#     "status":"passed_with_actions","commit":"<COMMIT_ID>"}'
