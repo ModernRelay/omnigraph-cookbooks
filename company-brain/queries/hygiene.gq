@@ -1,0 +1,50 @@
+// Hygiene reads. Each returns zero rows on a healthy graph. Run them on an
+// agent's branch before merging it. The schema cannot force an edge to
+// exist when a node is inserted (@card minimums are checked when an edge is
+// removed), so these reads are how a missing citation or owner is caught.
+
+query uncited_decisions() @description("Decisions that cite no source. Zero rows on a healthy graph.") {
+    match {
+        $d: Decision
+        not { $d decidedIn $_ }
+    }
+    return { $d.slug as decision, $d.status as status }
+    order { decision asc }
+}
+
+query decisions_without_project() @description("Decisions about no project. Zero rows on a healthy graph.") {
+    match {
+        $d: Decision
+        not { $d decisionAbout $_ }
+    }
+    return { $d.slug as decision, $d.status as status }
+    order { decision asc }
+}
+
+query unowned_actions() @description("Open or in-progress action items with no owner. Zero rows on a healthy graph.") {
+    match {
+        $a: ActionItem
+        $a.status = "open" or $a.status = "in_progress"
+        not { $a assignedTo $_ }
+    }
+    return { $a.slug as action, $a.title as title }
+    order { action asc }
+}
+
+query uncited_actions() @description("Action items that cite no source. Zero rows on a healthy graph.") {
+    match {
+        $a: ActionItem
+        not { $a actionFrom $_ }
+    }
+    return { $a.slug as action, $a.title as title }
+    order { action asc }
+}
+
+query agents_without_owner() @description("Agents with no accountable human. Zero rows on a healthy graph.") {
+    match {
+        $a: Agent
+        not { $a actsFor $_ }
+    }
+    return { $a.slug as agent }
+    order { agent asc }
+}

@@ -1,0 +1,158 @@
+// OmniGraph company brain: the shared context of one company, read and
+// written by its people and by their agents.
+//
+// Three layers, connected only by named edges:
+//   people and org  Person, Identity, Agent, Team, Project
+//   evidence        Source: a meeting, thread, document, email or ticket
+//   facts           Decision and ActionItem, each citing the Source it came from
+//
+// Rules the shape encodes:
+//   - Facts cite evidence with typed edges, never a free-text source field.
+//   - Decisions are never rewritten. A changed decision is a new Decision,
+//     and the old one points to it with SupersededBy. "Current" and
+//     "superseded" are derived by the queries, not stored.
+//   - One Person per human. Emails and chat handles are Identity nodes.
+//   - Every edge is keyed by its endpoints, so re-ingesting is idempotent.
+//   - Who wrote a change is the commit actor from the bearer token; the
+//     schema records who decided and who is accountable, not who typed.
+
+node Person @description("A human. One node per human, ever. Emails and chat handles are Identity nodes, not fields; a person who leaves gets active=false and keeps their history.") {
+    slug: String @key
+    name: String
+    title: String?
+    active: Bool?
+}
+
+node Identity @description("An identifier one tool uses for a person: email:alice@lanternworks.example, slack:u01alice, github:apark. It can exist before anyone knows whose it is.")
+              @instruction("slug is <system>:<value>, lowercased and trimmed. Look up an Identity before creating a Person, and link it with IdentifiesPerson instead of creating a second Person.") {
+    slug: String @key
+    system: enum(email, slack, github, google, linear, jira, notion, other) @index
+    value: String @description("The raw value exactly as the tool gave it")
+}
+
+node Agent @description("A software agent that reads and writes this graph. slug is its OmniGraph actor id, so commit history joins to this node.")
+           @instruction("Agents write only on their own branches and never merge. A human reviews and merges.") {
+    slug: String @key
+    name: String
+    purpose: String?
+    active: Bool?
+}
+
+node Team @description("An organizational unit: a team, squad or department. The company itself is the root team.") {
+    slug: String @key
+    name: String
+}
+
+node Project @description("A time-bound effort with an owner and an outcome.") {
+    slug: String @key
+    name: String
+    status: enum(planned, active, paused, done, cancelled) @index
+    target_date: Date?
+}
+
+node Source @description("A record the brain learned from: a meeting, chat thread, document, email or ticket. Facts are extracted from Sources; a Source is never edited to say something new.")
+            @instruction("slug is <system>:<native id> (meet:…, slack:<channel>/<ts>, doc:…), so ingesting the same item twice upserts instead of duplicating.") {
+    slug: String @key
+    kind: enum(meeting, thread, document, email, ticket, other) @index
+    title: String @index
+    url: String?
+    occurred_at: DateTime @index @description("When the meeting happened or the message was sent")
+    summary: String? @index
+}
+
+node Decision @description("A commitment to a course of action, made by named people. Never rewritten: a changed decision is a new Decision that the old one points to with SupersededBy.")
+              @instruction("Write decisions with propose_decision or propose_successor, which cite a Source in the same commit. Agents write status proposed on their own branch; a human accepts and merges. Never edit statement; supersede instead. Fill rationale only from what the Source says.") {
+    slug: String @key
+    title: String @index
+    statement: String @description("What was decided, in one or two sentences")
+    rationale: String? @description("Why, as stated in the source: drivers and the options that lost")
+    status: enum(proposed, accepted, rejected, deprecated) @index
+    decided_at: DateTime? @description("When it was decided in the world")
+    recorded_at: DateTime @description("When the brain learned it")
+}
+
+node ActionItem @description("Something one person committed to do, usually by a date, coming out of a Source.")
+                @instruction("Write action items with add_action_item, which sets the owner and cites the Source in the same commit. The owner, not an agent, closes the item.") {
+    slug: String @key
+    title: String @index
+    status: enum(open, in_progress, done, cancelled) @index
+    due: Date? @index
+    completed_at: DateTime?
+    recorded_at: DateTime
+}
+
+// ── People and org ────────────────────────────────────────────────────────
+
+edge MemberOf: Person -> Team @description("Membership with an optional role. until null means current; a move closes one edge and opens another.") {
+    role: String?
+    since: Date?
+    until: Date?
+    @key(@src, @dst)
+}
+
+edge PartOf: Team -> Team @card(0..1) @description("The source team sits inside the target team.") {
+    @key(@src, @dst)
+}
+
+edge IdentifiesPerson: Identity -> Person @card(0..1) @description("This identifier belongs to this person. At most one person per identifier.") {
+    @key(@src, @dst)
+}
+
+edge ActsFor: Agent -> Person @card(1..1) @description("The human accountable for this agent.") {
+    @key(@src, @dst)
+}
+
+edge OwnedBy: Project -> Person @card(0..1) @description("The person accountable for the project.") {
+    @key(@src, @dst)
+}
+
+edge RunBy: Project -> Team @card(0..1) @description("The team doing the project.") {
+    @key(@src, @dst)
+}
+
+// ── Evidence ──────────────────────────────────────────────────────────────
+
+edge Involved: Source -> Person @description("A person who organized, attended, wrote or was mentioned in the source.") {
+    role: enum(organizer, attendee, author, mentioned)?
+    @key(@src, @dst)
+}
+
+edge SourceAbout: Source -> Project @description("The source discusses this project.") {
+    @key(@src, @dst)
+}
+
+// ── Decisions ─────────────────────────────────────────────────────────────
+
+edge DecidedIn: Decision -> Source @card(1..) @description("Where the decision was made or recorded. Every decision cites at least one source.") {
+    @key(@src, @dst)
+}
+
+edge DecidedBy: Decision -> Person @description("A person who made the decision.") {
+    @key(@src, @dst)
+}
+
+edge DecisionAbout: Decision -> Project @description("The project the decision concerns.") {
+    @key(@src, @dst)
+}
+
+edge SupersededBy: Decision -> Decision @card(0..1) @description("The source decision was replaced by the target. A decision is superseded at most once, so two competing successors collide at merge.") {
+    @key(@src, @dst)
+}
+
+// ── Commitments ───────────────────────────────────────────────────────────
+
+edge AssignedTo: ActionItem -> Person @card(0..1) @description("The one person who owns the action item.") {
+    @key(@src, @dst)
+}
+
+edge ActionFrom: ActionItem -> Source @description("Where the action item was agreed.") {
+    @key(@src, @dst)
+}
+
+edge Implements: ActionItem -> Decision @card(0..1) @description("The decision this action item carries out.") {
+    @key(@src, @dst)
+}
+
+edge ActionAbout: ActionItem -> Project @card(0..1) @description("The project the action item belongs to.") {
+    @key(@src, @dst)
+}

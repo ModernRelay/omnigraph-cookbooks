@@ -1,0 +1,57 @@
+# Operator-config example for the company-brain cookbook.
+# Your operator config lives at ~/.omnigraph/config.yaml (per-user, NOT committed).
+# Merge the `aliases:` below into it for short names over this graph's stored
+# queries. Point `local` at your running cluster server (`omnigraph-server
+# --cluster .`); alias invocation needs the server up.
+#
+# Read aliases bind to served stored queries by name; run with
+# `omnigraph alias <name> [args]` — args bind by NAME to the query's $params
+# (`args: [project]` fills `$project`). Operator aliases are READ-ONLY — run
+# stored *mutations* with `omnigraph mutate <name> --params '{…}'` (see the bottom).
+servers:
+  local:
+    url: http://127.0.0.1:8080
+defaults:
+  server: local
+  default_graph: knowledge
+  output: table
+
+aliases:
+  # ── Decisions ────────────────────────────────────────────────
+  decisions:        { server: local, graph: knowledge, query: current_decisions }
+  project:          { server: local, graph: knowledge, query: project_decisions,       args: [project] }
+  why:              { server: local, graph: knowledge, query: decision_sources,        args: [decision] }
+  who-decided:      { server: local, graph: knowledge, query: decision_deciders,       args: [decision] }
+  lineage:          { server: local, graph: knowledge, query: decision_lineage,        args: [decision] }
+  replaced-by:      { server: local, graph: knowledge, query: decision_successor,      args: [decision] }
+  from-source:      { server: local, graph: knowledge, query: decisions_from_source,   args: [source] }
+  to-review:        { server: local, graph: knowledge, query: proposed_decisions }
+  not-started:      { server: local, graph: knowledge, query: unimplemented_decisions }
+
+  # ── Commitments ──────────────────────────────────────────────
+  open:             { server: local, graph: knowledge, query: open_actions }
+  overdue:          { server: local, graph: knowledge, query: overdue_actions,         args: [as_of] }
+  owes:             { server: local, graph: knowledge, query: person_actions,          args: [person] }
+
+  # ── People, projects, evidence ───────────────────────────────
+  team:             { server: local, graph: knowledge, query: team_members,            args: [team] }
+  whois:            { server: local, graph: knowledge, query: person_by_identity,      args: [identity] }
+  unresolved:       { server: local, graph: knowledge, query: unresolved_identities }
+  agents:           { server: local, graph: knowledge, query: agents }
+  projects:         { server: local, graph: knowledge, query: active_projects }
+  quiet:            { server: local, graph: knowledge, query: quiet_projects,          args: [since] }
+  sources:          { server: local, graph: knowledge, query: project_sources,         args: [project] }
+
+  # ── Hygiene (zero rows on a healthy graph) ───────────────────
+  lint-uncited:     { server: local, graph: knowledge, query: uncited_decisions }
+  lint-unowned:     { server: local, graph: knowledge, query: unowned_actions }
+
+# ── Mutations (served stored mutations; NOT aliasable) ───────────────────────
+# The bearer identity determines authorization and commit attribution. Agents
+# run these on their own branch; a person accepts and merges. Examples:
+#   omnigraph mutate add_action_item --graph knowledge --branch agent/notes-oct-14 --params \
+#     '{"slug":"provider-recert","title":"Book the provider recertification","due":"2026-10-21","recorded_at":"2026-10-14T16:00:00.000Z","owner":"chen","source":"meet:checkout-kickoff-2026-09-30","project":"checkout"}'
+#   omnigraph mutate accept_decision --graph knowledge --branch agent/notes-oct-14 \
+#     --params '{"slug":"checkout-launch-nov-20"}'
+#   omnigraph mutate resolve_identity --graph knowledge --params '{"identity":"slack:u09guest","person":"fay"}'
+# (with defaults.server/default_graph set, --server/--graph can be omitted.)

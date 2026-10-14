@@ -1,0 +1,127 @@
+// Writes. Each query is one graph commit. The ones that create a fact also
+// write its provenance in the same commit, so a decision or action item never
+// lands without the source it came from. Agents run these on their own
+// branch; a person reviews the branch, accepts, and merges.
+//
+// Edges are keyed by their endpoints, so re-running a link is a no-op. A
+// write refused with read_set_conflict had no effect and can be rerun; a
+// write whose response was lost may have landed, so read before rerunning.
+
+// ── Evidence ──────────────────────────────────────────────────────────────
+
+query record_source($slug: String, $kind: String, $title: String, $occurred_at: DateTime, $url: String?, $summary: String?)
+    @description("Record a meeting, thread, document, email or ticket. The slug is <system>:<native id>, so recording it again upserts.") {
+    insert Source { slug: $slug, kind: $kind, title: $title, occurred_at: $occurred_at, url: $url, summary: $summary }
+}
+
+query link_source_project($source: String, $project: String) @description("Say a source is about a project.") {
+    insert SourceAbout { from: $source, to: $project }
+}
+
+query add_participant($source: String, $person: String, $role: String) @description("Record who organized, attended, wrote or was mentioned in a source.") {
+    insert Involved { from: $source, to: $person, role: $role }
+}
+
+// ── Decisions ─────────────────────────────────────────────────────────────
+
+query propose_decision($slug: String, $title: String, $statement: String, $rationale: String?, $decided_at: DateTime?, $recorded_at: DateTime, $project: String, $source: String)
+    @description("Propose a new decision about a project, citing the source it came from, in one commit.")
+    @instruction("Run on your own branch. Fill rationale only from what the source says. A person accepts it with accept_decision before merging.") {
+    insert Decision { slug: $slug, title: $title, statement: $statement, rationale: $rationale,
+                      status: "proposed", decided_at: $decided_at, recorded_at: $recorded_at }
+    insert DecisionAbout { from: $slug, to: $project }
+    insert DecidedIn { from: $slug, to: $source }
+}
+
+query propose_successor($previous: String, $slug: String, $title: String, $statement: String, $rationale: String?, $decided_at: DateTime?, $recorded_at: DateTime, $project: String, $source: String)
+    @description("Propose a decision that replaces an earlier one: the new decision, its source and the SupersededBy link, in one commit.")
+    @instruction("Use this instead of editing a decision. A decision is superseded at most once, so if another branch already replaced it, the merge refuses yours.") {
+    insert Decision { slug: $slug, title: $title, statement: $statement, rationale: $rationale,
+                      status: "proposed", decided_at: $decided_at, recorded_at: $recorded_at }
+    insert DecisionAbout { from: $slug, to: $project }
+    insert DecidedIn { from: $slug, to: $source }
+    insert SupersededBy { from: $previous, to: $slug }
+}
+
+query cite_source($decision: String, $source: String) @description("Add another source to a decision.") {
+    insert DecidedIn { from: $decision, to: $source }
+}
+
+query add_decider($decision: String, $person: String) @description("Record a person who made a decision.") {
+    insert DecidedBy { from: $decision, to: $person }
+}
+
+query accept_decision($slug: String) @description("Accept a proposed decision. Affects 0 nodes unless it is proposed.")
+    @instruction("For people reviewing a branch, not for the agent that proposed it.") {
+    update Decision set { status: "accepted" } where slug = $slug and status = "proposed"
+}
+
+query reject_decision($slug: String) @description("Reject a proposed decision. Affects 0 nodes unless it is proposed.") {
+    update Decision set { status: "rejected" } where slug = $slug and status = "proposed"
+}
+
+query deprecate_decision($slug: String) @description("Retire an accepted decision that nothing replaced. To change a decision, propose a successor instead.") {
+    update Decision set { status: "deprecated" } where slug = $slug and status = "accepted"
+}
+
+// ── Commitments ───────────────────────────────────────────────────────────
+
+query add_action_item($slug: String, $title: String, $due: Date?, $recorded_at: DateTime, $owner: String, $source: String, $project: String)
+    @description("Record an action item with its owner, the source it was agreed in and its project, in one commit.") {
+    insert ActionItem { slug: $slug, title: $title, status: "open", due: $due, recorded_at: $recorded_at }
+    insert AssignedTo { from: $slug, to: $owner }
+    insert ActionFrom { from: $slug, to: $source }
+    insert ActionAbout { from: $slug, to: $project }
+}
+
+query link_action_decision($action: String, $decision: String) @description("Say an action item carries out a decision.") {
+    insert Implements { from: $action, to: $decision }
+}
+
+query reschedule_action($slug: String, $due: Date?) @description("Change the due date of an open or in-progress action item.") {
+    update ActionItem set { due: $due } where slug = $slug and status != "done" and status != "cancelled"
+}
+
+query start_action($slug: String) @description("Mark an open action item in progress.") {
+    update ActionItem set { status: "in_progress" } where slug = $slug and status = "open"
+}
+
+query complete_action($slug: String, $completed_at: DateTime) @description("Mark an action item done. Affects 0 nodes if it is already done or cancelled.")
+    @instruction("Only the owner closes an action item.") {
+    update ActionItem set { status: "done", completed_at: $completed_at }
+    where slug = $slug and status != "done" and status != "cancelled"
+}
+
+query cancel_action($slug: String) @description("Cancel an action item that will not be done.") {
+    update ActionItem set { status: "cancelled" } where slug = $slug and status != "done"
+}
+
+// ── People and org ────────────────────────────────────────────────────────
+
+query add_person($slug: String, $name: String, $title: String?) @description("Add a person.")
+    @instruction("Resolve every identifier with person_by_identity first. Create a person only when none resolves.") {
+    insert Person { slug: $slug, name: $name, title: $title, active: true }
+}
+
+query add_identity($slug: String, $system: String, $value: String) @description("Record an identifier, resolved or not. slug is <system>:<value>, lowercased.") {
+    insert Identity { slug: $slug, system: $system, value: $value }
+}
+
+query resolve_identity($identity: String, $person: String) @description("Link an identifier to the person it belongs to. An identifier belongs to at most one person.") {
+    insert IdentifiesPerson { from: $identity, to: $person }
+}
+
+query add_member($person: String, $team: String, $role: String?, $since: Date?) @description("Add a person to a team, with an optional role and start date.") {
+    insert MemberOf { from: $person, to: $team, role: $role, since: $since }
+}
+
+query add_agent($slug: String, $name: String, $purpose: String?, $accountable: String) @description("Register an agent under its OmniGraph actor id, with the human accountable for it.") {
+    insert Agent { slug: $slug, name: $name, purpose: $purpose, active: true }
+    insert ActsFor { from: $slug, to: $accountable }
+}
+
+query add_project($slug: String, $name: String, $status: String, $target_date: Date?, $owner: String, $team: String) @description("Add a project with its owner and team.") {
+    insert Project { slug: $slug, name: $name, status: $status, target_date: $target_date }
+    insert OwnedBy { from: $slug, to: $owner }
+    insert RunBy { from: $slug, to: $team }
+}

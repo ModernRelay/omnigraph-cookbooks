@@ -1,0 +1,101 @@
+// Decision reads. Whether a decision is current or superseded is derived
+// from SupersededBy on every read; it is never stored.
+
+query current_decisions() @description("Accepted decisions that no accepted decision has replaced, by project. The decision log as it stands.") {
+    match {
+        $d: Decision { status: "accepted" }
+        $p: Project
+        $d decisionAbout $p
+        not { $d supersededBy $n  $n.status = "accepted" }
+    }
+    return { $p.name as project, $d.slug as decision, $d.title as title, $d.decided_at as decided_at }
+    order { project asc, decided_at asc }
+}
+
+query project_decisions($project: String) @description("Decisions about one project that nothing has replaced yet, with their status. On an agent's branch this shows its proposal; on main, what was accepted.") {
+    match {
+        $p: Project { slug: $project }
+        $d: Decision
+        $d decisionAbout $p
+        not { $d supersededBy $_ }
+    }
+    return { $d.title as decision, $d.status as status }
+    order { decision asc }
+}
+
+query decision_sources($decision: String) @description("The meetings, threads and documents a decision cites, oldest first.") {
+    match {
+        $d: Decision { slug: $decision }
+        $s: Source
+        $d decidedIn $s
+    }
+    return { $s.title as source, $s.kind as kind, $s.occurred_at as occurred_at }
+    order { occurred_at asc }
+}
+
+query decision_deciders($decision: String) @description("Who made a decision.") {
+    match {
+        $d: Decision { slug: $decision }
+        $p: Person
+        $d decidedBy $p
+    }
+    return { $p.name as person, $p.title as title }
+    order { person asc }
+}
+
+query decision_lineage($decision: String) @description("Every earlier decision this one replaced, newest first.") {
+    match {
+        $d: Decision { slug: $decision }
+        $old: Decision
+        $old supersededBy{1,10} $d
+    }
+    return { $old.slug as earlier, $old.title as title, $old.decided_at as decided_at }
+    order { decided_at desc }
+}
+
+query decision_successor($decision: String) @description("What a decision was replaced by, if anything: the end of its SupersededBy chain.") {
+    match {
+        $d: Decision { slug: $decision }
+        $new: Decision
+        $d supersededBy{1,10} $new
+        not { $new supersededBy $_ }
+    }
+    return { $new.slug as current, $new.title as title, $new.status as status }
+}
+
+query decisions_from_source($source: String) @description("What a meeting, thread or document decided.") {
+    match {
+        $s: Source { slug: $source }
+        $d: Decision
+        $d decidedIn $s
+    }
+    return { $d.slug as decision, $d.title as title, $d.status as status }
+    order { decision asc }
+}
+
+query proposed_decisions() @description("Decisions waiting for a person to accept or reject them.") {
+    match {
+        $d: Decision { status: "proposed" }
+    }
+    return { $d.slug as decision, $d.title as title, $d.recorded_at as recorded_at }
+    order { recorded_at asc }
+}
+
+query unimplemented_decisions() @description("Current accepted decisions that no action item carries out yet.") {
+    match {
+        $d: Decision { status: "accepted" }
+        not { $d supersededBy $n  $n.status = "accepted" }
+        not { $a implements $d }
+    }
+    return { $d.slug as decision, $d.title as title, $d.decided_at as decided_at }
+    order { decided_at asc }
+}
+
+query search_decisions($q: String) @description("Full-text search over decision titles, best match first.") {
+    match {
+        $d: Decision
+    }
+    return { $d.slug as decision, $d.title as title, $d.status as status }
+    order { bm25($d.title, $q) }
+    limit 20
+}

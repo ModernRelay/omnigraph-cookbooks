@@ -1,0 +1,101 @@
+// People, teams, identities, agents and projects.
+
+query project_owner($project: String) @description("Who owns a project and which team runs it.") {
+    match {
+        $p: Project { slug: $project }
+        $person: Person
+        $p ownedBy $person
+    }
+    return { $person.name as owner, $person.title as title }
+}
+
+query team_members($team: String) @description("Current members of a team (no end date), with their role.") {
+    match {
+        $t: Team { slug: $team }
+        $p: Person
+        $p $m:memberOf $t
+        $m.until is null
+    }
+    return { $p.name as person, $m.role as role, $m.since as since }
+    order { person asc }
+}
+
+query person_by_identity($identity: String) @description("Resolve an identifier such as email:alice@lanternworks.example or slack:u01alice to a person.")
+                                            @instruction("Run this before creating a Person. No row means the identifier is unresolved, not that the person is new.") {
+    match {
+        $i: Identity { slug: $identity }
+        $p: Person
+        $i identifiesPerson $p
+    }
+    return { $p.slug as person, $p.name as name }
+}
+
+query person_identities($person: String) @description("Every identifier known for a person.") {
+    match {
+        $p: Person { slug: $person }
+        $i: Identity
+        $i identifiesPerson $p
+    }
+    return { $i.slug as identity, $i.system as system }
+    order { identity asc }
+}
+
+query unresolved_identities() @description("Identifiers no one has linked to a person yet: a queue for a human, since the same person may already exist.") {
+    match {
+        $i: Identity
+        not { $i identifiesPerson $_ }
+    }
+    return { $i.slug as identity, $i.system as system, $i.value as value }
+    order { identity asc }
+}
+
+query agents() @description("Every agent that writes to this graph and the human accountable for it.") {
+    match {
+        $a: Agent
+        $p: Person
+        $a actsFor $p
+    }
+    return { $a.slug as agent, $a.name as name, $p.name as accountable }
+    order { agent asc }
+}
+
+query active_projects() @description("Active projects with their owner, team and target date.") {
+    match {
+        $p: Project { status: "active" }
+        $owner: Person
+        $team: Team
+        $p ownedBy $owner
+        $p runBy $team
+    }
+    return { $p.name as project, $owner.name as owner, $team.name as team, $p.target_date as target_date }
+    order { project asc }
+}
+
+query quiet_projects($since: DateTime) @description("Active or paused projects with no meeting, thread or document about them since a time. Pass a fixed time, e.g. 2026-09-14T00:00:00.000Z.") {
+    match {
+        $p: Project
+        $p.status = "active" or $p.status = "paused"
+        not { $s sourceAbout $p  $s.occurred_at >= $since }
+    }
+    return { $p.name as project, $p.status as status }
+    order { project asc }
+}
+
+query project_sources($project: String) @description("Everything the brain has read about a project, newest first.") {
+    match {
+        $p: Project { slug: $project }
+        $s: Source
+        $s sourceAbout $p
+    }
+    return { $s.title as source, $s.kind as kind, $s.occurred_at as occurred_at }
+    order { occurred_at desc }
+}
+
+query search_sources($q: String) @description("Full-text search over source titles, best match first.") {
+    match {
+        $s: Source
+    }
+    return { $s.slug as source, $s.title as title, $s.kind as kind }
+    order { bm25($s.title, $q) }
+    limit 20
+}

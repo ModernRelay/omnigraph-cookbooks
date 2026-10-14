@@ -12,6 +12,7 @@ and a cluster declaration. Local examples use filesystem storage.
 | [VC operating system](vc-os/) | `vcos` | Deals, portfolio, relationships and investment beliefs |
 | [Development graph](dev-graph/) | `dev` | Issues, decisions, specifications and releases |
 | [Beads](beads/) | `beads` | A beads-style work queue for coding agents, with the `ob` client |
+| [Company brain](company-brain/) | `knowledge` | Decisions, action items and the meetings and threads they came from, shared by a company's people and agents |
 
 ## Local setup
 

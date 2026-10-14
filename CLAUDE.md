@@ -5,7 +5,7 @@ links to the corresponding `CLAUDE.md`; edit the target once.
 
 ## Scope and sources
 
-These are six self-contained OmniGraph **0.13.0** bundles: schemas, seed data,
+These are seven self-contained OmniGraph **0.13.0** bundles: schemas, seed data,
 stored queries and applied policies. The only application code is the beads
 cookbook's `ob` client in `beads/client/`, with its own tests. The root
 [README](README.md) owns setup, live updates and upgrades; individual cookbook
@@ -19,6 +19,7 @@ guides own their domain model and worked queries.
 | `vc-os` | `vcos` |
 | `dev-graph` | `dev` |
 | `beads` | `beads` |
+| `company-brain` | `knowledge` |
 
 The graph ID is the key in `cluster.yaml`, not the folder name. Configurations
 omit `storage`, so local roots default to their directory. Explicit storage
@@ -31,7 +32,7 @@ from the released binary pin in `deploy/railway/Dockerfile`. Refresh with
 
 ## Changes and validation
 
-- Run `python3 scripts/check-cookbooks.py` for all six local journeys. It uses
+- Run `python3 scripts/check-cookbooks.py` for all seven local journeys. It uses
   the released CLI/server, isolated operator homes and disposable roots; it
   never touches a deployed graph. The Railway config preparer has its own tests
   under `deploy/railway/tests/`. For beads the checker also drives the `ob`
@@ -62,6 +63,8 @@ purges its managed root and history. Schema changes need only `main` live.
 Adoption, missing-root recreation and out-of-band schema changes are refused.
 
 All bundles include `act-admin`, `act-writer`, `act-reader` role policies.
+company-brain adds `act-agent` (and named agents), which write only on
+unprotected branches and cannot merge.
 Static actor-to-token JSON remains supported. The bearer token selects the
 trusted actor; a query's `$actor` is merely application provenance. `config_manage`
 authorizes live deployment, and schema changes also need graph `schema_apply`.

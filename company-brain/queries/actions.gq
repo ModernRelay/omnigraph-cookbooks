@@ -1,0 +1,59 @@
+// Action items. Whether an item is overdue is derived from due and an
+// as-of date, never stored, so the seed's answers do not change with the
+// calendar.
+
+query open_actions() @description("Open and in-progress action items with their owner and due date, earliest due first.") {
+    match {
+        $a: ActionItem
+        $a.status = "open" or $a.status = "in_progress"
+        $p: Person
+        $a assignedTo $p
+    }
+    return { $a.slug as action, $a.title as title, $p.name as owner, $a.due as due }
+    order { due asc }
+}
+
+query overdue_actions($as_of: Date) @description("Open or in-progress action items due before a date, e.g. 2026-10-14.") {
+    match {
+        $a: ActionItem
+        $a.status = "open" or $a.status = "in_progress"
+        $a.due < $as_of
+        $p: Person
+        $a assignedTo $p
+    }
+    return { $a.slug as action, $a.title as title, $p.name as owner, $a.due as due }
+    order { due asc }
+}
+
+query person_actions($person: String) @description("Everything one person owns that is not done or cancelled.") {
+    match {
+        $p: Person { slug: $person }
+        $a: ActionItem
+        $a assignedTo $p
+        $a.status = "open" or $a.status = "in_progress"
+    }
+    return { $a.slug as action, $a.title as title, $a.status as status, $a.due as due }
+    order { due asc }
+}
+
+query actions_from_source($source: String) @description("What a meeting, thread or ticket committed people to.") {
+    match {
+        $s: Source { slug: $source }
+        $a: ActionItem
+        $a actionFrom $s
+        $p: Person
+        $a assignedTo $p
+    }
+    return { $a.title as action, $p.name as owner, $a.status as status, $a.due as due }
+    order { action asc }
+}
+
+query decision_actions($decision: String) @description("The action items carrying out a decision.") {
+    match {
+        $d: Decision { slug: $decision }
+        $a: ActionItem
+        $a implements $d
+    }
+    return { $a.title as action, $a.status as status, $a.due as due }
+    order { action asc }
+}

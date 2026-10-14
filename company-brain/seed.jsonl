@@ -1,0 +1,138 @@
+{"type": "Person", "data": {"slug": "alice", "name": "Alice Park", "title": "Head of Payments", "active": true}}
+{"type": "Person", "data": {"slug": "bob", "name": "Bob Ortiz", "title": "Search lead", "active": true}}
+{"type": "Person", "data": {"slug": "chen", "name": "Chen Wei", "title": "Software engineer", "active": true}}
+{"type": "Person", "data": {"slug": "dana", "name": "Dana Kim", "title": "Product designer", "active": true}}
+{"type": "Person", "data": {"slug": "eli", "name": "Eli Novak", "title": "CTO", "active": true}}
+{"type": "Person", "data": {"slug": "fay", "name": "Fay Okafor", "title": "Support lead", "active": true}}
+{"type": "Team", "data": {"slug": "lanternworks", "name": "Lanternworks"}}
+{"type": "Team", "data": {"slug": "payments", "name": "Payments"}}
+{"type": "Team", "data": {"slug": "discovery", "name": "Discovery"}}
+{"type": "Team", "data": {"slug": "platform", "name": "Platform"}}
+{"type": "Team", "data": {"slug": "support", "name": "Support"}}
+{"type": "Identity", "data": {"slug": "email:alice@lanternworks.example", "system": "email", "value": "alice@lanternworks.example"}}
+{"type": "Identity", "data": {"slug": "slack:u01alice", "system": "slack", "value": "U01ALICE"}}
+{"type": "Identity", "data": {"slug": "github:apark", "system": "github", "value": "apark"}}
+{"type": "Identity", "data": {"slug": "email:bob@lanternworks.example", "system": "email", "value": "bob@lanternworks.example"}}
+{"type": "Identity", "data": {"slug": "slack:u02bob", "system": "slack", "value": "U02BOB"}}
+{"type": "Identity", "data": {"slug": "email:chen@lanternworks.example", "system": "email", "value": "chen@lanternworks.example"}}
+{"type": "Identity", "data": {"slug": "github:chenwei", "system": "github", "value": "chenwei"}}
+{"type": "Identity", "data": {"slug": "email:dana@lanternworks.example", "system": "email", "value": "dana@lanternworks.example"}}
+{"type": "Identity", "data": {"slug": "email:eli@lanternworks.example", "system": "email", "value": "Eli@Lanternworks.example"}}
+{"type": "Identity", "data": {"slug": "email:fay@lanternworks.example", "system": "email", "value": "fay@lanternworks.example"}}
+{"type": "Identity", "data": {"slug": "slack:u09guest", "system": "slack", "value": "U09GUEST"}}
+{"type": "Agent", "data": {"slug": "act-notes-bot", "name": "Meeting notes agent", "purpose": "Turns meeting notes into proposed decisions and action items", "active": true}}
+{"type": "Agent", "data": {"slug": "act-slack-bot", "name": "Slack agent", "purpose": "Turns decisions made in Slack threads into proposals", "active": true}}
+{"type": "Project", "data": {"slug": "checkout", "name": "Checkout v2", "status": "active", "target_date": "2026-11-13"}}
+{"type": "Project", "data": {"slug": "search", "name": "Search revamp", "status": "active", "target_date": "2026-12-15"}}
+{"type": "Project", "data": {"slug": "onboarding", "name": "New onboarding", "status": "planned"}}
+{"type": "Project", "data": {"slug": "billing-migration", "name": "Billing migration", "status": "paused"}}
+{"type": "Source", "data": {"slug": "doc:billing-plan", "kind": "document", "title": "Billing migration plan", "occurred_at": "2026-07-20T10:00:00.000Z", "summary": "Plan to move invoicing off the legacy billing system; frozen until Q1."}}
+{"type": "Source", "data": {"slug": "email:search-vendor-quote", "kind": "email", "title": "Search vendor quote", "occurred_at": "2026-09-10T08:30:00.000Z", "summary": "A hosted search vendor quoted three times the budget."}}
+{"type": "Source", "data": {"slug": "slack:c-search/1757930400", "kind": "thread", "title": "#search: hosted vendor or in-house?", "occurred_at": "2026-09-15T10:00:00.000Z", "summary": "Bob proposes buying a hosted search vendor to ship faster."}}
+{"type": "Source", "data": {"slug": "meet:checkout-kickoff-2026-09-30", "kind": "meeting", "title": "Checkout v2 kickoff", "occurred_at": "2026-09-30T15:00:00.000Z", "summary": "Launch date set to Nov 13; saved cards stay in v2."}}
+{"type": "Source", "data": {"slug": "meet:search-review-2026-10-02", "kind": "meeting", "title": "Search review", "occurred_at": "2026-10-02T14:00:00.000Z", "summary": "The in-house prototype hit the latency target; vendor dropped."}}
+{"type": "Source", "data": {"slug": "meet:onboarding-crit-2026-10-06", "kind": "meeting", "title": "Onboarding design crit", "occurred_at": "2026-10-06T13:00:00.000Z", "summary": "Dana proposes cutting onboarding from seven steps to three."}}
+{"type": "Source", "data": {"slug": "ticket:sup-1423", "kind": "ticket", "title": "SUP-1423: checkout errors on saved cards", "occurred_at": "2026-10-08T09:15:00.000Z", "summary": "Customers see a generic error when paying with a saved card."}}
+{"type": "Decision", "data": {"slug": "billing-freeze", "title": "Freeze the billing migration until Q1", "statement": "No billing migration work until January; Platform focuses on reliability.", "status": "accepted", "recorded_at": "2026-07-20T12:00:00.000Z", "rationale": "Two outages in June; the team cannot run a migration and an incident rotation at once.", "decided_at": "2026-07-20T10:00:00.000Z"}}
+{"type": "Decision", "data": {"slug": "search-vendor-buy", "title": "Buy a hosted search vendor", "statement": "Replace in-house search with a hosted vendor for the revamp.", "status": "accepted", "recorded_at": "2026-09-15T11:00:00.000Z", "rationale": "Faster to ship than building ranking ourselves.", "decided_at": "2026-09-15T10:00:00.000Z"}}
+{"type": "Decision", "data": {"slug": "search-in-house", "title": "Keep search in-house", "statement": "Build the search revamp on our own stack; cancel the vendor trial.", "status": "accepted", "recorded_at": "2026-10-02T16:00:00.000Z", "rationale": "The vendor quote was three times the budget, and the in-house prototype hit the latency target.", "decided_at": "2026-10-02T14:30:00.000Z"}}
+{"type": "Decision", "data": {"slug": "checkout-launch-nov-13", "title": "Launch Checkout v2 on Nov 13", "statement": "Checkout v2 goes live for all customers on Nov 13.", "status": "accepted", "recorded_at": "2026-09-30T17:00:00.000Z", "decided_at": "2026-09-30T15:30:00.000Z"}}
+{"type": "Decision", "data": {"slug": "checkout-saved-cards", "title": "Keep saved cards in Checkout v2", "statement": "Saved cards stay available in v2; no forced re-entry.", "status": "accepted", "recorded_at": "2026-09-30T17:00:00.000Z", "rationale": "Removing them would hurt repeat purchases.", "decided_at": "2026-09-30T15:40:00.000Z"}}
+{"type": "Decision", "data": {"slug": "onboarding-three-steps", "title": "Cut onboarding to three steps", "statement": "Reduce sign-up onboarding from seven steps to three.", "status": "proposed", "recorded_at": "2026-10-06T15:00:00.000Z"}}
+{"type": "ActionItem", "data": {"slug": "launch-checklist", "title": "Write the Checkout v2 launch checklist", "status": "open", "due": "2026-11-06", "recorded_at": "2026-09-30T17:00:00.000Z"}}
+{"type": "ActionItem", "data": {"slug": "fix-saved-card-errors", "title": "Fix the saved-card errors from SUP-1423", "status": "in_progress", "due": "2026-10-10", "recorded_at": "2026-10-08T10:00:00.000Z"}}
+{"type": "ActionItem", "data": {"slug": "cancel-vendor-trial", "title": "Cancel the hosted search trial", "status": "done", "due": "2026-10-05", "recorded_at": "2026-10-02T16:00:00.000Z", "completed_at": "2026-10-03T09:00:00.000Z"}}
+{"type": "ActionItem", "data": {"slug": "ship-search-prototype", "title": "Ship the in-house search prototype to staging", "status": "done", "due": "2026-10-10", "recorded_at": "2026-10-02T16:00:00.000Z", "completed_at": "2026-10-09T17:00:00.000Z"}}
+{"type": "ActionItem", "data": {"slug": "onboarding-copy", "title": "Draft copy for the three-step onboarding", "status": "open", "due": "2026-10-20", "recorded_at": "2026-10-06T15:00:00.000Z"}}
+{"edge": "PartOf", "from": "payments", "to": "lanternworks"}
+{"edge": "PartOf", "from": "discovery", "to": "lanternworks"}
+{"edge": "PartOf", "from": "platform", "to": "lanternworks"}
+{"edge": "PartOf", "from": "support", "to": "lanternworks"}
+{"edge": "MemberOf", "from": "alice", "to": "payments", "data": {"role": "lead", "since": "2025-03-01"}}
+{"edge": "MemberOf", "from": "chen", "to": "payments", "data": {"role": "engineer", "since": "2026-07-01"}}
+{"edge": "MemberOf", "from": "chen", "to": "discovery", "data": {"role": "engineer", "since": "2025-05-12", "until": "2026-06-30"}}
+{"edge": "MemberOf", "from": "bob", "to": "discovery", "data": {"role": "lead", "since": "2024-11-04"}}
+{"edge": "MemberOf", "from": "dana", "to": "discovery", "data": {"role": "designer", "since": "2025-09-15"}}
+{"edge": "MemberOf", "from": "eli", "to": "lanternworks", "data": {"role": "CTO", "since": "2023-01-09"}}
+{"edge": "MemberOf", "from": "eli", "to": "platform", "data": {"role": "acting lead", "since": "2026-06-01"}}
+{"edge": "MemberOf", "from": "fay", "to": "support", "data": {"role": "lead", "since": "2024-02-19"}}
+{"edge": "IdentifiesPerson", "from": "email:alice@lanternworks.example", "to": "alice"}
+{"edge": "IdentifiesPerson", "from": "slack:u01alice", "to": "alice"}
+{"edge": "IdentifiesPerson", "from": "github:apark", "to": "alice"}
+{"edge": "IdentifiesPerson", "from": "email:bob@lanternworks.example", "to": "bob"}
+{"edge": "IdentifiesPerson", "from": "slack:u02bob", "to": "bob"}
+{"edge": "IdentifiesPerson", "from": "email:chen@lanternworks.example", "to": "chen"}
+{"edge": "IdentifiesPerson", "from": "github:chenwei", "to": "chen"}
+{"edge": "IdentifiesPerson", "from": "email:dana@lanternworks.example", "to": "dana"}
+{"edge": "IdentifiesPerson", "from": "email:eli@lanternworks.example", "to": "eli"}
+{"edge": "IdentifiesPerson", "from": "email:fay@lanternworks.example", "to": "fay"}
+{"edge": "ActsFor", "from": "act-notes-bot", "to": "alice"}
+{"edge": "ActsFor", "from": "act-slack-bot", "to": "eli"}
+{"edge": "OwnedBy", "from": "checkout", "to": "alice"}
+{"edge": "RunBy", "from": "checkout", "to": "payments"}
+{"edge": "OwnedBy", "from": "search", "to": "bob"}
+{"edge": "RunBy", "from": "search", "to": "discovery"}
+{"edge": "OwnedBy", "from": "onboarding", "to": "dana"}
+{"edge": "RunBy", "from": "onboarding", "to": "discovery"}
+{"edge": "OwnedBy", "from": "billing-migration", "to": "eli"}
+{"edge": "RunBy", "from": "billing-migration", "to": "platform"}
+{"edge": "SourceAbout", "from": "doc:billing-plan", "to": "billing-migration"}
+{"edge": "SourceAbout", "from": "email:search-vendor-quote", "to": "search"}
+{"edge": "SourceAbout", "from": "slack:c-search/1757930400", "to": "search"}
+{"edge": "SourceAbout", "from": "meet:checkout-kickoff-2026-09-30", "to": "checkout"}
+{"edge": "SourceAbout", "from": "meet:search-review-2026-10-02", "to": "search"}
+{"edge": "SourceAbout", "from": "meet:onboarding-crit-2026-10-06", "to": "onboarding"}
+{"edge": "SourceAbout", "from": "ticket:sup-1423", "to": "checkout"}
+{"edge": "Involved", "from": "doc:billing-plan", "to": "eli", "data": {"role": "author"}}
+{"edge": "Involved", "from": "email:search-vendor-quote", "to": "bob", "data": {"role": "mentioned"}}
+{"edge": "Involved", "from": "slack:c-search/1757930400", "to": "bob", "data": {"role": "author"}}
+{"edge": "Involved", "from": "slack:c-search/1757930400", "to": "chen", "data": {"role": "mentioned"}}
+{"edge": "Involved", "from": "meet:checkout-kickoff-2026-09-30", "to": "alice", "data": {"role": "organizer"}}
+{"edge": "Involved", "from": "meet:checkout-kickoff-2026-09-30", "to": "chen", "data": {"role": "attendee"}}
+{"edge": "Involved", "from": "meet:checkout-kickoff-2026-09-30", "to": "eli", "data": {"role": "attendee"}}
+{"edge": "Involved", "from": "meet:search-review-2026-10-02", "to": "bob", "data": {"role": "organizer"}}
+{"edge": "Involved", "from": "meet:search-review-2026-10-02", "to": "dana", "data": {"role": "attendee"}}
+{"edge": "Involved", "from": "meet:search-review-2026-10-02", "to": "eli", "data": {"role": "attendee"}}
+{"edge": "Involved", "from": "meet:onboarding-crit-2026-10-06", "to": "dana", "data": {"role": "organizer"}}
+{"edge": "Involved", "from": "meet:onboarding-crit-2026-10-06", "to": "bob", "data": {"role": "attendee"}}
+{"edge": "Involved", "from": "ticket:sup-1423", "to": "fay", "data": {"role": "author"}}
+{"edge": "DecisionAbout", "from": "billing-freeze", "to": "billing-migration"}
+{"edge": "DecidedIn", "from": "billing-freeze", "to": "doc:billing-plan"}
+{"edge": "DecidedBy", "from": "billing-freeze", "to": "eli"}
+{"edge": "DecisionAbout", "from": "search-vendor-buy", "to": "search"}
+{"edge": "DecidedIn", "from": "search-vendor-buy", "to": "slack:c-search/1757930400"}
+{"edge": "DecidedBy", "from": "search-vendor-buy", "to": "bob"}
+{"edge": "DecisionAbout", "from": "search-in-house", "to": "search"}
+{"edge": "DecidedIn", "from": "search-in-house", "to": "meet:search-review-2026-10-02"}
+{"edge": "DecidedIn", "from": "search-in-house", "to": "email:search-vendor-quote"}
+{"edge": "DecidedBy", "from": "search-in-house", "to": "bob"}
+{"edge": "DecidedBy", "from": "search-in-house", "to": "eli"}
+{"edge": "DecisionAbout", "from": "checkout-launch-nov-13", "to": "checkout"}
+{"edge": "DecidedIn", "from": "checkout-launch-nov-13", "to": "meet:checkout-kickoff-2026-09-30"}
+{"edge": "DecidedBy", "from": "checkout-launch-nov-13", "to": "alice"}
+{"edge": "DecidedBy", "from": "checkout-launch-nov-13", "to": "eli"}
+{"edge": "DecisionAbout", "from": "checkout-saved-cards", "to": "checkout"}
+{"edge": "DecidedIn", "from": "checkout-saved-cards", "to": "meet:checkout-kickoff-2026-09-30"}
+{"edge": "DecidedBy", "from": "checkout-saved-cards", "to": "alice"}
+{"edge": "DecisionAbout", "from": "onboarding-three-steps", "to": "onboarding"}
+{"edge": "DecidedIn", "from": "onboarding-three-steps", "to": "meet:onboarding-crit-2026-10-06"}
+{"edge": "DecidedBy", "from": "onboarding-three-steps", "to": "dana"}
+{"edge": "SupersededBy", "from": "search-vendor-buy", "to": "search-in-house"}
+{"edge": "AssignedTo", "from": "launch-checklist", "to": "chen"}
+{"edge": "ActionFrom", "from": "launch-checklist", "to": "meet:checkout-kickoff-2026-09-30"}
+{"edge": "ActionAbout", "from": "launch-checklist", "to": "checkout"}
+{"edge": "Implements", "from": "launch-checklist", "to": "checkout-launch-nov-13"}
+{"edge": "AssignedTo", "from": "fix-saved-card-errors", "to": "chen"}
+{"edge": "ActionFrom", "from": "fix-saved-card-errors", "to": "ticket:sup-1423"}
+{"edge": "ActionAbout", "from": "fix-saved-card-errors", "to": "checkout"}
+{"edge": "AssignedTo", "from": "cancel-vendor-trial", "to": "bob"}
+{"edge": "ActionFrom", "from": "cancel-vendor-trial", "to": "meet:search-review-2026-10-02"}
+{"edge": "ActionAbout", "from": "cancel-vendor-trial", "to": "search"}
+{"edge": "Implements", "from": "cancel-vendor-trial", "to": "search-in-house"}
+{"edge": "AssignedTo", "from": "ship-search-prototype", "to": "bob"}
+{"edge": "ActionFrom", "from": "ship-search-prototype", "to": "meet:search-review-2026-10-02"}
+{"edge": "ActionAbout", "from": "ship-search-prototype", "to": "search"}
+{"edge": "Implements", "from": "ship-search-prototype", "to": "search-in-house"}
+{"edge": "AssignedTo", "from": "onboarding-copy", "to": "dana"}
+{"edge": "ActionFrom", "from": "onboarding-copy", "to": "meet:onboarding-crit-2026-10-06"}
+{"edge": "ActionAbout", "from": "onboarding-copy", "to": "onboarding"}
