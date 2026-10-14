@@ -30,7 +30,9 @@ jobs:
           mkdir -p "$RUNNER_TEMP/omnigraph-bin"
           tar -xzf "$archive/$asset.tar.gz" -C "$RUNNER_TEMP/omnigraph-bin" omnigraph omnigraph-server
           echo "$RUNNER_TEMP/omnigraph-bin" >> "$GITHUB_PATH"
-      - name: Qualify all five local journeys
+      - name: Qualify all local journeys
         run: python3 scripts/check-cookbooks.py
+      - name: Test the beads client end to end
+        run: python3 -m unittest discover -s beads/client/tests -v
       - name: Verify deployment preparation stays effect-free
         run: python3 -m unittest discover -s deploy/railway/tests -v

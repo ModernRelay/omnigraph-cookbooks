@@ -1,0 +1,87 @@
+// OmniGraph beads: a dependency-aware issue tracker for coding agents.
+//
+// The graph stores facts only. Whether an issue is ready or blocked is
+// derived by the queries in queries/issues.gq on every read, so there is no
+// stored readiness flag to drift. Who changed what, and when, is recorded
+// by the commit history (`ob history`), so there is no event table either.
+
+node Issue @description("A unit of work (a bead). Identity is the slug, e.g. ob-k3x9qa.")
+           @instruction("Use the dependency edges, never status, to express ordering: an issue is ready when it is open, not deferred, and no open issue blocks it or any of its ancestors.") {
+    slug: String @key
+    title: String @index
+    description: String? @index
+    design: String?
+    acceptance: String?
+    notes: String?
+    kind: enum(bug, feature, task, epic, chore, decision, spike, story, milestone) @index
+    // `blocked` is deliberately absent: blocking is derived from BlockedBy.
+    status: enum(open, in_progress, deferred, closed) @index
+    priority: I32 @index
+    labels: [String]?
+    // The claim lives on the row, so one conditional update claims atomically.
+    assignee: String?
+    created_by: String?
+    created_at: DateTime
+    updated_at: DateTime
+    started_at: DateTime?
+    closed_at: DateTime?
+    close_reason: String?
+    defer_until: DateTime?
+    due_at: DateTime?
+    lease_expires_at: DateTime?
+    external_ref: String?
+    metadata: String?
+    embedding: Vector(1536)? @embed("title")
+    @range(priority, 0..4)
+    @check(slug, "^[A-Za-z0-9][A-Za-z0-9._-]*$")
+}
+
+node Comment @description("A comment on one issue.") {
+    slug: String @key
+    body: String @index
+    author: String?
+    created_at: DateTime
+}
+
+node Memory @description("A durable project insight that `ob prime` gives every new agent session.") {
+    slug: String @key
+    body: String @index
+    created_by: String?
+    updated_at: DateTime
+    embedding: Vector(1536)? @embed("body")
+}
+
+// Ordering. The source cannot start until the target is closed.
+edge BlockedBy: Issue -> Issue @description("The source cannot start until the target is closed.") {
+    @key(@src, @dst)
+}
+
+// Hierarchy. A child is blocked whenever an ancestor is blocked.
+edge ChildOf: Issue -> Issue @card(0..1) @description("The source is part of the target (an epic or parent task).") {
+    @key(@src, @dst)
+}
+
+// Annotations. None of these affect readiness.
+edge RelatesTo: Issue -> Issue @description("A loose see-also link; traverse it undirected.") {
+    @key(@src, @dst)
+}
+
+edge DiscoveredFrom: Issue -> Issue @card(0..1) @description("The source was found while working on the target.") {
+    @key(@src, @dst)
+}
+
+edge Duplicates: Issue -> Issue @card(0..1) @description("The source duplicates the target, which stays canonical.") {
+    @key(@src, @dst)
+}
+
+edge Supersedes: Issue -> Issue @description("The source replaces the target.") {
+    @key(@src, @dst)
+}
+
+edge CommentOn: Comment -> Issue @card(1..1) {
+    @key(@src, @dst)
+}
+
+edge MemoryAbout: Memory -> Issue @description("The memory concerns this issue.") {
+    @key(@src, @dst)
+}

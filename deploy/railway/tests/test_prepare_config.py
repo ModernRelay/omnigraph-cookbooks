@@ -10,7 +10,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[3]
-COOKBOOKS = ("industry-intel", "pharma-intel", "second-brain", "vc-os", "dev-graph")
+COOKBOOKS = ("industry-intel", "pharma-intel", "second-brain", "vc-os", "dev-graph", "beads")
 
 
 class PrepareConfigTests(unittest.TestCase):
