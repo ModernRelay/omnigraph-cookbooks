@@ -40,6 +40,44 @@ omnigraph query person_by_identity --server http://127.0.0.1:8080 --graph knowle
 [`schema.pg`](schema.pg) has eight node types and sixteen edge types in three
 layers.
 
+```mermaid
+---
+config:
+  flowchart:
+    wrappingWidth: 320
+---
+flowchart LR
+  classDef L0 fill:#e8f0fe,stroke:#4a6fd1,color:#1d1d1f,stroke-width:1.5px
+  Person["<b>Person</b>"]:::L0
+  Identity["<b>Identity</b>"]:::L0
+  Agent["<b>Agent</b>"]:::L0
+  Team["<b>Team</b><br/><small>↻ part of</small>"]:::L0
+  Project["<b>Project</b>"]:::L0
+  classDef L1 fill:#e7f6ec,stroke:#3c9a5f,color:#1d1d1f,stroke-width:1.5px
+  Source["<b>Source</b>"]:::L1
+  classDef L2 fill:#fdf0e2,stroke:#d08a2b,color:#1d1d1f,stroke-width:1.5px
+  Decision["<b>Decision</b><br/><small>↻ superseded by</small>"]:::L2
+  ActionItem["<b>ActionItem</b>"]:::L2
+  Person -->|"member of"| Team
+  Identity -->|"identifies"| Person
+  Agent -->|"acts for"| Person
+  Project -->|"owned by"| Person
+  Project -->|"run by"| Team
+  Source -->|"involved"| Person
+  Source -->|"about"| Project
+  Decision -->|"decided in"| Source
+  Decision -->|"decided by"| Person
+  Decision -->|"about"| Project
+  ActionItem -->|"assigned to"| Person
+  ActionItem -->|"from"| Source
+  ActionItem -->|"implements"| Decision
+  ActionItem -->|"about"| Project
+```
+
+Blue is people and org, green the evidence, orange the facts extracted from it.
+Each arrow is an edge type, drawn in its schema direction; a `↻` line in a box
+is an edge between two nodes of that type.
+
 | Type | Holds |
 |---|---|
 | `Person` | A human, one node per human. Title and an `active` flag; no emails or handles |
