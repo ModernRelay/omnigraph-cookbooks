@@ -1,0 +1,61 @@
+// Claims: what people said, as they said it, before anyone decides on it.
+// Whether a claim is contested is derived from Contradicts on every read,
+// never stored.
+
+query claims_from_source($source: String) @description("What a meeting, thread or document claimed: each claim, who said it, where, and the exact quote.") {
+    match {
+        $s: Source { slug: $source }
+        $c: Claim
+        $c claimFrom $s
+        $p: Person
+        $c claimedBy $p
+    }
+    return { $c.slug as claim, $c.kind as kind, $c.status as status, $p.name as said_by, $c.locator as at, $c.quote as quote }
+    order { at asc }
+}
+
+query contested_claims() @description("Pairs of claims that contradict each other with neither side rejected: what still has to be settled. The first claim is the newer one.") {
+    match {
+        $new: Claim
+        $old: Claim
+        $new contradicts $old
+        $new.status != "rejected"
+        $old.status != "rejected"
+    }
+    return { $new.slug as claim, $new.statement as says, $old.slug as contradicts, $old.statement as against }
+    order { claim asc }
+}
+
+query decisions_at_risk() @description("Current accepted decisions resting on a claim that an unrejected claim contradicts. Run it on an agent's branch to see what its new claims put in question.") {
+    match {
+        $d: Decision { status: "accepted" }
+        not { $d supersededBy $n  $n.status = "accepted" }
+        $c: Claim
+        $d basedOn $c
+        $c.status != "rejected"
+        $x: Claim
+        $c <contradicts> $x
+        $x.status != "rejected"
+    }
+    return { $d.slug as decision, $c.statement as rests_on, $x.statement as contradicted_by }
+    order { decision asc }
+}
+
+query unverified_claims() @description("Claims nobody has verified or rejected yet, oldest first: the review queue.") {
+    match {
+        $c: Claim { status: "unverified" }
+        $s: Source
+        $c claimFrom $s
+    }
+    return { $c.slug as claim, $c.kind as kind, $c.statement as statement, $s.title as source, $c.recorded_at as recorded_at }
+    order { recorded_at asc, claim asc }
+}
+
+query search_claims($q: String) @description("Full-text search over claim statements, best match first.") {
+    match {
+        $c: Claim
+    }
+    return { $c.slug as claim, $c.statement as statement, $c.status as status }
+    order { bm25($c.statement, $q) }
+    limit 20
+}
