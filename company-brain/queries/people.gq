@@ -1,4 +1,4 @@
-// People, teams, identities, agents and projects.
+// People, teams, actors, projects and sources.
 
 query project_owner($project: String) @description("Who owns a project and which team runs it.") {
     match {
@@ -20,43 +20,30 @@ query team_members($team: String) @description("Current members of a team (no en
     order { person asc }
 }
 
-query person_by_identity($identity: String) @description("Resolve an identifier such as email:alice@lanternworks.example or slack:u01alice to a person.")
-                                            @instruction("Run this before creating a Person. No row means the identifier is unresolved, not that the person is new.") {
+query person_by_handle($handle: String) @description("Resolve an email, Slack member ID or GitHub login to a person, lowercased: alice@lanternworks.example, u01alice, apark.")
+                                        @instruction("Run this for every handle a source gives before creating a Person. No row means nobody has that handle yet, not that the person is new.") {
     match {
-        $i: Identity { slug: $identity }
         $p: Person
-        $i identifiesPerson $p
+        $p.email = $handle or $p.slack = $handle or $p.github = $handle
     }
     return { $p.slug as person, $p.name as name }
 }
 
-query person_identities($person: String) @description("Every identifier known for a person.") {
+query person_handles($person: String) @description("A person's title, email, Slack member ID and GitHub login. Read these before re-running add_person, which replaces them all.") {
     match {
         $p: Person { slug: $person }
-        $i: Identity
-        $i identifiesPerson $p
     }
-    return { $i.slug as identity, $i.system as system }
-    order { identity asc }
+    return { $p.name as name, $p.title as title, $p.email as email, $p.slack as slack, $p.github as github }
 }
 
-query unresolved_identities() @description("Identifiers no one has linked to a person yet: a queue for a human, since the same person may already exist.") {
+query actors() @description("Everyone who reads or writes this graph, people's own logins and agents, with the person behind each.") {
     match {
-        $i: Identity
-        not { $i identifiesPerson $_ }
-    }
-    return { $i.slug as identity, $i.system as system, $i.value as value }
-    order { identity asc }
-}
-
-query agents() @description("Every agent that writes to this graph and the human accountable for it.") {
-    match {
-        $a: Agent
+        $a: Actor
         $p: Person
         $a actsFor $p
     }
-    return { $a.slug as agent, $a.name as name, $p.name as accountable }
-    order { agent asc }
+    return { $a.slug as actor, $a.kind as kind, $a.name as name, $p.name as person }
+    order { actor asc }
 }
 
 query active_projects() @description("Active projects with their owner, team and target date.") {

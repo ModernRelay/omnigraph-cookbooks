@@ -23,14 +23,18 @@ query project_decisions($project: String) @description("Decisions about one proj
     order { decision asc }
 }
 
-query decision_sources($decision: String) @description("The meetings, threads and documents a decision cites, oldest first.") {
+query decision_evidence($decision: String) @description("What a decision rests on: each claim, who said it, the exact quote and the source it came from, oldest first.") {
     match {
         $d: Decision { slug: $decision }
+        $c: Claim
+        $d basedOn $c
         $s: Source
-        $d decidedIn $s
+        $c claimFrom $s
+        $p: Person
+        $c claimedBy $p
     }
-    return { $s.title as source, $s.kind as kind, $s.occurred_at as occurred_at }
-    order { occurred_at asc }
+    return { $c.slug as claim, $c.status as status, $p.name as said_by, $c.quote as quote, $s.title as source, $s.occurred_at as occurred_at }
+    order { occurred_at asc, claim asc }
 }
 
 query decision_deciders($decision: String) @description("Who made a decision.") {
@@ -53,6 +57,21 @@ query decision_lineage($decision: String) @description("Every earlier decision t
     order { decided_at desc }
 }
 
+query why_superseded($decision: String) @description("Why a decision was replaced: the one-line reason on SupersededBy, and each claim behind the successor that contradicts a claim behind the original.") {
+    match {
+        $old: Decision { slug: $decision }
+        $new: Decision
+        $old $w:supersededBy $new
+        $nc: Claim
+        $new basedOn $nc
+        $oc: Claim
+        $old basedOn $oc
+        $nc <contradicts> $oc
+    }
+    return { $new.slug as replaced_by, $w.reason as reason, $nc.statement as because, $oc.statement as contradicts }
+    order { because asc }
+}
+
 query decision_successor($decision: String) @description("What a decision was replaced by, if anything: the end of its SupersededBy chain.") {
     match {
         $d: Decision { slug: $decision }
@@ -63,13 +82,15 @@ query decision_successor($decision: String) @description("What a decision was re
     return { $new.slug as current, $new.title as title, $new.status as status }
 }
 
-query decisions_from_source($source: String) @description("What a meeting, thread or document decided.") {
+query decisions_from_source($source: String) @description("Decisions resting on claims made in a meeting, thread or document, with how many of their claims came from it.") {
     match {
         $s: Source { slug: $source }
+        $c: Claim
+        $c claimFrom $s
         $d: Decision
-        $d decidedIn $s
+        $d basedOn $c
     }
-    return { $d.slug as decision, $d.title as title, $d.status as status }
+    return { $d.slug as decision, $d.title as title, $d.status as status, count($c) as claims }
     order { decision asc }
 }
 
@@ -81,11 +102,11 @@ query proposed_decisions() @description("Decisions waiting for a person to accep
     order { recorded_at asc }
 }
 
-query unimplemented_decisions() @description("Current accepted decisions that no action item carries out yet.") {
+query unimplemented_decisions() @description("Current accepted decisions that no action item follows from yet.") {
     match {
         $d: Decision { status: "accepted" }
         not { $d supersededBy $n  $n.status = "accepted" }
-        not { $a implements $d }
+        not { $a followsFrom $d }
     }
     return { $d.slug as decision, $d.title as title, $d.decided_at as decided_at }
     order { decided_at asc }

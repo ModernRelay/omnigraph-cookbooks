@@ -39,8 +39,10 @@ query person_actions($person: String) @description("Everything one person owns t
 query actions_from_source($source: String) @description("What a meeting, thread or ticket committed people to.") {
     match {
         $s: Source { slug: $source }
+        $c: Claim
+        $c claimFrom $s
         $a: ActionItem
-        $a actionFrom $s
+        $a actionFrom $c
         $p: Person
         $a assignedTo $p
     }
@@ -48,11 +50,11 @@ query actions_from_source($source: String) @description("What a meeting, thread 
     order { action asc }
 }
 
-query decision_actions($decision: String) @description("The action items carrying out a decision.") {
+query decision_actions($decision: String) @description("The action items that follow from a decision.") {
     match {
         $d: Decision { slug: $decision }
         $a: ActionItem
-        $a implements $d
+        $a followsFrom $d
     }
     return { $a.title as action, $a.status as status, $a.due as due }
     order { action asc }
