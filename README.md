@@ -60,7 +60,8 @@ curl -fsS http://127.0.0.1:8080/readyz
 # Append once to the new empty graph. Keep the exact commit receipt.
 omnigraph load --server http://127.0.0.1:8080 --graph spike \
   --data seed.jsonl --mode append --json
-omnigraph queries list --server http://127.0.0.1:8080 --graph spike
+# The stored-query registry is read from the cluster, not through the server.
+omnigraph queries list --cluster . --graph spike
 omnigraph query recent_signals --server http://127.0.0.1:8080 --graph spike
 ```
 
