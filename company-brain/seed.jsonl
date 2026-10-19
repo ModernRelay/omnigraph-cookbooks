@@ -59,7 +59,8 @@
 {"edge": "PartOf", "from": "support", "to": "lanternworks"}
 {"edge": "MemberOf", "from": "alice", "to": "payments", "data": {"role": "lead", "since": "2025-03-01"}}
 {"edge": "MemberOf", "from": "chen", "to": "payments", "data": {"role": "engineer", "since": "2026-07-01"}}
-{"edge": "MemberOf", "from": "chen", "to": "discovery", "data": {"role": "engineer", "since": "2025-05-12", "until": "2026-06-30"}}
+{"edge": "MemberOf", "from": "chen", "to": "discovery", "data": {"role": "engineer", "since": "2025-05-12"}}
+{"edge": "LeftTeam", "from": "chen", "to": "discovery", "data": {"since": "2025-05-12", "until": "2026-06-30"}}
 {"edge": "MemberOf", "from": "bob", "to": "discovery", "data": {"role": "lead", "since": "2024-11-04"}}
 {"edge": "MemberOf", "from": "dana", "to": "discovery", "data": {"role": "designer", "since": "2025-09-15"}}
 {"edge": "MemberOf", "from": "eli", "to": "lanternworks", "data": {"role": "CTO", "since": "2023-01-09"}}

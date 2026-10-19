@@ -39,7 +39,7 @@ omnigraph query overdue_actions --server http://127.0.0.1:8080 --graph knowledge
 
 ## Model
 
-[`schema.pg`](schema.pg) has eight node types and seventeen edge types in four
+[`schema.pg`](schema.pg) has eight node types and eighteen edge types in four
 layers.
 
 ```mermaid
@@ -62,6 +62,7 @@ flowchart LR
   Decision["<b>Decision</b><br/><small>↻ superseded by</small>"]:::L3
   ActionItem["<b>ActionItem</b>"]:::L3
   Person -->|"member of"| Team
+  Person -->|"left"| Team
   Actor -->|"acts for"| Person
   Project -->|"owned by"| Person
   Project -->|"run by"| Team
@@ -86,7 +87,7 @@ type.
 |---|---|
 | `Person` | Someone in the real world, one node per human: title, `active` flag, and `email`, `slack`, `github` handles. Being a Person grants nothing |
 | `Actor` | Someone who reads or writes the graph: a person's own login or an agent (`kind`), keyed by OmniGraph actor id, `ActsFor` the person behind it |
-| `Team` | An organizational unit; teams nest with `PartOf`, people join with `MemberOf {role, since, until}` |
+| `Team` | An organizational unit; teams nest with `PartOf`. A person's stint is `MemberOf {role, since}`, keyed by its start, and `LeftTeam {since, until}` closes it |
 | `Project` | A time-bound effort with a status, `OwnedBy` a person and `RunBy` a team |
 | `Source` | The evidence: a meeting, thread, document, email or ticket (`kind`), `SourceAbout` a project |
 | `Claim` | One statement someone made in a source: `kind` (fact, proposal, commitment, risk), the verbatim `quote`, a `locator`, a `status` (unverified, verified, rejected). `ClaimFrom` its source, `ClaimedBy` who said it, and it may `Contradict` an earlier claim |
@@ -121,18 +122,23 @@ The rules the shape encodes:
 - **People are not logins.** A Person exists whether or not they ever touch
   the graph. An Actor is an OmniGraph identity that can; it `ActsFor` a
   person. Agents resolve a handle with `person_by_handle` before creating
-  anyone, so the same person does not appear three times.
+  anyone, so the same person does not appear three times. Someone who leaves
+  is marked with `deactivate_person` and `end_membership`, never deleted, and
+  `update_person` changes a name, title or handle without reactivating them.
 - **Two kinds of time.** When something happened in the world is in the
-  schema (`occurred_at`, `decided_at`, `due`, `since`/`until`). When the brain
+  schema (`occurred_at`, `decided_at`, `due`, `since`, `until`). When the brain
   learned it is `recorded_at` on claims and facts, plus the commit history.
 - **Creating never overwrites.** Inserting a keyed node replaces the whole
   row, so each create also writes one unkeyed edge capped at one
-  (`ClaimFrom`, `DecisionAbout`, `AssignedTo`). Creating a claim, decision or
-  action item under a slug that already exists adds a second one, and the
-  whole write is refused with a `@card` violation. An agent that ingests the
-  same meeting twice is refused at the first claim it already recorded, and
-  nothing a person verified, accepted or closed is reset. Every other edge is
-  keyed by its endpoints, so re-running a link is a no-op.
+  (`ClaimFrom`, `DecisionAbout`, `AssignedTo`, `ActsFor`). Creating a claim,
+  decision, action item or actor under a slug that already exists adds a
+  second one, and the whole write is refused with a `@card` violation. An
+  agent that ingests the same meeting twice is refused at the first claim it
+  already recorded, and nothing a person verified, accepted, closed or
+  retired is reset. A new person has no edge to guard with, so `add_person`
+  relies on `person_by_handle` first. Every other edge is keyed, so
+  re-running a link is a no-op, and a membership stint recorded again stays
+  closed if `LeftTeam` closed it.
 
 ## Derived, not stored
 
@@ -141,15 +147,16 @@ The rules the shape encodes:
 | What is decided right now? | `current_decisions` |
 | What is decided about this project, including proposals on a branch? | `project_decisions` |
 | What does this decision rest on, in whose words? | `decision_evidence`, `decision_deciders` |
-| Why was it replaced, and by what? | `why_superseded`, `decision_lineage`, `decision_successor` |
+| Why was it replaced, and by what? | `why_superseded`, `superseding_contradictions`, `decision_lineage`, `decision_successor` |
 | Which claims dispute each other? | `contested_claims` |
-| Which current decisions do new claims put in question? | `decisions_at_risk` |
+| Which current decisions do new claims put in question, or rest on a rejected one? | `decisions_at_risk`, `current_on_rejected` |
 | What still needs a person to verify or accept? | `unverified_claims`, `proposed_decisions` |
 | What came out of Tuesday's sync? | `claims_from_source`, `decisions_from_source`, `actions_from_source` |
 | Which accepted decisions have no action following from them? | `unimplemented_decisions` |
 | What is overdue, and who owns it? | `overdue_actions`, `person_actions` |
 | Which projects went quiet? | `quiet_projects` |
 | Who is this Slack user? Who answers for this agent? | `person_by_handle`, `actors` |
+| Which claim said these words? | `search_quotes` |
 
 Overdue and quiet take a fixed date or time as a parameter, so the seed's
 answers do not change with the calendar.
@@ -229,8 +236,9 @@ Then it runs the [hygiene](queries/hygiene.gq) reads on the branch, merges,
 and settles the contradiction and the proposal on main:
 
 ```bash
-for q in unsupported_decisions accepted_on_unverified decisions_without_project \
-         claims_without_source unowned_actions unsupported_actions agents_without_owner; do
+for q in unsupported_decisions accepted_on_unverified current_on_rejected \
+         decisions_without_project claims_without_source claims_without_speaker \
+         unowned_actions unsupported_actions agents_without_owner; do
   omnigraph query "$q" "${S[@]}" "${B[@]}"         # each 0 rows
 done
 omnigraph branch merge agent/notes-oct-14 --into main "${S[@]}"
@@ -239,10 +247,17 @@ omnigraph mutate verify_claim "${S[@]}" --params '{"slug":"provider-certifies-no
 omnigraph mutate reject_claim "${S[@]}" --params '{"slug":"provider-certifies-nov-6"}'
 omnigraph mutate accept_decision "${S[@]}" --params '{"slug":"checkout-launch-nov-20"}'
 omnigraph query accepted_on_unverified "${S[@]}"   # 0 rows
+omnigraph query current_on_rejected "${S[@]}"      # 0 rows: Nov 13 is replaced
 omnigraph query why_superseded "${S[@]}" --params '{"decision":"checkout-launch-nov-13"}'
-#   checkout-launch-nov-20 | The payment provider moved certification back a week. |
-#     The payment provider moved … certification to Nov 13. | The payment provider certifies … by Nov 6.
+#   checkout-launch-nov-20 | accepted | The payment provider moved certification back a week.
+omnigraph query superseding_contradictions "${S[@]}" --params '{"decision":"checkout-launch-nov-13"}'
+#   checkout-launch-nov-20 | The payment provider moved … certification to Nov 13. |
+#     The payment provider certifies … by Nov 6.
 ```
+
+Between `reject_claim` and `accept_decision`, `current_on_rejected` lists
+`checkout-launch-nov-13`: a current decision resting on a claim a person just
+rejected. Accepting the successor clears it.
 
 Had the person rejected the proposal instead, `reject_decision` and then
 `withdraw_successor {"previous":"checkout-launch-nov-13","successor":"checkout-launch-nov-20"}`
@@ -287,7 +302,7 @@ enums and renames apply in place.
 
 | Path | What |
 |---|---|
-| `schema.pg` | 8 node types, 17 edge types |
+| `schema.pg` | 8 node types, 18 edge types |
 | `queries/claims.gq` | Claim reads: contested claims, decisions at risk, the review queue |
 | `queries/decisions.gq` | Decision reads |
 | `queries/people.gq` | People, teams, actors, projects and sources |

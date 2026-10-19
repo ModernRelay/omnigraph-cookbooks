@@ -9,12 +9,12 @@ query project_owner($project: String) @description("Who owns a project and which
     return { $person.name as owner, $person.title as title }
 }
 
-query team_members($team: String) @description("Current members of a team (no end date), with their role.") {
+query team_members($team: String) @description("Current members of a team: stints no LeftTeam has closed, with their role.") {
     match {
         $t: Team { slug: $team }
         $p: Person
         $p $m:memberOf $t
-        $m.until is null
+        not { $p $l:leftTeam $t  $l.since = $m.since }
     }
     return { $p.name as person, $m.role as role, $m.since as since }
     order { person asc }
@@ -29,20 +29,20 @@ query person_by_handle($handle: String) @description("Resolve an email, Slack me
     return { $p.slug as person, $p.name as name }
 }
 
-query person_handles($person: String) @description("A person's title, email, Slack member ID and GitHub login. Read these before re-running add_person, which replaces them all.") {
+query person_handles($person: String) @description("A person's title, whether they are active, and their email, Slack member ID and GitHub login. Read these before update_person, which sets them all.") {
     match {
         $p: Person { slug: $person }
     }
-    return { $p.name as name, $p.title as title, $p.email as email, $p.slack as slack, $p.github as github }
+    return { $p.name as name, $p.title as title, $p.active as active, $p.email as email, $p.slack as slack, $p.github as github }
 }
 
-query actors() @description("Everyone who reads or writes this graph, people's own logins and agents, with the person behind each.") {
+query actors() @description("Everyone who reads or writes this graph, people's own logins and agents, with the person behind each and whether the actor is active.") {
     match {
         $a: Actor
         $p: Person
         $a actsFor $p
     }
-    return { $a.slug as actor, $a.kind as kind, $a.name as name, $p.name as person }
+    return { $a.slug as actor, $a.kind as kind, $a.name as name, $a.active as active, $p.name as person }
     order { actor asc }
 }
 

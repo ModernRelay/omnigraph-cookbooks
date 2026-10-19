@@ -26,7 +26,7 @@ query contested_claims() @description("Pairs of claims that contradict each othe
     order { claim asc }
 }
 
-query decisions_at_risk() @description("Current accepted decisions resting on a claim that an unrejected claim contradicts. Run it on an agent's branch to see what its new claims put in question.") {
+query decisions_at_risk() @description("Current accepted decisions resting on a claim that an unrejected claim contradicts. Run it on an agent's branch to see what its new claims put in question. Once a person rejects the claim itself, the decision moves to current_on_rejected.") {
     match {
         $d: Decision { status: "accepted" }
         not { $d supersededBy $n  $n.status in ["accepted", "deprecated"] }
@@ -57,5 +57,14 @@ query search_claims($q: String) @description("Full-text search over claim statem
     }
     return { $c.slug as claim, $c.statement as statement, $c.status as status }
     order { bm25($c.statement, $q) }
+    limit 20
+}
+
+query search_quotes($q: String) @description("Full-text search over the exact words claims quote, best match first: find the claim behind a sentence someone remembers.") {
+    match {
+        $c: Claim
+    }
+    return { $c.slug as claim, $c.quote as quote, $c.status as status }
+    order { bm25($c.quote, $q) }
     limit 20
 }

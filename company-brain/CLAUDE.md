@@ -15,14 +15,14 @@ fictional company, "Lanternworks"; all names are made up.
 ## Key Files
 
 - `schema.pg` — 8 node types (`Person`, `Actor`, `Team`, `Project`, `Source`,
-  `Claim`, `Decision`, `ActionItem`), 17 edge types.
+  `Claim`, `Decision`, `ActionItem`), 18 edge types.
 - `queries/claims.gq`, `queries/decisions.gq`, `queries/people.gq`,
   `queries/actions.gq` — reads.
 - `queries/hygiene.gq` — reads that must return zero rows; run them on a
   branch before merging it with `omnigraph query <name> --branch …`. The
   `lint-*` aliases read main only.
 - `queries/mutations.gq` — stored writes.
-- `seed.jsonl` / `seed.md` — 55 nodes and 113 edges. Keep them in sync;
+- `seed.jsonl` / `seed.md` — 55 nodes and 114 edges. Keep them in sync;
   `seed.md` lists what each read returns.
 
 ## Rules
@@ -39,10 +39,14 @@ fictional company, "Lanternworks"; all names are made up.
   and `ClaimFrom` does not stop an insert without one; `unsupported_decisions`
   and `claims_without_source` catch it.
 - Creates refuse an existing slug. Inserting a keyed node replaces the whole
-  row, so `ClaimFrom`, `DecisionAbout` and `AssignedTo` are unkeyed and capped
-  at one: `record_claim`, `promote_claim`, `propose_successor` and
-  `add_action_item` on a slug that exists fail with a `@card` violation and
-  write nothing. Keep those three edges unkeyed; pick a new slug on refusal.
+  row, so `ClaimFrom`, `DecisionAbout`, `AssignedTo` and `ActsFor` are
+  unkeyed and capped at one: `record_claim`, `promote_claim`,
+  `propose_successor`, `add_action_item` and `add_actor` on a slug that
+  exists fail with a `@card` violation and write nothing. Keep those four
+  edges unkeyed; pick a new slug on refusal. `add_person` has no edge to
+  guard with: run it only when `person_by_handle` resolves nobody.
+- Every claim has a speaker: `ClaimedBy` is `@card(1..1)` and `record_claim`
+  requires one. A raw load without it shows up in `claims_without_speaker`.
 - Never edit a claim's `quote` or `statement`, or a decision's `statement`.
   Reject the claim and record a new one; change a decision with
   `propose_successor`, which needs a claim and a reason. Do not store
@@ -50,8 +54,9 @@ fictional company, "Lanternworks"; all names are made up.
   `SupersededBy` and `Contradicts`. An accepted or deprecated successor
   replaces a decision; a rejected one does not, and `withdraw_successor`
   (after `reject_decision`) frees the original's single `SupersededBy` slot.
-  `omnigraph lint` warns that no update sets `Claim.locator`, `decided_at` or
-  `rationale`; that is intended.
+  `omnigraph lint` warns that no update sets `Claim.locator`, `decided_at`,
+  `rationale` or `Actor.purpose`; that is intended. An agent whose job
+  changes gets a new actor id, so history says which job wrote what.
 - Point `Contradicts` from the newer claim to the older one. Leave both until
   a person rejects one.
 - Agents create on a branch; they cannot write main, merge or delete a
@@ -65,7 +70,13 @@ fictional company, "Lanternworks"; all names are made up.
 - A Person is anyone in the real world; an Actor is an OmniGraph actor id that
   reads or writes, linked to its person with `ActsFor`. Resolve every handle
   with `person_by_handle` before creating a person. Handles (`email`,
-  `slack`, `github`) are lowercased properties of Person.
+  `slack`, `github`) are lowercased properties of Person; change them, a name
+  or a title with `update_person`, which leaves `active` alone. Someone who
+  leaves gets `deactivate_person` and `end_membership`; a retired agent gets
+  `deactivate_actor` (and its token revoked). Nothing is deleted.
+- A membership is a stint, `MemberOf {role, since}` keyed by its start date.
+  `end_membership` writes `LeftTeam` for that stint; `add_member` cannot
+  reopen it, and rejoining is a new stint with a new `since`.
 - Source slugs are `<system>:<native id>` (`meet:…`, `slack:<channel>/<ts>`,
   `doc:…`, `ticket:…`), so ingesting the same item twice upserts.
 - Use fixed dates in reads that compare to a date (`overdue_actions`,

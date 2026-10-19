@@ -9,9 +9,11 @@
 // promotes them (promote_claim, propose_successor, add_action_item).
 //
 // Creates refuse a slug that already exists: each writes one unkeyed edge
-// capped at one (ClaimFrom, DecisionAbout, AssignedTo), so a second create
-// fails with a @card violation and changes nothing. Other edges are keyed by
-// their endpoints, so re-running a link is a no-op. A write refused with
+// capped at one (ClaimFrom, DecisionAbout, AssignedTo, ActsFor), so a second
+// create fails with a @card violation and changes nothing. add_person is the
+// exception: a new person has no edge to guard with, so resolve handles
+// first. Other edges are keyed by their endpoints (MemberOf and LeftTeam
+// also by since), so re-running a link is a no-op. A write refused with
 // read_set_conflict had no effect and can be rerun; a write whose response
 // was lost may have landed, so read before rerunning.
 
@@ -133,18 +135,36 @@ query cancel_action($slug: String) @description("Cancel an action item that will
 
 // ── People and org ────────────────────────────────────────────────────────
 
-query add_person($slug: String, $name: String, $title: String?, $email: String?, $slack: String?, $github: String?) @description("Add a person with whatever handles are known, lowercased. Running it again for the same slug replaces the person's title and handles.")
-    @instruction("Resolve every handle with person_by_handle first; create a person only when none resolves. To add a handle later, read person_handles and pass every handle you want to keep.") {
+query add_person($slug: String, $name: String, $title: String?, $email: String?, $slack: String?, $github: String?) @description("Add a new person with whatever handles are known, lowercased. On an existing slug it replaces the whole row, including active.")
+    @instruction("Resolve every handle with person_by_handle first; create a person only when none resolves. Never run it for someone who exists: change a name, title or handle with update_person, and mark someone who left with deactivate_person.") {
     insert Person { slug: $slug, name: $name, title: $title, active: true, email: $email, slack: $slack, github: $github }
 }
 
-query add_member($person: String, $team: String, $role: String?, $since: Date?) @description("Add a person to a team, with an optional role and start date.") {
+query update_person($slug: String, $name: String, $title: String?, $email: String?, $slack: String?, $github: String?) @description("Set a person's name, title, email, Slack member ID and GitHub login, handles lowercased. Leaves active alone; a null clears that field.")
+    @instruction("Read person_handles first and pass every value you want to keep.") {
+    update Person set { name: $name, title: $title, email: $email, slack: $slack, github: $github } where slug = $slug
+}
+
+query deactivate_person($slug: String) @description("Mark someone who left. They keep their claims, decisions and history. Close their team stints with end_membership.") {
+    update Person set { active: false } where slug = $slug
+}
+
+query add_member($person: String, $team: String, $role: String?, $since: Date) @description("Open a stint on a team, with an optional role, from the date it started. Recording the same stint again cannot reopen one that LeftTeam closed; rejoining later is a new stint with its own since.") {
     insert MemberOf { from: $person, to: $team, role: $role, since: $since }
 }
 
-query add_actor($slug: String, $kind: String, $name: String, $purpose: String?, $person: String) @description("Register an actor under its OmniGraph actor id: a person's own login, or an agent with the person accountable for it.") {
+query end_membership($person: String, $team: String, $since: Date, $until: Date) @description("Close the stint on a team that started on since, as of until.")
+    @instruction("Read since from team_members. A move is end_membership on the old team and add_member on the new one.") {
+    insert LeftTeam { from: $person, to: $team, since: $since, until: $until }
+}
+
+query add_actor($slug: String, $kind: String, $name: String, $purpose: String?, $person: String) @description("Register an actor under its OmniGraph actor id: a person's own login, or an agent with the person accountable for it. Refused if the slug already exists.") {
     insert Actor { slug: $slug, kind: $kind, name: $name, purpose: $purpose, active: true }
     insert ActsFor { from: $slug, to: $person }
+}
+
+query deactivate_actor($slug: String) @description("Retire an actor: a person who left, or an agent no longer in use. Revoke its token too; this records the fact, the token grants the access.") {
+    update Actor set { active: false } where slug = $slug
 }
 
 query add_project($slug: String, $name: String, $status: String, $target_date: Date?, $owner: String, $team: String) @description("Add a project with its owner and team.") {

@@ -25,6 +25,7 @@ aliases:
   project:          { server: local, graph: knowledge, query: project_decisions,       args: [project] }
   why:              { server: local, graph: knowledge, query: decision_evidence,       args: [decision] }
   why-replaced:     { server: local, graph: knowledge, query: why_superseded,          args: [decision] }
+  why-contradicted: { server: local, graph: knowledge, query: superseding_contradictions, args: [decision] }
   who-decided:      { server: local, graph: knowledge, query: decision_deciders,       args: [decision] }
   lineage:          { server: local, graph: knowledge, query: decision_lineage,        args: [decision] }
   replaced-by:      { server: local, graph: knowledge, query: decision_successor,      args: [decision] }
@@ -37,6 +38,7 @@ aliases:
   contested:        { server: local, graph: knowledge, query: contested_claims }
   at-risk:          { server: local, graph: knowledge, query: decisions_at_risk }
   to-verify:        { server: local, graph: knowledge, query: unverified_claims }
+  who-said:         { server: local, graph: knowledge, query: search_quotes,           args: [q] }
 
   # ── Commitments ──────────────────────────────────────────────
   open:             { server: local, graph: knowledge, query: open_actions }
@@ -55,8 +57,10 @@ aliases:
   # Check a branch before merging it with `omnigraph query <name> --branch …`.
   lint-unsupported: { server: local, graph: knowledge, query: unsupported_decisions }
   lint-unverified:  { server: local, graph: knowledge, query: accepted_on_unverified }
+  lint-on-rejected: { server: local, graph: knowledge, query: current_on_rejected }
   lint-no-project:  { server: local, graph: knowledge, query: decisions_without_project }
   lint-no-source:   { server: local, graph: knowledge, query: claims_without_source }
+  lint-no-speaker:  { server: local, graph: knowledge, query: claims_without_speaker }
   lint-unowned:     { server: local, graph: knowledge, query: unowned_actions }
   lint-no-claim:    { server: local, graph: knowledge, query: unsupported_actions }
   lint-agent-owner: { server: local, graph: knowledge, query: agents_without_owner }
@@ -73,4 +77,6 @@ aliases:
 #     --params '{"slug":"checkout-launch-nov-20"}'
 #   omnigraph mutate add_person --graph knowledge --params \
 #     '{"slug":"gus","name":"Gus Lee","title":"Support agent","email":"gus@lanternworks.example","slack":"u09guest","github":null}'
+#   omnigraph mutate end_membership --graph knowledge --params \
+#     '{"person":"chen","team":"payments","since":"2026-07-01","until":"2026-12-31"}'
 # (with defaults.server/default_graph set, --server/--graph can be omitted.)

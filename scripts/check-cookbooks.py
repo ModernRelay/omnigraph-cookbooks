@@ -275,10 +275,34 @@ def company_brain_journey(url, env):
     mutate(writer, "withdraw_successor", {"previous": "billing-freeze", "successor": "billing-go"})
     mutate(writer, "propose_successor", {**successor, "slug": "billing-go-2"})
 
+    # The reason survives a successor whose claim contradicts nothing.
+    assert rows("why_superseded", {"decision": "billing-freeze"}) == [
+        {"replaced_by": "billing-go-2", "status": "proposed", "reason": "Resume"}]
+    assert not rows("superseding_contradictions", {"decision": "billing-freeze"})
+
     # A deprecated successor keeps the decision it replaced out of the log.
     mutate(writer, "deprecate_decision", {"slug": "search-in-house"})
     current = {row["decision"] for row in rows("current_decisions")}
     assert "search-vendor-buy" not in current and "search-in-house" not in current, current
+
+    # A current decision on a rejected claim is flagged; a cancelled item
+    # does not count as implementing its decision.
+    mutate(writer, "reject_claim", {"slug": "provider-certifies-nov-6"})
+    assert rows("current_on_rejected") == [{"decision": "checkout-launch-nov-13", "claim": "provider-certifies-nov-6"}]
+    mutate(writer, "cancel_action", {"slug": "launch-checklist"})
+    assert "checkout-launch-nov-13" in {row["decision"] for row in rows("unimplemented_decisions")}
+
+    # Departures stay departed: an ended stint recorded again stays closed,
+    # a profile update keeps active, and a retired actor cannot be re-added.
+    mutate(writer, "add_member", {"person": "chen", "team": "discovery", "role": "engineer", "since": "2025-05-12"})
+    assert "Chen Wei" not in {row["person"] for row in rows("team_members", {"team": "discovery"})}
+    mutate(writer, "deactivate_person", {"slug": "chen"})
+    mutate(writer, "update_person", {"slug": "chen", "name": "Chen Wei", "title": "Senior engineer",
+                                     "email": "chen@lanternworks.example", "slack": "u07chen", "github": "chenwei"})
+    assert rows("person_handles", {"person": "chen"})[0]["active"] is False
+    mutate(writer, "deactivate_actor", {"slug": "act-slack-bot"})
+    refused_by_card(mutate(writer, "add_actor", {"slug": "act-slack-bot", "kind": "agent", "name": "Slack agent",
+                                                 "purpose": None, "person": "eli"}, ok=False))
 
 
 def main():

@@ -24,6 +24,17 @@ query accepted_on_unverified() @description("Accepted decisions resting on a cla
     order { decision asc }
 }
 
+query current_on_rejected() @description("Current accepted decisions resting on a claim a person rejected: replace them with propose_successor or retire them with deprecate_decision. Zero rows on a healthy graph.") {
+    match {
+        $d: Decision { status: "accepted" }
+        not { $d supersededBy $n  $n.status in ["accepted", "deprecated"] }
+        $c: Claim { status: "rejected" }
+        $d basedOn $c
+    }
+    return { $d.slug as decision, $c.slug as claim }
+    order { decision asc }
+}
+
 query decisions_without_project() @description("Decisions about no project. Zero rows on a healthy graph.") {
     match {
         $d: Decision
@@ -37,6 +48,15 @@ query claims_without_source() @description("Claims that cite no source. Zero row
     match {
         $c: Claim
         not { $c claimFrom $_ }
+    }
+    return { $c.slug as claim, $c.statement as statement }
+    order { claim asc }
+}
+
+query claims_without_speaker() @description("Claims with no ClaimedBy. Every claim has a speaker; record_claim requires one. Zero rows on a healthy graph.") {
+    match {
+        $c: Claim
+        not { $c claimedBy $_ }
     }
     return { $c.slug as claim, $c.statement as statement }
     order { claim asc }

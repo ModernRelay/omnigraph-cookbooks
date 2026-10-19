@@ -11,18 +11,19 @@ onboarding, and Platform has frozen a billing migration. Two agents read the
 company's meetings and Slack: `act-notes-bot` (accountable: Alice) and
 `act-slack-bot` (accountable: Eli).
 
-**Totals (loaded):** 55 nodes and 113 edges.
+**Totals (loaded):** 55 nodes and 114 edges.
 
 | Node type | # | Edge type | # |
 |---|---|---|---|
 | Person | 6 | MemberOf | 8 |
-| Actor | 3 | PartOf | 4 |
-| Team | 5 | ActsFor | 3 |
-| Project | 4 | OwnedBy | 4 |
-| Source | 8 | RunBy | 4 |
-| Claim | 18 | SourceAbout | 8 |
-| Decision | 6 | ClaimFrom | 18 |
-| ActionItem | 5 | ClaimedBy | 18 |
+| Actor | 3 | LeftTeam | 1 |
+| Team | 5 | PartOf | 4 |
+| Project | 4 | ActsFor | 3 |
+| Source | 8 | OwnedBy | 4 |
+| Claim | 18 | RunBy | 4 |
+| Decision | 6 | SourceAbout | 8 |
+| ActionItem | 5 | ClaimFrom | 18 |
+| | | ClaimedBy | 18 |
 | | | Contradicts | 2 |
 | | | BasedOn | 11 |
 | | | DecidedBy | 8 |
@@ -142,9 +143,10 @@ latency target."
   `prototype-meets-latency` (Bob), both from the Search review, each with
   its quote.
 - **`why_superseded {"decision":"search-vendor-buy"}`**: replaced by
-  `search-in-house`, with the edge's reason, because "The hosted vendor's
-  quote is three times the search budget." contradicts "A hosted search
-  vendor is cheaper and faster than building ranking in-house."
+  `search-in-house` (accepted), with the edge's reason.
+  **`superseding_contradictions`** for the same decision: "The hosted
+  vendor's quote is three times the search budget." contradicts "A hosted
+  search vendor is cheaper and faster than building ranking in-house."
 - **`decision_lineage {"decision":"search-in-house"}`**: `search-vendor-buy`.
   `decision_successor {"decision":"search-vendor-buy"}`: `search-in-house`.
   `decision_deciders {"decision":"search-in-house"}`: Bob Ortiz, Eli Novak.
@@ -169,12 +171,17 @@ latency target."
 - **`quiet_projects {"since":"2026-09-14T00:00:00.000Z"}`**: Billing migration
   (paused; nothing since July).
 - **`team_members {"team":"discovery"}`**: Bob Ortiz (lead), Dana Kim
-  (designer). Chen's membership ended on 2026-06-30, so he is not listed.
+  (designer). `LeftTeam` closed Chen's stint on 2026-06-30, so he is not
+  listed.
 - **`person_by_handle {"handle":"u01alice"}`**: `alice`.
 - **`actors`**: `act-alice` (human, Alice Park), `act-notes-bot` (agent, Alice
   Park), `act-slack-bot` (agent, Eli Novak).
+- **`search_quotes {"q":"November"}`**: `launch-nov-13`,
+  `provider-certifies-nov-6`, `chen-writes-checklist`.
 - **Hygiene:** `unsupported_decisions`, `accepted_on_unverified`,
-  `decisions_without_project`, `claims_without_source`, `unowned_actions`,
+  `current_on_rejected` (`search-vendor-buy` rests on the rejected
+  `vendor-cheaper`, but it is replaced), `decisions_without_project`,
+  `claims_without_source`, `claims_without_speaker`, `unowned_actions`,
   `unsupported_actions` and `agents_without_owner` each return zero rows.
 
 ## The walkthrough in the README
@@ -192,9 +199,10 @@ give:
 - The review loop prints nothing and each hygiene read returns zero rows on
   the branch. After the merge (`fast_forward`) and `verify_claim`,
   `reject_claim` and `accept_decision` on main, `current_decisions` lists
-  `checkout-launch-nov-20` instead of `checkout-launch-nov-13`. `why_superseded
-  {"decision":"checkout-launch-nov-13"}` returns the reason and the two
-  contradicting claims, and `decisions_at_risk` is empty again.
+  `checkout-launch-nov-20` instead of `checkout-launch-nov-13`.
+  `why_superseded {"decision":"checkout-launch-nov-13"}` returns the reason,
+  `superseding_contradictions` the two contradicting claims, and
+  `decisions_at_risk` and `current_on_rejected` are empty again.
 - A second branch that proposed `checkout-launch-nov-27` as another successor
   of `checkout-launch-nov-13` fails to merge with
   `merge conflicts: edge type 'SupersededBy' (cardinality_violation)`.

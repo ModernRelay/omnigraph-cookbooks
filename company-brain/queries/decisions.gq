@@ -59,18 +59,27 @@ query decision_lineage($decision: String) @description("Every earlier decision t
     order { decided_at desc }
 }
 
-query why_superseded($decision: String) @description("Why a decision was replaced: the one-line reason on SupersededBy, and each claim behind the successor that contradicts a claim behind the original.") {
+query why_superseded($decision: String) @description("Why a decision was replaced: its successor and the one-line reason on SupersededBy. superseding_contradictions shows the claims behind it, when they contradict.") {
     match {
         $old: Decision { slug: $decision }
         $new: Decision
         $old $w:supersededBy $new
+    }
+    return { $new.slug as replaced_by, $new.status as status, $w.reason as reason }
+}
+
+query superseding_contradictions($decision: String) @description("Each claim behind a decision's successor that contradicts a claim behind the decision itself. Zero rows when the successor was proposed for a reason no claim contradicts; why_superseded still has the reason.") {
+    match {
+        $old: Decision { slug: $decision }
+        $new: Decision
+        $old supersededBy $new
         $nc: Claim
         $new basedOn $nc
         $oc: Claim
         $old basedOn $oc
         $nc <contradicts> $oc
     }
-    return { $new.slug as replaced_by, $w.reason as reason, $nc.statement as because, $oc.statement as contradicts }
+    return { $new.slug as replaced_by, $nc.statement as because, $oc.statement as contradicts }
     order { because asc }
 }
 
@@ -105,11 +114,11 @@ query proposed_decisions() @description("Decisions waiting for a person to accep
     order { recorded_at asc }
 }
 
-query unimplemented_decisions() @description("Current accepted decisions that no action item follows from yet.") {
+query unimplemented_decisions() @description("Current accepted decisions that no action item follows from yet, not counting cancelled items.") {
     match {
         $d: Decision { status: "accepted" }
         not { $d supersededBy $n  $n.status in ["accepted", "deprecated"] }
-        not { $a followsFrom $d }
+        not { $a followsFrom $d  $a.status != "cancelled" }
     }
     return { $d.slug as decision, $d.title as title, $d.decided_at as decided_at }
     order { decided_at asc }
