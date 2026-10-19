@@ -23,7 +23,7 @@ COOKBOOKS = {
     "vc-os": ("vcos", "deals_open"),
     "dev-graph": ("dev", "open_epics"),
     "beads": ("beads", "ready"),
-    "company-brain": ("knowledge", "current_decisions"),
+    "company-brain": ("company", "current_decisions"),
 }
 # Cookbooks whose policy lets act-agent write only on unprotected branches.
 BRANCH_ONLY_AGENTS = {"company-brain"}
@@ -233,7 +233,7 @@ def company_brain_journey(url, env):
     """An agent records on a branch, a person merges and settles on main.
     Creates refuse an existing slug, and a rejected successor can be
     withdrawn so the decision it named can be replaced again."""
-    scope = ("--server", url, "--graph", "knowledge")
+    scope = ("--server", url, "--graph", "company")
     agent = {**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-agent"]}
     writer = {**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-writer"]}
 

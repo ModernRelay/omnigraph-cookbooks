@@ -3,7 +3,7 @@
 A company's working memory of record: who is on which team, what each project
 is, what people said, what was decided, who owes what, and the exact words
 each of those rests on. People and agents both read it. Agents propose changes
-on their own branches; a person reviews and merges them. Graph ID `knowledge`.
+on their own branches; a person reviews and merges them. Graph ID `company`.
 
 The point is not search over Slack. It is a model of the company that stays
 coherent as it grows. Agents record what was said as **claims**, each with the
@@ -23,17 +23,17 @@ decisions and commitments.
 ## Quick start
 
 Use the shared [local setup](../README.md#local-setup) with folder
-`company-brain` and graph `knowledge`, then load `seed.jsonl` (described in
+`company-brain` and graph `company`, then load `seed.jsonl` (described in
 [seed.md](seed.md)). With the server up:
 
 ```bash
-omnigraph query current_decisions --server http://127.0.0.1:8080 --graph knowledge
-omnigraph query decision_evidence --server http://127.0.0.1:8080 --graph knowledge \
+omnigraph query current_decisions --server http://127.0.0.1:8080 --graph company
+omnigraph query decision_evidence --server http://127.0.0.1:8080 --graph company \
   --params '{"decision":"search-in-house"}'
-omnigraph query why_superseded --server http://127.0.0.1:8080 --graph knowledge \
+omnigraph query why_superseded --server http://127.0.0.1:8080 --graph company \
   --params '{"decision":"search-vendor-buy"}'
-omnigraph query contested_claims --server http://127.0.0.1:8080 --graph knowledge
-omnigraph query overdue_actions --server http://127.0.0.1:8080 --graph knowledge \
+omnigraph query contested_claims --server http://127.0.0.1:8080 --graph company
+omnigraph query overdue_actions --server http://127.0.0.1:8080 --graph company \
   --params '{"as_of":"2026-10-14"}'
 ```
 
@@ -182,7 +182,7 @@ provider moved certification. Writing on main is refused (403), so it works on
 a branch. First it records what was said, nothing more:
 
 ```bash
-S=(--server http://127.0.0.1:8080 --graph knowledge)
+S=(--server http://127.0.0.1:8080 --graph company)
 B=(--branch agent/notes-oct-14)
 export OMNIGRAPH_BEARER_TOKEN=local-notes-token
 omnigraph branch create agent/notes-oct-14 --from main "${S[@]}"

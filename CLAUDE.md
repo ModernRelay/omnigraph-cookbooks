@@ -19,7 +19,7 @@ guides own their domain model and worked queries.
 | `vc-os` | `vcos` |
 | `dev-graph` | `dev` |
 | `beads` | `beads` |
-| `company-brain` | `knowledge` |
+| `company-brain` | `company` |
 
 The graph ID is the key in `cluster.yaml`, not the folder name. Configurations
 omit `storage`, so local roots default to their directory. Explicit storage

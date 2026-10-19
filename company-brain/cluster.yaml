@@ -13,14 +13,14 @@ state:
   lock: true
 
 graphs:
-  knowledge:
+  company:
     schema: schema.pg
     queries: queries/        # registers every `query <name>` in queries/*.gq as a stored query
 
 policies:
   graph-access:
     file: policies/graph.policy.yaml
-    applies_to: [knowledge]
+    applies_to: [company]
   cluster-access:
     file: policies/server.policy.yaml
     applies_to: [cluster]
