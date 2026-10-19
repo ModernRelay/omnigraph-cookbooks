@@ -76,7 +76,7 @@ Install the 0.13 CLI. From this repository's root, choose a cookbook:
 | `vc-os` | `vcos` |
 | `dev-graph` | `dev` |
 | `beads` | `beads` |
-| `company-brain` | `knowledge` |
+| `company-brain` | `company` |
 
 Set `OMNIGRAPH_CLUSTER_URI` locally to the same literal S3 root used by the
 service. Prepare a new directory:
