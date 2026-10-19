@@ -20,7 +20,12 @@
 //   - One Person per human, with emails and chat handles as properties. An
 //     Actor is someone who reads or writes this graph: a person's own login,
 //     or an agent acting for a person.
-//   - Every edge is keyed by its endpoints, so re-ingesting is idempotent.
+//   - Creating is not overwriting. Inserting a keyed node upserts the whole
+//     row, so each create also writes one unkeyed edge capped at one
+//     (ClaimFrom, DecisionAbout, AssignedTo). Creating a slug that already
+//     exists adds a second such edge, and the whole write is refused with a
+//     @card violation instead of resetting what a person reviewed. Every
+//     other edge is keyed by its endpoints, so re-running a link is a no-op.
 //   - Two kinds of time: when something happened (occurred_at, decided_at)
 //     and when the brain learned it (recorded_at, and the commit history).
 
@@ -36,7 +41,7 @@ node Person @description("Someone in the real world: an employee, a customer, a 
 }
 
 node Actor @description("Someone who reads or writes this graph: a person's own login or a software agent. slug is the OmniGraph actor id the bearer token selects, so commit history joins to this node.")
-           @instruction("Agents write only on their own branches and never merge. A person reviews and merges.") {
+           @instruction("Agents write only on the branch they were given; they cannot write main, merge or delete branches. The policy cannot tell one agent's branch from another's, so a person checks each commit's actor before merging.") {
     slug: String @key
     kind: enum(human, agent) @index
     name: String
@@ -67,7 +72,7 @@ node Source @description("A record the brain learned from: a meeting, chat threa
 }
 
 node Claim @description("One statement someone made in a source, as they made it: a fact, a proposal, a commitment or a risk. Extracting a claim does not make it true; it stays unverified until someone verifies or rejects it.")
-           @instruction("Write claims with record_claim. quote is the exact text from the source, never a paraphrase; statement says the same thing in one plain sentence. Extraction leaves status unverified. Never edit a claim's statement or quote; reject it and record a new one.") {
+           @instruction("Write claims with record_claim. quote is the exact text from the source, never a paraphrase; statement says the same thing in one plain sentence. Extraction leaves status unverified. record_claim refuses a slug that already exists. Never edit a claim's statement or quote; reject it and record a new one.") {
     slug: String @key
     statement: String @index
     quote: String @index @description("The exact words in the source")
@@ -78,7 +83,7 @@ node Claim @description("One statement someone made in a source, as they made it
 }
 
 node Decision @description("A commitment to a course of action, made by named people and resting on claims. Never rewritten: a changed decision is a new Decision that the old one points to with SupersededBy.")
-              @instruction("Write decisions with promote_claim or propose_successor, which rest the decision on a claim in the same commit. Agents write status proposed on their own branch; a person verifies the claims, accepts and merges. Never edit statement; supersede instead. Fill rationale only from what the claims say.") {
+              @instruction("Write decisions with promote_claim or propose_successor, which rest the decision on a claim in the same commit. Both refuse a slug that already exists. Agents write status proposed on a branch; a person merges it, then verifies the claims and accepts on main, where agents cannot write. Never edit statement; supersede instead. Fill rationale only from what the claims say.") {
     slug: String @key
     title: String @index
     statement: String @description("What was decided, in one or two sentences")
@@ -129,9 +134,9 @@ edge SourceAbout: Source -> Project @description("The source discusses this proj
     @key(@src, @dst)
 }
 
-edge ClaimFrom: Claim -> Source @card(1..1) @description("The source the claim was made in. The same statement in two sources is two claims.") {
-    @key(@src, @dst)
-}
+// Unkeyed on purpose: record_claim for a slug that already exists adds a
+// second ClaimFrom and is refused, so the claim is never overwritten.
+edge ClaimFrom: Claim -> Source @card(1..1) @description("The source the claim was made in. The same statement in two sources is two claims.")
 
 edge ClaimedBy: Claim -> Person @card(0..1) @description("Who said or wrote it. Whether they had the authority to decide it is a separate question.") {
     @key(@src, @dst)
@@ -151,9 +156,9 @@ edge DecidedBy: Decision -> Person @description("A person who made the decision.
     @key(@src, @dst)
 }
 
-edge DecisionAbout: Decision -> Project @description("The project the decision concerns.") {
-    @key(@src, @dst)
-}
+// Unkeyed on purpose: promoting or proposing a decision under a slug that
+// already exists adds a second DecisionAbout and is refused.
+edge DecisionAbout: Decision -> Project @card(1..1) @description("The project the decision concerns.")
 
 edge SupersededBy: Decision -> Decision @card(0..1) @description("The source decision was replaced by the target. A decision is superseded at most once, so two competing successors collide at merge. The full why is in the claims: the successor rests on a claim that contradicts one behind the original.") {
     reason: String? @description("One line on why, as stated in the source")
@@ -162,9 +167,9 @@ edge SupersededBy: Decision -> Decision @card(0..1) @description("The source dec
 
 // ── Commitments ───────────────────────────────────────────────────────────
 
-edge AssignedTo: ActionItem -> Person @card(0..1) @description("The one person who owns the action item.") {
-    @key(@src, @dst)
-}
+// Unkeyed on purpose: add_action_item for a slug that already exists adds a
+// second AssignedTo and is refused, so a closed item is never reopened.
+edge AssignedTo: ActionItem -> Person @card(0..1) @description("The one person who owns the action item.")
 
 edge ActionFrom: ActionItem -> Claim @card(1..) @description("The commitment claim the action item was promoted from.") {
     @key(@src, @dst)

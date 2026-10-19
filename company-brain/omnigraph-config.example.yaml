@@ -8,6 +8,9 @@
 # `omnigraph alias <name> [args]` — args bind by NAME to the query's $params
 # (`args: [project]` fills `$project`). Operator aliases are READ-ONLY — run
 # stored *mutations* with `omnigraph mutate <name> --params '{…}'` (see the bottom).
+# An alias always reads main: it cannot choose a branch. To read an agent's
+# branch, run the stored query by name instead:
+#   omnigraph query decisions_at_risk --graph knowledge --branch agent/notes-oct-14
 servers:
   local:
     url: http://127.0.0.1:8080
@@ -48,20 +51,25 @@ aliases:
   quiet:            { server: local, graph: knowledge, query: quiet_projects,          args: [since] }
   sources:          { server: local, graph: knowledge, query: project_sources,         args: [project] }
 
-  # ── Hygiene (zero rows on a healthy graph) ───────────────────
+  # ── Hygiene on main (zero rows on a healthy graph) ───────────
+  # Check a branch before merging it with `omnigraph query <name> --branch …`.
   lint-unsupported: { server: local, graph: knowledge, query: unsupported_decisions }
   lint-unverified:  { server: local, graph: knowledge, query: accepted_on_unverified }
+  lint-no-project:  { server: local, graph: knowledge, query: decisions_without_project }
+  lint-no-source:   { server: local, graph: knowledge, query: claims_without_source }
   lint-unowned:     { server: local, graph: knowledge, query: unowned_actions }
+  lint-no-claim:    { server: local, graph: knowledge, query: unsupported_actions }
+  lint-agent-owner: { server: local, graph: knowledge, query: agents_without_owner }
 
 # ── Mutations (served stored mutations; NOT aliasable) ───────────────────────
 # The bearer identity determines authorization and commit attribution. Agents
-# record claims and propose on their own branch; a person verifies, accepts
-# and merges. Examples:
+# record claims and propose on a branch; a person reviews and merges it, then
+# verifies and accepts on main. Examples:
 #   omnigraph mutate record_claim --graph knowledge --branch agent/notes-oct-14 --params \
 #     '{"slug":"chen-books-recert","kind":"commitment","statement":"Chen books the provider recertification by Oct 21.","quote":"Chen, can you book the recert slot by next Wednesday?","locator":"00:11:20","recorded_at":"2026-10-14T16:00:00.000Z","source":"meet:checkout-sync-2026-10-14","speaker":"alice"}'
 #   omnigraph mutate add_action_item --graph knowledge --branch agent/notes-oct-14 --params \
 #     '{"slug":"provider-recert","title":"Book the provider recertification","due":"2026-10-21","recorded_at":"2026-10-14T16:00:00.000Z","owner":"chen","claim":"chen-books-recert","project":"checkout"}'
-#   omnigraph mutate accept_decision --graph knowledge --branch agent/notes-oct-14 \
+#   omnigraph mutate accept_decision --graph knowledge \
 #     --params '{"slug":"checkout-launch-nov-20"}'
 #   omnigraph mutate add_person --graph knowledge --params \
 #     '{"slug":"gus","name":"Gus Lee","title":"Support agent","email":"gus@lanternworks.example","slack":"u09guest","github":null}'

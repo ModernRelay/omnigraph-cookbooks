@@ -114,7 +114,10 @@ The rules the shape encodes:
   sits on the edge; the full why is in the nodes, because the successor
   rests on a claim that contradicts one behind the original. A decision is
   superseded at most once (`@card(0..1)`), so two agents proposing competing
-  successors on two branches collide when the second merges.
+  successors on two branches collide when the second merges. A decision
+  stays replaced once its successor was accepted, even if that successor is
+  deprecated later. A rejected successor replaces nothing, and
+  `withdraw_successor` frees the slot for another.
 - **People are not logins.** A Person exists whether or not they ever touch
   the graph. An Actor is an OmniGraph identity that can; it `ActsFor` a
   person. Agents resolve a handle with `person_by_handle` before creating
@@ -122,8 +125,14 @@ The rules the shape encodes:
 - **Two kinds of time.** When something happened in the world is in the
   schema (`occurred_at`, `decided_at`, `due`, `since`/`until`). When the brain
   learned it is `recorded_at` on claims and facts, plus the commit history.
-- **Every edge is keyed by its endpoints,** so an agent that ingests the same
-  meeting twice changes nothing the second time.
+- **Creating never overwrites.** Inserting a keyed node replaces the whole
+  row, so each create also writes one unkeyed edge capped at one
+  (`ClaimFrom`, `DecisionAbout`, `AssignedTo`). Creating a claim, decision or
+  action item under a slug that already exists adds a second one, and the
+  whole write is refused with a `@card` violation. An agent that ingests the
+  same meeting twice is refused at the first claim it already recorded, and
+  nothing a person verified, accepted or closed is reset. Every other edge is
+  keyed by its endpoints, so re-running a link is a no-op.
 
 ## Derived, not stored
 
@@ -148,10 +157,12 @@ answers do not change with the calendar.
 ## Agents extract, people decide
 
 The policy gives every agent its own actor (`act-notes-bot`, `act-slack-bot`,
-or the generic `act-agent`). Agents read everything, write only on unprotected
-branches and cannot merge; people (`act-alice`, `act-admin`, `act-writer`)
-review and merge. Each commit records the actor from the bearer token, so the
-history says which agent wrote what, and `actors` says who answers for it.
+or the generic `act-agent`). Agents read everything, create branches and write
+only on unprotected branches; they cannot write main, merge or delete a
+branch. People (`act-alice`, `act-admin`, `act-writer`) review and merge, then
+verify and accept on main, where no agent can write. Each commit records the
+actor from the bearer token, so the history says which agent wrote what, and
+`actors` says who answers for it.
 
 Add the agent tokens when you start the server:
 
@@ -197,34 +208,60 @@ omnigraph query project_decisions "${S[@]}" "${B[@]}" --params '{"project":"chec
 #   Launch Checkout v2 on Nov 20 | proposed      (main still says Nov 13)
 ```
 
-A person reviews the branch (`omnigraph commit list --branch …` and
-`omnigraph commit changes <commit>`), settles the contradiction, accepts and
-merges:
+A person reviews the branch before merging it. The policy cannot tell one
+agent's branch from another's, or which stored query an agent ran, so the
+review checks the history: who wrote each of the branch's commits, and
+whether any of them updated a claim, decision or action item. An agent only
+creates those; a status change is a person's job on main. On a clean branch
+the loop prints nothing (it uses `jq`):
 
 ```bash
 export OMNIGRAPH_BEARER_TOKEN=local-admin-token
-omnigraph mutate verify_claim "${S[@]}" "${B[@]}" --params '{"slug":"provider-certifies-nov-13"}'
-omnigraph mutate reject_claim "${S[@]}" "${B[@]}" --params '{"slug":"provider-certifies-nov-6"}'
-omnigraph mutate accept_decision "${S[@]}" "${B[@]}" --params '{"slug":"checkout-launch-nov-20"}'
-omnigraph query accepted_on_unverified "${S[@]}" "${B[@]}"     # 0 rows
+omnigraph commit list "${S[@]}" "${B[@]}"          # one line per commit, with its actor
+for c in $(omnigraph commit list "${S[@]}" "${B[@]}" --json \
+             | jq -r '.commits[] | select(.graph_branch == "agent/notes-oct-14") | .graph_commit_id'); do
+  omnigraph commit changes "$c" "${S[@]}" --op update --type Claim --type Decision --type ActionItem --json \
+    | jq -c '.cause.actor_id as $a | .changes[] | {actor: $a, type: .type.name, id}'
+done
+```
+
+Then it runs the [hygiene](queries/hygiene.gq) reads on the branch, merges,
+and settles the contradiction and the proposal on main:
+
+```bash
+for q in unsupported_decisions accepted_on_unverified decisions_without_project \
+         claims_without_source unowned_actions unsupported_actions agents_without_owner; do
+  omnigraph query "$q" "${S[@]}" "${B[@]}"         # each 0 rows
+done
 omnigraph branch merge agent/notes-oct-14 --into main "${S[@]}"
+omnigraph branch delete agent/notes-oct-14 "${S[@]}" --yes
+omnigraph mutate verify_claim "${S[@]}" --params '{"slug":"provider-certifies-nov-13"}'
+omnigraph mutate reject_claim "${S[@]}" --params '{"slug":"provider-certifies-nov-6"}'
+omnigraph mutate accept_decision "${S[@]}" --params '{"slug":"checkout-launch-nov-20"}'
+omnigraph query accepted_on_unverified "${S[@]}"   # 0 rows
 omnigraph query why_superseded "${S[@]}" --params '{"decision":"checkout-launch-nov-13"}'
 #   checkout-launch-nov-20 | The payment provider moved certification back a week. |
 #     The payment provider moved … certification to Nov 13. | The payment provider certifies … by Nov 6.
 ```
+
+Had the person rejected the proposal instead, `reject_decision` and then
+`withdraw_successor {"previous":"checkout-launch-nov-13","successor":"checkout-launch-nov-20"}`
+leave Nov 13 current and free to be replaced again.
 
 If the Slack agent had heard "two weeks" and proposed Nov 27 as another
 successor on its own branch, merging that branch now fails with
 `merge conflicts: edge type 'SupersededBy' (cardinality_violation)`.
 Nothing lands; a person decides which date is right.
 
-Run the [hygiene](queries/hygiene.gq) reads on an agent's branch before merging
-it. Each returns zero rows on a healthy graph. They exist because the schema
-cannot force an edge to exist when a node is inserted: `@card(1..)` on
-`BasedOn` and `ClaimFrom` stops the last link from being removed, and the
-stored mutations write the fact and what it rests on in one commit.
-`accepted_on_unverified` enforces the two steps: verify the claims before
-accepting the decision.
+Each [hygiene](queries/hygiene.gq) read returns zero rows on a healthy graph.
+They exist because the schema cannot force an edge to exist when a node is
+inserted: `@card(1..)` on `BasedOn` and `ClaimFrom` stops the last link from
+being removed, and the stored mutations write the fact and what it rests on in
+one commit. `accepted_on_unverified` enforces the two steps: verify the claims
+before accepting the decision. Run them on a branch with `omnigraph query
+<name> --branch …`, as above. The `lint-*` aliases in
+[`omnigraph-config.example.yaml`](omnigraph-config.example.yaml) read main
+only, because an alias cannot choose a branch.
 
 ## Extending
 
@@ -270,6 +307,11 @@ enums and renames apply in place.
   audiences.
 - **Merges compare whole rows.** Two agents changing different fields of the
   same action item still conflict.
+- **The policy keeps agents off main, not off each other.** Rules are per
+  graph and per protected or unprotected branch, and `invoke_query` covers
+  the whole catalog. Any agent can write on any unprotected branch, and run
+  `verify_claim` or `accept_decision` there; the review step above catches
+  both from the history before a merge.
 - **Handles live on the person.** A handle nobody has claimed yet cannot wait
   in the graph on its own; the agent creates the person or leaves the claim
   for a human.

@@ -1,15 +1,19 @@
 // Writes. Each query is one graph commit. The ones that create a claim, a
 // decision or an action item also write what it rests on in the same
-// commit, so nothing lands without its evidence. Agents run these on their
-// own branch; a person reviews the branch, verifies, accepts, and merges.
+// commit, so nothing lands without its evidence. Agents run the creates on
+// a branch; a person reviews the branch's commits, merges it, then
+// verifies, accepts and rejects on main, where agents cannot write.
 //
 // Two steps, never one: an agent records what was said (record_claim), and
 // a separate step checks the claims against what main already holds and
 // promotes them (promote_claim, propose_successor, add_action_item).
 //
-// Edges are keyed by their endpoints, so re-running a link is a no-op. A
-// write refused with read_set_conflict had no effect and can be rerun; a
-// write whose response was lost may have landed, so read before rerunning.
+// Creates refuse a slug that already exists: each writes one unkeyed edge
+// capped at one (ClaimFrom, DecisionAbout, AssignedTo), so a second create
+// fails with a @card violation and changes nothing. Other edges are keyed by
+// their endpoints, so re-running a link is a no-op. A write refused with
+// read_set_conflict had no effect and can be rerun; a write whose response
+// was lost may have landed, so read before rerunning.
 
 // ── Evidence and claims ───────────────────────────────────────────────────
 
@@ -23,7 +27,7 @@ query link_source_project($source: String, $project: String) @description("Say a
 }
 
 query record_claim($slug: String, $kind: String, $statement: String, $quote: String, $locator: String?, $recorded_at: DateTime, $source: String, $speaker: String)
-    @description("Record one claim made in a source: the exact quote, where it is, and who said it, in one commit. The claim starts unverified.")
+    @description("Record one claim made in a source: the exact quote, where it is, and who said it, in one commit. The claim starts unverified. Refused if the slug already exists.")
     @instruction("quote is copied from the source, never paraphrased. Resolve the speaker with person_by_handle first. Recording a claim decides nothing; promote it in a separate step.") {
     insert Claim { slug: $slug, kind: $kind, statement: $statement, quote: $quote, locator: $locator,
                    status: "unverified", recorded_at: $recorded_at }
@@ -36,19 +40,21 @@ query mark_contradiction($claim: String, $contradicts: String) @description("Rec
     insert Contradicts { from: $claim, to: $contradicts }
 }
 
-query verify_claim($slug: String) @description("Mark an unverified claim verified: checked against the source and against what the graph already holds. Affects 0 nodes unless it is unverified.") {
+query verify_claim($slug: String) @description("Mark an unverified claim verified: checked against the source and against what the graph already holds. Affects 0 nodes unless it is unverified.")
+    @instruction("For people, on main after merging the branch that recorded the claim.") {
     update Claim set { status: "verified" } where slug = $slug and status = "unverified"
 }
 
-query reject_claim($slug: String) @description("Reject a claim that turned out wrong or was superseded by a contradicting one. Affects 0 nodes if it is already rejected.") {
+query reject_claim($slug: String) @description("Reject a claim that turned out wrong or was superseded by a contradicting one. Affects 0 nodes if it is already rejected.")
+    @instruction("For people, on main after merging the branch that recorded the claim.") {
     update Claim set { status: "rejected" } where slug = $slug and status != "rejected"
 }
 
 // ── Decisions ─────────────────────────────────────────────────────────────
 
 query promote_claim($claim: String, $slug: String, $title: String, $statement: String, $rationale: String?, $decided_at: DateTime?, $recorded_at: DateTime, $project: String)
-    @description("Propose a decision that rests on a claim, about a project, in one commit.")
-    @instruction("Run on your own branch, after checking the claim against main. Fill rationale only from what the claims say. Rest the decision on more claims with add_basis. A person verifies the claims and accepts it with accept_decision before merging.") {
+    @description("Propose a decision that rests on a claim, about a project, in one commit. Refused if the slug already exists.")
+    @instruction("Run on your branch, after checking the claim against main. Pick a new slug; an existing one is refused. Fill rationale only from what the claims say. Rest the decision on more claims with add_basis. A person merges the branch, verifies the claims and accepts it on main.") {
     insert Decision { slug: $slug, title: $title, statement: $statement, rationale: $rationale,
                       status: "proposed", decided_at: $decided_at, recorded_at: $recorded_at }
     insert BasedOn { from: $slug, to: $claim }
@@ -56,8 +62,8 @@ query promote_claim($claim: String, $slug: String, $title: String, $statement: S
 }
 
 query propose_successor($previous: String, $claim: String, $reason: String, $slug: String, $title: String, $statement: String, $rationale: String?, $decided_at: DateTime?, $recorded_at: DateTime, $project: String)
-    @description("Propose a decision that replaces an earlier one: the new decision, the claim it rests on, and SupersededBy with a one-line reason, in one commit.")
-    @instruction("Use this instead of editing a decision. Rest it on the claim that contradicts the original's. A decision is superseded at most once, so if another branch already replaced it, the merge refuses yours.") {
+    @description("Propose a decision that replaces an earlier one: the new decision, the claim it rests on, and SupersededBy with a one-line reason, in one commit. Refused if the slug already exists.")
+    @instruction("Use this instead of editing a decision. Rest it on the claim that contradicts the original's. A decision is superseded at most once, so if another branch already replaced it, the merge refuses yours. A rejected successor keeps the slot until withdraw_successor removes it.") {
     insert Decision { slug: $slug, title: $title, statement: $statement, rationale: $rationale,
                       status: "proposed", decided_at: $decided_at, recorded_at: $recorded_at }
     insert BasedOn { from: $slug, to: $claim }
@@ -74,11 +80,12 @@ query add_decider($decision: String, $person: String) @description("Record a per
 }
 
 query accept_decision($slug: String) @description("Accept a proposed decision. Affects 0 nodes unless it is proposed.")
-    @instruction("For people reviewing a branch, not for the agent that proposed it. Verify the claims it rests on first; accepted_on_unverified catches a miss.") {
+    @instruction("For people, on main after merging the branch that proposed it. Verify the claims it rests on first; accepted_on_unverified catches a miss.") {
     update Decision set { status: "accepted" } where slug = $slug and status = "proposed"
 }
 
-query reject_decision($slug: String) @description("Reject a proposed decision. Affects 0 nodes unless it is proposed.") {
+query reject_decision($slug: String) @description("Reject a proposed decision. Affects 0 nodes unless it is proposed.")
+    @instruction("For people, on main. If it was proposed as a successor, run withdraw_successor next so the earlier decision can be replaced again.") {
     update Decision set { status: "rejected" } where slug = $slug and status = "proposed"
 }
 
@@ -86,10 +93,16 @@ query deprecate_decision($slug: String) @description("Retire an accepted decisio
     update Decision set { status: "deprecated" } where slug = $slug and status = "accepted"
 }
 
+query withdraw_successor($previous: String, $successor: String)
+    @description("Remove the SupersededBy link from a decision to a successor that was rejected, so the decision can be replaced again. A separate commit from reject_decision: one write cannot both update and delete.")
+    @instruction("Only after reject_decision on the successor. Withdrawing an accepted successor would make the decision it replaced current again.") {
+    delete SupersededBy where @src = $previous and @dst = $successor
+}
+
 // ── Commitments ───────────────────────────────────────────────────────────
 
 query add_action_item($slug: String, $title: String, $due: Date?, $recorded_at: DateTime, $owner: String, $claim: String, $project: String)
-    @description("Promote a commitment claim to an action item with its owner and project, in one commit.") {
+    @description("Promote a commitment claim to an action item with its owner and project, in one commit. Refused if the slug already exists.") {
     insert ActionItem { slug: $slug, title: $title, status: "open", due: $due, recorded_at: $recorded_at }
     insert AssignedTo { from: $slug, to: $owner }
     insert ActionFrom { from: $slug, to: $claim }

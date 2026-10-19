@@ -1,8 +1,18 @@
 # Tokens select actors; permissions come from this applied policy.
 #
-# People own main. Agents read everything and write only on unprotected
-# branches; they cannot merge. A person reviews an agent's branch, accepts
-# what it proposed, and merges it.
+# People own main. Agents read everything, create branches and write only on
+# unprotected branches; they cannot write main, merge, or delete a branch. A
+# person reviews an agent's branch, merges it, then verifies and accepts on
+# main, so an agent can never accept on main itself.
+#
+# What this policy cannot enforce, and the review step covers instead:
+# - Branch ownership. branch_scope knows only protected and unprotected, so
+#   any agent can write on any unprotected branch, including another agent's.
+#   Every commit records its actor; check them before merging.
+# - Which stored query an agent runs. invoke_query covers the whole catalog,
+#   so an agent can run verify_claim or accept_decision on its own branch.
+#   An agent only creates claims, decisions and action items, so an update
+#   to one of them in an agent's commit is a reason not to merge.
 #
 # act-admin, act-writer and act-reader are the roles every cookbook ships.
 # act-alice, act-notes-bot and act-slack-bot are the cast of the README
@@ -42,7 +52,7 @@ rules:
   - id: agents-open-branches
     allow:
       actors: { group: agents }
-      actions: [branch_create, branch_delete]
+      actions: [branch_create]
       target_branch_scope: unprotected
   - id: change-schema
     allow:

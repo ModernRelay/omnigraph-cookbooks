@@ -1,5 +1,6 @@
 // Hygiene reads. Each returns zero rows on a healthy graph. Run them on an
-// agent's branch before merging it. The schema cannot force an edge to
+// agent's branch before merging it, with `omnigraph query <name> --branch
+// <branch>`; an alias always reads main. The schema cannot force an edge to
 // exist when a node is inserted (@card minimums are checked when an edge is
 // removed), so these reads are how a missing claim, source or owner is
 // caught.

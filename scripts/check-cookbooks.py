@@ -172,7 +172,10 @@ def qualify(name, graph, stored_query, workspace, env):
                 assert drafted["commit"]["graph_commit_id"]
                 refused = run(agent, "branch", "merge", "agent-draft", "--into", "main", *scope, "--json", ok=False)
                 assert "403" in refused.stdout + refused.stderr, (refused.stdout, refused.stderr)
-                run(agent, "branch", "delete", "agent-draft", *scope, "--yes", "--json")
+                # Agents cannot delete a branch, so one cannot discard another's draft.
+                refused = run(agent, "branch", "delete", "agent-draft", *scope, "--yes", "--json", ok=False)
+                assert "403" in refused.stdout + refused.stderr, (refused.stdout, refused.stderr)
+                run(writer, "branch", "delete", "agent-draft", *scope, "--yes", "--json")
                 assert run(env, "query", "cookbook_check", *scope, "--json")["rows"] == [{"total": 0}]
             written = run(writer, "load", *scope, "--data", str(sample), "--mode", "append", "--json")
             verify_receipt(written["commit"])
@@ -182,10 +185,13 @@ def qualify(name, graph, stored_query, workspace, env):
             count()
             if name == "beads":
                 beads_client_journey(url, env)
+            if name == "company-brain":
+                company_brain_journey(url, env)
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
-                  + (", ob client" if name == "beads" else ""), flush=True)
+                  + (", ob client" if name == "beads" else "")
+                  + (", review journey" if name == "company-brain" else ""), flush=True)
         finally:
             process.terminate()
             try:
@@ -221,6 +227,58 @@ def beads_client_journey(url, env):
     events = [(e["actor"], e["type"]) for e in ob("act-reader", "history", blocker)]
     assert events == [("act-admin", "Issue"), ("act-admin", "BlockedBy"), ("act-writer", "Issue"),
                       ("act-writer", "Issue")], events
+
+
+def company_brain_journey(url, env):
+    """An agent records on a branch, a person merges and settles on main.
+    Creates refuse an existing slug, and a rejected successor can be
+    withdrawn so the decision it named can be replaced again."""
+    scope = ("--server", url, "--graph", "knowledge")
+    agent = {**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-agent"]}
+    writer = {**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-writer"]}
+
+    def mutate(who, query, params, *branch, ok=True):
+        return run(who, "mutate", query, *scope, *branch, "--params", json.dumps(params), "--json", ok=ok)
+
+    def rows(query, params=None):
+        return run(env, "query", query, *scope, "--params", json.dumps(params or {}), "--json")["rows"]
+
+    def refused_by_card(result):
+        assert "@card violation" in result.stdout + result.stderr, (result.stdout, result.stderr)
+
+    claim = {"slug": "checker-claim", "kind": "proposal", "statement": "Resume the billing migration.",
+             "quote": "Let's resume billing.", "locator": None, "recorded_at": "2026-10-15T00:00:00.000Z",
+             "source": "doc:billing-plan", "speaker": "dana"}
+    run(agent, "branch", "create", "agent-claims", *scope, "--json")
+    mutate(agent, "record_claim", claim, "--branch", "agent-claims")
+    refused_by_card(mutate(agent, "record_claim", claim, "--branch", "agent-claims", ok=False))
+    refused = mutate(agent, "verify_claim", {"slug": "checker-claim"}, ok=False)
+    assert "403" in refused.stdout + refused.stderr, (refused.stdout, refused.stderr)
+    run(writer, "branch", "merge", "agent-claims", "--into", "main", *scope, "--json")
+    run(writer, "branch", "delete", "agent-claims", *scope, "--yes", "--json")
+    mutate(writer, "verify_claim", {"slug": "checker-claim"})
+
+    # Re-recording a verified seed claim must not reset it to unverified.
+    refused_by_card(mutate(writer, "record_claim", {**claim, "slug": "launch-nov-13"}, ok=False))
+    assert not rows("accepted_on_unverified")
+
+    successor = {"previous": "billing-freeze", "claim": "checker-claim", "reason": "Resume", "slug": "billing-go",
+                 "title": "Resume billing", "statement": "Resume.", "rationale": None, "decided_at": None,
+                 "recorded_at": "2026-10-15T00:00:00.000Z", "project": "billing-migration"}
+    refused_by_card(mutate(writer, "propose_successor", {**successor, "slug": "billing-freeze"}, ok=False))
+    mutate(writer, "propose_successor", successor)
+    mutate(writer, "reject_decision", {"slug": "billing-go"})
+    statuses = {row["decision"]: row["status"] for row in rows("project_decisions", {"project": "billing-migration"})}
+    assert statuses == {"Freeze the billing migration until Q1": "accepted", "Resume billing": "rejected"}, statuses
+    assert not rows("decision_successor", {"decision": "billing-freeze"})
+    refused_by_card(mutate(writer, "propose_successor", {**successor, "slug": "billing-go-2"}, ok=False))
+    mutate(writer, "withdraw_successor", {"previous": "billing-freeze", "successor": "billing-go"})
+    mutate(writer, "propose_successor", {**successor, "slug": "billing-go-2"})
+
+    # A deprecated successor keeps the decision it replaced out of the log.
+    mutate(writer, "deprecate_decision", {"slug": "search-in-house"})
+    current = {row["decision"] for row in rows("current_decisions")}
+    assert "search-vendor-buy" not in current and "search-in-house" not in current, current
 
 
 def main():

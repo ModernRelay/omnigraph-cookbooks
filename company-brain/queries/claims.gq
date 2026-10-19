@@ -29,7 +29,7 @@ query contested_claims() @description("Pairs of claims that contradict each othe
 query decisions_at_risk() @description("Current accepted decisions resting on a claim that an unrejected claim contradicts. Run it on an agent's branch to see what its new claims put in question.") {
     match {
         $d: Decision { status: "accepted" }
-        not { $d supersededBy $n  $n.status = "accepted" }
+        not { $d supersededBy $n  $n.status in ["accepted", "deprecated"] }
         $c: Claim
         $d basedOn $c
         $c.status != "rejected"

@@ -19,7 +19,8 @@ fictional company, "Lanternworks"; all names are made up.
 - `queries/claims.gq`, `queries/decisions.gq`, `queries/people.gq`,
   `queries/actions.gq` — reads.
 - `queries/hygiene.gq` — reads that must return zero rows; run them on a
-  branch before merging it.
+  branch before merging it with `omnigraph query <name> --branch …`. The
+  `lint-*` aliases read main only.
 - `queries/mutations.gq` — stored writes.
 - `seed.jsonl` / `seed.md` — 55 nodes and 113 edges. Keep them in sync;
   `seed.md` lists what each read returns.
@@ -37,18 +38,30 @@ fictional company, "Lanternworks"; all names are made up.
   and the edge to what it rests on in one commit. `@card(1..)` on `BasedOn`
   and `ClaimFrom` does not stop an insert without one; `unsupported_decisions`
   and `claims_without_source` catch it.
+- Creates refuse an existing slug. Inserting a keyed node replaces the whole
+  row, so `ClaimFrom`, `DecisionAbout` and `AssignedTo` are unkeyed and capped
+  at one: `record_claim`, `promote_claim`, `propose_successor` and
+  `add_action_item` on a slug that exists fail with a `@card` violation and
+  write nothing. Keep those three edges unkeyed; pick a new slug on refusal.
 - Never edit a claim's `quote` or `statement`, or a decision's `statement`.
   Reject the claim and record a new one; change a decision with
   `propose_successor`, which needs a claim and a reason. Do not store
   `current`, `superseded` or `contested`; they are derived from
-  `SupersededBy` and `Contradicts`. `omnigraph lint` warns that no update
-  sets `Claim.locator`, `decided_at` or `rationale`; that is intended.
+  `SupersededBy` and `Contradicts`. An accepted or deprecated successor
+  replaces a decision; a rejected one does not, and `withdraw_successor`
+  (after `reject_decision`) frees the original's single `SupersededBy` slot.
+  `omnigraph lint` warns that no update sets `Claim.locator`, `decided_at` or
+  `rationale`; that is intended.
 - Point `Contradicts` from the newer claim to the older one. Leave both until
   a person rejects one.
-- Agents write `status: proposed` on their own branch. Only a person runs
-  `verify_claim`, `reject_claim`, `accept_decision` or `reject_decision` and
-  merges. Accept only decisions whose claims are verified
-  (`accepted_on_unverified` must return zero rows).
+- Agents create on a branch; they cannot write main, merge or delete a
+  branch. A person reviews the branch's commits, merges it, then runs
+  `verify_claim`, `reject_claim`, `accept_decision` or `reject_decision` on
+  main. The policy cannot stop an agent writing on another agent's branch or
+  running those four there (`invoke_query` covers the whole catalog), so
+  before merging, check that no agent commit updated a Claim, Decision or
+  ActionItem (README, "Agents extract, people decide"). Accept only decisions
+  whose claims are verified (`accepted_on_unverified` must return zero rows).
 - A Person is anyone in the real world; an Actor is an OmniGraph actor id that
   reads or writes, linked to its person with `ActsFor`. Resolve every handle
   with `person_by_handle` before creating a person. Handles (`email`,

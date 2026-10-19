@@ -189,9 +189,10 @@ give:
 - After `propose_successor`, `project_decisions {"project":"checkout"}` on
   the branch shows Launch Checkout v2 on Nov 20 (proposed); main still shows
   Nov 13.
-- After `verify_claim`, `reject_claim`, `accept_decision` and the merge
-  (`fast_forward`), `current_decisions` lists `checkout-launch-nov-20`
-  instead of `checkout-launch-nov-13`. `why_superseded
+- The review loop prints nothing and each hygiene read returns zero rows on
+  the branch. After the merge (`fast_forward`) and `verify_claim`,
+  `reject_claim` and `accept_decision` on main, `current_decisions` lists
+  `checkout-launch-nov-20` instead of `checkout-launch-nov-13`. `why_superseded
   {"decision":"checkout-launch-nov-13"}` returns the reason and the two
   contradicting claims, and `decisions_at_risk` is empty again.
 - A second branch that proposed `checkout-launch-nov-27` as another successor

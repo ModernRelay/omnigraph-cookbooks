@@ -64,7 +64,7 @@ Adoption, missing-root recreation and out-of-band schema changes are refused.
 
 All bundles include `act-admin`, `act-writer`, `act-reader` role policies.
 company-brain adds `act-agent` (and named agents), which write only on
-unprotected branches and cannot merge.
+unprotected branches and cannot merge or delete branches.
 Static actor-to-token JSON remains supported. The bearer token selects the
 trusted actor; a query's `$actor` is merely application provenance. `config_manage`
 authorizes live deployment, and schema changes also need graph `schema_apply`.

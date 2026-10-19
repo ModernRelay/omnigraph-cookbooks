@@ -1,23 +1,25 @@
 // Decision reads. Whether a decision is current or superseded is derived
-// from SupersededBy on every read; it is never stored.
+// from SupersededBy on every read; it is never stored. A decision stays
+// replaced once its successor was accepted, even if that successor is later
+// deprecated. A rejected successor replaces nothing.
 
-query current_decisions() @description("Accepted decisions that no accepted decision has replaced, by project. The decision log as it stands.") {
+query current_decisions() @description("Accepted decisions that no accepted or deprecated decision has replaced, by project. The decision log as it stands.") {
     match {
         $d: Decision { status: "accepted" }
         $p: Project
         $d decisionAbout $p
-        not { $d supersededBy $n  $n.status = "accepted" }
+        not { $d supersededBy $n  $n.status in ["accepted", "deprecated"] }
     }
     return { $p.name as project, $d.slug as decision, $d.title as title, $d.decided_at as decided_at }
     order { project asc, decided_at asc }
 }
 
-query project_decisions($project: String) @description("Decisions about one project that nothing has replaced yet, with their status. On an agent's branch this shows its proposal; on main, what was accepted.") {
+query project_decisions($project: String) @description("Decisions about one project that no proposed, accepted or deprecated successor has replaced, with their status, so a proposal shows in place of what it would replace until a person accepts or rejects it.") {
     match {
         $p: Project { slug: $project }
         $d: Decision
         $d decisionAbout $p
-        not { $d supersededBy $_ }
+        not { $d supersededBy $n  $n.status != "rejected" }
     }
     return { $d.title as decision, $d.status as status }
     order { decision asc }
@@ -72,12 +74,13 @@ query why_superseded($decision: String) @description("Why a decision was replace
     order { because asc }
 }
 
-query decision_successor($decision: String) @description("What a decision was replaced by, if anything: the end of its SupersededBy chain.") {
+query decision_successor($decision: String) @description("What a decision was replaced by, if anything: the end of its SupersededBy chain, skipping rejected successors.") {
     match {
         $d: Decision { slug: $decision }
         $new: Decision
         $d supersededBy{1,10} $new
-        not { $new supersededBy $_ }
+        $new.status != "rejected"
+        not { $new supersededBy $m  $m.status != "rejected" }
     }
     return { $new.slug as current, $new.title as title, $new.status as status }
 }
@@ -105,7 +108,7 @@ query proposed_decisions() @description("Decisions waiting for a person to accep
 query unimplemented_decisions() @description("Current accepted decisions that no action item follows from yet.") {
     match {
         $d: Decision { status: "accepted" }
-        not { $d supersededBy $n  $n.status = "accepted" }
+        not { $d supersededBy $n  $n.status in ["accepted", "deprecated"] }
         not { $a followsFrom $d }
     }
     return { $d.slug as decision, $d.title as title, $d.decided_at as decided_at }
