@@ -71,7 +71,8 @@ authorizes live deployment, and schema changes also need graph `schema_apply`.
 Do not expand roles or change a running cluster without task authorization.
 
 Query the live graph to answer questions; seed files are load inputs. Discover
-stored names and parameters with `omnigraph queries list --server URL --graph ID`.
+stored names and parameters with `omnigraph queries list --cluster DIR --graph ID`
+(a cluster command: `--server` is rejected).
 Aliases bind arguments by parameter name and are read-only. Mutations use
 `omnigraph mutate`; ad-hoc source uses `-e` or `--query`, never the name slot.
 Parameterize values and supply every required field.

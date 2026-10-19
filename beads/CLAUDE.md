@@ -26,7 +26,7 @@ that concurrent agents need. The seed is a fictional note-taking app,
 ## Rules
 
 - Graph id `beads`. Stored queries and parameters:
-  `omnigraph queries list --server URL --graph beads`.
+  `omnigraph queries list --cluster . --graph beads`.
 - Readiness lives only in the queries. Do not add a stored `blocked` status or
   flag. If you change the `ready` rule, change `ready`, `ready_labeled`,
   `ready_filtered`, `ready_count` and `unblocked_open_count` together, and the
