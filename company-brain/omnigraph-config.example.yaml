@@ -1,0 +1,82 @@
+# Operator-config example for the company-brain cookbook.
+# Your operator config lives at ~/.omnigraph/config.yaml (per-user, NOT committed).
+# Merge the `aliases:` below into it for short names over this graph's stored
+# queries. Point `local` at your running cluster server (`omnigraph-server
+# --cluster .`); alias invocation needs the server up.
+#
+# Read aliases bind to served stored queries by name; run with
+# `omnigraph alias <name> [args]` — args bind by NAME to the query's $params
+# (`args: [project]` fills `$project`). Operator aliases are READ-ONLY — run
+# stored *mutations* with `omnigraph mutate <name> --params '{…}'` (see the bottom).
+# An alias always reads main: it cannot choose a branch. To read an agent's
+# branch, run the stored query by name instead:
+#   omnigraph query decisions_at_risk --graph knowledge --branch agent/notes-oct-14
+servers:
+  local:
+    url: http://127.0.0.1:8080
+defaults:
+  server: local
+  default_graph: knowledge
+  output: table
+
+aliases:
+  # ── Decisions ────────────────────────────────────────────────
+  decisions:        { server: local, graph: knowledge, query: current_decisions }
+  project:          { server: local, graph: knowledge, query: project_decisions,       args: [project] }
+  why:              { server: local, graph: knowledge, query: decision_evidence,       args: [decision] }
+  why-replaced:     { server: local, graph: knowledge, query: why_superseded,          args: [decision] }
+  why-contradicted: { server: local, graph: knowledge, query: superseding_contradictions, args: [decision] }
+  who-decided:      { server: local, graph: knowledge, query: decision_deciders,       args: [decision] }
+  lineage:          { server: local, graph: knowledge, query: decision_lineage,        args: [decision] }
+  replaced-by:      { server: local, graph: knowledge, query: decision_successor,      args: [decision] }
+  from-source:      { server: local, graph: knowledge, query: decisions_from_source,   args: [source] }
+  to-review:        { server: local, graph: knowledge, query: proposed_decisions }
+  not-started:      { server: local, graph: knowledge, query: unimplemented_decisions }
+
+  # ── Claims ───────────────────────────────────────────────────
+  claims:           { server: local, graph: knowledge, query: claims_from_source,      args: [source] }
+  contested:        { server: local, graph: knowledge, query: contested_claims }
+  at-risk:          { server: local, graph: knowledge, query: decisions_at_risk }
+  to-verify:        { server: local, graph: knowledge, query: unverified_claims }
+  who-said:         { server: local, graph: knowledge, query: search_quotes,           args: [q] }
+
+  # ── Commitments ──────────────────────────────────────────────
+  open:             { server: local, graph: knowledge, query: open_actions }
+  overdue:          { server: local, graph: knowledge, query: overdue_actions,         args: [as_of] }
+  owes:             { server: local, graph: knowledge, query: person_actions,          args: [person] }
+
+  # ── People, projects, evidence ───────────────────────────────
+  team:             { server: local, graph: knowledge, query: team_members,            args: [team] }
+  whois:            { server: local, graph: knowledge, query: person_by_handle,        args: [handle] }
+  actors:           { server: local, graph: knowledge, query: actors }
+  projects:         { server: local, graph: knowledge, query: active_projects }
+  quiet:            { server: local, graph: knowledge, query: quiet_projects,          args: [since] }
+  sources:          { server: local, graph: knowledge, query: project_sources,         args: [project] }
+
+  # ── Hygiene on main (zero rows on a healthy graph) ───────────
+  # Check a branch before merging it with `omnigraph query <name> --branch …`.
+  lint-unsupported: { server: local, graph: knowledge, query: unsupported_decisions }
+  lint-unverified:  { server: local, graph: knowledge, query: accepted_on_unverified }
+  lint-on-rejected: { server: local, graph: knowledge, query: current_on_rejected }
+  lint-no-project:  { server: local, graph: knowledge, query: decisions_without_project }
+  lint-no-source:   { server: local, graph: knowledge, query: claims_without_source }
+  lint-no-speaker:  { server: local, graph: knowledge, query: claims_without_speaker }
+  lint-unowned:     { server: local, graph: knowledge, query: unowned_actions }
+  lint-no-claim:    { server: local, graph: knowledge, query: unsupported_actions }
+  lint-agent-owner: { server: local, graph: knowledge, query: agents_without_owner }
+
+# ── Mutations (served stored mutations; NOT aliasable) ───────────────────────
+# The bearer identity determines authorization and commit attribution. Agents
+# record claims and propose on a branch; a person reviews and merges it, then
+# verifies and accepts on main. Examples:
+#   omnigraph mutate record_claim --graph knowledge --branch agent/notes-oct-14 --params \
+#     '{"slug":"chen-books-recert","kind":"commitment","statement":"Chen books the provider recertification by Oct 21.","quote":"Chen, can you book the recert slot by next Wednesday?","locator":"00:11:20","recorded_at":"2026-10-14T16:00:00.000Z","source":"meet:checkout-sync-2026-10-14","speaker":"alice"}'
+#   omnigraph mutate add_action_item --graph knowledge --branch agent/notes-oct-14 --params \
+#     '{"slug":"provider-recert","title":"Book the provider recertification","due":"2026-10-21","recorded_at":"2026-10-14T16:00:00.000Z","owner":"chen","claim":"chen-books-recert","project":"checkout"}'
+#   omnigraph mutate accept_decision --graph knowledge \
+#     --params '{"slug":"checkout-launch-nov-20"}'
+#   omnigraph mutate add_person --graph knowledge --params \
+#     '{"slug":"gus","name":"Gus Lee","title":"Support agent","email":"gus@lanternworks.example","slack":"u09guest","github":null}'
+#   omnigraph mutate end_membership --graph knowledge --params \
+#     '{"person":"chen","team":"payments","since":"2026-07-01","until":"2026-12-31"}'
+# (with defaults.server/default_graph set, --server/--graph can be omitted.)

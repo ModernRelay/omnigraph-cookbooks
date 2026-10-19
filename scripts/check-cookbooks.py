@@ -23,8 +23,12 @@ COOKBOOKS = {
     "vc-os": ("vcos", "deals_open"),
     "dev-graph": ("dev", "open_epics"),
     "beads": ("beads", "ready"),
+    "company-brain": ("knowledge", "current_decisions"),
 }
-TOKENS = {actor: f"cookbook-test-{actor}" for actor in ("act-admin", "act-writer", "act-reader")}
+# Cookbooks whose policy lets act-agent write only on unprotected branches.
+BRANCH_ONLY_AGENTS = {"company-brain"}
+TOKENS = {actor: f"cookbook-test-{actor}"
+          for actor in ("act-admin", "act-writer", "act-reader", "act-agent")}
 HTTP = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 
@@ -157,6 +161,22 @@ def qualify(name, graph, stored_query, workspace, env):
                           "--data", str(sample), "--mode", "append", "--json", ok=False)
             assert "403" in refused.stdout + refused.stderr or "denied" in (refused.stdout + refused.stderr).lower(), (refused.stdout, refused.stderr)
             assert run(env, "query", "cookbook_check", *scope, "--json")["rows"] == [{"total": 0}]
+            if name in BRANCH_ONLY_AGENTS:
+                # An agent drafts on its own branch; only a person merges into main.
+                agent = {**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-agent"]}
+                refused = run(agent, "load", *scope, "--data", str(sample), "--mode", "append", "--json", ok=False)
+                assert "403" in refused.stdout + refused.stderr, (refused.stdout, refused.stderr)
+                run(agent, "branch", "create", "agent-draft", *scope, "--json")
+                drafted = run(agent, "load", *scope, "--branch", "agent-draft", "--data", str(sample),
+                              "--mode", "append", "--json")
+                assert drafted["commit"]["graph_commit_id"]
+                refused = run(agent, "branch", "merge", "agent-draft", "--into", "main", *scope, "--json", ok=False)
+                assert "403" in refused.stdout + refused.stderr, (refused.stdout, refused.stderr)
+                # Agents cannot delete a branch, so one cannot discard another's draft.
+                refused = run(agent, "branch", "delete", "agent-draft", *scope, "--yes", "--json", ok=False)
+                assert "403" in refused.stdout + refused.stderr, (refused.stdout, refused.stderr)
+                run(writer, "branch", "delete", "agent-draft", *scope, "--yes", "--json")
+                assert run(env, "query", "cookbook_check", *scope, "--json")["rows"] == [{"total": 0}]
             written = run(writer, "load", *scope, "--data", str(sample), "--mode", "append", "--json")
             verify_receipt(written["commit"])
             expected_counts[("node", "CookbookCheck")] = 1
@@ -165,10 +185,13 @@ def qualify(name, graph, stored_query, workspace, env):
             count()
             if name == "beads":
                 beads_client_journey(url, env)
+            if name == "company-brain":
+                company_brain_journey(url, env)
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
-                  + (", ob client" if name == "beads" else ""), flush=True)
+                  + (", ob client" if name == "beads" else "")
+                  + (", review journey" if name == "company-brain" else ""), flush=True)
         finally:
             process.terminate()
             try:
@@ -204,6 +227,82 @@ def beads_client_journey(url, env):
     events = [(e["actor"], e["type"]) for e in ob("act-reader", "history", blocker)]
     assert events == [("act-admin", "Issue"), ("act-admin", "BlockedBy"), ("act-writer", "Issue"),
                       ("act-writer", "Issue")], events
+
+
+def company_brain_journey(url, env):
+    """An agent records on a branch, a person merges and settles on main.
+    Creates refuse an existing slug, and a rejected successor can be
+    withdrawn so the decision it named can be replaced again."""
+    scope = ("--server", url, "--graph", "knowledge")
+    agent = {**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-agent"]}
+    writer = {**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-writer"]}
+
+    def mutate(who, query, params, *branch, ok=True):
+        return run(who, "mutate", query, *scope, *branch, "--params", json.dumps(params), "--json", ok=ok)
+
+    def rows(query, params=None):
+        return run(env, "query", query, *scope, "--params", json.dumps(params or {}), "--json")["rows"]
+
+    def refused_by_card(result):
+        assert "@card violation" in result.stdout + result.stderr, (result.stdout, result.stderr)
+
+    claim = {"slug": "checker-claim", "kind": "proposal", "statement": "Resume the billing migration.",
+             "quote": "Let's resume billing.", "locator": None, "recorded_at": "2026-10-15T00:00:00.000Z",
+             "source": "doc:billing-plan", "speaker": "dana"}
+    run(agent, "branch", "create", "agent-claims", *scope, "--json")
+    mutate(agent, "record_claim", claim, "--branch", "agent-claims")
+    refused_by_card(mutate(agent, "record_claim", claim, "--branch", "agent-claims", ok=False))
+    refused = mutate(agent, "verify_claim", {"slug": "checker-claim"}, ok=False)
+    assert "403" in refused.stdout + refused.stderr, (refused.stdout, refused.stderr)
+    run(writer, "branch", "merge", "agent-claims", "--into", "main", *scope, "--json")
+    run(writer, "branch", "delete", "agent-claims", *scope, "--yes", "--json")
+    mutate(writer, "verify_claim", {"slug": "checker-claim"})
+
+    # Re-recording a verified seed claim must not reset it to unverified.
+    refused_by_card(mutate(writer, "record_claim", {**claim, "slug": "launch-nov-13"}, ok=False))
+    assert not rows("accepted_on_unverified")
+
+    successor = {"previous": "billing-freeze", "claim": "checker-claim", "reason": "Resume", "slug": "billing-go",
+                 "title": "Resume billing", "statement": "Resume.", "rationale": None, "decided_at": None,
+                 "recorded_at": "2026-10-15T00:00:00.000Z", "project": "billing-migration"}
+    refused_by_card(mutate(writer, "propose_successor", {**successor, "slug": "billing-freeze"}, ok=False))
+    mutate(writer, "propose_successor", successor)
+    mutate(writer, "reject_decision", {"slug": "billing-go"})
+    statuses = {row["decision"]: row["status"] for row in rows("project_decisions", {"project": "billing-migration"})}
+    assert statuses == {"Freeze the billing migration until Q1": "accepted", "Resume billing": "rejected"}, statuses
+    assert not rows("decision_successor", {"decision": "billing-freeze"})
+    refused_by_card(mutate(writer, "propose_successor", {**successor, "slug": "billing-go-2"}, ok=False))
+    mutate(writer, "withdraw_successor", {"previous": "billing-freeze", "successor": "billing-go"})
+    mutate(writer, "propose_successor", {**successor, "slug": "billing-go-2"})
+
+    # The reason survives a successor whose claim contradicts nothing.
+    assert rows("why_superseded", {"decision": "billing-freeze"}) == [
+        {"replaced_by": "billing-go-2", "status": "proposed", "reason": "Resume"}]
+    assert not rows("superseding_contradictions", {"decision": "billing-freeze"})
+
+    # A deprecated successor keeps the decision it replaced out of the log.
+    mutate(writer, "deprecate_decision", {"slug": "search-in-house"})
+    current = {row["decision"] for row in rows("current_decisions")}
+    assert "search-vendor-buy" not in current and "search-in-house" not in current, current
+
+    # A current decision on a rejected claim is flagged; a cancelled item
+    # does not count as implementing its decision.
+    mutate(writer, "reject_claim", {"slug": "provider-certifies-nov-6"})
+    assert rows("current_on_rejected") == [{"decision": "checkout-launch-nov-13", "claim": "provider-certifies-nov-6"}]
+    mutate(writer, "cancel_action", {"slug": "launch-checklist"})
+    assert "checkout-launch-nov-13" in {row["decision"] for row in rows("unimplemented_decisions")}
+
+    # Departures stay departed: an ended stint recorded again stays closed,
+    # a profile update keeps active, and a retired actor cannot be re-added.
+    mutate(writer, "add_member", {"person": "chen", "team": "discovery", "role": "engineer", "since": "2025-05-12"})
+    assert "Chen Wei" not in {row["person"] for row in rows("team_members", {"team": "discovery"})}
+    mutate(writer, "deactivate_person", {"slug": "chen"})
+    mutate(writer, "update_person", {"slug": "chen", "name": "Chen Wei", "title": "Senior engineer",
+                                     "email": "chen@lanternworks.example", "slack": "u07chen", "github": "chenwei"})
+    assert rows("person_handles", {"person": "chen"})[0]["active"] is False
+    mutate(writer, "deactivate_actor", {"slug": "act-slack-bot"})
+    refused_by_card(mutate(writer, "add_actor", {"slug": "act-slack-bot", "kind": "agent", "name": "Slack agent",
+                                                 "purpose": None, "person": "eli"}, ok=False))
 
 
 def main():

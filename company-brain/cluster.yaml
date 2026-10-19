@@ -1,0 +1,26 @@
+# company-brain deployment, declared as code (omnigraph cluster model).
+#
+# Filesystem-backed cluster; storage defaults to this directory.
+# Follow ../README.md#local-setup for bootstrap and writer-lock handoff.
+# Later configuration updates go through cluster plan/apply --server.
+version: 1
+
+metadata:
+  name: company-brain
+
+state:
+  backend: cluster
+  lock: true
+
+graphs:
+  knowledge:
+    schema: schema.pg
+    queries: queries/        # registers every `query <name>` in queries/*.gq as a stored query
+
+policies:
+  graph-access:
+    file: policies/graph.policy.yaml
+    applies_to: [knowledge]
+  cluster-access:
+    file: policies/server.policy.yaml
+    applies_to: [cluster]

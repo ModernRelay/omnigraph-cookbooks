@@ -1,0 +1,91 @@
+// Hygiene reads. Each returns zero rows on a healthy graph. Run them on an
+// agent's branch before merging it, with `omnigraph query <name> --branch
+// <branch>`; an alias always reads main. The schema cannot force an edge to
+// exist when a node is inserted (@card minimums are checked when an edge is
+// removed), so these reads are how a missing claim, source or owner is
+// caught.
+
+query unsupported_decisions() @description("Decisions that rest on no claim. Zero rows on a healthy graph.") {
+    match {
+        $d: Decision
+        not { $d basedOn $_ }
+    }
+    return { $d.slug as decision, $d.status as status }
+    order { decision asc }
+}
+
+query accepted_on_unverified() @description("Accepted decisions resting on a claim nobody verified. Verify the claims before accepting. Zero rows on a healthy graph.") {
+    match {
+        $d: Decision { status: "accepted" }
+        $c: Claim { status: "unverified" }
+        $d basedOn $c
+    }
+    return { $d.slug as decision, $c.slug as claim }
+    order { decision asc }
+}
+
+query current_on_rejected() @description("Current accepted decisions resting on a claim a person rejected: replace them with propose_successor or retire them with deprecate_decision. Zero rows on a healthy graph.") {
+    match {
+        $d: Decision { status: "accepted" }
+        not { $d supersededBy $n  $n.status in ["accepted", "deprecated"] }
+        $c: Claim { status: "rejected" }
+        $d basedOn $c
+    }
+    return { $d.slug as decision, $c.slug as claim }
+    order { decision asc }
+}
+
+query decisions_without_project() @description("Decisions about no project. Zero rows on a healthy graph.") {
+    match {
+        $d: Decision
+        not { $d decisionAbout $_ }
+    }
+    return { $d.slug as decision, $d.status as status }
+    order { decision asc }
+}
+
+query claims_without_source() @description("Claims that cite no source. Zero rows on a healthy graph.") {
+    match {
+        $c: Claim
+        not { $c claimFrom $_ }
+    }
+    return { $c.slug as claim, $c.statement as statement }
+    order { claim asc }
+}
+
+query claims_without_speaker() @description("Claims with no ClaimedBy. Every claim has a speaker; record_claim requires one. Zero rows on a healthy graph.") {
+    match {
+        $c: Claim
+        not { $c claimedBy $_ }
+    }
+    return { $c.slug as claim, $c.statement as statement }
+    order { claim asc }
+}
+
+query unowned_actions() @description("Open or in-progress action items with no owner. Zero rows on a healthy graph.") {
+    match {
+        $a: ActionItem
+        $a.status = "open" or $a.status = "in_progress"
+        not { $a assignedTo $_ }
+    }
+    return { $a.slug as action, $a.title as title }
+    order { action asc }
+}
+
+query unsupported_actions() @description("Action items that rest on no claim. Zero rows on a healthy graph.") {
+    match {
+        $a: ActionItem
+        not { $a actionFrom $_ }
+    }
+    return { $a.slug as action, $a.title as title }
+    order { action asc }
+}
+
+query agents_without_owner() @description("Agents with no accountable person. Zero rows on a healthy graph.") {
+    match {
+        $a: Actor { kind: "agent" }
+        not { $a actsFor $_ }
+    }
+    return { $a.slug as agent }
+    order { agent asc }
+}

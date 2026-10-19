@@ -1,0 +1,174 @@
+// Writes. Each query is one graph commit. The ones that create a claim, a
+// decision or an action item also write what it rests on in the same
+// commit, so nothing lands without its evidence. Agents run the creates on
+// a branch; a person reviews the branch's commits, merges it, then
+// verifies, accepts and rejects on main, where agents cannot write.
+//
+// Two steps, never one: an agent records what was said (record_claim), and
+// a separate step checks the claims against what main already holds and
+// promotes them (promote_claim, propose_successor, add_action_item).
+//
+// Creates refuse a slug that already exists: each writes one unkeyed edge
+// capped at one (ClaimFrom, DecisionAbout, AssignedTo, ActsFor), so a second
+// create fails with a @card violation and changes nothing. add_person is the
+// exception: a new person has no edge to guard with, so resolve handles
+// first. Other edges are keyed by their endpoints (MemberOf and LeftTeam
+// also by since), so re-running a link is a no-op. A write refused with
+// read_set_conflict had no effect and can be rerun; a write whose response
+// was lost may have landed, so read before rerunning.
+
+// ── Evidence and claims ───────────────────────────────────────────────────
+
+query record_source($slug: String, $kind: String, $title: String, $occurred_at: DateTime, $url: String?, $summary: String?)
+    @description("Record a meeting, thread, document, email or ticket. The slug is <system>:<native id>, so recording it again upserts.") {
+    insert Source { slug: $slug, kind: $kind, title: $title, occurred_at: $occurred_at, url: $url, summary: $summary }
+}
+
+query link_source_project($source: String, $project: String) @description("Say a source is about a project.") {
+    insert SourceAbout { from: $source, to: $project }
+}
+
+query record_claim($slug: String, $kind: String, $statement: String, $quote: String, $locator: String?, $recorded_at: DateTime, $source: String, $speaker: String)
+    @description("Record one claim made in a source: the exact quote, where it is, and who said it, in one commit. The claim starts unverified. Refused if the slug already exists.")
+    @instruction("quote is copied from the source, never paraphrased. Resolve the speaker with person_by_handle first. Recording a claim decides nothing; promote it in a separate step.") {
+    insert Claim { slug: $slug, kind: $kind, statement: $statement, quote: $quote, locator: $locator,
+                   status: "unverified", recorded_at: $recorded_at }
+    insert ClaimFrom { from: $slug, to: $source }
+    insert ClaimedBy { from: $slug, to: $speaker }
+}
+
+query mark_contradiction($claim: String, $contradicts: String) @description("Record that a claim says the opposite of an earlier one. Both stay; the pair is contested until one is rejected.")
+    @instruction("Point the newer claim at the older one. Check decisions_at_risk afterwards.") {
+    insert Contradicts { from: $claim, to: $contradicts }
+}
+
+query verify_claim($slug: String) @description("Mark an unverified claim verified: checked against the source and against what the graph already holds. Affects 0 nodes unless it is unverified.")
+    @instruction("For people, on main after merging the branch that recorded the claim.") {
+    update Claim set { status: "verified" } where slug = $slug and status = "unverified"
+}
+
+query reject_claim($slug: String) @description("Reject a claim that turned out wrong or was superseded by a contradicting one. Affects 0 nodes if it is already rejected.")
+    @instruction("For people, on main after merging the branch that recorded the claim.") {
+    update Claim set { status: "rejected" } where slug = $slug and status != "rejected"
+}
+
+// ── Decisions ─────────────────────────────────────────────────────────────
+
+query promote_claim($claim: String, $slug: String, $title: String, $statement: String, $rationale: String?, $decided_at: DateTime?, $recorded_at: DateTime, $project: String)
+    @description("Propose a decision that rests on a claim, about a project, in one commit. Refused if the slug already exists.")
+    @instruction("Run on your branch, after checking the claim against main. Pick a new slug; an existing one is refused. Fill rationale only from what the claims say. Rest the decision on more claims with add_basis. A person merges the branch, verifies the claims and accepts it on main.") {
+    insert Decision { slug: $slug, title: $title, statement: $statement, rationale: $rationale,
+                      status: "proposed", decided_at: $decided_at, recorded_at: $recorded_at }
+    insert BasedOn { from: $slug, to: $claim }
+    insert DecisionAbout { from: $slug, to: $project }
+}
+
+query propose_successor($previous: String, $claim: String, $reason: String, $slug: String, $title: String, $statement: String, $rationale: String?, $decided_at: DateTime?, $recorded_at: DateTime, $project: String)
+    @description("Propose a decision that replaces an earlier one: the new decision, the claim it rests on, and SupersededBy with a one-line reason, in one commit. Refused if the slug already exists.")
+    @instruction("Use this instead of editing a decision. Rest it on the claim that contradicts the original's. A decision is superseded at most once, so if another branch already replaced it, the merge refuses yours. A rejected successor keeps the slot until withdraw_successor removes it.") {
+    insert Decision { slug: $slug, title: $title, statement: $statement, rationale: $rationale,
+                      status: "proposed", decided_at: $decided_at, recorded_at: $recorded_at }
+    insert BasedOn { from: $slug, to: $claim }
+    insert DecisionAbout { from: $slug, to: $project }
+    insert SupersededBy { from: $previous, to: $slug, reason: $reason }
+}
+
+query add_basis($decision: String, $claim: String) @description("Rest a decision on another claim.") {
+    insert BasedOn { from: $decision, to: $claim }
+}
+
+query add_decider($decision: String, $person: String) @description("Record a person who made a decision.") {
+    insert DecidedBy { from: $decision, to: $person }
+}
+
+query accept_decision($slug: String) @description("Accept a proposed decision. Affects 0 nodes unless it is proposed.")
+    @instruction("For people, on main after merging the branch that proposed it. Verify the claims it rests on first; accepted_on_unverified catches a miss.") {
+    update Decision set { status: "accepted" } where slug = $slug and status = "proposed"
+}
+
+query reject_decision($slug: String) @description("Reject a proposed decision. Affects 0 nodes unless it is proposed.")
+    @instruction("For people, on main. If it was proposed as a successor, run withdraw_successor next so the earlier decision can be replaced again.") {
+    update Decision set { status: "rejected" } where slug = $slug and status = "proposed"
+}
+
+query deprecate_decision($slug: String) @description("Retire an accepted decision that nothing replaced. To change a decision, propose a successor instead.") {
+    update Decision set { status: "deprecated" } where slug = $slug and status = "accepted"
+}
+
+query withdraw_successor($previous: String, $successor: String)
+    @description("Remove the SupersededBy link from a decision to a successor that was rejected, so the decision can be replaced again. A separate commit from reject_decision: one write cannot both update and delete.")
+    @instruction("Only after reject_decision on the successor. Withdrawing an accepted successor would make the decision it replaced current again.") {
+    delete SupersededBy where @src = $previous and @dst = $successor
+}
+
+// ── Commitments ───────────────────────────────────────────────────────────
+
+query add_action_item($slug: String, $title: String, $due: Date?, $recorded_at: DateTime, $owner: String, $claim: String, $project: String)
+    @description("Promote a commitment claim to an action item with its owner and project, in one commit. Refused if the slug already exists.") {
+    insert ActionItem { slug: $slug, title: $title, status: "open", due: $due, recorded_at: $recorded_at }
+    insert AssignedTo { from: $slug, to: $owner }
+    insert ActionFrom { from: $slug, to: $claim }
+    insert ActionAbout { from: $slug, to: $project }
+}
+
+query follows_decision($action: String, $decision: String) @description("Say an action item follows from a decision.") {
+    insert FollowsFrom { from: $action, to: $decision }
+}
+
+query reschedule_action($slug: String, $due: Date?) @description("Change the due date of an open or in-progress action item.") {
+    update ActionItem set { due: $due } where slug = $slug and status != "done" and status != "cancelled"
+}
+
+query start_action($slug: String) @description("Mark an open action item in progress.") {
+    update ActionItem set { status: "in_progress" } where slug = $slug and status = "open"
+}
+
+query complete_action($slug: String, $completed_at: DateTime) @description("Mark an action item done. Affects 0 nodes if it is already done or cancelled.")
+    @instruction("Only the owner closes an action item.") {
+    update ActionItem set { status: "done", completed_at: $completed_at }
+    where slug = $slug and status != "done" and status != "cancelled"
+}
+
+query cancel_action($slug: String) @description("Cancel an action item that will not be done.") {
+    update ActionItem set { status: "cancelled" } where slug = $slug and status != "done"
+}
+
+// ── People and org ────────────────────────────────────────────────────────
+
+query add_person($slug: String, $name: String, $title: String?, $email: String?, $slack: String?, $github: String?) @description("Add a new person with whatever handles are known, lowercased. On an existing slug it replaces the whole row, including active.")
+    @instruction("Resolve every handle with person_by_handle first; create a person only when none resolves. Never run it for someone who exists: change a name, title or handle with update_person, and mark someone who left with deactivate_person.") {
+    insert Person { slug: $slug, name: $name, title: $title, active: true, email: $email, slack: $slack, github: $github }
+}
+
+query update_person($slug: String, $name: String, $title: String?, $email: String?, $slack: String?, $github: String?) @description("Set a person's name, title, email, Slack member ID and GitHub login, handles lowercased. Leaves active alone; a null clears that field.")
+    @instruction("Read person_handles first and pass every value you want to keep.") {
+    update Person set { name: $name, title: $title, email: $email, slack: $slack, github: $github } where slug = $slug
+}
+
+query deactivate_person($slug: String) @description("Mark someone who left. They keep their claims, decisions and history. Close their team stints with end_membership.") {
+    update Person set { active: false } where slug = $slug
+}
+
+query add_member($person: String, $team: String, $role: String?, $since: Date) @description("Open a stint on a team, with an optional role, from the date it started. Recording the same stint again cannot reopen one that LeftTeam closed; rejoining later is a new stint with its own since.") {
+    insert MemberOf { from: $person, to: $team, role: $role, since: $since }
+}
+
+query end_membership($person: String, $team: String, $since: Date, $until: Date) @description("Close the stint on a team that started on since, as of until.")
+    @instruction("Read since from team_members. A move is end_membership on the old team and add_member on the new one.") {
+    insert LeftTeam { from: $person, to: $team, since: $since, until: $until }
+}
+
+query add_actor($slug: String, $kind: String, $name: String, $purpose: String?, $person: String) @description("Register an actor under its OmniGraph actor id: a person's own login, or an agent with the person accountable for it. Refused if the slug already exists.") {
+    insert Actor { slug: $slug, kind: $kind, name: $name, purpose: $purpose, active: true }
+    insert ActsFor { from: $slug, to: $person }
+}
+
+query deactivate_actor($slug: String) @description("Retire an actor: a person who left, or an agent no longer in use. Revoke its token too; this records the fact, the token grants the access.") {
+    update Actor set { active: false } where slug = $slug
+}
+
+query add_project($slug: String, $name: String, $status: String, $target_date: Date?, $owner: String, $team: String) @description("Add a project with its owner and team.") {
+    insert Project { slug: $slug, name: $name, status: $status, target_date: $target_date }
+    insert OwnedBy { from: $slug, to: $owner }
+    insert RunBy { from: $slug, to: $team }
+}
