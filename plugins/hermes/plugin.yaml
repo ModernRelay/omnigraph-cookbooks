@@ -1,0 +1,16 @@
+name: omnigraph
+version: 0.2.0
+description: >-
+  Lightweight Omnigraph awareness for Hermes. Discovers your omnigraph.yaml + graphs,
+  reminds the model to consult the graph (and, optionally, to save durable info to it),
+  and installs the omnigraph-best-practices skill via a GitHub tap. No tools, no guard —
+  all operations are the `omnigraph` CLI, run by the model via the terminal.
+author: ModernRelay
+
+provides_hooks:
+  - on_session_start
+  - pre_llm_call
+
+# No tools, no manifest requires_env: the plugin only reads config + injects reminders.
+# Behaviour knobs live under plugins.entries.omnigraph (config_path, autocapture,
+# default_target, remind_every_turn) — see README.
