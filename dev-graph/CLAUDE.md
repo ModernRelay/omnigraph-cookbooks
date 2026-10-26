@@ -27,29 +27,29 @@ All names are fabricated; the seed exists to shape the demo queries.
 - `queries/issues-dashboard.gq` — per-issue / per-epic triage reads.
 - `cluster.yaml` — deployment (graph `dev`, schema, stored queries). Filesystem-backed.
 - `omnigraph-config.example.yaml` — example operator aliases; merge into
-  `~/.omnigraph/config.yaml` (per-user, never committed).
+  `$OMNIGRAPH_HOME/config.yaml` (per-user, never committed).
 
 ## Setup
 
-Use the shared [0.13 local setup](../README.md#local-setup) with cookbook
+Use the shared [local setup](../README.md#local-setup) with cookbook
 `dev-graph` and graph `dev`. It owns authentication, the bootstrap writer-lock
 handoff, readiness, and served seed loading. Apply later configuration edits with
 the [live update workflow](../README.md#live-updates).
 
-Graph id `dev`. Stored queries and their parameters: `omnigraph queries list --cluster . --graph dev`.
-Alias args bind by name to `$params`: `omnigraph alias issue iss-rate-limit` is `omnigraph query issue_lookup --graph dev --params '{"slug":"iss-rate-limit"}'`.
+Graph id `dev`. Stored queries and their parameters: `omnigraph queries list --target local --graph dev`.
+Alias parameters bind by name to `$params`: `omnigraph alias issue --params '{"slug":"iss-rate-limit"}'` is `omnigraph query issue_lookup --target local-reader --graph dev --params '{"slug":"iss-rate-limit"}'`.
 
 ## Writing
 
-Aliases are read-only; mutations run as `omnigraph mutate <name> --params '<json>'` with every
+Aliases are read-only; mutations run as `omnigraph mutate <name> --target local-writer --graph dev --params '<json>'` with every
 non-optional property supplied. Signatures live at the bottom of `queries/queries.gq`. Working example:
 
 ```bash
-omnigraph mutate create_issue --graph dev --params '{"slug":"iss-flaky-presence-test","title":"Presence integration test is flaky","status":"todo","issueType":"bug","actor":"act-admin","at":"2026-09-14"}'
-omnigraph mutate add_issue_to_epic --graph dev --params '{"issue":"iss-flaky-presence-test","epic":"epc-observability"}'
+omnigraph mutate create_issue --target local-writer --graph dev --params '{"slug":"iss-flaky-presence-test","title":"Presence integration test is flaky","status":"todo","issueType":"bug","actor":"act-admin","at":"2026-09-14"}'
+omnigraph mutate add_issue_to_epic --target local-writer --graph dev --params '{"issue":"iss-flaky-presence-test","epic":"epc-observability"}'
 ```
 
-With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
+The shared operator config sets no `default_graph`, so every command passes `--graph dev`.
 
 ## The mutability model (do not bend it)
 

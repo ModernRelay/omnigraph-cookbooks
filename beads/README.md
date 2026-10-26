@@ -18,20 +18,23 @@ incidents) see [dev-graph](../dev-graph/); this cookbook is the minimal queue.
 
 Use the shared [local setup](../README.md#local-setup) with folder `beads` and
 graph `beads`, then load `seed.jsonl` (a fictional project, described in
-[seed.md](seed.md)). With the server up:
+[seed.md](seed.md)). With the server and the HTTPS gateway up, in the terminal
+where you configured the CLI:
 
 ```bash
-omnigraph query ready --server http://127.0.0.1:8080 --graph beads
-omnigraph query blocked --server http://127.0.0.1:8080 --graph beads
-omnigraph mutate claim --server http://127.0.0.1:8080 --graph beads \
+omnigraph query ready --target local-reader --graph beads
+omnigraph query blocked --target local-reader --graph beads
+omnigraph mutate claim --target local-writer --graph beads \
   --params '{"id":"lk-acl","who":"act-writer","lease":null}'
 ```
 
-Or with the client, as an agent would:
+Or with the client, as an agent would. `OB_TARGET` names a server target from
+that operator configuration and `OB_GRAPH` the graph (default `beads`); the
+target supplies the endpoint and the token, so `ob` never handles one:
 
 ```bash
 export PATH=$PWD/client:$PATH
-export OB_SERVER=http://127.0.0.1:8080 OB_GRAPH=beads OB_TOKEN=local-writer-token OB_ACTOR=act-writer
+export OB_TARGET=local-writer OB_GRAPH=beads OB_ACTOR=act-writer
 ob ready
 ob claim lk-acl --lease 2h     # or: ob ready --claim, which takes the top issue
 ob show lk-acl
@@ -42,7 +45,7 @@ ob ready                       # the sharing tasks are ready now
 ## Your own project
 
 `ob` also runs without a server on a local graph of its own. Start from a
-shell without the Quick Start's `OB_*` variables: `OB_SERVER` sends every
+shell without the Quick Start's `OB_*` variables: `OB_TARGET` sends every
 command to the server.
 
 ```bash
@@ -57,7 +60,9 @@ ob onboard >> AGENTS.md        # tell agents how to use it
 
 Add `--json` to any `ob` command, before or after the subcommand, for
 machine-readable output. `ob` needs only Python 3.10+ and the `omnigraph` CLI
-on `PATH` (or `OB_OMNIGRAPH`).
+on `PATH` (or `OB_OMNIGRAPH`). In served mode the CLI finds its operator
+configuration as usual (`OMNIGRAPH_HOME`, else `~/.omnigraph`);
+`OB_OPERATOR_CONFIG=FILE` passes `--operator-config FILE` instead.
 
 ## Model
 
@@ -120,11 +125,19 @@ does. Moving an issue under a new parent is checked for its whole subtree, and
   when it touched a different issue. Rerun it: every mutation here re-checks its
   own condition, so a rerun cannot apply twice. `ob` does this with jittered
   backoff, and spreads agents over the ready list after a lost claim.
-- **Never replay a lost response.** A timeout, a dropped connection or a
-  502/503/504 leaves a write's outcome unknown. `ob` resends reads, but not
-  writes: it exits 3 with `"outcome": "unknown"`, and the issue has to be read
-  before the command runs again. `ob claim`, `ob update` and `ob create` do that
-  read themselves, since the row shows whether their write landed.
+- **Never replay a lost response.** Every failed `omnigraph` command reports a
+  `disposition` whose `effects` (`none`, `partial` or `unknown`) say whether it
+  changed anything. A timeout, a dropped connection or a 502/503/504 leaves a
+  write's effects unknown. `ob` resends reads, and writes refused before they
+  started (`effects: none`: busy, or the server not reached), but never a write
+  whose effects are unknown: it exits 3 with `"outcome": "unknown"`, and the
+  issue has to be read before the command runs again. `ob claim`, `ob update`
+  and `ob create` do that read themselves, since the row shows whether their
+  write landed.
+- **Concurrent commands on one operator configuration.** Each `omnigraph`
+  command on a server target briefly locks its operator configuration's
+  credential state, and a concurrent command that finds the lock held is
+  refused before it sends anything. `ob` runs such a command again.
 - **Per-issue compare-and-swap edits.** Every write stamps `updated_at`.
   `ob update` writes back with `where slug = $id and updated_at = $expected`
   and re-reads if someone edited the issue in between, so concurrent label
@@ -137,7 +150,7 @@ does. Moving an issue under a new parent is checked for its whole subtree, and
   the lease and the assignee (close keeps the assignee as a record), so a
   reopened issue is free for anyone to claim.
 - **History from commits.** `ob history <id>` reads the change feed; each
-  commit records its actor, which in served mode comes from the bearer token.
+  commit records its actor, which in served mode comes from the target's token.
 
 ## Roles
 
@@ -146,8 +159,8 @@ The bundle's [policies](policies/) follow the repository's three roles:
 `act-writer` (agents) reads, writes, and creates or deletes branches;
 `act-reader` (dashboards, auditors) reads and invokes stored reads, and is
 refused on stored mutations. `OB_ACTOR` should name the same actor as the
-token: the history records the token's actor regardless, but `assignee` is a
-value the client sends.
+target's token: the history records the token's actor regardless, but
+`assignee` is a value the client sends.
 
 Plans go on branches: `ob branch create plan`, then
 `ob --branch plan create …` files work that `main` does not see until an admin
@@ -158,10 +171,12 @@ runs `ob branch merge plan`.
 With an embedding provider configured (see [cluster.yaml](cluster.yaml)),
 `ob init --embed` fills issue-title and memory vectors through the offline
 `omnigraph embed` pipeline before each write, and `ob similar` and
-`ob recall --semantic` rank by meaning. OmniGraph 0.13.0's pipeline embeds
-`type: Issue\ntitle: <value>` while a query embeds its text as given, so `ob`
-sends queries in the pipeline's shape. Set `OMNIGRAPH_EMBEDDINGS_MOCK=1` for
-deterministic test vectors.
+`ob recall --semantic` rank by meaning. The pipeline embeds each title or
+memory body exactly as written, as a query embeds its text. Vectors stored with
+OmniGraph 0.13 embedded a templated line instead; regenerate them with
+`omnigraph embed --reembed-all` and reload them, as the engine's
+[embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.14.0/docs/user/search/embeddings.md#offline-file-pipeline)
+describes. Set `OMNIGRAPH_EMBEDDINGS_MOCK=1` for deterministic test vectors.
 
 ## Compared with beads
 
@@ -171,10 +186,10 @@ seed, both return **the same ready and blocked sets**; reaching that fixed
 `ob`'s handling of closed parents and adopted beads' two link rules above.
 Neither tool ever handed one issue to two agents.
 
-Measured on one laptop with other work running, so treat the timings as
-rough. After `bd gc`, which shrank the imported Dolt journal from 314 MB to
-3 MB, `ready`, `show` and `search` take 200–470 ms in `bd` and about 200 ms in
-`ob`; `bd blocked` takes 1.3 s. `ob`'s writes were 2.5–7 times faster, but a local
+Measured with OmniGraph 0.13.0 on one laptop with other work running, so
+treat the timings as rough. After `bd gc`, which shrank the imported Dolt
+journal from 314 MB to 3 MB, `ready`, `show` and `search` take 200–470 ms in
+`bd` and about 200 ms in `ob`; `bd blocked` takes 1.3 s. `ob`'s writes were 2.5–7 times faster, but a local
 OmniGraph store does not fsync and Dolt syncs every commit, so that gap is not
 like for like. `bd import` took about 10 minutes for 2,000 issues, against under
 a second for `ob`'s batched load. About 90 ms of each `ob` command is Python
@@ -192,15 +207,15 @@ starting up.
 | `seed.jsonl`, `seed.md` | A fictional project and its description |
 | `omnigraph-config.example.yaml` | Read aliases and mutation examples |
 | `client/ob`, `client/ob_cli.py` | The client |
-| `client/tests/test_ob.py` | End-to-end tests on local graphs; the served run is in `../scripts/check-cookbooks.py` |
+| `client/tests/test_ob.py` | End-to-end tests on local graphs, and on a served graph behind the local HTTPS gateway |
 | `client/tests/bench_ob.py` | Latency and concurrent-agent benchmark |
 | `client/tests/compare_bd.py` | Side-by-side run against `bd` |
 
 ```bash
 cd client
-python3 -m unittest discover -s tests -v                  # needs omnigraph
+python3 -m unittest discover -s tests -v                  # needs omnigraph, omnigraph-server, openssl
 python3 tests/bench_ob.py --issues 2000 --agents 8        # a scratch local graph
-OB_TOKEN=local-writer-token python3 tests/bench_ob.py --server http://127.0.0.1:8080  # a running server, on a scratch branch
+python3 tests/bench_ob.py --target local-writer           # a running server, on a scratch branch
 python3 tests/compare_bd.py --issues 2000 --agents 8      # needs bd
 ```
 

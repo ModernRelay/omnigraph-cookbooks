@@ -118,7 +118,7 @@ node InformationArtifact {
 }
 
 node Chunk {
-    text: String
+    text: String @index
     chunk_index: I32
     embedding: Vector(3072) @embed("text") @index
     createdAt: DateTime

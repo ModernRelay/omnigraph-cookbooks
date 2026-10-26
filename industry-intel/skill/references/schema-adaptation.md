@@ -42,13 +42,14 @@ The template has:
 
 ```pg
 node Chunk {
-    text: String
+    text: String @index
     chunk_index: I32
     embedding: Vector(3072) @embed("text") @index
     createdAt: DateTime
 }
 ```
 
+`hybrid_chunks` ranks `text` with `bm25`, which needs the `@index` on `text`.
 `@embed` records the source/model relationship; it does not populate the vector
 on load or mutation. Chunk rows must include real 3072-dimensional vectors.
 Use the offline `omnigraph embed` JSONL transformation when adding chunks, then
@@ -64,10 +65,10 @@ Update the graph policy's `applies_to` entry as well, while leaving the server
 policy bound to `[cluster]`. Preserve the template's administrator management
 permissions so later live updates remain authorized.
 
-Update `default_graph` and alias `graph` values in
-`omnigraph-config.example.yaml`. Audit aliases with fixed domain values when
-their enums change. Preserve unrelated operator settings when installing the
-new entries; tokens belong in credentials, not the example config.
+Update each alias's `graph` value in `omnigraph-config.example.yaml`. Audit
+aliases with fixed domain values when their enums change. Preserve unrelated
+operator settings when installing the new entries; tokens belong in credentials,
+not the example config.
 
 ```bash
 for query_file in queries/*.gq; do
@@ -98,5 +99,6 @@ storage apply against its held writer lock.
   history still references the old data. Removing an entire graph declaration
   instead purges that graph's managed storage and retained history.
 
-For the full supported migration boundary, consult the repository's vendored
-`omnigraph` skill, `references/schema.md`.
+For the full supported migration boundary, consult the `omnigraph` skill's
+`references/schema.md`. The repository vendors that skill;
+`omnigraph skill export DIR` writes the copy that matches the installed CLI.

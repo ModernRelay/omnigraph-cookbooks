@@ -7,15 +7,16 @@ The fixed seed illustrates SPIKE; it is not a current research feed.
 Follow the root README's
 [local setup](https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#local-setup)
 with cookbook `industry-intel` and graph `spike`. That is the single setup
-sequence for apply, writer-lock handoff, server startup, readiness, login, and
-loading. Merge the cookbook's named server and aliases into the operator config
-without replacing unrelated entries. Use the reader identity for exploration.
+sequence for apply, writer-lock handoff, server startup, the HTTPS gateway, CLI
+targets, readiness, and loading. Merge the cookbook's aliases into the operator
+config without replacing unrelated entries. They use the `local-reader` target,
+the reader identity, for exploration.
 
 ## Verify the served graph
 
 ```bash
-omnigraph alias patterns disruption
-omnigraph alias pattern-signals pat-sovereign-ai
+omnigraph alias patterns --params '{"kind":"disruption"}'
+omnigraph alias pattern-signals --params '{"slug":"pat-sovereign-ai"}'
 ```
 
 The unchanged demo returns two disruption patterns (SaaSpocalypse and Sovereign

@@ -1,9 +1,12 @@
 """End-to-end tests for ob against a real OmniGraph graph.
 
 Run from beads/client:  python3 -m unittest discover -s tests -v
-The omnigraph binary comes from $OB_OMNIGRAPH, else PATH (the cookbooks pin
-the 0.13.0 release). The tests use local graphs only; ob against the served
-cookbook is part of the repository checker, scripts/check-cookbooks.py.
+The omnigraph and omnigraph-server binaries come from $OB_OMNIGRAPH and
+$OB_OMNIGRAPH_SERVER, else PATH (the cookbooks pin the 0.14.0 release). Most
+tests use local graphs. ServedTests start a server for the cookbook behind the
+repository's local HTTPS gateway and drive ob through server targets;
+TransportTests put a scripted server behind the same gateway to see which
+commands ob sends again. Both need python3 and openssl for the gateway.
 """
 
 from __future__ import annotations
@@ -12,21 +15,28 @@ import concurrent.futures
 import http.server
 import json
 import os
+import re
 import shutil
+import socket
 import subprocess
+import sys
 import tempfile
 import threading
+import time
 import unittest
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent   # beads/client
 BUNDLE = HERE.parent                              # beads/: schema, queries, policies, cluster.yaml
 OB = HERE / "ob"
 REPO = BUNDLE.parent
+GATEWAY = REPO / "scripts" / "local-tls-gateway.py"
 
 
 def find_binary(name: str) -> str | None:
-    env = os.environ.get("OB_OMNIGRAPH")
+    env = os.environ.get("OB_OMNIGRAPH" if name == "omnigraph" else "OB_OMNIGRAPH_SERVER")
     if env:
         return env
     for build in ("release", "debug"):
@@ -37,14 +47,71 @@ def find_binary(name: str) -> str | None:
 
 
 OMNIGRAPH = find_binary("omnigraph")
+SERVER = find_binary("omnigraph-server")
 
 
 def clean_env(**extra: str) -> dict:
     """The caller's environment without any ob or OmniGraph setting, so that a
-    shell configured for a real graph (OB_TOKEN, OB_SERVER, ...) cannot leak in."""
-    env = {k: v for k, v in os.environ.items() if not k.startswith(("OB_", "OMNIGRAPH_"))}
+    shell configured for a real graph (OB_TARGET, OMNIGRAPH_HOME, ...) cannot
+    leak in."""
+    env = {k: v for k, v in os.environ.items() if not k.startswith(("OB_", "OMNIGRAPH_", "OG_"))}
     env.update(extra)
     return env
+
+
+def free_port() -> int:
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        return sock.getsockname()[1]
+
+
+def wait_until(check, what: str, timeout: float = 60):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            if check():
+                return
+        except OSError:
+            pass
+        time.sleep(0.1)
+    raise AssertionError(f"timed out waiting for {what}")
+
+
+class Gateway:
+    """scripts/local-tls-gateway.py in front of a plain-HTTP port, with its own
+    CA in `certs`: the 0.14 CLI sends a target's token only over HTTPS."""
+
+    def __init__(self, upstream: int, certs: Path):
+        self.port = free_port()
+        self.ca = certs / "ca.pem"
+        self.proc = subprocess.Popen(
+            [sys.executable, str(GATEWAY), "--listen", f"127.0.0.1:{self.port}",
+             "--upstream", f"127.0.0.1:{upstream}", "--certs", str(certs)],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        def listening() -> bool:
+            if self.proc.poll() is not None:
+                raise AssertionError("the HTTPS gateway exited")
+            with socket.create_connection(("127.0.0.1", self.port), timeout=1):
+                return True
+
+        wait_until(listening, "the HTTPS gateway")
+
+    def stop(self):
+        self.proc.terminate()
+        self.proc.wait(timeout=10)
+
+
+def write_operator_config(path: Path, gateway: Gateway, targets: dict[str, str]) -> None:
+    """One server target per name, each reading its token from the named
+    environment variable and trusting the gateway's CA."""
+    lines = ["version: 1", "targets:"]
+    for name, token_env in targets.items():
+        lines += [f"  {name}:", "    kind: server", f"    endpoint: https://localhost:{gateway.port}",
+                  f"    auth: {{provider: token, source: {{env: {token_env}}}}}",
+                  f"    transport: {{tls: {{ca: {{mode: append, file: {gateway.ca}}}}}}}"]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n")
 
 
 class ObCase(unittest.TestCase):
@@ -97,8 +164,8 @@ class ObCase(unittest.TestCase):
         return self.ob("import", str(path))
 
     def commits(self) -> int:
-        proc = subprocess.run([OMNIGRAPH, "commit", "list", "--store", f"{self.tmp}/.ob/graph.omni", "--json"],
-                              capture_output=True, text=True, check=True)
+        proc = subprocess.run([OMNIGRAPH, "commit", "list", "--target", f"{self.tmp}/.ob/graph.omni", "--json"],
+                              capture_output=True, text=True, check=True, env=self.env)
         data = json.loads(proc.stdout)
         return len(data["commits"] if isinstance(data, dict) else data)
 
@@ -149,8 +216,8 @@ class ReadinessTests(ObCase):
         self.assertIn("own descendant", self.ob_fails("dep", "add", parent, first))
         edge = Path(self.tmp) / "edge.jsonl"
         edge.write_text(json.dumps({"edge": "BlockedBy", "from": parent, "to": first}) + "\n")
-        subprocess.run([OMNIGRAPH, "load", "--data", str(edge), "--mode", "merge", "--store",
-                        f"{self.tmp}/.ob/graph.omni", "--quiet"], check=True, capture_output=True)
+        subprocess.run([OMNIGRAPH, "load", "--data", str(edge), "--mode", "merge", "--target",
+                        f"{self.tmp}/.ob/graph.omni"], check=True, capture_output=True, env=self.env)
         ready = self.ready()
         self.assertNotIn(parent, ready)
         self.assertIn(first, ready)
@@ -515,8 +582,8 @@ class SeedTests(ObCase):
     """The seed must produce exactly the sets seed.md lists, whatever the date."""
 
     def test_seed_matches_seed_md(self):
-        subprocess.run([OMNIGRAPH, "load", "--data", str(BUNDLE / "seed.jsonl"), "--mode", "append", "--store",
-                        f"{self.tmp}/.ob/graph.omni", "--quiet"], check=True, capture_output=True)
+        subprocess.run([OMNIGRAPH, "load", "--data", str(BUNDLE / "seed.jsonl"), "--mode", "append", "--target",
+                        f"{self.tmp}/.ob/graph.omni"], check=True, capture_output=True, env=self.env)
         self.assertEqual(self.ready(), ["lk-sync", "lk-crash-empty", "lk-acl", "lk-release", "lk-import-md",
                                         "lk-changelog", "lk-search", "lk-version"])
         self.assertEqual(sorted(r["slug"] for r in self.ob("blocked")),
@@ -526,21 +593,72 @@ class SeedTests(ObCase):
         self.assertIn("lk-queue", self.ready())
 
 
-class TransportTests(unittest.TestCase):
-    """ob over HTTP against a scripted server: which requests it sends again."""
+API_HEADER = "Omnigraph-Http-Api"
 
-    def serve(self, script: dict[str, list[tuple[int, dict]]]):
+
+def from_server(status: int, body: dict) -> tuple[int, dict, bool]:
+    """A response the OmniGraph server sent: it carries the API header."""
+    return status, body, True
+
+
+def from_proxy(status: int) -> tuple[int, None, bool]:
+    """A bare status from a proxy in front of the server, such as a 504."""
+    return status, None, False
+
+
+def refusal(status: int, code: str, action: str, **detail) -> tuple[int, dict, bool]:
+    return from_server(status, {"error": code, "code": code,
+                                "disposition": {"effects": "none", "action": action}, **detail})
+
+
+def mutation(name: str, affected: int) -> tuple[int, dict, bool]:
+    return from_server(200, {"branch": "main", "query_name": name, "affected_nodes": affected,
+                             "affected_edges": 0, "actor_id": "alice", "commit": None})
+
+
+def rows(name: str, found: list[dict]) -> tuple[int, dict, bool]:
+    return from_server(200, {"query_name": name, "target": {"branch": "main", "snapshot": None},
+                             "row_count": len(found), "columns": sorted(found[0]) if found else [],
+                             "rows": found})
+
+
+class TransportTests(unittest.TestCase):
+    """ob through the real CLI against a scripted server behind the HTTPS
+    gateway: which commands it sends again, decided by each failure's
+    disposition."""
+
+    @classmethod
+    def setUpClass(cls):
+        if not OMNIGRAPH:
+            raise unittest.SkipTest("omnigraph binary not found")
+        cls.tmp = Path(tempfile.mkdtemp(prefix="ob-transport-"))
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.tmp, ignore_errors=True)
+
+    def serve(self, script: dict[str, list[tuple[int, dict | None, bool]]]) -> list[str]:
         calls: list[str] = []
 
         class Handler(http.server.BaseHTTPRequestHandler):
+            protocol_version = "HTTP/1.1"
+
+            def do_HEAD(self):  # the CLI's discovery probe
+                self.send_response(200)
+                self.send_header(API_HEADER, "0.14")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+
             def do_POST(self):
                 self.rfile.read(int(self.headers["Content-Length"]))
                 name = self.path.rsplit("/", 1)[-1]
                 calls.append(name)
-                status, payload = script[name].pop(0)
-                data = json.dumps(payload).encode()
+                status, payload, api = script[name].pop(0)
+                data = json.dumps(payload).encode() if payload is not None else b""
                 self.send_response(status)
-                self.send_header("Content-Type", "application/json")
+                if api:
+                    self.send_header(API_HEADER, "0.14")
+                    self.send_header("Content-Type", "application/json")
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()
                 self.wfile.write(data)
@@ -552,49 +670,217 @@ class TransportTests(unittest.TestCase):
         threading.Thread(target=server.serve_forever, daemon=True).start()
         self.addCleanup(server.server_close)
         self.addCleanup(server.shutdown)
-        return f"http://127.0.0.1:{server.server_address[1]}", calls
+        gateway = Gateway(server.server_address[1], self.tmp / "certs")
+        self.addCleanup(gateway.stop)
+        self.home = self.tmp / f"home-{gateway.port}"
+        write_operator_config(self.home / "config.yaml", gateway, {"scripted": "OG_SCRIPTED_TOKEN"})
+        return calls
 
-    def run_ob(self, url: str, *args):
-        env = clean_env(OB_SERVER=url, OB_GRAPH="beads", OB_ACTOR="alice")
+    def run_ob(self, *args):
+        env = clean_env(OB_OMNIGRAPH=OMNIGRAPH, OB_TARGET="scripted", OB_GRAPH="beads", OB_ACTOR="alice",
+                        OMNIGRAPH_HOME=str(self.home), OG_SCRIPTED_TOKEN="scripted-token")
         return subprocess.run([str(OB), "--json", *args], capture_output=True, text=True, env=env)
 
     def test_a_write_without_an_answer_is_not_sent_again(self):
-        url, calls = self.serve({"close": [(504, {})]})
-        proc = self.run_ob(url, "close", "ob-1", "--force")
+        calls = self.serve({"close": [from_proxy(504)]})
+        proc = self.run_ob("close", "ob-1", "--force")
         self.assertEqual(proc.returncode, 3, proc.stdout + proc.stderr)
         self.assertEqual(json.loads(proc.stdout)["outcome"], "unknown")
         self.assertEqual(calls, ["close"])
 
     def test_a_write_refused_before_it_started_is_sent_again(self):
-        url, calls = self.serve({"close": [(429, {}), (200, {"affected_nodes": 1})]})
-        proc = self.run_ob(url, "close", "ob-1", "--force")
+        calls = self.serve({"close": [refusal(429, "too_many_requests", "retry"), mutation("close", 1)]})
+        proc = self.run_ob("close", "ob-1", "--force")
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertEqual(calls, ["close", "close"])
 
-    def test_reads_are_sent_again(self):
-        row = {"slug": "ob-1", "title": "t", "kind": "task", "priority": 2}
-        url, calls = self.serve({"ready": [(503, {}), (200, {"rows": [row]})]})
-        proc = self.run_ob(url, "ready")
+    def test_a_write_that_lost_the_race_is_run_again(self):
+        conflict = refusal(409, "conflict", "refresh", read_set_conflict={"member": "graph_head:main"})
+        calls = self.serve({"close": [conflict, mutation("close", 1)]})
+        proc = self.run_ob("close", "ob-1", "--force")
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
-        self.assertEqual(calls, ["ready", "ready"])
+        self.assertEqual(calls, ["close", "close"])
+
+    def test_a_refused_write_is_not_sent_again(self):
+        calls = self.serve({"close": [refusal(403, "forbidden", "refresh")]})
+        proc = self.run_ob("close", "ob-1", "--force")
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        self.assertNotIn("outcome", json.loads(proc.stdout))
+        self.assertEqual(calls, ["close"])
+
+    def test_reads_are_sent_again(self):
+        row = {"i.slug": "ob-1", "i.title": "t", "i.kind": "task", "i.priority": 2}
+        calls = self.serve({"ready": [from_proxy(504), refusal(503, "service_unavailable", "retry"),
+                                      rows("ready", [row])]})
+        proc = self.run_ob("ready")
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertEqual([r["slug"] for r in json.loads(proc.stdout)], ["ob-1"])
+        self.assertEqual(calls, ["ready", "ready", "ready"])
 
     def test_a_claim_reads_the_issue_before_claiming_again(self):
-        url, calls = self.serve({
-            "claim": [(504, {}), (200, {"affected_nodes": 1})],
-            "show": [(200, {"rows": [{"i": {"slug": "ob-1", "status": "open"}}]})],
+        calls = self.serve({
+            "claim": [from_proxy(504), mutation("claim", 1)],
+            "show": [rows("show", [{"i": {"slug": "ob-1", "status": "open"}}])],
         })
-        proc = self.run_ob(url, "claim", "ob-1")
+        proc = self.run_ob("claim", "ob-1")
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertEqual(calls, ["claim", "show", "claim"])
 
     def test_a_claim_that_landed_is_not_sent_again(self):
-        url, calls = self.serve({
-            "claim": [(504, {})],
-            "show": [(200, {"rows": [{"i": {"slug": "ob-1", "status": "in_progress", "assignee": "alice"}}]})],
+        calls = self.serve({
+            "claim": [from_proxy(504)],
+            "show": [rows("show", [{"i": {"slug": "ob-1", "status": "in_progress", "assignee": "alice"}}])],
         })
-        proc = self.run_ob(url, "claim", "ob-1")
+        proc = self.run_ob("claim", "ob-1")
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertEqual(calls, ["claim", "show"])
+
+
+TOKENS = {"act-admin": "local-admin-token", "act-writer": "local-writer-token", "act-reader": "local-reader-token"}
+
+
+class ServedTests(unittest.TestCase):
+    """ob against the served cookbook: a real server and the HTTPS gateway,
+    one server target per actor, addressed with OB_TARGET and OB_GRAPH."""
+
+    @classmethod
+    def setUpClass(cls):
+        if not (OMNIGRAPH and SERVER):
+            raise unittest.SkipTest("omnigraph and omnigraph-server binaries not found")
+        cls.tmp = Path(tempfile.mkdtemp(prefix="ob-served-"))
+        cls.processes: list = []
+        try:
+            cls.start()
+        except BaseException:
+            cls.tearDownClass()
+            raise
+
+    @classmethod
+    def start(cls):
+        root = cls.tmp / "cluster"
+        root.mkdir()
+        for name in ("schema.pg", "cluster.yaml"):
+            shutil.copy(BUNDLE / name, root / name)
+        for name in ("queries", "policies"):
+            shutil.copytree(BUNDLE / name, root / name)
+        env = clean_env(OMNIGRAPH_HOME=str(cls.tmp / "home"))
+        apply = subprocess.run([OMNIGRAPH, "cluster", "apply", "--target", ".", "--config", ".", "--as",
+                                "act-admin", "--json"], cwd=root, env=env, capture_output=True, text=True)
+        if apply.returncode != 0:
+            raise AssertionError(f"cluster apply failed: {apply.stdout}{apply.stderr}")
+        # The apply keeps its admission lock; nothing else uses this root.
+        lock = re.search(r"Admission lock: (\S+?);", apply.stderr).group(1)
+        subprocess.run([OMNIGRAPH, "cluster", "force-unlock", lock, "--target", "."], cwd=root, env=env,
+                       check=True, capture_output=True)
+        port = free_port()
+        cls.log = open(cls.tmp / "server.log", "w")
+        server = subprocess.Popen([SERVER, "--cluster", ".", "--bind", f"127.0.0.1:{port}"], cwd=root,
+                                  stdout=cls.log, stderr=subprocess.STDOUT,
+                                  env={**env, "OMNIGRAPH_SERVER_BEARER_TOKENS_JSON": json.dumps(TOKENS)})
+        cls.processes.append(server)
+
+        def ready() -> bool:
+            if server.poll() is not None:
+                raise AssertionError(f"omnigraph-server exited: {(cls.tmp / 'server.log').read_text()}")
+            try:
+                with urllib.request.urlopen(f"http://127.0.0.1:{port}/readyz", timeout=2) as response:
+                    return json.load(response).get("ready") is True
+            except urllib.error.HTTPError as exc:  # 503 until the graph is served
+                exc.close()
+                return False
+
+        wait_until(ready, "omnigraph-server")
+        cls.gateway = Gateway(port, cls.tmp / "certs")
+        cls.operator_config = cls.tmp / "home" / "config.yaml"
+        write_operator_config(cls.operator_config, cls.gateway,
+                              {actor: "OG_" + actor.upper().replace("-", "_") + "_TOKEN" for actor in TOKENS})
+        cls.env = clean_env(OB_OMNIGRAPH=OMNIGRAPH, OB_GRAPH="beads", OMNIGRAPH_HOME=str(cls.tmp / "home"),
+                            **{"OG_" + actor.upper().replace("-", "_") + "_TOKEN": token
+                               for actor, token in TOKENS.items()})
+
+    @classmethod
+    def tearDownClass(cls):
+        if getattr(cls, "gateway", None):
+            cls.gateway.stop()
+        for process in cls.processes:
+            process.terminate()  # SIGTERM: the server releases its writer lock
+            try:
+                process.wait(timeout=35)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+        if getattr(cls, "log", None):
+            cls.log.close()
+        shutil.rmtree(cls.tmp, ignore_errors=True)
+
+    def run_ob(self, actor: str, *args, **env):
+        merged = {**self.env, "OB_TARGET": actor, "OB_ACTOR": actor, **env}
+        return subprocess.run([str(OB), "--json", *args], capture_output=True, text=True, env=merged,
+                              cwd=self.tmp, timeout=120)
+
+    def ob(self, actor: str, *args, **env):
+        proc = self.run_ob(actor, *args, **env)
+        if proc.returncode != 0:
+            self.fail(f"ob {' '.join(args)} as {actor} failed ({proc.returncode}): {proc.stdout}{proc.stderr}")
+        return json.loads(proc.stdout)
+
+    def ready(self, actor: str) -> list[str]:
+        return [row["slug"] for row in self.ob(actor, "ready", "-n", "500")]
+
+    def test_served_journey_records_each_tokens_actor(self):
+        blocker = self.ob("act-admin", "create", "served blocker")["id"]
+        work = self.ob("act-admin", "create", "served work", "--deps", blocker)["id"]
+        ready = self.ready("act-writer")
+        self.assertIn(blocker, ready)
+        self.assertNotIn(work, ready)
+        self.assertEqual(self.ob("act-reader", "show", work)["links_out"][0]["slug"], blocker)
+        self.assertIn(work, {r["slug"] for r in self.ob("act-reader", "blocked")})
+        self.assertEqual(self.ob("act-writer", "claim", blocker)["claimed"], blocker)
+        self.assertEqual(self.ob("act-writer", "close", blocker)["closed"], 1)
+        self.assertIn(work, self.ready("act-reader"))
+        refused = self.run_ob("act-reader", "claim", work)
+        self.assertEqual(refused.returncode, 1, refused.stdout + refused.stderr)  # refused, not unknown
+        self.assertEqual(json.loads(refused.stdout)["detail"]["disposition"]["effects"], "none")
+        events = [(e["actor"], e["type"]) for e in self.ob("act-reader", "history", blocker)]
+        self.assertEqual(events, [("act-admin", "Issue"), ("act-admin", "BlockedBy"), ("act-writer", "Issue"),
+                                  ("act-writer", "Issue")])
+
+    def test_racing_served_agents_get_distinct_work(self):
+        # Concurrent CLI runs share the operator configuration, whose lock the
+        # CLI does not wait for; ob sends a command refused by it again.
+        label = f"race-{os.getpid()}"
+        issues = {self.ob("act-writer", "create", f"race {i}", "-l", label)["id"] for i in range(6)}
+        agents = [f"agent-{i}" for i in range(6)]
+        with concurrent.futures.ThreadPoolExecutor(len(agents)) as pool:
+            claimed = list(pool.map(lambda who: self.ob("act-writer", "ready", "--claim", "-l", label,
+                                                         OB_ACTOR=who)["claimed"], agents))
+        self.assertEqual(set(claimed), issues)
+        holders = {self.ob("act-reader", "show", slug)["assignee"] for slug in claimed}
+        self.assertEqual(holders, set(agents))
+
+    def test_plan_on_a_served_branch_then_merge(self):
+        base = self.ob("act-writer", "create", "served base")["id"]
+        self.ob("act-writer", "branch", "create", "served-plan")
+        planned = self.ob("act-writer", "--branch", "served-plan", "create", "planned", "--deps", base)["id"]
+        self.assertNotIn(planned, self.ready("act-writer") + [r["slug"] for r in self.ob("act-writer", "blocked")])
+        self.ob("act-admin", "branch", "merge", "served-plan")
+        self.assertEqual(self.ob("act-writer", "show", planned)["links_out"][0]["slug"], base)
+        self.ob("act-writer", "branch", "delete", "served-plan")
+        self.assertNotIn("served-plan", json.dumps(self.ob("act-writer", "branch", "list")))
+
+    def test_an_explicit_operator_config_file(self):
+        empty_home = self.tmp / "empty-home"
+        empty_home.mkdir(exist_ok=True)
+        rows = self.ob("act-reader", "ready", "-n", "500", OMNIGRAPH_HOME=str(empty_home),
+                       OB_OPERATOR_CONFIG=str(self.operator_config))
+        self.assertIsInstance(rows, list)
+
+    def test_the_old_server_settings_are_refused(self):
+        proc = self.run_ob("act-writer", "ready", OB_SERVER="http://127.0.0.1:8080", OB_TOKEN="local-writer-token")
+        self.assertEqual(proc.returncode, 1)
+        message = json.loads(proc.stdout)["error"]
+        self.assertIn("OB_SERVER is no longer read: use OB_TARGET", message)
+        self.assertIn("OB_TOKEN is no longer read", message)
 
 
 if __name__ == "__main__":

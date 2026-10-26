@@ -63,16 +63,30 @@ EDGE_LABELS = {
 }
 ICONS = {"open": "○", "in_progress": "◐", "deferred": "❄", "closed": "✓", "blocked": "●"}
 
-# A write that loses the race for the branch head is refused before it has
-# any effect ("reprepare from the current branch state"). Every ob write
+# Every failed `omnigraph` command reports a disposition whose `effects` say
+# whether it changed anything. A write that loses the race for the branch head
+# is refused with `effects: none` and a `read_set_conflict`; every ob write
 # re-checks its own condition, so rerunning it against fresh state is safe.
-# A write whose response is lost (a timeout, a dropped connection, a 502/503/
-# 504) is different: it may have landed, so ob reads before deciding, or stops
-# and says so; it never resends one blindly.
+# A command refused before it started (busy, or the server unreachable) is sent
+# again too. A write with `effects: unknown` (a timeout, a dropped connection, a
+# 502/503/504) is different: it may have landed, so ob reads before deciding,
+# or stops and says so; it never resends one blindly.
 CONFLICT_RETRIES = 24
 CONFLICT_BACKOFF_MAX = 0.4
 TRANSPORT_RETRIES = 5
-HTTP_API = "0.13"
+# The CLI's exit codes for data commands: 2 is partial or unknown effects, 64
+# a refused command line and 75 busy (`action: retry`).
+EXIT_UNKNOWN, EXIT_USAGE, EXIT_BUSY = 2, 64, 75
+# Each command on a server target briefly takes a lock in the operator
+# configuration's credential state, and a concurrent command that finds it
+# held is refused at once, before it sends anything. The refusal has no
+# `code`, so ob knows it by its message.
+LOCKED_CONFIG = "could not lock operator configuration"
+# Settings of OmniGraph 0.13 that served mode no longer reads.
+RETIRED_ENV = {
+    "OB_SERVER": "OB_TARGET, the name of a server target in the operator configuration",
+    "OB_TOKEN": "the token source of that target (ob never handles tokens)",
+}
 # Readiness follows parent links up to eight levels (queries/issues.gq), so ob
 # refuses a parent link that would make a hierarchy deeper than that.
 MAX_DEPTH = 8
@@ -96,6 +110,16 @@ class Conflict(ObError):
 
 class UnknownOutcome(ObError):
     """A write was sent but no answer came back, so it may have landed."""
+
+
+class Transient(ObError):
+    """Refused before it started (busy, or no server reached); sending it
+    again may succeed."""
+
+
+class Contended(ObError):
+    """Refused before it started because another CLI run held the operator
+    configuration's lock; it is free again within milliseconds."""
 
 
 # ---------------------------------------------------------------------------
@@ -141,16 +165,6 @@ def check_json(text: str) -> str:
     except json.JSONDecodeError as exc:
         raise ObError(f"--metadata is invalid JSON: {exc}") from exc
     return text
-
-
-def embedding_query(type_name: str, field: str, text: str) -> str:
-    """Query text in the shape `omnigraph embed` gives stored documents.
-
-    OmniGraph 0.13.0's offline pipeline embeds `type: <Type>\n<field>: <value>`,
-    while a query-time `nearest(..., $q)` embeds `$q` verbatim; sending the
-    same shape keeps both sides of the comparison in one text space.
-    """
-    return f"type: {type_name}\n{field}: {text}"
 
 
 def new_id(prefix: str, length: int = 6) -> str:
@@ -199,18 +213,47 @@ def find_config_dir(start: Path) -> Path | None:
     return None
 
 
+def refuse_retired_settings() -> None:
+    """OmniGraph 0.14 reaches a server only through a registered target, so the
+    old server URL and token settings would be silently wrong; refuse them."""
+    found = [name for name in RETIRED_ENV if os.environ.get(name)]
+    if found:
+        raise ObError("; ".join(f"{name} is no longer read: use {RETIRED_ENV[name]}" for name in found)
+                      + ". Unset " + " and ".join(found) + " (see the beads README)")
+
+
 def load_config(args) -> tuple[Path | None, dict]:
+    refuse_retired_settings()
     cfg_dir = Path(args.dir).resolve() if args.dir else find_config_dir(Path.cwd())
     cfg: dict = {}
     if cfg_dir and (cfg_dir / CONFIG_FILE).is_file():
         cfg = json.loads((cfg_dir / CONFIG_FILE).read_text())
+        if cfg.get("store"):
+            cfg["store"] = local_store(cfg["store"], cfg_dir)
+    if "server" in cfg:
+        raise ObError(f'{cfg_dir / CONFIG_FILE} names a "server", which OmniGraph 0.14 no longer accepts: '
+                      "register the server as a target in the operator configuration, then replace "
+                      '"server" with "target": "<name>" in that file, or set OB_TARGET')
     if os.environ.get("OB_STORE"):
-        cfg = {**cfg, "store": os.environ["OB_STORE"]}
-        cfg.pop("server", None)
-    if os.environ.get("OB_SERVER"):
-        cfg = {**cfg, "server": os.environ["OB_SERVER"], "graph": os.environ.get("OB_GRAPH", "beads")}
+        cfg = {**cfg, "store": local_store(os.environ["OB_STORE"], Path.cwd())}
+        cfg.pop("target", None)
+    if os.environ.get("OB_TARGET"):
+        cfg = {**cfg, "target": os.environ["OB_TARGET"]}
         cfg.pop("store", None)
+    if cfg.get("target"):
+        cfg["graph"] = os.environ.get("OB_GRAPH") or cfg.get("graph") or "beads"
     return cfg_dir, cfg
+
+
+def local_store(store: str, base: Path) -> str:
+    """A local graph as an absolute path: the CLI reads a bare name as the name
+    of a registered target, and reaches s3:// or az:// only through a server."""
+    if store.startswith("file://"):
+        return store
+    if "://" in store:
+        raise ObError(f"{store}: OmniGraph 0.14 reaches remote storage only through a server; serve the "
+                      "graph and set OB_TARGET to its server target")
+    return str((base / store).resolve())
 
 
 def default_actor(cfg: dict) -> str:
@@ -243,6 +286,14 @@ def omnigraph_binary() -> str:
     return "omnigraph"
 
 
+def omnigraph_command() -> list[str]:
+    """The CLI and its global flags: an explicit operator configuration file
+    when OB_OPERATOR_CONFIG names one (otherwise the CLI finds its own, under
+    OMNIGRAPH_HOME or ~/.omnigraph)."""
+    operator = os.environ.get("OB_OPERATOR_CONFIG")
+    return [omnigraph_binary(), *(["--operator-config", operator] if operator else [])]
+
+
 def query_index() -> dict[str, Path]:
     index: dict[str, Path] = {}
     for path in sorted(QUERY_DIR.glob("*.gq")):
@@ -252,139 +303,92 @@ def query_index() -> dict[str, Path]:
 
 
 class Graph:
-    """One graph, addressed directly (`store`) or through a server (`server`).
+    """One graph, addressed directly (a local `store`) or through a server
+    (`target`, a server target in the operator configuration, and `graph`).
 
-    A local store and a server named in ~/.omnigraph/config.yaml go through
-    the `omnigraph` CLI. A server given as an http(s) URL is called directly
-    over HTTP, which saves a process start and a graph open per operation.
+    Every operation goes through the `omnigraph` CLI. A server target owns its
+    endpoint, TLS settings and token, so ob never sees a credential.
     """
 
     def __init__(self, cfg: dict, cfg_dir: Path | None, actor: str, branch: str | None):
-        self.bin = omnigraph_binary()
+        self.cmd = omnigraph_command()
         self.actor = actor
         self.branch = branch
-        self.server = cfg.get("server")
+        self.target = cfg.get("target")
         self.graph_id = cfg.get("graph") or "beads"
-        self.http = self.server if self.server and self.server.startswith(("http://", "https://")) else None
-        self.token = os.environ.get("OB_TOKEN") or os.environ.get("OMNIGRAPH_BEARER_TOKEN")
-        store = cfg.get("store")
-        if store and cfg_dir and "://" not in store and not os.path.isabs(store):
-            store = str((cfg_dir / store).resolve())
-        self.store = store
+        self.store = None if self.target else cfg.get("store")
         self.embed = bool(cfg.get("embed"))
         self.queries = query_index()
-        if not self.server and not self.store:
-            raise ObError("no graph configured: run `ob init` (or set OB_DIR, OB_STORE or OB_SERVER)")
+        if not self.target and not self.store:
+            raise ObError("no graph configured: run `ob init` (or set OB_DIR, OB_STORE or OB_TARGET)")
 
     # -- CLI transport ---------------------------------------------------
     def address(self) -> list[str]:
-        if self.server:
-            return ["--server", self.server, "--graph", self.graph_id]
-        return ["--store", self.store]
+        if self.target:
+            return ["--target", self.target, "--graph", self.graph_id]
+        return ["--target", self.store]
 
-    def _exec(self, argv: list[str]) -> dict:
-        proc = subprocess.run([self.bin, *argv], capture_output=True, text=True)
+    def _exec(self, argv: list[str], read: bool) -> dict:
+        proc = subprocess.run([*self.cmd, *argv], capture_output=True, text=True)
         payload = _parse_json(proc.stdout) or _parse_json(proc.stderr)
         if proc.returncode == 0:
             if payload is None:
                 raise ObError(f"omnigraph printed no JSON for {argv[0]}: {proc.stdout[:200]}")
             return payload
-        raise _classify(payload, proc.stderr.strip() or proc.stdout.strip() or f"omnigraph {argv[0]} failed")
+        fallback = proc.stderr.strip() or proc.stdout.strip() or f"omnigraph {argv[0]} failed"
+        raise _classify(payload, proc.returncode, fallback, read)
+
+    def _run(self, argv: list[str], read: bool, rerun_conflicts: bool = True) -> dict:
+        """One command, sent again only while its failure says it had no effect:
+        a lost race (when the command re-checks its own condition), a busy
+        refusal, a locked operator configuration, or a request that never
+        reached the server. A read is also sent again after a lost response."""
+        import random
+
+        conflicts = transients = 0
+        conflict_delay, transient_delay = 0.005, 0.05
+        while True:
+            try:
+                return self._exec(argv, read)
+            except (Conflict, Contended) as exc:
+                conflicts += 1
+                if (isinstance(exc, Conflict) and not rerun_conflicts) or conflicts == CONFLICT_RETRIES:
+                    raise
+                time.sleep(conflict_delay + random.random() * conflict_delay)
+                conflict_delay = min(conflict_delay * 2, CONFLICT_BACKOFF_MAX)
+            except Transient as exc:
+                transients += 1
+                if transients == TRANSPORT_RETRIES:
+                    raise ObError(str(exc), exc.payload) from None
+                time.sleep(transient_delay + random.random() * transient_delay)
+                transient_delay = min(transient_delay * 2, 2.0)
 
     def _source(self, name: str) -> list[str]:
-        if self.server:
+        if self.target:
             return []  # a stored query on the server
         if name not in self.queries:
             raise ObError(f"unknown query {name}")
         return ["--query", str(self.queries[name])]
 
-    # -- HTTP transport --------------------------------------------------
-    def _request(self, method: str, path: str, body=None, query: dict | None = None,
-                 replay_safe: bool = True) -> dict:
-        """One HTTP call. A read is resent after a lost response; a write
-        (`replay_safe=False`) only when it provably never started: a 429, or a
-        connection that was refused. Otherwise it raises UnknownOutcome."""
-        import socket
-        import urllib.error  # imported lazily: ssl alone costs ~100 ms at startup
-        import urllib.parse
-        import urllib.request
-
-        url = f"{self.http.rstrip('/')}/graphs/{urllib.parse.quote(self.graph_id)}{path}"
-        if query:
-            url += "?" + urllib.parse.urlencode({k: v for k, v in query.items() if v is not None})
-        headers = {"Omnigraph-Http-Api": HTTP_API, "Accept": "application/json"}
-        data = None
-        if body is not None:
-            data = json.dumps(body).encode()
-            headers["Content-Type"] = "application/json"
-        if self.token:
-            headers["Authorization"] = f"Bearer {self.token}"
-        import random
-
-        last = TRANSPORT_RETRIES - 1
-        delay = 0.05
-        for attempt in range(TRANSPORT_RETRIES):
-            try:
-                request = urllib.request.Request(url, data=data, method=method, headers=headers)
-                with urllib.request.urlopen(request, timeout=120) as response:
-                    raw = response.read()
-                    return json.loads(raw) if raw else {}
-            except urllib.error.HTTPError as exc:
-                raw = exc.read()
-                payload = _parse_json(raw.decode(errors="replace")) or {}
-                message = f"HTTP {exc.code} from {method} {path}"
-                gateway = exc.code in (502, 503, 504)
-                if gateway and not replay_safe:
-                    raise UnknownOutcome(payload.get("error") or message, payload) from None
-                if not (exc.code == 429 or gateway) or attempt == last:
-                    raise _classify(payload, message) from None
-            except (urllib.error.URLError, TimeoutError, ConnectionError) as exc:
-                reason = exc.reason if isinstance(exc, urllib.error.URLError) else exc
-                never_sent = isinstance(reason, (ConnectionRefusedError, socket.gaierror))
-                if not (replay_safe or never_sent):
-                    raise UnknownOutcome(f"no response from {self.http} for {method} {path}: {reason}") from None
-                if attempt == last:
-                    raise ObError(f"cannot reach {self.http}: {reason}") from None
-            time.sleep(delay + random.random() * delay)
-            delay = min(delay * 2, 2.0)
-        raise AssertionError("unreachable")
+    def _direct_actor(self) -> list[str]:
+        # A served write's actor is the one its target's token resolves to.
+        return [] if self.target else ["--as", self.actor]
 
     # -- operations ------------------------------------------------------
-    def _retrying(self, attempt):
-        import random
-
-        delay = 0.005
-        for n in range(CONFLICT_RETRIES):
-            try:
-                return attempt()
-            except Conflict:
-                if n == CONFLICT_RETRIES - 1:
-                    raise
-                time.sleep(delay + random.random() * delay)
-                delay = min(delay * 2, CONFLICT_BACKOFF_MAX)
-        raise AssertionError("unreachable")
-
     def _invoke(self, name: str, params: dict, mutation: bool) -> dict:
-        if self.http:
-            body = {"params": params, "expect_mutation": mutation}
-            if self.branch:
-                body["branch"] = self.branch
-            return self._request("POST", f"/queries/{name}", body, replay_safe=not mutation)
         argv = ["mutate" if mutation else "query", name, *self._source(name), *self.address(),
                 "--params", json.dumps(params), "--json"]
         if self.branch:
             argv += ["--branch", self.branch]
         if mutation:
-            argv.append("--quiet")
-            if not self.server:
-                argv += ["--as", self.actor]
-        return self._exec(argv)
+            argv += self._direct_actor()
+        return self._run(argv, read=not mutation)
 
     def query(self, name: str, params: dict | None = None) -> list[dict]:
         return [strip_row(r) for r in self._invoke(name, params or {}, False).get("rows", [])]
 
     def mutate(self, name: str, params: dict) -> dict:
-        return self._retrying(lambda: self._invoke(name, params, True))
+        return self._invoke(name, params, True)
 
     def load(self, rows: list[dict], mode: str) -> dict:
         import tempfile
@@ -394,47 +398,27 @@ class Graph:
             path.write_text("".join(json.dumps(row) + "\n" for row in rows))
             if self.embed:
                 path = self._embed_file(path)
-            if self.http:
-                body = {"data": path.read_text(), "mode": mode}
-                if self.branch:
-                    body["branch"] = self.branch
-                return self._retrying(lambda: self._request("POST", "/load", body, replay_safe=False))
-            argv = ["load", "--data", str(path), "--mode", mode, *self.address(), "--json", "--quiet"]
+            argv = ["load", "--data", str(path), "--mode", mode, *self.address(), "--json"]
             if self.branch:
                 argv += ["--branch", self.branch]
-            if not self.server:
-                argv += ["--as", self.actor]
-            return self._retrying(lambda: self._exec(argv))
+            return self._run(argv + self._direct_actor(), read=False)
 
-    def changes_page(self, token: str | None) -> dict:
-        if self.http:
-            query = {"start": None if token else "beginning", "page_token": token, "limit": 8192,
-                     "branch": self.branch}
-            return self._request("GET", "/changes", query=query)
-        argv = ["changes", "poll", *self.address(), "--json", "--limit", "8192"]
-        argv += ["--page-token", token] if token else ["--start", "beginning"]
+    def changes(self) -> dict:
+        """The whole change feed of the branch; the CLI follows every page."""
+        argv = ["changes", "poll", *self.address(), "--start", "beginning", "--json"]
         if self.branch:
             argv += ["--branch", self.branch]
-        return self._exec(argv)
+        return self._run(argv, read=True)
 
     def branch_op(self, action: str, name: str | None, base: str) -> dict:
-        if self.http:
-            if action == "list":
-                return self._request("GET", "/branches")
-            if action == "create":
-                return self._request("POST", "/branches", {"name": name, "from": base}, replay_safe=False)
-            if action == "merge":
-                return self._request("POST", "/branches/merge", {"source": name, "target": base},
-                                     replay_safe=False)
-            from urllib.parse import quote
-
-            return self._request("DELETE", f"/branches/{quote(name, safe='')}", replay_safe=False)
         argv = ["branch", action, *([name] if name else []), *self.address(), "--json"]
         if action == "create":
             argv += ["--from", base]
         if action == "merge":
             argv += ["--into", base]
-        return self._exec(argv)
+        if action == "delete":
+            argv.append("--yes")  # in JSON mode the CLI deletes a served branch only with --yes
+        return self._run(argv, read=action == "list", rerun_conflicts=False)
 
     def _embed_file(self, path: Path) -> Path:
         """Fill the declared embeddings with OmniGraph's offline pipeline."""
@@ -449,7 +433,7 @@ class Graph:
         spec_path.write_text(json.dumps(spec))
         out = path.with_name(path.stem + ".embedded.jsonl")
         proc = subprocess.run(
-            [self.bin, "embed", "--input", str(path), "--output", str(out), "--spec", str(spec_path)],
+            [*self.cmd, "embed", "--input", str(path), "--output", str(out), "--spec", str(spec_path)],
             capture_output=True, text=True,
         )
         if proc.returncode != 0:
@@ -467,8 +451,10 @@ class Graph:
             row = json.loads(self._embed_file(path).read_text().splitlines()[0])
             return row["data"].get("embedding")
 
-    def raw(self, argv: list[str]) -> dict:
-        return self._exec(argv)
+    def maintain(self, argv: list[str]) -> dict:
+        """A maintenance command on the local store, sent once: these commands
+        keep their own exit codes, and a retry is the caller's decision."""
+        return self._exec([*argv, "--target", self.store, "--json"], read=False)
 
     def parallel(self, calls: list[tuple[str, dict]]) -> list[list[dict]]:
         """Run independent reads concurrently (each waits on I/O, not the GIL)."""
@@ -493,16 +479,34 @@ class Graph:
         return results
 
 
-def _classify(payload: dict | None, fallback: str) -> ObError:
+def _classify(payload: dict | None, returncode: int, fallback: str, read: bool) -> ObError:
+    """Turn a failed command into what ob may do next, from its disposition."""
     payload = payload or {}
-    if "key_conflict" in payload and payload["key_conflict"]:
-        return KeyConflict(payload.get("error", "key conflict"), payload)
-    if "read_set_conflict" in payload and payload["read_set_conflict"]:
-        return Conflict(payload.get("error", "conflict"), payload)
-    return ObError(payload.get("error") or fallback, payload)
+    disposition = payload.get("disposition") or {}
+    effects = disposition.get("effects")
+    if effects is None and not read and returncode != EXIT_USAGE:
+        effects = "unknown"  # an unclassified write failure may still have landed
+    message = payload.get("error") or fallback
+    if effects in ("unknown", "partial") or returncode == EXIT_UNKNOWN:
+        return UnknownOutcome(message, payload)
+    if payload.get("key_conflict"):
+        return KeyConflict(message, payload)
+    if payload.get("read_set_conflict"):
+        return Conflict(message, payload)
+    if effects == "none" and "code" not in payload and LOCKED_CONFIG in message:
+        return Contended(message, payload)
+    never_sent = payload.get("request_dispatched") is False and "http_status" not in payload
+    busy = returncode == EXIT_BUSY or disposition.get("action") == "retry"
+    # A read changes nothing, so a lost answer (a gateway status, or a transport
+    # failure the CLI reports without a code) is safe to ask again.
+    lost_read = read and (payload.get("http_status") in (502, 503, 504) or "code" not in payload)
+    if busy or never_sent or lost_read:
+        return Transient(message, payload)
+    return ObError(message, payload)
 
 
 def _parse_json(text: str) -> dict | None:
+    """The JSON document in a CLI stream; diagnostic lines may come first."""
     text = text.strip()
     if not text:
         return None
@@ -510,9 +514,9 @@ def _parse_json(text: str) -> dict | None:
         value = json.loads(text)
         return value if isinstance(value, dict) else {"rows": value}
     except json.JSONDecodeError:
-        start = text.find("{")
-        if start > 0:
-            return _parse_json(text[start:])
+        start = text.find("\n{")
+        if start >= 0:
+            return _parse_json(text[start + 1:])
         return None
 
 
@@ -552,19 +556,23 @@ def issue_line(row: dict, status: str | None = None) -> str:
 def cmd_init(args, out: Out):
     base = Path(args.dir or os.environ.get("OB_DIR") or Path.cwd() / CONFIG_DIR).resolve()
     cfg_path = base / CONFIG_FILE
+    refuse_retired_settings()
+    if args.server:
+        raise ObError("--server is no longer accepted: register the server as a target in the operator "
+                      "configuration and run `ob init --target NAME`")
     if cfg_path.exists():
         raise ObError(f"already initialized: {cfg_path}")
+    store = None if args.target else local_store(args.store or "graph.omni", base)
     base.mkdir(parents=True, exist_ok=True)
     # Resolve the default actor once, so later commands need not ask git.
     cfg: dict = {"prefix": args.prefix, "embed": bool(args.embed), "actor": args.actor or default_actor({})}
-    binary = omnigraph_binary()
-    if args.server:
-        cfg.update({"server": args.server, "graph": args.graph})
-        detail = f"served graph {args.graph} on {args.server}"
+    if args.target:
+        cfg.update({"target": args.target, "graph": args.graph})
+        detail = f"served graph {args.graph} through target {args.target}"
     else:
         cfg["store"] = args.store or "graph.omni"
-        store = cfg["store"] if "://" in cfg["store"] or os.path.isabs(cfg["store"]) else str(base / cfg["store"])
-        proc = subprocess.run([binary, "init", "--schema", str(SCHEMA), store], capture_output=True, text=True)
+        proc = subprocess.run([*omnigraph_command(), "init", "--schema", str(SCHEMA), store],
+                              capture_output=True, text=True)
         if proc.returncode != 0:
             raise ObError(f"omnigraph init failed: {proc.stderr.strip() or proc.stdout.strip()}")
         detail = f"local graph {store}"
@@ -1172,7 +1180,7 @@ def cmd_similar(args, out: Out, g: Graph, cfg: dict):
         found = g.query("show", {"id": text})
         if found:
             text = found[0]["i"]["title"]
-    rows = g.query("similar", {"q": embedding_query("Issue", "title", text)})
+    rows = g.query("similar", {"q": text})
     out.emit(rows, lambda: "\n".join(f"{r['distance']:.3f}  {issue_line(r)}" for r in rows))
 
 
@@ -1195,7 +1203,7 @@ def cmd_recall(args, out: Out, g: Graph, cfg: dict):
     if not args.query:
         rows = g.query("memories")
     elif g.embed and args.semantic:
-        rows = g.query("recall_semantic", {"q": embedding_query("Memory", "body", args.query)})
+        rows = g.query("recall_semantic", {"q": args.query})
     else:
         rows = g.query("recall", {"q": args.query})
     out.emit(rows, lambda: "\n".join(f"{r['slug']}: {r['body']}" for r in rows) or "no memories")
@@ -1219,29 +1227,23 @@ def cmd_stats(args, out: Out, g: Graph, cfg: dict):
 def cmd_history(args, out: Out, g: Graph, cfg: dict):
     """Who changed an issue, when, and how, from the commit history itself."""
     events = []
-    token = None
-    while True:
-        page = g.changes_page(token)
-        for block in page.get("blocks", []):
-            cause = block.get("cause", {})
-            for change in block.get("changes", []):
-                ends = change.get("after", change.get("before", {})).get("endpoints") or {}
-                if change.get("id") != args.id and args.id not in (ends.get("from"), ends.get("to")):
-                    continue
-                before = (change.get("before") or {}).get("properties") or {}
-                after = (change.get("after") or {}).get("properties") or {}
-                diff = {k: [before.get(k), after.get(k)] for k in sorted(set(before) | set(after))
-                        if before.get(k) != after.get(k) and k not in ("updated_at", "embedding")}
-                events.append({
-                    "commit": cause.get("graph_commit_id"),
-                    "actor": cause.get("actor") or cause.get("actor_id"),
-                    "at": iso(dt.datetime.fromtimestamp(cause.get("authored_at", 0) / 1e6, dt.timezone.utc)),
-                    "type": change["type"]["name"], "op": change["op"],
-                    "endpoints": ends or None, "changed": diff,
-                })
-        token = page.get("next_page_token")
-        if not token:
-            break
+    for block in g.changes().get("blocks", []):
+        cause = block.get("cause", {})
+        for change in block.get("changes", []):
+            ends = change.get("after", change.get("before", {})).get("endpoints") or {}
+            if change.get("id") != args.id and args.id not in (ends.get("from"), ends.get("to")):
+                continue
+            before = (change.get("before") or {}).get("properties") or {}
+            after = (change.get("after") or {}).get("properties") or {}
+            diff = {k: [before.get(k), after.get(k)] for k in sorted(set(before) | set(after))
+                    if before.get(k) != after.get(k) and k not in ("updated_at", "embedding")}
+            events.append({
+                "commit": cause.get("graph_commit_id"),
+                "actor": cause.get("actor_id"),
+                "at": iso(dt.datetime.fromtimestamp(cause.get("authored_at", 0) / 1e6, dt.timezone.utc)),
+                "type": change["type"]["name"], "op": change["op"],
+                "endpoints": ends or None, "changed": diff,
+            })
 
     def human():
         lines = []
@@ -1386,10 +1388,10 @@ def cmd_import(args, out: Out, g: Graph, cfg: dict):
 
     load_chunks(nodes, 2000)
     load_chunks(edges, 8000)
-    # Build the declared indexes now: until a table's first full-text index
-    # exists, unindexed full-text search matches case-sensitively.
+    # Compact and index the bulk load now, as OmniGraph advises after a large
+    # load; reads are correct without it, but scan what the indexes miss.
     if g.store:
-        g.raw(["optimize", "--store", g.store, "--json"])
+        g.maintain(["optimize"])
     out.emit({"issues": len(nodes), "links": len(edges), "skipped_links": skipped, "commits": commits},
              f"imported {len(nodes)} issues and {len(edges)} links in {commits} commit(s)"
              + (f"; skipped {skipped}" if skipped else ""))
@@ -1452,12 +1454,11 @@ def cmd_branch(args, out: Out, g: Graph, cfg: dict):
 
 
 def cmd_maintain(args, out: Out, g: Graph, cfg: dict):
-    if g.server:
+    if g.target:
         raise ObError("maintenance runs against storage; run it where the cluster storage is reachable")
-    report = {"optimize": g.raw(["optimize", "--store", g.store, "--json"])}
+    report = {"optimize": g.maintain(["optimize"])}
     if args.cleanup:
-        report["cleanup"] = g.raw(["cleanup", "--store", g.store, "--keep", str(args.keep),
-                                   "--confirm", "--json"])
+        report["cleanup"] = g.maintain(["cleanup", "--keep", str(args.keep), "--confirm"])
     out.emit(report, "optimized" + (f"; kept the newest {args.keep} commits" if args.cleanup else ""))
 
 
@@ -1494,9 +1495,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("init", help="create a local graph, or point at a served one")
     s.add_argument("--prefix", default="ob")
-    s.add_argument("--store", help="graph URI (default .ob/graph.omni); file://, s3:// or az://")
-    s.add_argument("--server", help="omnigraph server name or URL (served mode)")
+    s.add_argument("--store", help="local graph path or file:// URI (default .ob/graph.omni)")
+    s.add_argument("--target", help="server target in the operator configuration (served mode)")
     s.add_argument("--graph", default="beads", help="graph id on the server")
+    s.add_argument("--server", help=argparse.SUPPRESS)  # OmniGraph 0.13; refused with a pointer to --target
     s.add_argument("--embed", action="store_true", help="store title and memory embeddings")
     s.set_defaults(fn=cmd_init, needs_graph=False)
 

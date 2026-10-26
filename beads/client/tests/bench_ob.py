@@ -1,18 +1,19 @@
 """Measure ob on a synthetic project: command latency and parallel agents.
 
     python3 tests/bench_ob.py --issues 2000 --agents 8 --seconds 20
-    OB_TOKEN=... python3 tests/bench_ob.py --server http://127.0.0.1:8080
+    python3 tests/bench_ob.py --target local-writer [--graph beads]
 
 Builds a random dependency DAG (with epics and parent links) in bd's JSONL
 format, imports it through `ob import`, then times each command and runs
 parallel agents that loop `ready --claim` / `close`. Every claim is checked:
 no issue may be claimed by two agents.
 
-By default it uses a scratch local graph. `--server` measures a running
-beads server instead (see ../README.md#local-setup) with a writer token in
-OB_TOKEN; everything happens on a scratch branch, deleted afterwards, so the
-graph's main branch is untouched. The benchmark never starts or bootstraps a
-server itself.
+By default it uses a scratch local graph. `--target` measures a running
+beads server instead, through a server target with a writer token in the
+operator configuration (see ../README.md#local-setup; set OMNIGRAPH_HOME, or
+OB_OPERATOR_CONFIG, as for ob). Everything happens on a scratch branch,
+deleted afterwards, so the graph's main branch is untouched. The benchmark
+never starts or bootstraps a server itself.
 """
 
 from __future__ import annotations
@@ -67,11 +68,14 @@ LABELS = ["backend", "frontend", "infra", "docs", "urgent", "agent"]
 
 
 class Runner:
-    def __init__(self, workdir: str, server_url: str | None = None, token: str | None = None,
+    def __init__(self, workdir: str, target: str | None = None, graph: str = "beads",
                  branch: str | None = None):
-        if server_url:
-            self.env = clean_env(OB_OMNIGRAPH=OMNIGRAPH, OB_SERVER=server_url, OB_GRAPH="beads", OB_TOKEN=token,
-                                 OB_ACTOR="bench")
+        if target:
+            # The target's operator configuration and token variable come from the caller.
+            keep = {k: v for k, v in os.environ.items()
+                    if k.startswith(("OMNIGRAPH_", "OG_")) or k == "OB_OPERATOR_CONFIG"}
+            self.env = clean_env(OB_OMNIGRAPH=OMNIGRAPH, OB_TARGET=target, OB_GRAPH=graph, OB_ACTOR="bench",
+                                 **keep)
         else:
             self.env = clean_env(OB_OMNIGRAPH=OMNIGRAPH, OB_DIR=f"{workdir}/.ob", OB_ACTOR="bench")
         self.branch = ["--branch", branch] if branch else []
@@ -79,7 +83,7 @@ class Runner:
     def ob(self, *args, actor: str | None = None, check: bool = True, on_branch: bool = True):
         env = dict(self.env)
         if actor:
-            env["OB_ACTOR"] = actor  # one token for all agents: the claims still carry each name
+            env["OB_ACTOR"] = actor  # one target for all agents: the claims still carry each name
         branch = self.branch if on_branch else []
         proc = subprocess.run([OB, "--json", *branch, *args], capture_output=True, text=True, env=env)
         if check and proc.returncode != 0:
@@ -102,18 +106,17 @@ def main() -> int:
     parser.add_argument("--seconds", type=float, default=20)
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--keep", action="store_true", help="keep the scratch graph")
-    parser.add_argument("--server", help="URL of a running beads server; needs a writer token in OB_TOKEN")
+    parser.add_argument("--target", help="server target of a running beads server, with a writer token")
+    parser.add_argument("--graph", default="beads", help="graph id on that server")
     args = parser.parse_args()
 
     workdir = tempfile.mkdtemp(prefix="ob-bench-")
     branch = None
     rows = []
     try:
-        if args.server:
-            if not os.environ.get("OB_TOKEN"):
-                parser.error("--server needs a writer token in OB_TOKEN")
+        if args.target:
             name = f"bench-{os.getpid()}"
-            run = Runner(workdir, args.server, os.environ["OB_TOKEN"], name)
+            run = Runner(workdir, args.target, args.graph, name)
             run.ob("branch", "create", name, on_branch=False)
             branch = name  # delete it afterwards
         else:
@@ -196,7 +199,7 @@ def main() -> int:
                      f"{len(claims)} issues done, {len(claims) / elapsed:.1f}/s, "
                      f"{len(doubles)} double claims, {len(errors)} errors"))
 
-        mode = f"served over HTTP, branch {branch}" if args.server else "local store"
+        mode = f"served through target {args.target}, branch {branch}" if args.target else "local store"
         print(f"\nob on OmniGraph, {mode}: {args.issues} issues, {links} links "
               f"({subprocess.run([OMNIGRAPH, 'version'], capture_output=True, text=True).stdout.splitlines()[0]})\n")
         print("| operation | median ms | detail |")

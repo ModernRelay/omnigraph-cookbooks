@@ -1,6 +1,6 @@
 # Runtime for an already-applied cluster. Bootstrap and ownership handoff
 # are explicit operator steps; see README.md. No startup storage mutations.
-ARG OMNIGRAPH_REF=v0.13.0
+ARG OMNIGRAPH_REF=v0.14.0
 ARG OMNIGRAPH_ASSET=omnigraph-linux-x86_64
 
 # The released Linux binaries need glibc >= 2.39. Match image and asset arch.

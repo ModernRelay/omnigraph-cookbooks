@@ -72,7 +72,7 @@ class Ob(Tool):
 
     def env(self, actor: str):
         env = {**os.environ, "OB_OMNIGRAPH": OMNIGRAPH, "OB_DIR": str(self.workdir / ".ob"), "OB_ACTOR": actor}
-        for key in ("OB_STORE", "OB_SERVER"):
+        for key in ("OB_STORE", "OB_TARGET", "OB_SERVER", "OB_TOKEN"):
             env.pop(key, None)
         return env
 
@@ -88,7 +88,7 @@ def ready_set_ob(tool: Ob) -> set[str]:
     start = source.index("query ready()")
     body = source[start:source.index("\n}\n", start) + 2]
     body = body.replace("limit 500", "limit 1000000")
-    proc = subprocess.run([OMNIGRAPH, "query", "-e", body, "--store", str(tool.workdir / ".ob" / "graph.omni"),
+    proc = subprocess.run([OMNIGRAPH, "query", "-e", body, "--target", str(tool.workdir / ".ob" / "graph.omni"),
                            "--json"], capture_output=True, text=True, check=True)
     return {r["i.slug"] for r in json.loads(proc.stdout)["rows"]}
 

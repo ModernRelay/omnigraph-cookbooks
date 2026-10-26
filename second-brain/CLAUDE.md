@@ -15,7 +15,7 @@ The reference seed is **Alex Chen**, a fictional 36-year-old senior product desi
 - `seed.md` / `seed.jsonl` — Seed dataset (human-readable / loadable).
 - `queries/*.gq` — Read and mutation queries.
 - `cluster.yaml` — Deployment declaration (graph `brain`, schema, stored queries).
-- `omnigraph-config.example.yaml` — Example operator config; merge its aliases into your per-user `~/.omnigraph/config.yaml`.
+- `omnigraph-config.example.yaml` — Read aliases; merge them into the operator config from the [local setup](../README.md#local-setup).
 
 For general Omnigraph ops — schema language, queries, loading, branches,
 cluster commands, CLI — see the **omnigraph** skill and
@@ -23,25 +23,25 @@ cluster commands, CLI — see the **omnigraph** skill and
 
 ## Setup
 
-Use the shared [0.13 local setup](../README.md#local-setup) with cookbook
+Use the shared [local setup](../README.md#local-setup) with cookbook
 `second-brain` and graph `brain`. It owns authentication, the bootstrap writer-lock
 handoff, readiness, and served seed loading. Apply later configuration edits with
 the [live update workflow](../README.md#live-updates).
 
-Graph id `brain`. Stored queries and their parameters: `omnigraph queries list --cluster . --graph brain`.
-Alias args bind by name to `$params`: `omnigraph alias person-tasks-i-owe per-theo` is `omnigraph query person_tasks_i_owe --graph brain --params '{"slug":"per-theo"}'`.
+Graph id `brain`. Stored queries and their parameters: `omnigraph queries list --target local --graph brain`.
+Aliases pass parameters by name: `omnigraph alias person-tasks-i-owe --params '{"slug":"per-theo"}'` is `omnigraph query person_tasks_i_owe --target local-reader --graph brain --params '{"slug":"per-theo"}'`.
 
 ## Writing
 
-Aliases are read-only; mutations run as `omnigraph mutate <name> --params '<json>'` with every
-non-optional property supplied. Signatures live in `queries/mutations.gq`. Working example:
+Aliases are read-only; mutations run as `omnigraph mutate <name> --target local-writer --graph brain --params '<json>'`
+with every non-optional property supplied. Signatures live in `queries/mutations.gq`. Working example:
 
 ```bash
-omnigraph mutate add_task --graph brain --params '{"slug":"tk-theo-whisky","name":"Bring Theo the Lagavulin 16","status":"next","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
-omnigraph mutate link_task_for_person --graph brain --params '{"task":"tk-theo-whisky","person":"per-theo"}'
+omnigraph mutate add_task --target local-writer --graph brain --params '{"slug":"tk-theo-whisky","name":"Bring Theo the Lagavulin 16","status":"next","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+omnigraph mutate link_task_for_person --target local-writer --graph brain --params '{"task":"tk-theo-whisky","person":"per-theo"}'
 ```
 
-With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
+`--graph` can be omitted only for a target with `default_graph`; the shared setup's targets have none.
 
 ## Domain Model
 
