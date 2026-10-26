@@ -36,6 +36,10 @@ vc-os/P9_MIGRATION.md
 # Cluster control-plane local state (ledger, catalog, approvals)
 __cluster/
 
+# beads client: local graphs from `ob init`, Python bytecode
+.ob/
+__pycache__/
+
 # Legacy combined config (RFC-008) — cookbooks ship cluster.yaml + an
 # omnigraph-config.example.yaml; per-operator config is ~/.omnigraph/config.yaml
 omnigraph.yaml

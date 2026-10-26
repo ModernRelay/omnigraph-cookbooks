@@ -38,8 +38,8 @@ names and numbers are invented.
   depends on it. Field edits use `expected` as a compare-and-swap.
 - `record_test_run` writes the run and the test case's status in one commit.
   Keep them together.
-- `act-agent` writes only on unprotected branches and cannot merge. The shared
-  checker asserts this; do not widen the agent rules.
+- `act-agent` writes only on unprotected branches and cannot merge or delete a
+  branch. The shared checker asserts this; do not widen the agent rules.
 - Keep the seed vendor-neutral and fictional. Standards are cited by public
   identifier with descriptive clause names, never invented clause numbers.
 - After a schema, query or seed change, re-run the reads against a fresh seed

@@ -20,8 +20,9 @@ every decision to a person.
 
 Check `omnigraph version` (0.13). Use the server and token you were given; the
 token selects the `act-agent` actor. That actor can read, invoke stored
-queries, and create, write and delete unprotected branches. It cannot write to
-`main` or merge. A 403 on a write means you addressed `main`: use a branch.
+queries, and create and write unprotected branches. It cannot write to `main`,
+merge or delete a branch; the engineer who merges your work cleans up. A 403
+on a write means you addressed `main`: use a branch.
 
 List the stored queries and their parameters before you start. Use them rather
 than ad-hoc queries; they encode the program's rules.
@@ -101,7 +102,7 @@ the change. If you can't name a number, say what evidence would fix it.
 
 ## Guardrails
 
-- Never write to `main`, never merge, never delete a branch you did not create.
+- Write only on branches you created, never on an engineer's branch.
 - Never revise a requirement with `safety_critical: true`. Raise a finding
   instead.
 - Never set maturity to `verified` or `frozen`, resolve a finding, change a

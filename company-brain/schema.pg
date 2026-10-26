@@ -1,0 +1,192 @@
+// OmniGraph company brain: the shared context of one company, kept coherent
+// by its people and by their agents.
+//
+// Four layers, connected only by named edges:
+//   people and org  Person, Actor, Team, Project
+//   evidence        Source: a meeting, thread, document, email or ticket
+//   claims          Claim: one statement someone made in a source, with the
+//                   exact quote and where in the source it is
+//   facts           Decision and ActionItem, promoted from claims
+//
+// Rules the shape encodes:
+//   - Extracting is not deciding. Agents record what was said as claims; a
+//     separate step verifies claims and promotes them to decisions and
+//     action items.
+//   - Facts rest on claims and claims quote their source, with typed edges,
+//     never a free-text source field.
+//   - Decisions are never rewritten. A changed decision is a new Decision,
+//     and the old one points to it with SupersededBy. "Current",
+//     "superseded" and "contested" are derived by the queries, not stored.
+//   - One Person per human, with emails and chat handles as properties. An
+//     Actor is someone who reads or writes this graph: a person's own login,
+//     or an agent acting for a person.
+//   - Creating is not overwriting. Inserting a keyed node upserts the whole
+//     row, so each create also writes one unkeyed edge capped at one
+//     (ClaimFrom, DecisionAbout, AssignedTo, ActsFor). Creating a slug that
+//     already exists adds a second such edge, and the whole write is refused
+//     with a @card violation instead of resetting what a person reviewed or
+//     retired. Every other edge is keyed, so re-running a link is a no-op.
+//   - Org history is appended, not rewritten. A membership is one stint,
+//     keyed by its start date; leaving writes LeftTeam for that stint, so
+//     recording a stint again cannot reopen it and rejoining adds a new one.
+//   - Two kinds of time: when something happened (occurred_at, decided_at)
+//     and when the brain learned it (recorded_at, and the commit history).
+
+node Person @description("Someone in the real world: an employee, a customer, a vendor contact. One node per human. Being a Person grants nothing; access to the graph belongs to an Actor.")
+            @instruction("Resolve every handle a source gives with person_by_handle before creating a Person; add_person replaces the whole row of an existing slug. Store handles lowercased and trimmed. Change a name, title or handle with update_person and mark someone who left with deactivate_person.") {
+    slug: String @key
+    name: String
+    title: String?
+    active: Bool? @description("false for someone who left (deactivate_person); they keep their history")
+    email: String? @unique
+    slack: String? @unique @description("Slack member ID, lowercased: u01alice")
+    github: String? @unique
+}
+
+node Actor @description("Someone who reads or writes this graph: a person's own login or a software agent. slug is the OmniGraph actor id the bearer token selects, so commit history joins to this node.")
+           @instruction("Register with add_actor, which refuses a slug that already exists; retire with deactivate_actor. Agents write only on the branch they were given; they cannot write main, merge or delete branches. The policy cannot tell one agent's branch from another's, so a person checks each commit's actor before merging.") {
+    slug: String @key
+    kind: enum(human, agent)
+    name: String
+    purpose: String?
+    active: Bool?
+}
+
+node Team @description("An organizational unit: a team, squad or department. The company itself is the root team.") {
+    slug: String @key
+    name: String
+}
+
+node Project @description("A time-bound effort with an owner and an outcome.") {
+    slug: String @key
+    name: String
+    status: enum(planned, active, paused, done, cancelled) @index
+    target_date: Date?
+}
+
+node Source @description("A record the brain learned from: a meeting, chat thread, document, email or ticket. Claims are extracted from Sources; a Source is never edited to say something new.")
+            @instruction("slug is <system>:<native id> (meet:…, slack:<channel>/<ts>, doc:…), so ingesting the same item twice upserts instead of duplicating.") {
+    slug: String @key
+    kind: enum(meeting, thread, document, email, ticket, other)
+    title: String @index
+    url: String?
+    occurred_at: DateTime @index @description("When the meeting happened or the message was sent")
+    summary: String?
+}
+
+node Claim @description("One statement someone made in a source, as they made it: a fact, a proposal, a commitment or a risk. Extracting a claim does not make it true; it stays unverified until someone verifies or rejects it.")
+           @instruction("Write claims with record_claim. quote is the exact text from the source, never a paraphrase; statement says the same thing in one plain sentence. Extraction leaves status unverified. record_claim refuses a slug that already exists. Never edit a claim's statement or quote; reject it and record a new one.") {
+    slug: String @key
+    statement: String @index
+    quote: String @index @description("The exact words in the source; search_quotes finds a claim by them")
+    locator: String? @description("Where in the source: a timestamp, a section, a message ts")
+    kind: enum(fact, proposal, commitment, risk)
+    status: enum(unverified, verified, rejected) @index
+    recorded_at: DateTime @description("When the brain learned it")
+}
+
+node Decision @description("A commitment to a course of action, made by named people and resting on claims. Never rewritten: a changed decision is a new Decision that the old one points to with SupersededBy.")
+              @instruction("Write decisions with promote_claim or propose_successor, which rest the decision on a claim in the same commit. Both refuse a slug that already exists. Agents write status proposed on a branch; a person merges it, then verifies the claims and accepts on main, where agents cannot write. Never edit statement; supersede instead. Fill rationale only from what the claims say.") {
+    slug: String @key
+    title: String @index
+    statement: String @description("What was decided, in one or two sentences")
+    rationale: String? @description("Why, as stated in the source: drivers and the options that lost")
+    status: enum(proposed, accepted, rejected, deprecated) @index
+    decided_at: DateTime? @description("When it was decided in the world")
+    recorded_at: DateTime @description("When the brain learned it")
+}
+
+node ActionItem @description("Something one person committed to do, usually by a date, promoted from a commitment claim.")
+                @instruction("Write action items with add_action_item, which sets the owner and rests the item on its claim in the same commit. The owner, not an agent, closes the item.") {
+    slug: String @key
+    title: String
+    status: enum(open, in_progress, done, cancelled) @index
+    due: Date? @index
+    completed_at: DateTime?
+    recorded_at: DateTime
+}
+
+// ── People and org ────────────────────────────────────────────────────────
+
+edge MemberOf: Person -> Team @description("One stint on a team, with an optional role, keyed by the date it started. It is current until a LeftTeam with the same since closes it; a move closes one stint and opens another.") {
+    role: String?
+    since: Date
+    @key(@src, @dst, since)
+}
+
+edge LeftTeam: Person -> Team @description("Closes the MemberOf stint that started on since. A separate edge, so recording the stint again cannot reopen it.") {
+    since: Date
+    until: Date
+    @key(@src, @dst, since)
+}
+
+edge PartOf: Team -> Team @card(0..1) @description("The source team sits inside the target team.") {
+    @key(@src, @dst)
+}
+
+// Unkeyed on purpose: add_actor for a slug that already exists adds a second
+// ActsFor and is refused, so a retired actor is never reactivated.
+edge ActsFor: Actor -> Person @card(0..1) @description("The person behind this actor: their own login, or the person accountable for an agent.")
+
+edge OwnedBy: Project -> Person @card(0..1) @description("The person accountable for the project.") {
+    @key(@src, @dst)
+}
+
+edge RunBy: Project -> Team @card(0..1) @description("The team doing the project.") {
+    @key(@src, @dst)
+}
+
+// ── Evidence and claims ───────────────────────────────────────────────────
+
+edge SourceAbout: Source -> Project @description("The source discusses this project.") {
+    @key(@src, @dst)
+}
+
+// Unkeyed on purpose: record_claim for a slug that already exists adds a
+// second ClaimFrom and is refused, so the claim is never overwritten.
+edge ClaimFrom: Claim -> Source @card(1..1) @description("The source the claim was made in. The same statement in two sources is two claims.")
+
+edge ClaimedBy: Claim -> Person @card(1..1) @description("Who said or wrote it; every claim has one, and record_claim requires it. Whether they had the authority to decide it is a separate question.") {
+    @key(@src, @dst)
+}
+
+edge Contradicts: Claim -> Claim @description("The source claim says the opposite of the target; point the newer claim at the older one. A pair with neither side rejected is contested.") {
+    @key(@src, @dst)
+}
+
+// ── Decisions ─────────────────────────────────────────────────────────────
+
+edge BasedOn: Decision -> Claim @card(1..) @description("The claims a decision rests on: the proposal it promotes and the facts behind it.") {
+    @key(@src, @dst)
+}
+
+edge DecidedBy: Decision -> Person @description("A person who made the decision.") {
+    @key(@src, @dst)
+}
+
+// Unkeyed on purpose: promoting or proposing a decision under a slug that
+// already exists adds a second DecisionAbout and is refused.
+edge DecisionAbout: Decision -> Project @card(1..1) @description("The project the decision concerns.")
+
+edge SupersededBy: Decision -> Decision @card(0..1) @description("The source decision was replaced by the target. A decision is superseded at most once, so two competing successors collide at merge. The full why is in the claims: the successor rests on a claim that contradicts one behind the original.") {
+    reason: String? @description("One line on why, as stated in the source")
+    @key(@src, @dst)
+}
+
+// ── Commitments ───────────────────────────────────────────────────────────
+
+// Unkeyed on purpose: add_action_item for a slug that already exists adds a
+// second AssignedTo and is refused, so a closed item is never reopened.
+edge AssignedTo: ActionItem -> Person @card(0..1) @description("The one person who owns the action item.")
+
+edge ActionFrom: ActionItem -> Claim @card(1..) @description("The commitment claim the action item was promoted from.") {
+    @key(@src, @dst)
+}
+
+edge FollowsFrom: ActionItem -> Decision @card(0..1) @description("The decision this action item follows from, if any.") {
+    @key(@src, @dst)
+}
+
+edge ActionAbout: ActionItem -> Project @card(0..1) @description("The project the action item belongs to.") {
+    @key(@src, @dst)
+}

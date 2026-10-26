@@ -1,8 +1,17 @@
 # Example roles. Tokens select actors; permissions come from this applied policy.
 # Engineers run as writers and own `main`. An AI agent runs as act-agent: it
-# reads everything and invokes stored queries, but writes only on unprotected
-# branches and cannot merge, so every agent change reaches the program through
-# an engineer's review and merge.
+# reads everything, invokes stored queries, creates branches and writes only on
+# unprotected branches. It cannot write main, merge or delete a branch, so every
+# agent change reaches the program through an engineer's review and merge.
+#
+# What this policy cannot enforce, and the review before a merge covers instead:
+# - Branch ownership. branch_scope knows only protected and unprotected, so an
+#   agent can write on any unprotected branch, including an engineer's. Every
+#   commit records its actor; check them before merging.
+# - Which stored query an agent runs. invoke_query covers the whole catalog, so
+#   an agent can run review_requirement, set_maturity or record_baseline on its
+#   own branch. Those are engineering decisions; such a commit from act-agent is
+#   a reason not to merge.
 version: 1
 groups:
   readers: [act-admin, act-writer, act-reader, act-agent]
@@ -38,7 +47,7 @@ rules:
   - id: agents-open-branches
     allow:
       actors: { group: agents }
-      actions: [branch_create, branch_delete]
+      actions: [branch_create]
       target_branch_scope: unprotected
   - id: change-schema
     allow:

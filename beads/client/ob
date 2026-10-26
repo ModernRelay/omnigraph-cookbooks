@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+"""ob: beads on OmniGraph. The implementation is ob_cli.py, kept as a module so
+Python caches its bytecode between the many short runs an agent makes."""
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from ob_cli import main  # noqa: E402
+
+sys.exit(main())

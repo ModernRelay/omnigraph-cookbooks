@@ -182,8 +182,8 @@ is the graph's commit log; no export or document copy is needed.
 
 The graph policy gives an AI agent its own actor, `act-agent`. It reads
 everything and invokes stored queries, but it can only write on unprotected
-branches and cannot merge, so every agent change reaches `main` through an
-engineer's merge:
+branches and cannot merge or delete a branch, so every agent change reaches
+`main` through an engineer's merge:
 
 ```bash
 export OMNIGRAPH_TOKEN_LOCAL=local-agent-token
@@ -197,8 +197,11 @@ omnigraph mutate raise_finding --params '...'   # refused on main: HTTP 403
 [`skill/SKILL.md`](skill/SKILL.md) is a skill for such an agent: the checks to
 run, how to write a checkable requirement, and the guardrails. Agents mark what
 they draft `review_status: ai_generated`; `awaiting_review` lists it until a
-person reviews it. On a server with OIDC configured, the stored reads are also
-MCP tools; writes go through `omnigraph mutate` or HTTP.
+person reviews it. The policy cannot limit which stored queries an agent runs,
+so before merging an agent's branch, check its commits for decisions that
+belong to engineers, such as `review_requirement` or `record_baseline`. On a
+server with OIDC configured, the stored reads are also MCP tools; writes go
+through `omnigraph mutate` or HTTP.
 
 ### Reacting to changes
 
