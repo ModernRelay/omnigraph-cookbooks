@@ -18,19 +18,27 @@ every decision to a person.
 
 ## Setup
 
-Check `omnigraph version` (0.13). Use the server and token you were given; the
-token selects the `act-agent` actor. That actor can read, invoke stored
-queries, and create and write unprotected branches. It cannot write to `main`,
-merge or delete a branch; the engineer who merges your work cleans up. A 403
-on a write means you addressed `main`: use a branch.
+Check `omnigraph version` (0.14). Use the server target you were given, here
+`local-agent` from the cookbook's local setup; its token selects the
+`act-agent` actor and never appears in your commands. That actor can read,
+invoke stored queries, and create and write unprotected branches. It cannot
+write to `main`, merge, publish or delete a branch; the engineer who merges
+your work cleans up. A `forbidden` refusal on a write means you addressed
+`main`: use a branch. `omnigraph access` lists what you may do.
 
 List the stored queries and their parameters before you start. Use them rather
 than ad-hoc queries; they encode the program's rules.
 
 ```bash
-omnigraph queries list --cluster <cookbook folder> --graph program
-omnigraph query open_findings --server <URL> --graph program --json
+omnigraph access --target local-agent --graph program --branch main
+omnigraph queries list --target local-agent --graph program
+omnigraph query open_findings --target local-agent --graph program --json
 ```
+
+If your host connects through MCP (`omnigraph mcp --target local-agent --graph
+program`), each stored read is a call to the `query` tool. Write through the
+stored mutations below with `omnigraph mutate`, not with MCP's `mutate` tool,
+which takes free GQ text.
 
 ## Read before you write
 
@@ -66,8 +74,8 @@ raised for the same requirement and check.
 Work on a branch named for the task, for example `agent-checks-2026-10-12`:
 
 ```bash
-omnigraph branch create agent-checks-2026-10-12 --server <URL> --graph program
-omnigraph mutate raise_finding --server <URL> --graph program --branch agent-checks-2026-10-12 \
+omnigraph branch create agent-checks-2026-10-12 --target local-agent --graph program
+omnigraph mutate raise_finding --target local-agent --graph program --branch agent-checks-2026-10-12 \
   --params '{"slug":"fnd-stale-req-lv-mass","check":"stale_verification","severity":"warning",
              "message":"tc-mass-props passed on 2026-08-20; req-lv-mass changed on 2026-09-29.",
              "requirement":"req-lv-mass","raised_by":"<your engineer slug>"}'
@@ -112,16 +120,22 @@ the change. If you can't name a number, say what evidence would fix it.
 
 ## Write outcomes
 
-- `0 nodes` from an update means its `where` no longer matched: the row
-  changed since you read it, or the condition already holds. Re-read before
-  trying again.
-- A `read_set_conflict` had no effect; run it again.
-- A timeout or an unknown outcome may have committed. Read the row or the
-  branch's `commit list` before you replay anything.
+Every failed write reports a `disposition`, and the CLI's exit code follows it.
+
+- Exit 0 with `0 nodes` from an update means its `where` no longer matched:
+  the row changed since you read it, or the condition already holds. Re-read
+  before trying again.
+- Exit 1, `effects: none`: nothing changed. A `forbidden` code means you wrote
+  where you may not; a `conflict` (another commit got there first) means read
+  the current state and decide again, not replay blindly.
+- Exit 2, `effects: unknown` or `partial`: the write may have committed. Read
+  the row or the branch's `commit list` before you replay anything.
+- Exit 75: the server was busy and started nothing; wait as `Retry-After`
+  says, then try once more.
 
 ## Report
 
 End with a short summary for the engineer: the branch name, the findings you
 raised and on which requirements, the changes you proposed, and which ones
-need a decision. They review the branch with the same stored queries
-(`--branch <name>`) and merge what they accept.
+need a decision. They review the branch with `branch diff` and the same stored
+queries (`--branch <name>`), and merge what they accept.

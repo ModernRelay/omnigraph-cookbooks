@@ -1,8 +1,8 @@
 # Example roles. Tokens select actors; permissions come from this applied policy.
 # Engineers run as writers and own `main`. An AI agent runs as act-agent: it
 # reads everything, invokes stored queries, creates branches and writes only on
-# unprotected branches. It cannot write main, merge or delete a branch, so every
-# agent change reaches the program through an engineer's review and merge.
+# unprotected branches. It cannot write main, merge, publish or delete a branch,
+# so every agent change reaches the program through an engineer's review and merge.
 #
 # What this policy cannot enforce, and the review before a merge covers instead:
 # - Branch ownership. branch_scope knows only protected and unprotected, so an
@@ -38,6 +38,15 @@ rules:
     allow:
       actors: { group: writers }
       actions: [branch_create, branch_delete, branch_merge]
+      target_branch_scope: any
+  # A merge written `as commit` waits unpublished, so the review gate can run
+  # against the exact merged result before an engineer publishes or drops it.
+  # Anyone who may merge may also merge directly: this is a review habit, not
+  # an approval boundary.
+  - id: publish-reviewed-merges
+    allow:
+      actors: { group: writers }
+      actions: [commit_publish, commit_drop]
       target_branch_scope: any
   - id: agents-write-on-branches
     allow:

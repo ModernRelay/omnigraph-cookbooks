@@ -16,7 +16,7 @@ names and numbers are invented.
 ## Key Files
 
 - `schema.pg` — 15 node types, 27 edge types.
-- `queries/program.gq` — 38 stored reads.
+- `queries/program.gq` — 39 stored reads.
 - `queries/mutations.gq` — 21 stored writes; updates re-check their state.
 - `seed.jsonl` / `seed.md` — reference seed. Keep them in sync; `seed.md`
   lists what each read must return on the fresh seed.
@@ -26,7 +26,7 @@ names and numbers are invented.
 ## Rules
 
 - Graph id `program`. Stored queries and parameters:
-  `omnigraph queries list --cluster . --graph program`.
+  `omnigraph queries list --target local --graph program`.
 - Do not add stored status fields for anything a query derives: no
   "verified", "over budget", "stale" or "ready for review" flags. Extend the
   query instead.
@@ -38,8 +38,12 @@ names and numbers are invented.
   depends on it. Field edits use `expected` as a compare-and-swap.
 - `record_test_run` writes the run and the test case's status in one commit.
   Keep them together.
-- `act-agent` writes only on unprotected branches and cannot merge or delete a
-  branch. The shared checker asserts this; do not widen the agent rules.
+- `act-agent` writes only on unprotected branches and cannot merge, publish or
+  delete a branch. The shared checker asserts this; do not widen the agent
+  rules. Writers may publish and drop unpublished commits, for the review gate
+  on a merge written `as commit`.
+- `budget_rollup`, `limit_check` and `limit_violations` share one comparison
+  rule (`max`: value above the limit; `min`: below). Change them together.
 - Keep the seed vendor-neutral and fictional. Standards are cited by public
   identifier with descriptive clause names, never invented clause numbers.
 - After a schema, query or seed change, re-run the reads against a fresh seed

@@ -36,15 +36,16 @@ unit) except where the limit is two-sided or a protocol.
 ### Budgets
 
 `budget_rollup` adds up every parameter of the requirement's quantity on the
-blocks beneath the one it is allocated to:
+blocks beneath the one it is allocated to, and flags a total that breaks the
+limit:
 
-| Requirement | Limit | Allocated | Contributors | |
-|---|---|---|---|---|
-| `dc-eps-generation` | min 180 W | 186 W | 1 | closes |
-| `dc-pl-mass` | max 28 kg | **30.8 kg** | 2 | **over by 2.8 kg** |
-| `dc-str-mass` | max 40 kg | 38.2 kg | 2 | closes |
-| `req-lv-mass` | max 150 kg | 142.6 kg | 17 | closes with 7.4 kg margin |
-| `req-sys-power` | max 160 W | 157 W | 8 | closes with 3 W margin |
+| Requirement | Limit | Allocated | Contributors | `violated` | |
+|---|---|---|---|---|---|
+| `dc-eps-generation` | min 180 W | 186 W | 1 | false | closes |
+| `dc-pl-mass` | max 28 kg | **30.8 kg** | 2 | **true** | **over by 2.8 kg** |
+| `dc-str-mass` | max 40 kg | 38.2 kg | 2 | false | closes |
+| `req-lv-mass` | max 150 kg | 142.6 kg | 17 | false | closes with 7.4 kg margin |
+| `req-sys-power` | max 160 W | 157 W | 8 | false | closes with 3 W margin |
 
 The launch mass closes although the payload sub-budget does not: the margin
 sits at system level. `budget_contributors` for `dc-pl-mass` returns the
@@ -52,8 +53,8 @@ optics (24.5 kg, estimated, resting on the low-confidence `asm-optics-mass`)
 and the imager electronics (6.3 kg).
 
 `limit_check` returns seven single-value limits beside the design value each
-bounds. One fails: `req-obc-temp`, a maximum of 70 degC, against a measured
-73.4 degC.
+bounds. One is `violated`: `req-obc-temp`, a maximum of 70 degC, against a
+measured 73.4 degC, which is also the one row of `limit_violations`.
 
 ### Verification
 

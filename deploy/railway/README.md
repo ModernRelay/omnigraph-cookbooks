@@ -52,8 +52,8 @@ Set these service variables using Railway's secret/reference-variable UI:
 
 Generate separate random secrets, for example with `openssl rand -hex 24`.
 Keep them out of the repository and deployment bundle. Add an `act-agent`
-entry for a cookbook with agents, such as company-brain, whose agents write
-only on review branches. The bundled policies give the admin configuration
+entry for a cookbook with agents, such as company-brain or hardware-program,
+whose agents write only on review branches. The bundled policies give the admin configuration
 management, writers data changes, and readers read access. Only the admin can
 apply schemas or delete graphs. See the engine's
 [authentication guide](https://github.com/ModernRelay/omnigraph/blob/v0.14.0/docs/user/operations/server.md#authentication)

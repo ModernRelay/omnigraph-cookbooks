@@ -2,7 +2,7 @@
 #
 # Filesystem-backed cluster; storage defaults to this directory.
 # Follow ../README.md#local-setup for bootstrap and writer-lock handoff.
-# Later configuration updates go through cluster plan/apply --server.
+# Later configuration updates go through cluster plan/apply --target <server target>.
 version: 1
 
 metadata:

@@ -89,7 +89,9 @@ query requirement_tests($slug: String) @description("Test cases that verify one 
 
 // A budget is a requirement with a quantity and a limit, allocated to a block;
 // it adds up every Parameter of that quantity on blocks beneath that block.
-query budget_rollup() @description("Each budget requirement's limit beside the total of the design values beneath its block.") {
+// `violated` compares the total with the limit by the requirement's
+// comparator; margin policy (how close is too close) stays the caller's.
+query budget_rollup() @description("Each budget requirement's limit beside the total of the design values beneath its block, and whether the total violates it.") {
     match {
         $r: Requirement
         $r.quantity is not null
@@ -98,7 +100,12 @@ query budget_rollup() @description("Each budget requirement's limit beside the t
         $p characterizes $c
         $p.quantity = $r.quantity
     }
-    return { $r.slug, $r.quantity, $r.comparator, $r.limit_value, $r.unit, sum($p.value) as allocated, count($p) as contributors }
+    return {
+        $r.slug, $r.quantity, $r.comparator, $r.limit_value, $r.unit,
+        sum($p.value) as allocated, count(distinct $p) as contributors,
+        (max($r.comparator) = "max" and sum($p.value) > max($r.limit_value))
+            or (max($r.comparator) = "min" and sum($p.value) < max($r.limit_value)) as violated
+    }
     order { $r.slug asc }
     limit 200
 }
@@ -116,13 +123,30 @@ query budget_contributors($slug: String) @description("The design values that ad
     limit 500
 }
 
-query limit_check() @description("Each single-value limit beside the design value it bounds.") {
+query limit_check() @description("Each single-value limit beside the design value it bounds, and whether the value violates it.") {
     match {
         $r: Requirement
         $r.limit_value is not null
         $r bounds $p
     }
-    return { $r.slug, $r.quantity, $r.comparator, $r.limit_value, $r.unit, $p.slug as parameter, $p.value, $p.basis }
+    return {
+        $r.slug, $r.quantity, $r.comparator, $r.limit_value, $r.unit, $p.slug as parameter, $p.value, $p.basis,
+        ($r.comparator = "max" and $p.value > $r.limit_value)
+            or ($r.comparator = "min" and $p.value < $r.limit_value) as violated
+    }
+    order { $r.slug asc }
+    limit 500
+}
+
+query limit_violations() @description("Design values that break the single-value limit a requirement sets on them.") {
+    match {
+        $r: Requirement
+        $r.limit_value is not null
+        $r bounds $p
+        ($r.comparator = "max" and $p.value > $r.limit_value)
+            or ($r.comparator = "min" and $p.value < $r.limit_value)
+    }
+    return { $r.slug, $r.comparator, $r.limit_value, $r.unit, $p.slug as parameter, $p.value, $p.basis }
     order { $r.slug asc }
     limit 500
 }

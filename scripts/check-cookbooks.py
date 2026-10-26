@@ -235,11 +235,14 @@ def qualify(name, graph, stored_query, workspace, env):
                 beads_client_journey(env)
             if name == "company-brain":
                 company_brain_journey(env)
+            if name == "hardware-program":
+                hardware_program_journey(env)
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
                   + (", ob client" if name == "beads" else "")
-                  + (", review journey" if name == "company-brain" else ""), flush=True)
+                  + (", review journey" if name == "company-brain" else "")
+                  + (", review gate" if name == "hardware-program" else ""), flush=True)
         finally:
             gateway.terminate()
             process.terminate()
@@ -353,6 +356,37 @@ def company_brain_journey(env):
     mutate(writer, "deactivate_actor", {"slug": "act-slack-bot"})
     refused_by_card(mutate(writer, "add_actor", {"slug": "act-slack-bot", "kind": "agent", "name": "Slack agent",
                                                  "purpose": None, "person": "eli"}, ok=False))
+
+
+def hardware_program_journey(env):
+    """Budgets and limits flag their own violations. A change merges as an
+    unpublished commit, the review gate reads that exact result while main
+    stays put, an agent cannot publish it, and a writer can."""
+    def scope(actor):
+        return ("--target", target(actor), "--graph", "program")
+
+    def rows(query, *extra, params=None):
+        return run(env, "query", query, *scope("act-reader"), "--params", json.dumps(params or {}),
+                   *extra, "--json")["rows"]
+
+    violated = {row["r.slug"] for row in rows("budget_rollup") if row["violated"]}
+    assert violated == {"dc-pl-mass"}, violated
+    assert [row["r.slug"] for row in rows("limit_violations")] == ["req-obc-temp"]
+
+    writer = scope("act-writer")
+    run(env, "branch", "create", "cr-heatsink", *writer, "--json")
+    run(env, "mutate", "set_parameter", *writer, "--branch", "cr-heatsink",
+        "--params", json.dumps({"slug": "p-obc-temp", "value": 66.2, "basis": "measured"}), "--json")
+    merged = run(env, "branch", "merge", "cr-heatsink", "--into", "main", "--as-commit", *writer, "--json")
+    commit = merged["commit"]["graph_commit_id"]
+    assert merged["commit"]["published"] is False, merged
+    assert [row["r.slug"] for row in rows("limit_violations")] == ["req-obc-temp"], "main moved before publish"
+    assert rows("limit_violations", "--snapshot", commit) == []
+    # A denied publish answers as an unknown commit, so the id discloses nothing.
+    refused(run(env, "commit", "publish", commit, *scope("act-agent"), "--json", ok=False), code="not_found")
+    run(env, "commit", "publish", commit, *writer, "--json")
+    assert rows("limit_violations") == []
+    run(env, "branch", "delete", "cr-heatsink", *writer, "--yes", "--json")
 
 
 def main():

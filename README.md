@@ -53,9 +53,9 @@ omnigraph-server --cluster . --bind 127.0.0.1:8080
 Leave the server running. The sample tokens are for this loopback demo; choose
 your own secrets for a shared deployment. The roles are: admin manages
 configuration and data; writer reads and writes data and branches; reader reads
-and invokes stored read queries. Cookbooks with agents, such as company-brain,
-also define `act-agent`, which writes only on review branches. Policies are
-part of each bundle.
+and invokes stored read queries. Cookbooks with agents, such as company-brain
+and hardware-program, also define `act-agent`, which writes only on review
+branches. Policies are part of each bundle.
 
 Stopping the server with Ctrl-C releases its writer lock, so the next start
 needs no unlock. A server that was killed keeps the lock; follow the engine's

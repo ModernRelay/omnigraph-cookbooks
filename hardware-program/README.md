@@ -20,27 +20,27 @@ number in it is invented.
 ## Quick start
 
 Use the shared [local setup](../README.md#local-setup) with folder
-`hardware-program` and graph `program`, and load `seed.jsonl`. To try the agent
-role below, add an `act-agent` token to the server's token map, for example
-`"act-agent":"local-agent-token"`. With the server up:
+`hardware-program` and graph `program`, and load `seed.jsonl`. Its four
+targets are the roles used below: `local` (admin), `local-writer` for
+engineers, `local-reader`, and `local-agent` for an AI agent. With the server
+and gateway up:
 
 ```bash
-omnigraph query budget_rollup --server http://127.0.0.1:8080 --graph program --format table
-omnigraph query gate_not_passing --server http://127.0.0.1:8080 --graph program \
-  --params '{"milestone":"ms-cdr"}' --format table
+omnigraph query budget_rollup --target local-reader --graph program
+omnigraph query gate_not_passing --target local-reader --graph program \
+  --params '{"milestone":"ms-cdr"}'
 ```
 
-`budget_rollup` shows the launch mass closing at 142.6 kg of 150 while the
-payload, at 30.8 kg, is over its 28 kg allocation. `gate_not_passing` lists the
-failed thermal vacuum test and the two tests not yet run that stand between the
-program and its critical design review.
+`budget_rollup` shows the launch mass closing at 142.6 kg of 150, while the
+payload, at 30.8 kg, is over its 28 kg allocation: its row says
+`violated: true`. `gate_not_passing` lists the failed thermal vacuum test and
+the two tests not yet run that stand between the program and its critical
+design review.
 
-Merge the `servers`, `defaults` and `aliases` of
-[`omnigraph-config.example.yaml`](omnigraph-config.example.yaml) into
-`~/.omnigraph/config.yaml`. The defaults select server `local` and graph
-`program`, so the commands below need no addressing flags, and the aliases
-give every read a short name (`omnigraph alias budgets`,
-`omnigraph alias gate-failing ms-cdr`).
+Merge the `aliases:` of [`omnigraph-config.example.yaml`](omnigraph-config.example.yaml)
+into `$OMNIGRAPH_HOME/config.yaml` for a short name per read, such as
+`omnigraph alias budgets` or
+`omnigraph alias gate-failing --params '{"milestone":"ms-cdr"}'`.
 
 ## Model
 
@@ -73,7 +73,8 @@ The links carry the engineering:
 
 | Question | Stored query |
 |---|---|
-| Does each budget close? | `budget_rollup`, `budget_contributors`, `limit_check` |
+| Does each budget close? | `budget_rollup`, `budget_contributors` |
+| Does each single value meet its limit? | `limit_check`, `limit_violations` |
 | What is not yet verified, or failing? | `unverified_requirements`, `failing_requirements`, `test_status_summary` |
 | Which passes no longer hold? | `stale_verification`: a passing test that ran before its requirement last changed |
 | Is a test measuring the right thing? | `measurement_mismatch` |
@@ -84,10 +85,11 @@ The links carry the engineering:
 | What needs a person? | `awaiting_review`, `open_findings`, `unowned_requirements`, `untraced_requirements` |
 | Where do we stand on a standard? | `compliance_matrix` |
 
-`omnigraph queries list --cluster . --graph program`, run in this folder,
-prints all 38 reads and 21 mutations with their parameters. Budgets compare in the client: the query returns the limit, the
-comparator and the total, so a margin policy (say, 10% at preliminary design)
-stays yours.
+`omnigraph queries list --target local --graph program` prints all 39 reads
+and 21 mutations with their parameters. `budget_rollup` and `limit_check`
+compare each value with its limit by the requirement's comparator and return
+`violated`; how close counts as too close (say, a 10% margin at preliminary
+design) stays your policy.
 
 A budget adds up values on the blocks *beneath* its allocation. Attach a
 non-additive value, such as a first natural frequency or a temperature, to the
@@ -96,8 +98,7 @@ a roll-up.
 
 ## Workflows
 
-The commands below rely on the operator config defaults and run with a writer
-token (`OMNIGRAPH_TOKEN_LOCAL=local-writer-token`).
+Engineers run these as `local-writer`; every read also works as `local-reader`.
 
 ### A requirement change on a branch
 
@@ -105,25 +106,34 @@ The launch provider cuts the mass allowance. Before touching anything, see
 what the change reaches:
 
 ```bash
-omnigraph query impacted_requirements --params '{"slug":"req-lv-mass"}'
-omnigraph query impacted_tests --params '{"slug":"req-lv-mass"}'
-omnigraph query requirement_tests --params '{"slug":"req-lv-mass"}'
+omnigraph query impacted_requirements --target local-writer --graph program --params '{"slug":"req-lv-mass"}'
+omnigraph query impacted_tests --target local-writer --graph program --params '{"slug":"req-lv-mass"}'
+omnigraph query requirement_tests --target local-writer --graph program --params '{"slug":"req-lv-mass"}'
 ```
 
 Make the change on a branch, so the review sees it whole:
 
 ```bash
-omnigraph branch create cr-lv-mass
-omnigraph query requirement --params '{"slug":"req-lv-mass"}' --branch cr-lv-mass --json   # note updated_at
-omnigraph mutate revise_requirement --branch cr-lv-mass --params '{
+omnigraph branch create cr-lv-mass --target local-writer --graph program
+omnigraph query requirement --target local-writer --graph program --branch cr-lv-mass \
+  --params '{"slug":"req-lv-mass"}' --json        # note updated_at
+omnigraph mutate revise_requirement --target local-writer --graph program --branch cr-lv-mass --params '{
   "slug":"req-lv-mass","expected":"2026-09-29T10:00:00.000Z",
   "title":"Launch mass at most 145 kg",
   "statement":"The spacecraft shall have a launch mass of 145 kg or less, including propellant.",
   "rationale":"Second slot change.","quantity":"mass","comparator":"max",
   "limit_value":145.0,"unit":"kg","review_status":"human_reviewed"}'
-omnigraph query budget_rollup --branch cr-lv-mass
-omnigraph query stale_verification --branch cr-lv-mass
-omnigraph branch merge cr-lv-mass --into main
+omnigraph query budget_rollup --target local-writer --graph program --branch cr-lv-mass
+omnigraph query stale_verification --target local-writer --graph program --branch cr-lv-mass
+```
+
+Review exactly what the branch changed, field by field, and preview the merge
+without writing it:
+
+```bash
+omnigraph branch diff cr-lv-mass --target local-writer --graph program
+omnigraph branch merge cr-lv-mass --into main --dry-run --target local-writer --graph program
+omnigraph branch merge cr-lv-mass --into main --target local-writer --graph program
 ```
 
 `revise_requirement` is a compare-and-swap on `updated_at`: if someone changed
@@ -136,32 +146,54 @@ wording shows up in `stale_verification` until it is re-run.
 Run each option on its own branch and compare the derived results:
 
 ```bash
-omnigraph branch create trade-optics-light
-omnigraph mutate set_parameter --branch trade-optics-light \
+omnigraph branch create trade-optics-light --target local-writer --graph program
+omnigraph mutate set_parameter --target local-writer --graph program --branch trade-optics-light \
   --params '{"slug":"p-mass-optics","value":21.4,"basis":"estimated"}'
-omnigraph query budget_rollup --branch trade-optics-light   # dc-pl-mass: 27.7 kg, closes
-omnigraph query budget_rollup                               # main: 30.8 kg, over
+omnigraph query budget_rollup --target local-writer --graph program --branch trade-optics-light   # dc-pl-mass: 27.7 kg, closes
+omnigraph query budget_rollup --target local-writer --graph program                               # main: 30.8 kg, violated
+omnigraph branch diff trade-optics-light --target local-writer --graph program
 ```
 
-Merge the winner, delete the others, and record why with `record_decision`.
 A branch is cheap and holds the whole option: parameters, revised
-requirements and new test cases together.
+requirements and new test cases together. Two options that change the same
+value cannot both merge: once one has, `branch merge --dry-run` on the other
+reports a `divergent_update` conflict on that value and writes nothing. Merge
+the winner, delete the others, and record why with `record_decision`.
 
 ### Test results
 
 ```bash
-omnigraph mutate record_test_run --params '{
+omnigraph mutate record_test_run --target local-writer --graph program --params '{
   "run":"run-tvac-v1b","test":"tc-tvac","iteration":"it-v1","outcome":"pass",
   "measured_value":66.2,"unit":"degC","notes":"With the copper heat spreader.",
-  "run_at":"2026-10-08T15:00:00.000Z",
-  "report":"base64:'"$(base64 < tvac-run-2.pdf | tr -d '\n')"'"}'
-omnigraph blob get node TestRun run-tvac-v1b report --out tvac-run-2.pdf
+  "run_at":"2026-10-08T15:00:00.000Z"}'
+omnigraph blob put node TestRun run-tvac-v1b report --file tvac-run-2.pdf --target local-writer --graph program
+omnigraph blob get node TestRun run-tvac-v1b report --out tvac-run-2.pdf --target local-reader --graph program
 ```
 
-The run, its report and the test case's latest status land in one commit, so
-a reader never sees one without the others. The report is stored in the graph
-as a Blob; leave `report` out when there is none. An aborted run goes through
-`record_aborted_run`, which leaves the status alone.
+The run and the test case's latest status land in one commit, so a reader
+never sees one without the other. The report is stored in the graph as a Blob
+of up to 32 MiB; `blob put` adds it in a second commit, or pass it in the same
+commit as `record_test_run`'s `report` parameter (`"base64:<bytes>"`). An
+aborted run goes through `record_aborted_run`, which leaves the status alone.
+
+### Check the merged result before publishing
+
+A merge can wait unpublished, so the review gate runs against exactly what
+`main` would become:
+
+```bash
+omnigraph branch merge cr-obc-heatsink --into main --as-commit --target local-writer --graph program --json
+# "commit": {"graph_commit_id": "<COMMIT_ID>", "published": false, ...}
+omnigraph query gate_not_passing --target local-reader --graph program \
+  --params '{"milestone":"ms-cdr"}' --snapshot <COMMIT_ID>
+omnigraph query limit_violations --target local-reader --graph program --snapshot <COMMIT_ID>
+omnigraph commit publish <COMMIT_ID> --target local-writer --graph program   # or: commit drop <COMMIT_ID>
+```
+
+`main` does not move until `commit publish`. An unpublished commit expires if
+another write reaches `main` first; merge again then. This is a review habit,
+not an approval boundary: whoever may merge may also merge directly.
 
 ### Review baselines
 
@@ -169,39 +201,57 @@ A review is a snapshot. When the critical design review passes, record the
 commit it reviewed:
 
 ```bash
-omnigraph commit list --json        # the newest commit is first
-omnigraph mutate record_baseline --params \
+omnigraph commit list --target local-writer --graph program --json        # the newest commit is first
+omnigraph mutate record_baseline --target local-writer --graph program --params \
   '{"milestone":"ms-cdr","status":"passed_with_actions","commit":"<COMMIT_ID>"}'
 ```
 
 Any read can then run against the program exactly as the review saw it, for
-example `omnigraph query budget_rollup --snapshot <COMMIT_ID>`. The history
-is the graph's commit log; no export or document copy is needed.
+example `omnigraph query budget_rollup --target local-reader --graph program
+--snapshot <COMMIT_ID>`. To work from that state, start a branch there:
+`omnigraph branch create cdr-actions --from-commit <COMMIT_ID> --target
+local-writer --graph program`. The history is the graph's commit log; no
+export or document copy is needed.
 
 ### Agents
 
 The graph policy gives an AI agent its own actor, `act-agent`. It reads
 everything and invokes stored queries, but it can only write on unprotected
-branches and cannot merge or delete a branch, so every agent change reaches
-`main` through an engineer's merge:
+branches and cannot merge, publish or delete a branch, so every agent change
+reaches `main` through an engineer's merge. `omnigraph access` shows it:
 
 ```bash
-export OMNIGRAPH_TOKEN_LOCAL=local-agent-token
-omnigraph branch create agent-review-jitter
-omnigraph mutate raise_finding --branch agent-review-jitter --params '{
+omnigraph access --target local-agent --graph program --branch main
+omnigraph branch create agent-review-jitter --target local-agent --graph program
+omnigraph mutate raise_finding --target local-agent --graph program --branch agent-review-jitter --params '{
   "slug":"fnd-jitter-units","check":"requirement_quality","severity":"warning",
   "message":"No quantity or limit.","requirement":"dc-adcs-jitter","raised_by":"agent-checker"}'
-omnigraph mutate raise_finding --params '...'   # refused on main: HTTP 403
+omnigraph mutate raise_finding --target local-agent --graph program --params '{...}'   # on main: forbidden, effects none
 ```
+
+An agent host such as Claude Code or Codex can reach the same reads over MCP.
+`omnigraph mcp` relays the agent's MCP over stdio to the server through a
+registered target, so the token never enters the agent's configuration:
+
+```json
+{"command": "omnigraph", "args": ["mcp", "--target", "local-agent", "--graph", "program"],
+ "env": {"OMNIGRAPH_HOME": "/Users/you/.omnigraph-cookbooks", "OG_LOCAL_AGENT_TOKEN": "local-agent-token"}}
+```
+
+Each stored read is then a call to the `query` tool. Write tools appear only
+when the server runs with `--mcp-allow-writes` and the bridge with `--write`,
+and the policy still refuses the agent on `main`. The MCP `mutate` tool takes
+GQ text rather than a stored mutation's name, so have the agent write through
+`omnigraph mutate <stored-mutation> --target local-agent`, which keeps it on
+the reviewed write shapes.
 
 [`skill/SKILL.md`](skill/SKILL.md) is a skill for such an agent: the checks to
 run, how to write a checkable requirement, and the guardrails. Agents mark what
 they draft `review_status: ai_generated`; `awaiting_review` lists it until a
 person reviews it. The policy cannot limit which stored queries an agent runs,
-so before merging an agent's branch, check its commits for decisions that
-belong to engineers, such as `review_requirement` or `record_baseline`. On a
-server with OIDC configured, the stored reads are also MCP tools; writes go
-through `omnigraph mutate` or HTTP.
+so before merging an agent's branch, check its `branch diff` and its commits for
+decisions that belong to engineers, such as `review_requirement` or
+`record_baseline`.
 
 ### Reacting to changes
 
@@ -210,7 +260,8 @@ values. An agent can follow it and re-run the checks when requirements or
 results move:
 
 ```bash
-omnigraph changes poll --start after:<COMMIT_ID> --type Requirement --type TestCase --json
+omnigraph changes poll --target local-agent --graph program --start after:<COMMIT_ID> \
+  --type Requirement --type TestCase --json
 ```
 
 Keep the returned cursor and pass it back with `--cursor` on the next poll.
@@ -220,10 +271,11 @@ Keep the returned cursor and pass it back with `--cursor` on the next poll.
 `Requirement.embedding` holds a 3072-dimension vector of the statement for
 `similar_requirements`, which finds near-duplicate or conflicting requirements
 by meaning. The seed has no vectors. Generate them with the offline
-`omnigraph embed` pipeline, load the result, then enable the provider in
+`omnigraph embed` pipeline, which embeds the statement text exactly as a
+`nearest` query embeds its text, load the result, then enable the provider in
 [`cluster.yaml`](cluster.yaml) and apply it through the running server. See
 [live updates](../README.md#live-updates). `search_requirements` needs none of
-this; it ranks titles and statements by text.
+this; it ranks the indexed titles and statements by text.
 
 ## Extending
 
