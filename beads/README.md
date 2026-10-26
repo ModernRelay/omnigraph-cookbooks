@@ -39,14 +39,19 @@ ob close lk-acl --reason "ACLs enforced server-side"
 ob ready                       # the sharing tasks are ready now
 ```
 
-`ob` also runs without a server on a local graph of its own:
+## Your own project
+
+`ob` also runs without a server on a local graph of its own. Start from a
+shell without the Quick Start's `OB_*` variables: `OB_SERVER` sends every
+command to the server.
 
 ```bash
-cd your-project
+export PATH=$PWD/client:$PATH  # from the beads folder
+cd ~/your-project
 ob init                        # creates .ob/ with a local graph
-ob create "Fix login timeout" -t bug -p 1
-ob create "Write auth docs" --deps <bug-id>
-ob ready
+ob create "Fix login timeout" -t bug -p 1 --id ob-login
+ob create "Write auth docs" --deps ob-login
+ob ready                       # only the bug: the docs wait on it
 ob onboard >> AGENTS.md        # tell agents how to use it
 ```
 
