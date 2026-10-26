@@ -1,0 +1,80 @@
+# Read aliases for the hardware-program cookbook (graph `program`).
+# Merge the `aliases:` entries below into $OMNIGRAPH_HOME/config.yaml, the operator
+# config from ../README.md#local-setup, whose `local-reader` target they use.
+# Run one with `omnigraph alias <name>`; pass a query's parameters by name with
+# `--params '{"slug":"..."}'`. Aliases only read; run stored mutations with
+# `omnigraph mutate <name> --target local-writer --graph program --params '{...}'`,
+# or as an agent with `--target local-agent --branch <your branch>`.
+aliases:
+
+  # ── Requirements and traceability ───────────────────────────────
+  req:                {target: local-reader, graph: program, query: requirement}   # --params '{"slug":"req-lv-mass"}'
+  reqs:               {target: local-reader, graph: program, query: requirements_by_tier}   # --params '{"tier":"system"}'
+  trace:              {target: local-reader, graph: program, query: trace_up}   # --params '{"slug":"dc-adcs-jitter"}'
+  why:                {target: local-reader, graph: program, query: why_exists}   # --params '{"block":"blk-battery"}'
+  req-tests:          {target: local-reader, graph: program, query: requirement_tests}   # --params '{"slug":"req-lv-mass"}'
+  decisions:          {target: local-reader, graph: program, query: decisions_affecting}   # --params '{"slug":"req-lv-mass"}'
+
+  # ── Change impact ───────────────────────────────────────────────
+  impact:             {target: local-reader, graph: program, query: impacted_requirements}   # --params '{"slug":"req-lv-mass"}'
+  impact-tests:       {target: local-reader, graph: program, query: impacted_tests}   # --params '{"slug":"req-lv-mass"}'
+  impact-interfaces:  {target: local-reader, graph: program, query: impacted_interfaces}   # --params '{"slug":"req-sys-power"}'
+
+  # ── Budgets and limits ──────────────────────────────────────────
+  budgets:            {target: local-reader, graph: program, query: budget_rollup}
+  contributors:       {target: local-reader, graph: program, query: budget_contributors}   # --params '{"slug":"dc-pl-mass"}'
+  limits:             {target: local-reader, graph: program, query: limit_check}
+  violations:         {target: local-reader, graph: program, query: limit_violations}
+
+  # ── Verification ────────────────────────────────────────────────
+  unverified:         {target: local-reader, graph: program, query: unverified_requirements}
+  failing:            {target: local-reader, graph: program, query: failing_requirements}
+  stale:              {target: local-reader, graph: program, query: stale_verification}
+  mismatch:           {target: local-reader, graph: program, query: measurement_mismatch}
+  tests:              {target: local-reader, graph: program, query: test_status_summary}
+  runs:               {target: local-reader, graph: program, query: test_history}   # --params '{"test":"tc-xband"}'
+
+  # ── Review readiness (pass a milestone slug, e.g. ms-cdr) ───────
+  gate-unverified:    {target: local-reader, graph: program, query: gate_unverified}   # --params '{"milestone":"ms-cdr"}'
+  gate-failing:       {target: local-reader, graph: program, query: gate_not_passing}   # --params '{"milestone":"ms-cdr"}'
+  gate-interfaces:    {target: local-reader, graph: program, query: gate_unfrozen_interfaces}   # --params '{"milestone":"ms-cdr"}'
+  gate-stale:         {target: local-reader, graph: program, query: gate_stale_verification}   # --params '{"milestone":"ms-cdr"}'
+  milestones:         {target: local-reader, graph: program, query: milestones}
+
+  # ── Interfaces, assumptions, risks ──────────────────────────────
+  interfaces:         {target: local-reader, graph: program, query: interfaces}
+  untested-ifaces:    {target: local-reader, graph: program, query: untested_interfaces}
+  fragile:            {target: local-reader, graph: program, query: assumptions_under_frozen_work}
+  assumptions-due:    {target: local-reader, graph: program, query: assumptions_due}   # --params '{"today":"2026-10-12"}'
+  risks:              {target: local-reader, graph: program, query: open_risks}
+  unmitigated:        {target: local-reader, graph: program, query: unmitigated_risks}
+
+  # ── Hygiene and review ──────────────────────────────────────────
+  unowned:            {target: local-reader, graph: program, query: unowned_requirements}
+  untraced:           {target: local-reader, graph: program, query: untraced_requirements}
+  unexplained:        {target: local-reader, graph: program, query: unexplained_components}
+  to-review:          {target: local-reader, graph: program, query: awaiting_review}
+  findings:           {target: local-reader, graph: program, query: open_findings}
+
+  # ── Compliance, variants, search ────────────────────────────────
+  compliance:         {target: local-reader, graph: program, query: compliance_matrix}   # --params '{"standard":"std-iso-24113"}'
+  variant:            {target: local-reader, graph: program, query: variant_requirements}   # --params '{"variant":"var-prod"}'
+  search:             {target: local-reader, graph: program, query: search_requirements}   # --params '{"q":"mass"}'
+  similar:            {target: local-reader, graph: program, query: similar_requirements}   # --params '{"q":"mass"}'
+
+# ── Stored mutations (use `omnigraph mutate`, not an alias) ───────
+# Each publishes one commit. Agents run them on a branch (`--branch <name>`);
+# the policy refuses agent writes on main.
+#
+#   omnigraph mutate record_test_run --target local-writer --graph program --params '{
+#     "run":"run-tvac-v1b","test":"tc-tvac","iteration":"it-v1","outcome":"pass",
+#     "measured_value":66.2,"unit":"degC","notes":"With the copper heat spreader.",
+#     "run_at":"2026-10-08T15:00:00.000Z"}'
+#   omnigraph mutate set_parameter --target local-writer --graph program --branch trade-optics-light \
+#     --params '{"slug":"p-mass-optics","value":21.4,"basis":"estimated"}'
+#   omnigraph mutate raise_finding --target local-agent --graph program --branch agent-review --params '{
+#     "slug":"fnd-x","check":"requirement_quality","severity":"warning","message":"No limit.",
+#     "requirement":"dc-adcs-jitter","raised_by":"agent-checker"}'
+#   omnigraph mutate resolve_finding --target local-writer --graph program --params '{"slug":"fnd-x","status":"accepted"}'
+#   omnigraph mutate record_baseline --target local-writer --graph program --params '{"milestone":"ms-cdr",
+#     "status":"passed_with_actions","commit":"<COMMIT_ID>"}'

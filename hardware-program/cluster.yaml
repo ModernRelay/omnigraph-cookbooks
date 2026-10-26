@@ -1,0 +1,41 @@
+# hardware-program deployment, declared as code (omnigraph cluster model).
+#
+# Filesystem-backed cluster; storage defaults to this directory.
+# Follow ../README.md#local-setup for bootstrap and writer-lock handoff.
+# Later configuration updates go through cluster plan/apply --target <server target>.
+version: 1
+
+metadata:
+  name: hardware-program
+
+state:
+  backend: cluster
+  lock: true
+
+graphs:
+  program:
+    schema: schema.pg
+    queries: queries/        # registers every `query <name>` in queries/*.gq as a stored query
+    # embedding_provider: default   # uncomment WITH the `providers:` block below for similar_requirements
+
+# Optional query-time embeddings for `similar_requirements`. Supply
+# GEMINI_API_KEY in the server environment, uncomment both the provider below
+# and the graph binding above, then plan/apply through the running server.
+# Stored vectors come from the offline `omnigraph embed` pipeline; load never
+# generates them. See README.md#similar-requirements-optional.
+#
+# providers:
+#   embedding:
+#     default:
+#       kind: gemini
+#       base_url: https://generativelanguage.googleapis.com/v1beta
+#       model: gemini-embedding-2
+#       api_key: ${GEMINI_API_KEY}
+
+policies:
+  graph-access:
+    file: policies/graph.policy.yaml
+    applies_to: [program]
+  cluster-access:
+    file: policies/server.policy.yaml
+    applies_to: [cluster]
