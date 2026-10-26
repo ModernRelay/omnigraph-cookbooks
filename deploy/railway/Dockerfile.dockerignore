@@ -1,6 +1,0 @@
-# The runtime downloads its release; no repository files belong in the image.
-**
-!deploy/
-!deploy/railway/
-!deploy/railway/Dockerfile
-!deploy/railway/Dockerfile.dockerignore

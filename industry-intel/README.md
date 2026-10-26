@@ -115,8 +115,6 @@ mutations require both query invocation and write permission.
 `omnigraph access --target local-reader --graph spike` lists what the reader
 may do.
 
-For S3 hosting, use the [Railway deployment guide](../deploy/railway/README.md).
-
 ## The weekly review (operating loop)
 
 The graph earns its keep through a recurring loop, supported by the
