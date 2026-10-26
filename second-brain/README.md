@@ -50,7 +50,7 @@ No SPIKE pattern layer — we deliberately skipped it. This is for individual li
 
 The seed populates the life of a fictional 36-year-old senior product designer in Brooklyn — partner Maya, two kids, a side project, a half-marathon, a kitchen renovation, and a preschool decision in progress. All names, places, and dates are fabricated. See `seed.md` for the full layout.
 
-**Totals:** 121 nodes across 12 types, 229 edges across 36 types. `Knows` and `RelatedToPerson` are stored bidirectionally — see `CLAUDE.md` for the load-discipline convention.
+**Totals:** 121 nodes across 12 types, 228 edges across 36 types. `Knows` and `RelatedToPerson` are stored bidirectionally — see `CLAUDE.md` for the load-discipline convention.
 
 | Dimension | Count | Includes |
 |---|---|---|
@@ -123,9 +123,9 @@ Full property tables and constraints in [`schema.pg`](./schema.pg).
 omnigraph alias close-friends
 
 # What did Theo and I do recently, and what do I owe him
-omnigraph alias person-recent-events per-theo
-omnigraph alias person-tasks-i-owe per-theo
-omnigraph alias preferences-for-person per-theo
+omnigraph alias person-recent-events --params '{"slug":"per-theo"}'
+omnigraph alias person-tasks-i-owe --params '{"slug":"per-theo"}'
+omnigraph alias preferences-for-person --params '{"slug":"per-theo"}'
 
 # Open relationship debts across everyone
 omnigraph alias tasks-i-owe
@@ -133,27 +133,27 @@ omnigraph alias tasks-they-owe
 
 # My operating principles + the habits motivated by them
 omnigraph alias principles
-omnigraph alias habit-principle hab-morning-pages
+omnigraph alias habit-principle --params '{"slug":"hab-morning-pages"}'
 
 # What's on my mind right now
 omnigraph alias open-questions
-omnigraph alias notes-by-kind reflection
+omnigraph alias notes-by-kind --params '{"kind":"reflection"}'
 
 # Project rollups: what tasks are open for Quiet Coach, what events are coming up
-omnigraph alias project-tasks proj-quietcoach
-omnigraph alias project-events proj-quietcoach
+omnigraph alias project-tasks --params '{"slug":"proj-quietcoach"}'
+omnigraph alias project-events --params '{"slug":"proj-quietcoach"}'
 
 # Area drill-down: everything attached to Family
-omnigraph alias area-projects area-family
-omnigraph alias area-tasks area-family
-omnigraph alias area-habits area-family
+omnigraph alias area-projects --params '{"slug":"area-family"}'
+omnigraph alias area-tasks --params '{"slug":"area-family"}'
+omnigraph alias area-habits --params '{"slug":"area-family"}'
 
 # Reading queue + who recommended what
 omnigraph alias reading-queue
-omnigraph alias person-recommendations per-kenji
+omnigraph alias person-recommendations --params '{"slug":"per-kenji"}'
 
 # Life events affecting people I care about
-omnigraph alias person-recent-events per-maya
+omnigraph alias person-recent-events --params '{"slug":"per-maya"}'
 omnigraph alias events-recent
 ```
 
@@ -163,19 +163,19 @@ omnigraph alias events-recent
 - `seed.md` / `seed.jsonl` — Reference seed (human-readable / loadable)
 - `queries/*.gq` — Read queries (8 files) + mutations (`mutations.gq`)
 - `cluster.yaml` — Deployment declaration (graph `brain`, schema, stored queries)
-- `omnigraph-config.example.yaml` — Example operator config: merge its `aliases:` into your per-user `~/.omnigraph/config.yaml`
+- `omnigraph-config.example.yaml` — Read aliases: merge its `aliases:` into the operator config from the [local setup](../README.md#local-setup)
 
 ## Quick Start
 
-Follow the shared [0.13 local setup](../README.md#local-setup) with
+Follow the shared [local setup](../README.md#local-setup) with
 `second-brain` and graph ID `brain`. Merge this cookbook's
 `omnigraph-config.example.yaml` into your operator config, then query:
 
 ```bash
 omnigraph alias close-friends
-omnigraph alias person-recent-events per-theo
+omnigraph alias person-recent-events --params '{"slug":"per-theo"}'
 omnigraph alias tasks-i-owe
-omnigraph query close_friends --server local --graph brain
+omnigraph query close_friends --target local-reader --graph brain
 ```
 
 Apply schema and stored query edits with the [live update workflow](../README.md#live-updates).

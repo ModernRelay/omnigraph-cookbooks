@@ -27,13 +27,13 @@ Use the shared [local setup](../README.md#local-setup) with folder
 [seed.md](seed.md)). With the server up:
 
 ```bash
-omnigraph query current_decisions --server http://127.0.0.1:8080 --graph company
-omnigraph query decision_evidence --server http://127.0.0.1:8080 --graph company \
+omnigraph query current_decisions --target local-reader --graph company
+omnigraph query decision_evidence --target local-reader --graph company \
   --params '{"decision":"search-in-house"}'
-omnigraph query why_superseded --server http://127.0.0.1:8080 --graph company \
+omnigraph query why_superseded --target local-reader --graph company \
   --params '{"decision":"search-vendor-buy"}'
-omnigraph query contested_claims --server http://127.0.0.1:8080 --graph company
-omnigraph query overdue_actions --server http://127.0.0.1:8080 --graph company \
+omnigraph query contested_claims --target local-reader --graph company
+omnigraph query overdue_actions --target local-reader --graph company \
   --params '{"as_of":"2026-10-14"}'
 ```
 
@@ -171,10 +171,35 @@ verify and accept on main, where no agent can write. Each commit records the
 actor from the bearer token, so the history says which agent wrote what, and
 `actors` says who answers for it.
 
-Add the agent tokens when you start the server:
+The shared [local setup](../README.md#local-setup) has a token and a target
+for admin, writer, reader and the generic `act-agent`. The walkthrough adds a
+token and a target for each of the two named agents. The server reads static
+tokens only at start, so stop it (Ctrl-C) and start it again with all six:
 
 ```bash
-export OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-admin":"local-admin-token","act-writer":"local-writer-token","act-reader":"local-reader-token","act-notes-bot":"local-notes-token","act-slack-bot":"local-slack-token"}'
+export OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-admin":"local-admin-token","act-writer":"local-writer-token","act-reader":"local-reader-token","act-agent":"local-agent-token","act-notes-bot":"local-notes-token","act-slack-bot":"local-slack-token"}'
+omnigraph-server --cluster . --bind 127.0.0.1:8080
+```
+
+Then add their targets under `targets:` in `$OMNIGRAPH_HOME/config.yaml`, in
+the same shape as the shared ones, and export their tokens:
+
+```yaml
+  local-notes:
+    kind: server
+    endpoint: https://localhost:8443
+    auth: {provider: token, source: {env: OG_LOCAL_NOTES_TOKEN}}
+    transport: {tls: {ca: {mode: append, file: local-tls/ca.pem}}}
+  local-slack:
+    kind: server
+    endpoint: https://localhost:8443
+    auth: {provider: token, source: {env: OG_LOCAL_SLACK_TOKEN}}
+    transport: {tls: {ca: {mode: append, file: local-tls/ca.pem}}}
+```
+
+```bash
+export OG_LOCAL_NOTES_TOKEN=local-notes-token OG_LOCAL_SLACK_TOKEN=local-slack-token
+omnigraph config validate
 ```
 
 The meeting notes agent hears in the Oct 14 Checkout sync that the payment
@@ -182,13 +207,12 @@ provider moved certification. Writing on main is refused (403), so it works on
 a branch. First it records what was said, nothing more:
 
 ```bash
-S=(--server http://127.0.0.1:8080 --graph company)
+AGENT=(--target local-notes --graph company)
 B=(--branch agent/notes-oct-14)
-export OMNIGRAPH_BEARER_TOKEN=local-notes-token
-omnigraph branch create agent/notes-oct-14 --from main "${S[@]}"
-omnigraph mutate record_source "${S[@]}" "${B[@]}" --params \
+omnigraph branch create agent/notes-oct-14 --from main "${AGENT[@]}"
+omnigraph mutate record_source "${AGENT[@]}" "${B[@]}" --params \
   '{"slug":"meet:checkout-sync-2026-10-14","kind":"meeting","title":"Checkout sync","occurred_at":"2026-10-14T15:00:00.000Z","url":null,"summary":null}'
-omnigraph mutate record_claim "${S[@]}" "${B[@]}" --params \
+omnigraph mutate record_claim "${AGENT[@]}" "${B[@]}" --params \
   '{"slug":"provider-certifies-nov-13","kind":"fact","statement":"The payment provider moved Checkout v2 certification to Nov 13.","quote":"The provider pushed our certification back a week, to November 13.","locator":"00:03:40","recorded_at":"2026-10-14T16:00:00.000Z","source":"meet:checkout-sync-2026-10-14","speaker":"alice"}'
 ```
 
@@ -196,12 +220,12 @@ Then it checks the claim against what main trusts. The Nov 13 launch rests on
 a kickoff claim that the new one disputes:
 
 ```bash
-omnigraph query decision_evidence "${S[@]}" --params '{"decision":"checkout-launch-nov-13"}'
+omnigraph query decision_evidence "${AGENT[@]}" --params '{"decision":"checkout-launch-nov-13"}'
 #   launch-nov-13            | Alice Park | We go live for everyone on November 13.
 #   provider-certifies-nov-6 | Chen Wei   | The provider confirmed certification by November 6, a week before launch.
-omnigraph mutate mark_contradiction "${S[@]}" "${B[@]}" --params \
+omnigraph mutate mark_contradiction "${AGENT[@]}" "${B[@]}" --params \
   '{"claim":"provider-certifies-nov-13","contradicts":"provider-certifies-nov-6"}'
-omnigraph query decisions_at_risk "${S[@]}" "${B[@]}"
+omnigraph query decisions_at_risk "${AGENT[@]}" "${B[@]}"
 #   checkout-launch-nov-13 | The payment provider certifies … by Nov 6. | … moved … certification to Nov 13.
 #   (on main: 0 rows)
 ```
@@ -209,48 +233,55 @@ omnigraph query decisions_at_risk "${S[@]}" "${B[@]}"
 It proposes a successor that rests on the new claim, with a one-line reason:
 
 ```bash
-omnigraph mutate propose_successor "${S[@]}" "${B[@]}" --params \
+omnigraph mutate propose_successor "${AGENT[@]}" "${B[@]}" --params \
   '{"previous":"checkout-launch-nov-13","claim":"provider-certifies-nov-13","reason":"The payment provider moved certification back a week.","slug":"checkout-launch-nov-20","title":"Launch Checkout v2 on Nov 20","statement":"Checkout v2 goes live for all customers on Nov 20.","rationale":"Launch stays a week after certification, which moved to Nov 13.","decided_at":"2026-10-14T15:20:00.000Z","recorded_at":"2026-10-14T16:00:00.000Z","project":"checkout"}'
-omnigraph query project_decisions "${S[@]}" "${B[@]}" --params '{"project":"checkout"}'
+omnigraph query project_decisions "${AGENT[@]}" "${B[@]}" --params '{"project":"checkout"}'
 #   Launch Checkout v2 on Nov 20 | proposed      (main still says Nov 13)
 ```
 
-A person reviews the branch before merging it. The policy cannot tell one
-agent's branch from another's, or which stored query an agent ran, so the
-review checks the history: who wrote each of the branch's commits, and
-whether any of them updated a claim, decision or action item. An agent only
-creates those; a status change is a person's job on main. On a clean branch
-the loop prints nothing (it uses `jq`):
+A person, here the admin, reviews the branch before merging it. `branch diff`
+shows what the branch would bring into main: each node and edge it added or
+changed since it left main, with the claim's quote and locator to check
+against the source. The policy cannot tell one agent's branch from another's,
+or which stored query an agent ran, so the review also checks the history:
+who wrote each of the branch's commits, and whether any of them updated a
+claim, decision or action item. An agent only creates those; a status change
+is a person's job on main. The diff cannot show this, because it is the net
+change: a claim an agent recorded and then verified on its branch is one
+insert there. On a clean branch the loop prints no changes (it uses `jq`):
 
 ```bash
-export OMNIGRAPH_BEARER_TOKEN=local-admin-token
-omnigraph commit list "${S[@]}" "${B[@]}"          # one line per commit, with its actor
-for c in $(omnigraph commit list "${S[@]}" "${B[@]}" --json \
+PERSON=(--target local --graph company)
+omnigraph branch diff agent/notes-oct-14 "${PERSON[@]}"   # 3 nodes and 6 edges, all inserts
+omnigraph commit list "${PERSON[@]}" "${B[@]}"            # one line per commit, with its actor
+for c in $(omnigraph commit list "${PERSON[@]}" "${B[@]}" --json \
              | jq -r '.commits[] | select(.graph_branch == "agent/notes-oct-14") | .graph_commit_id'); do
-  omnigraph commit changes "$c" "${S[@]}" --op update --type Claim --type Decision --type ActionItem --json \
+  omnigraph commit changes "$c" "${PERSON[@]}" --op update --type Claim --type Decision --type ActionItem --json \
     | jq -c '.cause.actor_id as $a | .changes[] | {actor: $a, type: .type.name, id}'
 done
 ```
 
-Then it runs the [hygiene](queries/hygiene.gq) reads on the branch, merges,
-and settles the contradiction and the proposal on main:
+Then the person runs the [hygiene](queries/hygiene.gq) reads on the branch,
+previews the merge, merges, and settles the contradiction and the proposal on
+main:
 
 ```bash
 for q in unsupported_decisions accepted_on_unverified current_on_rejected \
          decisions_without_project claims_without_source claims_without_speaker \
          unowned_actions unsupported_actions agents_without_owner; do
-  omnigraph query "$q" "${S[@]}" "${B[@]}"         # each 0 rows
+  omnigraph query "$q" "${PERSON[@]}" "${B[@]}"    # each 0 rows
 done
-omnigraph branch merge agent/notes-oct-14 --into main "${S[@]}"
-omnigraph branch delete agent/notes-oct-14 "${S[@]}" --yes
-omnigraph mutate verify_claim "${S[@]}" --params '{"slug":"provider-certifies-nov-13"}'
-omnigraph mutate reject_claim "${S[@]}" --params '{"slug":"provider-certifies-nov-6"}'
-omnigraph mutate accept_decision "${S[@]}" --params '{"slug":"checkout-launch-nov-20"}'
-omnigraph query accepted_on_unverified "${S[@]}"   # 0 rows
-omnigraph query current_on_rejected "${S[@]}"      # 0 rows: Nov 13 is replaced
-omnigraph query why_superseded "${S[@]}" --params '{"decision":"checkout-launch-nov-13"}'
+omnigraph branch merge agent/notes-oct-14 --into main --dry-run "${PERSON[@]}"   # would be: fast_forward
+omnigraph branch merge agent/notes-oct-14 --into main "${PERSON[@]}"
+omnigraph branch delete agent/notes-oct-14 "${PERSON[@]}" --yes
+omnigraph mutate verify_claim "${PERSON[@]}" --params '{"slug":"provider-certifies-nov-13"}'
+omnigraph mutate reject_claim "${PERSON[@]}" --params '{"slug":"provider-certifies-nov-6"}'
+omnigraph mutate accept_decision "${PERSON[@]}" --params '{"slug":"checkout-launch-nov-20"}'
+omnigraph query accepted_on_unverified "${PERSON[@]}"   # 0 rows
+omnigraph query current_on_rejected "${PERSON[@]}"      # 0 rows: Nov 13 is replaced
+omnigraph query why_superseded "${PERSON[@]}" --params '{"decision":"checkout-launch-nov-13"}'
 #   checkout-launch-nov-20 | accepted | The payment provider moved certification back a week.
-omnigraph query superseding_contradictions "${S[@]}" --params '{"decision":"checkout-launch-nov-13"}'
+omnigraph query superseding_contradictions "${PERSON[@]}" --params '{"decision":"checkout-launch-nov-13"}'
 #   checkout-launch-nov-20 | The payment provider moved … certification to Nov 13. |
 #     The payment provider certifies … by Nov 6.
 ```
@@ -263,10 +294,11 @@ Had the person rejected the proposal instead, `reject_decision` and then
 `withdraw_successor {"previous":"checkout-launch-nov-13","successor":"checkout-launch-nov-20"}`
 leave Nov 13 current and free to be replaced again.
 
-If the Slack agent had heard "two weeks" and proposed Nov 27 as another
-successor on its own branch, merging that branch now fails with
-`merge conflicts: edge type 'SupersededBy' (cardinality_violation)`.
-Nothing lands; a person decides which date is right.
+If the Slack agent (`local-slack`) had heard "two weeks" and proposed Nov 27
+as another successor on its own branch, merging that branch now fails with
+`merge conflicts: edge type 'SupersededBy' (cardinality_violation)`. Its dry
+run reports the same conflict before anyone merges. Nothing lands; a person
+decides which date is right.
 
 Each [hygiene](queries/hygiene.gq) read returns zero rows on a healthy graph.
 They exist because the schema cannot force an edge to exist when a node is

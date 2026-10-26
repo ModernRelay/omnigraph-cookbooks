@@ -28,7 +28,7 @@ fictional company, "Lanternworks"; all names are made up.
 ## Rules
 
 - Graph id `company`. Stored queries and parameters:
-  `omnigraph queries list --cluster . --graph company`.
+  `omnigraph queries list --target local --graph company`.
 - Two steps, never one. Record what a source says with `record_claim`
   (verbatim `quote`, `locator`, speaker); it starts `unverified`. Check new
   claims against main (`decision_evidence`, `mark_contradiction`,

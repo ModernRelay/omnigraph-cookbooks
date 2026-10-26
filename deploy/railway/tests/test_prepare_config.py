@@ -19,11 +19,11 @@ class PrepareConfigTests(unittest.TestCase):
     def setUpClass(cls):
         cls.binary = os.environ.get("OMNIGRAPH_BIN") or shutil.which("omnigraph")
         if not cls.binary:
-            raise RuntimeError("Install OmniGraph 0.13 or set OMNIGRAPH_BIN")
+            raise RuntimeError("Install OmniGraph 0.14 or set OMNIGRAPH_BIN")
         cls.binary = str(Path(cls.binary).resolve())
         version = subprocess.check_output([cls.binary, "--version"], text=True)
-        if not version.startswith("omnigraph 0.13."):
-            raise RuntimeError(f"Tests require OmniGraph 0.13; got {version.strip()}")
+        if not version.startswith("omnigraph 0.14."):
+            raise RuntimeError(f"Tests require OmniGraph 0.14; got {version.strip()}")
 
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="railway-config-test-")

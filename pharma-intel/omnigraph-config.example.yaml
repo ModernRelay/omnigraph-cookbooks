@@ -1,104 +1,92 @@
-# Operator-config example for the Pharma Intel cookbook.
-# Your operator config lives at ~/.omnigraph/config.yaml (per-user, NOT committed).
-# Merge the `aliases:` below into it for short names over this graph's stored
-# queries. Point `local` at your running cluster server (`omnigraph-server
-# --cluster .`); alias invocation needs the server up.
-#
-# Alias args bind by NAME to the stored query's $params (`args: [slug]` fills
-# `$slug`), so `omnigraph alias signal sig-x` == `omnigraph query get_signal
-# --params '{"slug":"sig-x"}'`. Aliases are READ-ONLY: run the
-# stored *mutations* with `omnigraph mutate <name> --params '{…}'` (see the
-# bottom of this file), never through an alias.
-servers:
-  local:
-    url: http://127.0.0.1:8080
-defaults:
-  server: local
-  default_graph: pharma
+# Read aliases for the Pharma Intel cookbook (graph `pharma`).
+# Merge the `aliases:` entries below into $OMNIGRAPH_HOME/config.yaml, the operator
+# config from ../README.md#local-setup, whose `local-reader` target they use.
+# Run one with `omnigraph alias <name>`; pass a query's parameters by name with
+# `--params '{"slug":"..."}'`. Aliases only read; run stored mutations with
+# `omnigraph mutate <name> --target local-writer --graph pharma --params '{...}'`.
 aliases:
   # ── Signals ──
-  signal: { server: local, graph: pharma, query: get_signal, args: [slug], format: kv }
-  signals: { server: local, graph: pharma, query: recent_signals }
-  # search-* run full-text search(), which is case-sensitive: the term must match the stored casing (`Medicare` matches, `medicare` returns 0 rows).
-  search-signals: { server: local, graph: pharma, query: search_signals, args: [q] }
-  signals-by-domain: { server: local, graph: pharma, query: signals_by_domain, args: [domain] }
-  signal-patterns: { server: local, graph: pharma, query: signal_patterns, args: [slug] }
-  signal-contradictions: { server: local, graph: pharma, query: signal_contradictions, args: [slug] }
-  signal-compound: { server: local, graph: pharma, query: signal_compound, args: [slug] }
-  signal-mechanism: { server: local, graph: pharma, query: signal_mechanism, args: [slug] }
-  signal-trial: { server: local, graph: pharma, query: signal_trial, args: [slug] }
-  signal-companies: { server: local, graph: pharma, query: signal_companies, args: [slug] }
-  signal-supports-assumptions: { server: local, graph: pharma, query: signal_supports_assumptions, args: [slug] }
-  signal-contradicts-assumptions: { server: local, graph: pharma, query: signal_contradicts_assumptions, args: [slug] }
-  signal-informs-questions: { server: local, graph: pharma, query: signal_informs_questions, args: [slug] }
-  signal-artifacts: { server: local, graph: pharma, query: signal_artifacts, args: [slug] }
+  signal: {target: local-reader, graph: pharma, query: get_signal}   # --params '{"slug":"..."}'
+  signals: {target: local-reader, graph: pharma, query: recent_signals}
+  # search-* run full-text search(), which ignores case: `medicare` and `Medicare` both match.
+  search-signals: {target: local-reader, graph: pharma, query: search_signals}   # --params '{"q":"..."}'
+  signals-by-domain: {target: local-reader, graph: pharma, query: signals_by_domain}   # --params '{"domain":"..."}'
+  signal-patterns: {target: local-reader, graph: pharma, query: signal_patterns}   # --params '{"slug":"..."}'
+  signal-contradictions: {target: local-reader, graph: pharma, query: signal_contradictions}   # --params '{"slug":"..."}'
+  signal-compound: {target: local-reader, graph: pharma, query: signal_compound}   # --params '{"slug":"..."}'
+  signal-mechanism: {target: local-reader, graph: pharma, query: signal_mechanism}   # --params '{"slug":"..."}'
+  signal-trial: {target: local-reader, graph: pharma, query: signal_trial}   # --params '{"slug":"..."}'
+  signal-companies: {target: local-reader, graph: pharma, query: signal_companies}   # --params '{"slug":"..."}'
+  signal-supports-assumptions: {target: local-reader, graph: pharma, query: signal_supports_assumptions}   # --params '{"slug":"..."}'
+  signal-contradicts-assumptions: {target: local-reader, graph: pharma, query: signal_contradicts_assumptions}   # --params '{"slug":"..."}'
+  signal-informs-questions: {target: local-reader, graph: pharma, query: signal_informs_questions}   # --params '{"slug":"..."}'
+  signal-artifacts: {target: local-reader, graph: pharma, query: signal_artifacts}   # --params '{"slug":"..."}'
 
   # ── Patterns ──
-  pattern: { server: local, graph: pharma, query: get_pattern, args: [slug], format: kv }
-  patterns: { server: local, graph: pharma, query: patterns_all }
-  patterns-by-kind: { server: local, graph: pharma, query: patterns_by_kind, args: [kind] }
-  pattern-signals: { server: local, graph: pharma, query: pattern_signals, args: [slug] }
-  pattern-contradictions: { server: local, graph: pharma, query: pattern_contradictions, args: [slug] }
-  pattern-drives: { server: local, graph: pharma, query: pattern_drives, args: [slug] }
-  pattern-contradicts-patterns: { server: local, graph: pharma, query: pattern_contradicts_patterns, args: [slug] }
-  pattern-insights: { server: local, graph: pharma, query: pattern_insights, args: [slug] }
+  pattern: {target: local-reader, graph: pharma, query: get_pattern}   # --params '{"slug":"..."}'
+  patterns: {target: local-reader, graph: pharma, query: patterns_all}
+  patterns-by-kind: {target: local-reader, graph: pharma, query: patterns_by_kind}   # --params '{"kind":"..."}'
+  pattern-signals: {target: local-reader, graph: pharma, query: pattern_signals}   # --params '{"slug":"..."}'
+  pattern-contradictions: {target: local-reader, graph: pharma, query: pattern_contradictions}   # --params '{"slug":"..."}'
+  pattern-drives: {target: local-reader, graph: pharma, query: pattern_drives}   # --params '{"slug":"..."}'
+  pattern-contradicts-patterns: {target: local-reader, graph: pharma, query: pattern_contradicts_patterns}   # --params '{"slug":"..."}'
+  pattern-insights: {target: local-reader, graph: pharma, query: pattern_insights}   # --params '{"slug":"..."}'
 
   # ── Compounds & Mechanisms ──
-  compound: { server: local, graph: pharma, query: get_compound, args: [slug], format: kv }
-  compounds: { server: local, graph: pharma, query: compounds_all }
-  compounds-by-phase: { server: local, graph: pharma, query: compounds_by_phase, args: [phase] }
-  compounds-by-mechanism: { server: local, graph: pharma, query: compounds_by_mechanism, args: [mechanism] }
-  compound-sponsor: { server: local, graph: pharma, query: compound_sponsor, args: [slug] }
-  compound-trials: { server: local, graph: pharma, query: compound_trials, args: [slug] }
-  compound-signals: { server: local, graph: pharma, query: compound_signals, args: [slug] }
-  mechanism: { server: local, graph: pharma, query: get_mechanism, args: [slug], format: kv }
-  mechanisms: { server: local, graph: pharma, query: mechanisms_all }
-  mechanism-compounds: { server: local, graph: pharma, query: mechanism_compounds, args: [slug] }
-  mechanism-signals: { server: local, graph: pharma, query: mechanism_signals, args: [slug] }
-  mechanism-signals-via-compound: { server: local, graph: pharma, query: mechanism_signals_via_compound, args: [slug] }
+  compound: {target: local-reader, graph: pharma, query: get_compound}   # --params '{"slug":"..."}'
+  compounds: {target: local-reader, graph: pharma, query: compounds_all}
+  compounds-by-phase: {target: local-reader, graph: pharma, query: compounds_by_phase}   # --params '{"phase":"..."}'
+  compounds-by-mechanism: {target: local-reader, graph: pharma, query: compounds_by_mechanism}   # --params '{"mechanism":"..."}'
+  compound-sponsor: {target: local-reader, graph: pharma, query: compound_sponsor}   # --params '{"slug":"..."}'
+  compound-trials: {target: local-reader, graph: pharma, query: compound_trials}   # --params '{"slug":"..."}'
+  compound-signals: {target: local-reader, graph: pharma, query: compound_signals}   # --params '{"slug":"..."}'
+  mechanism: {target: local-reader, graph: pharma, query: get_mechanism}   # --params '{"slug":"..."}'
+  mechanisms: {target: local-reader, graph: pharma, query: mechanisms_all}
+  mechanism-compounds: {target: local-reader, graph: pharma, query: mechanism_compounds}   # --params '{"slug":"..."}'
+  mechanism-signals: {target: local-reader, graph: pharma, query: mechanism_signals}   # --params '{"slug":"..."}'
+  mechanism-signals-via-compound: {target: local-reader, graph: pharma, query: mechanism_signals_via_compound}   # --params '{"slug":"..."}'
 
   # ── Trials, Deals, Regulatory ──
-  trial: { server: local, graph: pharma, query: get_trial, args: [slug], format: kv }
-  trials-by-status: { server: local, graph: pharma, query: trials_by_status, args: [status] }
-  trial-sponsor: { server: local, graph: pharma, query: trial_sponsor, args: [slug] }
-  deal: { server: local, graph: pharma, query: get_deal, args: [slug], format: kv }
-  deals: { server: local, graph: pharma, query: deals_all }
-  deal-parties: { server: local, graph: pharma, query: deal_parties, args: [slug] }
-  regulatory: { server: local, graph: pharma, query: get_regulatory, args: [slug], format: kv }
-  regulatory-recent: { server: local, graph: pharma, query: regulatory_recent }
-  regulatory-compound: { server: local, graph: pharma, query: regulatory_compound, args: [slug] }
-  company: { server: local, graph: pharma, query: get_company, args: [slug], format: kv }
-  company-compounds: { server: local, graph: pharma, query: company_compounds, args: [slug] }
-  insight: { server: local, graph: pharma, query: get_insight, args: [slug], format: kv }
-  insights: { server: local, graph: pharma, query: insights_all }
-  insight-patterns: { server: local, graph: pharma, query: insight_patterns, args: [slug] }
+  trial: {target: local-reader, graph: pharma, query: get_trial}   # --params '{"slug":"..."}'
+  trials-by-status: {target: local-reader, graph: pharma, query: trials_by_status}   # --params '{"status":"..."}'
+  trial-sponsor: {target: local-reader, graph: pharma, query: trial_sponsor}   # --params '{"slug":"..."}'
+  deal: {target: local-reader, graph: pharma, query: get_deal}   # --params '{"slug":"..."}'
+  deals: {target: local-reader, graph: pharma, query: deals_all}
+  deal-parties: {target: local-reader, graph: pharma, query: deal_parties}   # --params '{"slug":"..."}'
+  regulatory: {target: local-reader, graph: pharma, query: get_regulatory}   # --params '{"slug":"..."}'
+  regulatory-recent: {target: local-reader, graph: pharma, query: regulatory_recent}
+  regulatory-compound: {target: local-reader, graph: pharma, query: regulatory_compound}   # --params '{"slug":"..."}'
+  company: {target: local-reader, graph: pharma, query: get_company}   # --params '{"slug":"..."}'
+  company-compounds: {target: local-reader, graph: pharma, query: company_compounds}   # --params '{"slug":"..."}'
+  insight: {target: local-reader, graph: pharma, query: get_insight}   # --params '{"slug":"..."}'
+  insights: {target: local-reader, graph: pharma, query: insights_all}
+  insight-patterns: {target: local-reader, graph: pharma, query: insight_patterns}   # --params '{"slug":"..."}'
 
   # ── Internal Context (the value layer) ──
-  program: { server: local, graph: pharma, query: get_program, args: [slug], format: kv }
-  programs: { server: local, graph: pharma, query: programs_all }
-  program-compound: { server: local, graph: pharma, query: program_compound, args: [slug] }
-  program-mechanism: { server: local, graph: pharma, query: program_mechanism, args: [slug] }
-  program-assumptions: { server: local, graph: pharma, query: program_assumptions, args: [slug] }
-  program-decisions: { server: local, graph: pharma, query: program_decisions, args: [slug] }
-  program-competitors: { server: local, graph: pharma, query: program_competitors, args: [slug] }
-  program-signals: { server: local, graph: pharma, query: program_signals, args: [slug] }
-  program-landscape-signals: { server: local, graph: pharma, query: program_landscape_signals, args: [slug] }
-  assumption: { server: local, graph: pharma, query: get_assumption, args: [slug], format: kv }
-  assumptions: { server: local, graph: pharma, query: assumptions_all }
-  assumption-supports: { server: local, graph: pharma, query: assumption_supporting_signals, args: [slug] }
-  assumption-contradictions: { server: local, graph: pharma, query: assumption_contradicting_signals, args: [slug] }
-  decision: { server: local, graph: pharma, query: get_decision, args: [slug], format: kv }
-  decisions-upcoming: { server: local, graph: pharma, query: decisions_upcoming }
-  decisions-all: { server: local, graph: pharma, query: decisions_all }
-  decision-program: { server: local, graph: pharma, query: decision_program, args: [slug] }
-  decision-questions: { server: local, graph: pharma, query: decision_questions, args: [slug] }
-  decision-assumptions: { server: local, graph: pharma, query: decision_assumptions, args: [slug] }
-  question: { server: local, graph: pharma, query: get_question, args: [slug], format: kv }
-  questions: { server: local, graph: pharma, query: questions_open }
-  question-signals: { server: local, graph: pharma, query: question_signals, args: [slug] }
+  program: {target: local-reader, graph: pharma, query: get_program}   # --params '{"slug":"..."}'
+  programs: {target: local-reader, graph: pharma, query: programs_all}
+  program-compound: {target: local-reader, graph: pharma, query: program_compound}   # --params '{"slug":"..."}'
+  program-mechanism: {target: local-reader, graph: pharma, query: program_mechanism}   # --params '{"slug":"..."}'
+  program-assumptions: {target: local-reader, graph: pharma, query: program_assumptions}   # --params '{"slug":"..."}'
+  program-decisions: {target: local-reader, graph: pharma, query: program_decisions}   # --params '{"slug":"..."}'
+  program-competitors: {target: local-reader, graph: pharma, query: program_competitors}   # --params '{"slug":"..."}'
+  program-signals: {target: local-reader, graph: pharma, query: program_signals}   # --params '{"slug":"..."}'
+  program-landscape-signals: {target: local-reader, graph: pharma, query: program_landscape_signals}   # --params '{"slug":"..."}'
+  assumption: {target: local-reader, graph: pharma, query: get_assumption}   # --params '{"slug":"..."}'
+  assumptions: {target: local-reader, graph: pharma, query: assumptions_all}
+  assumption-supports: {target: local-reader, graph: pharma, query: assumption_supporting_signals}   # --params '{"slug":"..."}'
+  assumption-contradictions: {target: local-reader, graph: pharma, query: assumption_contradicting_signals}   # --params '{"slug":"..."}'
+  decision: {target: local-reader, graph: pharma, query: get_decision}   # --params '{"slug":"..."}'
+  decisions-upcoming: {target: local-reader, graph: pharma, query: decisions_upcoming}
+  decisions-all: {target: local-reader, graph: pharma, query: decisions_all}
+  decision-program: {target: local-reader, graph: pharma, query: decision_program}   # --params '{"slug":"..."}'
+  decision-questions: {target: local-reader, graph: pharma, query: decision_questions}   # --params '{"slug":"..."}'
+  decision-assumptions: {target: local-reader, graph: pharma, query: decision_assumptions}   # --params '{"slug":"..."}'
+  question: {target: local-reader, graph: pharma, query: get_question}   # --params '{"slug":"..."}'
+  questions: {target: local-reader, graph: pharma, query: questions_open}
+  question-signals: {target: local-reader, graph: pharma, query: question_signals}   # --params '{"slug":"..."}'
 
 # ── Mutations (served stored mutations in queries/mutations.gq; NOT aliasable) ──
-#   omnigraph mutate add_signal --params '{"slug":"sig-new","name":"…","brief":"…",
+#   omnigraph mutate add_signal --target local-writer --graph pharma --params '{"slug":"sig-new","name":"…","brief":"…",
 #     "stagingTimestamp":"2026-09-14T00:00:00Z","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
-#   omnigraph mutate link_about_compound --params '{"signal":"sig-new","compound":"comp-vk2735-sc"}'
-# (with defaults.server/default_graph set, --server/--graph can be omitted.)
+#   omnigraph mutate link_about_compound --target local-writer --graph pharma --params '{"signal":"sig-new","compound":"comp-vk2735-sc"}'

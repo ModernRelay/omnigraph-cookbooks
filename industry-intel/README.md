@@ -86,19 +86,20 @@ Full property tables and constraints in `schema.pg`.
 - `schema.pg` — Executable Omnigraph schema (source of truth)
 - `seed.md` / `seed.jsonl` — Seed dataset (human-readable / loadable)
 - `queries/*.gq` — Read and mutation queries
-- `omnigraph-config.example.yaml` — example operator config (aliases over the stored queries); merge into your per-user `~/.omnigraph/config.yaml`
+- `omnigraph-config.example.yaml` — read aliases over the stored queries; merge its `aliases:` into the operator config from the [local setup](../README.md#local-setup)
 - `.env.omni` — optional RustFS/S3 credentials (not committed)
 
 ## Quick Start
 
-Follow the shared [0.13 local setup](../README.md#local-setup) with
+Follow the shared [local setup](../README.md#local-setup) with
 `industry-intel` and graph ID `spike`. It creates the filesystem-backed cluster,
-starts the authenticated server, and loads the seed through HTTP. Merge this
-cookbook's `omnigraph-config.example.yaml` into your operator config for aliases.
+starts the authenticated server behind a local HTTPS gateway, and loads the
+seed through it. Merge this cookbook's `omnigraph-config.example.yaml` into
+your operator config for aliases.
 
 ```bash
-omnigraph alias pattern-signals pat-sovereign-ai
-omnigraph query recent_signals --server local --graph spike
+omnigraph alias pattern-signals --params '{"slug":"pat-sovereign-ai"}'
+omnigraph query recent_signals --target local-reader --graph spike
 ```
 
 Schema, query, policy and provider edits use the [live update workflow](../README.md#live-updates).
@@ -106,11 +107,13 @@ Schema, query, policy and provider edits use the [live update workflow](../READM
 ### Authorization
 
 `cluster.yaml` binds `policies/intel.policy.yaml` to `spike` and
-`policies/server.policy.yaml` to the cluster. The shared setup's `act-admin`
-identity administers the deployment; `act-writer` can run stored mutations and
-`act-reader` can read. Use distinct private credentials for these actors outside
-the local demo. Stored mutations require both query invocation and write
-permission.
+`policies/server.policy.yaml` to the cluster. In the shared setup, the `local`
+target (`act-admin`) administers the deployment, `local-writer` (`act-writer`)
+can run stored mutations and `local-reader` (`act-reader`) can read. Use
+distinct private credentials for these actors outside the local demo. Stored
+mutations require both query invocation and write permission.
+`omnigraph access --target local-reader --graph spike` lists what the reader
+may do.
 
 For S3 hosting, use the [Railway deployment guide](../deploy/railway/README.md).
 
@@ -133,7 +136,7 @@ The graph earns its keep through a recurring loop, supported by the
 
 ```bash
 omnigraph alias triage
-omnigraph alias momentum 2026-05-01T00:00:00Z
+omnigraph alias momentum --params '{"since":"2026-05-01T00:00:00Z"}'
 ```
 
 ## Enable embeddings (hybrid retrieval)
@@ -158,7 +161,7 @@ omnigraph alias momentum 2026-05-01T00:00:00Z
    or mutates a graph; `--reembed-all` replaces selected vectors only in its
    output file. The offline and server providers must use the same model and
    vector dimension. See the engine's
-   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.13.0/docs/user/search/embeddings.md#offline-file-pipeline)
+   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.14.0/docs/user/search/embeddings.md#offline-file-pipeline)
    for the spec format.
 
 See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.

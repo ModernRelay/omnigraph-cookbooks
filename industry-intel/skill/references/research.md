@@ -240,7 +240,7 @@ unkeyed edge without a stable top-level `id` would be a new edge on replay.
 ### Step 11 — Smoke test
 
 ```bash
-omnigraph alias patterns disruption
+omnigraph alias patterns --params '{"kind":"disruption"}'
 omnigraph alias signals
 ```
 
@@ -249,7 +249,7 @@ Should return the patterns and signals you seeded.
 Try a traversal:
 
 ```bash
-omnigraph alias pattern-signals pat-<your-pattern>
+omnigraph alias pattern-signals --params '{"slug":"pat-<your-pattern>"}'
 ```
 
 ## Common Pitfalls

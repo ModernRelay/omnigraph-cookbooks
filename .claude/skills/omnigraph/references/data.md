@@ -5,6 +5,8 @@
 - `mutate` — single edits
 - `load` — bulk JSONL (`--mode`, `--from`)
 - Branches: review before merge
+- Destructive ops go through a branch
+- Branch commands
 - Inspecting state after changes
 
 How to modify data safely in Omnigraph.
@@ -46,11 +48,11 @@ edits.
 > (writing storage directly) *and* an `omnigraph-server` endpoint (the
 > server orchestrates the write and publishes one atomic commit). See
 > [`references/remote-ops.md`](remote-ops.md) for remote-specific concerns
-> (lost responses and safe retry decisions).
+> (504 handling, write-verification ritual).
 
 ## `mutate` — Single Edits
 
-Runs either directly (`--store`) or through a server (`--server`/profile):
+Runs either directly or through a server, selected by `--target`:
 
 ```bash
 omnigraph mutate add_signal \
@@ -61,7 +63,7 @@ omnigraph mutate add_signal \
 Or invoke a served stored mutation by name:
 
 ```bash
-omnigraph mutate add_signal --server intel-dev --graph spike \
+omnigraph mutate add_signal --target intel-dev --graph spike \
   --params '{"slug":"sig-foo","name":"Foo","brief":"...","stagingTimestamp":"2026-04-14T00:00:00Z","createdAt":"2026-04-14T00:00:00Z","updatedAt":"2026-04-14T00:00:00Z"}'
 ```
 
@@ -144,6 +146,12 @@ branch operation had no effect. See [branch outcome details](changes.md#branch-s
 vectors in the JSONL, or run the offline `omnigraph embed` file transformation
 and load its output. See [`search.md`](search.md).
 
+### `overwrite` is scoped but destructive
+
+It removes existing entities of every type represented in the batch. Use it
+for a complete type replacement, preferably on a review branch. Do not assume
+that it clears unrelated types or the whole branch.
+
 ## Branches: Review Before Merge
 
 Branches exist for **data review**, not schema changes. Schema goes straight to `main` via `plan` + `apply`.
@@ -154,16 +162,16 @@ Branches exist for **data review**, not schema changes. Schema goes straight to 
 REPO=s3://my-bucket/repos/spike-intel
 
 # 1. Create feature branch from main
-omnigraph branch create --from main staging-2026-04-14 --store $REPO
+omnigraph branch create --from main staging-2026-04-14 --target $REPO
 
 # 2. Load delta onto the branch (merge mode is typical for review)
-omnigraph load --data delta.jsonl --branch staging-2026-04-14 --mode merge $REPO
+omnigraph load --data delta.jsonl --branch staging-2026-04-14 --mode merge --target $REPO
 
 # 3. Verify on the branch (reads can target --branch or --snapshot)
-omnigraph query recent_signals --query queries/signals.gq --branch staging-2026-04-14 --store $REPO
+omnigraph query recent_signals --query queries/signals.gq --branch staging-2026-04-14 --target $REPO
 
 # 4. Merge to main and delete the source only after publication
-omnigraph branch merge staging-2026-04-14 --into main --delete-branch --store $REPO
+omnigraph branch merge staging-2026-04-14 --into main --delete-branch --target $REPO
 ```
 
 ### Fork a branch in one shot with `--from`
@@ -181,8 +189,8 @@ happens after a successful merge publication.
 
 Deleting a parent branch is supported while descendants remain. Logical deletion
 retains the native history descendants need; only explicit `cleanup` reclaims
-unretained table versions and retired refs. `optimize` does not perform that
-collection.
+unretained table versions, retired refs, and table forks left by branches
+created under 0.11 or earlier. `optimize` does not perform that collection.
 
 ### Merge conflicts
 
@@ -201,17 +209,44 @@ keeps the history that base needs.
 
 `omnigraph schema apply` rejects the request if any non-main branches exist. Delete them first (`branch merge … --delete-branch` or `branch delete`); a merge alone leaves the source branch live. This is enforced — it's not just a guideline.
 
+## Destructive Ops Go Through a Branch
+
+For any bulk load that could disrupt downstream queries (overwriting a
+heavily-referenced node type, removing edges en masse, or reseeding a core
+type), use a feature branch:
+
+```bash
+omnigraph load --data risky.jsonl --branch recovery-2026-04-14 \
+  --from main --mode overwrite --target $REPO
+# inspect, diff, verify reads
+omnigraph branch merge recovery-2026-04-14 --into main --delete-branch --target $REPO
+```
+
+## Branch Commands (quick reference)
+
+```bash
+omnigraph branch create --from main <branch-name> --target $REPO
+omnigraph branch list --target $REPO
+omnigraph branch merge <branch-name> --into main --delete-branch --target $REPO
+omnigraph branch delete <branch-name> --target $REPO
+```
+
+All support `--json` for automation-friendly output. Address the graph with
+`--target NAME|ADDRESS`; a named or inline root additionally requires a graph
+selection.
+
 ## Inspecting State After Changes
 
 ```bash
-omnigraph snapshot $REPO --branch main --json           # node/edge entity counts
-omnigraph export $REPO --branch main > graph.jsonl      # full JSONL dump
-omnigraph commit list $REPO --branch main --json        # history
+omnigraph snapshot --target $REPO --branch main --json           # node/edge entity counts
+omnigraph export --target $REPO --branch main > graph.jsonl      # full JSONL dump
+omnigraph commit list --target $REPO --branch main --json        # history
 ```
 
 `export` is the right tool for large-snapshot inspection — don't try to page through the whole graph with read queries.
 
 > **Cluster note:** everything in this file applies unchanged in cluster
-> deployments. Use `--server <name|url> --graph <id>` for rows, loads and
-> branches while the server owns writer admission; live configuration goes
-> through cluster apply.
+> deployments — the control plane owns schema/queries/policies; rows, loads,
+> and branches stay on the data plane against the derived graph roots
+> (`<dir>/graphs/<id>.omni`, or `<storage>/graphs/<id>.omni` for an S3-backed
+> cluster).

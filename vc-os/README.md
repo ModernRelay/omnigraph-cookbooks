@@ -163,17 +163,17 @@ The seed populates a fictional Berlin-based AI-infra fund running Fund III ($250
 
 ## Example queries - with live output
 
-The seed is shaped to light these up. Each is a single graph traversal that would otherwise require hand-stitching across 4+ systems. Output below is verbatim from `omnigraph alias <name> [args]` against the loaded seed.
+The seed is shaped to light these up. Each is a single graph traversal that would otherwise require hand-stitching across 4+ systems. Output below is from `omnigraph alias <name> --params '{…}'` against the loaded seed, with some columns and long values left out.
 
-> Aliases come from `omnigraph-config.example.yaml` — merge into `~/.omnigraph/config.yaml` (or invoke a stored query directly: `omnigraph query <name> --graph vcos [--params …]`).
+> Aliases come from `omnigraph-config.example.yaml` — merge into `$OMNIGRAPH_HOME/config.yaml` (or invoke a stored query directly: `omnigraph query <name> --target local-reader --graph vcos [--params …]`).
 
 ### Pre-IC brief for a deal
 
 ```bash
-omnigraph alias pre-ic-brief-thesis    deal-helix-series-a
-omnigraph alias pre-ic-brief-evidence  deal-helix-series-a
-omnigraph alias pre-ic-brief-questions deal-helix-series-a
-omnigraph alias debate-stances         deal-helix-series-a
+omnigraph alias pre-ic-brief-thesis --params '{"slug":"deal-helix-series-a"}'
+omnigraph alias pre-ic-brief-evidence --params '{"slug":"deal-helix-series-a"}'
+omnigraph alias pre-ic-brief-questions --params '{"slug":"deal-helix-series-a"}'
+omnigraph alias debate-stances --params '{"slug":"deal-helix-series-a"}'
 ```
 
 **`pre-ic-brief-thesis`** - relevant thesis + grounding assumptions:
@@ -189,8 +189,8 @@ thesis-on-prem-inference | On-prem inference for regulated industries | asmp-hel
 ```
 a.slug                            | s.slug                    | s.kind      | s.date     | s.brief
 ----------------------------------+---------------------------+-------------+------------+--------
-asmp-inference-cost-parity-onprem | sig-aws-bedrock-onprem    | competitive | 2026-03-04 | AWS Bedrock on-prem appliance announced…
-asmp-helix-onprem-margin          | sig-aws-bedrock-onprem    | competitive | 2026-03-04 | (same)
+asmp-helix-onprem-margin          | sig-aws-bedrock-onprem    | competitive | 2026-03-04 | AWS Bedrock on-prem appliance announced…
+asmp-inference-cost-parity-onprem | sig-aws-bedrock-onprem    | competitive | 2026-03-04 | (same)
 asmp-helix-onprem-margin          | sig-microsoft-onprem-push | market-move | 2026-01-28 | Microsoft on-prem GPU SKUs for regulated…
 ```
 
@@ -212,7 +212,7 @@ ins-helix-bear | memo   | bear     | AWS Bedrock on-prem appliance launched in M
 ### Post-signal portfolio impact
 
 ```bash
-omnigraph alias signal-portfolio-impact sig-vector-forge-aws-deal
+omnigraph alias signal-portfolio-impact --params '{"slug":"sig-vector-forge-aws-deal"}'
 ```
 
 Walks `Signal → contradicts → Assumption → basedOn(inv) → Decision → regarding → Deal → forOrganization(status=portfolio)`. A new external signal arrives - which committed portfolio decisions just got destabilized?
@@ -226,8 +226,8 @@ org-aetherbrick | Aetherbrick | dec-aetherbrick-follow-on-eval | follow-on | Ver
 ### Exit landscape for a portfolio organization
 
 ```bash
-omnigraph alias exit-landscape                  org-pinion-infer
-omnigraph alias exit-landscape-decision-makers  org-pinion-infer
+omnigraph alias exit-landscape --params '{"slug":"org-pinion-infer"}'
+omnigraph alias exit-landscape-decision-makers --params '{"slug":"org-pinion-infer"}'
 ```
 
 **`exit-landscape`** - plausible acquirers:
@@ -250,11 +250,11 @@ org-microsoft | Microsoft | per-acq-microsoft-priti | Priti Joshi
 ### Board-prep pack
 
 ```bash
-omnigraph alias board-prep-pack                  org-aetherbrick
-omnigraph alias board-prep-open-questions        org-aetherbrick
-omnigraph alias board-prep-commitments           org-aetherbrick
-omnigraph alias board-prep-meeting-history       org-aetherbrick   # prior board meetings
-omnigraph alias board-prep-next-meeting          org-aetherbrick   # scheduled next board
+omnigraph alias board-prep-pack --params '{"slug":"org-aetherbrick"}'
+omnigraph alias board-prep-open-questions --params '{"slug":"org-aetherbrick"}'
+omnigraph alias board-prep-commitments --params '{"slug":"org-aetherbrick"}'
+omnigraph alias board-prep-meeting-history --params '{"slug":"org-aetherbrick"}'   # prior board meetings
+omnigraph alias board-prep-next-meeting --params '{"slug":"org-aetherbrick"}'      # scheduled next board
 ```
 
 **`board-prep-pack`** - recent signals since last board:
@@ -274,17 +274,17 @@ cmt-aetherbrick-board-prep | Aetherbrick - board prep doc | open       | 2026-06
 
 **`board-prep-next-meeting`** - when the next board is:
 ```
-m.slug                        | m.name                      | m.scheduled_at           | m.location | m.summary
-------------------------------+-----------------------------+--------------------------+------------+----------
-mtg-aetherbrick-board-q2-2026 | Aetherbrick - Q2 2026 board | 2026-07-09T15:00:00.000Z | Berlin HQ  | Next board. Churn cohort follow-up + Series B framework decision expected.
+m.slug                        | m.name                      | m.scheduled_at      | m.location | m.summary
+------------------------------+-----------------------------+---------------------+------------+----------
+mtg-aetherbrick-board-q2-2026 | Aetherbrick - Q2 2026 board | 2026-07-09T15:00:00 | Berlin HQ  | Next board. Churn cohort follow-up + Series B framework decision expected.
 ```
 
 ### Meeting history with a deal or organization
 
 ```bash
-omnigraph alias meetings-with-deal               deal-helix-series-a
-omnigraph alias ic-prep-meeting-history          deal-helix-series-a
-omnigraph alias ic-prep-open-commitments         deal-helix-series-a
+omnigraph alias meetings-with-deal --params '{"slug":"deal-helix-series-a"}'
+omnigraph alias ic-prep-meeting-history --params '{"slug":"deal-helix-series-a"}'
+omnigraph alias ic-prep-open-commitments --params '{"slug":"deal-helix-series-a"}'
 ```
 
 **`ic-prep-open-commitments`** - what's still owed before Helix IC:
@@ -298,8 +298,8 @@ cmt-helix-customer-refs  | Helix - 3 customer reference calls | high         | 2
 ### Intro path to a founder
 
 ```bash
-omnigraph alias direct-team-knowers     per-helix-elena   # 1-hop
-omnigraph alias intro-path-to-founder   per-helix-yuki    # 2-hop via bridge
+omnigraph alias direct-team-knowers --params '{"slug":"per-helix-elena"}'    # 1-hop
+omnigraph alias intro-path-to-founder --params '{"slug":"per-helix-yuki"}'   # 2-hop via bridge
 ```
 
 **`direct-team-knowers per-helix-elena`** - who on the firm already knows her:
@@ -335,7 +335,7 @@ Run weekly to catch belief drift before a quarterly review.
 ### Reserve pressure check
 
 ```bash
-omnigraph alias reserve-pressure fund-iii
+omnigraph alias reserve-pressure --params '{"fund_slug":"fund-iii"}'
 ```
 ```
 c.slug           | d.slug               | q.slug                 | q.name                                          | q.description
@@ -348,11 +348,11 @@ Tactyc says *how much* dry powder; the graph says *which organizations are about
 ### Source-reliability revalidation
 
 ```bash
-omnigraph alias publishers                                # TechCrunch, anon blog
-omnigraph alias databases                                 # PitchBook
-omnigraph alias expert-networks                           # Tegus
-omnigraph alias sources-by-reliability low                # who to flag
-omnigraph alias source-downstream-signals org-techcrunch  # what to revalidate
+omnigraph alias publishers                                                       # TechCrunch, anon blog
+omnigraph alias databases                                                        # PitchBook
+omnigraph alias expert-networks                                                  # Tegus
+omnigraph alias sources-by-reliability --params '{"reliability":"low"}'          # who to flag
+omnigraph alias source-downstream-signals --params '{"slug":"org-techcrunch"}'   # what to revalidate
 ```
 
 **`publishers`**:
@@ -474,7 +474,7 @@ For each agent below: the natural-language **prompt** you'd send it, concrete **
 ### 4. Multi-agent IC simulation · calendar webhook 48h before a high-conviction IC
 
 **Prompt** (one per agent - bull / bear / neutral fork):
-> An IC is in 48h. You are the {bull | bear | neutral} agent. Read the deal's Thesis + Assumptions + recent Signals + related Patterns. Pick the evidence that genuinely supports your stance - overlap with the other agents is expected, that's the point. Write one `Insight{stance=…}` with `omnigraph mutate add_insight_with_stance --params '{…}'` on the shared debate branch, citing Signals via `InsightReliesOnSignal` and any Pattern via `InsightHighlightsPattern`. Don't invent. Neutral agent: name what new evidence would resolve the disagreement.
+> An IC is in 48h. You are the {bull | bear | neutral} agent. Read the deal's Thesis + Assumptions + recent Signals + related Patterns. Pick the evidence that genuinely supports your stance - overlap with the other agents is expected, that's the point. Write one `Insight{stance=…}` with `omnigraph mutate add_insight_with_stance --target local-writer --graph vcos --branch tentative/ic-debate-<deal> --params '{…}'` on the shared debate branch, citing Signals via `InsightReliesOnSignal` and any Pattern via `InsightHighlightsPattern`. Don't invent. Neutral agent: name what new evidence would resolve the disagreement.
 
 **External:** the calendar invite for the IC.
 
@@ -522,14 +522,14 @@ vc-os/
 ├── schema.pg          # 17 nodes, ~62 edges, ~19 enums - source of truth
 ├── seed.md            # human-readable narrative (twin of seed.jsonl)
 ├── seed.jsonl         # loadable seed
-├── omnigraph-config.example.yaml  # example operator config — aliases to merge into ~/.omnigraph/config.yaml
+├── omnigraph-config.example.yaml  # read aliases to merge into $OMNIGRAPH_HOME/config.yaml
 └── queries/
     ├── beliefs.gq        # 23 reads
     ├── deals.gq          # 20 reads
     ├── decisions.gq      # 15 reads
     ├── meetings.gq       # 23 reads (incl. IC + board prep + meeting history)
-    ├── mutations.gq      # 86 mutations (add_* + link_*)
-    ├── organizations.gq  # 28 reads (incl. exit-landscape + co-investor)
+    ├── mutations.gq      # 87 mutations (add_* + link_*)
+    ├── organizations.gq  # 29 reads (incl. exit-landscape + co-investor)
     ├── patterns.gq       # 15 reads
     ├── people.gq         # 22 reads
     ├── portfolio.gq      # 17 reads
@@ -540,7 +540,7 @@ vc-os/
 
 ## Quick Start
 
-Follow the shared [0.13 local setup](../README.md#local-setup) with
+Follow the shared [local setup](../README.md#local-setup) with
 `vc-os` and graph ID `vcos`. Merge this cookbook's
 `omnigraph-config.example.yaml` into your operator config. Later schema and
 stored query edits use the [live update workflow](../README.md#live-updates).
@@ -550,19 +550,19 @@ Then query through the server via aliases (in a separate terminal):
 ```bash
 omnigraph alias team
 omnigraph alias founders-enriched
-omnigraph alias pre-ic-brief-thesis      deal-helix-series-a
-omnigraph alias signal-portfolio-impact  sig-vector-forge-aws-deal
-omnigraph alias exit-landscape           org-pinion-infer
-omnigraph alias debate-stances           deal-helix-series-a
-omnigraph alias board-prep-pack          org-aetherbrick
+omnigraph alias pre-ic-brief-thesis --params '{"slug":"deal-helix-series-a"}'
+omnigraph alias signal-portfolio-impact --params '{"slug":"sig-vector-forge-aws-deal"}'
+omnigraph alias exit-landscape --params '{"slug":"org-pinion-infer"}'
+omnigraph alias debate-stances --params '{"slug":"deal-helix-series-a"}'
+omnigraph alias board-prep-pack --params '{"slug":"org-aetherbrick"}'
 omnigraph alias contradicted-active-theses
-omnigraph alias intro-path-to-founder    per-helix-yuki
-omnigraph alias reserve-pressure         fund-iii
+omnigraph alias intro-path-to-founder --params '{"slug":"per-helix-yuki"}'
+omnigraph alias reserve-pressure --params '{"fund_slug":"fund-iii"}'
 omnigraph alias lessons-active
-omnigraph alias publishers                                  # publisher/database/expert-network sources
-omnigraph alias source-downstream-signals org-techcrunch    # downstream-signal revalidation
-omnigraph alias person-insights          per-helix-yuki     # founder assessment
-omnigraph alias observed-organizations                      # PitchBook-imported (no Quito engagement)
+omnigraph alias publishers                                                       # publisher/database/expert-network sources
+omnigraph alias source-downstream-signals --params '{"slug":"org-techcrunch"}'   # downstream-signal revalidation
+omnigraph alias person-insights --params '{"slug":"per-helix-yuki"}'             # founder assessment
+omnigraph alias observed-organizations                                           # PitchBook-imported (no Quito engagement)
 ```
 
 The aliases are also grouped by meeting view in `omnigraph-config.example.yaml` - `VIEW: IC Meeting`, `VIEW: Weekly Pipeline Meeting`, `VIEW: Portfolio Support Meeting`, `VIEW: LPAC / Fund Reporting` - so dashboards map 1:1 to alias bundles.

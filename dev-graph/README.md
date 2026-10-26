@@ -149,7 +149,8 @@ different schema.
 ## Killer queries (derived — computed, not stored)
 
 Shipped as stored queries in `queries/` and exposed as operator aliases in
-`omnigraph-config.example.yaml`. Run with `omnigraph alias <name> [args]`.
+`omnigraph-config.example.yaml`. Run with `omnigraph alias <name>`, passing any
+parameters by name with `--params`.
 
 | Concept | Alias | What it answers |
 |---|---|---|
@@ -182,7 +183,8 @@ something interesting:
   `presence`, `web-client`, `storage`, `billing`, `webhooks`.
 - **A live storyline:** a **presence memory-leak incident** (`inc-presence-leak`,
   S2) caused by a perf PR → traced to its commit → a hotfix + a backpressure
-  `Decision` + a postmortem `Learning`. `incident-cause inc-presence-leak` walks it.
+  `Decision` + a postmortem `Learning`. `incident-cause` with
+  `{"incident":"inc-presence-leak"}` walks it.
 - **Governance in motion:** `inv-single-writer` is **violated**; `gap-single-writer`
   undermines it and was **widened**; a partition-guard PR **narrows** it.
   `gaps` and `unheld-invariants` surface this. One **unguarded assumption**
@@ -195,16 +197,16 @@ See [`seed.md`](seed.md) for the full human-readable inventory (kept in sync wit
 
 ## Quick start
 
-Follow the shared [0.13 local setup](../README.md#local-setup) with
+Follow the shared [local setup](../README.md#local-setup) with
 `dev-graph` and graph ID `dev`. Merge this cookbook's
 `omnigraph-config.example.yaml` into your operator config, then explore:
 
 ```bash
 omnigraph alias ready
 omnigraph alias blocked-upstream
-omnigraph alias incident-cause inc-presence-leak
+omnigraph alias incident-cause --params '{"incident":"inc-presence-leak"}'
 omnigraph alias gaps
-omnigraph query ready --server local --graph dev
+omnigraph query ready --target local-reader --graph dev
 ```
 
 Use the [live update workflow](../README.md#live-updates) for schema, stored
@@ -247,15 +249,16 @@ To enable semantic search:
    export OMNIGRAPH_EMBED_MODEL=gemini-embedding-2
    omnigraph embed --input rows.jsonl --output rows.embedded.jsonl \
      --spec /path/to/embeddings.json --reembed-all
-   omnigraph load --data rows.embedded.jsonl --mode merge --server local --graph dev
+   omnigraph load --target local --graph dev --data rows.embedded.jsonl --mode merge
    ```
 
    Set `GEMINI_API_KEY` for this command too. `omnigraph embed` transforms files;
    ordinary load preserves supplied vectors and does not generate them. See the
-   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.13.0/docs/user/search/embeddings.md#offline-file-pipeline)
+   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.14.0/docs/user/search/embeddings.md#offline-file-pipeline)
    for the spec format. Use `seed.jsonl` only for a fresh demo.
-3. Run `omnigraph alias sem-issue "tenant isolation"`. Structural queries also
-   work without embeddings; text-vector queries require the configured provider.
+3. Run `omnigraph alias sem-issue --params '{"q":"tenant isolation"}'`.
+   Structural queries also work without embeddings; text-vector queries require
+   the configured provider.
 
 ## Identifier scheme
 
@@ -274,7 +277,7 @@ for agents) · `gate-` Gate · `lbl-` Label · `inv-` Invariant · `prn-` Princi
 - `seed.jsonl` / `seed.md` — reference seed (loadable / human-readable twin).
 - `cluster.yaml` — deployment declaration (graph `dev`, schema, stored queries).
 - `omnigraph-config.example.yaml` — example operator aliases; merge into
-  `~/.omnigraph/config.yaml` (per-user, never committed).
+  `$OMNIGRAPH_HOME/config.yaml` (per-user, never committed).
 
 ## What this deliberately does NOT model
 

@@ -14,31 +14,31 @@ The reference seed is **Viking Therapeutics** (NASDAQ: VKTX), a public GLP-1/GIP
 - `README.md` — Reference seed description, schema essentials, quick start.
 - `seed.md` / `seed.jsonl` — Seed dataset (human-readable / loadable).
 - `queries/*.gq` — Read and mutation queries.
-- `omnigraph-config.example.yaml` — Example operator config (aliases). Merge its `aliases:` into your per-user `~/.omnigraph/config.yaml`; this cookbook ships no `omnigraph.yaml`.
+- `omnigraph-config.example.yaml` — Read aliases. Merge its `aliases:` into the operator config from the [local setup](../README.md#local-setup); this cookbook ships no `omnigraph.yaml`.
 
 Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).
 
 ## Setup
 
-Use the shared [0.13 local setup](../README.md#local-setup) with cookbook
+Use the shared [local setup](../README.md#local-setup) with cookbook
 `pharma-intel` and graph `pharma`. It owns authentication, the bootstrap writer-lock
 handoff, readiness, and served seed loading. Apply later configuration edits with
 the [live update workflow](../README.md#live-updates).
 
-Graph id `pharma`. Stored queries and their parameters: `omnigraph queries list --cluster . --graph pharma`.
-Alias args bind by name to `$params`: `omnigraph alias assumption-contradictions asmp-oral-displaces-injectable` is `omnigraph query assumption_contradicting_signals --graph pharma --params '{"slug":"asmp-oral-displaces-injectable"}'`.
+Graph id `pharma`. Stored queries and their parameters: `omnigraph queries list --target local --graph pharma`.
+Aliases pass parameters by name: `omnigraph alias assumption-contradictions --params '{"slug":"asmp-oral-displaces-injectable"}'` is `omnigraph query assumption_contradicting_signals --target local-reader --graph pharma --params '{"slug":"asmp-oral-displaces-injectable"}'`.
 
 ## Writing
 
-Aliases are read-only; mutations run as `omnigraph mutate <name> --params '<json>'` with every
-non-optional property supplied. Signatures live in `queries/mutations.gq`. Working example:
+Aliases are read-only; mutations run as `omnigraph mutate <name> --target local-writer --graph pharma --params '<json>'`
+with every non-optional property supplied. Signatures live in `queries/mutations.gq`. Working example:
 
 ```bash
-omnigraph mutate add_signal --graph pharma --params '{"slug":"sig-orforglipron-approval","name":"FDA approves orforglipron","brief":"First oral small-molecule GLP-1 approved for obesity.","stagingTimestamp":"2026-09-14T00:00:00Z","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
-omnigraph mutate link_about_compound --graph pharma --params '{"signal":"sig-orforglipron-approval","compound":"comp-vk2735-sc"}'
+omnigraph mutate add_signal --target local-writer --graph pharma --params '{"slug":"sig-orforglipron-approval","name":"FDA approves orforglipron","brief":"First oral small-molecule GLP-1 approved for obesity.","stagingTimestamp":"2026-09-14T00:00:00Z","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+omnigraph mutate link_about_compound --target local-writer --graph pharma --params '{"signal":"sig-orforglipron-approval","compound":"comp-vk2735-sc"}'
 ```
 
-With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
+`--graph` can be omitted only for a target with `default_graph`; the shared setup's targets have none.
 
 ## Domain Model
 

@@ -15,31 +15,31 @@ The reference seed is a **fictional Berlin-based AI-infra fund** ("Quito Capital
 - `seed.md` / `seed.jsonl` — Reference seed (human-readable / loadable).
 - `queries/*.gq` — Read and mutation queries. One file per domain.
 - `cluster.yaml` — Deployment declaration (graph `vcos`, schema, stored queries).
-- `omnigraph-config.example.yaml` — Example operator config. Your operator config is per-user at `~/.omnigraph/config.yaml` (never committed); merge this file's aliases into it. Aliases bind to the stored queries published by `cluster apply`.
+- `omnigraph-config.example.yaml` — Read aliases. Your operator config is per-user at `$OMNIGRAPH_HOME/config.yaml` (never committed); merge this file's aliases into it. Aliases bind to the stored queries published by `cluster apply`.
 
 Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).
 
 ## Setup
 
-Use the shared [0.13 local setup](../README.md#local-setup) with cookbook
+Use the shared [local setup](../README.md#local-setup) with cookbook
 `vc-os` and graph `vcos`. It owns authentication, the bootstrap writer-lock
 handoff, readiness, and served seed loading. Apply later configuration edits with
 the [live update workflow](../README.md#live-updates).
 
-Graph id `vcos`. Stored queries and their parameters: `omnigraph queries list --cluster . --graph vcos`.
-Alias args bind by name to `$params`: `omnigraph alias pre-ic-brief-thesis deal-helix-series-a` is `omnigraph query pre_ic_brief_thesis --graph vcos --params '{"slug":"deal-helix-series-a"}'`.
+Graph id `vcos`. Stored queries and their parameters: `omnigraph queries list --target local --graph vcos`.
+Alias parameters bind by name to `$params`: `omnigraph alias pre-ic-brief-thesis --params '{"slug":"deal-helix-series-a"}'` is `omnigraph query pre_ic_brief_thesis --target local-reader --graph vcos --params '{"slug":"deal-helix-series-a"}'`.
 
 ## Writing
 
-Aliases are read-only; mutations run as `omnigraph mutate <name> --params '<json>'` with every
+Aliases are read-only; mutations run as `omnigraph mutate <name> --target local-writer --graph vcos --params '<json>'` with every
 non-optional property supplied. Signatures live in `queries/mutations.gq`. Working example:
 
 ```bash
-omnigraph mutate add_lesson --graph vcos --params '{"slug":"lsn-ref-calls-before-ic","name":"Finish customer reference calls before IC","kind":"rule-of-thumb","body":"No IC vote while a reference call is still open.","status":"tentative","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
-omnigraph mutate link_lesson_distilled_from --graph vcos --params '{"lesson":"lsn-ref-calls-before-ic","pattern":"pat-on-prem-shift"}'
+omnigraph mutate add_lesson --target local-writer --graph vcos --params '{"slug":"lsn-ref-calls-before-ic","name":"Finish customer reference calls before IC","kind":"rule-of-thumb","body":"No IC vote while a reference call is still open.","status":"tentative","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+omnigraph mutate link_lesson_distilled_from --target local-writer --graph vcos --params '{"lesson":"lsn-ref-calls-before-ic","pattern":"pat-on-prem-shift"}'
 ```
 
-With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
+The shared operator config sets no `default_graph`, so every command passes `--graph vcos`.
 
 ## Schema Language (`.pg`)
 
@@ -113,7 +113,7 @@ must preserve the following conventions:
 
 - **Edge-property projections use a bound edge variable** — for example, `$p $r:roleInDeal $d` and `return { $r.role }`. `deal_role_participants` demonstrates the syntax.
 - **`Chunk` is declared but the seed has zero.** Embeddings come from an offline JSONL-to-JSONL pipeline; the static seed cannot generate them and `omnigraph embed` does not mutate a graph. Hybrid search needs a separate ingest.
-- **Alias args bind to query parameters by name.** Keep each alias `args` entry equal to the corresponding query parameter name.
+- **Alias parameters bind to query parameters by name.** Keep each alias's `--params` comment in `omnigraph-config.example.yaml` equal to the query's parameter names.
 - **Preview schema edits through served `cluster plan`.** Apply supported changes live. If planning refuses a type change, design a data migration or rebuild into a separate fresh cluster; never delete a managed graph root behind its ledger. See [upgrading](../README.md#upgrading).
 - **`Artifact.blob` is declared but the seed uses none.** Same status as Chunks — populate via separate ingest.
 
