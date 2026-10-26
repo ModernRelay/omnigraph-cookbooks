@@ -1,91 +1,78 @@
-# Operator-config example for the dev-graph cookbook.
-# Your operator config lives at ~/.omnigraph/config.yaml (per-user, NOT committed).
-# Merge the `aliases:` below into it for short names over this graph's stored
-# queries. Point `local` at your running cluster server (`omnigraph-server
-# --cluster .`); alias invocation needs the server up.
-#
-# Read aliases bind to served stored queries by name; run with
-# `omnigraph alias <name> [args]` — args bind by NAME to the query's $params
-# (`args: [slug]` fills `$slug`). Operator aliases are READ-ONLY — run stored
-# *mutations* with `omnigraph mutate <name> --params '{…}'` (see the bottom), not
-# via an alias.
-servers:
-  local:
-    url: http://127.0.0.1:8080
-defaults:
-  server: local
-  default_graph: dev
-  output: table
-
+# Read aliases for the dev-graph cookbook (graph `dev`).
+# Merge the `aliases:` entries below into $OMNIGRAPH_HOME/config.yaml, the operator
+# config from ../README.md#local-setup, whose `local-reader` target they use.
+# Run one with `omnigraph alias <name>`; pass a query's parameters by name with
+# `--params '{"slug":"..."}'`. Aliases only read; run stored mutations with
+# `omnigraph mutate <name> --target local-writer --graph dev --params '{...}'`.
 aliases:
   # ── Lookups ──────────────────────────────────────────────────
-  issue: { server: local, graph: dev, query: issue_lookup, args: [slug] }
-  epic:  { server: local, graph: dev, query: epic_lookup,  args: [slug] }
-  pr:    { server: local, graph: dev, query: pr_lookup,    args: [slug] }
+  issue: {target: local-reader, graph: dev, query: issue_lookup}   # --params '{"slug":"..."}'
+  epic:  {target: local-reader, graph: dev, query: epic_lookup}    # --params '{"slug":"..."}'
+  pr:    {target: local-reader, graph: dev, query: pr_lookup}      # --params '{"slug":"..."}'
 
   # ── Work state (beads-style, derived) ────────────────────────
-  ready:            { server: local, graph: dev, query: ready }
-  blocked:          { server: local, graph: dev, query: blocked }
-  blocked-parent:   { server: local, graph: dev, query: blocked_by_parent }
-  blocked-epic:     { server: local, graph: dev, query: blocked_by_epic }
-  blocked-gate:     { server: local, graph: dev, query: blocked_by_gate }
-  blocked-wait:     { server: local, graph: dev, query: blocked_by_wait }
-  blocked-upstream: { server: local, graph: dev, query: blocked_on_upstream }
-  stale:            { server: local, graph: dev, query: stale_candidates }
+  ready:            {target: local-reader, graph: dev, query: ready}
+  blocked:          {target: local-reader, graph: dev, query: blocked}
+  blocked-parent:   {target: local-reader, graph: dev, query: blocked_by_parent}
+  blocked-epic:     {target: local-reader, graph: dev, query: blocked_by_epic}
+  blocked-gate:     {target: local-reader, graph: dev, query: blocked_by_gate}
+  blocked-wait:     {target: local-reader, graph: dev, query: blocked_by_wait}
+  blocked-upstream: {target: local-reader, graph: dev, query: blocked_on_upstream}
+  stale:            {target: local-reader, graph: dev, query: stale_candidates}
 
   # ── Epics ────────────────────────────────────────────────────
-  epic-issues: { server: local, graph: dev, query: epic_issues,      args: [epic] }
-  epic-open:   { server: local, graph: dev, query: epic_open_issues, args: [epic] }
+  epic-issues: {target: local-reader, graph: dev, query: epic_issues}        # --params '{"epic":"..."}'
+  epic-open:   {target: local-reader, graph: dev, query: epic_open_issues}   # --params '{"epic":"..."}'
 
   # ── Code / release ───────────────────────────────────────────
-  release-prs: { server: local, graph: dev, query: release_prs,           args: [release] }
-  issue-prs:   { server: local, graph: dev, query: issue_implementations, args: [issue] }
-  prs-comp:    { server: local, graph: dev, query: prs_for_component,     args: [component] }
-  issues-comp: { server: local, graph: dev, query: issues_for_component,  args: [component] }
+  release-prs: {target: local-reader, graph: dev, query: release_prs}             # --params '{"release":"..."}'
+  issue-prs:   {target: local-reader, graph: dev, query: issue_implementations}   # --params '{"issue":"..."}'
+  prs-comp:    {target: local-reader, graph: dev, query: prs_for_component}       # --params '{"component":"..."}'
+  issues-comp: {target: local-reader, graph: dev, query: issues_for_component}    # --params '{"component":"..."}'
 
   # ── Operations ───────────────────────────────────────────────
-  incident-cause:     { server: local, graph: dev, query: incident_root_cause,   args: [incident] }
-  incident-blast:     { server: local, graph: dev, query: incident_components,    args: [incident] }
-  learnings-incident: { server: local, graph: dev, query: learnings_for_incident, args: [incident] }
+  incident-cause:     {target: local-reader, graph: dev, query: incident_root_cause}      # --params '{"incident":"..."}'
+  incident-blast:     {target: local-reader, graph: dev, query: incident_components}      # --params '{"incident":"..."}'
+  learnings-incident: {target: local-reader, graph: dev, query: learnings_for_incident}   # --params '{"incident":"..."}'
 
   # ── Governance & substrate ───────────────────────────────────
-  unheld-invariants: { server: local, graph: dev, query: unheld_invariants }
-  gaps:              { server: local, graph: dev, query: gaps_undermining_invariants }
-  assumptions:       { server: local, graph: dev, query: assumptions }
-  caps-tier:         { server: local, graph: dev, query: capabilities_by_tier, args: [tier] }
-  decisions-comp:    { server: local, graph: dev, query: decisions_for_component, args: [component] }
-  no-spec:           { server: local, graph: dev, query: components_without_spec }
-  no-cap-impl:       { server: local, graph: dev, query: capabilities_without_component }
+  unheld-invariants: {target: local-reader, graph: dev, query: unheld_invariants}
+  gaps:              {target: local-reader, graph: dev, query: gaps_undermining_invariants}
+  assumptions:       {target: local-reader, graph: dev, query: assumptions}
+  caps-tier:         {target: local-reader, graph: dev, query: capabilities_by_tier}      # --params '{"tier":"..."}'
+  decisions-comp:    {target: local-reader, graph: dev, query: decisions_for_component}   # --params '{"component":"..."}'
+  no-spec:           {target: local-reader, graph: dev, query: components_without_spec}
+  no-cap-impl:       {target: local-reader, graph: dev, query: capabilities_without_component}
 
   # ── Issue-triage dashboard (queries/issues-dashboard.gq) ─────
-  open-epics:      { server: local, graph: dev, query: open_epics }
-  epic-counts:     { server: local, graph: dev, query: epic_issue_counts, args: [epic] }
-  issue-detail:    { server: local, graph: dev, query: issue_detail,     args: [issue] }
-  issue-blockers:  { server: local, graph: dev, query: issue_blockers,   args: [issue] }
-  issue-parents:   { server: local, graph: dev, query: issue_parents,    args: [issue] }
-  issue-epic-parent: { server: local, graph: dev, query: issue_parent_epic, args: [issue] }
-  issue-gates:     { server: local, graph: dev, query: issue_gates,      args: [issue] }
-  issue-waits-on:  { server: local, graph: dev, query: issue_waits_on,   args: [issue] }
-  issue-comments:  { server: local, graph: dev, query: issue_comments,   args: [issue] }
+  open-epics:      {target: local-reader, graph: dev, query: open_epics}
+  epic-counts:     {target: local-reader, graph: dev, query: epic_issue_counts}     # --params '{"epic":"..."}'
+  issue-detail:    {target: local-reader, graph: dev, query: issue_detail}          # --params '{"issue":"..."}'
+  issue-blockers:  {target: local-reader, graph: dev, query: issue_blockers}        # --params '{"issue":"..."}'
+  issue-parents:   {target: local-reader, graph: dev, query: issue_parents}         # --params '{"issue":"..."}'
+  issue-epic-parent: {target: local-reader, graph: dev, query: issue_parent_epic}   # --params '{"issue":"..."}'
+  issue-gates:     {target: local-reader, graph: dev, query: issue_gates}           # --params '{"issue":"..."}'
+  issue-waits-on:  {target: local-reader, graph: dev, query: issue_waits_on}        # --params '{"issue":"..."}'
+  issue-comments:  {target: local-reader, graph: dev, query: issue_comments}        # --params '{"issue":"..."}'
 
   # ── Semantic search (needs an embedding provider + populated embeddings; see README) ──
-  sem-issue:     { server: local, graph: dev, query: search_issues,       args: [q] }
-  sem-epic:      { server: local, graph: dev, query: search_epics,        args: [q] }
-  sem-spec:      { server: local, graph: dev, query: search_specs,        args: [q] }
-  sem-decision:  { server: local, graph: dev, query: search_decisions,    args: [q] }
-  sem-learning:  { server: local, graph: dev, query: search_learnings,    args: [q] }
-  sem-invariant: { server: local, graph: dev, query: search_invariants,   args: [q] }
-  sem-principle: { server: local, graph: dev, query: search_principles,   args: [q] }
-  sem-gap:       { server: local, graph: dev, query: search_gaps,         args: [q] }
-  sem-cap:       { server: local, graph: dev, query: search_capabilities, args: [q] }
-  sem-pr:        { server: local, graph: dev, query: search_prs,          args: [q] }
-  sem-incident:  { server: local, graph: dev, query: search_incidents,    args: [q] }
+  sem-issue:     {target: local-reader, graph: dev, query: search_issues}         # --params '{"q":"..."}'
+  sem-epic:      {target: local-reader, graph: dev, query: search_epics}          # --params '{"q":"..."}'
+  sem-spec:      {target: local-reader, graph: dev, query: search_specs}          # --params '{"q":"..."}'
+  sem-decision:  {target: local-reader, graph: dev, query: search_decisions}      # --params '{"q":"..."}'
+  sem-learning:  {target: local-reader, graph: dev, query: search_learnings}      # --params '{"q":"..."}'
+  sem-invariant: {target: local-reader, graph: dev, query: search_invariants}     # --params '{"q":"..."}'
+  sem-principle: {target: local-reader, graph: dev, query: search_principles}     # --params '{"q":"..."}'
+  sem-gap:       {target: local-reader, graph: dev, query: search_gaps}           # --params '{"q":"..."}'
+  sem-cap:       {target: local-reader, graph: dev, query: search_capabilities}   # --params '{"q":"..."}'
+  sem-pr:        {target: local-reader, graph: dev, query: search_prs}            # --params '{"q":"..."}'
+  sem-incident:  {target: local-reader, graph: dev, query: search_incidents}      # --params '{"q":"..."}'
 
 # ── Mutations (served stored mutations; NOT aliasable) ───────────────────────
-# Run on a branch. The bearer identity determines authorization and commit attribution.
+# Run on a branch. The target's token determines authorization and commit attribution.
 # The $actor parameter is application provenance stored in rows, not authority. Examples:
-#   omnigraph mutate create_issue --graph dev --branch review/x \
+#   omnigraph branch create review/x --from main --target local-writer --graph dev
+#   omnigraph mutate create_issue --target local-writer --graph dev --branch review/x \
 #     --params '{"slug":"iss-new","title":"…","status":"todo","issueType":"task","actor":"act-you","at":"2026-07-09"}'
-#   omnigraph mutate update_issue_status --graph dev \
+#   omnigraph mutate update_issue_status --target local-writer --graph dev --branch review/x \
 #     --params '{"slug":"iss-new","status":"in_progress","actor":"act-you","at":"2026-07-09"}'
-# (with defaults.server/default_graph set, --server/--graph can be omitted.)

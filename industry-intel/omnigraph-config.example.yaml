@@ -1,63 +1,50 @@
-# Operator-config example for the Industry Intel (SPIKE) cookbook.
-# Your operator config lives at ~/.omnigraph/config.yaml (per-user, NOT committed).
-# Merge the `aliases:` below into it for short names over this graph's stored
-# queries. Point `local` at your running cluster server (`omnigraph-server
-# --cluster .`); alias invocation needs the server up.
-#
-# Alias args bind by NAME to the stored query's $params (`args: [slug]` fills
-# `$slug`), so `omnigraph alias signal sig-x` == `omnigraph query get_signal
-# --params '{"slug":"sig-x"}'`. Aliases are READ-ONLY: run the
-# stored *mutations* with `omnigraph mutate <name> --params '{…}'` (see the
-# bottom of this file), never through an alias.
-servers:
-  local:
-    url: http://127.0.0.1:8080
-defaults:
-  server: local
-  default_graph: spike
+# Read aliases for the Industry Intel (SPIKE) cookbook (graph `spike`).
+# Merge the `aliases:` entries below into $OMNIGRAPH_HOME/config.yaml, the operator
+# config from ../README.md#local-setup, whose `local-reader` target they use.
+# Run one with `omnigraph alias <name>`; pass a query's parameters by name with
+# `--params '{"slug":"..."}'`. Aliases only read; run stored mutations with
+# `omnigraph mutate <name> --target local-writer --graph spike --params '{...}'`.
 aliases:
   # Signals
-  signal: { server: local, graph: spike, query: get_signal, args: [slug], format: kv }
-  signals: { server: local, graph: spike, query: recent_signals }
-  signal-patterns: { server: local, graph: spike, query: signal_patterns, args: [slug] }
-  signal-elements: { server: local, graph: spike, query: signal_elements, args: [slug] }
+  signal: {target: local-reader, graph: spike, query: get_signal}   # --params '{"slug":"..."}'
+  signals: {target: local-reader, graph: spike, query: recent_signals}
+  signal-patterns: {target: local-reader, graph: spike, query: signal_patterns}   # --params '{"slug":"..."}'
+  signal-elements: {target: local-reader, graph: spike, query: signal_elements}   # --params '{"slug":"..."}'
 
   # Patterns
-  pattern: { server: local, graph: spike, query: get_pattern, args: [slug], format: kv }
-  patterns: { server: local, graph: spike, query: patterns_by_kind, args: [kind] }
-  pattern-signals: { server: local, graph: spike, query: pattern_signals, args: [slug] }
-  pattern-elements: { server: local, graph: spike, query: pattern_elements, args: [slug] }
+  pattern: {target: local-reader, graph: spike, query: get_pattern}   # --params '{"slug":"..."}'
+  patterns: {target: local-reader, graph: spike, query: patterns_by_kind}   # --params '{"kind":"..."}'
+  pattern-signals: {target: local-reader, graph: spike, query: pattern_signals}   # --params '{"slug":"..."}'
+  pattern-elements: {target: local-reader, graph: spike, query: pattern_elements}   # --params '{"slug":"..."}'
 
   # Elements
-  element: { server: local, graph: spike, query: get_element, args: [slug], format: kv }
-  elements: { server: local, graph: spike, query: elements_by_kind, args: [kind] }
-  element-signals: { server: local, graph: spike, query: element_signals, args: [slug] }
-  element-patterns: { server: local, graph: spike, query: element_patterns, args: [slug] }
+  element: {target: local-reader, graph: spike, query: get_element}   # --params '{"slug":"..."}'
+  elements: {target: local-reader, graph: spike, query: elements_by_kind}   # --params '{"kind":"..."}'
+  element-signals: {target: local-reader, graph: spike, query: element_signals}   # --params '{"slug":"..."}'
+  element-patterns: {target: local-reader, graph: spike, query: element_patterns}   # --params '{"slug":"..."}'
 
   # Insights
-  insight: { server: local, graph: spike, query: get_insight, args: [slug], format: kv }
-  insight-patterns: { server: local, graph: spike, query: insight_patterns, args: [slug] }
-  insight-elements: { server: local, graph: spike, query: insight_elements, args: [slug] }
+  insight: {target: local-reader, graph: spike, query: get_insight}   # --params '{"slug":"..."}'
+  insight-patterns: {target: local-reader, graph: spike, query: insight_patterns}   # --params '{"slug":"..."}'
+  insight-elements: {target: local-reader, graph: spike, query: insight_elements}   # --params '{"slug":"..."}'
 
   # KnowHow
-  knowhow: { server: local, graph: spike, query: get_knowhow, args: [slug], format: kv }
-  knowhows: { server: local, graph: spike, query: recent_knowhow }
-  knowhow-elements: { server: local, graph: spike, query: knowhow_elements, args: [slug] }
+  knowhow: {target: local-reader, graph: spike, query: get_knowhow}   # --params '{"slug":"..."}'
+  knowhows: {target: local-reader, graph: spike, query: recent_knowhow}
+  knowhow-elements: {target: local-reader, graph: spike, query: knowhow_elements}   # --params '{"slug":"..."}'
 
   # ── Weekly review (operating loop — see README) ──
-  triage: { server: local, graph: spike, query: orphan_signals }
-  momentum: { server: local, graph: spike, query: pattern_momentum, args: [since] }
-  stale: { server: local, graph: spike, query: stale_patterns, args: [since] }
-  contested: { server: local, graph: spike, query: contested_patterns }
-  unsourced: { server: local, graph: spike, query: unsourced_signals }
+  triage: {target: local-reader, graph: spike, query: orphan_signals}
+  momentum: {target: local-reader, graph: spike, query: pattern_momentum}   # --params '{"since":"..."}'
+  stale: {target: local-reader, graph: spike, query: stale_patterns}   # --params '{"since":"..."}'
+  contested: {target: local-reader, graph: spike, query: contested_patterns}
+  unsourced: {target: local-reader, graph: spike, query: unsourced_signals}
 
   # ── Hybrid retrieval (requires embeddings — see README) ──
-  related: { server: local, graph: spike, query: related_chunks, args: [q] }
-  hybrid-search: { server: local, graph: spike, query: hybrid_chunks, args: [q] }
+  related: {target: local-reader, graph: spike, query: related_chunks}   # --params '{"q":"..."}'
+  hybrid-search: {target: local-reader, graph: spike, query: hybrid_chunks}   # --params '{"q":"..."}'
 
 # ── Mutations (served stored mutations in queries/mutations.gq; NOT aliasable) ──
-# Use the admin or writer identity from ../README.md#local-setup.
-#   omnigraph mutate add_signal --params '{"slug":"sig-new","name":"…","brief":"…",
+#   omnigraph mutate add_signal --target local-writer --graph spike --params '{"slug":"sig-new","name":"…","brief":"…",
 #     "stagingTimestamp":"2026-09-14T00:00:00Z","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
-#   omnigraph mutate link_signal_forms_pattern --params '{"signal":"sig-new","pattern":"pat-sovereign-ai"}'
-# (with defaults.server/default_graph set, --server/--graph can be omitted.)
+#   omnigraph mutate link_signal_forms_pattern --target local-writer --graph spike --params '{"signal":"sig-new","pattern":"pat-sovereign-ai"}'

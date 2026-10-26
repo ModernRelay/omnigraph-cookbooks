@@ -1,68 +1,48 @@
-# Read Aliases
+# Aliases and agent automation
 
-An operator alias binds a personal name and default parameters to a served
-stored query. The team's query stays in the applied cluster registry; aliases
-contain no `.gq` source and cannot invoke mutations.
+An operator alias binds a personal name to a stored read query on a registered
+served target. The registry remains the team's deployed contract; see
+[stored queries](stored-queries.md). The primary
+[operator reference](../../../docs/user/cli/targets.md#read-aliases) owns the grammar.
+
+Add this mapping to a complete `version: 1` operator document:
 
 ```yaml
-# ~/.omnigraph/config.yaml
-servers:
-  production: { url: https://graph.example.com }
 aliases:
-  person:
-    server: production
-    graph: knowledge
-    query: get_person
-    args: [slug]
-    format: json
-  recent-people:
-    server: production
-    graph: knowledge
-    query: recent_people
-    params: { since: "2026-10-01T00:00:00Z" }
-    format: json
+  triage:
+    target: production
+    graph: spike
+    query: weekly_triage
+    params: {limit: 20}
 ```
 
 ```bash
-omnigraph alias person ada
-omnigraph alias person --params '{"slug":"grace"}'
-omnigraph alias recent-people --format jsonl
+omnigraph alias triage --params '{"since":"2026-06-01"}' --format jsonl
+omnigraph alias triage --params '{"limit":5}' --json
 ```
 
-The server, graph and query name come from the binding. To choose a different
-scope or branch, call `query` directly. The `alias` command accepts
-`--params`/`--params-file` and `--format`/`--json`; it has its own namespace and
-cannot shadow built-in commands. Credentials belong in `omnigraph login`
-storage, never alias configuration.
+Aliases require an explicit target and, for multi-graph targets, an explicit
+graph. They never inherit `default_graph` and reject target/graph overrides.
+Managed aliases retain their target's pinned profile. Standalone aliases use
+their target's single auth provider; neither accepts an authentication override.
+`query` is a stored
+identifier, never a filename or inline program. Values in `params` are typed
+JSON-compatible defaults; explicit parameters shallowly replace matching names.
+There is no positional `args` binding or per-alias `format` field.
 
-## Parameters
+Aliases are read-only: a stored mutation refuses. Invoke mutations directly with
+`omnigraph mutate NAME --target production --graph spike --params '{...}'`.
+A direct-graph alias must omit `graph` to pass validation, but cannot execute:
+the stored-query registry is served-only. Validation does not add capabilities.
 
-`args` maps positional values to parameter names in order. Each argument is
-parsed as JSON first, then as a String:
+Use `--format jsonl` or `--json` for automation, or set `defaults.output` to
+`jsonl`/`json`. The supported defaults are `table`, `json`, `jsonl`, `csv`, and
+`kv`. Action receipts retain their own output contracts. Use JSON when the
+consumer needs the complete column list or read `graph_commit_id` for a
+conditional mutation; JSONL metadata does not carry those fields. See
+[result values](queries.md#system-fields-and-result-values).
 
-| Shell argument | Bound value |
-|---|---|
-| `29` | Integer |
-| `'"29"'` | String `29` |
-| `true` | Boolean |
-| `Ada` | String |
-| `'{"x":1}'` | Object |
-
-Explicit `--params` wins over positional arguments, which win over configured
-`params`. Parameter types must match the stored query.
-
-## Results and policy
-
-Use JSON when a consumer needs columns or the read's `graph_commit_id`; JSONL
-omits those metadata fields. Null property values are omitted from rows and
-DateTime output is UTC without a trailing `Z`. See [result values](queries.md#system-fields-and-result-values).
-
-Alias invocation requires the stored-query `invoke_query` and `read` grants.
-A stored mutation bound as an alias is refused. Invoke it explicitly instead:
-
-```bash
-omnigraph mutate update_person --server production --graph knowledge \
-  --params '{"slug":"ada","name":"Ada"}' --json
-```
-
-See [stored queries](stored-queries.md) for registry declaration and live updates.
+Never put credentials or helper definitions in aliases. Authentication comes
+from the target's owner-local provider, with no source fallback. Validation and
+inspection never run helpers; execution can acquire the selected credential.
+See [credentials](../../../docs/user/cli/targets.md#manage-credentials).

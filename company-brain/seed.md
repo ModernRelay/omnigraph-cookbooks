@@ -196,13 +196,15 @@ give:
 - After `propose_successor`, `project_decisions {"project":"checkout"}` on
   the branch shows Launch Checkout v2 on Nov 20 (proposed); main still shows
   Nov 13.
-- The review loop prints nothing and each hygiene read returns zero rows on
-  the branch. After the merge (`fast_forward`) and `verify_claim`,
+- `branch diff` lists three inserted nodes (the source, the claim and the
+  proposed decision) and six inserted edges. The review loop prints no
+  changes and each hygiene read returns zero rows on the branch. After the
+  dry run and the merge (both `fast_forward`) and `verify_claim`,
   `reject_claim` and `accept_decision` on main, `current_decisions` lists
   `checkout-launch-nov-20` instead of `checkout-launch-nov-13`.
   `why_superseded {"decision":"checkout-launch-nov-13"}` returns the reason,
   `superseding_contradictions` the two contradicting claims, and
   `decisions_at_risk` and `current_on_rejected` are empty again.
 - A second branch that proposed `checkout-launch-nov-27` as another successor
-  of `checkout-launch-nov-13` fails to merge with
+  of `checkout-launch-nov-13` fails to merge, and fails its dry run, with
   `merge conflicts: edge type 'SupersededBy' (cardinality_violation)`.

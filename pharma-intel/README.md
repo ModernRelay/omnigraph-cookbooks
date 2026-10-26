@@ -145,25 +145,25 @@ Full property tables and constraints in `schema.pg`.
 - `schema.pg` — Executable Omnigraph schema (source of truth)
 - `seed.md` / `seed.jsonl` — Seed dataset (human-readable / loadable)
 - `queries/*.gq` — Read queries (5 files, 70 queries) + mutations (1 file, 35 queries)
-- `omnigraph-config.example.yaml` — Example operator config: aliases for reads and examples for stored mutations. Merge its `aliases:` into your per-user `~/.omnigraph/config.yaml` (never committed).
+- `omnigraph-config.example.yaml` — Read aliases, with examples for stored mutations. Merge its `aliases:` into the operator config from the [local setup](../README.md#local-setup) (never committed).
 - `.env.omni` — RustFS credentials (not committed; see `.env.omni.example`)
 
 ## Quick Start
 
-Follow the shared [0.13 local setup](../README.md#local-setup) with
+Follow the shared [local setup](../README.md#local-setup) with
 `pharma-intel` and graph ID `pharma`. Merge this cookbook's
 `omnigraph-config.example.yaml` into your operator config for the aliases below.
 The setup uses a filesystem-backed cluster and loads the reference seed through
-the running server.
+the running server, reached over a local HTTPS gateway.
 
 ```bash
-omnigraph alias assumption-contradictions asmp-oral-displaces-injectable
-omnigraph alias decision-questions dec-vanquish-interim-readout
-omnigraph query decisions_upcoming --server local --graph pharma
+omnigraph alias assumption-contradictions --params '{"slug":"asmp-oral-displaces-injectable"}'
+omnigraph alias decision-questions --params '{"slug":"dec-vanquish-interim-readout"}'
+omnigraph query decisions_upcoming --target local-reader --graph pharma
 ```
 
 Use the [live update workflow](../README.md#live-updates) for schema and stored
-query edits. For S3 hosting, see the [Railway deployment guide](../deploy/railway/README.md).
+query edits.
 
 ## Demo Walkthrough
 
@@ -171,23 +171,23 @@ Four queries that show the three-layer model in action:
 
 ```bash
 # 1. Cross-silo contradiction: a regulatory-domain signal hits a strategic assumption
-omnigraph alias assumption-contradictions asmp-oral-displaces-injectable
+omnigraph alias assumption-contradictions --params '{"slug":"asmp-oral-displaces-injectable"}'
 # → Pfizer danuglipron discontinued + Structure GSBR-209 Phase 2a disappoints
 
 # 2. Pre-committee briefing: what rests on the upcoming Phase 3 start decision?
-omnigraph alias decision-assumptions dec-oral-phase3-start
+omnigraph alias decision-assumptions --params '{"slug":"dec-oral-phase3-start"}'
 # → asmp-oral-displaces-injectable (now contradicted) + asmp-mechanism-safe-at-scale
 
 # 3. Competitive landscape: all compounds targeting the same mechanism
-omnigraph alias program-competitors prog-vk2735-sc
+omnigraph alias program-competitors --params '{"slug":"prog-vk2735-sc"}'
 # → tirzepatide, VK2735 oral (self), VK2735 SC — mechanism peers across phase
 
 # 4. Proactive alert: what internal questions does a new signal inform?
-omnigraph alias signal-informs-questions sig-pfizer-danuglipron-discontinued
+omnigraph alias signal-informs-questions --params '{"slug":"sig-pfizer-danuglipron-discontinued"}'
 # → q-pfizer-failure-mechanism-risk (Viking clinical team)
 
 # 5. Landscape feed: every signal touching any compound in my mechanism
-omnigraph alias program-landscape-signals prog-vk2735-sc
+omnigraph alias program-landscape-signals --params '{"slug":"prog-vk2735-sc"}'
 # → 5 signals across VK2735 (SC + oral) + tirzepatide, time-sorted
 ```
 
@@ -198,16 +198,16 @@ Agents should operate the graph in this order:
 ```bash
 # 1. Pick a decision and expand its dependencies
 omnigraph alias decisions-upcoming
-omnigraph alias decision-assumptions dec-oral-phase3-start
-omnigraph alias decision-questions dec-oral-phase3-start
+omnigraph alias decision-assumptions --params '{"slug":"dec-oral-phase3-start"}'
+omnigraph alias decision-questions --params '{"slug":"dec-oral-phase3-start"}'
 
 # 2. Gather evidence for the key assumptions
-omnigraph alias assumption-supports asmp-oral-displaces-injectable
-omnigraph alias assumption-contradictions asmp-oral-displaces-injectable
+omnigraph alias assumption-supports --params '{"slug":"asmp-oral-displaces-injectable"}'
+omnigraph alias assumption-contradictions --params '{"slug":"asmp-oral-displaces-injectable"}'
 
 # 3. Trace a new or existing signal into internal impact
-omnigraph alias signal-contradicts-assumptions sig-pfizer-danuglipron-discontinued
-omnigraph alias signal-informs-questions sig-pfizer-danuglipron-discontinued
+omnigraph alias signal-contradicts-assumptions --params '{"slug":"sig-pfizer-danuglipron-discontinued"}'
+omnigraph alias signal-informs-questions --params '{"slug":"sig-pfizer-danuglipron-discontinued"}'
 ```
 
 For fresh web findings, first map the signal to existing companies, compounds, patterns, assumptions, and open questions; then propose the minimal seed or mutation update.

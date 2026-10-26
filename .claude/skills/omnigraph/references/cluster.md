@@ -1,184 +1,187 @@
-# Cluster Deployments
+# Cluster deployments
 
-A `cluster.yaml` and its referenced schemas, queries and policies declare the
-whole deployment. Apply creates and manages its graphs. The server serves that
-applied state; there is no standalone-graph server mode.
+A cluster declares graphs, schemas, stored queries, Cedar policy and runtime
+bindings in a directory containing `cluster.yaml`. One `--target` selects where
+commands execute. Target kind determines which operations are available.
+`--config DIR` supplies source files; it never selects a destination.
 
-## Configuration
+## Source and destination
+
+```text
+company-brain/                 # declared source, safe to version in Git
+├── cluster.yaml
+├── schema.pg
+├── queries/people.gq
+└── graph.policy.yaml
+
+company-data/                  # selected direct root, never version in Git
+├── graphs/<id>.omni            # created by apply
+└── __cluster/                 # deployment authority
+```
 
 ```yaml
+# company-brain/cluster.yaml
 version: 1
-# storage: s3://my-bucket/clusters/company-brain  # default: config directory
 state: { backend: cluster, lock: true }
 graphs:
   knowledge:
     schema: schema.pg
     queries: queries/
-    external_blobs:
-      allow:
-        - { base: s3://company-assets/knowledge/, scope: server_safe }
 ```
 
-`queries` accepts a directory, file list or `name: { file: ... }` map. Duplicate
-names and unparseable files fail validation. Relative schema/query/policy paths
-must stay inside the config directory: `..` and symlink components are refused.
-Keep `cluster.yaml` and referenced source files in Git; ignore generated
-`__cluster/` state and `graphs/` roots. Credentials belong outside the declaration.
+Referenced source paths are relative to the configuration directory. Query
+folders discover immediate `.gq` files; malformed sources and duplicate names
+refuse. A declared `storage:` is an optional equality assertion against the
+selected root. Direct commands resolve a relative assertion against the source
+directory. Server submission requires an absolute assertion or no `storage:`.
+Omitting `storage:` never sends writes to the source directory.
 
-The operator's `~/.omnigraph/config.yaml` separately owns named servers,
-profiles, actor defaults and aliases. A server never reads that operator file.
-`--config` selects source files; `--cluster` selects applied cluster storage.
+Registered direct targets pin storage URI and provider destination settings.
+S3 region, endpoint and addressing style, and Azure account/endpoint/emulator
+settings are destination identity; credentials continue through the appropriate
+provider chain. Ambient cloud settings cannot redirect a registered target.
+Inline storage addresses capture their provider settings for that invocation.
 
-## Update a running server
+## Direct bootstrap
 
 ```bash
-omnigraph cluster validate --config .
-omnigraph cluster plan --server production --config . --json
-omnigraph cluster apply --server production --config . --timeout 1800 --json
+mkdir -p ./company-data
+omnigraph cluster validate --config ./company-brain
+omnigraph cluster plan --target ./company-data --config ./company-brain --json
+omnigraph cluster apply --target ./company-data --config ./company-brain --as act-alice --json
+# After the previous owner has stopped and its accepted I/O has settled:
+omnigraph cluster force-unlock '<LOCK_ID>' --target ./company-data
+omnigraph-server --cluster file:///absolute/company-data --bind 127.0.0.1:8080 --unauthenticated
 ```
 
-Review the preview before applying, especially graph removals. Apply supports:
+`validate` is source-only and takes no target. Every backend command needs an
+explicit target or the configured `defaults.target`; there is no folder fallback.
+The CLI prints the resolved target on stderr before execution. `.` in
+`--config .` means the current source directory. Source-bearing direct/server
+plan and apply default that source path to `.`.
 
-- schema and stored-query updates;
-- graph and cluster policy grants, revocations and binding changes;
-- embedding provider definitions/bindings and external-Blob ingress rules;
-- graph creation and deletion.
+Direct apply creates graphs, not rows; use `load` or `mutate` for data. It retains
+its exact admission lock after completion. Exclude other writers and establish
+prior I/O settlement before an exact-ID unlock. A lock is cooperative exclusion,
+not fencing for older binaries or raw storage tools. Azure writers also require
+`omnigraph-azure-admission` and remain a qualification preview.
 
-Affected graphs close admission, drain their admitted work and activate the new
-configuration without restarting the process. Unrelated healthy graphs keep
-serving. Across graphs, deployment is not one transaction. Schema changes still
-require only `main` to be live; merge and delete feature branches first.
+## Live server deployment
 
-Removing a graph declaration authorizes permanent deletion of its exact managed
-root and all retained history. Shared external Blob source objects are not
-deleted; object-store retention can keep historical object versions. A schema
-property/type drop is different: older graph commits retain its data until
-explicit cleanup stops retaining them.
-
-The current applied policy must grant `config_manage` at cluster scope, `read`
-on disclosed graphs and `schema_apply` on existing graphs whose schema changes
-or whose declaration is removed.
-Proposed permissions cannot authorize their own installation. Served apply
-refuses `--as`; the bearer token supplies the actor.
-
-Root changes, adoption of existing roots, recreation of missing managed roots
-and acceptance of out-of-band schema drift are unsupported. A refusal such as
-`applied_schema_drift` needs investigation, not a force or correction flag.
-Rows are managed with `mutate`/`load`, separately from configuration apply.
-
-### Observe the original deployment
-
-Apply prints its deployment ID before submission and normally polls it until
-convergence and activation. `--no-wait` returns after durable acceptance.
-`--timeout` bounds caller waiting, including acceptance (default 300 seconds,
-range 1–3600); expiry exits 5 without cancelling server work.
+Configure `production` as a server target with `auth: {provider: token, source: {store: {}}}`;
+see [operator configuration](../../../docs/user/cli/targets.md).
 
 ```bash
-omnigraph cluster apply --server production --config . --no-wait --json
-omnigraph cluster status --server production --deployment-id ID --wait \
-  --timeout 1800 --json
+printf '%s' "$TOKEN" | omnigraph credentials set --target production --stdin
+omnigraph cluster plan --target production --config . --json
+omnigraph cluster apply --target production --config . --timeout 1800 --json
+omnigraph cluster status --target production --deployment-id ID --wait --timeout 1800 --json
+omnigraph query find_person --target production --params '{"name":"Alice"}' --json
 ```
 
-A lost reply triggers reads of the original ID, never automatic resubmission.
-Exact status returns `deployment`, `active` and `in_progress`. `active` describes
-that result's affected bindings; an unrelated blocked graph does not invalidate
-it. The authenticated submitter can read its own retained receipt after losing
-management permission. Aggregate status and new deployments require current
-permissions. See [remote outcomes](remote-ops.md) for data writes, whose recovery
-is not deployment-ID polling.
+A named server target uses only its declared auth provider. Remote
+inline URLs and Unix socket targets are unsupported.
+The server derives the actor from authentication;
+`--as` on a server `plan` or `apply` only asserts it, and another actor is
+refused with `actor_mismatch` and exit 4 before anything is submitted. The
+applied policy must grant `config_manage`, plus graph
+permissions required by schema changes or deletion. Proposed permissions cannot
+authorize their own installation.
 
-## Bootstrap or update while stopped
+Live apply keeps the process and writer owner, drains affected requests, applies
+schemas and installs matching queries/policies/runtime bindings. Other graphs
+keep serving. Across graphs this is not one transaction. Schema changes remain
+main-only and require one live branch; query-only changes create no graph commit.
+Removing a graph declaration deletes its managed root and retained history.
+Review plan output and retain backups before applying a removal. External Blob
+source objects are not deleted; provider version retention may keep older bytes.
 
-Direct apply writes storage itself. Stop serving and overlapping writers first:
+Apply reports its original deployment ID before submission. It normally waits
+for convergence and activation; `--no-wait` returns after acceptance. A timeout
+(default 300 seconds, maximum 3600) stops local waiting, not execution. Observe
+the same ID instead of creating a new attempt. `active` describes this runtime;
+a durable completion receipt alone does not prove activation. Wait for
+`in_progress: false` before another deployment. An initiating actor can observe
+its retained receipt after losing management permission; aggregate status and
+new deployments still require current permission.
+
+## Source-free inspection and recovery
 
 ```bash
-omnigraph cluster validate --config .
-omnigraph cluster plan --config . --json
-omnigraph cluster apply --config . --as operator --json
-# After the apply owner has stopped and its I/O has settled:
-omnigraph cluster force-unlock <LOCK_ID> --config .
-omnigraph-server --cluster . --bind 127.0.0.1:8080 --unauthenticated
+omnigraph cluster status --target file:///srv/company-data --deployment-id ID --json
+# Only after prior-owner and native/control-I/O quiescence:
+omnigraph cluster force-unlock LOCK_ID --target file:///srv/company-data
+omnigraph cluster apply --target file:///srv/company-data --deployment-id ID --writers-stopped --json
 ```
 
-The final flag is for trusted local development. For authenticated serving,
-configure tokens and policy as described in [server and policy](server-policy.md).
-There is no separate `init` step for a cluster graph.
+On a direct root, an ID-bearing apply without `--config` uses captured deployment
+evidence. It observes completed results and needs explicit `--target` plus
+`--writers-stopped` for recovery effects. An ID-bearing fresh source submission
+requires `--config DIR`; it cannot also carry the recovery attestation. Reusing
+an existing ID with identical captured source only observes; it never executes
+again. Different input refuses. Server ID-only apply refuses: use status.
 
-One mutation-capable process per cluster is supported. Direct apply, direct
-cluster writes and the server share exclusive writer admission. They leave the
-lock after exit, including a clean exit; a successful shutdown does not itself
-prove all native I/O has settled. Clear only the exact retained lock after that
-proof. Older binaries, raw storage tools and embedded writers are not fenced
-by this lock and must remain stopped.
+Reconciliation never replays uncertain schema execution or graph creation.
+Unknown results stay outstanding. Accepted deletion can continue removing only
+its originally recorded root. A settled partial result permits a corrective
+successor from achieved state; it does not roll back completed graphs. Output
+failure also leaves outcome uncertain, so retain the ID, root and lock.
 
-`cluster plan`, `observe`, `status` and direct graph reads take no writer lock.
-Plan/observe report `authority: "observed"` and the `state_cas` read; apply
-revalidates authority. Use served plan while the running server owns the root.
-
-## Storage and serving
-
-- `storage: s3://bucket/prefix` places state and derived graph roots together;
-  the writer uses standard `AWS_*` credentials and conditional storage writes.
-- Azure `az://` roots remain a qualification preview. Every write, apply,
-  server and maintenance process must use `omnigraph-azure-admission`.
-- New external Blob references are denied unless allowed by the graph's
-  `external_blobs` configuration. Servers install `server_safe` bases only;
-  `embedded_only` is not installed by the server or direct CLI. Allowed bases
-  must be outside cluster storage, never inside another managed graph root.
-- `omnigraph-server --cluster <dir|file://|s3://|az://>` boots applied state
-  without needing a checkout of the source bundle. The container entrypoint
-  accepts `OMNIGRAPH_CLUSTER`; the server binary takes `--cluster`.
-- Use `/readyz` for rollout readiness and authorized `/graphs` for per-graph
-  availability. Process auth, bind settings and signed-token trust remain
-  startup configuration; applied graph configuration is live. See
-  [server and policy](server-policy.md).
+For recognized prior ledger formats or obsolete completed-result fields, stop
+all owners and run `cluster upgrade-ledger --target ROOT --writers-stopped`.
+This changes ledger representation only. Finish outstanding work with its
+originating build before upgrading. No legacy executor or automatic migration
+remains. Missing graph roots and schema drift require authoritative repair or
+backup restoration; apply does not adopt or recreate them.
 
 ## Managed clusters
 
-Select the managed service explicitly with `--managed`:
+A profile pins API, organization and one auth provider for one identity. A managed
+target references it and pins cluster ID/incarnation plus an optional endpoint.
+Graph work needs that endpoint and an explicit/default graph. See
+[registration](../../../docs/user/cli/targets.md#login-and-registration).
 
 ```bash
-omnigraph login --api https://control.example
-omnigraph use CLUSTER_ID --api https://control.example --config .
-omnigraph cluster push --managed --expected-revision REV --message "Update configuration"
-omnigraph cluster plan --managed --rev NEW_REV --json
-omnigraph cluster apply --managed --plan PLAN_RUN_ID --json
-omnigraph query find_person --graph knowledge --params '{"name":"Alice"}' --json
+omnigraph login --profile work
+omnigraph cluster list --profile work --json
+omnigraph cluster create demo --profile work --no-wait --json
+omnigraph target add production --profile work --cluster CLUSTER_ID
+omnigraph cluster pull --target production --out source --json
+omnigraph cluster push --target production --config source --expected-revision REV --message 'Update schema'
+omnigraph cluster plan --target production --rev NEW_REV --json
+omnigraph cluster apply --target production --plan PREVIEW_ID --json
+omnigraph cluster status DELIVERY_ID --target production --json
+omnigraph cluster operation OPERATION_ID --profile work --wait --json
 ```
 
-`use` writes `.omnigraph/context`. API sessions and data credentials are separate
-OS-keychain entries. Supported data commands (`query`, `mutate`, `load`,
-`commit list`/`show`, `graphs list`) use that folder's endpoint and acquire/cache
-an identity credential; all but `graphs list` need `--graph`. A cached credential
-can work during a control-API outage until expiry. Other data commands retain
-ordinary addressing. Explicit `--server`/`--profile`/`--store`/`--cluster`, or
-`--direct` for ordinary ambient defaults, selects ordinary routing.
+Managed plan/apply use pushed source revisions/previews and reject local
+`--config`. Only push captures local source. Pull creates a new directory with
+source files and no destination metadata. Create returns identity without
+changing any target or directory. Delete/undo require the selected cluster;
+`--incarnation` is an equality attestation, never an override.
 
-Without `--managed`, cluster commands ignore folder context. Managed commands
-reject ordinary target flags, `--direct` and `--as`; errors do not fall back to
-local deployment. Lifecycle commands include `create`, `delete`, `undo-delete`
-and `operation`; `status` observes a run, and `history`/`cancel` manage runs.
-Use the same idempotency key to reconcile an uncertain managed submission.
+Lifecycle pending and accepted identities live under the operator home's
+`lifecycle/`, partitioned by API and organization. Retry an uncertain request
+with the same principal, exact arguments and key. Accepted history is bounded;
+full custody refuses instead of evicting evidence. Preserve old journals and
+preserve matching legacy folder evidence explicitly with `config recover-operations
+--source DIR --profile work`. This does not convert configuration or
+submit operations; resume with the original verified principal and original key.
 
-`cluster token --managed` issues an identity credential explicitly; it contains
-no graph/action grants. Applied Cedar policy decides access. `--clear` forgets
-the local credential without revoking it. For unattended control access, set
-`OMNIGRAPH_CONTROL_API` and `OMNIGRAPH_CONTROL_TOKEN` together.
+Managed graph commands acquire missing identity credentials without replaying
+submitted mutations. Credential issuance grants connectivity, not graph
+permissions; applied Cedar policy remains authoritative. `cluster token --target
+production --ttl 1h` administers the cached credential explicitly.
 
-See the [managed command reference](https://github.com/ModernRelay/omnigraph/blob/v0.13.0/docs/user/cli/reference.md#managed-cluster-commands),
-[lifecycle](https://github.com/ModernRelay/omnigraph/blob/v0.13.0/docs/user/cli/managed-lifecycle.md)
-and [data access](https://github.com/ModernRelay/omnigraph/blob/v0.13.0/docs/user/cli/managed-data.md)
-for exact flags, session limits and exit codes.
+## Serving and references
 
-## Recovery
+The server binary keeps its independent `--cluster DIR|URI` boot contract. A URI
+boots from applied resources without a source checkout. It never reads the CLI
+operator target file. Boot errors attributable to one graph quarantine that graph
+unless `--require-all-graphs` is set; global failures refuse startup. `/readyz`
+reports graph counts and `/graphs` requires `graph_list`. The bounded shutdown
+uses `--shutdown-grace-seconds` (default 25) and exits 2 if drain expires.
 
-| Situation | Action |
-|---|---|
-| Served apply timed out or lost its response | Continue `cluster status --server … --deployment-id ID --wait`; do not submit a new ID. |
-| Direct apply interrupted or accepted work needs stopped recovery | Read `omnigraph --cluster ROOT cluster status --deployment-id ID --json`. Stop the prior owner, prove its I/O settled, clear its exact lock, then use `omnigraph --cluster ROOT cluster apply --deployment-id ID --writers-stopped`. |
-| `state_lock_held` | `cluster observe` shows the holder. Stop it and prove I/O settlement before `cluster force-unlock LOCK_ID`; a lock's age is not proof. |
-| `ledger_upgrade_required` | With all writers stopped, run `omnigraph --cluster ROOT cluster upgrade-ledger --writers-stopped`. Conversion preserves graph data and history. |
-| Missing/corrupt ledger or unexpected graph root | Restore a trusted consistent backup or follow the diagnostic. Bootstrap never adopts an existing root; do not recreate state by hand. |
-
-Canonical guide: [clusters](https://github.com/ModernRelay/omnigraph/blob/v0.13.0/docs/user/clusters/index.md)
-and [configuration](https://github.com/ModernRelay/omnigraph/blob/v0.13.0/docs/user/clusters/config.md).
+See the repository's `docs/user/clusters/index.md` for deployment and recovery,
+`docs/user/clusters/config.md` for configuration and limits, and
+`docs/user/cli/managed-lifecycle.md` for service operations and custody.

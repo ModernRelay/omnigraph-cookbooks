@@ -1,13 +1,19 @@
 #!/usr/bin/env python3
-"""Qualify cookbook bundles with released binaries against disposable local roots."""
+"""Qualify cookbook bundles with released binaries against disposable local roots.
+
+Usage: check-cookbooks.py [COOKBOOK ...]   (default: every cookbook)
+"""
 
 import collections
+import importlib.util
 import json
 import os
 from pathlib import Path
 import shutil
 import socket
+import ssl
 import subprocess
+import sys
 import tempfile
 import time
 import urllib.error
@@ -27,13 +33,60 @@ COOKBOOKS = {
 }
 # Cookbooks whose policy lets act-agent write only on unprotected branches.
 BRANCH_ONLY_AGENTS = {"company-brain"}
-TOKENS = {actor: f"cookbook-test-{actor}"
-          for actor in ("act-admin", "act-writer", "act-reader", "act-agent")}
+ACTORS = ("act-admin", "act-writer", "act-reader", "act-agent")
+TOKENS = {actor: f"cookbook-test-{actor}" for actor in ACTORS}
+GATEWAY = ROOT / "scripts" / "local-tls-gateway.py"
 HTTP = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 
+def target(actor):
+    """The operator target that authenticates as one actor."""
+    return f"ck-{actor}"
+
+
+def token_variable(actor):
+    return "OG_CK_" + actor.upper().replace("-", "_") + "_TOKEN"
+
+
+def write_operator_config(home, endpoint, ca):
+    """One server target per actor, as the root README's local setup has.
+    The 0.14 CLI sends tokens only over HTTPS, so each target trusts the
+    local gateway's CA and reads its token from one named variable."""
+    lines = ["version: 1", "targets:"]
+    for actor in ACTORS:
+        lines += [f"  {target(actor)}:", "    kind: server", f"    endpoint: {endpoint}",
+                  f"    auth: {{provider: token, source: {{env: {token_variable(actor)}}}}}",
+                  f"    transport: {{tls: {{ca: {{mode: append, file: {json.dumps(str(ca))}}}}}}}"]
+    (home / "config.yaml").write_text("\n".join(lines) + "\n")
+
+
+def free_port():
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        return sock.getsockname()[1]
+
+
+def wait_ready(check, process, log, seconds=30):
+    deadline = time.monotonic() + seconds
+    while True:
+        assert process.poll() is None, f"process exited; see {log}"
+        try:
+            if check():
+                return
+        except (OSError, AssertionError, ValueError):
+            if time.monotonic() >= deadline:
+                raise
+        time.sleep(0.1)
+
+
+def refused(result, code="forbidden"):
+    """A refusal reports its typed code and that nothing changed."""
+    output = result.stdout + result.stderr
+    assert f'"code": "{code}"' in output and '"effects": "none"' in output, output[-3000:]
+
+
 def request(url, path, actor="act-admin", body=None, expected=200):
-    headers = {"Omnigraph-Http-Api": "0.13", "Authorization": f"Bearer {TOKENS[actor]}"}
+    headers = {"Omnigraph-Http-Api": "0.14", "Authorization": f"Bearer {TOKENS[actor]}"}
     if body is not None:
         headers["Content-Type"] = "application/json"
     req = urllib.request.Request(url + path, headers=headers,
@@ -45,7 +98,7 @@ def request(url, path, actor="act-admin", body=None, expected=200):
     with response:
         payload = response.read()
         assert response.status == expected, (path, response.status, payload[:1000])
-        assert response.headers.get_all("Omnigraph-Http-Api") == ["0.13"]
+        assert response.headers.get_all("Omnigraph-Http-Api") == ["0.14"]
         return json.loads(payload)
 
 
@@ -70,38 +123,37 @@ def qualify(name, graph, stored_query, workspace, env):
     assert valid["ok"]
     for query in sorted((bundle / "queries").glob("*.gq")):
         run(env, "lint", "--schema", str(bundle / "schema.pg"), "--query", str(query), "--json")
-    plan = run(env, "cluster", "plan", "--config", str(bundle), "--json")
+    plan = run(env, "cluster", "plan", "--target", str(bundle), "--config", str(bundle), "--json")
     assert plan["ok"]
-    applied = run(env, "cluster", "apply", "--config", str(bundle), "--as", "act-admin", "--json")
+    applied = run(env, "cluster", "apply", "--target", str(bundle), "--config", str(bundle),
+                  "--as", "act-admin", "--json")
     assert applied["status"] == "complete" and applied["result"]["converged"]
-    status = run(env, "cluster", "status", "--config", str(bundle), "--json")
-    lock = status["state_observations"]["lock_id"]
-    assert status["state_observations"]["locked"] and lock
+    status = run(env, "cluster", "status", "--target", str(bundle), "--json")
+    lock = status["lock_id"]
+    assert lock
     # This harness created the exclusive local root. The direct child exited;
     # no external object store or other owner can have accepted work here.
-    run(env, "cluster", "force-unlock", lock, "--config", str(bundle), "--json")
+    run(env, "cluster", "force-unlock", lock, "--target", str(bundle), "--json")
 
-    with socket.socket() as sock:
-        sock.bind(("127.0.0.1", 0))
-        port = sock.getsockname()[1]
+    port, gateway_port = free_port(), free_port()
     url = f"http://127.0.0.1:{port}"
+    write_operator_config(Path(env["OMNIGRAPH_HOME"]), f"https://localhost:{gateway_port}", workspace / "tls/ca.pem")
+    tls = ssl.create_default_context(cafile=str(workspace / "tls/ca.pem"))
     server_env = {**env, "OMNIGRAPH_SERVER_BEARER_TOKENS_JSON": json.dumps(TOKENS)}
     with (bundle / "server.log").open("w") as log:
         process = subprocess.Popen([SERVER, "--cluster", str(bundle), "--bind", f"127.0.0.1:{port}"],
                                    env=server_env, stdout=log, stderr=log)
+        gateway = subprocess.Popen([sys.executable, str(GATEWAY), "--listen", f"127.0.0.1:{gateway_port}",
+                                    "--upstream", f"127.0.0.1:{port}", "--certs", str(workspace / "tls")],
+                                   stdout=log, stderr=log)
         try:
-            deadline = time.monotonic() + 30
-            while True:
-                assert process.poll() is None, f"server exited; see {bundle / 'server.log'}"
-                try:
-                    ready = request(url, "/readyz")
-                    assert ready["loading_graph_count"] == 0
-                    break
-                except (OSError, AssertionError):
-                    if time.monotonic() >= deadline:
-                        raise
-                    time.sleep(0.1)
-            scope = ("--server", url, "--graph", graph)
+            wait_ready(lambda: request(url, "/readyz")["loading_graph_count"] == 0, process, bundle / "server.log")
+            wait_ready(lambda: urllib.request.urlopen(f"https://localhost:{gateway_port}/readyz",
+                                                      context=tls, timeout=5).status == 200,
+                       gateway, bundle / "server.log")
+
+            def scope(actor="act-admin"):
+                return ("--target", target(actor), "--graph", graph)
             def verify_receipt(commit):
                 assert commit and commit["graph_commit_id"], "write must return its exact commit"
                 # This fixture has one writer and no intervening operation.
@@ -110,7 +162,7 @@ def qualify(name, graph, stored_query, workspace, env):
                 assert (commit["graph_branch"] or "main") == snapshot["graph_branch"] == "main"
                 assert commit["graph_manifest_version"] == snapshot["graph_manifest_version"]
                 assert request(url, f"/graphs/{graph}/commits/{commit['graph_commit_id']}", "act-reader") == commit
-            seed = run(env, "load", *scope, "--data", str(bundle / "seed.jsonl"), "--mode", "append", "--json")
+            seed = run(env, "load", *scope(), "--data", str(bundle / "seed.jsonl"), "--mode", "append", "--json")
             verify_receipt(seed["commit"])
             rows = [json.loads(line) for line in (bundle / "seed.jsonl").read_text().splitlines() if line.strip()]
             counts = collections.Counter(row["type"] for row in rows if "type" in row)
@@ -128,14 +180,13 @@ def qualify(name, graph, stored_query, workspace, env):
                 result = request(url, f"/graphs/{graph}/query", "act-reader", {"query": query})
                 assert result["rows"] == [{"total": counts[node]}], result
             count()
-            read = run({**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-reader"]}, "query", stored_query, *scope, "--json")
+            read = run(env, "query", stored_query, *scope("act-reader"), "--json")
             assert read["rows"], f"{stored_query} must demonstrate populated seed data"
             # Writers can create and retire a review branch but cannot deploy.
-            writer = {**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-writer"]}
-            run(writer, "branch", "create", "cookbook-review", *scope, "--json")
-            run(writer, "branch", "delete", "cookbook-review", *scope, "--yes", "--json")
-            refused = run(writer, "cluster", "plan", "--config", str(bundle), "--server", url, "--json", ok=False)
-            assert "403" in refused.stdout + refused.stderr or "denied" in (refused.stdout + refused.stderr).lower(), (refused.stdout, refused.stderr)
+            run(env, "branch", "create", "cookbook-review", *scope("act-writer"), "--json")
+            run(env, "branch", "delete", "cookbook-review", *scope("act-writer"), "--yes", "--json")
+            refused(run(env, "cluster", "plan", "--target", target("act-writer"), "--config", str(bundle),
+                        "--json", ok=False))
 
             # Add a harmless type and query to exercise real schema + registry
             # activation on the same PID, not merely an unchanged apply.
@@ -143,73 +194,71 @@ def qualify(name, graph, stored_query, workspace, env):
                 schema.write("\nnode CookbookCheck {\n  slug: String @key\n}\n")
             (bundle / "queries/cookbook-check.gq").write_text(
                 "query cookbook_check() { match { $n: CookbookCheck } return { count($n) as total } }\n")
-            before = run(env, "snapshot", *scope, "--json")
-            run(env, "cluster", "plan", "--config", str(bundle), "--server", url, "--json")
-            assert run(env, "snapshot", *scope, "--json") == before, "plan changed graph state"
-            deployed = run(env, "cluster", "apply", "--config", str(bundle), "--server", url, "--json")
+            before = run(env, "snapshot", *scope(), "--json")
+            run(env, "cluster", "plan", "--target", target("act-admin"), "--config", str(bundle), "--json")
+            assert run(env, "snapshot", *scope(), "--json") == before, "plan changed graph state"
+            deployed = run(env, "cluster", "apply", "--target", target("act-admin"), "--config", str(bundle), "--json")
             assert deployed["active"] and not deployed["in_progress"], deployed
-            exact = run(env, "cluster", "status", "--server", url, "--deployment-id",
+            exact = run(env, "cluster", "status", "--target", target("act-admin"), "--deployment-id",
                         deployed["deployment"]["result"]["id"], "--wait", "--json")
             assert exact["active"] and not exact["in_progress"]
             assert exact["deployment"]["result"] == deployed["deployment"]["result"]
-            check = run(env, "query", "cookbook_check", *scope, "--json")
+            check = run(env, "query", "cookbook_check", *scope(), "--json")
             assert check["rows"] == [{"total": 0}], check
             sample = bundle / "check.jsonl"
             sample.write_text('{"type":"CookbookCheck","data":{"slug":"smoke"}}\n')
             # Refuse a fresh valid row for policy, not a duplicate-key error.
-            refused = run({**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-reader"]}, "load", *scope,
-                          "--data", str(sample), "--mode", "append", "--json", ok=False)
-            assert "403" in refused.stdout + refused.stderr or "denied" in (refused.stdout + refused.stderr).lower(), (refused.stdout, refused.stderr)
-            assert run(env, "query", "cookbook_check", *scope, "--json")["rows"] == [{"total": 0}]
+            refused(run(env, "load", *scope("act-reader"), "--data", str(sample), "--mode", "append", "--json",
+                        ok=False))
+            assert run(env, "query", "cookbook_check", *scope(), "--json")["rows"] == [{"total": 0}]
             if name in BRANCH_ONLY_AGENTS:
                 # An agent drafts on its own branch; only a person merges into main.
-                agent = {**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-agent"]}
-                refused = run(agent, "load", *scope, "--data", str(sample), "--mode", "append", "--json", ok=False)
-                assert "403" in refused.stdout + refused.stderr, (refused.stdout, refused.stderr)
-                run(agent, "branch", "create", "agent-draft", *scope, "--json")
-                drafted = run(agent, "load", *scope, "--branch", "agent-draft", "--data", str(sample),
+                agent = scope("act-agent")
+                refused(run(env, "load", *agent, "--data", str(sample), "--mode", "append", "--json", ok=False))
+                run(env, "branch", "create", "agent-draft", *agent, "--json")
+                drafted = run(env, "load", *agent, "--branch", "agent-draft", "--data", str(sample),
                               "--mode", "append", "--json")
                 assert drafted["commit"]["graph_commit_id"]
-                refused = run(agent, "branch", "merge", "agent-draft", "--into", "main", *scope, "--json", ok=False)
-                assert "403" in refused.stdout + refused.stderr, (refused.stdout, refused.stderr)
+                refused(run(env, "branch", "merge", "agent-draft", "--into", "main", *agent, "--json", ok=False))
                 # Agents cannot delete a branch, so one cannot discard another's draft.
-                refused = run(agent, "branch", "delete", "agent-draft", *scope, "--yes", "--json", ok=False)
-                assert "403" in refused.stdout + refused.stderr, (refused.stdout, refused.stderr)
-                run(writer, "branch", "delete", "agent-draft", *scope, "--yes", "--json")
-                assert run(env, "query", "cookbook_check", *scope, "--json")["rows"] == [{"total": 0}]
-            written = run(writer, "load", *scope, "--data", str(sample), "--mode", "append", "--json")
+                refused(run(env, "branch", "delete", "agent-draft", *agent, "--yes", "--json", ok=False))
+                run(env, "branch", "delete", "agent-draft", *scope("act-writer"), "--yes", "--json")
+                assert run(env, "query", "cookbook_check", *scope(), "--json")["rows"] == [{"total": 0}]
+            written = run(env, "load", *scope("act-writer"), "--data", str(sample), "--mode", "append", "--json")
             verify_receipt(written["commit"])
             expected_counts[("node", "CookbookCheck")] = 1
             assert request(url, f"/graphs/{graph}/queries/cookbook_check", "act-reader",
                            {"params": {}})["rows"] == [{"total": 1}]
             count()
             if name == "beads":
-                beads_client_journey(url, env)
+                beads_client_journey(env)
             if name == "company-brain":
-                company_brain_journey(url, env)
+                company_brain_journey(env)
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
                   + (", ob client" if name == "beads" else "")
                   + (", review journey" if name == "company-brain" else ""), flush=True)
         finally:
+            gateway.terminate()
             process.terminate()
-            try:
-                process.wait(timeout=35)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
+            for child in (gateway, process):
+                try:
+                    child.wait(timeout=35)
+                except subprocess.TimeoutExpired:
+                    child.kill()
+                    child.wait()
 
 
-def beads_client_journey(url, env):
-    """Drive beads' `ob` client over HTTP against the served graph: stored
+def beads_client_journey(env):
+    """Drive beads' `ob` client through each actor's server target: stored
     queries only, the token's actor in history, and the reader's refusal."""
     base = {k: v for k, v in env.items() if not k.startswith("OB_")}
-    base.update(OB_OMNIGRAPH=CLI, OB_SERVER=url, OB_GRAPH="beads")
+    base.update(OB_OMNIGRAPH=CLI, OB_GRAPH="beads")
 
     def ob(actor, *args, ok=True):
         result = subprocess.run([str(ROOT / "beads/client/ob"), "--json", *args], capture_output=True, text=True,
-                                timeout=120, env={**base, "OB_ACTOR": actor, "OB_TOKEN": TOKENS[actor]})
+                                timeout=120, env={**base, "OB_ACTOR": actor, "OB_TARGET": target(actor)})
         if (result.returncode == 0) != ok:
             raise AssertionError(f"ob {args} as {actor}: exit {result.returncode}\n{result.stdout}{result.stderr}")
         return json.loads(result.stdout) if ok else result
@@ -229,19 +278,20 @@ def beads_client_journey(url, env):
                       ("act-writer", "Issue")], events
 
 
-def company_brain_journey(url, env):
+def company_brain_journey(env):
     """An agent records on a branch, a person merges and settles on main.
     Creates refuse an existing slug, and a rejected successor can be
     withdrawn so the decision it named can be replaced again."""
-    scope = ("--server", url, "--graph", "company")
-    agent = {**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-agent"]}
-    writer = {**env, "OMNIGRAPH_BEARER_TOKEN": TOKENS["act-writer"]}
+    agent, writer = "act-agent", "act-writer"
+
+    def scope(actor):
+        return ("--target", target(actor), "--graph", "company")
 
     def mutate(who, query, params, *branch, ok=True):
-        return run(who, "mutate", query, *scope, *branch, "--params", json.dumps(params), "--json", ok=ok)
+        return run(env, "mutate", query, *scope(who), *branch, "--params", json.dumps(params), "--json", ok=ok)
 
     def rows(query, params=None):
-        return run(env, "query", query, *scope, "--params", json.dumps(params or {}), "--json")["rows"]
+        return run(env, "query", query, *scope("act-admin"), "--params", json.dumps(params or {}), "--json")["rows"]
 
     def refused_by_card(result):
         assert "@card violation" in result.stdout + result.stderr, (result.stdout, result.stderr)
@@ -249,13 +299,12 @@ def company_brain_journey(url, env):
     claim = {"slug": "checker-claim", "kind": "proposal", "statement": "Resume the billing migration.",
              "quote": "Let's resume billing.", "locator": None, "recorded_at": "2026-10-15T00:00:00.000Z",
              "source": "doc:billing-plan", "speaker": "dana"}
-    run(agent, "branch", "create", "agent-claims", *scope, "--json")
+    run(env, "branch", "create", "agent-claims", *scope(agent), "--json")
     mutate(agent, "record_claim", claim, "--branch", "agent-claims")
     refused_by_card(mutate(agent, "record_claim", claim, "--branch", "agent-claims", ok=False))
-    refused = mutate(agent, "verify_claim", {"slug": "checker-claim"}, ok=False)
-    assert "403" in refused.stdout + refused.stderr, (refused.stdout, refused.stderr)
-    run(writer, "branch", "merge", "agent-claims", "--into", "main", *scope, "--json")
-    run(writer, "branch", "delete", "agent-claims", *scope, "--yes", "--json")
+    refused(mutate(agent, "verify_claim", {"slug": "checker-claim"}, ok=False))
+    run(env, "branch", "merge", "agent-claims", "--into", "main", *scope(writer), "--json")
+    run(env, "branch", "delete", "agent-claims", *scope(writer), "--yes", "--json")
     mutate(writer, "verify_claim", {"slug": "checker-claim"})
 
     # Re-recording a verified seed claim must not reset it to unverified.
@@ -306,23 +355,35 @@ def company_brain_journey(url, env):
 
 
 def main():
+    selected = sys.argv[1:] or list(COOKBOOKS)
+    unknown = sorted(set(selected) - set(COOKBOOKS))
+    if unknown:
+        raise SystemExit(f"unknown cookbook: {', '.join(unknown)}; choose from {', '.join(COOKBOOKS)}")
     if not CLI or not SERVER:
-        raise SystemExit("Put 0.13.0 omnigraph and omnigraph-server on PATH or set OMNIGRAPH_BIN / OMNIGRAPH_SERVER_BIN")
+        raise SystemExit("Put 0.14.0 omnigraph and omnigraph-server on PATH or set OMNIGRAPH_BIN / OMNIGRAPH_SERVER_BIN")
     workspace = Path(tempfile.mkdtemp(prefix="omnigraph-cookbooks-test-"))
     env = {k: v for k, v in os.environ.items()
-           if not k.startswith(("OMNIGRAPH_", "AWS_", "AZURE_"))}
-    env.update(OMNIGRAPH_HOME=str(workspace / "operator"), OMNIGRAPH_BEARER_TOKEN=TOKENS["act-admin"])
+           if not k.startswith(("OMNIGRAPH_", "OG_", "AWS_", "AZURE_"))}
+    (workspace / "operator").mkdir()
+    env.update(OMNIGRAPH_HOME=str(workspace / "operator"),
+               **{token_variable(actor): token for actor, token in TOKENS.items()})
+    # Every journey's gateway serves the same local CA and certificate.
+    spec = importlib.util.spec_from_file_location("local_tls_gateway", GATEWAY)
+    gateway = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gateway)
+    gateway.ensure_certificates(workspace / "tls")
     try:
         version = run(env, "version").stdout
-        assert version.splitlines()[0] == "omnigraph 0.13.0", version
-        for name, (graph, query) in COOKBOOKS.items():
+        assert version.splitlines()[0] == "omnigraph 0.14.0", version
+        for name in selected:
+            graph, query = COOKBOOKS[name]
             qualify(name, graph, query, workspace, env)
     except BaseException:
         print(f"Failed fixture retained: {workspace}", flush=True)
         raise
     else:
         shutil.rmtree(workspace)
-        print(f"All {len(COOKBOOKS)} cookbooks passed against OmniGraph 0.13.0.")
+        print(f"All {len(selected)} selected cookbooks passed against OmniGraph 0.14.0.")
 
 
 if __name__ == "__main__":

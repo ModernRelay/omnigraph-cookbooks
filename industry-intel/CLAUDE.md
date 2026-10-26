@@ -12,32 +12,32 @@ An Omnigraph schema + seed modeling AI/ML industry intelligence using the SPIKE 
 - `README.md` — Reference seed description, schema essentials, quick start.
 - `seed.md` / `seed.jsonl` — Seed dataset (human-readable / loadable).
 - `queries/*.gq` — Read and mutation queries.
-- `omnigraph-config.example.yaml` — example operator config (aliases over the stored queries); merge into your per-user `~/.omnigraph/config.yaml`.
+- `omnigraph-config.example.yaml` — read aliases over the stored queries; merge its `aliases:` into the operator config from the [local setup](../README.md#local-setup).
 
 Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).
 
 ## Setup
 
-Use the shared [0.13 local setup](../README.md#local-setup) with cookbook
+Use the shared [local setup](../README.md#local-setup) with cookbook
 `industry-intel` and graph `spike`. It owns authentication, the bootstrap writer-lock
 handoff, readiness, and served seed loading. Apply later configuration edits with
 the [live update workflow](../README.md#live-updates).
 
-Graph id `spike`. Stored queries and their parameters: `omnigraph queries list --cluster . --graph spike`.
-Alias args bind by name to `$params`: `omnigraph alias pattern-signals pat-sovereign-ai` is `omnigraph query pattern_signals --graph spike --params '{"slug":"pat-sovereign-ai"}'`.
+Graph id `spike`. Stored queries and their parameters: `omnigraph queries list --target local --graph spike`.
+Aliases pass parameters by name: `omnigraph alias pattern-signals --params '{"slug":"pat-sovereign-ai"}'` is `omnigraph query pattern_signals --target local-reader --graph spike --params '{"slug":"pat-sovereign-ai"}'`.
 
 ## Writing
 
-Aliases are read-only; mutations run as `omnigraph mutate <name> --params '<json>'` with every
-non-optional property supplied. Signatures live in `queries/mutations.gq`. Working example:
+Aliases are read-only; mutations run as `omnigraph mutate <name> --target local-writer --graph spike --params '<json>'`
+with every non-optional property supplied. Signatures live in `queries/mutations.gq`. Working example:
 
 ```bash
-# Use the admin or writer identity from the shared setup.
-omnigraph mutate add_signal --graph spike --params '{"slug":"sig-eu-sovereign-cloud","name":"EU mandates sovereign cloud for public-sector AI","brief":"Public-sector AI workloads must run on EU-controlled infrastructure.","stagingTimestamp":"2026-09-14T00:00:00Z","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
-omnigraph mutate link_signal_forms_pattern --graph spike --params '{"signal":"sig-eu-sovereign-cloud","pattern":"pat-sovereign-ai"}'
+# local-writer is the writer target from the shared setup.
+omnigraph mutate add_signal --target local-writer --graph spike --params '{"slug":"sig-eu-sovereign-cloud","name":"EU mandates sovereign cloud for public-sector AI","brief":"Public-sector AI workloads must run on EU-controlled infrastructure.","stagingTimestamp":"2026-09-14T00:00:00Z","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+omnigraph mutate link_signal_forms_pattern --target local-writer --graph spike --params '{"signal":"sig-eu-sovereign-cloud","pattern":"pat-sovereign-ai"}'
 ```
 
-With `defaults.server` / `default_graph` from the operator config, `--graph` can be omitted.
+`--graph` can be omitted only for a target with `default_graph`; the shared setup's targets have none.
 
 ## Domain Model
 

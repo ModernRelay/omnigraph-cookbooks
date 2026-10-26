@@ -4,7 +4,7 @@ description: Bootstrap a SPIKE industry intelligence graph with the AI industry 
 license: MIT (see LICENSE at repo root)
 metadata:
   author: ModernRelay
-  version: "0.6.0"
+  version: "0.7.0"
   repository: https://github.com/ModernRelay/omnigraph-cookbooks
 ---
 
@@ -18,15 +18,17 @@ ask only when it is unclear.
 
 Locate or clone `ModernRelay/omnigraph-cookbooks`, then read its root README and
 the selected cookbook's guidance. Check `omnigraph version`; these instructions
-target CLI and server 0.13. Use matching release binaries. The filesystem
+target CLI and server 0.14. Use matching release binaries. The filesystem
 setup needs no object store or Docker. Existing data follows
 the repository's [upgrade procedure][upgrading], never an automatic reset.
 
 The root README owns [local setup][local-setup]: initial apply, exact writer-lock
-handoff, server identities, readiness, login, and seed loading. Read and follow
-that sequence. A filesystem deployment needs no storage credentials; the server
-still uses bearer identities for policy and live configuration management. Pick
-a free port if another server is running; do not stop an unrelated process.
+handoff, server identities, the local HTTPS gateway, CLI targets, readiness, and
+seed loading. Read and follow that sequence. A filesystem deployment needs no
+storage credentials; the server still uses bearer identities for policy and live
+configuration management. Pick free ports for the server and gateway if others
+are in use, and point the targets' `endpoint` at the gateway; do not stop an
+unrelated process.
 
 ## Demo
 
@@ -60,7 +62,8 @@ its domain instead of carrying over the demo's counts and examples.
 Follow [schema adaptation](references/schema-adaptation.md). Keep the SPIKE
 analytical relationships; adapt domain enums, actor classifications, and
 Element properties. Update the graph id everywhere it is referenced:
-`graphs`, graph-policy `applies_to`, operator `default_graph`, and aliases.
+`graphs`, graph-policy `applies_to`, each alias's `graph`, and `--graph` in
+the new cookbook's commands.
 Keep the cluster policy's `applies_to: [cluster]` binding.
 
 Lint every query file against the adapted schema, then validate the bundle:
@@ -89,10 +92,11 @@ An initial seed may omit Chunk entirely, as the demo does.
 
 Follow [local setup][local-setup] with the new directory and graph id. Query the
 running graph to verify patterns, signals, and at least one traversal. Merge
-only the relevant named-server and alias entries into the user's operator
-configuration; preserve unrelated settings and keep credentials separate.
+only the new cookbook's alias entries into the user's operator configuration;
+they use its `local-reader` target. Preserve unrelated settings and keep
+credentials out of the YAML.
 
-Report the cookbook location, loaded counts, server/graph target, and a working
+Report the cookbook location, loaded counts, target and graph, and a working
 query. Keep exact write receipts. After a lost or timed-out response, establish
 the outcome before replaying; for an accepted deployment, observe its original
 deployment ID.
@@ -100,9 +104,10 @@ deployment ID.
 ## Later changes
 
 Use [live updates][live-updates]: edit the declared schema, queries or policies,
-then `cluster plan --server …` and `cluster apply --server …`. Successful served
-apply activates the changes without restarting. Do not write the same cluster
-directly while its server owns the writer lock.
+then run `cluster plan --target local --config .` and
+`cluster apply --target local --config .`. Successful served apply activates
+the changes without restarting. Do not write the same cluster directly while
+its server owns the writer lock.
 
 Schema changes require `main` to be the only live branch. Supported renames use
 `@rename_from`; enum widening and nullable property additions are supported,
@@ -110,8 +115,9 @@ but arbitrary type/key changes and nullable-to-required tightening are not.
 Plan before apply. Removing a graph from `cluster.yaml` permanently deletes its
 managed storage and retained history; it is not a way to pause serving.
 
-Use the repository's vendored `omnigraph` skill for command details, bulk data
-review, embedding preparation, and uncertain write outcomes.
+Use the `omnigraph` skill for command details, bulk data review, embedding
+preparation, and uncertain write outcomes. The repository vendors it;
+`omnigraph skill export DIR` writes the copy that matches the installed CLI.
 
 [local-setup]: https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#local-setup
 [live-updates]: https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#live-updates
