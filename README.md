@@ -74,7 +74,7 @@ python3 scripts/local-tls-gateway.py
 ```
 
 It is for local demos only. A deployment terminates TLS at its proxy or
-platform, as Railway does.
+platform.
 
 ### 3. Configure the CLI
 
@@ -212,10 +212,6 @@ research and seed preparation. Install it with:
 npx skills add https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/industry-intel/skill
 ```
 
-For a Railway deployment, use the [deployment guide](deploy/railway/).
-Configuration changes use served apply. Binary rollout and writer ownership
-transfer are explicit operator steps.
-
 ## Validation and contributions
 
 Schemas and queries are executable examples. Before changing one, read the
@@ -228,9 +224,11 @@ python3 scripts/check-cookbooks.py
 
 It checks every bundle and query, then boots isolated local servers behind the
 local HTTPS gateway to load seeds, test reader/writer/admin permissions, and
-apply live schema/query updates without restarting. Use `OMNIGRAPH_BIN` and `OMNIGRAPH_SERVER_BIN` to choose
-explicit binaries. CI runs the same journeys plus the Railway preparation tests. No external
-storage or embedding-provider credentials are needed. Failed runs retain their temporary fixture and server logs.
+apply live schema/query updates without restarting. Use `OMNIGRAPH_BIN` and
+`OMNIGRAPH_SERVER_BIN` to choose explicit binaries. CI runs the same journeys
+with the release pinned in `.github/workflows/qualify.yml`. No external storage
+or embedding-provider credentials are needed. Failed runs retain their
+temporary fixture and server logs.
 
 Keep schemas, queries, seeds and cookbook-specific explanations together. Link
 to the engine guides for general syntax and operations.

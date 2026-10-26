@@ -163,7 +163,7 @@ omnigraph query decisions_upcoming --target local-reader --graph pharma
 ```
 
 Use the [live update workflow](../README.md#live-updates) for schema and stored
-query edits. For S3 hosting, see the [Railway deployment guide](../deploy/railway/README.md).
+query edits.
 
 ## Demo Walkthrough
 

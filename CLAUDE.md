@@ -28,7 +28,7 @@ belongs in the deployment configuration. Never commit graph or ledger state.
 
 The vendored [OmniGraph skill](.claude/skills/omnigraph/SKILL.md) owns command and
 language detail. Its immutable source is `scripts/omnigraph-skill.ref`, separate
-from the released binary pin in `deploy/railway/Dockerfile`. Refresh with
+from the released binary pin in `.github/workflows/qualify.yml`. Refresh with
 `scripts/sync-skill.sh`; do not hand-edit vendored references.
 
 ## Changes and validation
@@ -36,8 +36,7 @@ from the released binary pin in `deploy/railway/Dockerfile`. Refresh with
 - Run `python3 scripts/check-cookbooks.py` for all seven local journeys, or
   name cookbooks to run only those. It uses the released CLI/server, isolated
   operator homes, disposable roots and the local HTTPS gateway; it never
-  touches a deployed graph. The Railway config preparer has its own tests
-  under `deploy/railway/tests/`. For beads the checker also drives the `ob`
+  touches a deployed graph. For beads the checker also drives the `ob`
   client against the served graph; the client's local tests run with
   `python3 -m unittest discover -s beads/client/tests`.
 - For a query edit, start with `omnigraph lint --schema schema.pg --query
@@ -97,12 +96,3 @@ Full-text calls (`bm25`, `fuzzy`, `match_text`, ...) need the property declared
 `@index`.
 Never claim empty semantic results prove there are no matching facts without
 checking vector coverage.
-
-## Deployment
-
-[Railway](deploy/railway/README.md) prepares a bundle without storage writes.
-Bootstrap is explicit and, until the engine supports S3 bootstrap from the 0.14
-CLI, uses the 0.13.0 CLI once; later configuration updates go through the
-running server. Runtime/token changes require a stop-then-start replacement.
-Keep one writer and use `/readyz` for readiness. A local smoke pass does not
-qualify Railway/S3 failure or ownership-transfer behavior.

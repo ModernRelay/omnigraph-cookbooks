@@ -1,7 +1,7 @@
 #!/bin/bash
 # Refresh the vendored skill from its immutable documentation revision.
 # Edit omnigraph-skill.ref when adopting reviewed upstream documentation;
-# the runtime release remains pinned separately in deploy/railway/Dockerfile.
+# the runtime release remains pinned separately in .github/workflows/qualify.yml.
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 REF=$(cat "$ROOT/scripts/omnigraph-skill.ref")

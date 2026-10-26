@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+env:
+  # The OmniGraph release every journey is qualified against.
+  OMNIGRAPH_VERSION: v0.14.0
+
 jobs:
   cookbooks:
     runs-on: ubuntu-24.04
@@ -19,7 +23,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          version=$(sed -n 's/^ARG OMNIGRAPH_REF=//p' deploy/railway/Dockerfile)
+          version="$OMNIGRAPH_VERSION"
           [[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
           asset=omnigraph-linux-x86_64
           archive=$(mktemp -d)
@@ -34,5 +38,3 @@ jobs:
         run: python3 scripts/check-cookbooks.py
       - name: Test the beads client end to end
         run: python3 -m unittest discover -s beads/client/tests -v
-      - name: Verify deployment preparation stays effect-free
-        run: python3 -m unittest discover -s deploy/railway/tests -v
