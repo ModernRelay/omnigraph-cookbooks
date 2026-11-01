@@ -9,7 +9,8 @@ These are nine self-contained OmniGraph **0.14.0** bundles: schemas, seed data,
 stored queries and applied policies. The only application code is the beads
 cookbook's `ob` client in `beads/client/`, with its own tests, the law-history
 cookbook's source scripts in `law-history/sources/`, which fetch its pinned
-official documents and rebuild its seed from them, and the local HTTPS gateway
+official documents and rebuild its seed from them, its read check in
+`law-history/client/`, and the local HTTPS gateway
 `scripts/local-tls-gateway.py`. The root
 [README](README.md) owns setup, live updates and upgrades; individual cookbook
 guides own their domain model and worked queries.
@@ -42,7 +43,9 @@ from the released binary pin in `.github/workflows/qualify.yml`. Refresh with
   operator homes, disposable roots and the local HTTPS gateway; it never
   touches a deployed graph. For beads the checker also drives the `ob`
   client against the served graph; the client's local tests run with
-  `python3 -m unittest discover -s beads/client/tests`.
+  `python3 -m unittest discover -s beads/client/tests`. For law-history it
+  runs `law-history/client/check_reads.py`, so run the checker with a Python
+  that has `law-history/client/requirements.txt` installed.
 - For a query edit, start with `omnigraph lint --schema schema.pg --query
   queries/<file>.gq`. This is an offline check. Comments in `.pg`/`.gq` use `//`.
 - Keep `seed.md` and `seed.jsonl` consistent. Preserve the domain examples and

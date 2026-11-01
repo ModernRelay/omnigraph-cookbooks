@@ -218,10 +218,13 @@ npx skills add https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/indu
 
 Schemas and queries are executable examples. Before changing one, read the
 root and cookbook `CLAUDE.md` (`AGENTS.md` links to the same file). Run the
-local qualification with released binaries on PATH:
+local qualification with released binaries on PATH, from a Python that has the
+[Omnigraph Python client](https://github.com/ModernRelay/omnigraph-python)
+installed, which law-history's read check uses:
 
 ```bash
-python3 scripts/check-cookbooks.py
+python3 -m venv .venv && .venv/bin/pip install -r law-history/client/requirements.txt
+.venv/bin/python scripts/check-cookbooks.py
 ```
 
 It checks every bundle and query, then boots isolated local servers behind the

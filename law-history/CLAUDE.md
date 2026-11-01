@@ -11,9 +11,10 @@ carried, its words while in force, the changes that rewrote it, the judgments
 that applied or invalidated it, and the official document behind each fact.
 Which text applies on a date, what an old citation names today and whether a
 court read text that has since changed are derived by stored queries on every
-read, never stored. Schema, seed, queries, policies, an agent skill, and two
+read, never stored. Schema, seed, queries, policies, an agent skill, two
 scripts that fetch the seed's official documents and rebuild the seed from
-them. The seed is real United States federal law, in the public domain.
+them, and a read check through the Omnigraph Python client. The seed is real
+United States federal law, in the public domain.
 
 ## Key Files
 
@@ -32,6 +33,10 @@ them. The seed is real United States federal law, in the public domain.
 - `sources/build_seed.py` — writes `seed.jsonl` and the example source from
   those documents, checking each text, date and holding against them;
   `--check` compares a fresh build with the committed files.
+- `client/check_reads.py` — runs every stored read through the Omnigraph
+  Python client (`client/requirements.txt`) against a served fresh seed and
+  compares the rows with `seed.md`; the checker runs it. A new stored read
+  needs a check there, or the script fails.
 - `policies/graph.policy.yaml` — reader, writer, admin and `act-agent` roles.
 - `skill/SKILL.md` — guidance for an agent answering from a law graph.
 
@@ -66,5 +71,7 @@ them. The seed is real United States federal law, in the public domain.
   `sources/build_seed.py --check`. Never update a pinned SHA-256 to make a
   refused document pass; a publisher that changed a document is a new source
   to read and record.
-- After a schema, query or seed change, re-run the reads against a fresh seed
-  and update `seed.md`, then run `../scripts/check-cookbooks.py law-history`.
+- After a schema, query or seed change, update `seed.md` and the matching
+  checks in `client/check_reads.py`, then run
+  `../scripts/check-cookbooks.py law-history` with a Python that has
+  `client/requirements.txt` installed.

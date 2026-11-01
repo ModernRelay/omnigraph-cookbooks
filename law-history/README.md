@@ -280,6 +280,34 @@ both court reads, cite the sources, and never write statutory text from memory.
 The policy cannot limit which stored queries an agent runs, so before merging
 an agent's branch, check its commits for a `confirm_holding` by `act-agent`.
 
+### From Python
+
+The [Omnigraph Python client](https://github.com/ModernRelay/omnigraph-python)
+invokes the same stored reads over HTTP. Install it with
+`python3 -m pip install -r client/requirements.txt`, then, with the local
+setup's gateway and reader token:
+
+```python
+import asyncio, os, ssl
+import httpx
+from omnigraph import Omnigraph
+
+async def main():
+    ca = ssl.create_default_context(cafile=os.path.expandvars("$OMNIGRAPH_HOME/local-tls/ca.pem"))
+    async with Omnigraph("https://localhost:8443", graph_id="law", token=os.environ["OG_LOCAL_READER_TOKEN"],
+                         transport=httpx.AsyncHTTPTransport(verify=ca)) as og:
+        result = await og.queries.invoke("text_on", params={"label": "11 U.S.C. § 1182(1)", "on": "2022-05-01"})
+        for row in result["rows"]:
+            print(row["version"], row["v.in_force_from"], row["v.in_force_to"], row["v.text"])
+
+asyncio.run(main())
+```
+
+A failed call raises an `OmnigraphError` subclass that carries the server's
+`disposition`, as the CLI reports it. [`client/check_reads.py`](client/check_reads.py)
+runs every stored read this way and compares the rows with [seed.md](seed.md);
+the cookbook checker runs it against a fresh seed.
+
 ### Reacting to changes
 
 The change feed reports every committed row change. An agent can follow it and

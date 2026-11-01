@@ -46,3 +46,6 @@ omnigraph.yaml
 
 # law-history: official documents downloaded by sources/fetch.py
 law-history/sources/documents/
+
+# Python virtual environment for the checker (law-history/client/requirements.txt)
+.venv/

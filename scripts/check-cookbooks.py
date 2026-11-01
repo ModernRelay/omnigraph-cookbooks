@@ -239,7 +239,7 @@ def qualify(name, graph, stored_query, workspace, env):
             if name == "hardware-program":
                 hardware_program_journey(env)
             if name == "law-history":
-                law_history_journey(env)
+                law_history_journey(env, f"https://localhost:{gateway_port}", workspace / "tls/ca.pem")
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
@@ -393,9 +393,9 @@ def hardware_program_journey(env):
     run(env, "branch", "delete", "cr-heatsink", *writer, "--yes", "--json")
 
 
-def law_history_journey(env):
-    """Any citation a provision has carried reaches its text on a date, and
-    later law that reaches back is found. An agent adds a case and proposes a
+def law_history_journey(env, endpoint, ca):
+    """Every stored read returns what seed.md lists on the fresh seed, checked
+    through the Omnigraph Python client. An agent adds a case and proposes a
     holding on its own branch; an editor merges and confirms it, which
     replaces the proposal rather than adding a second holding."""
     def scope(actor):
@@ -408,18 +408,10 @@ def law_history_journey(env):
     def mutate(who, query, params, *extra, ok=True):
         return run(env, "mutate", query, *scope(who), "--params", json.dumps(params), *extra, "--json", ok=ok)
 
-    debtor = "11 U.S.C. § 1182(1)"
-    assert [r["version"] for r in rows("text_on", {"label": debtor, "on": "2022-05-01"})] == ["tv-usc11-1182-1-3"]
-    assert [r["c.slug"] for r in rows("later_law_reaching_back", {"label": debtor, "event_on": "2022-05-01"})] \
-        == ["chg-btatca-1182"]
-    assert {r["e.label"] for r in rows("cited_as_on", {"label": "2 U.S.C. § 441b(a)", "on": "2026-10-31"})} \
-        == {"52 U.S.C. § 30118(a)", "FECA § 316(a)"}
-    assert not rows("text_on", {"label": "2 U.S.C. § 441b(a)", "on": "2026-10-31"}), "a retired number names nothing"
-    assert not rows("held_invalid", {"label": "52 U.S.C. § 30118(a)"})
-    assert [r["j.citation"] for r in rows("held_invalid_enclosing", {"label": "52 U.S.C. § 30118(a)"})] \
-        == ["558 U.S. 310"]
-    for check in ("overlapping_versions", "versions_without_source", "changes_without_source", "holdings_to_review"):
-        assert not rows(check), check
+    reads = subprocess.run([sys.executable, str(ROOT / "law-history/client/check_reads.py"), "--url", endpoint,
+                            "--ca", str(ca), "--token-env", token_variable("act-reader")],
+                           env=env, capture_output=True, text=True)
+    assert reads.returncode == 0, f"stored reads differ from seed.md:\n{reads.stdout}{reads.stderr}"
 
     branch = ("--branch", "agent-mcconnell")
     run(env, "load", *scope("act-agent"), *branch, "--from", "main", "--mode", "append", "--json",
@@ -458,6 +450,9 @@ def main():
         raise SystemExit(f"unknown cookbook: {', '.join(unknown)}; choose from {', '.join(COOKBOOKS)}")
     if not CLI or not SERVER:
         raise SystemExit("Put 0.14.0 omnigraph and omnigraph-server on PATH or set OMNIGRAPH_BIN / OMNIGRAPH_SERVER_BIN")
+    if "law-history" in selected and importlib.util.find_spec("omnigraph") is None:
+        raise SystemExit("law-history checks its reads through the Omnigraph Python client: run this script "
+                         "with a Python that has law-history/client/requirements.txt installed")
     workspace = Path(tempfile.mkdtemp(prefix="omnigraph-cookbooks-test-"))
     env = {k: v for k, v in os.environ.items()
            if not k.startswith(("OMNIGRAPH_", "OG_", "AWS_", "AZURE_"))}
