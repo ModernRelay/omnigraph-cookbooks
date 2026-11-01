@@ -7,8 +7,10 @@ links to the corresponding `CLAUDE.md`; edit the target once.
 
 These are nine self-contained OmniGraph **0.14.0** bundles: schemas, seed data,
 stored queries and applied policies. The only application code is the beads
-cookbook's `ob` client in `beads/client/`, with its own tests, and the local
-HTTPS gateway `scripts/local-tls-gateway.py`. The root
+cookbook's `ob` client in `beads/client/`, with its own tests, the law-history
+cookbook's source scripts in `law-history/sources/`, which fetch its pinned
+official documents and rebuild its seed from them, and the local HTTPS gateway
+`scripts/local-tls-gateway.py`. The root
 [README](README.md) owns setup, live updates and upgrades; individual cookbook
 guides own their domain model and worked queries.
 

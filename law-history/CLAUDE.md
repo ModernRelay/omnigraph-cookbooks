@@ -11,9 +11,9 @@ carried, its words while in force, the changes that rewrote it, the judgments
 that applied or invalidated it, and the official document behind each fact.
 Which text applies on a date, what an old citation names today and whether a
 court read text that has since changed are derived by stored queries on every
-read, never stored. Schema, seed, queries, policies and an agent skill; no
-application code. The seed is real United States federal law, in the public
-domain.
+read, never stored. Schema, seed, queries, policies, an agent skill, and two
+scripts that fetch the seed's official documents and rebuild the seed from
+them. The seed is real United States federal law, in the public domain.
 
 ## Key Files
 
@@ -25,6 +25,13 @@ domain.
   lists what each read must return on the fresh seed.
 - `examples/mcconnell-source.jsonl` — the source row for the add-a-case
   walkthrough in `README.md`, which the checker also runs.
+- `sources/documents.json` — every official document behind the seed and the
+  example, pinned by URL, SHA-256 and fetch time.
+- `sources/fetch.py` — downloads them into `sources/documents/` (ignored by
+  git) and refuses any whose bytes differ from the pin.
+- `sources/build_seed.py` — writes `seed.jsonl` and the example source from
+  those documents, checking each text, date and holding against them;
+  `--check` compares a fresh build with the committed files.
 - `policies/graph.policy.yaml` — reader, writer, admin and `act-agent` roles.
 - `skill/SKILL.md` — guidance for an agent answering from a law graph.
 
@@ -53,5 +60,11 @@ domain.
 - `act-agent` writes only on unprotected branches and cannot merge, publish or
   delete a branch. The shared checker asserts this; do not widen the agent
   rules.
+- `seed.jsonl` and `examples/mcconnell-source.jsonl` are generated. Never edit
+  them by hand: change `sources/build_seed.py`, add any new document to
+  `sources/documents.json`, run `sources/fetch.py`, rebuild, and confirm with
+  `sources/build_seed.py --check`. Never update a pinned SHA-256 to make a
+  refused document pass; a publisher that changed a document is a new source
+  to read and record.
 - After a schema, query or seed change, re-run the reads against a fresh seed
   and update `seed.md`, then run `../scripts/check-cookbooks.py law-history`.

@@ -233,6 +233,27 @@ is replaced in place. Use `--as-commit` on the merge to run the checks against
 the exact merged result before publishing it, as in the
 [hardware-program review gate](../hardware-program/README.md#check-the-merged-result-before-publishing).
 
+### Rebuilding the seed from its sources
+
+The seed is built by a script, not typed. `sources/documents.json` pins the 22
+official documents behind it, the seed's 21 and the *McConnell* report, by URL
+and SHA-256. `sources/fetch.py` downloads them and refuses any document whose
+bytes no longer match its pin. `sources/build_seed.py` reads only those bytes,
+checks each text, date and holding against them, and writes `seed.jsonl` and
+`examples/mcconnell-source.jsonl`. The same documents give the same files, byte
+for byte:
+
+```bash
+python3 sources/fetch.py
+python3 sources/build_seed.py --check
+```
+
+Both scripts use only the Python standard library; the checks on the two court
+reports also need `pdftotext` from poppler. A refused document means its
+publisher now serves different bytes. Read the new version and, if it still
+supports the seed, pin it as a new source with its own hash and fetch time;
+never change a pin to make a refused document pass.
+
 ### Agents
 
 The graph policy gives an AI agent its own actor, `act-agent`. It reads

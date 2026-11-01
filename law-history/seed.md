@@ -8,6 +8,11 @@ public laws as enacted, the United States Reports from the Library of Congress,
 and the Law Revision Counsel's reclassification tables. All of them are works
 of the United States Government and in the public domain.
 
+`sources/build_seed.py` writes this file from those documents, which
+`sources/documents.json` pins by hash, and checks each text, date and holding
+against them. [README.md](README.md#rebuilding-the-seed-from-its-sources) shows
+how to fetch them and rebuild.
+
 79 nodes and 161 edges. Load it once into an empty graph with `--mode append`.
 
 | Kind | Count | Notes |
