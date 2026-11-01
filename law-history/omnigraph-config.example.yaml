@@ -1,0 +1,63 @@
+# Read aliases for the law-history cookbook (graph `law`).
+# Merge the `aliases:` entries below into $OMNIGRAPH_HOME/config.yaml, the operator
+# config from ../README.md#local-setup, whose `local-reader` target they use.
+# Run one with `omnigraph alias <name>`; pass a query's parameters by name with
+# `--params '{"label":"..."}'`. Aliases only read; run stored mutations with
+# `omnigraph mutate <name> --target local-writer --graph law --params '{...}'`,
+# or as an agent with `--target local-agent --branch <your branch>`.
+aliases:
+
+  # ── Text on a date ──────────────────────────────────────────────
+  text:               {target: local-reader, graph: law, query: text_on}   # --params '{"label":"11 U.S.C. § 1182(1)","on":"2022-05-01"}'
+  versions:           {target: local-reader, graph: law, query: versions}   # --params '{"label":"11 U.S.C. § 1182(1)"}'
+  version-sources:    {target: local-reader, graph: law, query: version_sources}   # --params '{"version":"tv-usc11-1182-1-3"}'
+
+  # ── Which law governs a past event ──────────────────────────────
+  reaching-back:      {target: local-reader, graph: law, query: later_law_reaching_back}   # --params '{"label":"11 U.S.C. § 1182(1)","event_on":"2022-05-01"}'
+  changes:            {target: local-reader, graph: law, query: changes_to}   # --params '{"label":"52 U.S.C. § 30118(b)(2)"}'
+  changes-between:    {target: local-reader, graph: law, query: changes_between}   # --params '{"from":"2020-01-01","to":"2023-01-01"}'
+
+  # ── Citations and renumbering ───────────────────────────────────
+  citations:          {target: local-reader, graph: law, query: citations}   # --params '{"label":"2 U.S.C. § 441b"}'
+  cited-as:           {target: local-reader, graph: law, query: cited_as_on}   # --params '{"label":"2 U.S.C. § 441b(a)","on":"2026-10-31"}'
+  cites:              {target: local-reader, graph: law, query: citations_from}   # --params '{"version":"tv-feca-316-b-2-2"}'
+  renumberings:       {target: local-reader, graph: law, query: renumberings}
+
+  # ── Courts ──────────────────────────────────────────────────────
+  invalid:            {target: local-reader, graph: law, query: held_invalid}   # --params '{"label":"2 U.S.C. § 441b"}'
+  invalid-enclosing:  {target: local-reader, graph: law, query: held_invalid_enclosing}   # --params '{"label":"52 U.S.C. § 30118(a)"}'
+  applying:           {target: local-reader, graph: law, query: judgments_applying}   # --params '{"label":"52 U.S.C. § 30118(b)(2)"}'
+  later-invalid:      {target: local-reader, graph: law, query: later_invalidations}   # --params '{"citation":"540 U.S. 93"}'
+  old-text-cases:     {target: local-reader, graph: law, query: precedents_on_changed_text}   # --params '{"on":"2026-10-31"}'
+
+  # ── Defined terms ───────────────────────────────────────────────
+  term-users:         {target: local-reader, graph: law, query: term_users}   # --params '{"term":"small business debtor"}'
+  definition-reach:   {target: local-reader, graph: law, query: definition_reach}   # --params '{"label":"11 U.S.C. § 1182(1)","on":"2026-10-31"}'
+
+  # ── Search, sources, coverage ───────────────────────────────────
+  search:             {target: local-reader, graph: law, query: search_text}   # --params '{"q":"electioneering communication"}'
+  laws:               {target: local-reader, graph: law, query: laws}
+  sources:            {target: local-reader, graph: law, query: sources}
+  coverage:           {target: local-reader, graph: law, query: coverage}
+
+  # ── Checks (each should return nothing) and review ──────────────
+  overlaps:           {target: local-reader, graph: law, query: overlapping_versions}
+  unsourced-versions: {target: local-reader, graph: law, query: versions_without_source}
+  unsourced-changes:  {target: local-reader, graph: law, query: changes_without_source}
+  to-review:          {target: local-reader, graph: law, query: holdings_to_review}
+
+# ── Stored mutations (use `omnigraph mutate`, not an alias) ───────
+# Each publishes one commit. Agents run them on a branch (`--branch <name>`);
+# the policy refuses agent writes on main. Add a judgment's Source first with
+# `omnigraph load`, as README.md#adding-a-case shows.
+#
+#   omnigraph mutate record_judgment --target local-agent --graph law --branch agent-mcconnell --params '{
+#     "slug":"jud-mcconnell","title":"McConnell v. Federal Election Commission",
+#     "court":"Supreme Court of the United States","citation":"540 U.S. 93","docket":"No. 02-1674",
+#     "decided_on":"2003-12-10","source":"src-us-reports-540-93"}'
+#   omnigraph mutate record_applied --target local-agent --graph law --branch agent-mcconnell \
+#     --params '{"judgment":"jud-mcconnell","version":"tv-feca-316-b-2-2"}'
+#   omnigraph mutate propose_holding --target local-agent --graph law --branch agent-mcconnell --params '{
+#     "judgment":"jud-citizens-united","provision":"prov-feca-316-b-2","scope":"in_part",
+#     "holding":"<the exact words of the opinion>","locator":"558 U.S. at 365","effective_from":"2010-01-21"}'
+#   omnigraph mutate confirm_holding --target local-writer --graph law --params '{...the same fields, checked...}'

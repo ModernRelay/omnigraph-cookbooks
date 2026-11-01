@@ -14,6 +14,7 @@ and a cluster declaration. Local examples use filesystem storage.
 | [Beads](beads/) | `beads` | A beads-style work queue for coding agents, with the `ob` client |
 | [Company brain](company-brain/) | `company` | Claims, decisions and action items with the exact source text they rest on, shared by a company's people and agents |
 | [Hardware program](hardware-program/) | `program` | Requirements, budgets, interfaces and verification for a hardware program |
+| [Law history](law-history/) | `law` | Statutes as they stood on any date: text, renumbering, later laws that reach back, and court holdings, each from an official source |
 
 ## Local setup
 

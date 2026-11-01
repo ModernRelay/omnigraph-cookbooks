@@ -31,9 +31,10 @@ COOKBOOKS = {
     "beads": ("beads", "ready"),
     "company-brain": ("company", "current_decisions"),
     "hardware-program": ("program", "budget_rollup"),
+    "law-history": ("law", "coverage"),
 }
 # Cookbooks whose policy lets act-agent write only on unprotected branches.
-BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program"}
+BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program", "law-history"}
 ACTORS = ("act-admin", "act-writer", "act-reader", "act-agent")
 TOKENS = {actor: f"cookbook-test-{actor}" for actor in ACTORS}
 GATEWAY = ROOT / "scripts" / "local-tls-gateway.py"
@@ -237,12 +238,15 @@ def qualify(name, graph, stored_query, workspace, env):
                 company_brain_journey(env)
             if name == "hardware-program":
                 hardware_program_journey(env)
+            if name == "law-history":
+                law_history_journey(env)
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
                   + (", ob client" if name == "beads" else "")
                   + (", review journey" if name == "company-brain" else "")
-                  + (", review gate" if name == "hardware-program" else ""), flush=True)
+                  + (", review gate" if name == "hardware-program" else "")
+                  + (", holding review" if name == "law-history" else ""), flush=True)
         finally:
             gateway.terminate()
             process.terminate()
@@ -387,6 +391,64 @@ def hardware_program_journey(env):
     run(env, "commit", "publish", commit, *writer, "--json")
     assert rows("limit_violations") == []
     run(env, "branch", "delete", "cr-heatsink", *writer, "--yes", "--json")
+
+
+def law_history_journey(env):
+    """Any citation a provision has carried reaches its text on a date, and
+    later law that reaches back is found. An agent adds a case and proposes a
+    holding on its own branch; an editor merges and confirms it, which
+    replaces the proposal rather than adding a second holding."""
+    def scope(actor):
+        return ("--target", target(actor), "--graph", "law")
+
+    def rows(query, params=None, *extra):
+        return run(env, "query", query, *scope("act-reader"), "--params", json.dumps(params or {}),
+                   *extra, "--json")["rows"]
+
+    def mutate(who, query, params, *extra, ok=True):
+        return run(env, "mutate", query, *scope(who), "--params", json.dumps(params), *extra, "--json", ok=ok)
+
+    debtor = "11 U.S.C. § 1182(1)"
+    assert [r["version"] for r in rows("text_on", {"label": debtor, "on": "2022-05-01"})] == ["tv-usc11-1182-1-3"]
+    assert [r["c.slug"] for r in rows("later_law_reaching_back", {"label": debtor, "event_on": "2022-05-01"})] \
+        == ["chg-btatca-1182"]
+    assert {r["e.label"] for r in rows("cited_as_on", {"label": "2 U.S.C. § 441b(a)", "on": "2026-10-31"})} \
+        == {"52 U.S.C. § 30118(a)", "FECA § 316(a)"}
+    assert not rows("text_on", {"label": "2 U.S.C. § 441b(a)", "on": "2026-10-31"}), "a retired number names nothing"
+    assert not rows("held_invalid", {"label": "52 U.S.C. § 30118(a)"})
+    assert [r["j.citation"] for r in rows("held_invalid_enclosing", {"label": "52 U.S.C. § 30118(a)"})] \
+        == ["558 U.S. 310"]
+    for check in ("overlapping_versions", "versions_without_source", "changes_without_source", "holdings_to_review"):
+        assert not rows(check), check
+
+    branch = ("--branch", "agent-mcconnell")
+    run(env, "load", *scope("act-agent"), *branch, "--from", "main", "--mode", "append", "--json",
+        "--data", str(ROOT / "law-history/examples/mcconnell-source.jsonl"))
+    mutate("act-agent", "record_judgment", {
+        "slug": "jud-mcconnell", "title": "McConnell v. Federal Election Commission",
+        "court": "Supreme Court of the United States", "citation": "540 U.S. 93", "docket": "No. 02-1674",
+        "decided_on": "2003-12-10", "source": "src-us-reports-540-93"}, *branch)
+    mutate("act-agent", "record_applied", {"judgment": "jud-mcconnell", "version": "tv-feca-316-b-2-2"}, *branch)
+    holding = {"judgment": "jud-citizens-united", "provision": "prov-feca-316-b-2", "scope": "in_part",
+               "holding": "Given our conclusion we are further required to overrule the part of McConnell that "
+                          "upheld BCRA § 203's extension of § 441b's restrictions on corporate independent "
+                          "expenditures.",
+               "locator": "558 U.S. at 365", "effective_from": "2010-01-21"}
+    mutate("act-agent", "propose_holding", holding, *branch)
+    refused(mutate("act-agent", "propose_holding", holding, ok=False))
+    assert [r["h.locator"] for r in rows("holdings_to_review", None, *branch)] == ["558 U.S. at 365"]
+    assert not rows("holdings_to_review"), "a proposal stays on its branch until merged"
+
+    run(env, "branch", "merge", "agent-mcconnell", "--into", "main", *scope("act-writer"), "--json")
+    run(env, "branch", "delete", "agent-mcconnell", *scope("act-writer"), "--yes", "--json")
+    assert len(rows("holdings_to_review")) == 1
+    mutate("act-writer", "confirm_holding", holding)
+    assert not rows("holdings_to_review")
+    assert [(r["j.citation"], r["h.review_status"]) for r in rows("held_invalid", {"label": "52 U.S.C. § 30118(b)(2)"})] \
+        == [("558 U.S. 310", "human_reviewed")]
+    assert [r["k.citation"] for r in rows("later_invalidations", {"citation": "540 U.S. 93"})] == ["558 U.S. 310"]
+    assert [r["j.citation"] for r in rows("judgments_applying", {"label": "52 U.S.C. § 30118(b)(2)"})] \
+        == ["540 U.S. 93", "558 U.S. 310"]
 
 
 def main():
