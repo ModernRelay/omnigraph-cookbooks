@@ -19,6 +19,11 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      # Not the runner's default: ubuntu-24.04 ships 3.12, which does not verify X.509 strictly,
+      # so it would not catch a gateway certificate a current Python refuses.
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
       - name: Install the pinned release
         shell: bash
         run: |
