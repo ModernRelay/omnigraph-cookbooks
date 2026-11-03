@@ -58,14 +58,16 @@ duplicates it; `lk-queue` supersedes `lk-queue-v1`; `lk-conflict` and
 
 `ready` returns eight issues, highest priority first: `lk-sync`,
 `lk-crash-empty`, `lk-acl`, `lk-release`, `lk-import-md`, `lk-changelog`,
-`lk-search`, `lk-version`. `blocked` returns five:
+`lk-search`, `lk-version`. Five issues are blocked, across the two queries that
+derive it — `blocked` matches a direct `BlockedBy` edge, `blocked_by_ancestor`
+the block a parent passes down. `ob blocked` runs both and shows all five:
 
-| Issue | Why |
-|---|---|
-| `lk-conflict` | waits on `lk-queue`, which is in progress |
-| `lk-sync-docs` | waits on `lk-conflict` |
-| `lk-share` | waits on `lk-acl` |
-| `lk-share-api`, `lk-share-ui` | their parent `lk-share` passes its block down |
+| Issue | Why | Query |
+|---|---|---|
+| `lk-conflict` | waits on `lk-queue`, which is in progress | `blocked` |
+| `lk-sync-docs` | waits on `lk-conflict` | `blocked` |
+| `lk-share` | waits on `lk-acl` | `blocked` |
+| `lk-share-api`, `lk-share-ui` | their parent `lk-share` passes its block down | `blocked_by_ancestor` |
 
 Each rule appears once:
 
