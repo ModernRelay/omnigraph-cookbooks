@@ -26,16 +26,18 @@ from the table for another cookbook.
 
 ### 1. Create the cluster
 
-From a fresh cookbook directory, validate and preview before creating storage:
+Validate and preview before creating storage. Every command below names the
+cookbook folder, so it runs the same from the repository root or from anywhere
+else; set `COOKBOOK` once:
 
 ```bash
-cd industry-intel
-omnigraph cluster validate --config .
-omnigraph cluster plan --target . --config . --json
-omnigraph cluster apply --target . --config . --as act-admin --json
+export COOKBOOK=$PWD/industry-intel     # the folder holding this cookbook's cluster.yaml
+omnigraph cluster validate --config "$COOKBOOK"
+omnigraph cluster plan --target "$COOKBOOK" --config "$COOKBOOK" --json
+omnigraph cluster apply --target "$COOKBOOK" --config "$COOKBOOK" --as act-admin --json
 ```
 
-`--config` names the folder holding `cluster.yaml`; `--target .` names the
+`--config` names the folder holding `cluster.yaml`; `--target` names the
 storage root, here the same folder. Fresh apply creates the ledger, graph and
 stored-query registry, and prints an **Admission lock** ID. There is no
 separate import step.
@@ -45,9 +47,9 @@ make sure nothing else writes to this folder, then clear that exact lock ID
 once and start the server:
 
 ```bash
-omnigraph cluster force-unlock '<LOCK_ID_FROM_APPLY>' --target .
+omnigraph cluster force-unlock '<LOCK_ID_FROM_APPLY>' --target "$COOKBOOK"
 export OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-admin":"local-admin-token","act-writer":"local-writer-token","act-reader":"local-reader-token","act-agent":"local-agent-token"}'
-omnigraph-server --cluster . --bind 127.0.0.1:8080
+omnigraph-server --cluster "$COOKBOOK" --bind 127.0.0.1:8080
 ```
 
 Leave the server running. The sample tokens are for this loopback demo; choose
@@ -72,6 +74,17 @@ creates a private CA and a `localhost` certificate on first use and relays
 ```bash
 export OMNIGRAPH_HOME=~/.omnigraph-cookbooks   # keeps this demo apart from your own CLI setup
 python3 scripts/local-tls-gateway.py
+```
+
+Making the certificate takes a moment on the first run, so the gateway starts
+listening a little after the command does. If you are scripting this rather
+than watching a terminal, wait for it before the next step — a request that
+arrives early is refused at the socket, and the CLI reports that as a failure
+to establish the HTTP contract:
+
+```bash
+until curl -fsS --cacert "$OMNIGRAPH_HOME/local-tls/ca.pem" \
+  https://localhost:8443/readyz >/dev/null 2>&1; do sleep 0.2; done
 ```
 
 It is for local demos only. A deployment terminates TLS at its proxy or
@@ -122,12 +135,12 @@ default.
 
 ### 4. Load and query
 
-From the cookbook directory:
+Still with `COOKBOOK` from step 1, so this works from any directory:
 
 ```bash
 curl -fsS --cacert "$OMNIGRAPH_HOME/local-tls/ca.pem" https://localhost:8443/readyz
 # Append once to the new empty graph. Keep the exact commit receipt.
-omnigraph load --target local --graph spike --data seed.jsonl --mode append --json
+omnigraph load --target local --graph spike --data "$COOKBOOK/seed.jsonl" --mode append --json
 omnigraph queries list --target local --graph spike
 omnigraph query recent_signals --target local-reader --graph spike
 omnigraph access --target local-reader --graph spike --branch main

@@ -21,11 +21,19 @@ import subprocess
 import sys
 
 
+def _strictly_valid(ca: Path, cert: Path) -> bool:
+    """True when a strict verifier accepts the certificate; one written before the key
+    identifiers were added must be replaced, not reused."""
+    result = subprocess.run(["openssl", "verify", "-x509_strict", "-CAfile", str(ca), str(cert)],
+                            capture_output=True)
+    return result.returncode == 0
+
+
 def ensure_certificates(directory: Path) -> tuple[Path, Path, Path]:
     directory.mkdir(parents=True, exist_ok=True)
     ca, ca_key = directory / "ca.pem", directory / "ca.key"
     cert, key = directory / "localhost.pem", directory / "localhost.key"
-    if all(path.exists() for path in (ca, cert, key)):
+    if all(path.exists() for path in (ca, cert, key)) and _strictly_valid(ca, cert):
         return ca, cert, key
     openssl = ["openssl"]
     run = lambda *args: subprocess.run([*openssl, *args], check=True, capture_output=True)
@@ -36,9 +44,13 @@ def ensure_certificates(directory: Path) -> tuple[Path, Path, Path]:
     run("req", "-newkey", "ec", "-pkeyopt", "ec_paramgen_curve:prime256v1", "-nodes",
         "-keyout", str(key), "-out", str(csr), "-subj", "/CN=localhost")
     extensions = directory / "localhost.ext"
+    # Key identifiers: a strict X.509 verifier refuses a certificate without them, and Python
+    # verifies strictly by default from 3.13.
     extensions.write_text("basicConstraints=critical,CA:FALSE\n"
                           "keyUsage=critical,digitalSignature\n"
                           "extendedKeyUsage=serverAuth\n"
+                          "subjectKeyIdentifier=hash\n"
+                          "authorityKeyIdentifier=keyid:always\n"
                           "subjectAltName=DNS:localhost,IP:127.0.0.1\n")
     run("x509", "-req", "-in", str(csr), "-CA", str(ca), "-CAkey", str(ca_key), "-CAcreateserial",
         "-out", str(cert), "-days", "365", "-extfile", str(extensions))
