@@ -43,3 +43,9 @@ __pycache__/
 # Legacy combined config (RFC-008) — cookbooks ship cluster.yaml + an
 # omnigraph-config.example.yaml; per-operator config is ~/.omnigraph/config.yaml
 omnigraph.yaml
+
+# law-history: official documents downloaded by sources/fetch.py
+law-history/sources/documents/
+
+# Python virtual environment for the checker (law-history/client/requirements.txt)
+.venv/

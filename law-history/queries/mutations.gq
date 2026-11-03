@@ -1,0 +1,42 @@
+// Writes. Each query publishes one graph commit.
+//
+// Judgments are the part of the record that needs people: which text a court
+// read, and above all whether it held a provision invalid, are judgments about
+// the law, not facts a parser can copy from a source. An agent proposes them on
+// its own branch with review_status ai_proposed; the graph policy refuses its
+// writes on `main`, so a holding reaches the record through a person's review
+// and merge. HeldInvalid is keyed by judgment and provision: confirming writes
+// the same edge again, which replaces the proposal.
+//
+// Text versions, changes and designations come from official sources and are
+// loaded in batches with `omnigraph load`; see seed.md.
+
+query record_judgment($slug: String, $title: String, $court: String, $citation: String,
+                      $docket: String?, $decided_on: Date, $source: String)
+    @description("Add a court decision by its reporter citation, with the official document it comes from.")
+    @instruction("Cite the official reporter where one exists. Add the Source first.") {
+    insert Judgment { slug: $slug, title: $title, court: $court, citation: $citation, docket: $docket, decided_on: $decided_on }
+    insert JudgmentEvidence { from: $slug, to: $source }
+}
+
+query record_applied($judgment: String, $version: String)
+    @description("Record the text version a court read: the version in force when it decided.")
+    @instruction("Find the version with text_on, passing the citation and the decision date.") {
+    insert Applied { from: $judgment, to: $version }
+}
+
+query propose_holding($judgment: String, $provision: String, $scope: String, $holding: String,
+                      $locator: String, $effective_from: Date)
+    @description("Propose that a judgment held a provision, or a stated part of it, invalid. Lands as ai_proposed for a person to review.")
+    @instruction("Quote the court's words exactly in holding and give the page in locator, such as 558 U.S. at 365. Hold it on the narrowest provision the court's words reach. Run this on your own branch.") {
+    insert HeldInvalid { from: $judgment, to: $provision, scope: $scope, holding: $holding, locator: $locator,
+                         effective_from: $effective_from, review_status: "ai_proposed" }
+}
+
+query confirm_holding($judgment: String, $provision: String, $scope: String, $holding: String,
+                      $locator: String, $effective_from: Date)
+    @description("Record a reviewed holding: a person has read the judgment and confirms the scope, words and page.")
+    @instruction("Send every field, corrected where the proposal was wrong: this replaces the proposal.") {
+    insert HeldInvalid { from: $judgment, to: $provision, scope: $scope, holding: $holding, locator: $locator,
+                         effective_from: $effective_from, review_status: "human_reviewed" }
+}

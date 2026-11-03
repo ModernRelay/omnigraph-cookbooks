@@ -39,7 +39,11 @@ jobs:
           mkdir -p "$RUNNER_TEMP/omnigraph-bin"
           tar -xzf "$archive/$asset.tar.gz" -C "$RUNNER_TEMP/omnigraph-bin" omnigraph omnigraph-server
           echo "$RUNNER_TEMP/omnigraph-bin" >> "$GITHUB_PATH"
+      - name: Install the Omnigraph Python client
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install -r law-history/client/requirements.txt
       - name: Qualify all local journeys
-        run: python3 scripts/check-cookbooks.py
+        run: '"$RUNNER_TEMP/venv/bin/python" scripts/check-cookbooks.py'
       - name: Test the beads client end to end
         run: python3 -m unittest discover -s beads/client/tests -v

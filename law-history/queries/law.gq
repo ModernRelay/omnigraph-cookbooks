@@ -1,0 +1,322 @@
+// Reads for the law-history cookbook. Every answer is derived on each read from
+// the provisions, designations, text versions, changes and judgments; nothing
+// stores "current law", "renumbered" or "still good law" as a flag.
+//
+// Pass dates as YYYY-MM-DD. A citation is matched exactly as a Designation label,
+// for example "52 U.S.C. § 30118(a)"; `citations` lists every label of a
+// provision.
+
+// ── Text on a date ────────────────────────────────────────────────
+
+query text_on($label: String, $on: Date) @description("The words a citation named on a date: through the citation in force that day, to its provision, to the text in force that day, with what this graph's record covers.") @instruction("An empty result means no text was in force under that citation on that date, or the date is outside the coverage; run coverage to tell which. A date after covered_to gets the last recorded version: say the record ends on covered_to and a later change may be missing. Never fill a gap from memory.") {
+    match {
+        $d: Designation { label: $label }
+        $d $g:designates $p
+        $g.valid_from <= $on
+        $g.valid_to > $on
+        $v versionOf $p
+        $v.in_force_from <= $on
+        $v.in_force_to > $on
+        $k coverageOf $p
+    }
+    return { $p.slug as provision, $v.slug as version, $v.text, $v.in_force_from, $v.in_force_to,
+             $v.from_is_record_start, $k.covered_from, $k.covered_to }
+}
+
+query versions($label: String) @description("Every version of the provision a citation names, under any of its numbers, oldest first.") {
+    match {
+        $d: Designation { label: $label }
+        $d designates $p
+        $v versionOf $p
+    }
+    return { $v.slug, $v.in_force_from, $v.in_force_to, $v.from_is_record_start, $v.text_sha256, $v.text }
+    order { $v.in_force_from asc }
+    limit 200
+}
+
+query version_sources($version: String) @description("The official documents that print or state a text version, with their date, hash and reuse terms.") {
+    match {
+        $v: TextVersion { slug: $version }
+        $v textEvidence $s
+    }
+    return { $s.slug, $s.title, $s.kind, $s.url, $s.current_through, $s.sha256, $s.licence, $s.commercial_reuse }
+    order { $s.current_through asc, $s.slug asc }
+    limit 50
+}
+
+// ── Which law governs a past event ────────────────────────────────
+
+query later_law_reaching_back($label: String, $event_on: Date) @description("Changes that took force after an event but govern events or cases from a date on or before it: a later law that can displace the text in force on the event's date. Read applies_text for the conditions.") {
+    match {
+        $d: Designation { label: $label }
+        $d designates $p
+        $v versionOf $p
+        $c changedTo $v
+        $c.in_force_on > $event_on
+        $c.applies_from_event <= $event_on
+        $c $m:madeBy $i
+        $m.role = "made"
+    }
+    return { $c.slug, $c.locator, $i.citation as law, $c.in_force_on, $c.applies_from_event, $c.applies_text,
+             $v.slug as version, $v.text }
+    order { $c.in_force_on asc }
+    limit 50
+}
+
+query changes_to($label: String) @description("Every change to the provision a citation names: the law, the instruction, when it took force and why that date, whom it reaches, and how its result is verified. One row per law behind a change: role modified marks a later law that changed it, such as one that moved a sunset date.") {
+    match {
+        $d: Designation { label: $label }
+        $d designates $p
+        $v versionOf $p
+        $c changedTo $v
+        $c $m:madeBy $i
+    }
+    return { $c.slug, $c.kind, $c.locator, $i.citation as law, $m.role, $c.enacted_on, $c.in_force_on, $c.in_force_basis,
+             $c.applies_from_event, $c.applies_text, $c.verification, $v.slug as version }
+    order { $c.in_force_on asc, $c.slug asc, $m.role asc }
+    limit 100
+}
+
+query changes_between($from: Date, $to: Date) @description("Every change that took force in a period, with the provision it changed.") {
+    match {
+        $c: Change
+        $c.in_force_on >= $from
+        $c.in_force_on < $to
+        $c changedTo $v
+        $v versionOf $p
+    }
+    return { $c.in_force_on, $c.slug, $c.kind, $c.locator, $p.slug as provision, $v.slug as version }
+    order { $c.in_force_on asc, $c.slug asc }
+    limit 500
+}
+
+// ── Citations and renumbering ─────────────────────────────────────
+
+query citations($label: String) @description("Every citation the provision a citation names has carried, in code titles and in the enacting act, with the dates each was in use.") {
+    match {
+        $d: Designation { label: $label }
+        $d designates $p
+        $e $g:designates $p
+    }
+    return { $e.label, $e.system, $e.positive_law, $g.valid_from, $g.valid_to }
+    order { $e.system asc, $g.valid_from asc }
+    limit 50
+}
+
+query cited_as_on($label: String, $on: Date) @description("What an old or current citation names on a date: the provision's citations in use that day. Resolves an old number to the current one.") {
+    match {
+        $d: Designation { label: $label }
+        $d designates $p
+        $e $g:designates $p
+        $g.valid_from <= $on
+        $g.valid_to > $on
+    }
+    return { $p.slug as provision, $e.label, $e.system, $e.positive_law }
+    order { $e.system asc }
+    limit 20
+}
+
+query citations_from($version: String) @description("The provisions a text version cites, resolved to their identity, with the words it uses and the citations those provisions carry today.") {
+    match {
+        $v: TextVersion { slug: $version }
+        $v $c:cites $p
+        $e $g:designates $p
+        $g.valid_to = date("9999-12-31")
+    }
+    return { $c.as_written, $p.slug as provision, $e.label as cited_today_as }
+    order { $c.as_written asc, $e.label asc }
+    limit 100
+}
+
+query renumberings() @description("Every editorial reclassification and renumbering, with the text versions it moved between.") {
+    match {
+        $c: Change { kind: "reclassify" }
+        $c changedFrom $old
+        $c changedTo $new
+        $new versionOf $p
+    }
+    return { $c.in_force_on, $c.locator, $p.slug as provision, $old.slug as before, $new.slug as after, $c.instruction }
+    order { $c.in_force_on asc }
+    limit 100
+}
+
+// ── Courts ────────────────────────────────────────────────────────
+
+query held_invalid($label: String) @description("Judgments holding invalid the provision a citation names, whatever number it carries now. The printed text does not show these; run held_invalid_enclosing too, for holdings on the section around it.") {
+    match {
+        $d: Designation { label: $label }
+        $d designates $p
+        $j $h:heldInvalid $p
+    }
+    return { $j.title, $j.citation, $j.decided_on, $p.slug as provision, $h.scope, $h.holding, $h.locator, $h.review_status }
+    order { $j.decided_on asc }
+    limit 50
+}
+
+query held_invalid_enclosing($label: String) @description("Judgments holding invalid a section or subsection that encloses the provision a citation names: a holding on the whole section reaches its parts.") {
+    match {
+        $d: Designation { label: $label }
+        $d designates $p
+        $p partOf{1,2} $s
+        $j $h:heldInvalid $s
+    }
+    return { $j.title, $j.citation, $j.decided_on, $s.slug as provision, $h.scope, $h.holding, $h.locator, $h.review_status }
+    order { $j.decided_on asc }
+    limit 50
+}
+
+query judgments_applying($label: String) @description("Judgments that applied the provision a citation names, with the text version each court read and when that version stopped being in force.") {
+    match {
+        $d: Designation { label: $label }
+        $d designates $p
+        $v versionOf $p
+        $j applied $v
+    }
+    return { $j.title, $j.citation, $j.decided_on, $v.slug as version_read, $v.in_force_from, $v.in_force_to }
+    order { $j.decided_on asc }
+    limit 100
+}
+
+query later_invalidations($citation: String) @description("Later judgments holding invalid a provision a judgment applied: a reason its reading of that text may no longer hold. Holdings on an enclosing section show under held_invalid_enclosing. Not a citator: the graph records holdings, not overrulings or negative treatment.") {
+    match {
+        $j: Judgment { citation: $citation }
+        $j applied $v
+        $v versionOf $p
+        $k $h:heldInvalid $p
+        $k.decided_on > $j.decided_on
+    }
+    return { $k.title, $k.citation, $k.decided_on, $p.slug as provision, $v.slug as version_applied, $h.scope, $h.holding,
+             $h.locator, $h.review_status }
+    order { $k.decided_on asc }
+    limit 50
+}
+
+query precedents_on_changed_text($on: Date) @description("Judgments whose text has since changed: the version the court read was no longer in force on the given date. A citation of the case needs the old text, not today's.") {
+    match {
+        $j: Judgment
+        $j applied $v
+        $v.in_force_to <= $on
+        $v versionOf $p
+        $n versionOf $p
+        $n.in_force_from <= $on
+        $n.in_force_to > $on
+    }
+    return { $j.title, $j.citation, $p.slug as provision, $v.slug as version_read, $v.in_force_to as read_text_ended, $n.slug as version_on_date }
+    order { $j.decided_on asc, $p.slug asc }
+    limit 200
+}
+
+// ── Defined terms ─────────────────────────────────────────────────
+
+query term_users($term: String) @description("Text versions that use a defined term, with the provision and the dates, so a change to the definition shows everything it reaches.") {
+    match {
+        $t: DefinedTerm { term: $term }
+        $v uses $t
+        $v versionOf $p
+    }
+    return { $p.slug as provision, $v.slug as version, $v.in_force_from, $v.in_force_to, $t.defined_at }
+    order { $p.slug asc, $v.in_force_from asc }
+    limit 200
+}
+
+query definition_reach($label: String, $on: Date) @description("Terms the provision a citation names defines on a date, and the provisions whose text in force that day uses them: what a change to this definition touches.") {
+    match {
+        $d: Designation { label: $label }
+        $d $g:designates $p
+        $g.valid_from <= $on
+        $g.valid_to > $on
+        $v versionOf $p
+        $v.in_force_from <= $on
+        $v.in_force_to > $on
+        $v $f:defines $t
+        $u uses $t
+        $u.in_force_from <= $on
+        $u.in_force_to > $on
+        $u versionOf $q
+    }
+    return { $t.term, $f.scope, $q.slug as used_by, $u.slug as version }
+    order { $t.term asc, $q.slug asc }
+    limit 200
+}
+
+// ── Search, sources, coverage ─────────────────────────────────────
+
+query search_text($q: String) @description("Text versions ranked by how well their words match, with their dates. A ranked window, not every match.") {
+    match {
+        $v: TextVersion
+        $v versionOf $p
+    }
+    return { $v.slug, $p.slug as provision, $v.in_force_from, $v.in_force_to, $v.text }
+    order { bm25($v.text, $q) }
+    limit 20
+}
+
+query laws() @description("Every act, code title and editorial reclassification in the graph.") {
+    match { $i: Instrument }
+    return { $i.slug, $i.kind, $i.citation, $i.title, $i.enacted_on }
+    order { $i.enacted_on asc, $i.slug asc }
+    limit 500
+}
+
+query sources() @description("Every official document behind the graph, with its date, hash and whether its terms allow commercial reuse.") {
+    match { $s: Source }
+    return { $s.slug, $s.kind, $s.publisher, $s.current_through, $s.commercial_reuse, $s.licence, $s.url }
+    order { $s.kind asc, $s.current_through asc, $s.slug asc }
+    limit 500
+}
+
+query coverage() @description("What the graph records for each provision with text: the period, the method and its limits.") {
+    match {
+        $k: Coverage
+        $k coverageOf $p
+    }
+    return { $p.slug as provision, $k.covered_from, $k.covered_to, $k.method, $k.note }
+    order { $p.slug asc }
+    limit 500
+}
+
+// ── Checks: each returns the rows that break a rule ───────────────
+
+query overlapping_versions() @description("Two versions of one provision in force at the same time. Should return nothing.") {
+    match {
+        $p: Provision
+        $a: TextVersion
+        $b: TextVersion
+        $a versionOf $p
+        $b versionOf $p
+        $a.slug < $b.slug
+        $a.in_force_from < $b.in_force_to
+        $b.in_force_from < $a.in_force_to
+    }
+    return { $p.slug as provision, $a.slug as first, $b.slug as second }
+    limit 100
+}
+
+query versions_without_source() @description("Text versions no official document backs. Should return nothing.") {
+    match {
+        $v: TextVersion
+        not { $v textEvidence $_ }
+    }
+    return { $v.slug }
+    limit 100
+}
+
+query changes_without_source() @description("Changes no official document backs. Should return nothing.") {
+    match {
+        $c: Change
+        not { $c changeEvidence $_ }
+    }
+    return { $c.slug }
+    limit 100
+}
+
+query holdings_to_review() @description("Holdings an agent proposed that no person has reviewed yet.") {
+    match {
+        $j: Judgment
+        $p: Provision
+        $j $h:heldInvalid $p
+        $h.review_status = "ai_proposed"
+    }
+    return { $j.citation, $p.slug as provision, $h.scope, $h.holding, $h.locator }
+    limit 100
+}

@@ -5,10 +5,13 @@ links to the corresponding `CLAUDE.md`; edit the target once.
 
 ## Scope and sources
 
-These are eight self-contained OmniGraph **0.14.0** bundles: schemas, seed data,
+These are nine self-contained OmniGraph **0.14.0** bundles: schemas, seed data,
 stored queries and applied policies. The only application code is the beads
-cookbook's `ob` client in `beads/client/`, with its own tests, and the local
-HTTPS gateway `scripts/local-tls-gateway.py`. The root
+cookbook's `ob` client in `beads/client/`, with its own tests, the law-history
+cookbook's source scripts in `law-history/sources/`, which fetch its pinned
+official documents and rebuild its seed from them, its read check in
+`law-history/client/`, and the local HTTPS gateway
+`scripts/local-tls-gateway.py`. The root
 [README](README.md) owns setup, live updates and upgrades; individual cookbook
 guides own their domain model and worked queries.
 
@@ -22,6 +25,7 @@ guides own their domain model and worked queries.
 | `beads` | `beads` |
 | `company-brain` | `company` |
 | `hardware-program` | `program` |
+| `law-history` | `law` |
 
 The graph ID is the key in `cluster.yaml`, not the folder name. Configurations
 omit `storage`, so local roots default to their directory. Explicit storage
@@ -34,12 +38,14 @@ from the released binary pin in `.github/workflows/qualify.yml`. Refresh with
 
 ## Changes and validation
 
-- Run `python3 scripts/check-cookbooks.py` for all eight local journeys, or
+- Run `python3 scripts/check-cookbooks.py` for all nine local journeys, or
   name cookbooks to run only those. It uses the released CLI/server, isolated
   operator homes, disposable roots and the local HTTPS gateway; it never
   touches a deployed graph. For beads the checker also drives the `ob`
   client against the served graph; the client's local tests run with
-  `python3 -m unittest discover -s beads/client/tests`.
+  `python3 -m unittest discover -s beads/client/tests`. For law-history it
+  runs `law-history/client/check_reads.py`, so run the checker with a Python
+  that has `law-history/client/requirements.txt` installed.
 - For a query edit, start with `omnigraph lint --schema schema.pg --query
   queries/<file>.gq`. This is an offline check. Comments in `.pg`/`.gq` use `//`.
 - Keep `seed.md` and `seed.jsonl` consistent. Preserve the domain examples and
@@ -69,9 +75,9 @@ need only `main` live. Adoption, missing-root recreation and out-of-band schema
 changes are refused.
 
 All bundles include `act-admin`, `act-writer`, `act-reader` role policies.
-company-brain and hardware-program add `act-agent` (company-brain also named
-agents), which write only on unprotected branches and cannot merge or delete
-branches. Static actor-to-token JSON remains supported. `omnigraph access
+company-brain, hardware-program and law-history add `act-agent` (company-brain
+also named agents), which write only on unprotected branches and cannot merge or
+delete branches. Static actor-to-token JSON remains supported. `omnigraph access
 --target NAME --graph ID --branch B` reports what a target's role may do. The
 bearer token selects the trusted actor; a query's `$actor` is merely application
 provenance. `config_manage` authorizes live deployment, and schema changes also

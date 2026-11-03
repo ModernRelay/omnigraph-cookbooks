@@ -1,0 +1,165 @@
+// law-history — statutes as they stood on any date, for agents and lawyers
+//
+// The graph holds what the official sources record: each provision of a law, the
+// citations it has carried, the words it held while in force, every change that
+// rewrote it with the dates the change took force and the cases it reaches, the
+// judgments that applied or invalidated it, and the official document behind every
+// word. Which text applies on a date, what an old citation names today, whether a
+// court read the words still in force and what a change touches are derived by the
+// stored queries on every read, never stored.
+//
+// Two kinds of time stay apart. Valid time (in force, applies to) is data on the
+// text versions and changes. Record time is the graph's own commit history: a
+// correction is a new commit, and any read can run against an earlier snapshot.
+//
+// The reference seed (seed.jsonl / seed.md) is real United States federal law, in
+// the public domain: the corporate expenditure ban (FECA § 316, now 52 U.S.C.
+// § 30118) through its 2002 amendment, the Citizens United holding and the 2014
+// renumbering; and the Subchapter V "debtor" definition (11 U.S.C. § 1182) through
+// five versions in five years.
+//
+// 10 node classes:
+//   Law        — Jurisdiction, Instrument, Provision, Designation
+//   Text       — TextVersion, Change, DefinedTerm
+//   Courts     — Judgment
+//   Provenance — Source, Coverage
+//
+// Open intervals end on 9999-12-31 rather than null, so a date range is two plain
+// comparisons: a comparison with null matches no row.
+
+// ── Law ───────────────────────────────────────────────────────────
+
+node Jurisdiction @description("A legal system that makes law: a country, a state, a supranational body.") {
+    slug: String @key
+    name: String
+    level: enum(supranational, national, subnational)
+}
+edge WithinJurisdiction: Jurisdiction -> Jurisdiction { @key(@src, @dst) }
+
+node Instrument @description("A source of law or of its arrangement: an act, a code title, or a codifier's editorial reclassification.") {
+    slug: String @key
+    kind: enum(code, act, editorial) @index    // editorial: a codifier's renumbering, which is not law
+    title: String
+    citation: String @index                    // "Pub. L. 107-155", "11 U.S.C."
+    enacted_on: Date?                          // none for an editorial reclassification
+}
+edge InstrumentOf: Instrument -> Jurisdiction @card(1..1) { @key(@src, @dst) }
+
+node Provision @description("A unit of law whose identity survives renumbering and moves. Its key is minted when the unit first appears, never derived from its number: numbers belong to Designation.") {
+    slug: String @key
+    kind: enum(section, subsection, paragraph) @index
+    heading: String?
+}
+edge ProvisionOf: Provision -> Instrument @card(1..1) { @key(@src, @dst) }
+edge PartOf: Provision -> Provision @description("The nearest enclosing provision this graph records, for the interval the unit sat there.") {
+    valid_from: Date
+    valid_to: Date
+    @key(@src, @dst, valid_from)
+}
+
+node Designation @description("A citation that named a provision for an interval: its number in a code title or in the act that enacted it. A renumbering ends one designation and starts another; the provision stays the same.") {
+    slug: String @key
+    label: String @index                       // "52 U.S.C. § 30118(a)", "FECA § 316(a)", "11 U.S.C. § 1182(1)"
+    system: enum(code, act) @index
+    positive_law: Bool?                        // code titles only: true when the title is enacted as law, so its text is the law; false when it is prima facie evidence and the Statutes at Large govern
+}
+edge Designates: Designation -> Provision {
+    valid_from: Date
+    valid_to: Date
+    @key(@src, @dst, valid_from)
+}
+
+// ── Text ──────────────────────────────────────────────────────────
+
+node TextVersion @description("The words of one provision while they were in force, without the provision's own number. Each version names the documents that print or state it.") {
+    slug: String @key
+    text: String @index
+    in_force_from: Date @index
+    in_force_to: Date @index                   // 9999-12-31 while still in force
+    from_is_record_start: Bool                 // true when in_force_from is where this graph's record begins, not when the words took force
+    text_sha256: String @index                 // equal hashes mean equal words, across versions and provisions
+    unresolved_citations: [String]?            // citations in the text to provisions this graph does not hold
+}
+edge VersionOf: TextVersion -> Provision @card(1..1) { @key(@src, @dst) }
+edge Cites: TextVersion -> Provision @description("A citation in the text, resolved to the provision it named on the text's dates, whatever number that provision carries now.") {
+    as_written: String
+    @key(@src, @dst, as_written)
+}
+
+node Change @description("One instruction of a law (or a codifier's reclassification) carried out on a provision's text.") {
+    slug: String @key
+    kind: enum(insert, amend, substitute, sunset, reclassify, repeal) @index
+    locator: String                            // "Pub. L. 107-155, § 203(a)"
+    instruction: String                        // the instruction as the source words it
+    enacted_on: Date?                          // none for an editorial reclassification
+    in_force_on: Date @index
+    in_force_basis: String                     // how the in-force date was decided
+    applies_from_event: Date?                  // the change governs events or cases from this date, which can precede in_force_on
+    applies_text: String?                      // the scope rule as the source words it
+    verification: enum(official_version, law_text, replay_matched, unverified) @index
+}
+edge MadeBy: Change -> Instrument {
+    role: enum(made, modified)                 // modified: a later law that changed this change, such as moving a sunset date
+    @key(@src, @dst)
+}
+edge ChangedFrom: Change -> TextVersion { @key(@src, @dst) }
+edge ChangedTo: Change -> TextVersion { @key(@src, @dst) }
+
+node DefinedTerm @description("A term a provision defines for a stated scope.") {
+    slug: String @key
+    term: String @index
+    defined_at: String?                        // the defining citation, when the definition is not in this graph
+}
+edge Defines: TextVersion -> DefinedTerm {
+    scope: String
+    @key(@src, @dst)
+}
+edge Uses: TextVersion -> DefinedTerm { @key(@src, @dst) }
+
+// ── Courts ────────────────────────────────────────────────────────
+
+node Judgment @description("A court decision, cited by its reporter citation.") {
+    slug: String @key
+    title: String
+    court: String
+    citation: String @index                    // "558 U.S. 310"
+    docket: String?
+    decided_on: Date @index
+}
+edge Applied: Judgment -> TextVersion @description("The words the court read: the version in force when it decided.") { @key(@src, @dst) }
+edge HeldInvalid: Judgment -> Provision @description("A holding that the provision, or a stated part of it, is invalid. The printed text stays unchanged; the holding is the court's decision, recorded with its words and page.") {
+    scope: enum(facial, as_applied, in_part)
+    holding: String                            // the court's words
+    locator: String                            // "558 U.S. at 365"
+    effective_from: Date
+    review_status: enum(human_reviewed, ai_proposed) @index
+    @key(@src, @dst)
+}
+
+// ── Provenance ────────────────────────────────────────────────────
+
+node Source @description("An official document this graph's facts come from, as fetched: its address, publisher, date and content hash, and the terms it may be reused on.") {
+    slug: String @key
+    title: String
+    kind: enum(code_edition, public_law, court_report, codifier_record) @index
+    publisher: String
+    url: String
+    current_through: Date?                     // for a code edition: the date its text is current to
+    fetched_at: DateTime
+    sha256: String
+    licence: String
+    commercial_reuse: Bool @index
+}
+edge TextEvidence: TextVersion -> Source { @key(@src, @dst) }
+edge ChangeEvidence: Change -> Source { @key(@src, @dst) }
+edge JudgmentEvidence: Judgment -> Source { @key(@src, @dst) }
+edge DesignationEvidence: Designation -> Source { @key(@src, @dst) }
+
+node Coverage @description("What this graph records of a provision: the period and the method. A date outside it is not recorded, which is not the same as no law.") {
+    slug: String @key
+    covered_from: Date
+    covered_to: Date
+    method: enum(official_versions, designations_only)
+    note: String
+}
+edge CoverageOf: Coverage -> Provision { @key(@src, @dst) }

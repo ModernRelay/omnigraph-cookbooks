@@ -14,6 +14,7 @@ and a cluster declaration. Local examples use filesystem storage.
 | [Beads](beads/) | `beads` | A beads-style work queue for coding agents, with the `ob` client |
 | [Company brain](company-brain/) | `company` | Claims, decisions and action items with the exact source text they rest on, shared by a company's people and agents |
 | [Hardware program](hardware-program/) | `program` | Requirements, budgets, interfaces and verification for a hardware program |
+| [Law history](law-history/) | `law` | Statutes as they stood on any date: text, renumbering, later laws that reach back, and court holdings, each from an official source |
 
 ## Local setup
 
@@ -230,10 +231,13 @@ npx skills add https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/indu
 
 Schemas and queries are executable examples. Before changing one, read the
 root and cookbook `CLAUDE.md` (`AGENTS.md` links to the same file). Run the
-local qualification with released binaries on PATH:
+local qualification with released binaries on PATH, from a Python that has the
+[Omnigraph Python client](https://github.com/ModernRelay/omnigraph-python)
+installed, which law-history's read check uses:
 
 ```bash
-python3 scripts/check-cookbooks.py
+python3 -m venv .venv && .venv/bin/pip install -r law-history/client/requirements.txt
+.venv/bin/python scripts/check-cookbooks.py
 ```
 
 It checks every bundle and query, then boots isolated local servers behind the

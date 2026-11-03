@@ -31,9 +31,10 @@ COOKBOOKS = {
     "beads": ("beads", "ready"),
     "company-brain": ("company", "current_decisions"),
     "hardware-program": ("program", "budget_rollup"),
+    "law-history": ("law", "coverage"),
 }
 # Cookbooks whose policy lets act-agent write only on unprotected branches.
-BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program"}
+BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program", "law-history"}
 ACTORS = ("act-admin", "act-writer", "act-reader", "act-agent")
 TOKENS = {actor: f"cookbook-test-{actor}" for actor in ACTORS}
 GATEWAY = ROOT / "scripts" / "local-tls-gateway.py"
@@ -237,12 +238,15 @@ def qualify(name, graph, stored_query, workspace, env):
                 company_brain_journey(env)
             if name == "hardware-program":
                 hardware_program_journey(env)
+            if name == "law-history":
+                law_history_journey(env, f"https://localhost:{gateway_port}", workspace / "tls/ca.pem")
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
                   + (", ob client" if name == "beads" else "")
                   + (", review journey" if name == "company-brain" else "")
-                  + (", review gate" if name == "hardware-program" else ""), flush=True)
+                  + (", review gate" if name == "hardware-program" else "")
+                  + (", holding review" if name == "law-history" else ""), flush=True)
         finally:
             gateway.terminate()
             process.terminate()
@@ -389,6 +393,56 @@ def hardware_program_journey(env):
     run(env, "branch", "delete", "cr-heatsink", *writer, "--yes", "--json")
 
 
+def law_history_journey(env, endpoint, ca):
+    """Every stored read returns what seed.md lists on the fresh seed, checked
+    through the Omnigraph Python client. An agent adds a case and proposes a
+    holding on its own branch; an editor merges and confirms it, which
+    replaces the proposal rather than adding a second holding."""
+    def scope(actor):
+        return ("--target", target(actor), "--graph", "law")
+
+    def rows(query, params=None, *extra):
+        return run(env, "query", query, *scope("act-reader"), "--params", json.dumps(params or {}),
+                   *extra, "--json")["rows"]
+
+    def mutate(who, query, params, *extra, ok=True):
+        return run(env, "mutate", query, *scope(who), "--params", json.dumps(params), *extra, "--json", ok=ok)
+
+    reads = subprocess.run([sys.executable, str(ROOT / "law-history/client/check_reads.py"), "--url", endpoint,
+                            "--ca", str(ca), "--token-env", token_variable("act-reader")],
+                           env=env, capture_output=True, text=True)
+    assert reads.returncode == 0, f"stored reads differ from seed.md:\n{reads.stdout}{reads.stderr}"
+
+    branch = ("--branch", "agent-mcconnell")
+    run(env, "load", *scope("act-agent"), *branch, "--from", "main", "--mode", "append", "--json",
+        "--data", str(ROOT / "law-history/examples/mcconnell-source.jsonl"))
+    mutate("act-agent", "record_judgment", {
+        "slug": "jud-mcconnell", "title": "McConnell v. Federal Election Commission",
+        "court": "Supreme Court of the United States", "citation": "540 U.S. 93", "docket": "No. 02-1674",
+        "decided_on": "2003-12-10", "source": "src-us-reports-540-93"}, *branch)
+    mutate("act-agent", "record_applied", {"judgment": "jud-mcconnell", "version": "tv-feca-316-b-2-2"}, *branch)
+    holding = {"judgment": "jud-citizens-united", "provision": "prov-feca-316-b-2", "scope": "in_part",
+               "holding": "Given our conclusion we are further required to overrule the part of McConnell that "
+                          "upheld BCRA § 203's extension of § 441b's restrictions on corporate independent "
+                          "expenditures.",
+               "locator": "558 U.S. at 365", "effective_from": "2010-01-21"}
+    mutate("act-agent", "propose_holding", holding, *branch)
+    refused(mutate("act-agent", "propose_holding", holding, ok=False))
+    assert [r["h.locator"] for r in rows("holdings_to_review", None, *branch)] == ["558 U.S. at 365"]
+    assert not rows("holdings_to_review"), "a proposal stays on its branch until merged"
+
+    run(env, "branch", "merge", "agent-mcconnell", "--into", "main", *scope("act-writer"), "--json")
+    run(env, "branch", "delete", "agent-mcconnell", *scope("act-writer"), "--yes", "--json")
+    assert len(rows("holdings_to_review")) == 1
+    mutate("act-writer", "confirm_holding", holding)
+    assert not rows("holdings_to_review")
+    assert [(r["j.citation"], r["h.review_status"]) for r in rows("held_invalid", {"label": "52 U.S.C. § 30118(b)(2)"})] \
+        == [("558 U.S. 310", "human_reviewed")]
+    assert [r["k.citation"] for r in rows("later_invalidations", {"citation": "540 U.S. 93"})] == ["558 U.S. 310"]
+    assert [r["j.citation"] for r in rows("judgments_applying", {"label": "52 U.S.C. § 30118(b)(2)"})] \
+        == ["540 U.S. 93", "558 U.S. 310"]
+
+
 def main():
     selected = sys.argv[1:] or list(COOKBOOKS)
     unknown = sorted(set(selected) - set(COOKBOOKS))
@@ -396,6 +450,9 @@ def main():
         raise SystemExit(f"unknown cookbook: {', '.join(unknown)}; choose from {', '.join(COOKBOOKS)}")
     if not CLI or not SERVER:
         raise SystemExit("Put 0.14.0 omnigraph and omnigraph-server on PATH or set OMNIGRAPH_BIN / OMNIGRAPH_SERVER_BIN")
+    if "law-history" in selected and importlib.util.find_spec("omnigraph") is None:
+        raise SystemExit("law-history checks its reads through the Omnigraph Python client: run this script "
+                         "with a Python that has law-history/client/requirements.txt installed")
     workspace = Path(tempfile.mkdtemp(prefix="omnigraph-cookbooks-test-"))
     env = {k: v for k, v in os.environ.items()
            if not k.startswith(("OMNIGRAPH_", "OG_", "AWS_", "AZURE_"))}
