@@ -1,0 +1,49 @@
+# Tokens select actors; permissions come from this applied policy.
+#
+# main is the indexed state of the repository's default branch. act-agent is
+# the indexer that runs in CI: it reads everything, opens a branch per pull
+# request and loads that revision there, but cannot write main, merge or
+# delete a branch. A person reviews the branch diff and merges.
+#
+# act-admin, act-writer and act-reader are the roles every cookbook ships.
+version: 1
+groups:
+  readers: [act-admin, act-writer, act-reader, act-agent]
+  writers: [act-admin, act-writer]
+  admins: [act-admin]
+  agents: [act-agent]
+protected_branches: [main]
+rules:
+  - id: read-data
+    allow:
+      actors: { group: readers }
+      actions: [read, export]
+      branch_scope: any
+  - id: invoke-stored-queries
+    allow:
+      actors: { group: readers }
+      actions: [invoke_query]
+  - id: write-data
+    allow:
+      actors: { group: writers }
+      actions: [change]
+      branch_scope: any
+  - id: manage-branches
+    allow:
+      actors: { group: writers }
+      actions: [branch_create, branch_delete, branch_merge]
+      target_branch_scope: any
+  - id: agents-write-on-branches
+    allow:
+      actors: { group: agents }
+      actions: [change]
+      branch_scope: unprotected
+  - id: agents-open-branches
+    allow:
+      actors: { group: agents }
+      actions: [branch_create]
+      target_branch_scope: unprotected
+  - id: change-schema
+    allow:
+      actors: { group: admins }
+      actions: [schema_apply]

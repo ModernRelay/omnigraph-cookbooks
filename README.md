@@ -14,6 +14,7 @@ and a cluster declaration. Local examples use filesystem storage.
 | [Beads](beads/) | `beads` | A beads-style work queue for coding agents, with the `ob` client |
 | [Company brain](company-brain/) | `company` | Claims, decisions and action items with the exact source text they rest on, shared by a company's people and agents |
 | [Hardware program](hardware-program/) | `program` | Requirements, budgets, interfaces and verification for a hardware program |
+| [Code graph](code-graph/) | `code` | A repository's symbols and compiler-resolved references, one graph state per git revision, with each pull request reviewed as a branch diff |
 
 ## Local setup
 

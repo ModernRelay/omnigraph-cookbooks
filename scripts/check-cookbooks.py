@@ -31,9 +31,10 @@ COOKBOOKS = {
     "beads": ("beads", "ready"),
     "company-brain": ("company", "current_decisions"),
     "hardware-program": ("program", "budget_rollup"),
+    "code-graph": ("code", "most_referenced"),
 }
 # Cookbooks whose policy lets act-agent write only on unprotected branches.
-BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program"}
+BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program", "code-graph"}
 ACTORS = ("act-admin", "act-writer", "act-reader", "act-agent")
 TOKENS = {actor: f"cookbook-test-{actor}" for actor in ACTORS}
 GATEWAY = ROOT / "scripts" / "local-tls-gateway.py"
@@ -237,12 +238,15 @@ def qualify(name, graph, stored_query, workspace, env):
                 company_brain_journey(env)
             if name == "hardware-program":
                 hardware_program_journey(env)
+            if name == "code-graph":
+                code_graph_journey(env)
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
                   + (", ob client" if name == "beads" else "")
                   + (", review journey" if name == "company-brain" else "")
-                  + (", review gate" if name == "hardware-program" else ""), flush=True)
+                  + (", review gate" if name == "hardware-program" else "")
+                  + (", pull request diff" if name == "code-graph" else ""), flush=True)
         finally:
             gateway.terminate()
             process.terminate()
@@ -387,6 +391,52 @@ def hardware_program_journey(env):
     run(env, "commit", "publish", commit, *writer, "--json")
     assert rows("limit_violations") == []
     run(env, "branch", "delete", "cr-heatsink", *writer, "--yes", "--json")
+
+
+def code_graph_journey(env):
+    """The indexer loads a pull request's revision onto its own branch, the
+    branch diff is exactly what the PR changed, the reads see the new code
+    only on the branch, a person merges, and the previous main stays readable."""
+    def scope(actor):
+        return ("--target", target(actor), "--graph", "code")
+
+    def rows(query, params=None, *extra):
+        return run(env, "query", query, *scope("act-reader"), "--params", json.dumps(params or {}),
+                   *extra, "--json")["rows"]
+
+    base, head = "a10592f3e1864cbe277619633db953450a6b1e4b", "4b44abe1b5c7755aac8555d7943611555183450b"
+    helper = {"symbol": "src/router/`utils.ts`/createNullObject."}
+    assert [row["r.sha"] for row in rows("revision")] == [base]
+    routers = {"linear-router/`router.ts`/LinearRouter", "pattern-router/`router.ts`/PatternRouter",
+               "reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter", "reg-exp-router/`router.ts`/RegExpRouter",
+               "smart-router/`router.ts`/SmartRouter", "trie-router/`router.ts`/TrieRouter"}
+    implementers = {row["i.symbol"] for row in rows("implementers", {"symbol": "src/`router.ts`/Router#add()."})}
+    assert implementers == {f"src/router/{r}#add()." for r in routers}, implementers
+    previous = run(env, "commit", "list", *scope("act-reader"), "--json")["commits"][0]["graph_commit_id"]
+
+    loaded = run(env, "load", *scope("act-agent"), "--data", str(ROOT / "code-graph/examples/pr-5267.jsonl"),
+                 "--from", "main", "--branch", "pr-5267", "--mode", "overwrite", "--yes", "--json")
+    assert loaded["commit"]["graph_commit_id"]
+    changes = run(env, "branch", "diff", "pr-5267", *scope("act-reader"), "--json")["changes"]
+    summary = collections.Counter((c["type"]["name"], c["op"]) for c in changes)
+    assert summary == {("Symbol", "insert"): 2, ("Symbol", "update"): 5, ("References", "insert"): 16,
+                       ("MemberOf", "insert"): 1, ("DefinedAt", "insert"): 2, ("Location", "insert"): 2,
+                       ("Location", "update"): 58, ("Revision", "insert"): 1, ("Revision", "delete"): 1}, summary
+    changed = {c["id"] for c in changes if c["type"]["name"] == "Symbol" and c["op"] == "update"}
+    assert changed == {f"src/router/reg-exp-router/`router.ts`/RegExpRouter#{m}" for m in
+                       ("`<constructor>`().", "add().", "buildAllMatchers().", "`#buildMatcher`().")} | {
+                       "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`()."}, changed
+
+    assert rows("callers", helper) == []
+    assert len(rows("callers", helper, "--branch", "pr-5267")) == 12
+    refused(run(env, "branch", "merge", "pr-5267", "--into", "main", *scope("act-agent"), "--json", ok=False))
+    merged = run(env, "branch", "merge", "pr-5267", "--into", "main", *scope("act-writer"), "--json")
+    assert merged["outcome"] == "fast_forward", merged
+    run(env, "branch", "delete", "pr-5267", *scope("act-writer"), "--yes", "--json")
+    assert [row["r.sha"] for row in rows("revision")] == [head]
+    assert len(rows("callers", helper)) == 12
+    assert [row["r.sha"] for row in rows("revision", None, "--snapshot", previous)] == [base]
+    assert rows("callers", helper, "--snapshot", previous) == []
 
 
 def main():
