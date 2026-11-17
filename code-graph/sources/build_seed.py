@@ -45,9 +45,14 @@ KIND = {
     54: "type_alias", 55: "type_alias", 61: "variable",
 }
 CALLABLE_KINDS = {"function", "method", "constructor", "getter", "setter"}
-# Hover text of a constant, variable or property holding a function:
+# scip-typescript gives a constant or variable an enclosing range exactly when
+# its initializer is a function, whatever its declared type: `const getCookie:
+# GetCookie = (c) => {...}` has one. Without a range, as for a property or
+# `const verify = Jwt.verify`, the declared type in the hover text decides:
 # `var f: () => any`, `(property) handle: <T>(c: Context<T>) => Response`.
-FUNCTION_SIGNATURE = re.compile(r"^(?:\(\w+\)\s*)?(?:const|let|var|property)?\s*[\w$#]+\??\s*:\s*(?:<[^>]*>\s*)?\(")
+RANGED_VALUE_KINDS = {"constant", "variable"}
+DECLARED_TYPE = re.compile(r"^(?:\(\w+\)\s*)?(?:const|let|var|property)?\s*[\w$#]+\??\s*:\s*")
+NULLISH_UNION = re.compile(r"^(?:\|\s*(?:undefined|null)\s*)+$")
 CALL_SUFFIX = ("(", "`", "?.(", "<")
 TYPES = ("Revision", "Symbol", "Location")
 EDGES = ("DefinedAt", "MemberOf", "References", "Implements")
@@ -139,6 +144,41 @@ def signature(documentation: list[str]) -> str | None:
     return first[:300] or None
 
 
+def is_function_type(text: str) -> bool:
+    """Whether a TypeScript type, as hover text spells it, is a function type.
+
+    A type that opens with `<` is a generic function type. One that opens with
+    `(` is a function type when `=>` follows the matching parenthesis, so
+    `("br" | "gzip")[]` is not one, and an optional `(() => void) | undefined`
+    is one. Hover text keeps only its first line, so a parameter list cut off
+    there counts as a function.
+    """
+    text = text.strip()
+    if text.startswith("<"):
+        return True
+    if not text.startswith("("):
+        return False
+    depth = 0
+    for i, ch in enumerate(text):
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+            if depth == 0:
+                after = text[i + 1:].strip()
+                if after.startswith("=>"):
+                    return True
+                return bool(NULLISH_UNION.match(after)) and is_function_type(text[1:i])
+    return True
+
+
+def is_callable(kind: str, ranged: bool, sig: str | None) -> bool:
+    if kind in CALLABLE_KINDS or (kind in RANGED_VALUE_KINDS and ranged):
+        return True
+    declared = DECLARED_TYPE.match(sig or "")
+    return bool(declared) and is_function_type(sig[declared.end():])
+
+
 def contains(outer, inner) -> bool:
     return (outer[0], outer[1]) <= (inner[0], inner[1]) and (inner[2], inner[3]) <= (outer[2], outer[3])
 
@@ -172,7 +212,7 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
                 continue
             kind = KIND[info.kind]
             sig = signature(info.documentation)
-            callable_ = kind in CALLABLE_KINDS or bool(sig and FUNCTION_SIGNATURE.match(sig))
+            callable_ = is_callable(kind, bool(o.enclosing_range), sig)
             span = o.enclosing_range or o.range
             digest = None
             if callable_ and o.enclosing_range:

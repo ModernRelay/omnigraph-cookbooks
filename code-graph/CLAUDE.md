@@ -23,7 +23,8 @@ hono's router at the parent of PR #5267 (`seed.jsonl`) and at the PR
 - `sources/` — `source.json` pins the repository, commits, slice and indexer;
   `fetch.py` checks out and indexes; `build_seed.py` converts; `scip_index.py`
   reads SCIP with the standard library; `indexer/` locks scip-typescript and
-  its TypeScript.
+  its TypeScript. `tests/` holds the converter's rules for keys and callability;
+  run them with `python3 -m unittest discover -s code-graph/sources/tests`.
 - `client/cg` — the client: `cg_cli.py` holds the code, `tests/` its offline
   tests with captured branch diffs. It writes only through `cg load` and
   `cg index`, both `--mode overwrite`. Run the tests with
@@ -45,7 +46,8 @@ hono's router at the parent of PR #5267 (`seed.jsonl`) and at the PR
   `act-writer` merges into `main` and deletes branches.
 - **To change the seed**, change `sources/source.json` or the converter, run
   `fetch.py` then `build_seed.py`, update `seed.md` from the reads' actual
-  output, and confirm `build_seed.py --check`. CI does not run these scripts.
+  output, and confirm `build_seed.py --check`. CI runs the converter's tests,
+  not these scripts.
 
 ## Query notes
 

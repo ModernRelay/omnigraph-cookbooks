@@ -247,9 +247,15 @@ qualifies the committed files.
 - **Members of union types are not indexed.** scip-typescript gives no symbol
   to a property of an object type inside a union, so turning a type into a
   union looks like removing its properties.
-- **Callable constants come from the hover text.** A constant, variable or
-  property counts as callable when its type in the indexer's hover text is a
-  function type.
+- **Callable constants come from their initializer or their type.**
+  scip-typescript gives a constant or variable a range exactly when its
+  initializer is a function, so one with a range is callable whatever its
+  declared type, as in `const getCookie: GetCookie = (c) => {...}`. A property,
+  or a constant holding another function (`const verify = Jwt.verify`), counts
+  as callable when its type in the indexer's hover text is a function type. A
+  function wrapped in a type assertion, `const C: FC = ((props) => {...}) as
+  FC`, gets no range, so it is not callable, has no `digest`, and its code
+  belongs to the module; hono has three of these among 413 function constants.
 - **No export information.** `unreferenced_callables` lists entry points and
   public API next to unused code. In the seed, most of its rows are the
   routers' own `add` and `match` methods: callers reach them through the
@@ -268,7 +274,7 @@ qualifies the committed files.
 - `client/` — the [cg client](#the-cg-client) and its tests, with captured
   branch diffs as fixtures.
 - `sources/` — `source.json` pins, `fetch.py`, `build_seed.py`, the SCIP reader
-  `scip_index.py`, and the locked indexer.
+  `scip_index.py`, the converter's tests in `tests/`, and the locked indexer.
 - `cluster.yaml`, `policies/` — the deployment: graph `code`, roles, the
   branch-only indexer.
 - `omnigraph-config.example.yaml` — read aliases; merge into
