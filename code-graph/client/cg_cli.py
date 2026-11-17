@@ -435,7 +435,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(run=cmd_find)
     for name, text in (("callers", "definitions that call or name a symbol"),
                        ("callees", "what a symbol's code calls or names"),
-                       ("impact", "everything within three references of a symbol"),
+                       ("impact", "everything within sixteen references of a symbol"),
                        ("implementers", "class members implementing an interface member"),
                        ("members", "what a module, class or interface declares")):
         p = reading(sub.add_parser(name, help=text))

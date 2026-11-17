@@ -21,9 +21,9 @@ these files by hand.
 | `Location` | 132 | 134 |
 | `DefinedAt` | 132 | 134 |
 | `MemberOf` | 116 | 117 |
-| `References` | 286 | 302 |
+| `References` | 292 | 310 |
 | `Implements` | 24 | 24 |
-| **Rows** | **823** | **846** |
+| **Rows** | **829** | **854** |
 
 The router has six implementations of `Router`: `LinearRouter`,
 `PatternRouter`, `PreparedRegExpRouter`, `RegExpRouter`, `SmartRouter` and
@@ -42,24 +42,24 @@ pass the full key from `symbols_named` as a parameter.
 | `symbols_named` | `name: add` | 7 rows: `src/router.ts` `Router#add` at line 42 and the six implementations | the same |
 | `file_symbols` | `path: src/router/utils.ts` | none | the module and `createNullObject` |
 | `members` | `RegExpRouter#` | 10 members: `name`, `#middleware`, `#routes`, `#tries`, the constructor, `#insertPath`, `add`, `match`, `buildAllMatchers`, `#buildMatcher` | the same |
-| `callers` | `utils.ts/createNullObject.` | none | 12: four modules; the classes `Node` in both routers and `Trie`, for their field initializers; `RegExpRouter`'s constructor, `add`, `buildAllMatchers` and `#buildMatcher`; and trie-router `Node#pushHandlerSets` |
+| `callers` | `utils.ts/createNullObject.` | none | 14: four modules, for their imports; the fields `#children` of `Node` in both routers and `paths` of `Trie`; the module constants `wildcardRegExpCache` and `emptyParams`; `RegExpRouter`'s constructor, `add`, `buildAllMatchers` and `#buildMatcher`; and trie-router `Node#pushHandlerSets` |
 | `callees` | `reg-exp-router/router.ts/RegExpRouter#add().` | 9 | 10: the same plus `createNullObject` |
-| `impact` | `utils.ts/createNullObject.` | none | 25 definitions within three references, 8 of them modules |
+| `impact` | `utils.ts/createNullObject.` | none | 31 definitions within sixteen references, 8 of them modules |
 | `impact` | `src/router.ts` `Router#add()` | 1: `SmartRouter#match`, which calls `add` on each router it holds | the same |
 | `implementers` | `src/router.ts` `Router#add()` | the six routers' `add` | the same |
-| `most_referenced` | | 20 rows, led by `Router` (15 referrers), `METHOD_NAME_ALL` (14) and `Result` (14) | |
+| `most_referenced` | | 20 rows, led by `Router` (19 referrers), `METHOD_NAME_ALL` (14) and `Result` (14) | |
 | `unreferenced_callables` | | 11: routers' `add` and `match` methods reached through `Router`, `buildAllMatchers` of `PreparedRegExpRouter`, and three constructors whose callers, such as `Hono`'s constructor in `src/hono.ts`, are outside the slice | |
 
 ## The branch diff
 
 `omnigraph branch diff pr-5267` after loading the PR file with `--mode
-overwrite` reports 88 changes:
+overwrite` reports 90 changes:
 
 | Change | Count |
 |---|---|
 | `Symbol` insert: ``utils.ts/`` and ``utils.ts/createNullObject.`` | 2 |
 | `Symbol` update: `RegExpRouter` constructor, `add`, `buildAllMatchers`, `#buildMatcher`; trie-router `Node#pushHandlerSets` | 5 |
-| `References` insert | 16 |
+| `References` insert | 18 |
 | `MemberOf` insert | 1 |
 | `DefinedAt` insert | 2 |
 | `Location` insert | 2 |

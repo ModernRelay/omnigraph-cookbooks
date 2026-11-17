@@ -1,9 +1,12 @@
 {
   "name": "code-graph-indexer",
   "private": true,
-  "description": "The SCIP indexer the code-graph seed is built with, locked to exact versions. Install with `npm ci`.",
-  "engines": { "node": ">=22.23.4" },
+  "description": "The SCIP indexer the code-graph seed is built with, and the TypeScript parser extents.mjs reads definition ranges with, locked to exact versions. Install with `npm ci`.",
+  "engines": {
+    "node": ">=22.23.4"
+  },
   "dependencies": {
-    "@sourcegraph/scip-typescript": "0.6.2"
+    "@sourcegraph/scip-typescript": "0.6.2",
+    "typescript": "6.0.3"
   }
 }

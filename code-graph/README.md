@@ -18,7 +18,7 @@ The seed is real code: the router of [hono](https://github.com/honojs/hono)
 ## What it answers
 
 - *Who calls this function, and how many times?* `callers`
-- *What breaks if I change it?* `impact`, everything within three references
+- *What breaks if I change it?* `impact`, everything within sixteen references
 - *Which classes implement this interface method?* `implementers`
 - *What does everything else depend on?* `most_referenced`
 - *What did this pull request change in the call graph?* `branch diff` of the
@@ -62,7 +62,7 @@ The decisions that matter:
    filter out by type.
 3. **One `Symbol` type, with `kind` as a closed vocabulary.** A multi-hop
    traversal needs the same node type at both ends, so a single type is what
-   lets `impact` follow `references{1,3}` through functions, methods and
+   lets `impact` follow `references{1,16}` through functions, methods and
    classes alike.
 4. **References, not only calls.** SCIP records that a definition's code names
    another symbol; it does not say how. An edge therefore covers calls, type
@@ -110,13 +110,13 @@ contains, so a symbol or reference the PR deleted disappears from the branch;
 refuses to build the cookbook's files otherwise, because a type missing from an
 `overwrite` file keeps its old rows.
 
-The diff for PR #5267 has 88 changes:
+The diff for PR #5267 has 90 changes:
 
 | Change | Count | Meaning |
 |---|---|---|
 | `Symbol` insert | 2 | the new `src/router/utils.ts` and its `createNullObject` |
 | `Symbol` update | 5 | the methods whose code changed: `RegExpRouter`'s constructor, `add`, `buildAllMatchers` and `#buildMatcher`, and trie-router `Node#pushHandlerSets` |
-| `References` insert | 16 | code that now names `createNullObject` |
+| `References` insert | 18 | code that now names `createNullObject` (14) or imports its module (4) |
 | `MemberOf`, `DefinedAt`, `Location` insert | 1, 2, 2 | the new symbols' structure |
 | `Location` update | 58 | definitions that only moved |
 | `Revision` delete and insert | 1 each | the indexed commit |
@@ -126,7 +126,7 @@ Query the branch before merging, then merge as a person and retire the branch:
 ```bash
 omnigraph alias callers --params '{"symbol":"src/router/`utils.ts`/createNullObject."}'   # main: none yet
 omnigraph query callers --target local-reader --graph code --branch pr-5267 \
-  --params '{"symbol":"src/router/`utils.ts`/createNullObject."}'                            # 12 definitions
+  --params '{"symbol":"src/router/`utils.ts`/createNullObject."}'                            # 14 definitions
 omnigraph branch merge pr-5267 --into main --target local-writer --graph code --json
 omnigraph branch delete pr-5267 --target local-writer --graph code --yes --json
 ```
@@ -162,7 +162,7 @@ CG_TARGET=local-reader code-graph/client/cg diff pr-5267
 ```
 
 ```text
-pr-5267 against main, revision a10592f3..4b44abe1: 2 symbols added, 0 removed, 5 changed; 16 references added, 0 removed, 0 changed; 53 definitions only moved.
+pr-5267 against main, revision a10592f3..4b44abe1: 2 symbols added, 0 removed, 5 changed; 18 references added, 0 removed, 0 changed; 53 definitions only moved.
 
 Added:
   src/router/utils.ts (module)
@@ -187,7 +187,8 @@ gh pr comment "$PR_NUMBER" --body-file review.md
 ```
 
 `cg index` runs scip-typescript from `CG_INDEXER`, the locked install in
-`sources/indexer/node_modules` after `npm ci` there, or your `PATH`, and refuses
+`sources/indexer/node_modules` after `npm ci` there, or your `PATH`; the
+converter always needs that `npm ci`, for the TypeScript parser. It refuses
 a checkout with uncommitted changes unless you pass `--allow-dirty`. The
 client's tests run offline against captured diffs:
 `python3 -m unittest discover -s code-graph/client/tests`.
@@ -196,7 +197,9 @@ client's tests run offline against captured diffs:
 
 The converter reads any TypeScript SCIP index. Index the repository with
 [scip-typescript](https://github.com/sourcegraph/scip-typescript) and convert
-the index; `--slice` keeps only the paths you name.
+the index; `--slice` keeps only the paths you name. The converter reads the
+checkout's files again with the TypeScript parser, so run `npm ci` in
+`code-graph/sources/indexer` first.
 
 ```bash
 npx @sourcegraph/scip-typescript@0.6.2 index --output index.scip     # in your repository
@@ -212,7 +215,8 @@ file larger than about 32 MiB needs a different transport; see the engine's
 
 SCIP indexers exist for Java, Kotlin, Scala, Rust, C, C++, Ruby, Python and C#.
 The converter relies on the enclosing ranges an indexer emits to find each
-reference's caller, and on scip-typescript's symbol kinds; it has been checked
+reference's caller, on TypeScript's parser for the definitions scip-typescript
+gives no range, and on scip-typescript's symbol kinds; it has been checked
 only against scip-typescript.
 
 ## Rebuilding the seed
@@ -229,7 +233,8 @@ python3 code-graph/sources/build_seed.py           # write seed.jsonl and exampl
 
 `fetch.py` needs git, and Node.js 22.23.4 or later with npm; it refuses a
 checkout that is not at its pinned commit and an indexer that is not the
-pinned version. `build_seed.py` uses only the Python standard library. Both
+pinned version. `build_seed.py` uses the Python standard library and runs
+`sources/indexer/extents.mjs` with Node.js. Both
 write under `sources/work/`, which git ignores. CI does not run them; it
 qualifies the committed files.
 
@@ -238,24 +243,36 @@ qualifies the committed files.
 - **`call` is a text check.** A reference counts as a call when the next
   characters are `(`, a backtick, `?.(` or `<`. The indexer does not mark
   call sites.
-- **Some code belongs to an outer definition.** scip-typescript gives class
-  fields and nested anonymous functions no range of their own, so a reference
-  in a field initializer belongs to the class, and one in a callback to the
-  function around it. For the same reason a class field holding an arrow
-  function has no `digest`, so a change to its code shows up only through
-  its references and `signature`.
+- **A reference belongs to the innermost definition around it.**
+  scip-typescript gives a range only to functions, classes, interfaces, enums,
+  type aliases, methods, constructors and constants whose initializer is a
+  function. The converter reads the range of every other constant and
+  variable, class field, getter and setter with the TypeScript parser
+  (`sources/indexer/extents.mjs`), so `cookie: detectFromCookie` in
+  `const detectors = {...}` belongs to `detectors`, and the code of a getter
+  to the getter, not to the module or class. A nested anonymous function and
+  a property in an object literal have no symbol, so their code belongs to the
+  definition around them; a destructuring declaration's code belongs to the
+  module.
+- **A call through a table is a reference to the table.** `detectors[name](c)`
+  names `detectors`, and `detectors` names each function in it, so `impact`
+  reaches the caller in two hops, and `callers` of a function in the table
+  lists `detectors`, not the code that calls through it. Telling a call
+  through the table from a read of its keys would need the type checker's
+  data flow, which SCIP does not record.
+- **`impact` follows at most sixteen references.** OmniGraph requires a finite
+  bound on a multi-hop traversal. The longest chain of references to a
+  callable in hono's `src/` is 13; a deeper chain is cut at sixteen.
 - **Members of union types are not indexed.** scip-typescript gives no symbol
   to a property of an object type inside a union, so turning a type into a
   union looks like removing its properties.
-- **Callable constants come from their initializer or their type.**
-  scip-typescript gives a constant or variable a range exactly when its
-  initializer is a function, so one with a range is callable whatever its
-  declared type, as in `const getCookie: GetCookie = (c) => {...}`. A property,
-  or a constant holding another function (`const verify = Jwt.verify`), counts
-  as callable when its type in the indexer's hover text is a function type. A
-  function wrapped in a type assertion, `const C: FC = ((props) => {...}) as
-  FC`, gets no range, so it is not callable, has no `digest`, and its code
-  belongs to the module; hono has three of these among 413 function constants.
+- **Callable constants come from their initializer or their type.** A
+  constant, variable or class field whose initializer is a function, even
+  behind a type assertion as in `const C: FC = ((props) => {...}) as FC`, is
+  callable whatever its declared type. One holding another function
+  (`const verify = Jwt.verify`), or a property declared without an
+  initializer, counts as callable when its type in the indexer's hover text is
+  a function type.
 - **No export information.** `unreferenced_callables` lists entry points and
   public API next to unused code. In the seed, most of its rows are the
   routers' own `add` and `match` methods: callers reach them through the

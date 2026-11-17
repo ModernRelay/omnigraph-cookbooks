@@ -431,10 +431,10 @@ def code_graph_journey(env):
     # Refused before any effect, so cg reports a plain failure, not an unknown outcome.
     assert denied.returncode == 1 and "policy denied" in denied.stderr, (denied.returncode, denied.stderr)
     loaded = cg("act-agent", "load", pr_file, "--branch", "pr-5267")
-    assert loaded["branch"] == "pr-5267" and loaded["commit"] and loaded["rows"] == 846, loaded
+    assert loaded["branch"] == "pr-5267" and loaded["commit"] and loaded["rows"] == 854, loaded
     changes = run(env, "branch", "diff", "pr-5267", *scope("act-reader"), "--json")["changes"]
     summary = collections.Counter((c["type"]["name"], c["op"]) for c in changes)
-    assert summary == {("Symbol", "insert"): 2, ("Symbol", "update"): 5, ("References", "insert"): 16,
+    assert summary == {("Symbol", "insert"): 2, ("Symbol", "update"): 5, ("References", "insert"): 18,
                        ("MemberOf", "insert"): 1, ("DefinedAt", "insert"): 2, ("Location", "insert"): 2,
                        ("Location", "update"): 58, ("Revision", "insert"): 1, ("Revision", "delete"): 1}, summary
     changed = {c["id"] for c in changes if c["type"]["name"] == "Symbol" and c["op"] == "update"}
@@ -445,19 +445,19 @@ def code_graph_journey(env):
     assert (review["from_revision"], review["to_revision"]) == (base, head), review
     assert [r["symbol"] for r in review["added"]] == ["src/router/`utils.ts`/", helper["symbol"]], review["added"]
     assert {r["symbol"] for r in review["changed"]} == changed and review["moved"] == 53, review
-    assert (len(review["references"]["added"]), len(review["references"]["removed"])) == (16, 0)
+    assert (len(review["references"]["added"]), len(review["references"]["removed"])) == (18, 0)
 
     assert rows("callers", helper) == []
-    assert len(rows("callers", helper, "--branch", "pr-5267")) == 12
+    assert len(rows("callers", helper, "--branch", "pr-5267")) == 14
     # cg resolves a unique name to its key, and lists the candidates of an ambiguous one.
-    assert len(cg("act-reader", "callers", "createNullObject", "--branch", "pr-5267")["rows"]) == 12
+    assert len(cg("act-reader", "callers", "createNullObject", "--branch", "pr-5267")["rows"]) == 14
     assert cg("act-reader", "implementers", "add", ok=False).returncode == 2
     refused(run(env, "branch", "merge", "pr-5267", "--into", "main", *scope("act-agent"), "--json", ok=False))
     merged = run(env, "branch", "merge", "pr-5267", "--into", "main", *scope("act-writer"), "--json")
     assert merged["outcome"] == "fast_forward", merged
     run(env, "branch", "delete", "pr-5267", *scope("act-writer"), "--yes", "--json")
     assert [row["r.sha"] for row in rows("revision")] == [head]
-    assert len(rows("callers", helper)) == 12
+    assert len(rows("callers", helper)) == 14
     assert [row["r.sha"] for row in rows("revision", None, "--snapshot", previous)] == [base]
     assert rows("callers", helper, "--snapshot", previous) == []
 
@@ -465,7 +465,7 @@ def code_graph_journey(env):
     cg("act-agent", "load", str(ROOT / "code-graph/seed.jsonl"), "--branch", "revert-5267")
     revert = cg("act-reader", "diff", "revert-5267")
     assert [r["symbol"] for r in revert["removed"]] == ["src/router/`utils.ts`/", helper["symbol"]], revert
-    assert (len(revert["references"]["added"]), len(revert["references"]["removed"])) == (0, 16), revert
+    assert (len(revert["references"]["added"]), len(revert["references"]["removed"])) == (0, 18), revert
     run(env, "branch", "delete", "revert-5267", *scope("act-writer"), "--yes", "--json")
 
 
