@@ -1,0 +1,34 @@
+{
+  "order": 3,
+  "name": "Agent work queue",
+  "category": "Engineering",
+  "blurb": "A dependency-aware issue queue for coding agents, in the style of beads: file work, link what waits on what, claim what is ready, close it.",
+  "sample": "Larkspur, a fictional note-taking app",
+  "questions": [
+    {
+      "q": "What can an agent claim now?",
+      "query": "ready"
+    },
+    {
+      "q": "What is blocked, and by what?",
+      "query": "blocked"
+    },
+    {
+      "q": "Which blocks does an issue inherit from its parents?",
+      "query": "ancestor_blockers"
+    },
+    {
+      "q": "What depends on this issue, directly or not?",
+      "query": "downstream"
+    }
+  ],
+  "search": {
+    "title": "Agent work queue: shared state for coding agents",
+    "keywords": [
+      "shared state",
+      "agent memory",
+      "coding agents",
+      "knowledge graph"
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+# When a cookbook changes on main, ping the omnigraph.dev Vercel deploy hook so
+# the site rebuilds and re-imports every cookbook: its schema, queries, sample
+# counts, README and site.json (ModernRelay/brand apps/omnigraph/scripts/
+# sync-cookbooks.mjs). The same hook the omnigraph repo's docs use
+# (refresh-docs-site.yml there). Also runnable manually.
+name: Refresh omnigraph.dev use cases
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "*/schema.pg"
+      - "*/queries/**"
+      - "*/seed.jsonl"
+      - "*/seed.md"
+      - "*/README.md"
+      - "*/cluster.yaml"
+      - "*/site.json"
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Trigger omnigraph.dev redeploy
+        env:
+          HOOK: ${{ secrets.OMNIGRAPH_SITE_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::warning::OMNIGRAPH_SITE_DEPLOY_HOOK is not set in this repository; omnigraph.dev was not rebuilt."
+            exit 0
+          fi
+          curl -fsS -X POST "$HOOK"

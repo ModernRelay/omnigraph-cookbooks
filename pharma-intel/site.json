@@ -1,0 +1,33 @@
+{
+  "order": 6,
+  "name": "Pharma intelligence",
+  "category": "Research",
+  "blurb": "Competitive intelligence for a biotech program: the compounds, trials and deals around it, the program's own assumptions, and which signals contradict them.",
+  "sample": "Viking Therapeutics' obesity program, from public sources",
+  "questions": [
+    {
+      "q": "Which signals contradict an assumption the program relies on?",
+      "query": "assumption_contradicting_signals"
+    },
+    {
+      "q": "Which decisions are coming up?",
+      "query": "decisions_upcoming"
+    },
+    {
+      "q": "Which compounds compete with the program?",
+      "query": "program_competitors"
+    },
+    {
+      "q": "Which compounds target a mechanism?",
+      "query": "compounds_by_mechanism"
+    }
+  ],
+  "search": {
+    "title": "Pharma intelligence knowledge graph template",
+    "keywords": [
+      "knowledge graph",
+      "graphrag",
+      "ontology"
+    ]
+  }
+}

@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 """Qualify cookbook bundles with released binaries against disposable local roots.
 
-Usage: check-cookbooks.py [COOKBOOK ...]   (default: every cookbook)
+Usage: check-cookbooks.py [--site] [COOKBOOK ...]   (default: every cookbook)
+
+Every run first checks each cookbook's site.json, the copy omnigraph.dev shows
+for it (see "The website" in the README). --site runs only that check: it is
+offline and needs no binaries.
 """
+
+import re
 
 import collections
 import importlib.util
@@ -389,11 +395,73 @@ def hardware_program_journey(env):
     run(env, "branch", "delete", "cr-heatsink", *writer, "--yes", "--json")
 
 
+# What omnigraph.dev accepts in a site.json; its importer
+# (ModernRelay/brand apps/omnigraph/scripts/sync-cookbooks.mjs) checks the same.
+SITE_CATEGORIES = {"Company", "Engineering", "Hardware", "Research", "Investing", "Personal"}
+SITE_TITLE_MAX = 60  # a search result shows about this much; the site appends " | Omnigraph"
+QUERY_START = re.compile(r"^query\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(", re.M)
+WRITES = re.compile(r"\b(insert|update|delete)\b")
+
+
+def stored_queries(folder):
+    """Each stored query in the cookbook's queries/*.gq, by name: whether it writes."""
+    found = {}
+    for path in sorted((ROOT / folder / "queries").glob("*.gq")):
+        source = path.read_text()
+        starts = list(QUERY_START.finditer(source))
+        for i, match in enumerate(starts):
+            body = source[match.end():starts[i + 1].start() if i + 1 < len(starts) else len(source)]
+            body = re.sub(r'"(?:[^"\\]|\\.)*"', "", body)
+            body = re.sub(r"//.*", "", body)
+            found[match.group(1)] = bool(WRITES.search(body))
+    return found
+
+
+def check_site(folder):
+    """The website's copy for one cookbook: present, complete, and naming only read queries it has."""
+    path = ROOT / folder / "site.json"
+    assert path.is_file(), f"{folder}: no site.json; every cookbook carries the copy omnigraph.dev shows"
+    site = json.loads(path.read_text())
+    where = f"{folder}/site.json"
+    for key, kind in (("order", int), ("name", str), ("category", str), ("blurb", str),
+                      ("sample", str), ("questions", list), ("search", dict)):
+        assert isinstance(site.get(key), kind) and site[key] != "", f"{where}: {key} must be a non-empty {kind.__name__}"
+    assert site["category"] in SITE_CATEGORIES, \
+        f"{where}: category {site['category']!r} is not one of {', '.join(sorted(SITE_CATEGORIES))}"
+    queries = stored_queries(folder)
+    assert site["questions"], f"{where}: name at least one question"
+    for question in site["questions"]:
+        assert isinstance(question.get("q"), str) and question["q"], f"{where}: every question needs its text in q"
+        name = question.get("query")
+        assert name in queries, f"{where}: question {question['q']!r} names {name!r}, which queries/*.gq does not define"
+        assert not queries[name], f"{where}: question {question['q']!r} names {name!r}, which writes; name a read"
+    search = site["search"]
+    title, keywords = search.get("title"), search.get("keywords")
+    assert isinstance(title, str) and 0 < len(title) <= SITE_TITLE_MAX, \
+        f"{where}: search.title must be 1 to {SITE_TITLE_MAX} characters"
+    assert isinstance(keywords, list) and keywords and all(isinstance(k, str) and k == k.lower() and k for k in keywords), \
+        f"{where}: search.keywords must be a non-empty list of lowercase phrases"
+    return site
+
+
+def check_sites(selected):
+    sites = {folder: check_site(folder) for folder in selected}
+    if len(selected) == len(COOKBOOKS):
+        orders = [site["order"] for site in sites.values()]
+        assert len(set(orders)) == len(orders), f"site.json order values repeat: {sorted(orders)}"
+    print(f"site.json passed for {len(selected)} cookbooks.")
+
+
 def main():
-    selected = sys.argv[1:] or list(COOKBOOKS)
+    args = sys.argv[1:]
+    site_only = "--site" in args
+    selected = [a for a in args if a != "--site"] or list(COOKBOOKS)
     unknown = sorted(set(selected) - set(COOKBOOKS))
     if unknown:
         raise SystemExit(f"unknown cookbook: {', '.join(unknown)}; choose from {', '.join(COOKBOOKS)}")
+    check_sites(selected)
+    if site_only:
+        return
     if not CLI or not SERVER:
         raise SystemExit("Put 0.14.0 omnigraph and omnigraph-server on PATH or set OMNIGRAPH_BIN / OMNIGRAPH_SERVER_BIN")
     workspace = Path(tempfile.mkdtemp(prefix="omnigraph-cookbooks-test-"))
