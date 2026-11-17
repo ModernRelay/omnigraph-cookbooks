@@ -1,6 +1,6 @@
 # code-graph benchmarks
 
-Two benchmarks for the claims this cookbook makes, both on
+Three benchmarks for the claims this cookbook makes, all on
 [hono](https://github.com/honojs/hono), TypeScript, MIT. They are run by hand,
 not in CI, and write everything they fetch or build under `work/`, which git
 ignores.
@@ -9,6 +9,7 @@ ignores.
 |---|---|---|
 | [PR diff](#pr-diff) | A pull request's branch diff is exactly what it changed | Two reference graphs built with the TypeScript compiler API, at the base and the merge commit |
 | [Execution recall](#execution-recall) | The graph contains the calls the code really makes | Calls recorded while hono's own test suite runs |
+| [Agent cost](#agent-cost) | An agent with the graph answers code-structure questions for fewer tokens and less time | Eight questions with keys from the compiler reference, checked against the source |
 
 The cookbook resolves references through scip-typescript, which runs the
 TypeScript compiler. A compiler-built reference therefore cannot test the
@@ -22,6 +23,8 @@ cookbook's graph, with other tools.
 git, Python 3, Node.js 22.23.4 or later, bun (hono's tests), the locked
 indexer (`npm ci` in `code-graph/sources/indexer`) and the 0.14.0 `omnigraph`
 CLI. Every `omnigraph` call runs with its own `OMNIGRAPH_HOME` under `work/`.
+The agent-cost benchmark also needs a signed-in `claude` (Claude Code), uv, and
+the other tools installed as the execution-recall benchmark installed them.
 
 ## PR diff
 
@@ -165,9 +168,120 @@ calls dispatched to an override, such as `this.getHeaders()` in an abstract
 class running a subclass's method; Omnigraph's `Implements` edges recover
 most of these. The other seven reach constructors and getters.
 
+## Agent cost
+
+```bash
+python3 code-graph/bench/agent.py setup    # one hono worktree per arm, set up by each tool's own installer
+python3 code-graph/bench/agent.py index    # each tool's first index of a fresh checkout, three times
+python3 code-graph/bench/agent.py run      # 8 questions, 7 arms, 3 sessions each
+python3 code-graph/bench/agent.py score    # results/agent.json
+```
+
+The other two benchmarks measure the graph. This one measures what a coding
+agent spends with it: the tokens, time and turns Claude Code 2.1.267 takes to
+answer a question about hono's code structure, and whether the answer is
+right. Seven arms get the same model (Sonnet 5.5), the same questions and the
+same read and search tools: no code graph, Omnigraph with this cookbook's
+graph, and the five tools of the execution-recall benchmark.
+
+Each tool is set up by its own Claude Code installer: its MCP server, the
+instructions it writes into CLAUDE.md, its skills, subagents and hooks. An
+installer that writes to the home directory writes to a scratch one, and
+setup moves what it wrote into the project, so a session loads the tool and
+nothing of the user's. Omnigraph has no installer for a repository: its arm
+reads a local graph through `cg`, with a CLAUDE.md section written for this
+benchmark (`OMNIGRAPH_CLAUDE_MD` in `agent.py`). Every arm may use Read, Grep,
+Glob, skills, subagents and, in the shell, grep, find, ls, cat, head, tail and
+wc; an arm whose tool has a command line may also run it. A session loads
+project settings only and its arm's MCP servers only, with auto-memory off.
+
+The eight questions in `agent-questions.json` each ask for a set of
+definitions: the callers of a method whose name six definitions share, of a
+function constant and of a uniquely named function; the classes implementing
+an interface; the overrides a call dispatches to; the users of a property; the
+constructions of a class; and the callers through any chain of calls. Keys
+come from the compiler reference and were checked against the source. Two
+were corrected after the runs, and their `note` says why: one call is reached
+through a table of functions, which the reference does not record, and one
+definition only assigns the property, which "use" may or may not include. An
+answer is the JSON list on a session's last `ANSWER:` line, mapped to
+definitions as the traces are and graded by F1.
+
+Results, 168 sessions, `results/agent.json`. Medians per session; input
+tokens include every cached read:
+
+| Arm | Exact answers | Cost | Wall time | Input tokens | Output tokens | Turns | Calls to its tool |
+|---|---|---|---|---|---|---|---|
+| No code graph | 24 of 24 | $0.100 | 16.1 s | 198k | 1,926 | 6 | |
+| Omnigraph | 21 of 24 | $0.059 | 11.7 s | 187k | 1,018 | 5 | 52% |
+| codegraph | 24 of 24 | $0.094 | 17.6 s | 221k | 1,766 | 6 | 0% |
+| Graphify | 21 of 24 | $0.100 | 16.0 s | 165k | 1,866 | 6 | 9% |
+| GitNexus | 22 of 24 | $0.102 | 14.3 s | 207k | 1,368 | 5 | 17% |
+| codebase-memory-mcp | 24 of 24 | $0.114 | 18.1 s | 207k | 2,016 | 6 | 1% |
+| code-review-graph | 24 of 24 | $0.107 | 20.1 s | 225k | 1,931 | 6 | 7% |
+
+The same sessions paired with no code graph, question by question: the
+geometric mean over the eight questions of the ratio of the two arms' medians,
+and on how many questions the arm spent less:
+
+| Arm | Cost | Wall time | Output tokens | Turns |
+|---|---|---|---|---|
+| Omnigraph | 0.77×, 6 of 8 | 0.88×, 4 of 8 | 0.70×, 6 of 8 | 0.86×, 5 of 8 |
+| codegraph | 1.01×, 5 of 8 | 1.02×, 4 of 8 | 0.91×, 6 of 8 | 0.98×, 2 of 8 |
+| Graphify | 1.01×, 4 of 8 | 1.03×, 3 of 8 | 0.99×, 5 of 8 | 0.94×, 4 of 8 |
+| GitNexus | 0.97×, 4 of 8 | 1.01×, 3 of 8 | 0.81×, 6 of 8 | 0.87×, 4 of 8 |
+| codebase-memory-mcp | 1.14×, 0 of 8 | 1.11×, 1 of 8 | 1.04×, 1 of 8 | 1.06×, 2 of 8 |
+| code-review-graph | 1.33×, 2 of 8 | 1.15×, 1 of 8 | 0.95×, 5 of 8 | 1.08×, 2 of 8 |
+
+Input tokens are mostly the same context read again on every turn, cheap from
+the cache; cost follows what each turn adds and what the model writes. A `cg`
+read returns the definitions as one table, where a text search returns lines
+to read, so an Omnigraph session adds a median 3.8k tokens to its context
+against 9.8k to 14.4k for the other arms. The saving is largest where names
+repeat: for the callers of `HonoRequest.header` an Omnigraph session costs
+$0.042 and takes 14.6 s, against $0.161 and 34.2 s without a graph, and for
+the users of `HonoRequest.path` $0.048 and 12.7 s against $0.094 and 20.9 s.
+On questions one text search answers, such as the classes implementing
+`Router`, it costs a little more.
+
+A tool also costs context before the question: a session without a graph
+starts at 36.2k tokens, and the tools add 0.4k (Omnigraph), 0.6k (Graphify),
+5.7k (codegraph), 9.4k (codebase-memory-mcp), 15.9k (code-review-graph) and
+20.0k (GitNexus) of tool schemas, instructions and skills.
+
+The agents with the other tools mostly searched text, calling their tool for
+0 to 17% of their tool calls. codegraph delivers its graph through a hook that
+adds context to every prompt, which needs no call; the context it gave for
+`header` counted 2 callers of `HonoRequest.header` and 14 of `Context.header`,
+which matching names produces, and its agents searched to check.
+
+Omnigraph's three inexact answers are the three sessions of the transitive
+question: `detectLanguage` calls `detectFromCookie` through a table of
+functions, which the compiler's references do not record as a call, so the
+agents that followed the graph stopped short of `detectLanguage` and
+`languageDetector`. Agents that read the code found both. Graphify and GitNexus
+missed them in two of three sessions, and one Graphify session missed
+`serveStatic`'s chained `header` call.
+
+Each tool's first index of a fresh checkout, median of three, from
+`index_seconds_fresh` in `work/agent/ARM/setup.json`:
+
+| Arm | Index time | Three runs |
+|---|---|---|
+| Omnigraph: scip-typescript, convert and load | 2.0 s | 2.3, 1.9, 2.0 |
+| codebase-memory-mcp | 2.0 s | 2.0, 1.7, 2.0 |
+| codegraph | 3.9 s | 4.2, 3.9, 3.9 |
+| Graphify, without its LLM extraction | 4.3 s | 4.3, 4.0, 4.5 |
+| code-review-graph | 5.8 s | 5.8, 5.8, 4.9 |
+| GitNexus | 21.3 s | 23.0, 21.3, 20.3 |
+
 ## Limits
 
 - One repository in one language. The ranking may differ elsewhere.
+- The agent-cost benchmark ran one model, in one harness, three sessions per
+  question and arm, with list prices. Omnigraph's instructions were written
+  for it, the other tools' by their authors, and the keys come from the same
+  compiler as Omnigraph's graph; every key was checked against the source.
 - The reference shares the TypeScript compiler with scip-typescript, so the
   PR-diff accuracy measures conversion and modeling, not resolution.
 - Execution recall covers only what hono's tests run, and the tracer skips

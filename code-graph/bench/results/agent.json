@@ -1,0 +1,5720 @@
+{
+  "model": "claude-sonnet-5-5",
+  "summary": {
+    "bare": {
+      "tool": "no code graph",
+      "runs": 24,
+      "completed": 24,
+      "mean_f1": 1.0,
+      "exact": 24,
+      "median_input_tokens": 198454.0,
+      "median_output_tokens": 1926.5,
+      "median_cache_write_tokens": 14058.5,
+      "median_first_context_tokens": 36250.0,
+      "median_cost_usd": 0.0999,
+      "total_cost_usd": 2.44,
+      "median_wall_seconds": 16.1,
+      "median_api_seconds": 15.435,
+      "median_turns": 6.5,
+      "median_tool_calls": 5.5,
+      "graph_tool_share": 0.0,
+      "per_question": {
+        "header-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 388312,
+          "median_wall_seconds": 34.19
+        },
+        "getcookie-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 192977,
+          "median_wall_seconds": 12.01
+        },
+        "router-implementers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 74448,
+          "median_wall_seconds": 7.17
+        },
+        "getheaders-dispatch": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 111528,
+          "median_wall_seconds": 7.6
+        },
+        "path-users": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 209363,
+          "median_wall_seconds": 20.92
+        },
+        "httpexception-constructions": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 267340,
+          "median_wall_seconds": 19.13
+        },
+        "compose-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 113309,
+          "median_wall_seconds": 9.43
+        },
+        "cookie-parse-impact": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 261018,
+          "median_wall_seconds": 25.83
+        }
+      },
+      "setup": {
+        "given": {
+          "mcp_servers": [],
+          "instructions_bytes": {},
+          "skills": [],
+          "subagents": [],
+          "hooks": {},
+          "shell": []
+        },
+        "index_seconds": {}
+      },
+      "vs_bare": {
+        "cost_usd": {
+          "geomean_ratio": 1.0,
+          "questions_lower": 0,
+          "questions": 8
+        },
+        "wall_seconds": {
+          "geomean_ratio": 1.0,
+          "questions_lower": 0,
+          "questions": 8
+        },
+        "input_tokens": {
+          "geomean_ratio": 1.0,
+          "questions_lower": 0,
+          "questions": 8
+        },
+        "output_tokens": {
+          "geomean_ratio": 1.0,
+          "questions_lower": 0,
+          "questions": 8
+        },
+        "turns": {
+          "geomean_ratio": 1.0,
+          "questions_lower": 0,
+          "questions": 8
+        }
+      }
+    },
+    "omnigraph": {
+      "tool": "Omnigraph (this cookbook, through cg)",
+      "runs": 24,
+      "completed": 24,
+      "mean_f1": 0.986,
+      "exact": 21,
+      "median_input_tokens": 186741.5,
+      "median_output_tokens": 1018.5,
+      "median_cache_write_tokens": 3792.0,
+      "median_first_context_tokens": 36639.0,
+      "median_cost_usd": 0.059,
+      "total_cost_usd": 1.8,
+      "median_wall_seconds": 11.725,
+      "median_api_seconds": 10.425,
+      "median_turns": 5.0,
+      "median_tool_calls": 4.0,
+      "graph_tool_share": 0.518,
+      "per_question": {
+        "header-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 188819,
+          "median_wall_seconds": 14.62
+        },
+        "getcookie-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 149527,
+          "median_wall_seconds": 10.72
+        },
+        "router-implementers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 112162,
+          "median_wall_seconds": 7.57
+        },
+        "getheaders-dispatch": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 113520,
+          "median_wall_seconds": 10.34
+        },
+        "path-users": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 156938,
+          "median_wall_seconds": 12.65
+        },
+        "httpexception-constructions": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 279584,
+          "median_wall_seconds": 21.75
+        },
+        "compose-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 149256,
+          "median_wall_seconds": 8.89
+        },
+        "cookie-parse-impact": {
+          "mean_f1": 0.889,
+          "median_input_tokens": 386637,
+          "median_wall_seconds": 25.88
+        }
+      },
+      "setup": {
+        "index_seconds": {
+          "index": 1.73,
+          "convert": 0.28,
+          "load": 0.19
+        },
+        "given": {
+          "mcp_servers": [],
+          "instructions_bytes": {
+            "CLAUDE.md": 858
+          },
+          "skills": [],
+          "subagents": [],
+          "hooks": {},
+          "shell": [
+            "cg"
+          ]
+        },
+        "index_seconds_fresh": {
+          "runs": [
+            2.34,
+            1.95,
+            1.98
+          ],
+          "median": 1.98
+        }
+      },
+      "vs_bare": {
+        "cost_usd": {
+          "geomean_ratio": 0.774,
+          "questions_lower": 6,
+          "questions": 8
+        },
+        "wall_seconds": {
+          "geomean_ratio": 0.879,
+          "questions_lower": 4,
+          "questions": 8
+        },
+        "input_tokens": {
+          "geomean_ratio": 0.985,
+          "questions_lower": 3,
+          "questions": 8
+        },
+        "output_tokens": {
+          "geomean_ratio": 0.704,
+          "questions_lower": 6,
+          "questions": 8
+        },
+        "turns": {
+          "geomean_ratio": 0.864,
+          "questions_lower": 5,
+          "questions": 8
+        }
+      }
+    },
+    "codegraph": {
+      "tool": "codegraph 1.6.2",
+      "runs": 24,
+      "completed": 24,
+      "mean_f1": 1.0,
+      "exact": 24,
+      "median_input_tokens": 220520.0,
+      "median_output_tokens": 1766.5,
+      "median_cache_write_tokens": 9796.0,
+      "median_first_context_tokens": 41975.5,
+      "median_cost_usd": 0.0936,
+      "total_cost_usd": 2.41,
+      "median_wall_seconds": 17.64,
+      "median_api_seconds": 16.810000000000002,
+      "median_turns": 6.0,
+      "median_tool_calls": 5.0,
+      "graph_tool_share": 0.0,
+      "per_question": {
+        "header-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 296728,
+          "median_wall_seconds": 26.65
+        },
+        "getcookie-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 131511,
+          "median_wall_seconds": 13.31
+        },
+        "router-implementers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 85348,
+          "median_wall_seconds": 6.47
+        },
+        "getheaders-dispatch": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 85333,
+          "median_wall_seconds": 8.07
+        },
+        "path-users": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 234078,
+          "median_wall_seconds": 22.42
+        },
+        "httpexception-constructions": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 224628,
+          "median_wall_seconds": 18.57
+        },
+        "compose-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 220065,
+          "median_wall_seconds": 13.34
+        },
+        "cookie-parse-impact": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 289312,
+          "median_wall_seconds": 25.07
+        }
+      },
+      "setup": {
+        "index_seconds": {
+          "install_and_index": 29.09
+        },
+        "given": {
+          "mcp_servers": [
+            "codegraph"
+          ],
+          "instructions_bytes": {
+            ".claude/CLAUDE.md": 806
+          },
+          "skills": [],
+          "subagents": [],
+          "hooks": {
+            "UserPromptSubmit": 1
+          },
+          "shell": [
+            "codegraph"
+          ]
+        },
+        "index_seconds_fresh": {
+          "runs": [
+            4.15,
+            3.92,
+            3.89
+          ],
+          "median": 3.92
+        }
+      },
+      "vs_bare": {
+        "cost_usd": {
+          "geomean_ratio": 1.007,
+          "questions_lower": 5,
+          "questions": 8
+        },
+        "wall_seconds": {
+          "geomean_ratio": 1.021,
+          "questions_lower": 4,
+          "questions": 8
+        },
+        "input_tokens": {
+          "geomean_ratio": 0.99,
+          "questions_lower": 4,
+          "questions": 8
+        },
+        "output_tokens": {
+          "geomean_ratio": 0.91,
+          "questions_lower": 6,
+          "questions": 8
+        },
+        "turns": {
+          "geomean_ratio": 0.983,
+          "questions_lower": 2,
+          "questions": 8
+        }
+      }
+    },
+    "graphify": {
+      "tool": "Graphify 0.9.102",
+      "runs": 24,
+      "completed": 24,
+      "mean_f1": 0.99,
+      "exact": 21,
+      "median_input_tokens": 164915.5,
+      "median_output_tokens": 1865.5,
+      "median_cache_write_tokens": 10942.0,
+      "median_first_context_tokens": 36841.0,
+      "median_cost_usd": 0.0999,
+      "total_cost_usd": 2.35,
+      "median_wall_seconds": 16.005,
+      "median_api_seconds": 14.71,
+      "median_turns": 6.0,
+      "median_tool_calls": 5.0,
+      "graph_tool_share": 0.089,
+      "per_question": {
+        "header-callers": {
+          "mean_f1": 0.991,
+          "median_input_tokens": 327471,
+          "median_wall_seconds": 33.54
+        },
+        "getcookie-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 78413,
+          "median_wall_seconds": 7.62
+        },
+        "router-implementers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 78522,
+          "median_wall_seconds": 8.2
+        },
+        "getheaders-dispatch": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 114176,
+          "median_wall_seconds": 8.5
+        },
+        "path-users": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 247674,
+          "median_wall_seconds": 25.08
+        },
+        "httpexception-constructions": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 254128,
+          "median_wall_seconds": 25.5
+        },
+        "compose-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 118822,
+          "median_wall_seconds": 9.52
+        },
+        "cookie-parse-impact": {
+          "mean_f1": 0.926,
+          "median_input_tokens": 213184,
+          "median_wall_seconds": 24.9
+        }
+      },
+      "setup": {
+        "index_seconds": {
+          "update": 20.35
+        },
+        "given": {
+          "mcp_servers": [],
+          "instructions_bytes": {
+            "CLAUDE.md": 1388
+          },
+          "skills": [
+            "graphify"
+          ],
+          "subagents": [],
+          "hooks": {
+            "PreToolUse": 2
+          },
+          "shell": [
+            "graphify"
+          ]
+        },
+        "index_seconds_fresh": {
+          "runs": [
+            4.34,
+            3.96,
+            4.5
+          ],
+          "median": 4.34
+        }
+      },
+      "vs_bare": {
+        "cost_usd": {
+          "geomean_ratio": 1.01,
+          "questions_lower": 4,
+          "questions": 8
+        },
+        "wall_seconds": {
+          "geomean_ratio": 1.027,
+          "questions_lower": 3,
+          "questions": 8
+        },
+        "input_tokens": {
+          "geomean_ratio": 0.879,
+          "questions_lower": 4,
+          "questions": 8
+        },
+        "output_tokens": {
+          "geomean_ratio": 0.988,
+          "questions_lower": 5,
+          "questions": 8
+        },
+        "turns": {
+          "geomean_ratio": 0.94,
+          "questions_lower": 4,
+          "questions": 8
+        }
+      }
+    },
+    "gitnexus": {
+      "tool": "GitNexus 1.6.12",
+      "runs": 24,
+      "completed": 24,
+      "mean_f1": 0.991,
+      "exact": 22,
+      "median_input_tokens": 207441.0,
+      "median_output_tokens": 1368.5,
+      "median_cache_write_tokens": 10197.5,
+      "median_first_context_tokens": 56223.0,
+      "median_cost_usd": 0.1022,
+      "total_cost_usd": 2.28,
+      "median_wall_seconds": 14.33,
+      "median_api_seconds": 12.204999999999998,
+      "median_turns": 5.0,
+      "median_tool_calls": 4.0,
+      "graph_tool_share": 0.174,
+      "per_question": {
+        "header-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 376885,
+          "median_wall_seconds": 30.8
+        },
+        "getcookie-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 115962,
+          "median_wall_seconds": 8.0
+        },
+        "router-implementers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 113909,
+          "median_wall_seconds": 7.77
+        },
+        "getheaders-dispatch": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 171730,
+          "median_wall_seconds": 10.55
+        },
+        "path-users": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 302750,
+          "median_wall_seconds": 30.84
+        },
+        "httpexception-constructions": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 297381,
+          "median_wall_seconds": 20.7
+        },
+        "compose-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 173154,
+          "median_wall_seconds": 9.5
+        },
+        "cookie-parse-impact": {
+          "mean_f1": 0.926,
+          "median_input_tokens": 304802,
+          "median_wall_seconds": 19.1
+        }
+      },
+      "setup": {
+        "index_seconds": {
+          "analyze": 40.63
+        },
+        "given": {
+          "mcp_servers": [
+            "gitnexus"
+          ],
+          "instructions_bytes": {
+            "CLAUDE.md": 3556,
+            "AGENTS.md": 3556
+          },
+          "skills": [
+            "gitnexus-cli",
+            "gitnexus-debugging",
+            "gitnexus-exploring",
+            "gitnexus-guide",
+            "gitnexus-impact-analysis",
+            "gitnexus-lfg",
+            "gitnexus-pdg-query",
+            "gitnexus-plan",
+            "gitnexus-refactoring",
+            "gitnexus-review",
+            "gitnexus-taint-analysis",
+            "gitnexus-work"
+          ],
+          "subagents": [],
+          "hooks": {
+            "PreToolUse": 1,
+            "PostToolUse": 1
+          },
+          "shell": [
+            "gitnexus"
+          ]
+        },
+        "index_seconds_fresh": {
+          "runs": [
+            23.0,
+            21.32,
+            20.26
+          ],
+          "median": 21.32
+        }
+      },
+      "vs_bare": {
+        "cost_usd": {
+          "geomean_ratio": 0.971,
+          "questions_lower": 4,
+          "questions": 8
+        },
+        "wall_seconds": {
+          "geomean_ratio": 1.009,
+          "questions_lower": 3,
+          "questions": 8
+        },
+        "input_tokens": {
+          "geomean_ratio": 1.187,
+          "questions_lower": 2,
+          "questions": 8
+        },
+        "output_tokens": {
+          "geomean_ratio": 0.812,
+          "questions_lower": 6,
+          "questions": 8
+        },
+        "turns": {
+          "geomean_ratio": 0.866,
+          "questions_lower": 4,
+          "questions": 8
+        }
+      }
+    },
+    "cbm": {
+      "tool": "codebase-memory-mcp 0.12.1",
+      "runs": 24,
+      "completed": 24,
+      "mean_f1": 1.0,
+      "exact": 24,
+      "median_input_tokens": 206584.5,
+      "median_output_tokens": 2016.0,
+      "median_cache_write_tokens": 14085.0,
+      "median_first_context_tokens": 45600.0,
+      "median_cost_usd": 0.114,
+      "total_cost_usd": 2.55,
+      "median_wall_seconds": 18.12,
+      "median_api_seconds": 15.489999999999998,
+      "median_turns": 6.0,
+      "median_tool_calls": 5.0,
+      "graph_tool_share": 0.012,
+      "per_question": {
+        "header-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 268433,
+          "median_wall_seconds": 27.85
+        },
+        "getcookie-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 190690,
+          "median_wall_seconds": 14.59
+        },
+        "router-implementers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 92266,
+          "median_wall_seconds": 7.31
+        },
+        "getheaders-dispatch": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 139462,
+          "median_wall_seconds": 9.3
+        },
+        "path-users": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 207552,
+          "median_wall_seconds": 24.79
+        },
+        "httpexception-constructions": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 305171,
+          "median_wall_seconds": 21.39
+        },
+        "compose-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 189361,
+          "median_wall_seconds": 11.05
+        },
+        "cookie-parse-impact": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 374847,
+          "median_wall_seconds": 31.81
+        }
+      },
+      "setup": {
+        "index_seconds": {
+          "index": 4.83
+        },
+        "given": {
+          "mcp_servers": [
+            "codebase-memory-mcp"
+          ],
+          "instructions_bytes": {},
+          "skills": [
+            "codebase-memory"
+          ],
+          "subagents": [
+            "codebase-memory",
+            "codebase-memory-auditor",
+            "codebase-memory-scout"
+          ],
+          "hooks": {
+            "PreToolUse": 1,
+            "PostToolUse": 1,
+            "SessionStart": 4,
+            "SubagentStart": 1
+          },
+          "shell": [
+            "codebase-memory-mcp"
+          ]
+        },
+        "index_seconds_fresh": {
+          "runs": [
+            2.0,
+            1.72,
+            1.97
+          ],
+          "median": 1.97
+        }
+      },
+      "vs_bare": {
+        "cost_usd": {
+          "geomean_ratio": 1.136,
+          "questions_lower": 0,
+          "questions": 8
+        },
+        "wall_seconds": {
+          "geomean_ratio": 1.113,
+          "questions_lower": 1,
+          "questions": 8
+        },
+        "input_tokens": {
+          "geomean_ratio": 1.141,
+          "questions_lower": 3,
+          "questions": 8
+        },
+        "output_tokens": {
+          "geomean_ratio": 1.038,
+          "questions_lower": 1,
+          "questions": 8
+        },
+        "turns": {
+          "geomean_ratio": 1.063,
+          "questions_lower": 2,
+          "questions": 8
+        }
+      }
+    },
+    "crg": {
+      "tool": "code-review-graph 2.3.9",
+      "runs": 24,
+      "completed": 24,
+      "mean_f1": 1.0,
+      "exact": 24,
+      "median_input_tokens": 225065.0,
+      "median_output_tokens": 1931.0,
+      "median_cache_write_tokens": 14447.0,
+      "median_first_context_tokens": 52110.0,
+      "median_cost_usd": 0.1068,
+      "total_cost_usd": 2.67,
+      "median_wall_seconds": 20.07,
+      "median_api_seconds": 18.165,
+      "median_turns": 6.0,
+      "median_tool_calls": 5.0,
+      "graph_tool_share": 0.066,
+      "per_question": {
+        "header-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 296734,
+          "median_wall_seconds": 25.24
+        },
+        "getcookie-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 219190,
+          "median_wall_seconds": 15.79
+        },
+        "router-implementers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 158103,
+          "median_wall_seconds": 9.82
+        },
+        "getheaders-dispatch": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 158331,
+          "median_wall_seconds": 8.95
+        },
+        "path-users": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 225643,
+          "median_wall_seconds": 25.1
+        },
+        "httpexception-constructions": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 300371,
+          "median_wall_seconds": 25.34
+        },
+        "compose-callers": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 192458,
+          "median_wall_seconds": 9.65
+        },
+        "cookie-parse-impact": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 343109,
+          "median_wall_seconds": 30.7
+        }
+      },
+      "setup": {
+        "index_seconds": {
+          "build": 7.09
+        },
+        "given": {
+          "mcp_servers": [
+            "code-review-graph"
+          ],
+          "instructions_bytes": {
+            "CLAUDE.md": 2345
+          },
+          "skills": [
+            "debug-issue",
+            "explore-codebase",
+            "refactor-safely",
+            "review-changes"
+          ],
+          "subagents": [],
+          "hooks": {
+            "PostToolUse": 1,
+            "SessionStart": 1
+          },
+          "shell": [
+            "code-review-graph"
+          ]
+        },
+        "index_seconds_fresh": {
+          "runs": [
+            5.84,
+            5.85,
+            4.86
+          ],
+          "median": 5.84
+        }
+      },
+      "vs_bare": {
+        "cost_usd": {
+          "geomean_ratio": 1.332,
+          "questions_lower": 2,
+          "questions": 8
+        },
+        "wall_seconds": {
+          "geomean_ratio": 1.148,
+          "questions_lower": 1,
+          "questions": 8
+        },
+        "input_tokens": {
+          "geomean_ratio": 1.277,
+          "questions_lower": 1,
+          "questions": 8
+        },
+        "output_tokens": {
+          "geomean_ratio": 0.949,
+          "questions_lower": 5,
+          "questions": 8
+        },
+        "turns": {
+          "geomean_ratio": 1.085,
+          "questions_lower": 2,
+          "questions": 8
+        }
+      }
+    }
+  },
+  "runs": [
+    {
+      "arm": "bare",
+      "question": "compose-callers",
+      "rep": 1,
+      "wall_seconds": 9.43,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 9.3,
+      "turns": 6,
+      "input_tokens": 152704,
+      "output_tokens": 1152,
+      "cache_write_tokens": 3185,
+      "first_context_tokens": 36243,
+      "cost_usd": 0.040075900000000005,
+      "tool_calls": {
+        "Grep": 2,
+        "Read": 3
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "compose-callers",
+      "rep": 2,
+      "wall_seconds": 8.82,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.47,
+      "turns": 5,
+      "input_tokens": 113198,
+      "output_tokens": 1030,
+      "cache_write_tokens": 2255,
+      "first_context_tokens": 36243,
+      "cost_usd": 0.0312945,
+      "tool_calls": {
+        "Grep": 1,
+        "Read": 3
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "compose-callers",
+      "rep": 3,
+      "wall_seconds": 9.95,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 9.52,
+      "turns": 5,
+      "input_tokens": 113309,
+      "output_tokens": 1069,
+      "cache_write_tokens": 24029,
+      "first_context_tokens": 36243,
+      "cost_usd": 0.1166092,
+      "tool_calls": {
+        "Grep": 1,
+        "Read": 3
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "cookie-parse-impact",
+      "rep": 1,
+      "wall_seconds": 30.99,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 30.87,
+      "turns": 15,
+      "input_tokens": 314093,
+      "output_tokens": 4434,
+      "cache_write_tokens": 36868,
+      "first_context_tokens": 36257,
+      "cost_usd": 0.22040390000000004,
+      "tool_calls": {
+        "Grep": 7,
+        "Read": 7
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "cookie-parse-impact",
+      "rep": 2,
+      "wall_seconds": 24.02,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 24.0,
+      "turns": 10,
+      "input_tokens": 261018,
+      "output_tokens": 3429,
+      "cache_write_tokens": 15842,
+      "first_context_tokens": 36257,
+      "cost_usd": 0.1230612,
+      "tool_calls": {
+        "Grep": 3,
+        "Read": 6
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "cookie-parse-impact",
+      "rep": 3,
+      "wall_seconds": 25.83,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 25.6,
+      "turns": 11,
+      "input_tokens": 232710,
+      "output_tokens": 3265,
+      "cache_write_tokens": 18590,
+      "first_context_tokens": 36257,
+      "cost_usd": 0.1292788,
+      "tool_calls": {
+        "Grep": 4,
+        "Read": 6
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "getcookie-callers",
+      "rep": 1,
+      "wall_seconds": 11.82,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 11.28,
+      "turns": 7,
+      "input_tokens": 116057,
+      "output_tokens": 1518,
+      "cache_write_tokens": 5175,
+      "first_context_tokens": 36251,
+      "cost_usd": 0.0478379,
+      "tool_calls": {
+        "Grep": 2,
+        "Read": 4
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "getcookie-callers",
+      "rep": 2,
+      "wall_seconds": 13.11,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 12.2,
+      "turns": 5,
+      "input_tokens": 194025,
+      "output_tokens": 1306,
+      "cache_write_tokens": 3830,
+      "first_context_tokens": 36251,
+      "cost_usd": 0.0482768,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 2,
+        "Bash:cd": 1,
+        "Bash:grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "getcookie-callers",
+      "rep": 3,
+      "wall_seconds": 12.01,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 11.19,
+      "turns": 5,
+      "input_tokens": 192977,
+      "output_tokens": 1188,
+      "cache_write_tokens": 24624,
+      "first_context_tokens": 36251,
+      "cost_usd": 0.1280886,
+      "tool_calls": {
+        "Grep": 1,
+        "Bash": 3,
+        "Bash:cd": 3
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "getheaders-dispatch",
+      "rep": 1,
+      "wall_seconds": 7.6,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.25,
+      "turns": 3,
+      "input_tokens": 111402,
+      "output_tokens": 763,
+      "cache_write_tokens": 1006,
+      "first_context_tokens": 36271,
+      "cost_usd": 0.0235632,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "getheaders-dispatch",
+      "rep": 2,
+      "wall_seconds": 7.48,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.09,
+      "turns": 3,
+      "input_tokens": 111557,
+      "output_tokens": 810,
+      "cache_write_tokens": 536,
+      "first_context_tokens": 36271,
+      "cost_usd": 0.0222157,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "getheaders-dispatch",
+      "rep": 3,
+      "wall_seconds": 7.96,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.59,
+      "turns": 3,
+      "input_tokens": 111528,
+      "output_tokens": 867,
+      "cache_write_tokens": 22187,
+      "first_context_tokens": 36271,
+      "cost_usd": 0.1072217,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "header-callers",
+      "rep": 1,
+      "wall_seconds": 39.89,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 38.85,
+      "turns": 18,
+      "input_tokens": 486771,
+      "output_tokens": 5500,
+      "cache_write_tokens": 35819,
+      "first_context_tokens": 36250,
+      "cost_usd": 0.24426900000000001,
+      "tool_calls": {
+        "Grep": 7,
+        "Bash": 3,
+        "Bash:grep": 2,
+        "Bash:sed": 1,
+        "Read": 7
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "header-callers",
+      "rep": 2,
+      "wall_seconds": 34.19,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 33.97,
+      "turns": 11,
+      "input_tokens": 317767,
+      "output_tokens": 4554,
+      "cache_write_tokens": 18533,
+      "first_context_tokens": 36250,
+      "cost_usd": 0.15047800000000003,
+      "tool_calls": {
+        "Grep": 6,
+        "Read": 3,
+        "Bash": 1,
+        "Bash:cd": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "header-callers",
+      "rep": 3,
+      "wall_seconds": 32.37,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 31.76,
+      "turns": 11,
+      "input_tokens": 388312,
+      "output_tokens": 4425,
+      "cache_write_tokens": 19759,
+      "first_context_tokens": 36250,
+      "cost_usd": 0.16102770000000002,
+      "tool_calls": {
+        "Grep": 7,
+        "Bash": 3,
+        "Bash:grep": 1,
+        "Bash:cd": 1,
+        "Bash:rg": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "httpexception-constructions",
+      "rep": 1,
+      "wall_seconds": 19.13,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 18.86,
+      "turns": 8,
+      "input_tokens": 267741,
+      "output_tokens": 2470,
+      "cache_write_tokens": 33558,
+      "first_context_tokens": 36250,
+      "cost_usd": 0.1832314,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 5,
+        "Bash:cd": 4,
+        "Bash:grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "httpexception-constructions",
+      "rep": 2,
+      "wall_seconds": 19.81,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 19.29,
+      "turns": 7,
+      "input_tokens": 267340,
+      "output_tokens": 2335,
+      "cache_write_tokens": 12275,
+      "first_context_tokens": 36250,
+      "cost_usd": 0.0988376,
+      "tool_calls": {
+        "Grep": 1,
+        "Bash": 5,
+        "Bash:cd": 2,
+        "Bash:grep": 2,
+        "Bash:sed": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "httpexception-constructions",
+      "rep": 3,
+      "wall_seconds": 19.09,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 18.67,
+      "turns": 7,
+      "input_tokens": 252846,
+      "output_tokens": 2857,
+      "cache_write_tokens": 8851,
+      "first_context_tokens": 36250,
+      "cost_usd": 0.08926959999999999,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 4,
+        "Bash:cd": 1,
+        "Bash:sed": 1,
+        "Bash:grep": 1,
+        "Bash:for": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "path-users",
+      "rep": 1,
+      "wall_seconds": 20.92,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 20.62,
+      "turns": 13,
+      "input_tokens": 209363,
+      "output_tokens": 3012,
+      "cache_write_tokens": 10613,
+      "first_context_tokens": 36250,
+      "cost_usd": 0.09332700000000001,
+      "tool_calls": {
+        "Grep": 6,
+        "Read": 6
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "path-users",
+      "rep": 2,
+      "wall_seconds": 23.2,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 22.66,
+      "turns": 11,
+      "input_tokens": 212555,
+      "output_tokens": 3144,
+      "cache_write_tokens": 10239,
+      "first_context_tokens": 36250,
+      "cost_usd": 0.0935076,
+      "tool_calls": {
+        "Grep": 4,
+        "Read": 6
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "path-users",
+      "rep": 3,
+      "wall_seconds": 20.35,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 19.28,
+      "turns": 6,
+      "input_tokens": 202883,
+      "output_tokens": 2459,
+      "cache_write_tokens": 27888,
+      "first_context_tokens": 36250,
+      "cost_usd": 0.1545115,
+      "tool_calls": {
+        "Grep": 3,
+        "Bash": 2,
+        "Bash:cd": 1,
+        "Bash:grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "router-implementers",
+      "rep": 1,
+      "wall_seconds": 5.69,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 5.4,
+      "turns": 2,
+      "input_tokens": 74448,
+      "output_tokens": 678,
+      "cache_write_tokens": 933,
+      "first_context_tokens": 36242,
+      "cost_usd": 0.018744,
+      "tool_calls": {
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "router-implementers",
+      "rep": 2,
+      "wall_seconds": 7.55,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.83,
+      "turns": 2,
+      "input_tokens": 74448,
+      "output_tokens": 556,
+      "cache_write_tokens": 933,
+      "first_context_tokens": 36242,
+      "cost_usd": 0.017524,
+      "tool_calls": {
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "bare",
+      "question": "router-implementers",
+      "rep": 3,
+      "wall_seconds": 7.17,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.55,
+      "turns": 3,
+      "input_tokens": 74141,
+      "output_tokens": 810,
+      "cache_write_tokens": 21697,
+      "first_context_tokens": 36242,
+      "cost_usd": 0.1009979,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "compose-callers",
+      "rep": 1,
+      "wall_seconds": 11.03,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.38,
+      "turns": 6,
+      "input_tokens": 189361,
+      "output_tokens": 1178,
+      "cache_write_tokens": 25654,
+      "first_context_tokens": 45593,
+      "cost_usd": 0.1307819,
+      "tool_calls": {
+        "Grep": 2,
+        "Read": 3
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "compose-callers",
+      "rep": 2,
+      "wall_seconds": 13.19,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 10.43,
+      "turns": 5,
+      "input_tokens": 140192,
+      "output_tokens": 1087,
+      "cache_write_tokens": 2493,
+      "first_context_tokens": 45593,
+      "cost_usd": 0.0346233,
+      "tool_calls": {
+        "Grep": 1,
+        "Read": 3
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "compose-callers",
+      "rep": 3,
+      "wall_seconds": 11.05,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.66,
+      "turns": 6,
+      "input_tokens": 189365,
+      "output_tokens": 1147,
+      "cache_write_tokens": 3648,
+      "first_context_tokens": 45593,
+      "cost_usd": 0.0446489,
+      "tool_calls": {
+        "Grep": 2,
+        "Read": 3
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "cookie-parse-impact",
+      "rep": 1,
+      "wall_seconds": 31.81,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 28.71,
+      "turns": 14,
+      "input_tokens": 424933,
+      "output_tokens": 4009,
+      "cache_write_tokens": 16368,
+      "first_context_tokens": 45607,
+      "cost_usd": 0.1464489,
+      "tool_calls": {
+        "Grep": 6,
+        "Read": 7
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "cookie-parse-impact",
+      "rep": 2,
+      "wall_seconds": 33.73,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 29.48,
+      "turns": 13,
+      "input_tokens": 322144,
+      "output_tokens": 4083,
+      "cache_write_tokens": 40277,
+      "first_context_tokens": 45607,
+      "cost_usd": 0.23014750000000003,
+      "tool_calls": {
+        "Grep": 5,
+        "mcp": 1,
+        "Read": 6
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "cookie-parse-impact",
+      "rep": 3,
+      "wall_seconds": 29.55,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 26.74,
+      "turns": 13,
+      "input_tokens": 374847,
+      "output_tokens": 3873,
+      "cache_write_tokens": 14758,
+      "first_context_tokens": 45607,
+      "cost_usd": 0.1337975,
+      "tool_calls": {
+        "Grep": 6,
+        "Read": 6
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "getcookie-callers",
+      "rep": 1,
+      "wall_seconds": 12.23,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 9.63,
+      "turns": 4,
+      "input_tokens": 189541,
+      "output_tokens": 969,
+      "cache_write_tokens": 3050,
+      "first_context_tokens": 45601,
+      "cost_usd": 0.0405543,
+      "tool_calls": {
+        "Grep": 1,
+        "Bash": 2,
+        "Bash:cd": 2
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "getcookie-callers",
+      "rep": 2,
+      "wall_seconds": 15.74,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 13.12,
+      "turns": 5,
+      "input_tokens": 238576,
+      "output_tokens": 1364,
+      "cache_write_tokens": 3890,
+      "first_context_tokens": 45601,
+      "cost_usd": 0.05268760000000001,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 2,
+        "Bash:cd": 1,
+        "Bash:grep": 1
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "getcookie-callers",
+      "rep": 3,
+      "wall_seconds": 14.59,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 12.19,
+      "turns": 6,
+      "input_tokens": 190690,
+      "output_tokens": 1578,
+      "cache_write_tokens": 26392,
+      "first_context_tokens": 45601,
+      "cost_usd": 0.137793,
+      "tool_calls": {
+        "Grep": 4,
+        "Bash": 1,
+        "Bash:cd": 1
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "getheaders-dispatch",
+      "rep": 1,
+      "wall_seconds": 8.4,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.14,
+      "turns": 3,
+      "input_tokens": 139462,
+      "output_tokens": 799,
+      "cache_write_tokens": 1690,
+      "first_context_tokens": 45621,
+      "cost_usd": 0.0285386,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "getheaders-dispatch",
+      "rep": 2,
+      "wall_seconds": 9.3,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.27,
+      "turns": 3,
+      "input_tokens": 139811,
+      "output_tokens": 881,
+      "cache_write_tokens": 1130,
+      "first_context_tokens": 45621,
+      "cost_usd": 0.0272095,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "getheaders-dispatch",
+      "rep": 3,
+      "wall_seconds": 9.59,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.97,
+      "turns": 3,
+      "input_tokens": 139057,
+      "output_tokens": 822,
+      "cache_write_tokens": 23526,
+      "first_context_tokens": 45621,
+      "cost_usd": 0.11388849999999999,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "header-callers",
+      "rep": 1,
+      "wall_seconds": 26.01,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 23.74,
+      "turns": 9,
+      "input_tokens": 268433,
+      "output_tokens": 3384,
+      "cache_write_tokens": 13700,
+      "first_context_tokens": 45600,
+      "cost_usd": 0.11413230000000002,
+      "tool_calls": {
+        "Grep": 4,
+        "mcp": 1,
+        "Read": 3
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "header-callers",
+      "rep": 2,
+      "wall_seconds": 40.7,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 37.88,
+      "turns": 26,
+      "input_tokens": 389882,
+      "output_tokens": 5902,
+      "cache_write_tokens": 23615,
+      "first_context_tokens": 45600,
+      "cost_usd": 0.1901333,
+      "tool_calls": {
+        "Grep": 6,
+        "Bash": 1,
+        "Bash:for": 1,
+        "Read": 18
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "header-callers",
+      "rep": 3,
+      "wall_seconds": 27.85,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 24.95,
+      "turns": 8,
+      "input_tokens": 260784,
+      "output_tokens": 3631,
+      "cache_write_tokens": 34121,
+      "first_context_tokens": 45600,
+      "cost_usd": 0.1954793,
+      "tool_calls": {
+        "Grep": 4,
+        "Bash": 1,
+        "Bash:cd": 1,
+        "Read": 2
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "httpexception-constructions",
+      "rep": 1,
+      "wall_seconds": 20.5,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 17.86,
+      "turns": 6,
+      "input_tokens": 305171,
+      "output_tokens": 2454,
+      "cache_write_tokens": 9478,
+      "first_context_tokens": 45600,
+      "cost_usd": 0.09204409999999999,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 3,
+        "Bash:cd": 3
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "httpexception-constructions",
+      "rep": 2,
+      "wall_seconds": 21.39,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 18.1,
+      "turns": 6,
+      "input_tokens": 257588,
+      "output_tokens": 2531,
+      "cache_write_tokens": 33126,
+      "first_context_tokens": 45600,
+      "cost_usd": 0.1802792,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 2,
+        "Bash:cd": 1,
+        "Bash:grep": 1,
+        "Read": 1
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "httpexception-constructions",
+      "rep": 3,
+      "wall_seconds": 21.58,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 18.93,
+      "turns": 7,
+      "input_tokens": 313731,
+      "output_tokens": 2688,
+      "cache_write_tokens": 10562,
+      "first_context_tokens": 45600,
+      "cost_usd": 0.09946769999999999,
+      "tool_calls": {
+        "Grep": 3,
+        "Bash": 3,
+        "Bash:cd": 2,
+        "Bash:grep": 1
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "path-users",
+      "rep": 1,
+      "wall_seconds": 26.58,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 24.02,
+      "turns": 11,
+      "input_tokens": 205617,
+      "output_tokens": 3299,
+      "cache_write_tokens": 32811,
+      "first_context_tokens": 45600,
+      "cost_usd": 0.1815298,
+      "tool_calls": {
+        "Grep": 4,
+        "Read": 6
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "path-users",
+      "rep": 2,
+      "wall_seconds": 22.63,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 20.53,
+      "turns": 12,
+      "input_tokens": 207552,
+      "output_tokens": 3253,
+      "cache_write_tokens": 11771,
+      "first_context_tokens": 45600,
+      "cost_usd": 0.0992073,
+      "tool_calls": {
+        "Grep": 5,
+        "Read": 6
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "path-users",
+      "rep": 3,
+      "wall_seconds": 24.79,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 22.46,
+      "turns": 13,
+      "input_tokens": 268297,
+      "output_tokens": 3235,
+      "cache_write_tokens": 14470,
+      "first_context_tokens": 45600,
+      "cost_usd": 0.1156317,
+      "tool_calls": {
+        "Grep": 7,
+        "Read": 5
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "router-implementers",
+      "rep": 1,
+      "wall_seconds": 6.98,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 5.18,
+      "turns": 3,
+      "input_tokens": 92266,
+      "output_tokens": 778,
+      "cache_write_tokens": 1082,
+      "first_context_tokens": 45592,
+      "cost_usd": 0.021234,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "router-implementers",
+      "rep": 2,
+      "wall_seconds": 9.47,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.23,
+      "turns": 4,
+      "input_tokens": 139595,
+      "output_tokens": 1006,
+      "cache_write_tokens": 23730,
+      "first_context_tokens": 45592,
+      "cost_usd": 0.1165779,
+      "tool_calls": {
+        "Grep": 3
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "cbm",
+      "question": "router-implementers",
+      "rep": 3,
+      "wall_seconds": 7.31,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 5.44,
+      "turns": 2,
+      "input_tokens": 92144,
+      "output_tokens": 761,
+      "cache_write_tokens": 960,
+      "first_context_tokens": 45592,
+      "cost_usd": 0.020575999999999997,
+      "tool_calls": {
+        "Grep": 1
+      },
+      "mcp_status": {
+        "codebase-memory-mcp": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "compose-callers",
+      "rep": 1,
+      "wall_seconds": 17.36,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 16.55,
+      "turns": 7,
+      "input_tokens": 306654,
+      "output_tokens": 1329,
+      "cache_write_tokens": 2954,
+      "first_context_tokens": 41803,
+      "cost_usd": 0.056356399999999994,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 4,
+        "Bash:sed": 2,
+        "Bash:grep": 2
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "compose-callers",
+      "rep": 2,
+      "wall_seconds": 12.45,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 10.69,
+      "turns": 6,
+      "input_tokens": 174659,
+      "output_tokens": 1210,
+      "cache_write_tokens": 29160,
+      "first_context_tokens": 41803,
+      "cost_usd": 0.1441539,
+      "tool_calls": {
+        "Grep": 2,
+        "Read": 3
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "compose-callers",
+      "rep": 3,
+      "wall_seconds": 13.34,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 12.03,
+      "turns": 5,
+      "input_tokens": 220065,
+      "output_tokens": 1186,
+      "cache_write_tokens": 3460,
+      "first_context_tokens": 41803,
+      "cost_usd": 0.0482333,
+      "tool_calls": {
+        "Grep": 4
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "cookie-parse-impact",
+      "rep": 1,
+      "wall_seconds": 24.21,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 22.62,
+      "turns": 12,
+      "input_tokens": 289312,
+      "output_tokens": 3123,
+      "cache_write_tokens": 38345,
+      "first_context_tokens": 42003,
+      "cost_usd": 0.2105773,
+      "tool_calls": {
+        "Grep": 5,
+        "Read": 6
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "cookie-parse-impact",
+      "rep": 2,
+      "wall_seconds": 25.07,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 23.88,
+      "turns": 10,
+      "input_tokens": 279833,
+      "output_tokens": 3002,
+      "cache_write_tokens": 9352,
+      "first_context_tokens": 42003,
+      "cost_usd": 0.0953567,
+      "tool_calls": {
+        "Grep": 4,
+        "Read": 5
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "cookie-parse-impact",
+      "rep": 3,
+      "wall_seconds": 26.44,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 24.88,
+      "turns": 14,
+      "input_tokens": 340254,
+      "output_tokens": 3357,
+      "cache_write_tokens": 13086,
+      "first_context_tokens": 42003,
+      "cost_usd": 0.11949019999999999,
+      "tool_calls": {
+        "Grep": 7,
+        "Read": 6
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "getcookie-callers",
+      "rep": 1,
+      "wall_seconds": 14.35,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 12.66,
+      "turns": 5,
+      "input_tokens": 220975,
+      "output_tokens": 1361,
+      "cache_write_tokens": 3618,
+      "first_context_tokens": 42034,
+      "cost_usd": 0.050695,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 2,
+        "Bash:sed": 1,
+        "Bash:grep": 1
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "getcookie-callers",
+      "rep": 2,
+      "wall_seconds": 12.42,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 11.35,
+      "turns": 6,
+      "input_tokens": 130018,
+      "output_tokens": 1115,
+      "cache_write_tokens": 2117,
+      "first_context_tokens": 42034,
+      "cost_usd": 0.033277799999999996,
+      "tool_calls": {
+        "Grep": 5
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "getcookie-callers",
+      "rep": 3,
+      "wall_seconds": 13.31,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 10.88,
+      "turns": 6,
+      "input_tokens": 131511,
+      "output_tokens": 1177,
+      "cache_write_tokens": 29153,
+      "first_context_tokens": 42034,
+      "cost_usd": 0.1394975,
+      "tool_calls": {
+        "Grep": 5
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "getheaders-dispatch",
+      "rep": 1,
+      "wall_seconds": 9.1,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.68,
+      "turns": 2,
+      "input_tokens": 85304,
+      "output_tokens": 614,
+      "cache_write_tokens": 694,
+      "first_context_tokens": 41781,
+      "cost_usd": 0.018242800000000003,
+      "tool_calls": {
+        "Grep": 1
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "getheaders-dispatch",
+      "rep": 2,
+      "wall_seconds": 8.07,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.48,
+      "turns": 2,
+      "input_tokens": 85377,
+      "output_tokens": 695,
+      "cache_write_tokens": 767,
+      "first_context_tokens": 41781,
+      "cost_usd": 0.019344800000000002,
+      "tool_calls": {
+        "Grep": 1
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "getheaders-dispatch",
+      "rep": 3,
+      "wall_seconds": 7.26,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.08,
+      "turns": 2,
+      "input_tokens": 85333,
+      "output_tokens": 653,
+      "cache_write_tokens": 26766,
+      "first_context_tokens": 41781,
+      "cost_usd": 0.12031649999999999,
+      "tool_calls": {
+        "Grep": 1
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "header-callers",
+      "rep": 1,
+      "wall_seconds": 26.29,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 23.54,
+      "turns": 8,
+      "input_tokens": 296728,
+      "output_tokens": 3287,
+      "cache_write_tokens": 37090,
+      "first_context_tokens": 41998,
+      "cost_usd": 0.2080726,
+      "tool_calls": {
+        "Grep": 5,
+        "Bash": 2,
+        "Bash:cd": 1,
+        "Bash:grep": 1
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "header-callers",
+      "rep": 2,
+      "wall_seconds": 46.79,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 45.33,
+      "turns": 26,
+      "input_tokens": 457588,
+      "output_tokens": 7026,
+      "cache_write_tokens": 17246,
+      "first_context_tokens": 41998,
+      "cost_usd": 0.18416840000000004,
+      "tool_calls": {
+        "Grep": 12,
+        "Bash": 3,
+        "Bash:cd": 1,
+        "Bash:grep": 2,
+        "Read": 10
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "header-callers",
+      "rep": 3,
+      "wall_seconds": 26.65,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 25.64,
+      "turns": 6,
+      "input_tokens": 242152,
+      "output_tokens": 3514,
+      "cache_write_tokens": 12652,
+      "first_context_tokens": 41998,
+      "cost_usd": 0.109573,
+      "tool_calls": {
+        "Grep": 3,
+        "Bash": 1,
+        "Bash:cd": 1,
+        "Read": 1
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "httpexception-constructions",
+      "rep": 1,
+      "wall_seconds": 17.92,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 17.07,
+      "turns": 5,
+      "input_tokens": 174854,
+      "output_tokens": 2172,
+      "cache_write_tokens": 30397,
+      "first_context_tokens": 41853,
+      "cost_usd": 0.15862720000000002,
+      "tool_calls": {
+        "Grep": 3,
+        "Bash": 1,
+        "Bash:cd": 1
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "httpexception-constructions",
+      "rep": 2,
+      "wall_seconds": 20.51,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 19.58,
+      "turns": 8,
+      "input_tokens": 283910,
+      "output_tokens": 2674,
+      "cache_write_tokens": 9078,
+      "first_context_tokens": 41853,
+      "cost_usd": 0.09141629999999999,
+      "tool_calls": {
+        "Grep": 3,
+        "Bash": 4,
+        "Bash:cd": 2,
+        "Bash:grep": 2
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "httpexception-constructions",
+      "rep": 3,
+      "wall_seconds": 18.57,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 17.41,
+      "turns": 8,
+      "input_tokens": 224628,
+      "output_tokens": 2536,
+      "cache_write_tokens": 6191,
+      "first_context_tokens": 41853,
+      "cost_usd": 0.07285,
+      "tool_calls": {
+        "Grep": 4,
+        "Bash": 1,
+        "Bash:cd": 1,
+        "Read": 2
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "path-users",
+      "rep": 1,
+      "wall_seconds": 22.42,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 21.13,
+      "turns": 11,
+      "input_tokens": 234078,
+      "output_tokens": 2953,
+      "cache_write_tokens": 9482,
+      "first_context_tokens": 42035,
+      "cost_usd": 0.0907976,
+      "tool_calls": {
+        "Grep": 4,
+        "Read": 6
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "path-users",
+      "rep": 2,
+      "wall_seconds": 22.66,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 21.77,
+      "turns": 11,
+      "input_tokens": 190991,
+      "output_tokens": 3138,
+      "cache_write_tokens": 36024,
+      "first_context_tokens": 42035,
+      "cost_usd": 0.19184890000000004,
+      "tool_calls": {
+        "Grep": 4,
+        "Read": 6
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "path-users",
+      "rep": 3,
+      "wall_seconds": 20.69,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 19.75,
+      "turns": 12,
+      "input_tokens": 235805,
+      "output_tokens": 2805,
+      "cache_write_tokens": 10110,
+      "first_context_tokens": 42035,
+      "cost_usd": 0.09193950000000001,
+      "tool_calls": {
+        "Grep": 4,
+        "Read": 7
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "router-implementers",
+      "rep": 1,
+      "wall_seconds": 7.23,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 5.25,
+      "turns": 2,
+      "input_tokens": 85348,
+      "output_tokens": 545,
+      "cache_write_tokens": 26626,
+      "first_context_tokens": 41953,
+      "cost_usd": 0.1187067,
+      "tool_calls": {
+        "Grep": 1
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "router-implementers",
+      "rep": 2,
+      "wall_seconds": 6.42,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 4.99,
+      "turns": 2,
+      "input_tokens": 85348,
+      "output_tokens": 548,
+      "cache_write_tokens": 411,
+      "first_context_tokens": 41953,
+      "cost_usd": 0.016498199999999998,
+      "tool_calls": {
+        "Grep": 1
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "codegraph",
+      "question": "router-implementers",
+      "rep": 3,
+      "wall_seconds": 6.47,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 5.17,
+      "turns": 2,
+      "input_tokens": 85376,
+      "output_tokens": 592,
+      "cache_write_tokens": 439,
+      "first_context_tokens": 41953,
+      "cost_usd": 0.0170352,
+      "tool_calls": {
+        "Grep": 1
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "compose-callers",
+      "rep": 1,
+      "wall_seconds": 9.65,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.75,
+      "turns": 4,
+      "input_tokens": 193156,
+      "output_tokens": 776,
+      "cache_write_tokens": 18924,
+      "first_context_tokens": 52103,
+      "cost_usd": 0.10089060000000001,
+      "tool_calls": {
+        "Grep": 1,
+        "mcp": 1,
+        "Read": 1
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "compose-callers",
+      "rep": 2,
+      "wall_seconds": 10.96,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.41,
+      "turns": 6,
+      "input_tokens": 176471,
+      "output_tokens": 1123,
+      "cache_write_tokens": 33549,
+      "first_context_tokens": 52103,
+      "cost_usd": 0.1597296,
+      "tool_calls": {
+        "Grep": 1,
+        "mcp": 1,
+        "Read": 3
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "compose-callers",
+      "rep": 3,
+      "wall_seconds": 9.25,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.44,
+      "turns": 4,
+      "input_tokens": 192458,
+      "output_tokens": 742,
+      "cache_write_tokens": 18226,
+      "first_context_tokens": 52103,
+      "cost_usd": 0.0977586,
+      "tool_calls": {
+        "Grep": 2,
+        "mcp": 1
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "cookie-parse-impact",
+      "rep": 1,
+      "wall_seconds": 29.52,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 25.98,
+      "turns": 13,
+      "input_tokens": 342830,
+      "output_tokens": 3686,
+      "cache_write_tokens": 35257,
+      "first_context_tokens": 52117,
+      "cost_usd": 0.2086681,
+      "tool_calls": {
+        "Grep": 6,
+        "Read": 6
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "cookie-parse-impact",
+      "rep": 2,
+      "wall_seconds": 38.37,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 36.23,
+      "turns": 13,
+      "input_tokens": 526788,
+      "output_tokens": 2935,
+      "cache_write_tokens": 30334,
+      "first_context_tokens": 52117,
+      "cost_usd": 0.200358,
+      "tool_calls": {
+        "mcp": 3,
+        "Grep": 7,
+        "Bash": 1,
+        "Bash:grep": 1,
+        "Read": 1
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "cookie-parse-impact",
+      "rep": 3,
+      "wall_seconds": 30.7,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 27.61,
+      "turns": 13,
+      "input_tokens": 343109,
+      "output_tokens": 3455,
+      "cache_write_tokens": 11232,
+      "first_context_tokens": 52117,
+      "cost_usd": 0.1126885,
+      "tool_calls": {
+        "Grep": 8,
+        "Read": 4
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "getcookie-callers",
+      "rep": 1,
+      "wall_seconds": 15.79,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 11.79,
+      "turns": 8,
+      "input_tokens": 171377,
+      "output_tokens": 1668,
+      "cache_write_tokens": 10179,
+      "first_context_tokens": 52111,
+      "cost_usd": 0.07352720000000001,
+      "tool_calls": {
+        "Grep": 1,
+        "mcp": 1,
+        "Read": 5
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "getcookie-callers",
+      "rep": 2,
+      "wall_seconds": 22.74,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 20.84,
+      "turns": 6,
+      "input_tokens": 328998,
+      "output_tokens": 1370,
+      "cache_write_tokens": 4333,
+      "first_context_tokens": 52111,
+      "cost_usd": 0.06352130000000002,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 3,
+        "Bash:cd": 3
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "getcookie-callers",
+      "rep": 3,
+      "wall_seconds": 13.0,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 10.76,
+      "turns": 8,
+      "input_tokens": 219190,
+      "output_tokens": 1486,
+      "cache_write_tokens": 27182,
+      "first_context_tokens": 52111,
+      "cost_usd": 0.142804,
+      "tool_calls": {
+        "Grep": 2,
+        "Read": 5
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "getheaders-dispatch",
+      "rep": 1,
+      "wall_seconds": 10.81,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.7,
+      "turns": 3,
+      "input_tokens": 158452,
+      "output_tokens": 760,
+      "cache_write_tokens": 23672,
+      "first_context_tokens": 52131,
+      "cost_usd": 0.1157774,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "getheaders-dispatch",
+      "rep": 2,
+      "wall_seconds": 8.95,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.55,
+      "turns": 3,
+      "input_tokens": 158027,
+      "output_tokens": 714,
+      "cache_write_tokens": 1062,
+      "first_context_tokens": 52131,
+      "cost_usd": 0.0270959,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "getheaders-dispatch",
+      "rep": 3,
+      "wall_seconds": 8.45,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.58,
+      "turns": 3,
+      "input_tokens": 158331,
+      "output_tokens": 806,
+      "cache_write_tokens": 1358,
+      "first_context_tokens": 52131,
+      "cost_usd": 0.029200700000000003,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "header-callers",
+      "rep": 1,
+      "wall_seconds": 28.86,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 26.77,
+      "turns": 8,
+      "input_tokens": 354554,
+      "output_tokens": 3745,
+      "cache_write_tokens": 34019,
+      "first_context_tokens": 52110,
+      "cost_usd": 0.20560230000000004,
+      "tool_calls": {
+        "mcp": 1,
+        "Grep": 3,
+        "Read": 2,
+        "Bash": 1,
+        "Bash:cd": 1
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "header-callers",
+      "rep": 2,
+      "wall_seconds": 21.54,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 20.13,
+      "turns": 6,
+      "input_tokens": 233237,
+      "output_tokens": 3073,
+      "cache_write_tokens": 12015,
+      "first_context_tokens": 52110,
+      "cost_usd": 0.1009274,
+      "tool_calls": {
+        "mcp": 1,
+        "Grep": 3,
+        "Bash": 1,
+        "Bash:jq": 1
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "header-callers",
+      "rep": 3,
+      "wall_seconds": 25.24,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 23.7,
+      "turns": 7,
+      "input_tokens": 296734,
+      "output_tokens": 3347,
+      "cache_write_tokens": 13017,
+      "first_context_tokens": 52110,
+      "cost_usd": 0.11392870000000001,
+      "tool_calls": {
+        "mcp": 1,
+        "Grep": 3,
+        "Bash": 2,
+        "Bash:cd": 2
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "httpexception-constructions",
+      "rep": 1,
+      "wall_seconds": 25.34,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 23.62,
+      "turns": 6,
+      "input_tokens": 288976,
+      "output_tokens": 2269,
+      "cache_write_tokens": 31600,
+      "first_context_tokens": 52110,
+      "cost_usd": 0.17484660000000005,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 3,
+        "Bash:cd": 2,
+        "Bash:grep": 1
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "httpexception-constructions",
+      "rep": 2,
+      "wall_seconds": 26.42,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 24.83,
+      "turns": 17,
+      "input_tokens": 300371,
+      "output_tokens": 3647,
+      "cache_write_tokens": 15877,
+      "first_context_tokens": 52110,
+      "cost_usd": 0.12844640000000002,
+      "tool_calls": {
+        "Grep": 6,
+        "Read": 10
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "httpexception-constructions",
+      "rep": 3,
+      "wall_seconds": 19.53,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 17.39,
+      "turns": 7,
+      "input_tokens": 401586,
+      "output_tokens": 2194,
+      "cache_write_tokens": 7667,
+      "first_context_tokens": 52110,
+      "cost_usd": 0.0920265,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 4,
+        "Bash:cd": 2,
+        "Bash:grep": 2
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "path-users",
+      "rep": 1,
+      "wall_seconds": 27.85,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 24.99,
+      "turns": 5,
+      "input_tokens": 225643,
+      "output_tokens": 2596,
+      "cache_write_tokens": 8803,
+      "first_context_tokens": 52110,
+      "cost_usd": 0.0828712,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 2,
+        "Bash:cd": 2
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "path-users",
+      "rep": 2,
+      "wall_seconds": 25.1,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 21.95,
+      "turns": 13,
+      "input_tokens": 287697,
+      "output_tokens": 3339,
+      "cache_write_tokens": 31825,
+      "first_context_tokens": 52110,
+      "cost_usd": 0.18629620000000002,
+      "tool_calls": {
+        "Grep": 6,
+        "Read": 6
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "path-users",
+      "rep": 3,
+      "wall_seconds": 20.61,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 18.94,
+      "turns": 11,
+      "input_tokens": 224487,
+      "output_tokens": 2769,
+      "cache_write_tokens": 7984,
+      "first_context_tokens": 52110,
+      "cost_usd": 0.0812915,
+      "tool_calls": {
+        "Grep": 5,
+        "Read": 5
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "router-implementers",
+      "rep": 1,
+      "wall_seconds": 9.82,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.2,
+      "turns": 4,
+      "input_tokens": 158103,
+      "output_tokens": 919,
+      "cache_write_tokens": 23386,
+      "first_context_tokens": 52102,
+      "cost_usd": 0.1162171,
+      "tool_calls": {
+        "Grep": 3
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "router-implementers",
+      "rep": 2,
+      "wall_seconds": 7.8,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.09,
+      "turns": 3,
+      "input_tokens": 104834,
+      "output_tokens": 697,
+      "cache_write_tokens": 630,
+      "first_context_tokens": 52102,
+      "cost_usd": 0.019917999999999998,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "crg",
+      "question": "router-implementers",
+      "rep": 3,
+      "wall_seconds": 10.88,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.54,
+      "turns": 4,
+      "input_tokens": 158240,
+      "output_tokens": 1007,
+      "cache_write_tokens": 1282,
+      "first_context_tokens": 52102,
+      "cost_usd": 0.0309052,
+      "tool_calls": {
+        "Grep": 3
+      },
+      "mcp_status": {
+        "code-review-graph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "compose-callers",
+      "rep": 1,
+      "wall_seconds": 9.94,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.73,
+      "turns": 6,
+      "input_tokens": 174370,
+      "output_tokens": 1114,
+      "cache_write_tokens": 3407,
+      "first_context_tokens": 56216,
+      "cost_usd": 0.0427395,
+      "tool_calls": {
+        "mcp": 1,
+        "Grep": 1,
+        "Read": 3
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "compose-callers",
+      "rep": 2,
+      "wall_seconds": 9.5,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.07,
+      "turns": 5,
+      "input_tokens": 173154,
+      "output_tokens": 891,
+      "cache_write_tokens": 2436,
+      "first_context_tokens": 56216,
+      "cost_usd": 0.036601,
+      "tool_calls": {
+        "mcp": 1,
+        "Grep": 1,
+        "Read": 2
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "compose-callers",
+      "rep": 3,
+      "wall_seconds": 8.65,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.9,
+      "turns": 4,
+      "input_tokens": 172522,
+      "output_tokens": 703,
+      "cache_write_tokens": 24583,
+      "first_context_tokens": 56216,
+      "cost_usd": 0.12101610000000002,
+      "tool_calls": {
+        "mcp": 1,
+        "Grep": 1,
+        "Read": 1
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "cookie-parse-impact",
+      "rep": 1,
+      "wall_seconds": 15.9,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 14.29,
+      "turns": 5,
+      "input_tokens": 240512,
+      "output_tokens": 1623,
+      "cache_write_tokens": 28570,
+      "first_context_tokens": 56230,
+      "cost_usd": 0.1525622,
+      "tool_calls": {
+        "mcp": 1,
+        "Grep": 3
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 0.8,
+      "f1": 0.888888888888889,
+      "exact": false,
+      "wrong": [],
+      "missed": [
+        "src/middleware/language/language.ts:detectLanguage",
+        "src/middleware/language/language.ts:languageDetector"
+      ]
+    },
+    {
+      "arm": "gitnexus",
+      "question": "cookie-parse-impact",
+      "rep": 2,
+      "wall_seconds": 22.71,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 19.95,
+      "turns": 10,
+      "input_tokens": 435921,
+      "output_tokens": 2315,
+      "cache_write_tokens": 9782,
+      "first_context_tokens": 56230,
+      "cost_usd": 0.1057963,
+      "tool_calls": {
+        "mcp": 2,
+        "Grep": 6,
+        "Read": 1
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "cookie-parse-impact",
+      "rep": 3,
+      "wall_seconds": 19.1,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 18.12,
+      "turns": 7,
+      "input_tokens": 304802,
+      "output_tokens": 1903,
+      "cache_write_tokens": 7295,
+      "first_context_tokens": 56230,
+      "cost_usd": 0.0788225,
+      "tool_calls": {
+        "mcp": 1,
+        "Grep": 4,
+        "Read": 1
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 0.8,
+      "f1": 0.888888888888889,
+      "exact": false,
+      "wrong": [],
+      "missed": [
+        "src/middleware/language/language.ts:detectLanguage",
+        "src/middleware/language/language.ts:languageDetector"
+      ]
+    },
+    {
+      "arm": "gitnexus",
+      "question": "getcookie-callers",
+      "rep": 1,
+      "wall_seconds": 11.06,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 10.12,
+      "turns": 3,
+      "input_tokens": 116408,
+      "output_tokens": 624,
+      "cache_write_tokens": 2923,
+      "first_context_tokens": 56224,
+      "cost_usd": 0.0301464,
+      "tool_calls": {
+        "mcp": 1,
+        "Grep": 1
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "getcookie-callers",
+      "rep": 2,
+      "wall_seconds": 7.27,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.43,
+      "turns": 3,
+      "input_tokens": 115962,
+      "output_tokens": 693,
+      "cache_write_tokens": 2477,
+      "first_context_tokens": 56224,
+      "cost_usd": 0.0290674,
+      "tool_calls": {
+        "mcp": 1,
+        "Grep": 1
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "getcookie-callers",
+      "rep": 3,
+      "wall_seconds": 8.0,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.69,
+      "turns": 3,
+      "input_tokens": 115962,
+      "output_tokens": 677,
+      "cache_write_tokens": 25264,
+      "first_context_tokens": 56224,
+      "cost_usd": 0.1177667,
+      "tool_calls": {
+        "mcp": 1,
+        "Grep": 1
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "getheaders-dispatch",
+      "rep": 1,
+      "wall_seconds": 12.76,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.04,
+      "turns": 3,
+      "input_tokens": 171898,
+      "output_tokens": 832,
+      "cache_write_tokens": 798,
+      "first_context_tokens": 56244,
+      "cost_usd": 0.029491600000000003,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "getheaders-dispatch",
+      "rep": 2,
+      "wall_seconds": 10.55,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.47,
+      "turns": 3,
+      "input_tokens": 171605,
+      "output_tokens": 825,
+      "cache_write_tokens": 23972,
+      "first_context_tokens": 56244,
+      "cost_usd": 0.11976590000000001,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "getheaders-dispatch",
+      "rep": 3,
+      "wall_seconds": 9.74,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.5,
+      "turns": 3,
+      "input_tokens": 171730,
+      "output_tokens": 740,
+      "cache_write_tokens": 1209,
+      "first_context_tokens": 56244,
+      "cost_usd": 0.0301577,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "header-callers",
+      "rep": 1,
+      "wall_seconds": 25.49,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 22.8,
+      "turns": 8,
+      "input_tokens": 326165,
+      "output_tokens": 2697,
+      "cache_write_tokens": 39288,
+      "first_context_tokens": 56223,
+      "cost_usd": 0.2136847,
+      "tool_calls": {
+        "mcp": 2,
+        "Grep": 4,
+        "Read": 1
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "header-callers",
+      "rep": 2,
+      "wall_seconds": 39.38,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 37.0,
+      "turns": 14,
+      "input_tokens": 382147,
+      "output_tokens": 4459,
+      "cache_write_tokens": 17343,
+      "first_context_tokens": 56223,
+      "cost_usd": 0.1513212,
+      "tool_calls": {
+        "mcp": 3,
+        "Grep": 6,
+        "Bash": 2,
+        "Bash:grep": 1,
+        "Read": 2,
+        "Bash:cd": 1
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "header-callers",
+      "rep": 3,
+      "wall_seconds": 30.8,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 28.1,
+      "turns": 9,
+      "input_tokens": 376885,
+      "output_tokens": 3759,
+      "cache_write_tokens": 12193,
+      "first_context_tokens": 56223,
+      "cost_usd": 0.12371,
+      "tool_calls": {
+        "mcp": 2,
+        "Grep": 4,
+        "Read": 1,
+        "Bash": 1,
+        "Bash:cd": 1
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "httpexception-constructions",
+      "rep": 1,
+      "wall_seconds": 18.8,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 15.31,
+      "turns": 6,
+      "input_tokens": 248809,
+      "output_tokens": 2116,
+      "cache_write_tokens": 10613,
+      "first_context_tokens": 56223,
+      "cost_usd": 0.0883051,
+      "tool_calls": {
+        "Grep": 1,
+        "Bash": 4,
+        "Bash:cd": 3,
+        "Bash:sed": 1
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "httpexception-constructions",
+      "rep": 2,
+      "wall_seconds": 22.26,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 18.0,
+      "turns": 5,
+      "input_tokens": 297381,
+      "output_tokens": 2499,
+      "cache_write_tokens": 5831,
+      "first_context_tokens": 56223,
+      "cost_usd": 0.0783613,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 2,
+        "Bash:cd": 2
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "httpexception-constructions",
+      "rep": 3,
+      "wall_seconds": 20.7,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 16.86,
+      "turns": 6,
+      "input_tokens": 311919,
+      "output_tokens": 2207,
+      "cache_write_tokens": 32310,
+      "first_context_tokens": 56223,
+      "cost_usd": 0.18014820000000004,
+      "tool_calls": {
+        "Grep": 1,
+        "Bash": 4,
+        "Bash:cd": 2,
+        "Bash:sed": 1,
+        "Bash:grep": 1
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "path-users",
+      "rep": 1,
+      "wall_seconds": 20.04,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 18.25,
+      "turns": 9,
+      "input_tokens": 251950,
+      "output_tokens": 2529,
+      "cache_write_tokens": 35037,
+      "first_context_tokens": 56223,
+      "cost_usd": 0.1880055,
+      "tool_calls": {
+        "mcp": 2,
+        "Grep": 3,
+        "Read": 3
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "path-users",
+      "rep": 2,
+      "wall_seconds": 30.84,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 26.46,
+      "turns": 13,
+      "input_tokens": 302750,
+      "output_tokens": 3680,
+      "cache_write_tokens": 7855,
+      "first_context_tokens": 56223,
+      "cost_usd": 0.0985895,
+      "tool_calls": {
+        "Grep": 9,
+        "mcp": 1,
+        "Read": 2
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "path-users",
+      "rep": 3,
+      "wall_seconds": 33.99,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 32.13,
+      "turns": 13,
+      "input_tokens": 369705,
+      "output_tokens": 3640,
+      "cache_write_tokens": 11453,
+      "first_context_tokens": 56223,
+      "cost_usd": 0.11892100000000001,
+      "tool_calls": {
+        "Grep": 5,
+        "mcp": 1,
+        "Read": 6
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "router-implementers",
+      "rep": 1,
+      "wall_seconds": 7.77,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.71,
+      "turns": 2,
+      "input_tokens": 113909,
+      "output_tokens": 591,
+      "cache_write_tokens": 0,
+      "first_context_tokens": 56215,
+      "cost_usd": 0.0181664,
+      "tool_calls": {
+        "Grep": 1
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "router-implementers",
+      "rep": 2,
+      "wall_seconds": 7.05,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 5.58,
+      "turns": 2,
+      "input_tokens": 113909,
+      "output_tokens": 587,
+      "cache_write_tokens": 448,
+      "first_context_tokens": 56215,
+      "cost_usd": 0.0198886,
+      "tool_calls": {
+        "Grep": 1
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "gitnexus",
+      "question": "router-implementers",
+      "rep": 3,
+      "wall_seconds": 7.83,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.27,
+      "turns": 3,
+      "input_tokens": 114120,
+      "output_tokens": 780,
+      "cache_write_tokens": 23437,
+      "first_context_tokens": 56215,
+      "cost_usd": 0.11149680000000001,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {
+        "gitnexus": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "compose-callers",
+      "rep": 1,
+      "wall_seconds": 11.03,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 9.46,
+      "turns": 5,
+      "input_tokens": 116239,
+      "output_tokens": 1050,
+      "cache_write_tokens": 2636,
+      "first_context_tokens": 36834,
+      "cost_usd": 0.033279500000000004,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:ls": 1,
+        "Grep": 3
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "compose-callers",
+      "rep": 2,
+      "wall_seconds": 9.52,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.76,
+      "turns": 4,
+      "input_tokens": 118854,
+      "output_tokens": 983,
+      "cache_write_tokens": 3906,
+      "first_context_tokens": 36834,
+      "cost_usd": 0.037819,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:ls": 1,
+        "Grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "compose-callers",
+      "rep": 3,
+      "wall_seconds": 8.79,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.39,
+      "turns": 4,
+      "input_tokens": 118822,
+      "output_tokens": 805,
+      "cache_write_tokens": 25556,
+      "first_context_tokens": 36834,
+      "cost_usd": 0.1204658,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:ls": 1,
+        "Grep": 1,
+        "Read": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "cookie-parse-impact",
+      "rep": 1,
+      "wall_seconds": 25.09,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 23.27,
+      "turns": 10,
+      "input_tokens": 218258,
+      "output_tokens": 3191,
+      "cache_write_tokens": 34115,
+      "first_context_tokens": 36848,
+      "cost_usd": 0.18764609999999998,
+      "tool_calls": {
+        "Grep": 3,
+        "Bash": 1,
+        "Bash:graphify": 1,
+        "Read": 5
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "cookie-parse-impact",
+      "rep": 2,
+      "wall_seconds": 23.0,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 22.54,
+      "turns": 10,
+      "input_tokens": 212810,
+      "output_tokens": 3134,
+      "cache_write_tokens": 10286,
+      "first_context_tokens": 36848,
+      "cost_usd": 0.0935982,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:grep": 1,
+        "Grep": 4,
+        "Read": 4
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 0.8,
+      "f1": 0.888888888888889,
+      "exact": false,
+      "wrong": [],
+      "missed": [
+        "src/middleware/language/language.ts:detectLanguage",
+        "src/middleware/language/language.ts:languageDetector"
+      ]
+    },
+    {
+      "arm": "graphify",
+      "question": "cookie-parse-impact",
+      "rep": 3,
+      "wall_seconds": 24.9,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 24.11,
+      "turns": 8,
+      "input_tokens": 213184,
+      "output_tokens": 3115,
+      "cache_write_tokens": 10591,
+      "first_context_tokens": 36848,
+      "cost_usd": 0.0946351,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:graphify": 1,
+        "Grep": 3,
+        "Read": 3
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 0.8,
+      "f1": 0.888888888888889,
+      "exact": false,
+      "wrong": [],
+      "missed": [
+        "src/middleware/language/language.ts:detectLanguage",
+        "src/middleware/language/language.ts:languageDetector"
+      ]
+    },
+    {
+      "arm": "graphify",
+      "question": "getcookie-callers",
+      "rep": 1,
+      "wall_seconds": 6.87,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.36,
+      "turns": 3,
+      "input_tokens": 78302,
+      "output_tokens": 785,
+      "cache_write_tokens": 3581,
+      "first_context_tokens": 36842,
+      "cost_usd": 0.030511999999999997,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:graphify": 1,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "getcookie-callers",
+      "rep": 2,
+      "wall_seconds": 9.65,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.03,
+      "turns": 3,
+      "input_tokens": 78619,
+      "output_tokens": 914,
+      "cache_write_tokens": 25569,
+      "first_context_tokens": 36842,
+      "cost_usd": 0.1175919,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:graphify": 1,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "getcookie-callers",
+      "rep": 3,
+      "wall_seconds": 7.62,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.88,
+      "turns": 3,
+      "input_tokens": 78413,
+      "output_tokens": 844,
+      "cache_write_tokens": 3692,
+      "first_context_tokens": 36842,
+      "cost_usd": 0.031550999999999996,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:ls": 1,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "getheaders-dispatch",
+      "rep": 1,
+      "wall_seconds": 8.33,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.89,
+      "turns": 3,
+      "input_tokens": 114146,
+      "output_tokens": 815,
+      "cache_write_tokens": 518,
+      "first_context_tokens": 36862,
+      "cost_usd": 0.0224594,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "getheaders-dispatch",
+      "rep": 2,
+      "wall_seconds": 9.1,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.12,
+      "turns": 3,
+      "input_tokens": 114176,
+      "output_tokens": 858,
+      "cache_write_tokens": 23236,
+      "first_context_tokens": 36862,
+      "cost_usd": 0.11148759999999999,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "getheaders-dispatch",
+      "rep": 3,
+      "wall_seconds": 8.5,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.09,
+      "turns": 3,
+      "input_tokens": 114181,
+      "output_tokens": 815,
+      "cache_write_tokens": 1662,
+      "first_context_tokens": 36862,
+      "cost_usd": 0.0269195,
+      "tool_calls": {
+        "Grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "header-callers",
+      "rep": 1,
+      "wall_seconds": 34.92,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 32.07,
+      "turns": 11,
+      "input_tokens": 327471,
+      "output_tokens": 4302,
+      "cache_write_tokens": 40361,
+      "first_context_tokens": 36841,
+      "cost_usd": 0.2340576,
+      "tool_calls": {
+        "Bash": 4,
+        "Bash:graphify": 1,
+        "Grep": 4,
+        "Read": 2,
+        "Bash:cd": 3
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "header-callers",
+      "rep": 2,
+      "wall_seconds": 33.54,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 32.14,
+      "turns": 12,
+      "input_tokens": 376001,
+      "output_tokens": 4655,
+      "cache_write_tokens": 19478,
+      "first_context_tokens": 36841,
+      "cost_usd": 0.1610007,
+      "tool_calls": {
+        "Bash": 3,
+        "Bash:graphify": 1,
+        "Grep": 7,
+        "Read": 1,
+        "Bash:cd": 1,
+        "Bash:head": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 0.9473684210526315,
+      "f1": 0.972972972972973,
+      "exact": false,
+      "wrong": [],
+      "missed": [
+        "src/middleware/serve-static/index.ts:serveStatic"
+      ]
+    },
+    {
+      "arm": "graphify",
+      "question": "header-callers",
+      "rep": 3,
+      "wall_seconds": 25.72,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 25.04,
+      "turns": 9,
+      "input_tokens": 271731,
+      "output_tokens": 3634,
+      "cache_write_tokens": 13679,
+      "first_context_tokens": 36841,
+      "cost_usd": 0.11773999999999998,
+      "tool_calls": {
+        "Bash": 3,
+        "Bash:graphify": 1,
+        "Grep": 3,
+        "Read": 2,
+        "Bash:cd": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "httpexception-constructions",
+      "rep": 1,
+      "wall_seconds": 26.95,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 25.94,
+      "turns": 8,
+      "input_tokens": 307278,
+      "output_tokens": 3365,
+      "cache_write_tokens": 11293,
+      "first_context_tokens": 36841,
+      "cost_usd": 0.10930540000000002,
+      "tool_calls": {
+        "Bash": 5,
+        "Bash:graphify": 1,
+        "Grep": 2,
+        "Bash:cd": 2,
+        "Bash:sed": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "httpexception-constructions",
+      "rep": 2,
+      "wall_seconds": 25.5,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 25.26,
+      "turns": 14,
+      "input_tokens": 254128,
+      "output_tokens": 3563,
+      "cache_write_tokens": 8839,
+      "first_context_tokens": 36841,
+      "cost_usd": 0.096411,
+      "tool_calls": {
+        "Bash": 4,
+        "Bash:ls": 1,
+        "Grep": 9,
+        "Bash:sed": 1,
+        "Bash:grep": 1,
+        "Bash:for": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "httpexception-constructions",
+      "rep": 3,
+      "wall_seconds": 20.98,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 19.96,
+      "turns": 7,
+      "input_tokens": 210146,
+      "output_tokens": 2681,
+      "cache_write_tokens": 30064,
+      "first_context_tokens": 36841,
+      "cost_usd": 0.1659515,
+      "tool_calls": {
+        "Bash": 3,
+        "Bash:graphify": 1,
+        "Grep": 3,
+        "Bash:cd": 1,
+        "Bash:grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "path-users",
+      "rep": 1,
+      "wall_seconds": 26.85,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 26.35,
+      "turns": 13,
+      "input_tokens": 214117,
+      "output_tokens": 3655,
+      "cache_write_tokens": 11448,
+      "first_context_tokens": 36841,
+      "cost_usd": 0.1034889,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:ls": 1,
+        "Grep": 5,
+        "Read": 6
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "path-users",
+      "rep": 2,
+      "wall_seconds": 23.93,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 23.29,
+      "turns": 9,
+      "input_tokens": 254589,
+      "output_tokens": 2986,
+      "cache_write_tokens": 9367,
+      "first_context_tokens": 36841,
+      "cost_usd": 0.092734,
+      "tool_calls": {
+        "Bash": 4,
+        "Bash:graphify": 1,
+        "Grep": 2,
+        "Read": 2,
+        "Bash:cd": 3
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "path-users",
+      "rep": 3,
+      "wall_seconds": 25.08,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 24.01,
+      "turns": 7,
+      "input_tokens": 247674,
+      "output_tokens": 3001,
+      "cache_write_tokens": 29416,
+      "first_context_tokens": 36841,
+      "cost_usd": 0.1703836,
+      "tool_calls": {
+        "Bash": 4,
+        "Bash:graphify": 1,
+        "Grep": 2,
+        "Bash:cd": 3
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "router-implementers",
+      "rep": 1,
+      "wall_seconds": 7.09,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.59,
+      "turns": 3,
+      "input_tokens": 78522,
+      "output_tokens": 794,
+      "cache_write_tokens": 3825,
+      "first_context_tokens": 36833,
+      "cost_usd": 0.0315752,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:ls": 1,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "router-implementers",
+      "rep": 2,
+      "wall_seconds": 8.29,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.26,
+      "turns": 4,
+      "input_tokens": 119685,
+      "output_tokens": 1013,
+      "cache_write_tokens": 26011,
+      "first_context_tokens": 36833,
+      "cost_usd": 0.1244257,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:graphify": 1,
+        "Grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "graphify",
+      "question": "router-implementers",
+      "rep": 3,
+      "wall_seconds": 8.2,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.35,
+      "turns": 3,
+      "input_tokens": 78490,
+      "output_tokens": 877,
+      "cache_write_tokens": 3793,
+      "first_context_tokens": 36833,
+      "cost_usd": 0.0322772,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:ls": 1,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "compose-callers",
+      "rep": 1,
+      "wall_seconds": 8.89,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.97,
+      "turns": 4,
+      "input_tokens": 149256,
+      "output_tokens": 731,
+      "cache_write_tokens": 972,
+      "first_context_tokens": 36632,
+      "cost_usd": 0.026895400000000003,
+      "tool_calls": {
+        "Bash": 2,
+        "Bash:cg": 2,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "compose-callers",
+      "rep": 2,
+      "wall_seconds": 9.16,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.04,
+      "turns": 5,
+      "input_tokens": 186337,
+      "output_tokens": 718,
+      "cache_write_tokens": 1014,
+      "first_context_tokens": 36632,
+      "cost_usd": 0.0306511,
+      "tool_calls": {
+        "Bash": 3,
+        "Bash:cg": 2,
+        "Bash:grep": 1,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "compose-callers",
+      "rep": 3,
+      "wall_seconds": 8.41,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 7.42,
+      "turns": 4,
+      "input_tokens": 149036,
+      "output_tokens": 745,
+      "cache_write_tokens": 22369,
+      "first_context_tokens": 36632,
+      "cost_usd": 0.1104717,
+      "tool_calls": {
+        "Bash": 2,
+        "Bash:cg": 2,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "cookie-parse-impact",
+      "rep": 1,
+      "wall_seconds": 21.34,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 19.13,
+      "turns": 9,
+      "input_tokens": 306877,
+      "output_tokens": 2437,
+      "cache_write_tokens": 3623,
+      "first_context_tokens": 36646,
+      "cost_usd": 0.0700856,
+      "tool_calls": {
+        "Bash": 7,
+        "Bash:cg": 5,
+        "Bash:for": 2,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 0.8,
+      "f1": 0.888888888888889,
+      "exact": false,
+      "wrong": [],
+      "missed": [
+        "src/middleware/language/language.ts:detectLanguage",
+        "src/middleware/language/language.ts:languageDetector"
+      ]
+    },
+    {
+      "arm": "omnigraph",
+      "question": "cookie-parse-impact",
+      "rep": 2,
+      "wall_seconds": 25.88,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 23.71,
+      "turns": 10,
+      "input_tokens": 386637,
+      "output_tokens": 2318,
+      "cache_write_tokens": 25196,
+      "first_context_tokens": 36646,
+      "cost_usd": 0.1610089,
+      "tool_calls": {
+        "Bash": 9,
+        "Bash:cg": 7,
+        "Bash:for": 1,
+        "Bash:grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 0.8,
+      "f1": 0.888888888888889,
+      "exact": false,
+      "wrong": [],
+      "missed": [
+        "src/middleware/language/language.ts:detectLanguage",
+        "src/middleware/language/language.ts:languageDetector"
+      ]
+    },
+    {
+      "arm": "omnigraph",
+      "question": "cookie-parse-impact",
+      "rep": 3,
+      "wall_seconds": 38.49,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 34.08,
+      "turns": 15,
+      "input_tokens": 552513,
+      "output_tokens": 3400,
+      "cache_write_tokens": 9992,
+      "first_context_tokens": 36646,
+      "cost_usd": 0.1291023,
+      "tool_calls": {
+        "Bash": 12,
+        "Bash:cg": 8,
+        "Bash:for": 1,
+        "Grep": 2,
+        "Bash:sed": 1,
+        "Bash:grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 0.8,
+      "f1": 0.888888888888889,
+      "exact": false,
+      "wrong": [],
+      "missed": [
+        "src/middleware/language/language.ts:detectLanguage",
+        "src/middleware/language/language.ts:languageDetector"
+      ]
+    },
+    {
+      "arm": "omnigraph",
+      "question": "getcookie-callers",
+      "rep": 1,
+      "wall_seconds": 10.72,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 9.4,
+      "turns": 5,
+      "input_tokens": 187146,
+      "output_tokens": 868,
+      "cache_write_tokens": 1466,
+      "first_context_tokens": 36640,
+      "cost_usd": 0.0339893,
+      "tool_calls": {
+        "Bash": 3,
+        "Bash:cg": 2,
+        "Bash:grep": 1,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "getcookie-callers",
+      "rep": 2,
+      "wall_seconds": 8.64,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.92,
+      "turns": 3,
+      "input_tokens": 112904,
+      "output_tokens": 725,
+      "cache_write_tokens": 22993,
+      "first_context_tokens": 36640,
+      "cost_usd": 0.1090828,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:cg": 1,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "getcookie-callers",
+      "rep": 3,
+      "wall_seconds": 11.05,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 9.86,
+      "turns": 4,
+      "input_tokens": 149527,
+      "output_tokens": 864,
+      "cache_write_tokens": 1216,
+      "first_context_tokens": 36640,
+      "cost_usd": 0.0292136,
+      "tool_calls": {
+        "Bash": 2,
+        "Bash:cg": 2,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "getheaders-dispatch",
+      "rep": 1,
+      "wall_seconds": 12.25,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 10.99,
+      "turns": 5,
+      "input_tokens": 188238,
+      "output_tokens": 964,
+      "cache_write_tokens": 1679,
+      "first_context_tokens": 36660,
+      "cost_usd": 0.0358891,
+      "tool_calls": {
+        "Bash": 3,
+        "Bash:cg": 1,
+        "Bash:grep": 1,
+        "Bash:cd": 1,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "getheaders-dispatch",
+      "rep": 2,
+      "wall_seconds": 9.85,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 9.17,
+      "turns": 4,
+      "input_tokens": 113486,
+      "output_tokens": 904,
+      "cache_write_tokens": 1497,
+      "first_context_tokens": 36660,
+      "cost_usd": 0.027101500000000004,
+      "tool_calls": {
+        "Bash": 2,
+        "Bash:cg": 1,
+        "Grep": 1,
+        "Bash:grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "getheaders-dispatch",
+      "rep": 3,
+      "wall_seconds": 10.34,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 9.47,
+      "turns": 4,
+      "input_tokens": 113520,
+      "output_tokens": 1073,
+      "cache_write_tokens": 23016,
+      "first_context_tokens": 36660,
+      "cost_usd": 0.11271400000000001,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 1,
+        "Bash:cg": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "header-callers",
+      "rep": 1,
+      "wall_seconds": 14.62,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 12.17,
+      "turns": 5,
+      "input_tokens": 188819,
+      "output_tokens": 1403,
+      "cache_write_tokens": 2016,
+      "first_context_tokens": 36639,
+      "cost_usd": 0.0416493,
+      "tool_calls": {
+        "Bash": 4,
+        "Bash:cg": 2,
+        "Bash:grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "header-callers",
+      "rep": 2,
+      "wall_seconds": 9.36,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 8.14,
+      "turns": 3,
+      "input_tokens": 112224,
+      "output_tokens": 944,
+      "cache_write_tokens": 971,
+      "first_context_tokens": 36639,
+      "cost_usd": 0.0253167,
+      "tool_calls": {
+        "Bash": 2,
+        "Bash:cg": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "header-callers",
+      "rep": 3,
+      "wall_seconds": 15.4,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 13.47,
+      "turns": 5,
+      "input_tokens": 189732,
+      "output_tokens": 1501,
+      "cache_write_tokens": 24368,
+      "first_context_tokens": 36639,
+      "cost_usd": 0.1298934,
+      "tool_calls": {
+        "Bash": 3,
+        "Bash:cg": 2,
+        "Bash:grep": 1,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "httpexception-constructions",
+      "rep": 1,
+      "wall_seconds": 19.73,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 19.15,
+      "turns": 7,
+      "input_tokens": 242281,
+      "output_tokens": 2432,
+      "cache_write_tokens": 6329,
+      "first_context_tokens": 36639,
+      "cost_usd": 0.07411229999999999,
+      "tool_calls": {
+        "Bash": 4,
+        "Bash:cg": 1,
+        "Grep": 2,
+        "Bash:grep": 2,
+        "Bash:for": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "httpexception-constructions",
+      "rep": 2,
+      "wall_seconds": 21.75,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 21.38,
+      "turns": 9,
+      "input_tokens": 279584,
+      "output_tokens": 2934,
+      "cache_write_tokens": 28964,
+      "first_context_tokens": 36639,
+      "cost_usd": 0.1711579,
+      "tool_calls": {
+        "Bash": 4,
+        "Bash:cg": 2,
+        "Grep": 3,
+        "Bash:for": 1,
+        "Bash:cd": 1,
+        "Read": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "httpexception-constructions",
+      "rep": 3,
+      "wall_seconds": 23.78,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 23.39,
+      "turns": 10,
+      "input_tokens": 285745,
+      "output_tokens": 3400,
+      "cache_write_tokens": 8454,
+      "first_context_tokens": 36639,
+      "cost_usd": 0.09643,
+      "tool_calls": {
+        "Bash": 4,
+        "Bash:cg": 2,
+        "Grep": 4,
+        "Bash:cd": 2,
+        "Read": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "path-users",
+      "rep": 1,
+      "wall_seconds": 12.65,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 11.95,
+      "turns": 5,
+      "input_tokens": 156938,
+      "output_tokens": 1593,
+      "cache_write_tokens": 3961,
+      "first_context_tokens": 36639,
+      "cost_usd": 0.0479479,
+      "tool_calls": {
+        "Bash": 2,
+        "Bash:cg": 2,
+        "Grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "path-users",
+      "rep": 2,
+      "wall_seconds": 12.32,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 11.13,
+      "turns": 4,
+      "input_tokens": 116224,
+      "output_tokens": 1356,
+      "cache_write_tokens": 24292,
+      "first_context_tokens": 36639,
+      "cost_usd": 0.12079360000000001,
+      "tool_calls": {
+        "Bash": 2,
+        "Bash:cg": 2,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "path-users",
+      "rep": 3,
+      "wall_seconds": 16.22,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 15.54,
+      "turns": 5,
+      "input_tokens": 191336,
+      "output_tokens": 1373,
+      "cache_write_tokens": 3363,
+      "first_context_tokens": 36639,
+      "cost_usd": 0.0468593,
+      "tool_calls": {
+        "Bash": 3,
+        "Bash:cg": 2,
+        "Bash:grep": 1,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "router-implementers",
+      "rep": 1,
+      "wall_seconds": 7.57,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.64,
+      "turns": 3,
+      "input_tokens": 111911,
+      "output_tokens": 615,
+      "cache_write_tokens": 697,
+      "first_context_tokens": 36631,
+      "cost_usd": 0.0209287,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:cg": 1,
+        "Grep": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "router-implementers",
+      "rep": 2,
+      "wall_seconds": 7.12,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.51,
+      "turns": 3,
+      "input_tokens": 112162,
+      "output_tokens": 644,
+      "cache_write_tokens": 1066,
+      "first_context_tokens": 36631,
+      "cost_usd": 0.022697900000000003,
+      "tool_calls": {
+        "Bash": 2,
+        "Bash:cg": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    },
+    {
+      "arm": "omnigraph",
+      "question": "router-implementers",
+      "rep": 3,
+      "wall_seconds": 11.2,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 9.09,
+      "turns": 5,
+      "input_tokens": 190351,
+      "output_tokens": 890,
+      "cache_write_tokens": 24143,
+      "first_context_tokens": 36631,
+      "cost_usd": 0.1229847,
+      "tool_calls": {
+        "Bash": 4,
+        "Bash:cg": 4
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": []
+    }
+  ]
+}
