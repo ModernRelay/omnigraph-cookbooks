@@ -246,3 +246,25 @@ temporary fixture and server logs.
 
 Keep schemas, queries, seeds and cookbook-specific explanations together. Link
 to the engine guides for general syntax and operations.
+
+## The website
+
+[omnigraph.dev/use-cases](https://www.omnigraph.dev/use-cases) is built from
+this repository: each cookbook's schema, stored queries, sample counts and
+README are imported on every site build. What the site says about a cookbook
+lives in its `site.json`:
+
+| Field | Shown as |
+|---|---|
+| `order` | its place in the directory |
+| `name`, `category`, `blurb` | the card and the page header; `category` is one of Company, Engineering, Hardware, Research, Investing, Personal |
+| `sample` | what the seed data depicts, beside its counts |
+| `questions` | "Questions it answers": each `q` names a stored **read** query in `queries/*.gq` |
+| `search` | the page's `<title>` (60 characters at most) and the keywords its structured data carries |
+
+`python3 scripts/check-cookbooks.py --site` checks every `site.json` offline
+in under a second; the full run checks them first. Rename or remove a query in
+the same change as the question that names it. A push to `main` that touches a
+cookbook rebuilds the site (`.github/workflows/refresh-site.yml`); a cookbook
+without a `site.json` still appears there, under "More", with its README's
+title and first paragraph.

@@ -46,8 +46,14 @@ from the released binary pin in `.github/workflows/qualify.yml`. Refresh with
   required-field/edge constraints. A keyed node or unique edge must not repeat
   within one seed batch.
 - New cookbooks ship schema, queries, seed, role policies, `cluster.yaml`,
-  operator alias examples and short domain guidance. Add their local journey
-  to the existing checker rather than creating a second harness.
+  operator alias examples, short domain guidance and a `site.json` (see
+  [The website](README.md#the-website)). Add their local journey to the
+  existing checker rather than creating a second harness.
+- `site.json` is the copy omnigraph.dev shows; its questions name stored read
+  queries. Renaming or removing a query means updating the question in the
+  same change; `check-cookbooks.py --site` catches a miss offline. Its search
+  keywords come from the market vocabulary in ModernRelay's mr-ops graph:
+  change them there first.
 - Update user instructions in the same change as a command or behavior. Prefer
   a link to an existing owner over copying another lifecycle walkthrough.
 

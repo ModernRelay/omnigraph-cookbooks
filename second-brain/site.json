@@ -1,0 +1,34 @@
+{
+  "order": 8,
+  "name": "Second brain",
+  "category": "Personal",
+  "blurb": "One person's people, projects, notes, tasks, habits and reading, with where each piece came from.",
+  "sample": "A fictional person's life",
+  "questions": [
+    {
+      "q": "What do I still owe this person?",
+      "query": "person_tasks_i_owe"
+    },
+    {
+      "q": "What should I do next?",
+      "query": "tasks_next"
+    },
+    {
+      "q": "What is on my reading list?",
+      "query": "reading_queue"
+    },
+    {
+      "q": "Who recommended this book?",
+      "query": "media_recommended_by"
+    }
+  ],
+  "search": {
+    "title": "Second brain knowledge graph template",
+    "keywords": [
+      "second brain",
+      "agent memory",
+      "llm wiki",
+      "knowledge graph"
+    ]
+  }
+}
