@@ -246,7 +246,7 @@ def qualify(name, graph, stored_query, workspace, env):
                   + (", ob client" if name == "beads" else "")
                   + (", review journey" if name == "company-brain" else "")
                   + (", review gate" if name == "hardware-program" else "")
-                  + (", pull request diff" if name == "code-graph" else ""), flush=True)
+                  + (", pull request diff, cg client" if name == "code-graph" else ""), flush=True)
         finally:
             gateway.terminate()
             process.terminate()
@@ -414,9 +414,24 @@ def code_graph_journey(env):
     assert implementers == {f"src/router/{r}#add()." for r in routers}, implementers
     previous = run(env, "commit", "list", *scope("act-reader"), "--json")["commits"][0]["graph_commit_id"]
 
-    loaded = run(env, "load", *scope("act-agent"), "--data", str(ROOT / "code-graph/examples/pr-5267.jsonl"),
-                 "--from", "main", "--branch", "pr-5267", "--mode", "overwrite", "--yes", "--json")
-    assert loaded["commit"]["graph_commit_id"]
+    # The cg client, through each actor's server target like any operator.
+    base_env = {k: v for k, v in env.items() if not k.startswith("CG_")}
+    base_env.update(CG_OMNIGRAPH=CLI, CG_GRAPH="code")
+
+    def cg(actor, *args, ok=True):
+        result = subprocess.run([sys.executable, str(ROOT / "code-graph/client/cg"), *args, "--json"],
+                                capture_output=True, text=True, timeout=120,
+                                env={**base_env, "CG_TARGET": target(actor)})
+        if (result.returncode == 0) != ok:
+            raise AssertionError(f"cg {args} as {actor}: exit {result.returncode}\n{result.stdout}{result.stderr}")
+        return json.loads(result.stdout) if ok else result
+
+    pr_file = str(ROOT / "code-graph/examples/pr-5267.jsonl")
+    denied = cg("act-reader", "load", pr_file, "--branch", "pr-5267", ok=False)
+    # Refused before any effect, so cg reports a plain failure, not an unknown outcome.
+    assert denied.returncode == 1 and "policy denied" in denied.stderr, (denied.returncode, denied.stderr)
+    loaded = cg("act-agent", "load", pr_file, "--branch", "pr-5267")
+    assert loaded["branch"] == "pr-5267" and loaded["commit"] and loaded["rows"] == 846, loaded
     changes = run(env, "branch", "diff", "pr-5267", *scope("act-reader"), "--json")["changes"]
     summary = collections.Counter((c["type"]["name"], c["op"]) for c in changes)
     assert summary == {("Symbol", "insert"): 2, ("Symbol", "update"): 5, ("References", "insert"): 16,
@@ -426,9 +441,17 @@ def code_graph_journey(env):
     assert changed == {f"src/router/reg-exp-router/`router.ts`/RegExpRouter#{m}" for m in
                        ("`<constructor>`().", "add().", "buildAllMatchers().", "`#buildMatcher`().")} | {
                        "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`()."}, changed
+    review = cg("act-reader", "diff", "pr-5267")
+    assert (review["from_revision"], review["to_revision"]) == (base, head), review
+    assert [r["symbol"] for r in review["added"]] == ["src/router/`utils.ts`/", helper["symbol"]], review["added"]
+    assert {r["symbol"] for r in review["changed"]} == changed and review["moved"] == 53, review
+    assert (len(review["references"]["added"]), len(review["references"]["removed"])) == (16, 0)
 
     assert rows("callers", helper) == []
     assert len(rows("callers", helper, "--branch", "pr-5267")) == 12
+    # cg resolves a unique name to its key, and lists the candidates of an ambiguous one.
+    assert len(cg("act-reader", "callers", "createNullObject", "--branch", "pr-5267")["rows"]) == 12
+    assert cg("act-reader", "implementers", "add", ok=False).returncode == 2
     refused(run(env, "branch", "merge", "pr-5267", "--into", "main", *scope("act-agent"), "--json", ok=False))
     merged = run(env, "branch", "merge", "pr-5267", "--into", "main", *scope("act-writer"), "--json")
     assert merged["outcome"] == "fast_forward", merged
@@ -437,6 +460,13 @@ def code_graph_journey(env):
     assert len(rows("callers", helper)) == 12
     assert [row["r.sha"] for row in rows("revision", None, "--snapshot", previous)] == [base]
     assert rows("callers", helper, "--snapshot", previous) == []
+
+    # Loading the base back over the merged PR removes what the PR added.
+    cg("act-agent", "load", str(ROOT / "code-graph/seed.jsonl"), "--branch", "revert-5267")
+    revert = cg("act-reader", "diff", "revert-5267")
+    assert [r["symbol"] for r in revert["removed"]] == ["src/router/`utils.ts`/", helper["symbol"]], revert
+    assert (len(revert["references"]["added"]), len(revert["references"]["removed"])) == (0, 16), revert
+    run(env, "branch", "delete", "revert-5267", *scope("act-writer"), "--yes", "--json")
 
 
 def main():

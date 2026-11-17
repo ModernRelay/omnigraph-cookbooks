@@ -24,6 +24,11 @@ hono's router at the parent of PR #5267 (`seed.jsonl`) and at the PR
   `fetch.py` checks out and indexes; `build_seed.py` converts; `scip_index.py`
   reads SCIP with the standard library; `indexer/` locks scip-typescript and
   its TypeScript.
+- `client/cg` — the client: `cg_cli.py` holds the code, `tests/` its offline
+  tests with captured branch diffs. It writes only through `cg load` and
+  `cg index`, both `--mode overwrite`. Run the tests with
+  `python3 -m unittest discover -s code-graph/client/tests`; the checker's
+  code-graph journey also drives it against a served graph.
 - `cluster.yaml` (graph `code`), `policies/`, `omnigraph-config.example.yaml`.
 
 ## Writing

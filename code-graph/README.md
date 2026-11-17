@@ -130,6 +130,64 @@ omnigraph branch delete pr-5267 --target local-writer --graph code --yes --json
 The commit `main` had before the merge stays readable: pass its
 `graph_commit_id` from `omnigraph commit list` to any read as `--snapshot`.
 
+## The cg client
+
+`client/cg` wraps these steps, and needs only Python 3 and the `omnigraph`
+CLI. It reads through the stored queries and writes only by loading a
+revision with `--mode overwrite`. It takes its target from `CG_TARGET` or
+`--target` (a server target name or a local graph path) and the graph from
+`CG_GRAPH` (default `code`); a server target owns the token.
+
+| Command | What it does |
+|---|---|
+| `cg find NAME` | the keys of the symbols with that name |
+| `cg callers SYMBOL` | also `callees`, `impact`, `implementers` and `members`; SYMBOL is a key or a name that matches one symbol, `--path` narrows a name, `--branch` reads a branch |
+| `cg hubs`, `cg unreferenced`, `cg revision` | the most referenced symbols, unreferenced callables, the indexed commit |
+| `cg load FILE --branch B` | load a revision file, creating `B` from `--base` (default `main`) when it does not exist |
+| `cg index [CHECKOUT] --branch B` | index a TypeScript checkout, convert it and load it, in one step |
+| `cg diff B` | the branch diff as a review: symbols added, removed and changed, references added and removed per caller, definitions that only moved; `--markdown` for a pull request comment |
+
+Add `--json` to any command for machine output. A refused write exits 1 and
+changed nothing; an ambiguous name exits 2 and lists the candidates; a write
+whose outcome is unknown exits 3, so check the branch before loading again.
+
+```bash
+export CG_TARGET=local-agent
+code-graph/client/cg load code-graph/examples/pr-5267.jsonl --branch pr-5267
+CG_TARGET=local-reader code-graph/client/cg diff pr-5267
+```
+
+```text
+pr-5267 against main, revision a10592f3..4b44abe1: 2 symbols added, 0 removed, 5 changed; 16 references added, 0 removed, 0 changed; 53 definitions only moved.
+
+Added:
+  src/router/utils.ts (module)
+  src/router/utils.ts:createNullObject (constant)
+
+Changed:
+  src/router/reg-exp-router/router.ts:RegExpRouter.#buildMatcher() (method): code changed
+  ...
+References added:
+  src/router/reg-exp-router/router.ts:RegExpRouter.add() now calls src/router/utils.ts:createNullObject
+  ...
+```
+
+The five methods that also moved count as changed, so 53 of the 58 moves
+remain. In CI, one step per pull request indexes the head and posts the review:
+
+```bash
+export CG_TARGET=code-indexer CG_GRAPH=code          # an operator target for act-agent's token
+code-graph/client/cg index . --branch "pr-$PR_NUMBER" --project tsconfig.json
+code-graph/client/cg diff "pr-$PR_NUMBER" --markdown > review.md
+gh pr comment "$PR_NUMBER" --body-file review.md
+```
+
+`cg index` runs scip-typescript from `CG_INDEXER`, the locked install in
+`sources/indexer/node_modules` after `npm ci` there, or your `PATH`, and refuses
+a checkout with uncommitted changes unless you pass `--allow-dirty`. The
+client's tests run offline against captured diffs:
+`python3 -m unittest discover -s code-graph/client/tests`.
+
 ## Index your own repository
 
 The converter reads any TypeScript SCIP index. Index the repository with
@@ -196,6 +254,8 @@ qualifies the committed files.
 - `queries/code.gq` — the stored reads.
 - `seed.jsonl` / `seed.md` — the base revision of the seed, and what it holds.
 - `examples/pr-5267.jsonl` — the PR revision, for [indexing a pull request](#index-a-pull-request).
+- `client/` — the [cg client](#the-cg-client) and its tests, with captured
+  branch diffs as fixtures.
 - `sources/` — `source.json` pins, `fetch.py`, `build_seed.py`, the SCIP reader
   `scip_index.py`, and the locked indexer.
 - `cluster.yaml`, `policies/` — the deployment: graph `code`, roles, the

@@ -1,0 +1,260 @@
+"""Tests for cg that need no server: the diff review, display names, name
+resolution and the omnigraph command lines cg builds.
+
+The fixtures are real `omnigraph branch diff --json` output from OmniGraph
+0.14.0: hono PR #5267 against its base, and the base loaded back over the PR.
+Run with: python3 -m unittest discover -s code-graph/client/tests
+"""
+
+import collections
+import json
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+from unittest import mock
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent))
+import cg_cli  # noqa: E402
+
+FIXTURES = HERE / "fixtures"
+HELPER = "src/router/`utils.ts`/createNullObject."
+MODULE = "src/router/`utils.ts`/"
+CHANGED = {
+    "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
+    "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
+    "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
+    "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
+    "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
+}
+BASE, HEAD = "a10592f3e1864cbe277619633db953450a6b1e4b", "4b44abe1b5c7755aac8555d7943611555183450b"
+
+
+def fixture(name):
+    return json.loads((FIXTURES / name).read_text())
+
+
+class Summarize(unittest.TestCase):
+    def test_pull_request(self):
+        s = cg_cli.summarize(fixture("pr-5267.diff.json"))
+        self.assertEqual((s["from_revision"], s["to_revision"]), (BASE, HEAD))
+        self.assertEqual([r["symbol"] for r in s["added"]], [MODULE, HELPER])
+        self.assertEqual(s["removed"], [])
+        self.assertEqual({r["symbol"] for r in s["changed"]}, CHANGED)
+        self.assertTrue(all(r["fields"] == ["digest"] for r in s["changed"]))
+        # 58 definitions moved; the five that also changed count as changed.
+        self.assertEqual(s["moved"], 53)
+        refs = s["references"]
+        self.assertEqual((len(refs["added"]), len(refs["removed"]), len(refs["changed"])), (16, 0, 0))
+        self.assertEqual(collections.Counter(r["to"] for r in refs["added"]), {HELPER: 12, MODULE: 4})
+        self.assertIn({"from": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().", "to": HELPER,
+                       "call": True, "sites": 1}, refs["added"])
+        self.assertEqual(s["members"]["added"], [{"from": HELPER, "to": MODULE}])
+        self.assertEqual(s["implements"], {"added": [], "removed": [], "changed": []})
+
+    def test_revert_removes_what_the_pull_request_added(self):
+        s = cg_cli.summarize(fixture("revert-5267.diff.json"))
+        self.assertEqual((s["from_revision"], s["to_revision"]), (HEAD, BASE))
+        self.assertEqual([r["symbol"] for r in s["removed"]], [MODULE, HELPER])
+        self.assertEqual(s["added"], [])
+        self.assertEqual({r["symbol"] for r in s["changed"]}, CHANGED)
+        self.assertEqual(len(s["references"]["removed"]), 16)
+        self.assertEqual(s["references"]["added"], [])
+        self.assertEqual(s["members"]["removed"], [{"from": HELPER, "to": MODULE}])
+
+    def test_edge_update_keeps_both_sides(self):
+        diff = {"changes": [{"kind": "edge", "type": {"name": "References"}, "op": "update",
+                             "before": {"properties": {"call": False, "sites": 1}, "endpoints": {"from": "a/`b.ts`/f().", "to": "a/`b.ts`/g()."}},
+                             "after": {"properties": {"call": True, "sites": 2}, "endpoints": {"from": "a/`b.ts`/f().", "to": "a/`b.ts`/g()."}}}]}
+        s = cg_cli.summarize(diff)
+        self.assertEqual(s["references"]["changed"], [{"from": "a/`b.ts`/f().", "to": "a/`b.ts`/g().", "call": True,
+                                                        "sites": 2, "before": {"call": False, "sites": 1}}])
+        self.assertIn("call False to True, sites 1 to 2", cg_cli.render(s, "b", "main"))
+
+
+class Render(unittest.TestCase):
+    def test_text(self):
+        text = cg_cli.render(cg_cli.summarize(fixture("pr-5267.diff.json")), "pr-5267", "main")
+        first = text.splitlines()[0]
+        self.assertEqual(first, "pr-5267 against main, revision a10592f3..4b44abe1: 2 symbols added, 0 removed, "
+                                "5 changed; 16 references added, 0 removed, 0 changed; 53 definitions only moved.")
+        self.assertIn("  src/router/utils.ts:createNullObject (constant)", text)
+        self.assertIn("  src/router/reg-exp-router/router.ts:RegExpRouter.add() (method): code changed", text)
+        self.assertIn("  src/router/reg-exp-router/router.ts:RegExpRouter.add() now calls "
+                      "src/router/utils.ts:createNullObject", text)
+        self.assertNotIn("Removed:", text)
+
+    def test_markdown(self):
+        text = cg_cli.render(cg_cli.summarize(fixture("revert-5267.diff.json")), "revert-5267", "pr-5267",
+                             markdown=True)
+        self.assertTrue(text.startswith("### Code graph: revert-5267 against pr-5267"))
+        self.assertIn("**Removed**", text)
+        self.assertIn("- `src/router/utils.ts:createNullObject` (constant)", text)
+        self.assertIn("`src/router/trie-router/node.ts:Node.#pushHandlerSets()` no longer calls "
+                      "`src/router/utils.ts:createNullObject`", text)
+
+
+class Display(unittest.TestCase):
+    def test_forms(self):
+        cases = {
+            MODULE: "src/router/utils.ts",
+            HELPER: "src/router/utils.ts:createNullObject",
+            "src/`router.ts`/Router#add().": "src/router.ts:Router.add()",
+            "src/`router.ts`/Router#": "src/router.ts:Router",
+            "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().":
+                "src/router/reg-exp-router/router.ts:RegExpRouter.#buildMatcher()",
+            "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().":
+                "src/router/reg-exp-router/router.ts:RegExpRouter.<constructor>()",
+        }
+        for key, shown in cases.items():
+            self.assertEqual(cg_cli.display(key), shown, key)
+
+    def test_unparseable_key_is_shown_as_is(self):
+        self.assertEqual(cg_cli.display("not a descriptor ("), "not a descriptor (")
+
+
+class FakeGraph:
+    def __init__(self, rows):
+        self.rows = rows
+        self.calls = []
+
+    def query(self, name, params=None, branch=None):
+        self.calls.append((name, params, branch))
+        return self.rows
+
+
+ADD_ROWS = [
+    {"s.symbol": "src/`router.ts`/Router#add().", "s.kind": "method", "s.path": "src/router.ts", "l.line": 42},
+    {"s.symbol": "src/router/trie-router/`router.ts`/TrieRouter#add().", "s.kind": "method",
+     "s.path": "src/router/trie-router/router.ts", "l.line": 9},
+]
+
+
+class Resolve(unittest.TestCase):
+    def test_a_key_is_used_as_given(self):
+        g = FakeGraph([])
+        self.assertEqual(cg_cli.resolve(g, HELPER), HELPER)
+        self.assertEqual(g.calls, [])
+
+    def test_a_unique_name(self):
+        g = FakeGraph(ADD_ROWS[:1])
+        self.assertEqual(cg_cli.resolve(g, "add", branch="pr-1"), "src/`router.ts`/Router#add().")
+        self.assertEqual(g.calls, [("symbols_named", {"name": "add"}, "pr-1")])
+
+    def test_an_ambiguous_name_lists_the_candidates(self):
+        with self.assertRaises(cg_cli.CgError) as caught:
+            cg_cli.resolve(FakeGraph(ADD_ROWS), "add")
+        self.assertEqual(caught.exception.status, cg_cli.EXIT_USAGE)
+        self.assertIn("2 symbols are named 'add'", str(caught.exception))
+        self.assertIn("src/router/trie-router/`router.ts`/TrieRouter#add().", str(caught.exception))
+
+    def test_path_narrows_a_name(self):
+        self.assertEqual(cg_cli.resolve(FakeGraph(ADD_ROWS), "add", path="src/router/trie-router/"),
+                         "src/router/trie-router/`router.ts`/TrieRouter#add().")
+        self.assertEqual(cg_cli.resolve(FakeGraph(ADD_ROWS), "add", path="src/router.ts"),
+                         "src/`router.ts`/Router#add().")
+
+    def test_no_match(self):
+        with self.assertRaises(cg_cli.CgError) as caught:
+            cg_cli.resolve(FakeGraph([]), "nothing")
+        self.assertEqual(caught.exception.status, cg_cli.EXIT_USAGE)
+
+
+class Commands(unittest.TestCase):
+    """The omnigraph command lines cg sends, with the CLI replaced."""
+
+    def fake_cli(self, branches=("main",), fail=None):
+        calls = []
+
+        def run(argv, capture_output, text):
+            calls.append(argv)
+            verb = argv[1]
+            if fail and verb == fail[0]:
+                return subprocess.CompletedProcess(argv, 1, json.dumps(fail[1]), "")
+            if verb == "branch":
+                return subprocess.CompletedProcess(argv, 0, json.dumps({"branches": list(branches)}), "")
+            if verb == "load":
+                return subprocess.CompletedProcess(argv, 0, json.dumps({"commit": {"graph_commit_id": "c1"}}), "")
+            return subprocess.CompletedProcess(argv, 0, json.dumps({"rows": []}), "")
+
+        return calls, mock.patch.object(cg_cli.subprocess, "run", side_effect=run)
+
+    def test_a_server_target_runs_stored_queries(self):
+        calls, patch = self.fake_cli()
+        with patch:
+            cg_cli.Graph("ck-reader", "code").query("callers", {"symbol": HELPER}, "pr-1")
+        argv = calls[0]
+        self.assertEqual(argv[1:3], ["query", "callers"])
+        self.assertEqual(argv[-5:], ["--target", "ck-reader", "--graph", "code", "--json"])
+        self.assertIn("--branch", argv)
+
+    def test_a_local_target_runs_the_cookbook_query_file(self):
+        calls, patch = self.fake_cli()
+        with patch:
+            cg_cli.Graph("./code.omni", "code").query("revision")
+        argv = calls[0]
+        self.assertEqual(argv[1:5], ["query", "--query", str(cg_cli.QUERIES), "revision"])
+        self.assertNotIn("--graph", argv)
+
+    def test_load_creates_a_missing_branch_from_its_base(self):
+        calls, patch = self.fake_cli(branches=("main",))
+        with patch:
+            cg_cli.Graph("ck-agent", "code").load(Path("r.jsonl"), "pr-1", "main")
+        load = calls[-1]
+        self.assertEqual(load[1:8], ["load", "--data", "r.jsonl", "--mode", "overwrite", "--yes", "--branch"])
+        self.assertEqual(load[8:11], ["pr-1", "--from", "main"])
+
+    def test_load_onto_an_existing_branch_or_main_forks_nothing(self):
+        for branch, branches in (("pr-1", ("main", "pr-1")), ("main", ("main",))):
+            calls, patch = self.fake_cli(branches=branches)
+            with patch:
+                cg_cli.Graph("ck-writer", "code").load(Path("r.jsonl"), branch, "main")
+            self.assertNotIn("--from", calls[-1], branch)
+
+    def test_a_failed_load_reports_whether_anything_changed(self):
+        for effects, status in (("none", cg_cli.EXIT_FAILED), ("unknown", cg_cli.EXIT_UNKNOWN),
+                                ("partial", cg_cli.EXIT_UNKNOWN), (None, cg_cli.EXIT_UNKNOWN)):
+            payload = {"error": "refused", "disposition": {"effects": effects} if effects else {}}
+            _, patch = self.fake_cli(branches=("main", "pr-1"), fail=("load", payload))
+            with patch, self.assertRaises(cg_cli.CgError) as caught:
+                cg_cli.Graph("ck-agent", "code").load(Path("r.jsonl"), "pr-1", "main")
+            self.assertEqual(caught.exception.status, status, effects)
+
+    def test_a_failed_read_changes_nothing(self):
+        _, patch = self.fake_cli(fail=("query", {"error": "forbidden", "code": "forbidden"}))
+        with patch, self.assertRaises(cg_cli.CgError) as caught:
+            cg_cli.Graph("ck-reader", "code").query("revision")
+        self.assertEqual(caught.exception.status, cg_cli.EXIT_FAILED)
+
+
+class Completeness(unittest.TestCase):
+    def test_every_type_is_required_for_an_overwrite(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "r.jsonl"
+            path.write_text('{"type":"Revision","data":{}}\n{"type":"Symbol","data":{}}\n')
+            counts = cg_cli.revision_types(path)
+        with self.assertRaises(cg_cli.CgError) as caught:
+            cg_cli.check_complete(counts, allow_missing=False)
+        self.assertEqual(caught.exception.status, cg_cli.EXIT_USAGE)
+        self.assertIn("Location", str(caught.exception))
+        cg_cli.check_complete(counts, allow_missing=True)
+
+    def test_the_cookbook_files_are_complete(self):
+        bundle = HERE.parents[1]
+        for name in ("seed.jsonl", "examples/pr-5267.jsonl"):
+            cg_cli.check_complete(cg_cli.revision_types(bundle / name), allow_missing=False)
+
+
+class Arguments(unittest.TestCase):
+    def test_json_is_accepted_after_the_command(self):
+        args = cg_cli.build_parser().parse_args(["diff", "pr-1", "--json"])
+        self.assertTrue(args.json)
+        args = cg_cli.build_parser().parse_args(["--json", "diff", "pr-1"])
+        self.assertTrue(args.json)
+        self.assertFalse(cg_cli.build_parser().parse_args(["diff", "pr-1"]).json)
+
+
+if __name__ == "__main__":
+    unittest.main()

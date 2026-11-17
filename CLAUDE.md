@@ -7,9 +7,10 @@ links to the corresponding `CLAUDE.md`; edit the target once.
 
 These are nine self-contained OmniGraph **0.14.0** bundles: schemas, seed data,
 stored queries and applied policies. The only application code is the beads
-cookbook's `ob` client in `beads/client/`, with its own tests, the code-graph
-seed tools in `code-graph/sources/` (standard-library Python, run by hand, not
-in CI), and the local HTTPS gateway `scripts/local-tls-gateway.py`. The root
+cookbook's `ob` client in `beads/client/` and the code-graph `cg` client in
+`code-graph/client/`, each with its own tests, the code-graph seed tools in
+`code-graph/sources/` (standard-library Python, run by hand, not in CI), and
+the local HTTPS gateway `scripts/local-tls-gateway.py`. The root
 [README](README.md) owns setup, live updates and upgrades; individual cookbook
 guides own their domain model and worked queries.
 
@@ -39,9 +40,10 @@ from the released binary pin in `.github/workflows/qualify.yml`. Refresh with
 - Run `python3 scripts/check-cookbooks.py` for all nine local journeys, or
   name cookbooks to run only those. It uses the released CLI/server, isolated
   operator homes, disposable roots and the local HTTPS gateway; it never
-  touches a deployed graph. For beads the checker also drives the `ob`
-  client against the served graph; the client's local tests run with
-  `python3 -m unittest discover -s beads/client/tests`.
+  touches a deployed graph. For beads and code-graph the checker also drives
+  the `ob` and `cg` clients against the served graph; their local tests run
+  with `python3 -m unittest discover -s beads/client/tests` and
+  `python3 -m unittest discover -s code-graph/client/tests`.
 - For a query edit, start with `omnigraph lint --schema schema.pg --query
   queries/<file>.gq`. This is an offline check. Comments in `.pg`/`.gq` use `//`.
 - Keep `seed.md` and `seed.jsonl` consistent. Preserve the domain examples and
