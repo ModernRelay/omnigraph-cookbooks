@@ -54,8 +54,10 @@ hono's router at the parent of PR #5267 (`seed.jsonl`) and at the PR
 ## Query notes
 
 - Keys contain backticks and dots: ``src/router/`utils.ts`/createNullObject.``.
-  Find a key with `symbols_named` or `file_symbols`, and pass it in single
-  quotes in a shell.
+  Find a key with `symbols_named` (`symbols_named_in` for a name with many
+  definitions) or `file_symbols`, and pass it in single quotes in a shell.
+- Every list read has a `limit`; `cg_cli.py` `LIMITS` mirrors them and its
+  tests check the two agree. Change both together.
 - A line number is on `Location` (`$s definedAt $l`), never on `Symbol`.
 - `References` means "names", not "calls": filter on the bound edge's `call`
   for call sites (`$c $r:references $t`, then `$r.call`).

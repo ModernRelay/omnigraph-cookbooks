@@ -40,6 +40,7 @@ pass the full key from `symbols_named` as a parameter.
 |---|---|---|---|
 | `revision` | | `a10592f3…`, scip-typescript 0.6.2 | `4b44abe1…` |
 | `symbols_named` | `name: add` | 7 rows: `src/router.ts` `Router#add` at line 42 and the six implementations | the same |
+| `symbols_named_in` | `name: add`, `path: src/router/trie-router` | 1 row: `TrieRouter#add` at line 9 | the same |
 | `file_symbols` | `path: src/router/utils.ts` | none | the module and `createNullObject` |
 | `members` | `RegExpRouter#` | 10 members: `name`, `#middleware`, `#routes`, `#tries`, the constructor, `#insertPath`, `add`, `match`, `buildAllMatchers`, `#buildMatcher` | the same |
 | `callers` | `utils.ts/createNullObject.` | none | 14: four modules, for their imports; the fields `#children` of `Node` in both routers and `paths` of `Trie`; the module constants `wildcardRegExpCache` and `emptyParams`; `RegExpRouter`'s constructor, `add`, `buildAllMatchers` and `#buildMatcher`; and trie-router `Node#pushHandlerSets` |

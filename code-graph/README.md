@@ -155,6 +155,16 @@ Add `--json` to any command for machine output. A refused write exits 1 and
 changed nothing; an ambiguous name exits 2 and lists the candidates; a write
 whose outcome is unknown exits 3, so check the branch before loading again.
 
+Every list read stops at a limit: 1,000 symbols for a name, 2,000 callers,
+callees, members or unreferenced callables, and 5,000 definitions for
+`impact`. A read that returns exactly its limit may be cut, and `cg` says so
+(`"cut": true` in JSON). `--path` filters a name inside the query, so a name
+with more definitions than the limit is still found in its directory. A
+revision file over 32 MiB loads into a local graph with `write_max_bytes`
+raised to its size, which holds its largest type in memory as one batch; a
+server's load request is capped at 32 MiB, so `cg` refuses such a file for a
+server target before sending anything.
+
 ```bash
 export CG_TARGET=local-agent
 code-graph/client/cg load code-graph/examples/pr-5267.jsonl --branch pr-5267

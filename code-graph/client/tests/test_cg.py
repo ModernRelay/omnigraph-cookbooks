@@ -8,6 +8,7 @@ Run with: python3 -m unittest discover -s code-graph/client/tests
 
 import collections
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -151,8 +152,12 @@ class Resolve(unittest.TestCase):
         self.assertIn("src/router/trie-router/`router.ts`/TrieRouter#add().", str(caught.exception))
 
     def test_path_narrows_a_name(self):
-        self.assertEqual(cg_cli.resolve(FakeGraph(ADD_ROWS), "add", path="src/router/trie-router/"),
+        g = FakeGraph(ADD_ROWS)
+        self.assertEqual(cg_cli.resolve(g, "add", path="src/router/trie-router/"),
                          "src/router/trie-router/`router.ts`/TrieRouter#add().")
+        # The path filters in the query, so a name with more definitions than
+        # the read's limit is still found in its directory.
+        self.assertEqual(g.calls, [("symbols_named_in", {"name": "add", "path": "src/router/trie-router"}, None)])
         self.assertEqual(cg_cli.resolve(FakeGraph(ADD_ROWS), "add", path="src/router.ts"),
                          "src/`router.ts`/Router#add().")
 
@@ -160,6 +165,25 @@ class Resolve(unittest.TestCase):
         with self.assertRaises(cg_cli.CgError) as caught:
             cg_cli.resolve(FakeGraph([]), "nothing")
         self.assertEqual(caught.exception.status, cg_cli.EXIT_USAGE)
+
+
+class Limits(unittest.TestCase):
+    def test_the_limits_match_the_query_file(self):
+        text = cg_cli.QUERIES.read_text()
+        limits = {}
+        for block in re.split(r"(?m)^(?=query )", text):
+            name, limit = re.match(r"query (\w+)", block), re.search(r"(?m)^\s*limit (\d+)\s*$", block)
+            if name and limit:
+                limits[name.group(1)] = int(limit.group(1))
+        # most_referenced is a top-20 list by design, not a cut list.
+        limits.pop("most_referenced")
+        self.assertEqual(limits, cg_cli.LIMITS)
+
+    def test_a_read_that_returns_its_limit_says_it_may_be_cut(self):
+        limit = cg_cli.LIMITS["callers"]
+        self.assertEqual(cg_cli.cut_note("callers", [{}] * (limit - 1)), "")
+        self.assertIn(f"stops at {limit}", cg_cli.cut_note("callers", [{}] * limit))
+        self.assertEqual(cg_cli.cut_note("implementers", [{}] * 10_000), "")
 
 
 class Commands(unittest.TestCase):
@@ -212,6 +236,29 @@ class Commands(unittest.TestCase):
             with patch:
                 cg_cli.Graph("ck-writer", "code").load(Path("r.jsonl"), branch, "main")
             self.assertNotIn("--from", calls[-1], branch)
+
+    def test_a_large_local_load_raises_the_write_limit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            big = Path(tmp) / "big.jsonl"
+            with open(big, "wb") as f:
+                f.truncate(cg_cli.WRITE_MAX_BYTES + 1)
+            calls, patch = self.fake_cli()
+            with patch:
+                cg_cli.Graph("./code.omni", "code").load(big, "main", "main")
+            self.assertIn(f"write_max_bytes={cg_cli.WRITE_MAX_BYTES + 1}", calls[-1])
+            # A server load request is capped and takes no settings: refused before any call.
+            calls, patch = self.fake_cli()
+            with patch, self.assertRaises(cg_cli.CgError) as caught:
+                cg_cli.Graph("ck-agent", "code").load(big, "main", "main")
+            self.assertEqual(caught.exception.status, cg_cli.EXIT_USAGE)
+            self.assertEqual(calls, [])
+            # A small file loads with the default.
+            small = Path(tmp) / "small.jsonl"
+            small.write_text("{}\n")
+            calls, patch = self.fake_cli()
+            with patch:
+                cg_cli.Graph("./code.omni", "code").load(small, "main", "main")
+            self.assertNotIn("--set", calls[-1])
 
     def test_a_failed_load_reports_whether_anything_changed(self):
         for effects, status in (("none", cg_cli.EXIT_FAILED), ("unknown", cg_cli.EXIT_UNKNOWN),

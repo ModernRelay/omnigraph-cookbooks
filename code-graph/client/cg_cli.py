@@ -36,6 +36,14 @@ EXIT_FAILED, EXIT_USAGE, EXIT_UNKNOWN = 1, 2, 3
 LINK_TYPES = {"References": "references", "Implements": "implements", "MemberOf": "members"}
 # How a changed Symbol property reads in a review.
 FIELD_WORDS = {"digest": "code", "path": "file", "callable": "callability"}
+# Each list read's `limit` in queries/code.gq (the tests check they agree). A
+# read that returns exactly its limit may have been cut, and cg says so.
+LIMITS = {"symbols_named": 1000, "symbols_named_in": 1000, "file_symbols": 2000, "members": 2000,
+          "callers": 2000, "callees": 2000, "impact": 5000, "unreferenced_callables": 2000}
+# What one load may stage before `write_max_bytes` refuses it. A local load of
+# a larger file raises the setting to the file's size; a server's load request
+# is capped at the same size and takes no settings.
+WRITE_MAX_BYTES = 32 * 1024 * 1024
 
 
 class CgError(Exception):
@@ -111,7 +119,15 @@ class Graph:
         return self.run(["branch", "list"])["branches"]
 
     def load(self, path: Path, branch: str, base: str) -> dict:
+        size = path.stat().st_size if path.exists() else 0
         argv = ["load", "--data", str(path), "--mode", "overwrite", "--yes", "--branch", branch]
+        if size > WRITE_MAX_BYTES:
+            if not self.direct:
+                raise CgError(f"{path} is {size / 2**20:.0f} MiB; a server load accepts at most "
+                              f"{WRITE_MAX_BYTES // 2**20} MiB. Load it into a local graph, or index a "
+                              "slice of the repository (--slice).", EXIT_USAGE)
+            # A raised limit holds the load's largest type in memory as one batch.
+            argv += ["--set", f"write_max_bytes={size}"]
         if branch != base and branch not in self.branches():
             argv += ["--from", base]
         return self.run(argv, write=True)
@@ -140,14 +156,22 @@ def display(key: str) -> str:
     return f"{path}:{rest}" if rest else path
 
 
+def named(g: Graph, name: str, path: str | None = None, branch: str | None = None) -> tuple[str, list[dict]]:
+    """The symbols with a name, in the file or directory `path` when given. The
+    path filter runs in the query, so a name with more definitions than the
+    read's limit is still found in its directory."""
+    if not path:
+        return "symbols_named", g.query("symbols_named", {"name": name}, branch)
+    rows = g.query("symbols_named_in", {"name": name, "path": path.rstrip("/")}, branch)
+    prefix = path.rstrip("/") + "/"
+    return "symbols_named_in", [r for r in rows if r["s.path"] == path or r["s.path"].startswith(prefix)]
+
+
 def resolve(g: Graph, text: str, path: str | None = None, branch: str | None = None) -> str:
     """A symbol key from a key or a name; a name must match one symbol."""
     if "/" in text:
         return text
-    rows = g.query("symbols_named", {"name": text}, branch)
-    if path:
-        prefix = path.rstrip("/") + "/"
-        rows = [r for r in rows if r["s.path"] == path or r["s.path"].startswith(prefix)]
+    _, rows = named(g, text, path, branch)
     if len(rows) == 1:
         return rows[0]["s.symbol"]
     where = f" under {path}" if path else ""
@@ -313,13 +337,20 @@ def table(rows: list[dict], columns: list[tuple[str, str]]) -> str:
     return "\n".join(lines)
 
 
+def cut_note(query: str, rows: list, hint: str = "") -> str:
+    """A line for a read that returned exactly its limit, which may have cut it."""
+    limit = LIMITS.get(query)
+    if limit is None or len(rows) < limit:
+        return ""
+    return f"\n(the first {limit} rows: {query} stops at {limit}, so the list may be incomplete{hint})"
+
+
 def cmd_find(args, g: Graph):
-    rows = g.query("symbols_named", {"name": args.name}, args.branch)
-    if args.path:
-        prefix = args.path.rstrip("/") + "/"
-        rows = [r for r in rows if r["s.path"] == args.path or r["s.path"].startswith(prefix)]
+    query, rows = named(g, args.name, args.path, args.branch)
     data = [{"symbol": r["s.symbol"], "kind": r["s.kind"], "path": r["s.path"], "line": r["l.line"]} for r in rows]
-    emit(args, data, table(data, [("symbol", "symbol"), ("kind", "kind"), ("line", "line")]))
+    note = cut_note(query, rows, "; narrow it with --path")
+    emit(args, {"rows": data, "cut": bool(note)},
+         table(data, [("symbol", "symbol"), ("kind", "kind"), ("line", "line")]) + note)
 
 
 READS = {
@@ -336,10 +367,11 @@ def cmd_read(args, g: Graph):
     query, columns = READS[args.command]
     key = resolve(g, args.symbol, args.path, args.branch)
     rows = g.query(query, {"symbol": key}, args.branch)
-    data = {"symbol": key, "rows": [{title: r.get(col) for col, title in columns} for r in rows]}
+    note = cut_note(query, rows)
+    data = {"symbol": key, "rows": [{title: r.get(col) for col, title in columns} for r in rows], "cut": bool(note)}
     human = [{title: (display(v) if col.endswith(".symbol") else v) for (col, title), v in
               zip(columns, (r.get(col) for col, _ in columns))} for r in rows]
-    emit(args, data, f"{display(key)}\n" + table(human, [(title, title) for _, title in columns]))
+    emit(args, data, f"{display(key)}\n" + table(human, [(title, title) for _, title in columns]) + note)
 
 
 def cmd_overview(args, g: Graph):
@@ -352,7 +384,8 @@ def cmd_overview(args, g: Graph):
         rows = g.query("unreferenced_callables", branch=args.branch)
         data = [{"symbol": r["s.symbol"], "kind": r["s.kind"]} for r in rows]
         human = [{**d, "symbol": display(d["symbol"])} for d in data]
-        emit(args, data, table(human, [("symbol", "symbol"), ("kind", "kind")]))
+        note = cut_note("unreferenced_callables", rows)
+        emit(args, {"rows": data, "cut": bool(note)}, table(human, [("symbol", "symbol"), ("kind", "kind")]) + note)
     else:
         rows = g.query("revision", branch=args.branch)
         data = rows[0] if rows else {}

@@ -8,6 +8,7 @@ aliases:
   # ── Finding symbols ──────────────────────────────────────────
   revision: {target: local-reader, graph: code, query: revision}
   symbol:   {target: local-reader, graph: code, query: symbols_named}   # --params '{"name":"add"}'
+  symbol-in: {target: local-reader, graph: code, query: symbols_named_in}  # --params '{"name":"add","path":"src/router/trie-router"}'
   file:     {target: local-reader, graph: code, query: file_symbols}    # --params '{"path":"src/router/utils.ts"}'
   members:  {target: local-reader, graph: code, query: members}         # --params '{"symbol":"..."}'
 
