@@ -47,3 +47,6 @@ __pycache__/
 # Legacy combined config (RFC-008) — cookbooks ship cluster.yaml + an
 # omnigraph-config.example.yaml; per-operator config is ~/.omnigraph/config.yaml
 omnigraph.yaml
+
+# code-graph benchmarks: clones, checkouts, indexes, graphs
+code-graph/bench/work/

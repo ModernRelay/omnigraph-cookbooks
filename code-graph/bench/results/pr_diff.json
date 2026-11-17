@@ -1,0 +1,1299 @@
+{
+  "prs": 40,
+  "mechanics_exact_prs": 40,
+  "accuracy_exact_prs": 36,
+  "mechanics": {
+    "added": {
+      "tp": 19,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "removed": {
+      "tp": 9,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "changed": {
+      "tp": 46,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "refs_added": {
+      "tp": 90,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "refs_removed": {
+      "tp": 37,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "refs_changed": {
+      "tp": 28,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "accuracy": {
+    "added": {
+      "tp": 19,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "removed": {
+      "tp": 6,
+      "fp": 3,
+      "fn": 0,
+      "precision": 0.6666666666666666,
+      "recall": 1.0,
+      "f1": 0.8
+    },
+    "changed": {
+      "tp": 43,
+      "fp": 3,
+      "fn": 2,
+      "precision": 0.9347826086956522,
+      "recall": 0.9555555555555556,
+      "f1": 0.945054945054945
+    },
+    "refs_added": {
+      "tp": 89,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "refs_removed": {
+      "tp": 32,
+      "fp": 5,
+      "fn": 1,
+      "precision": 0.8648648648648649,
+      "recall": 0.9696969696969697,
+      "f1": 0.9142857142857143
+    }
+  },
+  "per_pr": [
+    {
+      "head": "e1dd58856eea",
+      "subject": "fix(jwt): reject a signature segment outside the base64url alphabet an",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        2,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "bf16471913b5",
+      "subject": "Merge commit from fork",
+      "added": [
+        1,
+        0,
+        0
+      ],
+      "removed": [
+        1,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        1,
+        0,
+        0
+      ],
+      "refs_removed": [
+        1,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "d88fab372415",
+      "subject": "Merge commit from fork",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        0,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "34f90432a179",
+      "subject": "Merge commit from fork",
+      "added": [
+        4,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        2,
+        0,
+        0
+      ],
+      "refs_added": [
+        27,
+        0,
+        0
+      ],
+      "refs_removed": [
+        4,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "8a103aa59bcf",
+      "subject": "Merge commit from fork",
+      "added": [
+        3,
+        0,
+        0
+      ],
+      "removed": [
+        5,
+        0,
+        0
+      ],
+      "changed": [
+        10,
+        3,
+        0
+      ],
+      "refs_added": [
+        10,
+        0,
+        0
+      ],
+      "refs_removed": [
+        21,
+        0,
+        0
+      ],
+      "exact": false
+    },
+    {
+      "head": "15bbd96ad1b6",
+      "subject": "Merge commit from fork",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "17ad0e21f5a9",
+      "subject": "fix(context): allow `c.header()` after the response body is consumed (",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        0,
+        0,
+        1
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": false
+    },
+    {
+      "head": "ed1d5f72135c",
+      "subject": "fix(auth): escape backslashes in the WWW-Authenticate realm (#5590)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        4,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "eb78ecaabe26",
+      "subject": "fix(utils/url): preserve encoded duplicate query order (#5495)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "06a45bc3a639",
+      "subject": "feat(bearer-auth): allow MessageFunction to return a Response (#5269)",
+      "added": [
+        1,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        1,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "5ca49b072075",
+      "subject": "fix(css): Fix multiline CSS handling in style replacement (#5405)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "e9c01079a932",
+      "subject": "fix(hono-base): disallow `getPath` when `strict` is `false` (#5563)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        3,
+        0
+      ],
+      "changed": [
+        0,
+        0,
+        1
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        5,
+        0
+      ],
+      "exact": false
+    },
+    {
+      "head": "08807ce12aa3",
+      "subject": "fix(trie-router): keep first value for duplicate path params (#5422) (",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "e77c7c8eb9fe",
+      "subject": "fix(helper/route): match regex params in basePath() the same way as th",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "d54720da8013",
+      "subject": "fix(serve-static): respect q-values in Accept-Encoding for precompress",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        5,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "ae401f080004",
+      "subject": "fix(css): keep the descendant combinator before a pseudo-class when mi",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "2013fed5b217",
+      "subject": "fix(css): keep \"//\" inside an unquoted url() when minifying (#5450)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        0,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "43379d93e23a",
+      "subject": "fix(jsx): preserve self-closing void elements in cloneElement (#5314)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "336224440151",
+      "subject": "fix(build): keep barrel imports in the bundled `d.ts` (#5557)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        0,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "588ec13fa68e",
+      "subject": "fix(serve-static): only serve GET and HEAD requests (#5514)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        1,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "ae595de8ae05",
+      "subject": "feat(mount): introduce Mount Middleware and deprecate `app.mount` (#52",
+      "added": [
+        8,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        0,
+        0,
+        0
+      ],
+      "refs_added": [
+        33,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "f23b146afcec",
+      "subject": "fix(jsx): allow JSXNode function component results (#5476)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        0,
+        0,
+        0
+      ],
+      "refs_added": [
+        1,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "6d73a74f9757",
+      "subject": "docs(request): fix jsdoc comments for some getters (#5445)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        0,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "afb2068c1c53",
+      "subject": "fix(combine): return a Response from a short-circuiting middleware in ",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "e5bb2062a3dd",
+      "subject": "fix(jsx): add px to numeric gridGap, gridRowGap and gridColumnGap (#54",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "c3053ccf14f1",
+      "subject": "fix(etag): correctly match mixed-case header name in retainedHeader op",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "be1f7498fed2",
+      "subject": "fix(build): keep internal types private in bundled d.ts and avoid a se",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        0,
+        0,
+        0
+      ],
+      "refs_added": [
+        2,
+        0,
+        0
+      ],
+      "refs_removed": [
+        2,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "8b05c774ef15",
+      "subject": "Merge commit from fork",
+      "added": [
+        1,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        1,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "b877827fccde",
+      "subject": "feat(adapters): add the seven adapters as workspace packages (#5463)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        0,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "fc2343dbad8a",
+      "subject": "feat(adapters): add @hono/bun as a workspace package (#5447)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        0,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "90d02fb1645c",
+      "subject": "fix(types): allow returning a Blob as a response body (#5446)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        0,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "859e2c2bd0ec",
+      "subject": "chore: let oxfmt sort imports instead of eslint (#5442)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        0,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "8dcd52b92bea",
+      "subject": "chore: replace prettier with oxfmt (#5435)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "6cadf7537385",
+      "subject": "fix(lambda-edge): fail with a descriptive error on a malformed event (",
+      "added": [
+        1,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        2,
+        0,
+        0
+      ],
+      "refs_added": [
+        7,
+        0,
+        0
+      ],
+      "refs_removed": [
+        4,
+        0,
+        1
+      ],
+      "exact": false
+    },
+    {
+      "head": "de310ac063fe",
+      "subject": "fix(lambda-edge): sync content type detection with aws-lambda (#5426)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "28e8572cd265",
+      "subject": "fix(aws-lambda): preserve empty query parameters (#5292)",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        2,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "0d86899d28e1",
+      "subject": "fix(aws-lambda): treat binary +xml archive media types as binary (#542",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "52febbcc30bc",
+      "subject": "fix(jwt): throw JwtTokenInvalid when the signature is not valid base64",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "f950277cd3d9",
+      "subject": "fix(pretty-json): don't break responses with unparseable JSON bodies (",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    },
+    {
+      "head": "00ee875728e2",
+      "subject": "fix(linear-router): don't match an empty path segment as a param (#537",
+      "added": [
+        0,
+        0,
+        0
+      ],
+      "removed": [
+        0,
+        0,
+        0
+      ],
+      "changed": [
+        1,
+        0,
+        0
+      ],
+      "refs_added": [
+        0,
+        0,
+        0
+      ],
+      "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "exact": true
+    }
+  ]
+}
