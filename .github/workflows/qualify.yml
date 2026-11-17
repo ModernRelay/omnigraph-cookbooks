@@ -45,3 +45,5 @@ jobs:
         run: python3 -m unittest discover -s beads/client/tests -v
       - name: Test the code-graph client
         run: python3 -m unittest discover -s code-graph/client/tests -v
+      - name: Test the code-graph converter
+        run: python3 -m unittest discover -s code-graph/sources/tests -v
