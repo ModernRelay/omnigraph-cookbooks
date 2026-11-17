@@ -1,0 +1,35 @@
+{
+  "order": 2,
+  "name": "Development graph",
+  "category": "Engineering",
+  "blurb": "Issues, epics, specs, decisions, pull requests, releases and incidents as one graph, with the Git host still the record for code.",
+  "sample": "Meridian, a fictional collaborative-document product",
+  "questions": [
+    {
+      "q": "What is ready to pick up?",
+      "query": "ready"
+    },
+    {
+      "q": "Which issues are waiting on a fix upstream?",
+      "query": "blocked_on_upstream"
+    },
+    {
+      "q": "Which spec describes this epic?",
+      "query": "epic_spec"
+    },
+    {
+      "q": "Which pull requests shipped in this release?",
+      "query": "release_prs"
+    }
+  ],
+  "search": {
+    "title": "Code graph template for coding agents",
+    "keywords": [
+      "code graph",
+      "ai bill of materials",
+      "context graph",
+      "knowledge graph",
+      "coding agents"
+    ]
+  }
+}

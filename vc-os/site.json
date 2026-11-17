@@ -1,0 +1,34 @@
+{
+  "order": 7,
+  "name": "Venture firm",
+  "category": "Investing",
+  "blurb": "A venture firm's deals, portfolio, people and investment theses, with every signal tied to the beliefs it supports or contradicts.",
+  "sample": "Quito Capital, a fictional AI-infrastructure fund",
+  "questions": [
+    {
+      "q": "Which active theses has new evidence contradicted?",
+      "query": "contradicted_active_theses"
+    },
+    {
+      "q": "Before investment committee, what contradicts the assumptions behind this deal?",
+      "query": "pre_ic_brief_evidence"
+    },
+    {
+      "q": "Who on the team can get an introduction to this founder?",
+      "query": "intro_path_to_founder"
+    },
+    {
+      "q": "What has happened at a portfolio company since the last board meeting?",
+      "query": "board_prep_pack"
+    }
+  ],
+  "search": {
+    "title": "Venture firm context graph template",
+    "keywords": [
+      "context graph",
+      "world model",
+      "knowledge graph",
+      "ontology"
+    ]
+  }
+}

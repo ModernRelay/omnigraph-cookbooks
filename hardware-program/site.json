@@ -1,0 +1,34 @@
+{
+  "order": 4,
+  "name": "Hardware program",
+  "category": "Hardware",
+  "blurb": "Requirements, budgets, interfaces and verification for a hardware program, with \"verified\" and \"over budget\" worked out from the evidence on every read.",
+  "sample": "Petrel, a fictional 150 kg Earth-observation satellite",
+  "questions": [
+    {
+      "q": "Does each budget still close?",
+      "query": "budget_rollup"
+    },
+    {
+      "q": "If this requirement changes, which test results no longer hold?",
+      "query": "impacted_tests"
+    },
+    {
+      "q": "Which mission goals does this requirement serve?",
+      "query": "trace_up"
+    },
+    {
+      "q": "Which requirements has no test verified?",
+      "query": "unverified_requirements"
+    }
+  ],
+  "search": {
+    "title": "Hardware program systems graph template",
+    "keywords": [
+      "systems graph",
+      "digital twin",
+      "knowledge graph",
+      "ontology"
+    ]
+  }
+}
