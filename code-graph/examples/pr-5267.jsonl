@@ -105,7 +105,7 @@
 {"data":{"callable":false,"digest":null,"kind":"property","name":"#routes","path":"src/router/smart-router/router.ts","signature":"(property) #routes: [string, string, T][] | undefined","symbol":"src/router/smart-router/`router.ts`/SmartRouter#`#routes`."},"type":"Symbol"}
 {"data":{"callable":true,"digest":"aea0c9a2f0642135","kind":"constructor","name":"<constructor>","path":"src/router/smart-router/router.ts","signature":"constructor<T>(init: { routers: Router<T>[]; }): SmartRouter<T>","symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`()."},"type":"Symbol"}
 {"data":{"callable":false,"digest":null,"kind":"property","name":"routers","path":"src/router/smart-router/router.ts","signature":"(property) routers: Router<T>[]","symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)routers."},"type":"Symbol"}
-{"data":{"callable":true,"digest":null,"kind":"getter","name":"<get>activeRouter","path":"src/router/smart-router/router.ts","signature":"get activeRouter: Router<T>","symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<get>activeRouter`()."},"type":"Symbol"}
+{"data":{"callable":true,"digest":"be4914069f5c877f","kind":"getter","name":"<get>activeRouter","path":"src/router/smart-router/router.ts","signature":"get activeRouter: Router<T>","symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<get>activeRouter`()."},"type":"Symbol"}
 {"data":{"callable":true,"digest":"c548ef929bdac686","kind":"method","name":"add","path":"src/router/smart-router/router.ts","signature":"(method) add(method: string, path: string, handler: T): void","symbol":"src/router/smart-router/`router.ts`/SmartRouter#add()."},"type":"Symbol"}
 {"data":{"callable":true,"digest":"e149b0a5bddf1c19","kind":"method","name":"match","path":"src/router/smart-router/router.ts","signature":"(method) match(method: string, path: string): Result<T>","symbol":"src/router/smart-router/`router.ts`/SmartRouter#match()."},"type":"Symbol"}
 {"data":{"callable":false,"digest":null,"kind":"property","name":"name","path":"src/router/smart-router/router.ts","signature":"(property) name: string","symbol":"src/router/smart-router/`router.ts`/SmartRouter#name."},"type":"Symbol"}
@@ -134,7 +134,7 @@
 {"data":{"callable":true,"digest":"7e9dd7131e851a96","kind":"method","name":"match","path":"src/router/trie-router/router.ts","signature":"(method) match(method: string, path: string): Result<T>","symbol":"src/router/trie-router/`router.ts`/TrieRouter#match()."},"type":"Symbol"}
 {"data":{"callable":false,"digest":null,"kind":"property","name":"name","path":"src/router/trie-router/router.ts","signature":"(property) name: string","symbol":"src/router/trie-router/`router.ts`/TrieRouter#name."},"type":"Symbol"}
 {"data":{"end_line":104,"line":9,"symbol":"src/`router.ts`/"},"type":"Location"}
-{"data":{"end_line":21,"line":21,"symbol":"src/`router.ts`/MESSAGE_MATCHER_IS_ALREADY_BUILT."},"type":"Location"}
+{"data":{"end_line":22,"line":21,"symbol":"src/`router.ts`/MESSAGE_MATCHER_IS_ALREADY_BUILT."},"type":"Location"}
 {"data":{"end_line":17,"line":17,"symbol":"src/`router.ts`/METHODS."},"type":"Location"}
 {"data":{"end_line":9,"line":9,"symbol":"src/`router.ts`/METHOD_NAME_ALL."},"type":"Location"}
 {"data":{"end_line":13,"line":13,"symbol":"src/`router.ts`/METHOD_NAME_ALL_LOWERCASE."},"type":"Location"}
@@ -239,7 +239,7 @@
 {"data":{"end_line":7,"line":7,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#`#routes`."},"type":"Location"}
 {"data":{"end_line":11,"line":9,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`()."},"type":"Location"}
 {"data":{"end_line":9,"line":9,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)routers."},"type":"Location"}
-{"data":{"end_line":63,"line":63,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<get>activeRouter`()."},"type":"Location"}
+{"data":{"end_line":69,"line":63,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<get>activeRouter`()."},"type":"Location"}
 {"data":{"end_line":19,"line":13,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#add()."},"type":"Location"}
 {"data":{"end_line":61,"line":21,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#match()."},"type":"Location"}
 {"data":{"end_line":5,"line":5,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#name."},"type":"Location"}
@@ -550,7 +550,7 @@
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/pattern-router/`router.ts`/","to":"src/`router.ts`/Router#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/pattern-router/`router.ts`/","to":"src/`router.ts`/UnsupportedPathError#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/pattern-router/`router.ts`/PatternRouter#","to":"src/`router.ts`/Router#"}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/pattern-router/`router.ts`/PatternRouter#","to":"src/router/pattern-router/`router.ts`/Route#"}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/pattern-router/`router.ts`/PatternRouter#`#routes`.","to":"src/router/pattern-router/`router.ts`/Route#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/pattern-router/`router.ts`/PatternRouter#add().","to":"src/`router.ts`/UnsupportedPathError#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/pattern-router/`router.ts`/PatternRouter#add().","to":"src/router/pattern-router/`router.ts`/PatternRouter#`#routes`."}
 {"data":{"call":true,"sites":1},"edge":"References","from":"src/router/pattern-router/`router.ts`/PatternRouter#add().","to":"src/router/pattern-router/`router.ts`/PatternRouter#add()."}
@@ -584,8 +584,8 @@
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`matcher.ts`/match().","to":"src/router/reg-exp-router/`matcher.ts`/emptyParam."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`node.ts`/","to":"src/router/`utils.ts`/"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`node.ts`/","to":"src/router/`utils.ts`/createNullObject."}
-{"data":{"call":true,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`node.ts`/Node#","to":"src/router/`utils.ts`/createNullObject."}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`node.ts`/Node#","to":"src/router/reg-exp-router/`node.ts`/Node#"}
+{"data":{"call":true,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`node.ts`/Node#`#children`.","to":"src/router/`utils.ts`/createNullObject."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`node.ts`/Node#`#children`.","to":"src/router/reg-exp-router/`node.ts`/Node#"}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr().","to":"src/router/reg-exp-router/`node.ts`/Node#`#children`."}
 {"data":{"call":false,"sites":3},"edge":"References","from":"src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr().","to":"src/router/reg-exp-router/`node.ts`/Node#`#index`."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr().","to":"src/router/reg-exp-router/`node.ts`/Node#`#varIndex`."}
@@ -621,16 +621,15 @@
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/","to":"src/router/reg-exp-router/`matcher.ts`/match()."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/","to":"src/router/reg-exp-router/`router.ts`/"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/","to":"src/router/reg-exp-router/`router.ts`/RegExpRouter#"}
-{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#","to":"src/`router.ts`/Router#"}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#","to":"src/router/reg-exp-router/`matcher.ts`/MatcherMap#"}
-{"data":{"call":true,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#","to":"src/router/reg-exp-router/`matcher.ts`/match()."}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#","to":"src/router/reg-exp-router/`prepared-router.ts`/RelocateMap#"}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#","to":"src/`router.ts`/Router#"}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#addPath`().","to":"src/`router.ts`/ParamIndexMap#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#addPath`().","to":"src/router/reg-exp-router/`matcher.ts`/Matcher#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#addPath`().","to":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#matchers`."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#addWildcard`().","to":"src/`router.ts`/ParamIndexMap#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#addWildcard`().","to":"src/router/reg-exp-router/`matcher.ts`/Matcher#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#addWildcard`().","to":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#matchers`."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#matchers`.","to":"src/router/reg-exp-router/`matcher.ts`/MatcherMap#"}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#relocateMap`.","to":"src/router/reg-exp-router/`prepared-router.ts`/RelocateMap#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`<constructor>`().","to":"src/router/reg-exp-router/`matcher.ts`/MatcherMap#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`<constructor>`().","to":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#matchers`."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`<constructor>`().","to":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#relocateMap`."}
@@ -648,6 +647,8 @@
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#add().","to":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#relocateMap`."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#buildAllMatchers().","to":"src/router/reg-exp-router/`matcher.ts`/MatcherMap#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#buildAllMatchers().","to":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#`#matchers`."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#match.","to":"src/`router.ts`/Router#"}
+{"data":{"call":true,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter#match.","to":"src/router/reg-exp-router/`matcher.ts`/match()."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/RelocateMap#","to":"src/`router.ts`/ParamIndexMap#"}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/buildInitParams.","to":"src/`router.ts`/METHOD_NAME_ALL."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`prepared-router.ts`/buildInitParams.","to":"src/router/reg-exp-router/`matcher.ts`/HandlerData#"}
@@ -664,7 +665,7 @@
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/","to":"src/`router.ts`/Router#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/","to":"src/`router.ts`/UnsupportedPathError#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/","to":"src/router/`utils.ts`/"}
-{"data":{"call":true,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/","to":"src/router/`utils.ts`/createNullObject."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/","to":"src/router/`utils.ts`/createNullObject."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/","to":"src/router/reg-exp-router/`matcher.ts`/"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/","to":"src/router/reg-exp-router/`matcher.ts`/HandlerData#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/","to":"src/router/reg-exp-router/`matcher.ts`/Matcher#"}
@@ -679,10 +680,7 @@
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/","to":"src/router/reg-exp-router/`node.ts`/TAIL_WILDCARD_REG_EXP_STR."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/","to":"src/router/reg-exp-router/`trie.ts`/"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/","to":"src/router/reg-exp-router/`trie.ts`/Trie#"}
-{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#","to":"src/`router.ts`/Router#"}
-{"data":{"call":true,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#","to":"src/router/reg-exp-router/`matcher.ts`/match()."}
-{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#","to":"src/router/reg-exp-router/`router.ts`/HandlerWithMetadata#"}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#","to":"src/router/reg-exp-router/`trie.ts`/Trie#"}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#","to":"src/`router.ts`/Router#"}
 {"data":{"call":true,"sites":3},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().","to":"src/router/`utils.ts`/createNullObject."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().","to":"src/router/reg-exp-router/`matcher.ts`/HandlerData#"}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().","to":"src/router/reg-exp-router/`matcher.ts`/Matcher#"}
@@ -697,6 +695,9 @@
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#insertPath`().","to":"src/router/reg-exp-router/`node.ts`/PATH_ERROR."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#insertPath`().","to":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#tries`."}
 {"data":{"call":true,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#insertPath`().","to":"src/router/reg-exp-router/`trie.ts`/Trie#insert()."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#middleware`.","to":"src/router/reg-exp-router/`router.ts`/HandlerWithMetadata#"}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#routes`.","to":"src/router/reg-exp-router/`router.ts`/HandlerWithMetadata#"}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#tries`.","to":"src/router/reg-exp-router/`trie.ts`/Trie#"}
 {"data":{"call":false,"sites":3},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().","to":"src/`router.ts`/METHOD_NAME_ALL."}
 {"data":{"call":true,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().","to":"src/router/`utils.ts`/createNullObject."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().","to":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#middleware`."}
@@ -720,22 +721,23 @@
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().","to":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#routes`."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().","to":"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#tries`."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().","to":"src/router/reg-exp-router/`router.ts`/wildcardRegExpCache."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#match.","to":"src/`router.ts`/Router#"}
+{"data":{"call":true,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/RegExpRouter#match.","to":"src/router/reg-exp-router/`matcher.ts`/match()."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().","to":"src/router/reg-exp-router/`node.ts`/LABEL_REG_EXP_STR."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().","to":"src/router/reg-exp-router/`node.ts`/ONLY_WILDCARD_REG_EXP_STR."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().","to":"src/router/reg-exp-router/`node.ts`/TAIL_WILDCARD_REG_EXP_STR."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().","to":"src/router/reg-exp-router/`router.ts`/wildcardRegExpCache."}
 {"data":{"call":true,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/findMiddleware().","to":"src/router/reg-exp-router/`router.ts`/buildWildcardRegExp()."}
+{"data":{"call":true,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.","to":"src/router/`utils.ts`/createNullObject."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/","to":"src/router/`utils.ts`/"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/","to":"src/router/`utils.ts`/createNullObject."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/","to":"src/router/reg-exp-router/`node.ts`/"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/","to":"src/router/reg-exp-router/`node.ts`/Context#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/","to":"src/router/reg-exp-router/`node.ts`/Node#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/","to":"src/router/reg-exp-router/`node.ts`/ParamAssocArray#"}
-{"data":{"call":true,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#","to":"src/router/`utils.ts`/createNullObject."}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#","to":"src/router/reg-exp-router/`node.ts`/Context#"}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#","to":"src/router/reg-exp-router/`node.ts`/Context#varIndex."}
-{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#","to":"src/router/reg-exp-router/`node.ts`/Node#"}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#","to":"src/router/reg-exp-router/`node.ts`/ParamAssocArray#"}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#`#context`.","to":"src/router/reg-exp-router/`node.ts`/Context#"}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#`#context`.","to":"src/router/reg-exp-router/`node.ts`/Context#varIndex."}
+{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#`#root`.","to":"src/router/reg-exp-router/`node.ts`/Node#"}
 {"data":{"call":true,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#buildRegExp().","to":"src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr()."}
 {"data":{"call":false,"sites":4},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#buildRegExp().","to":"src/router/reg-exp-router/`trie.ts`/ReplacementMap#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#buildRegExp().","to":"src/router/reg-exp-router/`trie.ts`/Trie#`#root`."}
@@ -745,6 +747,8 @@
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#insert().","to":"src/router/reg-exp-router/`trie.ts`/Trie#`#index`."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#insert().","to":"src/router/reg-exp-router/`trie.ts`/Trie#`#root`."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#insert().","to":"src/router/reg-exp-router/`trie.ts`/Trie#paths."}
+{"data":{"call":true,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#paths.","to":"src/router/`utils.ts`/createNullObject."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/reg-exp-router/`trie.ts`/Trie#paths.","to":"src/router/reg-exp-router/`node.ts`/ParamAssocArray#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`index.ts`/","to":"src/router/smart-router/`router.ts`/"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`index.ts`/","to":"src/router/smart-router/`router.ts`/SmartRouter#"}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/smart-router/`router.ts`/","to":"src/`router.ts`/"}
@@ -752,12 +756,14 @@
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/","to":"src/`router.ts`/Result#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/","to":"src/`router.ts`/Router#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/","to":"src/`router.ts`/UnsupportedPathError#"}
-{"data":{"call":false,"sites":3},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#","to":"src/`router.ts`/Router#"}
-{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#","to":"src/router/smart-router/`router.ts`/SmartRouter#`#routers`."}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#","to":"src/router/smart-router/`router.ts`/SmartRouter#`#routes`."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#","to":"src/`router.ts`/Router#"}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#`#routers`.","to":"src/`router.ts`/Router#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().","to":"src/`router.ts`/Router#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().","to":"src/router/smart-router/`router.ts`/SmartRouter#`#routers`."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().","to":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)routers."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#`<get>activeRouter`().","to":"src/`router.ts`/Router#"}
+{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#`<get>activeRouter`().","to":"src/router/smart-router/`router.ts`/SmartRouter#`#routers`."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#`<get>activeRouter`().","to":"src/router/smart-router/`router.ts`/SmartRouter#`#routes`."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#add().","to":"src/`router.ts`/MESSAGE_MATCHER_IS_ALREADY_BUILT."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#add().","to":"src/router/smart-router/`router.ts`/SmartRouter#`#routes`."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#match().","to":"src/`router.ts`/Result#"}
@@ -776,12 +782,13 @@
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/","to":"src/`router.ts`/METHOD_NAME_ALL."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/","to":"src/`router.ts`/Params#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/","to":"src/router/`utils.ts`/"}
-{"data":{"call":true,"sites":2},"edge":"References","from":"src/router/trie-router/`node.ts`/","to":"src/router/`utils.ts`/createNullObject."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/","to":"src/router/`utils.ts`/createNullObject."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/HandlerParamsSet#","to":"src/router/trie-router/`node.ts`/HandlerSet#"}
-{"data":{"call":true,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#","to":"src/router/`utils.ts`/createNullObject."}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#","to":"src/router/trie-router/`node.ts`/HandlerSet#"}
-{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#","to":"src/router/trie-router/`node.ts`/Node#"}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#","to":"src/router/trie-router/`node.ts`/emptyParams."}
+{"data":{"call":true,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#children`.","to":"src/router/`utils.ts`/createNullObject."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#children`.","to":"src/router/trie-router/`node.ts`/Node#"}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#methods`.","to":"src/router/trie-router/`node.ts`/HandlerSet#"}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#params`.","to":"src/router/trie-router/`node.ts`/emptyParams."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#patterns`.","to":"src/router/trie-router/`node.ts`/Node#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().","to":"src/`router.ts`/METHOD_NAME_ALL."}
 {"data":{"call":true,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().","to":"src/router/`utils.ts`/createNullObject."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().","to":"src/router/trie-router/`node.ts`/HandlerParamsSet#"}
@@ -808,13 +815,14 @@
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#search().","to":"src/router/trie-router/`node.ts`/Node#`#patterns`."}
 {"data":{"call":true,"sites":7},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#search().","to":"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`()."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#search().","to":"src/router/trie-router/`node.ts`/emptyParams."}
+{"data":{"call":true,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/emptyParams.","to":"src/router/`utils.ts`/createNullObject."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`router.ts`/","to":"src/`router.ts`/"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`router.ts`/","to":"src/`router.ts`/Result#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`router.ts`/","to":"src/`router.ts`/Router#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`router.ts`/","to":"src/router/trie-router/`node.ts`/"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`router.ts`/","to":"src/router/trie-router/`node.ts`/Node#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`router.ts`/TrieRouter#","to":"src/`router.ts`/Router#"}
-{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/trie-router/`router.ts`/TrieRouter#","to":"src/router/trie-router/`node.ts`/Node#"}
+{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/trie-router/`router.ts`/TrieRouter#`#node`.","to":"src/router/trie-router/`node.ts`/Node#"}
 {"data":{"call":true,"sites":1},"edge":"References","from":"src/router/trie-router/`router.ts`/TrieRouter#add().","to":"src/router/trie-router/`node.ts`/Node#insert()."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`router.ts`/TrieRouter#add().","to":"src/router/trie-router/`router.ts`/TrieRouter#`#node`."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`router.ts`/TrieRouter#match().","to":"src/`router.ts`/Result#"}

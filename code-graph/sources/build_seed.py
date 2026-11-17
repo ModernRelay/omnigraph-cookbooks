@@ -16,10 +16,14 @@ To graph another TypeScript repository, index it and convert the index:
         --revision "$(git rev-parse HEAD)" --repository https://example.com/repo.git \
         --out graph.jsonl [--slice src/]
 
-Standard library only. Nodes are the global symbols the index defines; locals,
-parameters and type parameters are left out. A References edge joins the
-innermost definition whose enclosing range contains a reference to the symbol
-it names; call is true when one of those references is followed by a call.
+Standard library only, plus Node.js to run indexer/extents.mjs. Nodes are the
+global symbols the index defines; locals, parameters and type parameters are
+left out. A References edge joins the innermost definition whose range
+contains a reference to the symbol it names; call is true when one of those
+references is followed by a call. A definition's range is the indexer's
+enclosing range, or, for the definitions the indexer gives none (a constant
+holding something other than a function, a class field, a getter or setter),
+the one extents.mjs reads with the TypeScript parser.
 """
 from __future__ import annotations
 
@@ -29,6 +33,8 @@ import hashlib
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -45,12 +51,12 @@ KIND = {
     54: "type_alias", 55: "type_alias", 61: "variable",
 }
 CALLABLE_KINDS = {"function", "method", "constructor", "getter", "setter"}
-# scip-typescript gives a constant or variable an enclosing range exactly when
-# its initializer is a function, whatever its declared type: `const getCookie:
-# GetCookie = (c) => {...}` has one. Without a range, as for a property or
-# `const verify = Jwt.verify`, the declared type in the hover text decides:
+# A constant, variable or class field whose initializer is a function is
+# callable whatever its declared type: `const getCookie: GetCookie = (c) =>
+# {...}`. Without one, as for `const verify = Jwt.verify` or a property
+# declared in an interface, the declared type in the hover text decides:
 # `var f: () => any`, `(property) handle: <T>(c: Context<T>) => Response`.
-RANGED_VALUE_KINDS = {"constant", "variable"}
+VALUE_KINDS = {"constant", "variable", "property", "field"}
 DECLARED_TYPE = re.compile(r"^(?:\(\w+\)\s*)?(?:const|let|var|property)?\s*[\w$#]+\??\s*:\s*")
 NULLISH_UNION = re.compile(r"^(?:\|\s*(?:undefined|null)\s*)+$")
 CALL_SUFFIX = ("(", "`", "?.(", "<")
@@ -172,8 +178,8 @@ def is_function_type(text: str) -> bool:
     return True
 
 
-def is_callable(kind: str, ranged: bool, sig: str | None) -> bool:
-    if kind in CALLABLE_KINDS or (kind in RANGED_VALUE_KINDS and ranged):
+def is_callable(kind: str, function_initializer: bool, sig: str | None) -> bool:
+    if kind in CALLABLE_KINDS or (kind in VALUE_KINDS and function_initializer):
         return True
     declared = DECLARED_TYPE.match(sig or "")
     return bool(declared) and is_function_type(sig[declared.end():])
@@ -183,12 +189,42 @@ def contains(outer, inner) -> bool:
     return (outer[0], outer[1]) <= (inner[0], inner[1]) and (inner[2], inner[3]) <= (outer[2], outer[3])
 
 
+def owner(scopes: list, rng) -> str | None:
+    """The innermost definition whose range contains a reference's range.
+
+    Ranges nest, so the innermost one that contains the reference starts last
+    and, on a tie, ends first. None when no definition contains it.
+    """
+    owners = [(r, k) for r, k in scopes if contains(r, rng)]
+    if not owners:
+        return None
+    return max(owners, key=lambda e: ((e[0][0], e[0][1]), (-e[0][2], -e[0][3])))[1]
+
+
+EXTENTS_SCRIPT = os.path.join(HERE, "indexer", "extents.mjs")
+
+
+def read_extents(checkout: str, paths: list[str]) -> dict:
+    """Run extents.mjs over the files: {(path, name line, name character): (range, initializer is a function)}."""
+    node = shutil.which("node")
+    if not node or not os.path.isdir(os.path.join(HERE, "indexer", "node_modules", "typescript")):
+        sys.exit("reading definition ranges needs Node.js and the locked TypeScript parser: "
+                 "run `npm ci` in code-graph/sources/indexer")
+    proc = subprocess.run([node, EXTENTS_SCRIPT], input=json.dumps({"root": checkout, "files": paths}),
+                          capture_output=True, text=True)
+    if proc.returncode != 0:
+        sys.exit(f"extents.mjs failed:\n{proc.stderr.strip()[-2000:]}")
+    return {(path, e[0], e[1]): ((e[2], e[3], e[4], e[5]), e[6])
+            for path, entries in json.loads(proc.stdout).items() for e in entries}
+
+
 def in_slice(path: str, slice_: list[str]) -> bool:
     return not slice_ or any(path == s or (s.endswith("/") and path.startswith(s)) for s in slice_)
 
 
 def build(index_path: str, checkout: str, revision: str, repository: str, slice_: list[str]) -> list[dict]:
     idx = read_index(index_path)
+    extents = read_extents(checkout, [d.relative_path for d in idx.documents])
     infos = {s.symbol: s for d in idx.documents for s in d.symbols if not s.symbol.startswith("local ")}
     sources: dict[str, list[str]] = {}
 
@@ -199,23 +235,27 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
         return sources[path]
 
     nodes: dict[str, dict] = {}
-    scopes: dict[str, list] = collections.defaultdict(list)  # path -> [(enclosing range, key)]
+    scopes: dict[str, list] = collections.defaultdict(list)  # path -> [(definition range, key)]
     for d in idx.documents:
         for o in d.occurrences:
             info = infos.get(o.symbol)
             if not o.roles & DEFINITION or info is None or info.kind not in KIND:
                 continue
             key = descriptors_of(o.symbol)
-            if o.enclosing_range:
-                scopes[d.relative_path].append((o.enclosing_range, key))
+            # The indexer's range when it gives one, which for a constant means
+            # its initializer is a function; else the parser's.
+            extent, function_initializer = extents.get((d.relative_path, o.range[0], o.range[1]), (None, False))
+            defined = o.enclosing_range or extent
+            if defined:
+                scopes[d.relative_path].append((defined, key))
             if key in nodes:
                 continue
             kind = KIND[info.kind]
             sig = signature(info.documentation)
-            callable_ = is_callable(kind, bool(o.enclosing_range), sig)
-            span = o.enclosing_range or o.range
+            callable_ = is_callable(kind, bool(o.enclosing_range) or function_initializer, sig)
+            span = defined or o.range
             digest = None
-            if callable_ and o.enclosing_range:
+            if callable_ and defined:
                 text = "\n".join(lines(d.relative_path)[span[0]:span[2] + 1])
                 digest = hashlib.sha256(text.encode()).hexdigest()[:16]
             nodes[key] = {"symbol": key, "name": parse_descriptors(key)[-1][0], "kind": kind,
@@ -231,12 +271,9 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
             callee = descriptors_of(o.symbol)
             if callee not in nodes:
                 continue
-            # Enclosing ranges nest, so the innermost one that contains the
-            # reference starts last and, on a tie, ends first.
-            owners = [(r, k) for r, k in doc_scopes if contains(r, o.range)]
-            if not owners:
+            caller = owner(doc_scopes, o.range)
+            if caller is None:
                 continue
-            caller = max(owners, key=lambda e: ((e[0][0], e[0][1]), (-e[0][2], -e[0][3])))[1]
             text = lines(d.relative_path)
             after = text[o.range[2]][o.range[3]:].lstrip() if o.range[2] < len(text) else ""
             edge = references.setdefault((caller, callee), {"call": False, "sites": 0})

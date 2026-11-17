@@ -59,10 +59,10 @@ query callees($symbol: String) @description("What the symbol's code names: what 
     limit 200
 }
 
-query impact($symbol: String) @description("Every definition that reaches the symbol through up to three references: what a change to it can break.") {
+query impact($symbol: String) @description("Every definition that reaches the symbol through a chain of up to sixteen references: what a change to it can break.") {
     match {
         $t: Symbol { symbol: $symbol }
-        $c references{1,3} $t
+        $c references{1,16} $t
     }
     return distinct { $c.symbol, $c.kind, $c.path }
     order { $c.symbol asc }

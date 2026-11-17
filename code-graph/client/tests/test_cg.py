@@ -47,8 +47,8 @@ class Summarize(unittest.TestCase):
         # 58 definitions moved; the five that also changed count as changed.
         self.assertEqual(s["moved"], 53)
         refs = s["references"]
-        self.assertEqual((len(refs["added"]), len(refs["removed"]), len(refs["changed"])), (16, 0, 0))
-        self.assertEqual(collections.Counter(r["to"] for r in refs["added"]), {HELPER: 12, MODULE: 4})
+        self.assertEqual((len(refs["added"]), len(refs["removed"]), len(refs["changed"])), (18, 0, 0))
+        self.assertEqual(collections.Counter(r["to"] for r in refs["added"]), {HELPER: 14, MODULE: 4})
         self.assertIn({"from": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().", "to": HELPER,
                        "call": True, "sites": 1}, refs["added"])
         self.assertEqual(s["members"]["added"], [{"from": HELPER, "to": MODULE}])
@@ -60,7 +60,7 @@ class Summarize(unittest.TestCase):
         self.assertEqual([r["symbol"] for r in s["removed"]], [MODULE, HELPER])
         self.assertEqual(s["added"], [])
         self.assertEqual({r["symbol"] for r in s["changed"]}, CHANGED)
-        self.assertEqual(len(s["references"]["removed"]), 16)
+        self.assertEqual(len(s["references"]["removed"]), 18)
         self.assertEqual(s["references"]["added"], [])
         self.assertEqual(s["members"]["removed"], [{"from": HELPER, "to": MODULE}])
 
@@ -79,7 +79,7 @@ class Render(unittest.TestCase):
         text = cg_cli.render(cg_cli.summarize(fixture("pr-5267.diff.json")), "pr-5267", "main")
         first = text.splitlines()[0]
         self.assertEqual(first, "pr-5267 against main, revision a10592f3..4b44abe1: 2 symbols added, 0 removed, "
-                                "5 changed; 16 references added, 0 removed, 0 changed; 53 definitions only moved.")
+                                "5 changed; 18 references added, 0 removed, 0 changed; 53 definitions only moved.")
         self.assertIn("  src/router/utils.ts:createNullObject (constant)", text)
         self.assertIn("  src/router/reg-exp-router/router.ts:RegExpRouter.add() (method): code changed", text)
         self.assertIn("  src/router/reg-exp-router/router.ts:RegExpRouter.add() now calls "
