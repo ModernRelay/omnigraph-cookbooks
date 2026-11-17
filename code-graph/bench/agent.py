@@ -6,6 +6,10 @@ code-structure questions about hono with each code graph, and how right it is.
     python3 code-graph/bench/agent.py index [--arms A,B] [--reps N]   # time each tool's first index
     python3 code-graph/bench/agent.py run [--arms A,B] [--questions Q,R] [--reps N] [--model M] [--jobs J]
     python3 code-graph/bench/agent.py score [--model M]
+    python3 code-graph/bench/agent.py --suite vscode setup|run|score ...   # the benchmark at scale
+
+The vscode suite (scale.py, scale-design.md) uses VS Code 1.146.0 with 1.145.0
+as its previous commit; every arm there also gets a `git` that only reads.
 
 Each arm is a git worktree of hono at the base revision under work/agent/ARM,
 with at most one code graph, set up by that tool's own Claude Code installer:
@@ -62,6 +66,23 @@ sys.path.insert(0, str(BENCH))
 from common import load_reference  # noqa: E402
 
 BASE = json.loads(QUESTIONS.read_text())["revision"]
+SCALE = WORK / "scale"
+# A suite is one repository and its question file. `vscode` is the benchmark at
+# scale (scale.py builds its repository, graph, reference and questions).
+SUITES = {
+    "hono": {"questions": QUESTIONS, "repo": REPO, "agents": AGENTS, "runs": RUNS,
+             "reference": WORK / "ref-base.json", "results": "agent.json"},
+    "vscode": {"questions": BENCH / "scale-questions.json", "repo": SCALE / "repo.git", "agents": SCALE / "agent",
+               "runs": SCALE / "agent-runs", "reference": SCALE / "ref-1.146.0.json", "results": "agent-scale.json"},
+}
+SUITE = "hono"
+REFERENCE, RESULTS = SUITES["hono"]["reference"], SUITES["hono"]["results"]
+# The vscode suite's git reads no global configuration (scale.py GIT_ENV).
+GIT_ENV = {"GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1"}
+# Commands a vscode arm's `git` wrapper lets the agent run: it reads the
+# previous release, never changes the checkout.
+READ_ONLY_GIT = ("log", "diff", "show", "blame", "grep", "ls-files", "ls-tree", "rev-parse", "tag",
+                 "cat-file", "describe", "shortlog", "status")
 ARMS = ("bare", "omnigraph", "codegraph", "graphify", "gitnexus", "cbm", "crg")
 TOOL_NAMES = {"bare": "no code graph", "omnigraph": "Omnigraph (this cookbook, through cg)",
               "codegraph": "codegraph 1.6.2", "graphify": "Graphify 0.9.102", "gitnexus": "GitNexus 1.6.12",
@@ -73,6 +94,7 @@ BUILTIN_TOOLS = "Read,Grep,Glob,Bash,Skill,Task"
 READ_ONLY_SHELL = ["grep", "find", "ls", "cat", "head", "tail", "wc"]
 SYSTEM_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"
 RUN_TIMEOUT = 900
+SETUP_TIMEOUT = 1800
 MAX_TURNS = 80
 NO_TELEMETRY = {"DO_NOT_TRACK": "1", "CODEGRAPH_TELEMETRY": "0", "CODEGRAPH_NO_DOWNLOAD": "1",
                 "SCARF_ANALYTICS": "false", "GRAPHIFY_QUERY_LOG_DISABLE": "1"}
@@ -94,6 +116,28 @@ searching text; `cg --help` lists every command.
 SYMBOL is a name or a key from `cg find`; a name that several definitions
 share lists the candidates, so pass the key.
 """
+OMNIGRAPH_CLAUDE_MD_SCALE = OMNIGRAPH_CLAUDE_MD + """
+The graph holds release 1.146.0 on `main` and release 1.145.0 on branch
+`v1.145.0`. Every read takes `--branch v1.145.0` to read the previous
+release, and `cg diff main --into v1.145.0` lists everything 1.146.0 added and
+removed, which is over 300,000 lines. A read that stops at its row limit says
+so.
+"""
+
+
+def configure(suite: str):
+    """Point the module's paths at one suite."""
+    global SUITE, QUESTIONS, REPO, AGENTS, RUNS, REFERENCE, RESULTS, BASE, RUN_TIMEOUT, SETUP_TIMEOUT
+    spec = SUITES[suite]
+    SUITE = suite
+    QUESTIONS, REPO, AGENTS, RUNS = spec["questions"], spec["repo"], spec["agents"], spec["runs"]
+    REFERENCE, RESULTS = spec["reference"], spec["results"]
+    if suite == "vscode":
+        # Sessions on 2.3 million lines take longer, and each tool's first
+        # index of the repository gets the design's 60-minute budget.
+        RUN_TIMEOUT, SETUP_TIMEOUT = 1800, 3600
+    if QUESTIONS.exists():
+        BASE = json.loads(QUESTIONS.read_text())["revision"]
 
 
 @functools.cache
@@ -111,8 +155,9 @@ def omnigraph_bin() -> str:
     return binary
 
 
-def sh(*args, cwd=None, env=None, timeout=1800) -> str:
-    p = subprocess.run([str(a) for a in args], cwd=cwd, env=env, capture_output=True, text=True, timeout=timeout)
+def sh(*args, cwd=None, env=None, timeout=None) -> str:
+    p = subprocess.run([str(a) for a in args], cwd=cwd, env=env, capture_output=True, text=True,
+                       timeout=timeout or SETUP_TIMEOUT)
     if p.returncode:
         raise SystemExit(f"{' '.join(map(str, args))} failed:\n{p.stdout[-1500:]}\n{p.stderr[-2500:]}")
     return p.stdout
@@ -153,17 +198,19 @@ class Arm:
 
     def shell(self) -> list[str]:
         """Shell commands this arm's agent may run besides the read-only set."""
-        return {"omnigraph": ["cg"], "codegraph": ["codegraph"], "graphify": ["graphify"],
+        tool = {"omnigraph": ["cg"], "codegraph": ["codegraph"], "graphify": ["graphify"],
                 "gitnexus": ["gitnexus"], "cbm": ["codebase-memory-mcp"], "crg": ["code-review-graph"]}.get(self.name, [])
+        return (["git"] if SUITE == "vscode" else []) + tool
 
 
 # --- setup -------------------------------------------------------------------
 
 def worktree(arm: Arm):
+    env = {**os.environ, **GIT_ENV} if SUITE == "vscode" else None
     if not arm.repo.exists():
         arm.root.mkdir(parents=True, exist_ok=True)
-        sh("git", "-C", REPO, "worktree", "add", "--quiet", "--detach", arm.repo, BASE)
-    head = sh("git", "-C", arm.repo, "rev-parse", "HEAD").strip()
+        sh("git", "-C", REPO, "worktree", "add", "--quiet", "--detach", arm.repo, BASE, env=env)
+    head = sh("git", "-C", arm.repo, "rev-parse", "HEAD", env=env).strip()
     if head != BASE:
         raise SystemExit(f"{arm.repo} is at {head}, not {BASE}")
     (arm.home / ".claude").mkdir(parents=True, exist_ok=True)
@@ -186,7 +233,40 @@ def venv_tool(arm: Arm, package: str, command: str) -> Path:
     return venv / "bin" / command
 
 
+def read_only_git(arm: Arm):
+    """A `git` on the arm's PATH that runs only commands that read."""
+    arm.bin.mkdir(parents=True, exist_ok=True)
+    real = shutil.which("git", path=SYSTEM_PATH) or shutil.which("git")
+    (arm.bin / "git").write_text(f"""#!/usr/bin/env python3
+import os, sys
+args, i = sys.argv[1:], 0
+while i < len(args) and args[i].startswith("-"):
+    if args[i] == "-C":
+        i += 2
+    elif args[i] in ("--no-pager", "-P", "--no-optional-locks"):
+        i += 1
+    else:
+        sys.exit(f"git {{args[i]}} is not allowed here: the repository is read-only")
+if i >= len(args) or args[i] not in {READ_ONLY_GIT!r}:
+    sys.exit("only these git commands are allowed here: " + ", ".join({READ_ONLY_GIT!r}))
+os.execve({real!r}, [{real!r}, *args], {{**os.environ, **{GIT_ENV!r}}})
+""")
+    (arm.bin / "git").chmod(0o755)
+
+
 def setup_omnigraph(arm: Arm) -> dict:
+    if SUITE == "vscode":
+        # The graph scale.py built, both releases; its index times are in build.json.
+        graph = SCALE / "graph.omni"
+        if not (SCALE / "graph.omni.done").exists():
+            raise SystemExit("no vscode graph: run `scale.py build` first")
+        arm.wrap("cg", COOKBOOK / "client" / "cg", sys.executable, env={"CG_TARGET": graph, "CG_OMNIGRAPH": omnigraph_bin()})
+        (arm.repo / "CLAUDE.md").write_text(OMNIGRAPH_CLAUDE_MD_SCALE)
+        (arm.repo / ".claude").mkdir(exist_ok=True)
+        if not (arm.repo / ".claude" / "settings.json").exists():
+            (arm.repo / ".claude" / "settings.json").write_text("{}\n")
+        build = json.loads((SCALE / "build.json").read_text())
+        return {"index_seconds": {k: v for k, v in build.items() if "1.146.0" in k}}
     og, graph = omnigraph_bin(), arm.root / "graph.omni"
     index, rows = arm.root / "index.scip", arm.root / "graph.jsonl"
     indexer = COOKBOOK / "sources" / "indexer" / "node_modules" / ".bin" / "scip-typescript"
@@ -321,6 +401,14 @@ def adopt(arm: Arm):
     for source in (arm.home / ".claude.json", arm.repo / ".mcp.json"):
         if source.exists():
             servers.update(json.loads(source.read_text()).get("mcpServers", {}))
+    # A repository can commit its own MCP servers (VS Code commits one for its
+    # own development); they are the repository's, not the tool's, so no arm
+    # gets them. A tool's installer adds its servers to the same file.
+    committed = subprocess.run(["git", "-C", arm.repo, "show", "HEAD:.mcp.json"], capture_output=True, text=True,
+                               env={**os.environ, **GIT_ENV})
+    if committed.returncode == 0:
+        for name in json.loads(committed.stdout).get("mcpServers", {}):
+            servers.pop(name, None)
     for server in servers.values():
         server["env"] = {**server.get("env", {}), **arm.tool_env()}
     arm.mcp.write_text(json.dumps({"mcpServers": servers}, indent=2) + "\n")
@@ -349,7 +437,16 @@ def setup(arms: list[str]):
     for name in arms:
         arm = Arm(name)
         worktree(arm)
-        meta = SETUP[name](arm)
+        if SUITE == "vscode":
+            read_only_git(arm)
+        try:
+            meta = SETUP[name](arm)
+        except (subprocess.TimeoutExpired, SystemExit) as e:
+            # A tool that cannot index the repository within the budget is a
+            # result, not a reason to stop the other arms.
+            arm.meta.write_text(json.dumps({"failed": str(e)[-2000:]}, indent=2) + "\n")
+            print(f"{name}: setup failed: {str(e)[-300:]}", flush=True)
+            continue
         adopt(arm)
         meta["given"] = inventory(arm)
         previous = json.loads(arm.meta.read_text()) if arm.meta.exists() else {}
@@ -435,6 +532,9 @@ def run_one(arm: Arm, question: dict, rep: int, model: str, answer_format: str) 
             "--mcp-config", str(arm.mcp), "--tools", BUILTIN_TOOLS, "--allowedTools", ",".join(allowed),
             "--max-turns", str(MAX_TURNS)]
     env = {k: os.environ[k] for k in ("HOME", "USER", "LOGNAME", "TMPDIR", "LANG", "TERM") if k in os.environ}
+    # Where a box keeps Claude Code's login, when it is not under HOME.
+    env.update({k: v for k, v in os.environ.items()
+                if k in ("CLAUDE_CONFIG_DIR", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY")})
     env["PATH"] = f"{arm.bin}:{node_bin()}:{SYSTEM_PATH}:{Path(shutil.which('claude')).parent}"
     prompt = f"{question['question']}\n\n{answer_format}"
     start = time.monotonic()
@@ -459,9 +559,18 @@ def run_one(arm: Arm, question: dict, rep: int, model: str, answer_format: str) 
 def run(arms: list[str], qids: list[str] | None, reps: int, model: str, jobs: int):
     spec = json.loads(QUESTIONS.read_text())
     questions = [q for q in spec["questions"] if not qids or q["id"] in qids]
+    if qids and len(questions) != len(qids):
+        raise SystemExit(f"unknown questions: {sorted(set(qids) - {q['id'] for q in questions})}")
+    ready = []
     for name in arms:
-        if not Arm(name).mcp.exists():
+        arm = Arm(name)
+        if arm.meta.exists() and "failed" in json.loads(arm.meta.read_text()):
+            print(f"{name}: skipped, its setup failed (see {arm.meta})", flush=True)
+            continue
+        if not arm.mcp.exists():
             raise SystemExit(f"arm {name} is not set up: run `agent.py setup --arms {name}`")
+        ready.append(name)
+    arms = ready
     work = [(name, q, rep) for rep in range(1, reps + 1) for q in questions for name in arms]
     random.Random(7).shuffle(work)
     locks = {name: threading.Lock() for name in arms}
@@ -564,9 +673,11 @@ def parse_stream(path: Path) -> dict:
 
 def score(model: str):
     spec = json.loads(QUESTIONS.read_text())
-    nodes, _ = load_reference(WORK / "ref-base.json")
+    nodes, _ = load_reference(REFERENCE)
     lift = owner_lift(nodes)
     keys = {q["id"]: set(q["answer"]) for q in spec["questions"]}
+    family = {q["id"]: q.get("family", q["id"]) for q in spec["questions"]}
+    families = list(dict.fromkeys(family.values()))
     optional = {q["id"]: set(q.get("optional", [])) for q in spec["questions"]}
     for qid, key in keys.items():
         missing = [k for k in key | optional[qid] if k not in nodes and k.split(":")[0] not in nodes]
@@ -592,6 +703,9 @@ def score(model: str):
         rows.append({**{k: meta[k] for k in ("arm", "question", "rep", "wall_seconds", "timed_out")},
                      "completed": bool(res) and not res.get("is_error") and not meta["timed_out"],
                      "answered": bool(match), "api_seconds": round(res.get("duration_api_ms", 0) / 1000, 2),
+                     # The API's speed during this session, so a slow window shows.
+                     "output_tokens_per_api_second": round(tokens_out / (res["duration_api_ms"] / 1000), 1)
+                     if res.get("duration_api_ms") else None,
                      "turns": res.get("num_turns"), "input_tokens": tokens_in, "output_tokens": tokens_out,
                      "cache_write_tokens": cache_writes, "first_context_tokens": parsed["first_context"],
                      "cost_usd": res.get("total_cost_usd"), "tool_calls": dict(parsed["tools"]),
@@ -617,6 +731,13 @@ def score(model: str):
             "median_wall_seconds": med([r["wall_seconds"] for r in rs]),
             "median_api_seconds": med([r["api_seconds"] for r in rs]),
             "median_turns": med([r["turns"] or 0 for r in rs]),
+            "median_output_tokens_per_api_second": med([r["output_tokens_per_api_second"] for r in rs
+                                                        if r["output_tokens_per_api_second"]]),
+            "per_family": {fam: {"runs": len(fr), "exact": sum(r["exact"] for r in fr),
+                                 "mean_f1": round(statistics.mean(r["f1"] for r in fr), 3),
+                                 "median_cost_usd": round(med([r["cost_usd"] or 0 for r in fr]), 4),
+                                 "median_turns": med([r["turns"] or 0 for r in fr])}
+                           for fam in families if (fr := [r for r in rs if family[r["question"]] == fam])},
             "median_tool_calls": med(calls),
             "graph_tool_share": round(sum(r["tool_calls"].get("mcp", 0) + sum(
                 v for k, v in r["tool_calls"].items() if k.startswith("Bash:") and k[5:] in Arm(arm).shell())
@@ -642,7 +763,8 @@ def score(model: str):
                                    "questions_lower": sum(x < 1 for x in ratios), "questions": len(qs)}
     out = BENCH / "results"
     out.mkdir(exist_ok=True)
-    (out / "agent.json").write_text(json.dumps({"model": model, "summary": summary, "runs": rows}, indent=2) + "\n")
+    (out / RESULTS).write_text(json.dumps({"suite": SUITE, "model": model, "summary": summary, "runs": rows},
+                                          indent=2) + "\n")
     print(f"{'arm':<11} {'runs':>4} {'F1':>6} {'exact':>5} {'in tok':>9} {'out tok':>8} {'cost $':>7} "
           f"{'wall s':>7} {'api s':>6} {'turns':>5} {'calls':>5} {'graph%':>6}")
     for arm, s in summary.items():
@@ -660,6 +782,8 @@ def score(model: str):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap.add_argument("--suite", choices=sorted(SUITES), default="hono",
+                    help="the repository and questions: hono, or vscode (built by scale.py)")
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("setup", "index", "run", "score"):
         p = sub.add_parser(name)
@@ -674,6 +798,7 @@ def main():
             p.add_argument("--reps", type=int, default=3)
             p.add_argument("--jobs", type=int, default=3)
     args = ap.parse_args()
+    configure(args.suite)
     arms = [a for a in getattr(args, "arms", "").split(",") if a]
     unknown = set(arms) - set(ARMS)
     if unknown:
@@ -681,6 +806,8 @@ def main():
     if args.cmd == "setup":
         setup(arms)
     elif args.cmd == "index":
+        if SUITE != "hono":
+            raise SystemExit("index times the hono suite; the vscode suite records them in setup and build.json")
         index_times(arms, args.reps)
     elif args.cmd == "run":
         run(arms, args.questions.split(",") if args.questions else None, args.reps, args.model, args.jobs)

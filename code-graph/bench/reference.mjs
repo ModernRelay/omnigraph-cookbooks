@@ -305,7 +305,29 @@ export function buildReference(checkout, { project = 'tsconfig.build.json', scop
     }
     addEdges(owner, targets, false)
   }
-  return { nodes, edges, sites }
+  // A class member implements or overrides each member of the same name that
+  // its class's heritage types declare, inherited members included: the
+  // bodies a call through the interface or base member can run.
+  const implementsEdges = []
+  for (const [decl, id] of declId) {
+    if (!ts.isClassDeclaration(decl) || !decl.heritageClauses) continue
+    const bases = decl.heritageClauses.flatMap((h) => h.types).map((t) => checker.getTypeAtLocation(t))
+    for (const member of decl.members) {
+      const memberId = declId.get(member)
+      const name = member.name && nameText(member.name)
+      if (!memberId || !name) continue
+      const targets = new Set()
+      for (const base of bases) {
+        const prop = base.getProperty(name)
+        for (const d of prop?.declarations || []) {
+          const t = declId.get(d)
+          if (t && t !== memberId) targets.add(t)
+        }
+      }
+      for (const t of targets) implementsEdges.push([memberId, t])
+    }
+  }
+  return { nodes, edges, sites, implements: implementsEdges.sort() }
 
   function addEdges(owner, targets, call) {
     for (const t of targets) {

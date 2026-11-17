@@ -58,6 +58,14 @@ def load_reference(path: Path) -> tuple[dict, dict]:
     return ref["nodes"], edges
 
 
+def load_implements(path: Path) -> dict[str, set[str]]:
+    """member identity -> the identities of the members that implement or override it."""
+    impl: dict[str, set[str]] = {}
+    for member, target in json.loads(Path(path).read_text()).get("implements", []):
+        impl.setdefault(target, set()).add(member)
+    return impl
+
+
 def load_cookbook_rows(rows: list[dict]) -> tuple[dict, dict]:
     """Nodes and References edges of a cookbook revision, in identity space."""
     nodes, edges = {}, {}

@@ -1,0 +1,500 @@
+{
+  "suite": "vscode",
+  "revision": "5d4d801304f38e23dcbbae55b715d2333703e7a5",
+  "previous": "22c21f7d4a432914b19c090c9dcfa0639115cf06",
+  "releases": [
+    "1.145.0",
+    "1.146.0"
+  ],
+  "seed": 20261117,
+  "answer_format": "End your reply with one line that starts with ANSWER: followed by a JSON array of strings. Name each definition as path:Name for a top-level function, class, interface or constant, and as path:Class.member for a member of a class, with the path relative to the repository root, for example src/vs/platform/files/common/fileService.ts:FileService.readFile. For code that belongs to no named function, method or class, give the file path alone. Leave out test code: files under a test/ directory and files whose names end in .test.ts. Do not change any file.",
+  "families": {
+    "shared-name": {
+      "candidates": 673,
+      "rejected_by_source_check": 0,
+      "picked": 4
+    },
+    "dispatch": {
+      "candidates": 411,
+      "rejected_by_source_check": 3,
+      "picked": 4
+    },
+    "transitive": {
+      "candidates": 4503,
+      "rejected_by_source_check": 1,
+      "picked": 4
+    },
+    "construction": {
+      "candidates": 107,
+      "rejected_by_source_check": 0,
+      "picked": 4
+    },
+    "release": {
+      "candidates": 446,
+      "rejected_by_source_check": 0,
+      "picked": 4
+    },
+    "control": {
+      "candidates": 7001,
+      "rejected_by_source_check": 0,
+      "picked": 4
+    }
+  },
+  "questions": [
+    {
+      "id": "shared-name-1",
+      "family": "shared-name",
+      "question": "Which functions and methods in src/ call the getId method of IContentWidget, the interface in src/vs/editor/browser/editorBrowser.ts?",
+      "answer": [
+        "src/vs/editor/browser/viewParts/contentWidgets/contentWidgets.ts:ViewContentWidgets.removeWidget",
+        "src/vs/editor/browser/viewParts/contentWidgets/contentWidgets.ts:ViewContentWidgets.setWidgetPosition",
+        "src/vs/editor/browser/viewParts/contentWidgets/contentWidgets.ts:Widget.constructor",
+        "src/vs/editor/browser/widget/codeEditor/codeEditorWidget.ts:CodeEditorWidget.addContentWidget",
+        "src/vs/editor/browser/widget/codeEditor/codeEditorWidget.ts:CodeEditorWidget.layoutContentWidget",
+        "src/vs/editor/browser/widget/codeEditor/codeEditorWidget.ts:CodeEditorWidget.removeContentWidget"
+      ],
+      "target": "src/vs/editor/browser/editorBrowser.ts:IContentWidget.getId",
+      "grep_lines": 580,
+      "grep_pattern": "\\bgetId\\s*\\("
+    },
+    {
+      "id": "shared-name-2",
+      "family": "shared-name",
+      "question": "Which functions and methods in src/ call the layout method of NotebookCellOverlays, the class in src/vs/workbench/contrib/notebook/browser/viewParts/notebookCellOverlays.ts?",
+      "answer": [
+        "src/vs/workbench/contrib/notebook/browser/view/notebookCellList.ts:NotebookCellList.changeCellOverlays",
+        "src/vs/workbench/contrib/notebook/browser/view/notebookCellList.ts:NotebookCellList.setHiddenAreas",
+        "src/vs/workbench/contrib/notebook/browser/view/notebookCellList.ts:NotebookCellList.splice2",
+        "src/vs/workbench/contrib/notebook/browser/view/notebookCellList.ts:NotebookCellList.updateElementHeight2",
+        "src/vs/workbench/contrib/notebook/browser/viewParts/notebookCellOverlays.ts:NotebookCellOverlays.onCellsChanged",
+        "src/vs/workbench/contrib/notebook/browser/viewParts/notebookCellOverlays.ts:NotebookCellOverlays.onHiddenRangesChange"
+      ],
+      "target": "src/vs/workbench/contrib/notebook/browser/viewParts/notebookCellOverlays.ts:NotebookCellOverlays.layout",
+      "grep_lines": 1295,
+      "grep_pattern": "\\blayout\\s*\\("
+    },
+    {
+      "id": "shared-name-3",
+      "family": "shared-name",
+      "question": "Which functions and methods in src/ call the dispose method of MissionControlLane, the class in src/vs/platform/agentHost/node/missionControl/missionControlProtocolServer.ts?",
+      "answer": [
+        "src/vs/platform/agentHost/node/missionControl/missionControlProtocolServer.ts:MissionControlLane._dispatch",
+        "src/vs/platform/agentHost/node/missionControl/missionControlProtocolServer.ts:MissionControlLane.receive",
+        "src/vs/platform/agentHost/node/missionControl/missionControlProtocolServer.ts:MissionControlLane.send",
+        "src/vs/platform/agentHost/node/missionControl/missionControlProtocolServer.ts:MissionControlProtocolServer._replaceLane",
+        "src/vs/platform/agentHost/node/missionControl/missionControlProtocolServer.ts:MissionControlProtocolServer._resume",
+        "src/vs/platform/agentHost/node/missionControl/missionControlProtocolServer.ts:MissionControlProtocolServer.connect"
+      ],
+      "target": "src/vs/platform/agentHost/node/missionControl/missionControlProtocolServer.ts:MissionControlLane.dispose",
+      "grep_lines": 8038,
+      "grep_pattern": "\\bdispose\\s*\\("
+    },
+    {
+      "id": "shared-name-4",
+      "family": "shared-name",
+      "question": "Which functions and methods in src/ call the equals method of ContextKeyNotInExpr, the class in src/vs/platform/contextkey/common/contextkey.ts?",
+      "answer": [
+        "src/vs/platform/contextkey/common/contextkey.ts:ContextKeyAndExpr._normalizeArr",
+        "src/vs/platform/contextkey/common/contextkey.ts:ContextKeyAndExpr.equals",
+        "src/vs/platform/contextkey/common/contextkey.ts:ContextKeyOrExpr._normalizeArr",
+        "src/vs/platform/contextkey/common/contextkey.ts:ContextKeyOrExpr.equals",
+        "src/vs/platform/contextkey/common/contextkey.ts:expressionsAreEqualWithConstantSubstitution",
+        "src/vs/platform/contextkey/common/contextkey.ts:implies",
+        "src/vs/platform/userDataSync/common/keybindingsMerge.ts:isSameKeybinding",
+        "src/vs/workbench/services/keybinding/common/keybindingEditing.ts:KeybindingsEditingService.areSame"
+      ],
+      "target": "src/vs/platform/contextkey/common/contextkey.ts:ContextKeyNotInExpr.equals",
+      "grep_lines": 1967,
+      "grep_pattern": "\\bequals\\s*\\("
+    },
+    {
+      "id": "dispatch-1",
+      "family": "dispatch",
+      "question": "Which methods in src/ implement or override the update method of IPeekOutputRenderer, the interface in src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts, directly or through another class or interface? List only methods that have a body.",
+      "answer": [
+        "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:DiffContentProvider.update",
+        "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:MarkdownTestMessagePeek.update",
+        "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:PlainTextMessagePeek.update",
+        "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:TerminalMessagePeek.update"
+      ],
+      "target": "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:IPeekOutputRenderer.update",
+      "grep_lines": 1559,
+      "grep_pattern": "\\bupdate\\s*\\("
+    },
+    {
+      "id": "dispatch-2",
+      "family": "dispatch",
+      "question": "Which methods in src/ implement or override the updateOptions method of IDiffEditor, the interface in src/vs/editor/browser/editorBrowser.ts, directly or through another class or interface? List only methods that have a body.",
+      "answer": [
+        "src/vs/editor/browser/widget/diffEditor/diffEditorWidget.ts:DiffEditorWidget.updateOptions",
+        "src/vs/editor/browser/widget/diffEditor/embeddedDiffEditorWidget.ts:EmbeddedDiffEditorWidget.updateOptions",
+        "src/vs/editor/standalone/browser/standaloneCodeEditor.ts:StandaloneDiffEditor2.updateOptions"
+      ],
+      "target": "src/vs/editor/browser/editorBrowser.ts:IDiffEditor.updateOptions",
+      "grep_lines": 327,
+      "grep_pattern": "\\bupdateOptions\\s*\\("
+    },
+    {
+      "id": "dispatch-3",
+      "family": "dispatch",
+      "question": "Which methods in src/ implement or override the isEnabled method of IUserDataSyncEnablementService, the interface in src/vs/platform/userDataSync/common/userDataSync.ts, directly or through another class or interface? List only methods that have a body.",
+      "answer": [
+        "src/vs/platform/userDataSync/common/userDataSyncEnablementService.ts:UserDataSyncEnablementService.isEnabled",
+        "src/vs/workbench/contrib/editSessions/common/workspaceStateSync.ts:NullEnablementService.isEnabled",
+        "src/vs/workbench/services/userDataSync/browser/webUserDataSyncEnablementService.ts:WebUserDataSyncEnablementService.isEnabled"
+      ],
+      "target": "src/vs/platform/userDataSync/common/userDataSync.ts:IUserDataSyncEnablementService.isEnabled",
+      "grep_lines": 356,
+      "grep_pattern": "\\bisEnabled\\s*\\("
+    },
+    {
+      "id": "dispatch-4",
+      "family": "dispatch",
+      "question": "Which methods in src/ implement or override the create method of AbstractURLService, the class in src/vs/platform/url/common/urlService.ts, directly or through another class or interface? List only methods that have a body.",
+      "answer": [
+        "src/vs/platform/url/common/urlService.ts:NativeURLService.create",
+        "src/vs/workbench/services/url/browser/urlService.ts:BrowserURLService.create",
+        "src/vs/workbench/services/url/electron-browser/urlService.ts:RelayURLService.create"
+      ],
+      "target": "src/vs/platform/url/common/urlService.ts:AbstractURLService.create",
+      "grep_lines": 1119,
+      "grep_pattern": "\\bcreate\\s*\\("
+    },
+    {
+      "id": "transitive-1",
+      "family": "transitive",
+      "question": "Which functions and methods in src/ call the _publishAgentInfos method of AgentSideEffects, the class in src/vs/platform/agentHost/node/agentSideEffects.ts, either directly or through any chain of other calls?",
+      "answer": [
+        "src/vs/platform/agentHost/node/agentHostBootstrap.ts:createAgentHostRuntime",
+        "src/vs/platform/agentHost/node/agentHostMain.ts",
+        "src/vs/platform/agentHost/node/agentHostMain.ts:startAgentHost",
+        "src/vs/platform/agentHost/node/agentHostServerMain.ts",
+        "src/vs/platform/agentHost/node/agentHostServerMain.ts:main",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._cancelAgentMergePrompt",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._cancelAutomationSession",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._createSessionServerToolAccessor",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._dispatchActionNow",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._dispatchServerToolAction",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._initializeProvider",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._resumeAutomationTurn",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._startAgentMergePrompt",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService.archiveSession",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService.constructor",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService.dispatchAction",
+        "src/vs/platform/agentHost/node/agentServiceComposition.ts:createAgentServiceComposition",
+        "src/vs/platform/agentHost/node/agentServiceComposition.ts:createSessionLifecycleAccessor",
+        "src/vs/platform/agentHost/node/agentSideEffects.ts:AgentSideEffects.constructor",
+        "src/vs/platform/agentHost/node/agentSideEffects.ts:AgentSideEffects.handleAction",
+        "src/vs/platform/agentHost/node/agentSideEffects.ts:AgentSideEffects.registerProgressListener"
+      ],
+      "target": "src/vs/platform/agentHost/node/agentSideEffects.ts:AgentSideEffects._publishAgentInfos",
+      "grep_lines": 4,
+      "grep_pattern": "\\b_publishAgentInfos\\s*\\(",
+      "depth": 7
+    },
+    {
+      "id": "transitive-2",
+      "family": "transitive",
+      "question": "Which functions and methods in src/ call the setInsertIndicatorVisibility method of CellDragAndDropController, the class in src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts, either directly or through any chain of other calls?",
+      "answer": [
+        "src/vs/workbench/contrib/notebook/browser/notebookEditorWidget.ts:NotebookEditorWidget._createBody",
+        "src/vs/workbench/contrib/notebook/browser/notebookEditorWidget.ts:NotebookEditorWidget._createCellList",
+        "src/vs/workbench/contrib/notebook/browser/notebookEditorWidget.ts:NotebookEditorWidget._didDragMarkupCell",
+        "src/vs/workbench/contrib/notebook/browser/notebookEditorWidget.ts:NotebookEditorWidget._didDropMarkupCell",
+        "src/vs/workbench/contrib/notebook/browser/notebookEditorWidget.ts:NotebookEditorWidget._didEndDragMarkupCell",
+        "src/vs/workbench/contrib/notebook/browser/notebookEditorWidget.ts:NotebookEditorWidget._didStartDragMarkupCell",
+        "src/vs/workbench/contrib/notebook/browser/notebookEditorWidget.ts:NotebookEditorWidget.constructor",
+        "src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts:CellDragAndDropController.constructor",
+        "src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts:CellDragAndDropController.dragCleanup",
+        "src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts:CellDragAndDropController.endExplicitDrag",
+        "src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts:CellDragAndDropController.explicitDrag",
+        "src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts:CellDragAndDropController.explicitDrop",
+        "src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts:CellDragAndDropController.onCellDragLeave",
+        "src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts:CellDragAndDropController.onCellDragover",
+        "src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts:CellDragAndDropController.onCellDrop",
+        "src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts:CellDragAndDropController.registerDragHandle",
+        "src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts:CellDragAndDropController.setList",
+        "src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts:CellDragAndDropController.startExplicitDrag",
+        "src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts:CellDragAndDropController.updateInsertIndicator",
+        "src/vs/workbench/contrib/notebook/browser/view/renderers/cellRenderer.ts:CodeCellRenderer.renderTemplate"
+      ],
+      "target": "src/vs/workbench/contrib/notebook/browser/view/cellParts/cellDnd.ts:CellDragAndDropController.setInsertIndicatorVisibility",
+      "grep_lines": 10,
+      "grep_pattern": "\\bsetInsertIndicatorVisibility\\s*\\(",
+      "depth": 4
+    },
+    {
+      "id": "transitive-3",
+      "family": "transitive",
+      "question": "Which functions and methods in src/ call the getCharIndex method of CharacterMapping, the class in src/vs/editor/common/viewLayout/viewLineRenderer.ts, either directly or through any chain of other calls?",
+      "answer": [
+        "src/vs/editor/browser/controller/editContext/native/screenReaderContentRich.ts:RichScreenReaderContent._getEditorSelectionFromDomRange",
+        "src/vs/editor/browser/controller/editContext/native/screenReaderContentRich.ts:RichScreenReaderContent._setSelectionChangeListener",
+        "src/vs/editor/browser/controller/editContext/native/screenReaderContentRich.ts:RichScreenReaderContent._setSelectionOnScreenReaderContent",
+        "src/vs/editor/browser/controller/editContext/native/screenReaderContentRich.ts:RichScreenReaderContent.onFocusChange",
+        "src/vs/editor/browser/controller/editContext/native/screenReaderContentRich.ts:RichScreenReaderContent.updateScreenReaderContent",
+        "src/vs/editor/browser/viewParts/viewLines/viewLine.ts:FastRenderedViewLine._actualReadPixelOffset",
+        "src/vs/editor/browser/viewParts/viewLines/viewLine.ts:FastRenderedViewLine._getColumnPixelOffset",
+        "src/vs/editor/browser/viewParts/viewLines/viewLine.ts:FastRenderedViewLine.getColumnOfNodeOffset",
+        "src/vs/editor/browser/viewParts/viewLines/viewLine.ts:FastRenderedViewLine.getVisibleRangesForRange",
+        "src/vs/editor/browser/viewParts/viewLines/viewLine.ts:RenderedViewLine._actualReadPixelOffset",
+        "src/vs/editor/browser/viewParts/viewLines/viewLine.ts:RenderedViewLine._readPixelOffset",
+        "src/vs/editor/browser/viewParts/viewLines/viewLine.ts:RenderedViewLine._readRawVisibleRangesForRange",
+        "src/vs/editor/browser/viewParts/viewLines/viewLine.ts:RenderedViewLine._readVisibleRangesForRange",
+        "src/vs/editor/browser/viewParts/viewLines/viewLine.ts:RenderedViewLine.getColumnOfNodeOffset",
+        "src/vs/editor/browser/viewParts/viewLines/viewLine.ts:RenderedViewLine.getVisibleRangesForRange",
+        "src/vs/editor/browser/viewParts/viewLines/viewLine.ts:WebKitRenderedViewLine._readVisibleRangesForRange",
+        "src/vs/editor/browser/viewParts/viewLines/viewLine.ts:getColumnOfNodeOffset",
+        "src/vs/editor/browser/widget/diffEditor/components/diffEditorViewZones/copySelection.ts:enableCopySelection",
+        "src/vs/editor/browser/widget/diffEditor/components/diffEditorViewZones/diffEditorViewZones.ts:DiffEditorViewZones.constructor",
+        "src/vs/editor/browser/widget/diffEditor/components/diffEditorViewZones/inlineDiffDeletedCodeMargin.ts:InlineDiffDeletedCodeMargin.constructor",
+        "src/vs/editor/browser/widget/diffEditor/components/diffEditorViewZones/renderLines.ts:RenderLinesResult.getModelPositionAt",
+        "src/vs/editor/common/viewLayout/viewLineRenderer.ts:CharacterMapping.getColumn",
+        "src/vs/editor/common/viewLayout/viewLineRenderer.ts:CharacterMapping.getDomPosition",
+        "src/vs/editor/common/viewLayout/viewLineRenderer.ts:CharacterMapping.inflate",
+        "src/vs/editor/common/viewLayout/viewLineRenderer.ts:CharacterMapping.partDataToCharOffset",
+        "src/vs/editor/contrib/stickyScroll/browser/stickyScrollController.ts:StickyScrollController._registerMouseListeners",
+        "src/vs/editor/contrib/stickyScroll/browser/stickyScrollController.ts:StickyScrollController.constructor",
+        "src/vs/editor/contrib/stickyScroll/browser/stickyScrollWidget.ts:StickyScrollWidget.getEditorPositionFromNode"
+      ],
+      "target": "src/vs/editor/common/viewLayout/viewLineRenderer.ts:CharacterMapping.getCharIndex",
+      "grep_lines": 6,
+      "grep_pattern": "\\bgetCharIndex\\s*\\(",
+      "depth": 7
+    },
+    {
+      "id": "transitive-4",
+      "family": "transitive",
+      "question": "Which functions and methods in src/ call the subscribeIssue method of GitHubQueryApi, the interface in src/vs/platform/github/common/githubQueryService.ts, either directly or through any chain of other calls?",
+      "answer": [
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionInputPills.ts:AgentHostGitHubReferenceResolver._initializeIssue",
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionInputPills.ts:AgentHostGitHubReferenceResolver.constructor",
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionInputPills.ts:AgentHostGitHubReferenceResolver.getIssue",
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionInputPills.ts:AgentHostSessionInputPills._artifactEntry",
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionInputPills.ts:AgentHostSessionInputPills._buildArtifactSections",
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionInputPills.ts:AgentHostSessionInputPills._buildReferenceSections",
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionInputPills.ts:AgentHostSessionInputPills.constructor",
+        "src/vs/workbench/contrib/github/browser/githubLinkPresentation.contribution.ts:GitHubLinkPresentationProvider.createLinkPresentationWatcher",
+        "src/vs/workbench/contrib/github/browser/githubLinkPresentation.contribution.ts:GitHubLinkPresentationWatcher._initialize",
+        "src/vs/workbench/contrib/github/browser/githubLinkPresentation.contribution.ts:GitHubLinkPresentationWatcher._initializeSubscription",
+        "src/vs/workbench/contrib/github/browser/githubLinkPresentation.contribution.ts:GitHubLinkPresentationWatcher.constructor",
+        "src/vs/workbench/contrib/github/browser/githubResourceDetails.ts:GitHubResourceDetailsResolver._resolveIssue",
+        "src/vs/workbench/contrib/github/browser/githubResourceDetails.ts:GitHubResourceDetailsResolver.createHover",
+        "src/vs/workbench/contrib/github/browser/githubResourceDetails.ts:GitHubResourceDetailsResolver.dispose",
+        "src/vs/workbench/contrib/github/browser/githubResourceDetails.ts:GitHubResourceDetailsResolver.prefetchIssue",
+        "src/vs/workbench/contrib/github/browser/githubResourceDetails.ts:GitHubResourceDetailsResolver.resolveIssue",
+        "src/vs/workbench/contrib/github/browser/githubResourceDetails.ts:GitHubResourceDetailsResolver.resolveReference",
+        "src/vs/workbench/contrib/github/browser/githubResourceDetails.ts:GitHubResourceDetailsResolver.retain",
+        "src/vs/workbench/contrib/github/browser/githubResourceDetails.ts:createGitHubResourceDetailsHover",
+        "src/vs/workbench/contrib/sessions/browser/chat/sessionArtifacts.ts:SessionArtifacts.constructor",
+        "src/vs/workbench/contrib/sessions/browser/chat/sessionArtifacts.ts:buildSessionArtifactSections",
+        "src/vs/workbench/contrib/sessions/browser/chat/sessionArtifacts.ts:toEntry"
+      ],
+      "target": "src/vs/platform/github/common/githubQueryService.ts:GitHubQueryApi.subscribeIssue",
+      "grep_lines": 5,
+      "grep_pattern": "\\bsubscribeIssue\\s*\\(",
+      "depth": 7
+    },
+    {
+      "id": "construction-1",
+      "family": "construction",
+      "question": "Which functions and methods in src/ construct a LocalModelServingError, the class in src/vs/platform/agentHost/node/copilot/localModelBridge/shim/servingAccess.ts?",
+      "answer": [
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._acquireLock",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._confirmUnconfirmedGone",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._doStart",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._spawnUntilHealthy",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._stopOrThrow",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._throwIfAborted",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor.start",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:errorOf",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/servingAccessImpl.ts:busyTimeoutError",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/servingAccessImpl.ts:loadTimeoutError",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/servingAccessImpl.ts:notActiveError",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/shimLocalModelProvider.ts:ShimLocalModelProvider._buildLaunchPlan",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/shimLocalModelProvider.ts:ShimLocalModelProvider._startActive",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/shimLocalModelProvider.ts:notActiveError"
+      ],
+      "target": "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/servingAccess.ts:LocalModelServingError",
+      "grep_lines": 37,
+      "grep_pattern": "\\bnew\\s+LocalModelServingError\\b"
+    },
+    {
+      "id": "construction-2",
+      "family": "construction",
+      "question": "Which functions and methods in src/ construct a Query, the class in src/vs/platform/extensionManagement/common/extensionGalleryService.ts?",
+      "answer": [
+        "src/vs/platform/extensionManagement/common/extensionGalleryService.ts:AbstractExtensionGalleryService.getExtensionsUsingQueryApi",
+        "src/vs/platform/extensionManagement/common/extensionGalleryService.ts:AbstractExtensionGalleryService.getVersions",
+        "src/vs/platform/extensionManagement/common/extensionGalleryService.ts:AbstractExtensionGalleryService.query",
+        "src/vs/platform/extensionManagement/common/extensionGalleryService.ts:AbstractExtensionGalleryService.queryGalleryExtensions",
+        "src/vs/platform/extensionManagement/common/extensionGalleryService.ts:Query.withAssetTypes",
+        "src/vs/platform/extensionManagement/common/extensionGalleryService.ts:Query.withFilter",
+        "src/vs/platform/extensionManagement/common/extensionGalleryService.ts:Query.withFlags",
+        "src/vs/platform/extensionManagement/common/extensionGalleryService.ts:Query.withPage",
+        "src/vs/platform/extensionManagement/common/extensionGalleryService.ts:Query.withSortBy",
+        "src/vs/platform/extensionManagement/common/extensionGalleryService.ts:Query.withSortOrder",
+        "src/vs/platform/extensionManagement/common/extensionGalleryService.ts:Query.withSource"
+      ],
+      "target": "src/vs/platform/extensionManagement/common/extensionGalleryService.ts:Query",
+      "grep_lines": 18,
+      "grep_pattern": "\\bnew\\s+Query\\b"
+    },
+    {
+      "id": "construction-3",
+      "family": "construction",
+      "question": "Which functions and methods in src/ construct a SequenceDiff, the class in src/vs/editor/common/diff/defaultLinesDiffComputer/algorithms/diffAlgorithm.ts?",
+      "answer": [
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/algorithms/diffAlgorithm.ts:DiffAlgorithmResult.trivial",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/algorithms/diffAlgorithm.ts:DiffAlgorithmResult.trivialTimedOut",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/algorithms/diffAlgorithm.ts:SequenceDiff.delta",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/algorithms/diffAlgorithm.ts:SequenceDiff.deltaEnd",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/algorithms/diffAlgorithm.ts:SequenceDiff.deltaStart",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/algorithms/diffAlgorithm.ts:SequenceDiff.fromOffsetPairs",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/algorithms/diffAlgorithm.ts:SequenceDiff.intersect",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/algorithms/diffAlgorithm.ts:SequenceDiff.join",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/algorithms/diffAlgorithm.ts:SequenceDiff.swap",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/algorithms/dynamicProgrammingDiffing.ts:DynamicProgrammingDiffing.compute",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/algorithms/myersDiffAlgorithm.ts:MyersDiffAlgorithm.compute",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/defaultLinesDiffComputer.ts:DefaultLinesDiffComputer._computeDiff",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/defaultLinesDiffComputer.ts:DefaultLinesDiffComputer.computeMoves",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/heuristicSequenceOptimizations.ts:extendDiffsToEntireWordIfAppropriate",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/heuristicSequenceOptimizations.ts:joinSequenceDiffsByShifting",
+        "src/vs/editor/common/diff/defaultLinesDiffComputer/heuristicSequenceOptimizations.ts:removeShortMatches"
+      ],
+      "target": "src/vs/editor/common/diff/defaultLinesDiffComputer/algorithms/diffAlgorithm.ts:SequenceDiff",
+      "grep_lines": 18,
+      "grep_pattern": "\\bnew\\s+SequenceDiff\\b"
+    },
+    {
+      "id": "construction-4",
+      "family": "construction",
+      "question": "Which functions and methods in src/ construct a Progress, the class in src/vs/platform/progress/common/progress.ts?",
+      "answer": [
+        "src/vs/workbench/api/common/extHostAiSettingsSearch.ts:ExtHostAiSettingsSearch.$startSearch",
+        "src/vs/workbench/api/common/extHostLanguageModels.ts:ExtHostLanguageModels.$startChatRequest",
+        "src/vs/workbench/contrib/chat/browser/widget/chatWidget.ts:ChatWidget._tryExecuteImmediateSlashCommand",
+        "src/vs/workbench/contrib/chat/common/chatService/chatServiceImpl.ts:ChatService._sendRequestAsync",
+        "src/vs/workbench/contrib/codeEditor/browser/saveParticipants.ts:FormatOnSaveParticipant.participate",
+        "src/vs/workbench/contrib/sessions/browser/chat/sharedChatInputComposer.ts:SharedChatInputComposer._runClientSlashCommand",
+        "src/vs/workbench/services/progress/browser/progressService.ts:ProgressService.withWindowProgress",
+        "src/vs/workbench/services/search/node/ripgrepSearchProvider.ts:RipgrepSearchProvider.provideTextSearchResults",
+        "src/vs/workbench/services/search/node/ripgrepTextSearchEngine.ts:RipgrepTextSearchEngine.provideTextSearchResultsWithRgOptions",
+        "src/vs/workbench/services/search/node/ripgrepTextSearchEngine.ts:RipgrepTextSearchEngine.searchAgainWithoutFollowingSymlinks"
+      ],
+      "target": "src/vs/platform/progress/common/progress.ts:Progress",
+      "grep_lines": 11,
+      "grep_pattern": "\\bnew\\s+Progress\\b"
+    },
+    {
+      "id": "release-1",
+      "family": "release",
+      "question": "Which functions and methods in src/ call the setModel method of ChatWidget, the class in src/vs/workbench/contrib/chat/browser/widget/chatWidget.ts in release 1.146.0 but did not call it in release 1.145.0? The repository is at 1.146.0; the git tag 1.145.0 is the previous release.",
+      "answer": [
+        "src/vs/workbench/contrib/sessions/browser/chat/chatView.ts:ChatView._clearCurrentChat",
+        "src/vs/workbench/contrib/sessions/browser/chat/chatView.ts:ChatView._loadChat",
+        "src/vs/workbench/contrib/sessions/browser/chat/chatView.ts:ChatView._showPreparationInput",
+        "src/vs/workbench/contrib/sessions/browser/chat/sharedChatInputComposer.ts:SharedChatInputComposer._bindModel"
+      ],
+      "target": "src/vs/workbench/contrib/chat/browser/widget/chatWidget.ts:ChatWidget.setModel",
+      "grep_lines": 157,
+      "grep_pattern": "\\bsetModel\\s*\\("
+    },
+    {
+      "id": "release-2",
+      "family": "release",
+      "question": "Which functions and methods in src/ call the _findChatByUri method of CopilotAgent, the class in src/vs/platform/agentHost/node/copilot/copilotAgent.ts in release 1.146.0 but did not call it in release 1.145.0? The repository is at 1.146.0; the git tag 1.145.0 is the previous release.",
+      "answer": [
+        "src/vs/platform/agentHost/node/copilot/copilotAgent.ts:CopilotAgent",
+        "src/vs/platform/agentHost/node/copilot/copilotAgent.ts:CopilotAgent._refreshCanvasWatch",
+        "src/vs/platform/agentHost/node/copilot/copilotAgent.ts:CopilotAgent.getOrCreateActiveClient"
+      ],
+      "target": "src/vs/platform/agentHost/node/copilot/copilotAgent.ts:CopilotAgent._findChatByUri",
+      "grep_lines": 45,
+      "grep_pattern": "\\b_findChatByUri\\s*\\("
+    },
+    {
+      "id": "release-3",
+      "family": "release",
+      "question": "Which functions and methods in src/ call the isQueued method of ChatSendResult, the type in src/vs/workbench/contrib/chat/common/chatService/chatService.ts in release 1.146.0 but did not call it in release 1.145.0? The repository is at 1.146.0; the git tag 1.145.0 is the previous release.",
+      "answer": [
+        "src/vs/workbench/contrib/chat/browser/voiceClient/voiceSessionController.ts:VoiceSessionController._sendTranscriptionToChat",
+        "src/vs/workbench/contrib/chat/browser/voiceClient/voiceToolDispatchService.ts:VoiceToolDispatchService._sendChatRequest",
+        "src/vs/workbench/contrib/sessions/browser/chat/chatView.ts:getChatRequestOutcome",
+        "src/vs/workbench/contrib/sessions/providers/agentHost/browser/agentHostSkillButtons.ts:registerAgentHostSkillButton"
+      ],
+      "target": "src/vs/workbench/contrib/chat/common/chatService/chatService.ts:ChatSendResult.isQueued",
+      "grep_lines": 12,
+      "grep_pattern": "\\bisQueued\\s*\\("
+    },
+    {
+      "id": "release-4",
+      "family": "release",
+      "question": "Which functions and methods in src/ call getEffectiveAgents, defined in src/vs/platform/agentHost/common/customAgents.ts in release 1.146.0 but did not call it in release 1.145.0? The repository is at 1.146.0; the git tag 1.145.0 is the previous release.",
+      "answer": [
+        "src/vs/workbench/contrib/sessions/providers/agentHost/browser/baseAgentHostSessionsProvider.ts:BaseAgentHostSessionsProvider._reconcileAgentFromState",
+        "src/vs/workbench/contrib/sessions/providers/agentHost/browser/baseAgentHostSessionsProvider.ts:BaseAgentHostSessionsProvider._reconcileNewSessionAgent",
+        "src/vs/workbench/contrib/sessions/providers/agentHost/browser/baseAgentHostSessionsProvider.ts:BaseAgentHostSessionsProvider.getCustomAgents",
+        "src/vs/workbench/contrib/sessions/providers/agentHost/browser/baseAgentHostSessionsProvider.ts:BaseAgentHostSessionsProvider.resolveCustomAgent",
+        "src/vs/workbench/contrib/sessions/providers/agentHost/browser/baseAgentHostSessionsProvider.ts:BaseAgentHostSessionsProvider.setAgent"
+      ],
+      "target": "src/vs/platform/agentHost/common/customAgents.ts:getEffectiveAgents",
+      "grep_lines": 7,
+      "grep_pattern": "\\bgetEffectiveAgents\\s*\\("
+    },
+    {
+      "id": "control-1",
+      "family": "control",
+      "question": "Which functions and methods in src/ call the _toResourceAttachment method of AgentHostSessionHandler, the class in src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionHandler.ts?",
+      "answer": [
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionHandler.ts:AgentHostSessionHandler._convertVariableToAttachment",
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionHandler.ts:AgentHostSessionHandler._toElementImageAttachment",
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionHandler.ts:AgentHostSessionHandler._toImageAttachment"
+      ],
+      "target": "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionHandler.ts:AgentHostSessionHandler._toResourceAttachment",
+      "grep_lines": 7,
+      "grep_pattern": "\\b_toResourceAttachment\\s*\\("
+    },
+    {
+      "id": "control-2",
+      "family": "control",
+      "question": "Which functions and methods in src/ call createModifiedFilePreviewEditorInput, defined in src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatModifiedFilesConfirmationSubPart.ts?",
+      "answer": [
+        "src/vs/sessions/contrib/inboxOne/browser/inboxNotificationsView.ts:InboxNotificationsView.renderNeedsInputPart",
+        "src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatModifiedFilesConfirmationSubPart.ts:ChatModifiedFilesConfirmationSubPart.createModifiedFilesElement",
+        "src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatModifiedFilesConfirmationSubPart.ts:ChatModifiedFilesConfirmationSubPart.openModifiedFilePreview"
+      ],
+      "target": "src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatModifiedFilesConfirmationSubPart.ts:createModifiedFilePreviewEditorInput",
+      "grep_lines": 4,
+      "grep_pattern": "\\bcreateModifiedFilePreviewEditorInput\\s*\\("
+    },
+    {
+      "id": "control-3",
+      "family": "control",
+      "question": "Which functions and methods in src/ call the updateGlobalActivityBadge method of UserDataSyncWorkbenchContribution, the class in src/vs/workbench/contrib/userDataSync/browser/userDataSync.ts?",
+      "answer": [
+        "src/vs/workbench/contrib/userDataSync/browser/userDataSync.ts:UserDataSyncWorkbenchContribution",
+        "src/vs/workbench/contrib/userDataSync/browser/userDataSync.ts:UserDataSyncWorkbenchContribution.constructor",
+        "src/vs/workbench/contrib/userDataSync/browser/userDataSync.ts:UserDataSyncWorkbenchContribution.onDidChangeConflicts"
+      ],
+      "target": "src/vs/workbench/contrib/userDataSync/browser/userDataSync.ts:UserDataSyncWorkbenchContribution.updateGlobalActivityBadge",
+      "grep_lines": 5,
+      "grep_pattern": "\\bupdateGlobalActivityBadge\\s*\\("
+    },
+    {
+      "id": "control-4",
+      "family": "control",
+      "question": "Which functions and methods in src/ call isSyntheticUserMessage, defined in src/vs/platform/agentHost/node/copilot/copilotFusionEventIdentity.ts?",
+      "answer": [
+        "src/vs/platform/agentHost/node/copilot/copilotAgentSession.ts:CopilotAgentSession._subscribeToEvents",
+        "src/vs/platform/agentHost/node/copilot/copilotFusionEventIdentity.ts:CopilotFusionRequestCorrelation.observe",
+        "src/vs/platform/agentHost/node/copilot/copilotFusionReplay.ts:FusionReplayState.constructor",
+        "src/vs/platform/agentHost/node/copilot/copilotGrepSearchNudge.ts:CopilotGrepSearchNudge.recordUserMessage",
+        "src/vs/platform/agentHost/node/copilot/mapSessionEvents.ts:mapSessionEvents"
+      ],
+      "target": "src/vs/platform/agentHost/node/copilot/copilotFusionEventIdentity.ts:isSyntheticUserMessage",
+      "grep_lines": 8,
+      "grep_pattern": "\\bisSyntheticUserMessage\\s*\\("
+    }
+  ]
+}
