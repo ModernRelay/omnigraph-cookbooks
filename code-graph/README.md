@@ -57,8 +57,9 @@ The decisions that matter:
    code above it changes: in PR #5267, 58 definitions only moved. Kept on
    `Symbol`, those moves would bury the five functions that changed. Each
    callable instead carries `digest`, a hash of its definition text, so a
-   `Symbol` update in a diff means the code changed, and a move is a
-   `Location` update you can filter out by type.
+   `Symbol` update in a diff means its code or its declared type changed,
+   which `cg diff` tells apart, and a move is a `Location` update you can
+   filter out by type.
 3. **One `Symbol` type, with `kind` as a closed vocabulary.** A multi-hop
    traversal needs the same node type at both ends, so a single type is what
    lets `impact` follow `references{1,3}` through functions, methods and
@@ -240,7 +241,12 @@ qualifies the committed files.
 - **Some code belongs to an outer definition.** scip-typescript gives class
   fields and nested anonymous functions no range of their own, so a reference
   in a field initializer belongs to the class, and one in a callback to the
-  function around it.
+  function around it. For the same reason a class field holding an arrow
+  function has no `digest`, so a change to its code shows up only through
+  its references and `signature`.
+- **Members of union types are not indexed.** scip-typescript gives no symbol
+  to a property of an object type inside a union, so turning a type into a
+  union looks like removing its properties.
 - **Callable constants come from the hover text.** A constant, variable or
   property counts as callable when its type in the indexer's hover text is a
   function type.
