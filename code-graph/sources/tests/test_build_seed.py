@@ -75,6 +75,38 @@ class Callable(unittest.TestCase):
                 self.assertFalse(build_seed.is_callable(kind, ranged, sig))
 
 
+class ProjectPrefix(unittest.TestCase):
+    """A project indexed from a parent directory, as VS Code's src/tsconfig.json is."""
+
+    @staticmethod
+    def documents(paths):
+        from types import SimpleNamespace as NS
+        docs, infos = [], {}
+        for path, module in paths:
+            symbol = f"scip-typescript npm vscode 1.146.0 {module}"
+            infos[symbol] = NS(kind=29)
+            docs.append(NS(relative_path=path, occurrences=[NS(roles=build_seed.DEFINITION, symbol=symbol)]))
+        return docs, infos
+
+    def test_the_folder_is_the_document_path_minus_the_module_path(self):
+        docs, infos = self.documents([("src/vs/base/common/event.ts", "vs/base/common/`event.ts`/"),
+                                      ("src/bootstrap-cli.ts", "`bootstrap-cli.ts`/")])
+        self.assertEqual(build_seed.project_prefix(docs, infos), "src/")
+
+    def test_a_project_at_the_root_has_none(self):
+        docs, infos = self.documents([("src/router.ts", "src/`router.ts`/")])
+        self.assertEqual(build_seed.project_prefix(docs, infos), "")
+
+    def test_folders_that_disagree_are_refused(self):
+        docs, infos = self.documents([("a/x.ts", "`x.ts`/"), ("b/c/y.ts", "`y.ts`/")])
+        with self.assertRaises(ValueError):
+            build_seed.project_prefix(docs, infos)
+
+    def test_names_are_escaped_as_scip_spells_them(self):
+        self.assertEqual(build_seed.escape_name("src"), "src")
+        self.assertEqual(build_seed.escape_name("my dir"), "`my dir`")
+
+
 class Owner(unittest.TestCase):
     MODULE = ((0, 0, 40, 0), "src/`language.ts`/")
     TABLE = ((10, 0, 14, 2), "src/`language.ts`/detectors.")
