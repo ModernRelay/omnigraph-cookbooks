@@ -96,9 +96,28 @@ def main():
             by_kind[name][k] = {"executed": len(sub), "found": sum(e in edges for e in sub),
                                 "recall": sum(e in edges for e in sub) / len(sub) if sub else None}
     results["by_callee_kind"] = by_kind
+    # Where name matching fails: a call to a class member, or to a name that
+    # several definitions share, needs the receiver's type to resolve.
+    names = collections.Counter(n["name"] for n in rn.values() if n["kind"] != "module")
+    shapes = {
+        "top-level function": lambda b: "." not in b.split(":", 1)[-1],
+        "class member": lambda b: "." in b.split(":", 1)[-1],
+        "unique name": lambda b: names[rn[b]["name"]] == 1,
+        "name shared by 2-3": lambda b: 2 <= names[rn[b]["name"]] <= 3,
+        "name shared by 4+": lambda b: names[rn[b]["name"]] >= 4,
+    }
+    functions = [e for e in scored if kind(e[1]) == "function/method"]
+    by_shape = {}
+    for name, edges in graphs.items():
+        by_shape[name] = {}
+        for s, test in shapes.items():
+            sub = [e for e in functions if test(e[1])]
+            found = sum(e in edges for e in sub)
+            by_shape[name][s] = {"executed": len(sub), "found": found, "recall": found / len(sub) if sub else None}
+    results["functions_by_call_shape"] = by_shape
     print(f"{'graph':<22} {'scored':>6} {'found':>6} {'recall':>7} {'+impl':>7} {'unmodeled':>9}")
     for name, r in results.items():
-        if name == "by_callee_kind":
+        if name in ("by_callee_kind", "functions_by_call_shape"):
             continue
         rc = f"{r['recall']:.3f}" if r["recall"] is not None else "-"
         ri = f"{r['recall_with_implements']:.3f}" if r["recall_with_implements"] is not None else "-"
@@ -106,6 +125,9 @@ def main():
     print(f"\n{'by callee kind':<22}" + "".join(f"{k:>17}" for k in ("function/method", "constructor", "getter/setter")))
     for name, kinds in by_kind.items():
         print(f"{name:<22}" + "".join(f"{(v['recall'] if v['recall'] is not None else 0):>17.3f}" for v in kinds.values()))
+    print(f"\n{'functions by call shape':<24}" + "".join(f"{s:>20}" for s in shapes))
+    for name, cells in by_shape.items():
+        print(f"{name:<24}" + "".join(f"{(v['recall'] if v['recall'] is not None else 0):>20.3f}" for v in cells.values()))
     out = Path(__file__).resolve().parent / "results"
     out.mkdir(exist_ok=True)
     (out / "recall.json").write_text(json.dumps(results, indent=2) + "\n")

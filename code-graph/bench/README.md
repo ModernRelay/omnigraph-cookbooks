@@ -66,6 +66,12 @@ The four inexact pull requests, checked against their source diffs:
 The first run of this benchmark found that keys carried scip-typescript's
 positional `typeLiteralN` numbering, so one new type literal renamed every
 member below it. The converter now leaves those containers out of keys.
+Execution recall then found 46 function constants the converter did not count
+as callable, such as `const getCookie: GetCookie = (c) => {...}`, so calls to
+them had `call: false` and changes to their code went unseen; none of the 40
+sampled pull requests changed one. The converter now takes callability from
+the indexer's range. Cached conversions and references are keyed by a digest
+of the code that made them.
 
 ## Execution recall
 
@@ -100,7 +106,7 @@ Results, `results/recall.json`:
 | Compiler reference | 0.892 | 0.880 | 0.907 | 0.978 |
 | Cookbook, every reference | 0.891 | 0.876 | 0.907 | 1.000 |
 | Cookbook, every reference with `Implements` | 0.930 | | | |
-| Cookbook, call edges only | 0.706 | 0.779 | 0.907 | 0 |
+| Cookbook, call edges only | 0.733 | 0.810 | 0.907 | 0 |
 | codegraph | 0.679 | 0.748 | 0.870 | 0 |
 | Graphify | 0.677 | 0.747 | 0.852 | 0 |
 | GitNexus | 0.642 | 0.705 | 0.870 | 0 |
@@ -114,10 +120,41 @@ a filter. "Call edges only" keeps the edges whose `call` is true. "With
 member also reaches the implementations the graph records.
 
 The tools record calls, so the like-for-like column is functions and
-methods, where the cookbook's call edges find 0.779 and its references 0.876.
+methods, where the cookbook's call edges find 0.810 and its references 0.876.
 Getter calls are property reads: only a graph of references contains them. A
 graph of every reference also holds more edges than a call graph, and this
 benchmark does not count the edges the tests never ran.
+
+### Where the difference comes from
+
+Two things separate the cookbook from the tools, and they are of different
+kinds. The first is what is recorded. The cookbook's references contain 807
+executed calls and its call edges 664; the 143 between them are 93 getter
+calls, which run when a property is read, and 50 calls to functions the code
+passes as values. That is most of the gap between 0.891 and the tools' best,
+0.679, and it is a choice of what to record more than better extraction.
+
+The second is resolution. The tools find definitions by name, the cookbook
+through the type checker. Recall on calls to functions and methods, from
+`functions_by_call_shape` in `results/recall.json`:
+
+| Callee | Executed | Cookbook calls | codegraph | Graphify | GitNexus | codebase-memory-mcp | code-review-graph |
+|---|---|---|---|---|---|---|---|
+| Top-level function | 565 | 0.888 | 0.842 | 0.881 | 0.827 | 0.850 | 0.828 |
+| Class member | 194 | 0.582 | 0.474 | 0.356 | 0.351 | 0.206 | 0.397 |
+| Name defined once | 504 | 0.929 | 0.865 | 0.919 | 0.849 | 0.863 | 0.855 |
+| Name defined 4 or more times | 125 | 0.496 | 0.424 | 0.288 | 0.288 | 0.192 | 0.264 |
+
+Where a name identifies its definition, the tools come close: Graphify is
+within a point of the cookbook. The gap opens where it does not: a method
+call such as `c.req.header()` resolves to `HonoRequest.header` only if the
+type of `c.req` is known, and hono defines `header` in several places. Of
+the calls to a shared class-member name each tool missed, it recorded 14 to
+26 as the caller calling another definition of that name.
+
+The tools find 26 executed calls the cookbook lacks, 16 of them codegraph's.
+Most are calls dispatched to an override, which matching by name catches by
+linking every method of that name.
 
 The compiler reference misses 98 executed calls, about one in nine. 47 are
 function values called indirectly: a function passed as an argument, stored

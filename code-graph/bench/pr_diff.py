@@ -18,6 +18,7 @@ sources/indexer) and the 0.14.0 omnigraph CLI (OMNIGRAPH_BIN).
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -34,6 +35,19 @@ from common import load_cookbook, load_reference, prf  # noqa: E402
 REPO_URL = "https://github.com/honojs/hono.git"
 INDEXER = COOKBOOK / "sources" / "indexer" / "node_modules" / ".bin" / "scip-typescript"
 CG = COOKBOOK / "client" / "cg"
+
+
+def digest(*paths: Path) -> str:
+    """A short hash of the code that produced a cached file, so a change to the
+    converter or the reference builder is never served from a stale cache."""
+    h = hashlib.sha256()
+    for p in paths:
+        h.update(p.read_bytes())
+    return h.hexdigest()[:12]
+
+
+CONVERTER = digest(COOKBOOK / "sources" / "build_seed.py", COOKBOOK / "sources" / "scip_index.py")
+REFERENCE = digest(BENCH / "reference.mjs")
 
 
 def sh(*args, cwd=None, env=None):
@@ -73,7 +87,8 @@ def sample(repo: Path, count: int, before: str) -> list[dict]:
 
 def revision(repo: Path, sha: str, node_env: dict) -> tuple[Path, Path]:
     """The cookbook file and the reference for one commit, cached."""
-    cook, ref = WORK / "cook" / f"{sha}.jsonl", WORK / "ref" / f"{sha}.json"
+    cook = WORK / "cook" / f"{sha}-{CONVERTER}.jsonl"
+    ref = WORK / "ref" / f"{sha}-{REFERENCE}.json"
     if cook.exists() and ref.exists():
         return cook, ref
     for d in ("checkouts", "index", "cook", "ref"):
@@ -82,11 +97,14 @@ def revision(repo: Path, sha: str, node_env: dict) -> tuple[Path, Path]:
     if not checkout.exists():
         sh("git", "worktree", "add", "--quiet", "--detach", str(checkout), sha, cwd=repo)
     index = WORK / "index" / f"{sha}.scip"
-    sh(str(INDEXER), "index", "tsconfig.build.json", "--no-progress-bar", "--output", str(index), cwd=checkout,
-       env=node_env)
-    sh(sys.executable, "-I", str(COOKBOOK / "sources" / "build_seed.py"), "--index", str(index), "--checkout",
-       str(checkout), "--revision", sha, "--repository", REPO_URL, "--out", str(cook))
-    sh("node", str(BENCH / "reference.mjs"), str(checkout), str(ref), env=node_env)
+    if not index.exists():
+        sh(str(INDEXER), "index", "tsconfig.build.json", "--no-progress-bar", "--output", str(index),
+           cwd=checkout, env=node_env)
+    if not cook.exists():
+        sh(sys.executable, "-I", str(COOKBOOK / "sources" / "build_seed.py"), "--index", str(index), "--checkout",
+           str(checkout), "--revision", sha, "--repository", REPO_URL, "--out", str(cook))
+    if not ref.exists():
+        sh("node", str(BENCH / "reference.mjs"), str(checkout), str(ref), env=node_env)
     return cook, ref
 
 
