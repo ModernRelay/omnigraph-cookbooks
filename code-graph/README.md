@@ -49,7 +49,10 @@ The decisions that matter:
    for a method. It survives every edit that keeps the name and file, so the
    same function has the same key in every revision. SCIP symbols also carry
    the package version (`npm hono 4.13.3`); keeping it would rekey every node
-   at each release.
+   at each release. For the same reason the key leaves out the `typeLiteralN`
+   containers scip-typescript numbers anonymous type literals with: one new
+   type literal near the top of a file would otherwise rename every member
+   below it.
 2. **Line numbers live on `Location`, not on `Symbol`.** A line moves whenever
    code above it changes: in PR #5267, 58 definitions only moved. Kept on
    `Symbol`, those moves would bury the five functions that changed. Each
@@ -245,8 +248,10 @@ qualifies the committed files.
   public API next to unused code. In the seed, most of its rows are the
   routers' own `add` and `match` methods: callers reach them through the
   `Router` interface, so combine it with `implementers`.
-- **A constructor is reached through its class.** `new RegExpRouter()` names the
-  class, so a constructor has no incoming references.
+- **The seed's slice cuts edges.** References into the router from code
+  outside the slice are left out. `RegExpRouter`'s constructor looks
+  unreferenced in the seed only because its caller, `Hono`'s constructor in
+  `src/hono.ts`, is outside it; `new RegExpRouter()` names the constructor.
 
 ## Files
 

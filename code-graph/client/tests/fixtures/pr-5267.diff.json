@@ -1,12 +1,12 @@
 {
-  "from_commit_id": "hb1.01M7KF5W5NPXMFAW1PDRRNMTG6.1.01M7KF5W5NPXMFAW1PDRRNMTG6",
-  "to_commit_id": "hb1.01M7KF5WAR7E6EB0S93ZRKKXWS.2.01M7KF5WAR7E6EB0S93ZRKKXWS",
-  "base_commit_id": "hb1.01M7KF5W5NPXMFAW1PDRRNMTG6.1.01M7KF5W5NPXMFAW1PDRRNMTG6",
+  "from_commit_id": "hb1.01M7KHQ07THVJRGP8J0XBXHYG9.1.01M7KHQ07THVJRGP8J0XBXHYG9",
+  "to_commit_id": "hb1.01M7KHQ0CCAZYEH0V31NNAC9PF.2.01M7KHQ0CCAZYEH0V31NNAC9PF",
+  "base_commit_id": "hb1.01M7KHQ07THVJRGP8J0XBXHYG9.1.01M7KHQ07THVJRGP8J0XBXHYG9",
   "changes": [
     {
       "kind": "node",
       "type": {
-        "id": "Xvycf0CHfIRvji5BcVl0g4m9nMsi08MUlXzz3XlOD8M",
+        "id": "N_FDYYnETj9haHRnyMBzIgqV-RS7Dcrz7K9JwAtJn5Q",
         "name": "Revision"
       },
       "id": "4b44abe1b5c7755aac8555d7943611555183450b",
@@ -23,7 +23,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "Xvycf0CHfIRvji5BcVl0g4m9nMsi08MUlXzz3XlOD8M",
+        "id": "N_FDYYnETj9haHRnyMBzIgqV-RS7Dcrz7K9JwAtJn5Q",
         "name": "Revision"
       },
       "id": "a10592f3e1864cbe277619633db953450a6b1e4b",
@@ -40,7 +40,1373 @@
     {
       "kind": "node",
       "type": {
-        "id": "eBht-qdxHBzgTjIDFjiwGv53bHC2NMReYpKke4L848w",
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/`utils.ts`/",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "symbol": "src/router/`utils.ts`/",
+          "end_line": 2,
+          "line": 1
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/`utils.ts`/createNullObject.",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "symbol": "src/router/`utils.ts`/createNullObject.",
+          "end_line": 1,
+          "line": 1
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/",
+          "end_line": 169,
+          "line": 1
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/",
+          "end_line": 171,
+          "line": 1
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Context#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Context#",
+          "end_line": 9,
+          "line": 7
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Context#",
+          "end_line": 11,
+          "line": 9
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Context#varIndex.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Context#varIndex.",
+          "end_line": 8,
+          "line": 8
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Context#varIndex.",
+          "end_line": 10,
+          "line": 10
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/LABEL_REG_EXP_STR.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/LABEL_REG_EXP_STR.",
+          "end_line": 1,
+          "line": 1
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/LABEL_REG_EXP_STR.",
+          "end_line": 3,
+          "line": 3
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Node#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#",
+          "end_line": 168,
+          "line": 45
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#",
+          "end_line": 170,
+          "line": 47
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Node#`#children`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#children`.",
+          "end_line": 49,
+          "line": 49
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#children`.",
+          "end_line": 51,
+          "line": 51
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Node#`#index`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#index`.",
+          "end_line": 47,
+          "line": 47
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#index`.",
+          "end_line": 49,
+          "line": 49
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Node#`#varIndex`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#varIndex`.",
+          "end_line": 48,
+          "line": 48
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#varIndex`.",
+          "end_line": 50,
+          "line": 50
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr().",
+          "end_line": 167,
+          "line": 137
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr().",
+          "end_line": 169,
+          "line": 139
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Node#insert().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#insert().",
+          "end_line": 135,
+          "line": 51
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#insert().",
+          "end_line": 137,
+          "line": 53
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/ONLY_WILDCARD_REG_EXP_STR.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/ONLY_WILDCARD_REG_EXP_STR.",
+          "end_line": 2,
+          "line": 2
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/ONLY_WILDCARD_REG_EXP_STR.",
+          "end_line": 4,
+          "line": 4
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/PATH_ERROR.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/PATH_ERROR.",
+          "end_line": 4,
+          "line": 4
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/PATH_ERROR.",
+          "end_line": 6,
+          "line": 6
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/ParamAssocArray#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/ParamAssocArray#",
+          "end_line": 6,
+          "line": 6
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/ParamAssocArray#",
+          "end_line": 8,
+          "line": 8
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/TAIL_WILDCARD_REG_EXP_STR.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/TAIL_WILDCARD_REG_EXP_STR.",
+          "end_line": 3,
+          "line": 3
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/TAIL_WILDCARD_REG_EXP_STR.",
+          "end_line": 5,
+          "line": 5
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/compareKey().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/compareKey().",
+          "end_line": 43,
+          "line": 20
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/compareKey().",
+          "end_line": 45,
+          "line": 22
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/regExpMetaChars.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/regExpMetaChars.",
+          "end_line": 11,
+          "line": 11
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/regExpMetaChars.",
+          "end_line": 13,
+          "line": 13
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/",
+          "end_line": 174,
+          "line": 1
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/",
+          "end_line": 175,
+          "line": 1
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/HandlerWithMetadata#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/HandlerWithMetadata#",
+          "end_line": 18,
+          "line": 18
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/HandlerWithMetadata#",
+          "end_line": 19,
+          "line": 19
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#",
+          "end_line": 173,
+          "line": 47
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#",
+          "end_line": 174,
+          "line": 48
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
+          "end_line": 172,
+          "line": 144
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
+          "end_line": 173,
+          "line": 145
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#insertPath`().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#insertPath`().",
+          "end_line": 65,
+          "line": 59
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#insertPath`().",
+          "end_line": 66,
+          "line": 60
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#middleware`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#middleware`.",
+          "end_line": 49,
+          "line": 49
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#middleware`.",
+          "end_line": 50,
+          "line": 50
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#routes`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#routes`.",
+          "end_line": 50,
+          "line": 50
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#routes`.",
+          "end_line": 51,
+          "line": 51
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#tries`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#tries`.",
+          "end_line": 51,
+          "line": 51
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#tries`.",
+          "end_line": 52,
+          "line": 52
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
+          "end_line": 57,
+          "line": 53
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
+          "end_line": 58,
+          "line": 54
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
+          "end_line": 126,
+          "line": 67
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
+          "end_line": 127,
+          "line": 68
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
+          "end_line": 142,
+          "line": 130
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
+          "end_line": 143,
+          "line": 131
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#match.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#match.",
+          "end_line": 128,
+          "line": 128
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#match.",
+          "end_line": 129,
+          "line": 129
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#name.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#name.",
+          "end_line": 48,
+          "line": 48
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#name.",
+          "end_line": 49,
+          "line": 49
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().",
+          "end_line": 35,
+          "line": 21
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().",
+          "end_line": 36,
+          "line": 22
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/findMiddleware().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/findMiddleware().",
+          "end_line": 45,
+          "line": 37
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/findMiddleware().",
+          "end_line": 46,
+          "line": 38
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.",
+          "end_line": 20,
+          "line": 20
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.",
+          "end_line": 21,
+          "line": 21
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/",
+          "end_line": 84,
+          "line": 1
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/",
+          "end_line": 85,
+          "line": 1
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/ReplacementMap#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/ReplacementMap#",
+          "end_line": 4,
+          "line": 4
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/ReplacementMap#",
+          "end_line": 5,
+          "line": 5
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#",
+          "end_line": 83,
+          "line": 6
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#",
+          "end_line": 84,
+          "line": 7
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#`#context`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#context`.",
+          "end_line": 7,
+          "line": 7
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#context`.",
+          "end_line": 8,
+          "line": 8
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#`#index`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#index`.",
+          "end_line": 9,
+          "line": 9
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#index`.",
+          "end_line": 10,
+          "line": 10
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#`#root`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#root`.",
+          "end_line": 8,
+          "line": 8
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#root`.",
+          "end_line": 9,
+          "line": 9
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#buildRegExp().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#buildRegExp().",
+          "end_line": 82,
+          "line": 58
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#buildRegExp().",
+          "end_line": 83,
+          "line": 59
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#insert().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#insert().",
+          "end_line": 56,
+          "line": 13
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#insert().",
+          "end_line": 57,
+          "line": 14
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#paths.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#paths.",
+          "end_line": 11,
+          "line": 11
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#paths.",
+          "end_line": 12,
+          "line": 12
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/",
+          "end_line": 217,
+          "line": 1
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/",
+          "end_line": 218,
+          "line": 1
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/HandlerParamsSet#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerParamsSet#",
+          "end_line": 14,
+          "line": 12
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerParamsSet#",
+          "end_line": 15,
+          "line": 13
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/HandlerSet#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#",
+          "end_line": 10,
+          "line": 6
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#",
+          "end_line": 11,
+          "line": 7
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/HandlerSet#handler.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#handler.",
+          "end_line": 7,
+          "line": 7
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#handler.",
+          "end_line": 8,
+          "line": 8
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/HandlerSet#possibleKeys.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#possibleKeys.",
+          "end_line": 8,
+          "line": 8
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#possibleKeys.",
+          "end_line": 9,
+          "line": 9
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/HandlerSet#score.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#score.",
+          "end_line": 9,
+          "line": 9
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#score.",
+          "end_line": 10,
+          "line": 10
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#",
+          "end_line": 216,
+          "line": 19
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#",
+          "end_line": 217,
+          "line": 20
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#`#children`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#children`.",
+          "end_line": 22,
+          "line": 22
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#children`.",
+          "end_line": 23,
+          "line": 23
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#`#methods`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#methods`.",
+          "end_line": 20,
+          "line": 20
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#methods`.",
+          "end_line": 21,
+          "line": 21
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#`#params`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#params`.",
+          "end_line": 25,
+          "line": 25
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#params`.",
+          "end_line": 26,
+          "line": 26
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#`#pattern`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#pattern`.",
+          "end_line": 24,
+          "line": 24
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#pattern`.",
+          "end_line": 25,
+          "line": 25
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#`#patterns`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#patterns`.",
+          "end_line": 23,
+          "line": 23
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#patterns`.",
+          "end_line": 24,
+          "line": 24
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
+          "end_line": 83,
+          "line": 63
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
+          "end_line": 84,
+          "line": 64
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#insert().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#insert().",
+          "end_line": 61,
+          "line": 27
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#insert().",
+          "end_line": 62,
+          "line": 28
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#search().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#search().",
+          "end_line": 215,
+          "line": 85
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#search().",
+          "end_line": 216,
+          "line": 86
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/emptyParams.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/emptyParams.",
+          "end_line": 16,
+          "line": 16
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/emptyParams.",
+          "end_line": 17,
+          "line": 17
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "vQ72RRLHUDbQ22tPC5p1cMVQYnhHnKXFZXHwJzcXmB0",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/order.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/order.",
+          "end_line": 17,
+          "line": 17
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/order.",
+          "end_line": 18,
+          "line": 18
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "wD0vptUBjlv-JkFreYKRv784FYukED7gTCAHnbRKIOU",
         "name": "Symbol"
       },
       "id": "src/router/`utils.ts`/",
@@ -60,7 +1426,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "eBht-qdxHBzgTjIDFjiwGv53bHC2NMReYpKke4L848w",
+        "id": "wD0vptUBjlv-JkFreYKRv784FYukED7gTCAHnbRKIOU",
         "name": "Symbol"
       },
       "id": "src/router/`utils.ts`/createNullObject.",
@@ -80,7 +1446,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "eBht-qdxHBzgTjIDFjiwGv53bHC2NMReYpKke4L848w",
+        "id": "wD0vptUBjlv-JkFreYKRv784FYukED7gTCAHnbRKIOU",
         "name": "Symbol"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
@@ -111,7 +1477,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "eBht-qdxHBzgTjIDFjiwGv53bHC2NMReYpKke4L848w",
+        "id": "wD0vptUBjlv-JkFreYKRv784FYukED7gTCAHnbRKIOU",
         "name": "Symbol"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
@@ -142,7 +1508,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "eBht-qdxHBzgTjIDFjiwGv53bHC2NMReYpKke4L848w",
+        "id": "wD0vptUBjlv-JkFreYKRv784FYukED7gTCAHnbRKIOU",
         "name": "Symbol"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
@@ -173,7 +1539,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "eBht-qdxHBzgTjIDFjiwGv53bHC2NMReYpKke4L848w",
+        "id": "wD0vptUBjlv-JkFreYKRv784FYukED7gTCAHnbRKIOU",
         "name": "Symbol"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
@@ -204,7 +1570,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "eBht-qdxHBzgTjIDFjiwGv53bHC2NMReYpKke4L848w",
+        "id": "wD0vptUBjlv-JkFreYKRv784FYukED7gTCAHnbRKIOU",
         "name": "Symbol"
       },
       "id": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
@@ -233,1383 +1599,17 @@
       }
     },
     {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/`utils.ts`/",
-      "op": "insert",
-      "after": {
-        "properties": {
-          "symbol": "src/router/`utils.ts`/",
-          "end_line": 2,
-          "line": 1
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/`utils.ts`/createNullObject.",
-      "op": "insert",
-      "after": {
-        "properties": {
-          "symbol": "src/router/`utils.ts`/createNullObject.",
-          "end_line": 1,
-          "line": 1
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/",
-          "end_line": 169,
-          "line": 1
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/",
-          "end_line": 171,
-          "line": 1
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/Context#",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Context#",
-          "end_line": 9,
-          "line": 7
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Context#",
-          "end_line": 11,
-          "line": 9
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/Context#varIndex.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Context#varIndex.",
-          "end_line": 8,
-          "line": 8
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Context#varIndex.",
-          "end_line": 10,
-          "line": 10
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/LABEL_REG_EXP_STR.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/LABEL_REG_EXP_STR.",
-          "end_line": 1,
-          "line": 1
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/LABEL_REG_EXP_STR.",
-          "end_line": 3,
-          "line": 3
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/Node#",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Node#",
-          "end_line": 168,
-          "line": 45
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Node#",
-          "end_line": 170,
-          "line": 47
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/Node#`#children`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#children`.",
-          "end_line": 49,
-          "line": 49
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#children`.",
-          "end_line": 51,
-          "line": 51
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/Node#`#index`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#index`.",
-          "end_line": 47,
-          "line": 47
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#index`.",
-          "end_line": 49,
-          "line": 49
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/Node#`#varIndex`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#varIndex`.",
-          "end_line": 48,
-          "line": 48
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#varIndex`.",
-          "end_line": 50,
-          "line": 50
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr().",
-          "end_line": 167,
-          "line": 137
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr().",
-          "end_line": 169,
-          "line": 139
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/Node#insert().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Node#insert().",
-          "end_line": 135,
-          "line": 51
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/Node#insert().",
-          "end_line": 137,
-          "line": 53
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/ONLY_WILDCARD_REG_EXP_STR.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/ONLY_WILDCARD_REG_EXP_STR.",
-          "end_line": 2,
-          "line": 2
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/ONLY_WILDCARD_REG_EXP_STR.",
-          "end_line": 4,
-          "line": 4
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/PATH_ERROR.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/PATH_ERROR.",
-          "end_line": 4,
-          "line": 4
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/PATH_ERROR.",
-          "end_line": 6,
-          "line": 6
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/ParamAssocArray#",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/ParamAssocArray#",
-          "end_line": 6,
-          "line": 6
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/ParamAssocArray#",
-          "end_line": 8,
-          "line": 8
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/TAIL_WILDCARD_REG_EXP_STR.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/TAIL_WILDCARD_REG_EXP_STR.",
-          "end_line": 3,
-          "line": 3
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/TAIL_WILDCARD_REG_EXP_STR.",
-          "end_line": 5,
-          "line": 5
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/compareKey().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/compareKey().",
-          "end_line": 43,
-          "line": 20
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/compareKey().",
-          "end_line": 45,
-          "line": 22
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`node.ts`/regExpMetaChars.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/regExpMetaChars.",
-          "end_line": 11,
-          "line": 11
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`node.ts`/regExpMetaChars.",
-          "end_line": 13,
-          "line": 13
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/",
-          "end_line": 174,
-          "line": 1
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/",
-          "end_line": 175,
-          "line": 1
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/HandlerWithMetadata#",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/HandlerWithMetadata#",
-          "end_line": 18,
-          "line": 18
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/HandlerWithMetadata#",
-          "end_line": 19,
-          "line": 19
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#",
-          "end_line": 173,
-          "line": 47
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#",
-          "end_line": 174,
-          "line": 48
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
-          "end_line": 172,
-          "line": 144
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
-          "end_line": 173,
-          "line": 145
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#insertPath`().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#insertPath`().",
-          "end_line": 65,
-          "line": 59
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#insertPath`().",
-          "end_line": 66,
-          "line": 60
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#middleware`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#middleware`.",
-          "end_line": 49,
-          "line": 49
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#middleware`.",
-          "end_line": 50,
-          "line": 50
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#routes`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#routes`.",
-          "end_line": 50,
-          "line": 50
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#routes`.",
-          "end_line": 51,
-          "line": 51
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#tries`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#tries`.",
-          "end_line": 51,
-          "line": 51
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#tries`.",
-          "end_line": 52,
-          "line": 52
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
-          "end_line": 57,
-          "line": 53
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
-          "end_line": 58,
-          "line": 54
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
-          "end_line": 126,
-          "line": 67
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
-          "end_line": 127,
-          "line": 68
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
-          "end_line": 142,
-          "line": 130
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
-          "end_line": 143,
-          "line": 131
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#match.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#match.",
-          "end_line": 128,
-          "line": 128
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#match.",
-          "end_line": 129,
-          "line": 129
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#name.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#name.",
-          "end_line": 48,
-          "line": 48
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#name.",
-          "end_line": 49,
-          "line": 49
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().",
-          "end_line": 35,
-          "line": 21
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().",
-          "end_line": 36,
-          "line": 22
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/findMiddleware().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/findMiddleware().",
-          "end_line": 45,
-          "line": 37
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/findMiddleware().",
-          "end_line": 46,
-          "line": 38
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.",
-          "end_line": 20,
-          "line": 20
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.",
-          "end_line": 21,
-          "line": 21
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`trie.ts`/",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/",
-          "end_line": 84,
-          "line": 1
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/",
-          "end_line": 85,
-          "line": 1
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`trie.ts`/ReplacementMap#",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/ReplacementMap#",
-          "end_line": 4,
-          "line": 4
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/ReplacementMap#",
-          "end_line": 5,
-          "line": 5
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`trie.ts`/Trie#",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#",
-          "end_line": 83,
-          "line": 6
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#",
-          "end_line": 84,
-          "line": 7
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`trie.ts`/Trie#`#context`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#context`.",
-          "end_line": 7,
-          "line": 7
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#context`.",
-          "end_line": 8,
-          "line": 8
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`trie.ts`/Trie#`#index`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#index`.",
-          "end_line": 9,
-          "line": 9
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#index`.",
-          "end_line": 10,
-          "line": 10
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`trie.ts`/Trie#`#root`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#root`.",
-          "end_line": 8,
-          "line": 8
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#root`.",
-          "end_line": 9,
-          "line": 9
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`trie.ts`/Trie#buildRegExp().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#buildRegExp().",
-          "end_line": 82,
-          "line": 58
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#buildRegExp().",
-          "end_line": 83,
-          "line": 59
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`trie.ts`/Trie#insert().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#insert().",
-          "end_line": 56,
-          "line": 13
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#insert().",
-          "end_line": 57,
-          "line": 14
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/reg-exp-router/`trie.ts`/Trie#paths.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#paths.",
-          "end_line": 11,
-          "line": 11
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#paths.",
-          "end_line": 12,
-          "line": 12
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/",
-          "end_line": 217,
-          "line": 1
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/",
-          "end_line": 218,
-          "line": 1
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/HandlerParamsSet#",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/HandlerParamsSet#",
-          "end_line": 14,
-          "line": 12
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/HandlerParamsSet#",
-          "end_line": 15,
-          "line": 13
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/HandlerSet#",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#",
-          "end_line": 10,
-          "line": 6
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#",
-          "end_line": 11,
-          "line": 7
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:handler.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:handler.",
-          "end_line": 7,
-          "line": 7
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:handler.",
-          "end_line": 8,
-          "line": 8
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:possibleKeys.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:possibleKeys.",
-          "end_line": 8,
-          "line": 8
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:possibleKeys.",
-          "end_line": 9,
-          "line": 9
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:score.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:score.",
-          "end_line": 9,
-          "line": 9
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:score.",
-          "end_line": 10,
-          "line": 10
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/Node#",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#",
-          "end_line": 216,
-          "line": 19
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#",
-          "end_line": 217,
-          "line": 20
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/Node#`#children`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#`#children`.",
-          "end_line": 22,
-          "line": 22
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#`#children`.",
-          "end_line": 23,
-          "line": 23
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/Node#`#methods`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#`#methods`.",
-          "end_line": 20,
-          "line": 20
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#`#methods`.",
-          "end_line": 21,
-          "line": 21
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/Node#`#params`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#`#params`.",
-          "end_line": 25,
-          "line": 25
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#`#params`.",
-          "end_line": 26,
-          "line": 26
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/Node#`#pattern`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#`#pattern`.",
-          "end_line": 24,
-          "line": 24
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#`#pattern`.",
-          "end_line": 25,
-          "line": 25
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/Node#`#patterns`.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#`#patterns`.",
-          "end_line": 23,
-          "line": 23
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#`#patterns`.",
-          "end_line": 24,
-          "line": 24
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
-          "end_line": 83,
-          "line": 63
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
-          "end_line": 84,
-          "line": 64
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/Node#insert().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#insert().",
-          "end_line": 61,
-          "line": 27
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#insert().",
-          "end_line": 62,
-          "line": 28
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/Node#search().",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#search().",
-          "end_line": 215,
-          "line": 85
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/Node#search().",
-          "end_line": 216,
-          "line": 86
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/emptyParams.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/emptyParams.",
-          "end_line": 16,
-          "line": 16
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/emptyParams.",
-          "end_line": 17,
-          "line": 17
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "tL5N2cirR7_czZb2QSlb_hHK0Td3PlMZCYe0RBSK8b8",
-        "name": "Location"
-      },
-      "id": "src/router/trie-router/`node.ts`/order.",
-      "op": "update",
-      "before": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/order.",
-          "end_line": 17,
-          "line": 17
-        }
-      },
-      "after": {
-        "properties": {
-          "symbol": "src/router/trie-router/`node.ts`/order.",
-          "end_line": 18,
-          "line": 18
-        }
-      }
-    },
-    {
       "kind": "edge",
       "type": {
-        "id": "9n1hncF2L_pP28pGjUNUgCTWrdlQTWNpcRXtN-pwmzg",
-        "name": "DefinedAt"
+        "id": "A2VvcLwFlOgXljKQJMuhpadHcEPzYzwo96CVBlmYmRw",
+        "name": "MemberOf"
       },
-      "id": "[\"src/router/`utils.ts`/\",\"src/router/`utils.ts`/\"]",
+      "id": "[\"src/router/`utils.ts`/createNullObject.\",\"src/router/`utils.ts`/\"]",
       "op": "insert",
       "after": {
         "properties": {},
         "endpoints": {
-          "from": "src/router/`utils.ts`/",
+          "from": "src/router/`utils.ts`/createNullObject.",
           "to": "src/router/`utils.ts`/"
         }
       }
@@ -1617,23 +1617,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "9n1hncF2L_pP28pGjUNUgCTWrdlQTWNpcRXtN-pwmzg",
-        "name": "DefinedAt"
-      },
-      "id": "[\"src/router/`utils.ts`/createNullObject.\",\"src/router/`utils.ts`/createNullObject.\"]",
-      "op": "insert",
-      "after": {
-        "properties": {},
-        "endpoints": {
-          "from": "src/router/`utils.ts`/createNullObject.",
-          "to": "src/router/`utils.ts`/createNullObject."
-        }
-      }
-    },
-    {
-      "kind": "edge",
-      "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`node.ts`/\",\"src/router/`utils.ts`/\"]",
@@ -1652,7 +1636,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`node.ts`/\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1671,7 +1655,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`node.ts`/Node#\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1690,7 +1674,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`router.ts`/\",\"src/router/`utils.ts`/\"]",
@@ -1709,7 +1693,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`router.ts`/\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1728,7 +1712,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1747,7 +1731,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1766,7 +1750,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#add().\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1785,7 +1769,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1804,7 +1788,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`trie.ts`/\",\"src/router/`utils.ts`/\"]",
@@ -1823,7 +1807,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`trie.ts`/\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1842,7 +1826,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`trie.ts`/Trie#\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1861,7 +1845,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/trie-router/`node.ts`/\",\"src/router/`utils.ts`/\"]",
@@ -1880,7 +1864,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/trie-router/`node.ts`/\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1899,7 +1883,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/trie-router/`node.ts`/Node#\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1918,7 +1902,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "NiNRROoMgJuXbpsfAwJRAWNMOZtNog0ED_GEbtUb2Uw",
+        "id": "Y2s7ooWajStt_N68FM6acH8qbY0V00lZY4UUOx67j4Q",
         "name": "References"
       },
       "id": "[\"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1937,16 +1921,32 @@
     {
       "kind": "edge",
       "type": {
-        "id": "QYf_i0oidOc3eu7T_U8DUZO6PCbmJb8mUx3HcZdIYaw",
-        "name": "MemberOf"
+        "id": "wuTA3wNDbajT6q9D3lcCmafAmidnInXO3CbIK5M0G10",
+        "name": "DefinedAt"
       },
-      "id": "[\"src/router/`utils.ts`/createNullObject.\",\"src/router/`utils.ts`/\"]",
+      "id": "[\"src/router/`utils.ts`/\",\"src/router/`utils.ts`/\"]",
+      "op": "insert",
+      "after": {
+        "properties": {},
+        "endpoints": {
+          "from": "src/router/`utils.ts`/",
+          "to": "src/router/`utils.ts`/"
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "wuTA3wNDbajT6q9D3lcCmafAmidnInXO3CbIK5M0G10",
+        "name": "DefinedAt"
+      },
+      "id": "[\"src/router/`utils.ts`/createNullObject.\",\"src/router/`utils.ts`/createNullObject.\"]",
       "op": "insert",
       "after": {
         "properties": {},
         "endpoints": {
           "from": "src/router/`utils.ts`/createNullObject.",
-          "to": "src/router/`utils.ts`/"
+          "to": "src/router/`utils.ts`/createNullObject."
         }
       }
     }

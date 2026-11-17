@@ -48,7 +48,7 @@ pass the full key from `symbols_named` as a parameter.
 | `impact` | `src/router.ts` `Router#add()` | 1: `SmartRouter#match`, which calls `add` on each router it holds | the same |
 | `implementers` | `src/router.ts` `Router#add()` | the six routers' `add` | the same |
 | `most_referenced` | | 20 rows, led by `Router` (15 referrers), `METHOD_NAME_ALL` (14) and `Result` (14) | |
-| `unreferenced_callables` | | 11: routers' `add` and `match` methods reached through `Router`, `buildAllMatchers` of `PreparedRegExpRouter`, and three constructors reached through their classes | |
+| `unreferenced_callables` | | 11: routers' `add` and `match` methods reached through `Router`, `buildAllMatchers` of `PreparedRegExpRouter`, and three constructors whose callers, such as `Hono`'s constructor in `src/hono.ts`, are outside the slice | |
 
 ## The branch diff
 

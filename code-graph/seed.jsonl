@@ -102,7 +102,7 @@
 {"data":{"callable":false,"digest":null,"kind":"property","name":"#routers","path":"src/router/smart-router/router.ts","signature":"(property) #routers: Router<T>[]","symbol":"src/router/smart-router/`router.ts`/SmartRouter#`#routers`."},"type":"Symbol"}
 {"data":{"callable":false,"digest":null,"kind":"property","name":"#routes","path":"src/router/smart-router/router.ts","signature":"(property) #routes: [string, string, T][] | undefined","symbol":"src/router/smart-router/`router.ts`/SmartRouter#`#routes`."},"type":"Symbol"}
 {"data":{"callable":true,"digest":"aea0c9a2f0642135","kind":"constructor","name":"<constructor>","path":"src/router/smart-router/router.ts","signature":"constructor<T>(init: { routers: Router<T>[]; }): SmartRouter<T>","symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`()."},"type":"Symbol"}
-{"data":{"callable":false,"digest":null,"kind":"property","name":"routers","path":"src/router/smart-router/router.ts","signature":"(property) routers: Router<T>[]","symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)typeLiteral0:routers."},"type":"Symbol"}
+{"data":{"callable":false,"digest":null,"kind":"property","name":"routers","path":"src/router/smart-router/router.ts","signature":"(property) routers: Router<T>[]","symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)routers."},"type":"Symbol"}
 {"data":{"callable":true,"digest":null,"kind":"getter","name":"<get>activeRouter","path":"src/router/smart-router/router.ts","signature":"get activeRouter: Router<T>","symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<get>activeRouter`()."},"type":"Symbol"}
 {"data":{"callable":true,"digest":"c548ef929bdac686","kind":"method","name":"add","path":"src/router/smart-router/router.ts","signature":"(method) add(method: string, path: string, handler: T): void","symbol":"src/router/smart-router/`router.ts`/SmartRouter#add()."},"type":"Symbol"}
 {"data":{"callable":true,"digest":"e149b0a5bddf1c19","kind":"method","name":"match","path":"src/router/smart-router/router.ts","signature":"(method) match(method: string, path: string): Result<T>","symbol":"src/router/smart-router/`router.ts`/SmartRouter#match()."},"type":"Symbol"}
@@ -111,9 +111,9 @@
 {"data":{"callable":false,"digest":null,"kind":"module","name":"node.ts","path":"src/router/trie-router/node.ts","signature":"module \"node.ts\"","symbol":"src/router/trie-router/`node.ts`/"},"type":"Symbol"}
 {"data":{"callable":false,"digest":null,"kind":"type_alias","name":"HandlerParamsSet","path":"src/router/trie-router/node.ts","signature":"type HandlerParamsSet","symbol":"src/router/trie-router/`node.ts`/HandlerParamsSet#"},"type":"Symbol"}
 {"data":{"callable":false,"digest":null,"kind":"type_alias","name":"HandlerSet","path":"src/router/trie-router/node.ts","signature":"type HandlerSet","symbol":"src/router/trie-router/`node.ts`/HandlerSet#"},"type":"Symbol"}
-{"data":{"callable":false,"digest":null,"kind":"property","name":"handler","path":"src/router/trie-router/node.ts","signature":"(property) handler: T","symbol":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:handler."},"type":"Symbol"}
-{"data":{"callable":false,"digest":null,"kind":"property","name":"possibleKeys","path":"src/router/trie-router/node.ts","signature":"(property) possibleKeys: string[]","symbol":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:possibleKeys."},"type":"Symbol"}
-{"data":{"callable":false,"digest":null,"kind":"property","name":"score","path":"src/router/trie-router/node.ts","signature":"(property) score: number","symbol":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:score."},"type":"Symbol"}
+{"data":{"callable":false,"digest":null,"kind":"property","name":"handler","path":"src/router/trie-router/node.ts","signature":"(property) handler: T","symbol":"src/router/trie-router/`node.ts`/HandlerSet#handler."},"type":"Symbol"}
+{"data":{"callable":false,"digest":null,"kind":"property","name":"possibleKeys","path":"src/router/trie-router/node.ts","signature":"(property) possibleKeys: string[]","symbol":"src/router/trie-router/`node.ts`/HandlerSet#possibleKeys."},"type":"Symbol"}
+{"data":{"callable":false,"digest":null,"kind":"property","name":"score","path":"src/router/trie-router/node.ts","signature":"(property) score: number","symbol":"src/router/trie-router/`node.ts`/HandlerSet#score."},"type":"Symbol"}
 {"data":{"callable":false,"digest":null,"kind":"class","name":"Node","path":"src/router/trie-router/node.ts","signature":"class Node","symbol":"src/router/trie-router/`node.ts`/Node#"},"type":"Symbol"}
 {"data":{"callable":false,"digest":null,"kind":"property","name":"#children","path":"src/router/trie-router/node.ts","signature":"(property) #children: Record<string, Node<T>>","symbol":"src/router/trie-router/`node.ts`/Node#`#children`."},"type":"Symbol"}
 {"data":{"callable":false,"digest":null,"kind":"property","name":"#methods","path":"src/router/trie-router/node.ts","signature":"(property) #methods: Record<string, HandlerSet<T>>[]","symbol":"src/router/trie-router/`node.ts`/Node#`#methods`."},"type":"Symbol"}
@@ -234,7 +234,7 @@
 {"data":{"end_line":6,"line":6,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#`#routers`."},"type":"Location"}
 {"data":{"end_line":7,"line":7,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#`#routes`."},"type":"Location"}
 {"data":{"end_line":11,"line":9,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`()."},"type":"Location"}
-{"data":{"end_line":9,"line":9,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)typeLiteral0:routers."},"type":"Location"}
+{"data":{"end_line":9,"line":9,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)routers."},"type":"Location"}
 {"data":{"end_line":63,"line":63,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#`<get>activeRouter`()."},"type":"Location"}
 {"data":{"end_line":19,"line":13,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#add()."},"type":"Location"}
 {"data":{"end_line":61,"line":21,"symbol":"src/router/smart-router/`router.ts`/SmartRouter#match()."},"type":"Location"}
@@ -243,9 +243,9 @@
 {"data":{"end_line":217,"line":1,"symbol":"src/router/trie-router/`node.ts`/"},"type":"Location"}
 {"data":{"end_line":14,"line":12,"symbol":"src/router/trie-router/`node.ts`/HandlerParamsSet#"},"type":"Location"}
 {"data":{"end_line":10,"line":6,"symbol":"src/router/trie-router/`node.ts`/HandlerSet#"},"type":"Location"}
-{"data":{"end_line":7,"line":7,"symbol":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:handler."},"type":"Location"}
-{"data":{"end_line":8,"line":8,"symbol":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:possibleKeys."},"type":"Location"}
-{"data":{"end_line":9,"line":9,"symbol":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:score."},"type":"Location"}
+{"data":{"end_line":7,"line":7,"symbol":"src/router/trie-router/`node.ts`/HandlerSet#handler."},"type":"Location"}
+{"data":{"end_line":8,"line":8,"symbol":"src/router/trie-router/`node.ts`/HandlerSet#possibleKeys."},"type":"Location"}
+{"data":{"end_line":9,"line":9,"symbol":"src/router/trie-router/`node.ts`/HandlerSet#score."},"type":"Location"}
 {"data":{"end_line":216,"line":19,"symbol":"src/router/trie-router/`node.ts`/Node#"},"type":"Location"}
 {"data":{"end_line":22,"line":22,"symbol":"src/router/trie-router/`node.ts`/Node#`#children`."},"type":"Location"}
 {"data":{"end_line":20,"line":20,"symbol":"src/router/trie-router/`node.ts`/Node#`#methods`."},"type":"Location"}
@@ -366,7 +366,7 @@
 {"data":{},"edge":"DefinedAt","from":"src/router/smart-router/`router.ts`/SmartRouter#`#routers`.","to":"src/router/smart-router/`router.ts`/SmartRouter#`#routers`."}
 {"data":{},"edge":"DefinedAt","from":"src/router/smart-router/`router.ts`/SmartRouter#`#routes`.","to":"src/router/smart-router/`router.ts`/SmartRouter#`#routes`."}
 {"data":{},"edge":"DefinedAt","from":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().","to":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`()."}
-{"data":{},"edge":"DefinedAt","from":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)typeLiteral0:routers.","to":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)typeLiteral0:routers."}
+{"data":{},"edge":"DefinedAt","from":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)routers.","to":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)routers."}
 {"data":{},"edge":"DefinedAt","from":"src/router/smart-router/`router.ts`/SmartRouter#`<get>activeRouter`().","to":"src/router/smart-router/`router.ts`/SmartRouter#`<get>activeRouter`()."}
 {"data":{},"edge":"DefinedAt","from":"src/router/smart-router/`router.ts`/SmartRouter#add().","to":"src/router/smart-router/`router.ts`/SmartRouter#add()."}
 {"data":{},"edge":"DefinedAt","from":"src/router/smart-router/`router.ts`/SmartRouter#match().","to":"src/router/smart-router/`router.ts`/SmartRouter#match()."}
@@ -375,9 +375,9 @@
 {"data":{},"edge":"DefinedAt","from":"src/router/trie-router/`node.ts`/","to":"src/router/trie-router/`node.ts`/"}
 {"data":{},"edge":"DefinedAt","from":"src/router/trie-router/`node.ts`/HandlerParamsSet#","to":"src/router/trie-router/`node.ts`/HandlerParamsSet#"}
 {"data":{},"edge":"DefinedAt","from":"src/router/trie-router/`node.ts`/HandlerSet#","to":"src/router/trie-router/`node.ts`/HandlerSet#"}
-{"data":{},"edge":"DefinedAt","from":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:handler.","to":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:handler."}
-{"data":{},"edge":"DefinedAt","from":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:possibleKeys.","to":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:possibleKeys."}
-{"data":{},"edge":"DefinedAt","from":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:score.","to":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:score."}
+{"data":{},"edge":"DefinedAt","from":"src/router/trie-router/`node.ts`/HandlerSet#handler.","to":"src/router/trie-router/`node.ts`/HandlerSet#handler."}
+{"data":{},"edge":"DefinedAt","from":"src/router/trie-router/`node.ts`/HandlerSet#possibleKeys.","to":"src/router/trie-router/`node.ts`/HandlerSet#possibleKeys."}
+{"data":{},"edge":"DefinedAt","from":"src/router/trie-router/`node.ts`/HandlerSet#score.","to":"src/router/trie-router/`node.ts`/HandlerSet#score."}
 {"data":{},"edge":"DefinedAt","from":"src/router/trie-router/`node.ts`/Node#","to":"src/router/trie-router/`node.ts`/Node#"}
 {"data":{},"edge":"DefinedAt","from":"src/router/trie-router/`node.ts`/Node#`#children`.","to":"src/router/trie-router/`node.ts`/Node#`#children`."}
 {"data":{},"edge":"DefinedAt","from":"src/router/trie-router/`node.ts`/Node#`#methods`.","to":"src/router/trie-router/`node.ts`/Node#`#methods`."}
@@ -485,16 +485,16 @@
 {"data":{},"edge":"MemberOf","from":"src/router/smart-router/`router.ts`/SmartRouter#`#routers`.","to":"src/router/smart-router/`router.ts`/SmartRouter#"}
 {"data":{},"edge":"MemberOf","from":"src/router/smart-router/`router.ts`/SmartRouter#`#routes`.","to":"src/router/smart-router/`router.ts`/SmartRouter#"}
 {"data":{},"edge":"MemberOf","from":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().","to":"src/router/smart-router/`router.ts`/SmartRouter#"}
-{"data":{},"edge":"MemberOf","from":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)typeLiteral0:routers.","to":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`()."}
+{"data":{},"edge":"MemberOf","from":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)routers.","to":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`()."}
 {"data":{},"edge":"MemberOf","from":"src/router/smart-router/`router.ts`/SmartRouter#`<get>activeRouter`().","to":"src/router/smart-router/`router.ts`/SmartRouter#"}
 {"data":{},"edge":"MemberOf","from":"src/router/smart-router/`router.ts`/SmartRouter#add().","to":"src/router/smart-router/`router.ts`/SmartRouter#"}
 {"data":{},"edge":"MemberOf","from":"src/router/smart-router/`router.ts`/SmartRouter#match().","to":"src/router/smart-router/`router.ts`/SmartRouter#"}
 {"data":{},"edge":"MemberOf","from":"src/router/smart-router/`router.ts`/SmartRouter#name.","to":"src/router/smart-router/`router.ts`/SmartRouter#"}
 {"data":{},"edge":"MemberOf","from":"src/router/trie-router/`node.ts`/HandlerParamsSet#","to":"src/router/trie-router/`node.ts`/"}
 {"data":{},"edge":"MemberOf","from":"src/router/trie-router/`node.ts`/HandlerSet#","to":"src/router/trie-router/`node.ts`/"}
-{"data":{},"edge":"MemberOf","from":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:handler.","to":"src/router/trie-router/`node.ts`/HandlerSet#"}
-{"data":{},"edge":"MemberOf","from":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:possibleKeys.","to":"src/router/trie-router/`node.ts`/HandlerSet#"}
-{"data":{},"edge":"MemberOf","from":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:score.","to":"src/router/trie-router/`node.ts`/HandlerSet#"}
+{"data":{},"edge":"MemberOf","from":"src/router/trie-router/`node.ts`/HandlerSet#handler.","to":"src/router/trie-router/`node.ts`/HandlerSet#"}
+{"data":{},"edge":"MemberOf","from":"src/router/trie-router/`node.ts`/HandlerSet#possibleKeys.","to":"src/router/trie-router/`node.ts`/HandlerSet#"}
+{"data":{},"edge":"MemberOf","from":"src/router/trie-router/`node.ts`/HandlerSet#score.","to":"src/router/trie-router/`node.ts`/HandlerSet#"}
 {"data":{},"edge":"MemberOf","from":"src/router/trie-router/`node.ts`/Node#","to":"src/router/trie-router/`node.ts`/"}
 {"data":{},"edge":"MemberOf","from":"src/router/trie-router/`node.ts`/Node#`#children`.","to":"src/router/trie-router/`node.ts`/Node#"}
 {"data":{},"edge":"MemberOf","from":"src/router/trie-router/`node.ts`/Node#`#methods`.","to":"src/router/trie-router/`node.ts`/Node#"}
@@ -738,7 +738,7 @@
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#","to":"src/router/smart-router/`router.ts`/SmartRouter#`#routes`."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().","to":"src/`router.ts`/Router#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().","to":"src/router/smart-router/`router.ts`/SmartRouter#`#routers`."}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().","to":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)typeLiteral0:routers."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().","to":"src/router/smart-router/`router.ts`/SmartRouter#`<constructor>`().(init)routers."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#add().","to":"src/`router.ts`/MESSAGE_MATCHER_IS_ALREADY_BUILT."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#add().","to":"src/router/smart-router/`router.ts`/SmartRouter#`#routes`."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/smart-router/`router.ts`/SmartRouter#match().","to":"src/`router.ts`/Result#"}
@@ -762,12 +762,12 @@
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#","to":"src/router/trie-router/`node.ts`/emptyParams."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().","to":"src/`router.ts`/METHOD_NAME_ALL."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().","to":"src/router/trie-router/`node.ts`/HandlerParamsSet#"}
-{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().","to":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:possibleKeys."}
+{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().","to":"src/router/trie-router/`node.ts`/HandlerSet#possibleKeys."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().","to":"src/router/trie-router/`node.ts`/Node#"}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().","to":"src/router/trie-router/`node.ts`/Node#`#methods`."}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#insert().","to":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:handler."}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#insert().","to":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:possibleKeys."}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#insert().","to":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:score."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#insert().","to":"src/router/trie-router/`node.ts`/HandlerSet#handler."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#insert().","to":"src/router/trie-router/`node.ts`/HandlerSet#possibleKeys."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#insert().","to":"src/router/trie-router/`node.ts`/HandlerSet#score."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#insert().","to":"src/router/trie-router/`node.ts`/Node#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#insert().","to":"src/router/trie-router/`node.ts`/Node#`#children`."}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#insert().","to":"src/router/trie-router/`node.ts`/Node#`#methods`."}
@@ -776,8 +776,8 @@
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#insert().","to":"src/router/trie-router/`node.ts`/order."}
 {"data":{"call":false,"sites":2},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#search().","to":"src/`router.ts`/Params#"}
 {"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#search().","to":"src/router/trie-router/`node.ts`/HandlerParamsSet#"}
-{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#search().","to":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:handler."}
-{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#search().","to":"src/router/trie-router/`node.ts`/HandlerSet#typeLiteral0:score."}
+{"data":{"call":false,"sites":1},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#search().","to":"src/router/trie-router/`node.ts`/HandlerSet#handler."}
+{"data":{"call":false,"sites":2},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#search().","to":"src/router/trie-router/`node.ts`/HandlerSet#score."}
 {"data":{"call":false,"sites":3},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#search().","to":"src/router/trie-router/`node.ts`/Node#"}
 {"data":{"call":false,"sites":8},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#search().","to":"src/router/trie-router/`node.ts`/Node#`#children`."}
 {"data":{"call":false,"sites":15},"edge":"References","from":"src/router/trie-router/`node.ts`/Node#search().","to":"src/router/trie-router/`node.ts`/Node#`#params`."}

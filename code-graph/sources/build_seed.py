@@ -52,14 +52,29 @@ CALL_SUFFIX = ("(", "`", "?.(", "<")
 TYPES = ("Revision", "Symbol", "Location")
 EDGES = ("DefinedAt", "MemberOf", "References", "Implements")
 IDENTIFIER = re.compile(r"[\w+\-$]+")
+TYPE_LITERAL = re.compile(r"^typeLiteral\d+$")
 
 
 def descriptors_of(symbol: str) -> str:
-    """A global symbol is `scheme manager package version descriptors`; keep the descriptors."""
+    """A symbol's key: the descriptors of `scheme manager package version descriptors`.
+
+    scip-typescript puts the members of an anonymous type literal under a
+    `typeLiteralN:` container numbered by position in the file, so adding one
+    earlier in the file renames every later member. The key leaves those
+    containers out, so a member keeps its key while it keeps its name and place.
+    """
     parts = symbol.split(" ", 4)
     if len(parts) != 5:
         raise ValueError(f"not a global SCIP symbol: {symbol!r}")
-    return parts[4]
+    text = parts[4]
+    if "typeLiteral" not in text:
+        return text
+    kept, start = [], 0
+    for name, suffix, end in parse_descriptors(text):
+        if not (suffix == "meta" and TYPE_LITERAL.match(name)):
+            kept.append(text[start:end])
+        start = end
+    return "".join(kept)
 
 
 def parse_descriptors(text: str) -> list[tuple[str, str, int]]:
