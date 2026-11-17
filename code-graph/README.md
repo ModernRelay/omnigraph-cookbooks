@@ -233,6 +233,46 @@ pinned version. `build_seed.py` uses only the Python standard library. Both
 write under `sources/work/`, which git ignores. CI does not run them; it
 qualifies the committed files.
 
+## Benchmarks
+
+Measured on hono by the scripts in [`bench/`](bench/README.md), which has the
+methods, the adjudication of every miss and the limits. They run by hand, not
+in CI.
+
+**Pull request diffs.** The 40 most recent hono pull requests before
+2026-11-01 that change `src/`, each loaded as its base and merge commit and
+reviewed with `cg diff`. Scored against the difference of the converted files
+(mechanics) and against two reference graphs built with the TypeScript
+compiler API (accuracy):
+
+| | Exact pull requests | Added | Removed | Changed | References added | References removed |
+|---|---|---|---|---|---|---|
+| Mechanics | 40 of 40 | 19 of 19 | 9 of 9 | 46 of 46 | 90 of 90 | 37 of 37 |
+| Accuracy, precision | 36 of 40 | 1.000 | 0.667 | 0.935 | 1.000 | 0.865 |
+| Accuracy, recall | | 1.000 | 1.000 | 0.956 | 1.000 | 0.970 |
+
+**Execution recall against other code-graph tools.** hono's test suite, run
+on an instrumented copy, made 906 distinct calls between definitions. Recall
+is the share of them each graph contains:
+
+| Graph | All 906 | Functions and methods (759) | Class-member calls (194) |
+|---|---|---|---|
+| Omnigraph, every reference (what `callers` returns) | 0.891 | 0.876 | 0.768 |
+| Omnigraph, call edges only | 0.733 | 0.810 | 0.582 |
+| codegraph 1.6.2 | 0.679 | 0.748 | 0.474 |
+| Graphify 0.9.102 | 0.677 | 0.747 | 0.356 |
+| GitNexus 1.6.12 | 0.642 | 0.705 | 0.351 |
+| codebase-memory-mcp 0.12.1 | 0.626 | 0.685 | 0.206 |
+| code-review-graph 2.3.9 | 0.602 | 0.718 | 0.397 |
+
+Most of Omnigraph's lead comes from recording references, not only calls: a
+getter runs when a property is read, and a function passed as a value runs
+when the code it was passed to calls it. The rest is resolution. On calls to
+top-level functions and uniquely named ones, the name-matching tools come
+within a point of Omnigraph's call edges; they fall behind on method calls
+and on names several definitions share, which need the receiver's type. The
+benchmark measures recall only, on one repository.
+
 ## Limits
 
 - **`call` is a text check.** A reference counts as a call when the next
