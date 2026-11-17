@@ -142,6 +142,39 @@ def parse_descriptors(text: str) -> list[tuple[str, str, int]]:
     return out
 
 
+def escape_name(name: str) -> str:
+    """A name as a SCIP descriptor spells it: backticks around anything that is
+    not a plain identifier, with backticks inside doubled."""
+    if IDENTIFIER.fullmatch(name):
+        return name
+    return "`" + name.replace("`", "``") + "`"
+
+
+def project_prefix(documents, infos) -> str:
+    """The folder of the indexed project, relative to the repository, as
+    namespace descriptors: `src/` when the tsconfig lives in `src/`.
+
+    scip-typescript writes a file's path in a symbol relative to the project
+    but a document's path relative to the directory it ran in, so a key would
+    otherwise not start with its file's path. The folder is read from each
+    module's definition: the document's path minus the module's own path.
+    """
+    prefixes = collections.Counter()
+    for d in documents:
+        for o in d.occurrences:
+            info = infos.get(o.symbol)
+            if not o.roles & DEFINITION or info is None or KIND.get(info.kind) != "module":
+                continue
+            module = "/".join(name for name, suffix, _ in parse_descriptors(descriptors_of(o.symbol))
+                              if suffix == "namespace")
+            if d.relative_path == module or d.relative_path.endswith("/" + module):
+                prefixes[d.relative_path[:len(d.relative_path) - len(module)]] += 1
+    if len(prefixes) > 1:
+        raise ValueError(f"modules disagree on the project folder: {dict(prefixes)}")
+    folder = next(iter(prefixes), "")
+    return "".join(escape_name(part) + "/" for part in folder.strip("/").split("/") if part)
+
+
 def signature(documentation: list[str]) -> str | None:
     if not documentation:
         return None
@@ -226,6 +259,10 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
     idx = read_index(index_path)
     extents = read_extents(checkout, [d.relative_path for d in idx.documents])
     infos = {s.symbol: s for d in idx.documents for s in d.symbols if not s.symbol.startswith("local ")}
+    prefix = project_prefix(idx.documents, infos)
+
+    def key_of(symbol: str) -> str:
+        return prefix + descriptors_of(symbol)
     sources: dict[str, list[str]] = {}
 
     def lines(path: str) -> list[str]:
@@ -241,7 +278,7 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
             info = infos.get(o.symbol)
             if not o.roles & DEFINITION or info is None or info.kind not in KIND:
                 continue
-            key = descriptors_of(o.symbol)
+            key = key_of(o.symbol)
             # The indexer's range when it gives one, which for a constant means
             # its initializer is a function; else the parser's.
             extent, function_initializer = extents.get((d.relative_path, o.range[0], o.range[1]), (None, False))
@@ -268,7 +305,7 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
         for o in d.occurrences:
             if o.roles & DEFINITION or o.symbol not in infos:
                 continue
-            callee = descriptors_of(o.symbol)
+            callee = key_of(o.symbol)
             if callee not in nodes:
                 continue
             caller = owner(doc_scopes, o.range)
@@ -291,10 +328,10 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
 
     implements = set()
     for sym, info in infos.items():
-        src = descriptors_of(sym)
+        src = key_of(sym)
         for rel in info.relationships:
             if rel.is_implementation and not rel.symbol.startswith("local "):
-                dst = descriptors_of(rel.symbol)
+                dst = key_of(rel.symbol)
                 if src in nodes and dst in nodes:
                     implements.add((src, dst))
 
