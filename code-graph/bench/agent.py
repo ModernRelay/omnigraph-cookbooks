@@ -87,7 +87,7 @@ searching text; `cg --help` lists every command.
 - `cg find NAME`: the definitions with that name, and their keys
 - `cg callers SYMBOL`: every definition whose code names SYMBOL; `call` says whether one of those references is a call
 - `cg callees SYMBOL`: what SYMBOL's code calls or names
-- `cg impact SYMBOL`: every definition within three references of SYMBOL
+- `cg impact SYMBOL`: every definition within sixteen references of SYMBOL
 - `cg implementers MEMBER`: the class members that implement an interface member
 - `cg members SYMBOL`: what a module, class or interface declares
 
@@ -482,6 +482,11 @@ def run(arms: list[str], qids: list[str] | None, reps: int, model: str, jobs: in
 # --- score -------------------------------------------------------------------
 
 def owner_lift(nodes: dict):
+    """Map an answer to the granularity the answer format asks for: functions,
+    methods, classes, interfaces and function constants. A getter, field or
+    variable lifts to its class, and a constant that holds no function to its
+    file, so naming `upgradeWebSocket` and naming its file grade alike, though
+    the graph and the reference give such a constant its own code."""
     non_owner = {"getter", "setter", "property", "variable", "enum_member"}
 
     def lift(ident: str) -> str:

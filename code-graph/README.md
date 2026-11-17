@@ -252,42 +252,45 @@ compiler API (accuracy):
 
 | | Exact pull requests | Added | Removed | Changed | References added | References removed |
 |---|---|---|---|---|---|---|
-| Mechanics | 40 of 40 | 19 of 19 | 9 of 9 | 46 of 46 | 90 of 90 | 37 of 37 |
-| Accuracy, precision | 36 of 40 | 1.000 | 0.667 | 0.935 | 1.000 | 0.865 |
-| Accuracy, recall | | 1.000 | 1.000 | 0.956 | 1.000 | 0.970 |
+| Mechanics | 40 of 40 | 19 of 19 | 9 of 9 | 48 of 48 | 91 of 91 | 40 of 40 |
+| Accuracy, precision | 37 of 40 | 1.000 | 0.667 | 0.938 | 1.000 | 0.875 |
+| Accuracy, recall | | 1.000 | 1.000 | 1.000 | 1.000 | 0.972 |
 
 **Execution recall against other code-graph tools.** hono's test suite, run
-on an instrumented copy, made 906 distinct calls between definitions. Recall
+on an instrumented copy, made 915 distinct calls between definitions. Recall
 is the share of them each graph contains:
 
-| Graph | All 906 | Functions and methods (759) | Class-member calls (194) |
+| Graph | All 915 | Functions and methods (768) | Class-member calls (199) |
 |---|---|---|---|
-| Omnigraph, every reference (what `callers` returns) | 0.891 | 0.876 | 0.768 |
-| Omnigraph, call edges only | 0.733 | 0.810 | 0.582 |
-| codegraph 1.6.2 | 0.679 | 0.748 | 0.474 |
-| Graphify 0.9.102 | 0.677 | 0.747 | 0.356 |
-| GitNexus 1.6.12 | 0.642 | 0.705 | 0.351 |
-| codebase-memory-mcp 0.12.1 | 0.626 | 0.685 | 0.206 |
-| code-review-graph 2.3.9 | 0.602 | 0.718 | 0.397 |
+| Omnigraph, every reference (what `callers` returns) | 0.895 | 0.882 | 0.774 |
+| Omnigraph, call edges only | 0.779 | 0.865 | 0.774 |
+| codegraph 1.6.2 | 0.680 | 0.749 | 0.482 |
+| Graphify 0.9.102 | 0.679 | 0.749 | 0.372 |
+| GitNexus 1.6.12 | 0.625 | 0.684 | 0.322 |
+| codebase-memory-mcp 0.12.1 | 0.624 | 0.685 | 0.221 |
+| code-review-graph 2.3.9 | 0.597 | 0.711 | 0.387 |
 
-Most of Omnigraph's lead comes from recording references, not only calls: a
+Half of Omnigraph's lead comes from recording references, not only calls: a
 getter runs when a property is read, and a function passed as a value runs
 when the code it was passed to calls it. The rest is resolution. On calls to
 top-level functions and uniquely named ones, the name-matching tools come
-within a point of Omnigraph's call edges; they fall behind on method calls
-and on names several definitions share, which need the receiver's type. The
-benchmark measures recall only, on one repository.
+within two to four points of Omnigraph's call edges; they fall behind on
+method calls and on names several definitions share, which need the
+receiver's type. The benchmark measures recall only, on one repository.
 
 **Agent cost.** Claude Code with Sonnet 5.5 answered eight code-structure
 questions about hono three times in each of seven arms: no code graph,
 Omnigraph through `cg`, and the five tools above, each set up by its own Claude
 Code installer. Medians per session, and the cost paired with no code graph
-question by question:
+question by question. Omnigraph's first row is a rerun of its 24 sessions after
+the converter fix described under Limits; its wall time is not comparable,
+because the API wrote output 38% slower during it:
 
 | Arm | Exact answers | Cost | Wall time | Output tokens | Cost against no graph |
 |---|---|---|---|---|---|
 | No code graph | 24 of 24 | $0.100 | 16.1 s | 1,926 | |
-| Omnigraph | 21 of 24 | $0.059 | 11.7 s | 1,018 | 0.77×, lower on 6 of 8 |
+| Omnigraph, after the fix | 24 of 24 | $0.069 | (18.6 s) | 1,198 | 0.84×, lower on 5 of 8 |
+| Omnigraph, first run | 21 of 24 | $0.059 | 11.7 s | 1,018 | 0.77×, lower on 6 of 8 |
 | codegraph | 24 of 24 | $0.094 | 17.6 s | 1,766 | 1.01× |
 | Graphify | 21 of 24 | $0.100 | 16.0 s | 1,866 | 1.01× |
 | GitNexus | 22 of 24 | $0.102 | 14.3 s | 1,368 | 0.97× |
@@ -296,12 +299,15 @@ question by question:
 
 Omnigraph's agents used their graph for half their tool calls, the others'
 for at most 17%, and a `cg` read adds less to the context than the lines a
-search returns. The gain is largest on names several definitions share: the
-callers of `HonoRequest.header` cost $0.042 and 14.6 s with Omnigraph, against
-$0.161 and 34.2 s without a graph. Its three inexact answers are one
-question, a call made through a table of functions, which the compiler's
-references do not record and the agents that read the code found. Indexing
-hono takes Omnigraph 2.0 s, the tools 2.0 to 21.3 s.
+search returns. In the first run the gain was largest on names several
+definitions share: the callers of `HonoRequest.header` cost $0.042 and 14.6 s
+with Omnigraph, against $0.161 and 34.2 s without a graph. Its three inexact
+answers were one question, a call made through a table of functions: the
+graph gave the table's references to its module and `impact` stopped at three
+hops. With both fixed, the rerun answered every question exactly. Cost per
+session varies with prompt caching, by as much as $0.13 for one question in
+one arm, more than the differences between most arms' medians. Indexing hono
+takes Omnigraph 2.3 s, the tools 2.0 to 21.3 s.
 
 ## Limits
 
@@ -325,7 +331,7 @@ hono takes Omnigraph 2.0 s, the tools 2.0 to 21.3 s.
   lists `detectors`, not the code that calls through it. Telling a call
   through the table from a read of its keys would need the type checker's
   data flow, which SCIP does not record.
-- **`impact` follows at most sixteen references.** OmniGraph requires a finite
+- **`impact` follows at most sixteen references.** Omnigraph requires a finite
   bound on a multi-hop traversal. The longest chain of references to a
   callable in hono's `src/` is 13; a deeper chain is cut at sixteen.
 - **Members of union types are not indexed.** scip-typescript gives no symbol

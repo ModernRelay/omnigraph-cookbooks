@@ -46,7 +46,8 @@ def digest(*paths: Path) -> str:
     return h.hexdigest()[:12]
 
 
-CONVERTER = digest(COOKBOOK / "sources" / "build_seed.py", COOKBOOK / "sources" / "scip_index.py")
+CONVERTER = digest(COOKBOOK / "sources" / "build_seed.py", COOKBOOK / "sources" / "scip_index.py",
+                   COOKBOOK / "sources" / "indexer" / "extents.mjs")
 REFERENCE = digest(BENCH / "reference.mjs")
 
 

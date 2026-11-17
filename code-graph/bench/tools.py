@@ -61,14 +61,13 @@ def main():
     for ident, n in nodes.items():
         if n["kind"] != "module":
             by_path[n["path"]].append(ident)
-    NON_OWNER = {"getter", "setter", "property", "variable", "enum_member"}
 
     def owner(ident: str) -> str:
-        """The definition that owns code written in `ident`, by the benchmark's
-        ownership rules: members without a range of their own belong to their
-        container, as do constants that hold no function."""
+        """The definition that owns code written in `ident`, by the reference's
+        `owns`: a definition that owns no code, such as an interface member,
+        belongs to its container."""
         n = nodes[ident]
-        while n["kind"] in NON_OWNER or (n["kind"] == "constant" and not n["callable"]):
+        while not n["owns"]:
             parent = ident.rsplit(".", 1)[0] if "." in ident.split(":", 1)[-1] else n["path"]
             if parent not in nodes or parent == ident:
                 return n["path"]

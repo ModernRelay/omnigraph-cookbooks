@@ -8,8 +8,9 @@
 // functions and variables, and the members of object literals assigned to
 // them. Identity is `path:Container.member`, with no line numbers, so a node
 // keeps its identity while it keeps its name and file. An edge joins the
-// innermost such declaration containing an identifier to the declaration the
-// type checker resolves it to; `call` marks an identifier in callee position.
+// innermost declaration that owns code (`owns` on its node) containing an
+// identifier to the declaration the type checker resolves it to; `call` marks
+// an identifier in callee position.
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 import { createRequire } from 'node:module'
@@ -35,10 +36,17 @@ export function buildReference(checkout, { project = 'tsconfig.build.json', scop
   const program = ts.createProgram(files, { ...parsed.options, noEmit: true })
   const checker = program.getTypeChecker()
 
-  // Kinds scip-typescript gives an enclosing range, so they own the references
-  // inside them. Getters, setters, fields and properties have none.
+  // Declarations that own the references inside them, as the converter
+  // decides: the ones scip-typescript gives an enclosing range, and the ones
+  // the converter reads a range for with the TypeScript parser (constants and
+  // variables with an initializer, class fields, getters and setters).
+  // Interface members, object-literal members and enum members own nothing.
   const OWNER_KINDS = new Set(['class', 'interface', 'type_alias', 'enum', 'namespace', 'function', 'method',
-    'constructor', 'constant'])
+    'constructor', 'constant', 'variable', 'getter', 'setter', 'property'])
+  const ownsCode = (node, kind) => OWNER_KINDS.has(kind) && !ts.isMethodSignature(node) &&
+    !ts.isPropertySignature(node) && (!ts.isVariableDeclaration(node) || !!node.initializer) &&
+    (!(ts.isGetAccessorDeclaration(node) || ts.isSetAccessorDeclaration(node) || ts.isPropertyDeclaration(node)) ||
+      ts.isClassLike(node.parent))
   const nodes = {}
   const declId = new Map() // declaration node -> identity
   const refs = [] // [owner identity, identifier node]
@@ -64,6 +72,7 @@ export function buildReference(checkout, { project = 'tsconfig.build.json', scop
       nodes[id] = {
         kind, callable, path: rel(sf.fileName), name: id.includes(':') ? id.split(':').pop().split('.').pop() : rel(sf.fileName),
         line: lineOf(sf, (nameNode || node).getStart(sf)), end_line: lineOf(sf, node.getEnd()), digest: null,
+        owns: false,
       }
     }
     // A callable's code is its declaration text; overloads and merges add up.
@@ -158,13 +167,13 @@ export function buildReference(checkout, { project = 'tsconfig.build.json', scop
         const id = idOf([...chain, name])
         register(node, id, kind, callable, sf, node.name, codeNode)
         nextChain = [...chain, name]
-        // References belong to the innermost definition that has its own
-        // range in the index; members without one belong to their container.
-        // A constant has one only when it holds a function.
-        // Methods own their references with or without a body (abstract
-        // methods, overload signatures); interface method signatures do not.
-        if (OWNER_KINDS.has(kind) && !ts.isMethodSignature(node) && (kind !== 'constant' || callable)) {
+        // References belong to the innermost definition that owns code;
+        // members that own none belong to their container. Methods own their
+        // references with or without a body (abstract methods, overload
+        // signatures); interface method signatures do not.
+        if (ownsCode(node, kind)) {
           nextOwner = id
+          nodes[id].owns = true
         }
       }
     }
@@ -173,7 +182,8 @@ export function buildReference(checkout, { project = 'tsconfig.build.json', scop
       recordSite(node, sf, nextOwner)
       nextInBody = true
     }
-    // A non-function initializer is an expression evaluated by its owner.
+    // A non-function initializer is an expression: walk it as a body, so the
+    // declarations in it are locals and its code belongs to the declaration.
     if (!nextInBody && (ts.isVariableDeclaration(node) || ts.isPropertyDeclaration(node)) && node.initializer &&
       !isFunctionValue(unwrap(node.initializer))) {
       visitChildren(node, sf, nextChain, nextOwner, true, node.initializer)
@@ -237,7 +247,7 @@ export function buildReference(checkout, { project = 'tsconfig.build.json', scop
     const sf = program.getSourceFile(f)
     const moduleId = rel(sf.fileName)
     nodes[moduleId] = { kind: 'module', callable: false, path: moduleId, name: path.basename(moduleId), line: 1,
-      end_line: lineOf(sf, sf.getEnd()), digest: null }
+      end_line: lineOf(sf, sf.getEnd()), digest: null, owns: true }
     declId.set(sf, moduleId)
     ts.forEachChild(sf, (child) => walk(child, sf, [], moduleId, false))
   }

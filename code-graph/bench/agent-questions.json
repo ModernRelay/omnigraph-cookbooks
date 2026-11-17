@@ -126,7 +126,7 @@
         "src/utils/cookie.ts:parseSigned",
         "src/validator/validator.ts:validator"
       ],
-      "note": "detectLanguage calls detectFromCookie through the detectors table (detectors[detectorName](c, options)), and languageDetector calls detectLanguage. The compiler reference records no call for a function reached through a table, so these two were added after checking the source."
+      "note": "detectLanguage calls detectFromCookie through the detectors table (detectors[detectorName](c, options)), and languageDetector calls detectLanguage. Neither reference on that path, detectLanguage reading detectors and detectors naming detectFromCookie, is a call, so a key built from call edges misses these two; they were added after checking the source."
     }
   ]
 }

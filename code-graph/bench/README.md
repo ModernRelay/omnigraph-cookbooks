@@ -49,19 +49,16 @@ Results, `results/pr_diff.json`:
 
 | | Exact pull requests | Added | Removed | Changed | References added | References removed |
 |---|---|---|---|---|---|---|
-| Mechanics | 40 of 40 | 19 of 19 | 9 of 9 | 46 of 46 | 90 of 90 | 37 of 37 |
-| Accuracy, precision | 36 of 40 | 1.000 | 0.667 | 0.935 | 1.000 | 0.865 |
-| Accuracy, recall | | 1.000 | 1.000 | 0.956 | 1.000 | 0.970 |
+| Mechanics | 40 of 40 | 19 of 19 | 9 of 9 | 48 of 48 | 91 of 91 | 40 of 40 |
+| Accuracy, precision | 37 of 40 | 1.000 | 0.667 | 0.938 | 1.000 | 0.875 |
+| Accuracy, recall | | 1.000 | 1.000 | 1.000 | 1.000 | 0.972 |
 
-The four inexact pull requests, checked against their source diffs:
+The three inexact pull requests, checked against their source diffs:
 
 - **`8a103aa5`**: three updates the reference does not count are real
   changes. A constant's value changed, such as `ONLY_WILDCARD_REG_EXP_STR`
   from `".*"` to `"[^]*"`, and a field's type changed; the cookbook reports
   them through `signature`. The reference tracks code changes of callables only.
-- **`17ad0e21`**, **`e9c01079`**: `Context.header` and `Factory.createApp` are
-  class fields holding arrow functions. scip-typescript gives fields no range,
-  so the cookbook has no digest for them and misses changes to their code.
 - **`e9c01079`**: `HonoOptions` became a union of two object types, and
   scip-typescript stopped indexing their properties, so the diff reports
   `getPath`, `router` and `strict` removed with five references.
@@ -74,8 +71,22 @@ Execution recall then found 46 function constants the converter did not count
 as callable, such as `const getCookie: GetCookie = (c) => {...}`, so calls to
 them had `call: false` and changes to their code went unseen; none of the 40
 sampled pull requests changed one. The converter now takes callability from
-the indexer's range. Cached conversions and references are keyed by a digest
-of the code that made them.
+the initializer.
+
+The agent-cost benchmark then found that a constant holding a table of
+functions owned none of its references. scip-typescript gives such a constant,
+a class field, a getter and a setter no range, so their code belonged to the
+module or class around them, and `impact` could not follow `detectLanguage`
+through `detectors` to `detectFromCookie`. The converter now reads those
+ranges with the TypeScript parser, and the reference and the traces use the
+same owners. That gave 47 definitions a digest (25 class fields, 13 getters
+and 9 constants) and made 13 callable, among them `Context.json` and the other
+fields of `Context` that hold arrow functions, so calls to them are now call
+edges. It also caught two changes the first run missed: `17ad0e21` and
+`e9c01079` change `Context.header` and `Factory.createApp`, class fields
+holding arrow functions that had no digest. `17ad0e21` is now exact;
+`e9c01079` still is not, for the union type above. Cached conversions and
+references are keyed by a digest of the code that made them.
 
 ## Execution recall
 
@@ -92,7 +103,7 @@ call, by the same rules as the static graphs: a callback written in F is F's
 code wherever it runs. Test code runs as `<outside>` and is never a caller.
 The owner travels through awaits in an `AsyncLocalStorage`. The instrumented
 suite runs 3,956 tests like the untouched copy; one test differs. The tests
-executed 906 distinct calls between hono's definitions.
+executed 915 distinct calls between hono's definitions.
 
 Recall is the share of executed calls a graph contains. An edge the tests
 never ran is not wrong, so this measures recall only. Every graph is mapped
@@ -105,17 +116,17 @@ AST only) and code-review-graph 2.3.9.
 
 Results, `results/recall.json`:
 
-| Graph | All 906 | Functions and methods (759) | Constructors (54) | Getters and setters (93) |
+| Graph | All 915 | Functions and methods (768) | Constructors (54) | Getters and setters (93) |
 |---|---|---|---|---|
-| Compiler reference | 0.892 | 0.880 | 0.907 | 0.978 |
-| Omnigraph, every reference | 0.891 | 0.876 | 0.907 | 1.000 |
-| Omnigraph, every reference with `Implements` | 0.930 | | | |
-| Omnigraph, call edges only | 0.733 | 0.810 | 0.907 | 0 |
-| codegraph | 0.679 | 0.748 | 0.870 | 0 |
-| Graphify | 0.677 | 0.747 | 0.852 | 0 |
-| GitNexus | 0.642 | 0.705 | 0.870 | 0 |
-| codebase-memory-mcp | 0.626 | 0.685 | 0.870 | 0 |
-| code-review-graph | 0.602 | 0.718 | 0 | 0 |
+| Compiler reference | 0.893 | 0.882 | 0.907 | 0.978 |
+| Omnigraph, every reference | 0.895 | 0.882 | 0.907 | 1.000 |
+| Omnigraph, every reference with `Implements` | 0.934 | | | |
+| Omnigraph, call edges only | 0.779 | 0.865 | 0.907 | 0 |
+| codegraph | 0.680 | 0.749 | 0.870 | 0 |
+| Graphify | 0.679 | 0.749 | 0.852 | 0 |
+| GitNexus | 0.625 | 0.684 | 0.870 | 0 |
+| codebase-memory-mcp | 0.624 | 0.685 | 0.833 | 0 |
+| code-review-graph | 0.597 | 0.711 | 0 | 0 |
 
 "Every reference" is what the cookbook's reads on Omnigraph answer: `callers`,
 `callees` and `impact` follow every `References` edge and report `call` as a column, not
@@ -124,7 +135,7 @@ a filter. "Call edges only" keeps the edges whose `call` is true. "With
 member also reaches the implementations the graph records.
 
 The tools record calls, so the like-for-like column is functions and
-methods, where Omnigraph's call edges find 0.810 and its references 0.876.
+methods, where Omnigraph's call edges find 0.865 and its references 0.882.
 Getter calls are property reads: only a graph of references contains them. A
 graph of every reference also holds more edges than a call graph, and this
 benchmark does not count the edges the tests never ran.
@@ -132,11 +143,11 @@ benchmark does not count the edges the tests never ran.
 ### Where the difference comes from
 
 Two things separate Omnigraph from the tools, and they are of different
-kinds. The first is what is recorded. Omnigraph's references contain 807
-executed calls and its call edges 664; the 143 between them are 93 getter
-calls, which run when a property is read, and 50 calls to functions the code
-passes as values. That is most of the gap between 0.891 and the tools' best,
-0.679, and it is a choice of what to record more than better extraction.
+kinds. The first is what is recorded. Omnigraph's references contain 819
+executed calls and its call edges 713; the 106 between them are 93 getter
+calls, which run when a property is read, and 13 calls to functions the code
+passes as values. That is half of the gap between 0.895 and the tools' best,
+0.680, and it is a choice of what to record more than better extraction.
 
 The second is resolution. The tools find definitions by name; the graph
 loaded into Omnigraph comes from the type checker, through scip-typescript.
@@ -145,19 +156,19 @@ Recall on calls to functions and methods, from `functions_by_call_shape` in
 
 | Callee | Executed | Omnigraph calls | codegraph | Graphify | GitNexus | codebase-memory-mcp | code-review-graph |
 |---|---|---|---|---|---|---|---|
-| Top-level function | 565 | 0.888 | 0.842 | 0.881 | 0.827 | 0.850 | 0.828 |
-| Class member | 194 | 0.582 | 0.474 | 0.356 | 0.351 | 0.206 | 0.397 |
-| Name defined once | 504 | 0.929 | 0.865 | 0.919 | 0.849 | 0.863 | 0.855 |
-| Name defined 4 or more times | 125 | 0.496 | 0.424 | 0.288 | 0.288 | 0.192 | 0.264 |
+| Top-level function | 569 | 0.896 | 0.842 | 0.880 | 0.810 | 0.847 | 0.824 |
+| Class member | 199 | 0.774 | 0.482 | 0.372 | 0.322 | 0.221 | 0.387 |
+| Name defined once | 513 | 0.955 | 0.864 | 0.918 | 0.823 | 0.860 | 0.842 |
+| Name defined 4 or more times | 125 | 0.640 | 0.424 | 0.288 | 0.272 | 0.192 | 0.264 |
 
 Where a name identifies its definition, the tools come close: Graphify is
-within a point of Omnigraph. The gap opens where it does not: a method
+within two to four points of Omnigraph. The gap opens where it does not: a method
 call such as `c.req.header()` resolves to `HonoRequest.header` only if the
 type of `c.req` is known, and hono defines `header` in several places. Of
 the calls to a shared class-member name each tool missed, it recorded 14 to
 26 as the caller calling another definition of that name.
 
-The tools find 26 executed calls Omnigraph lacks, 16 of them codegraph's.
+The tools find 23 executed calls Omnigraph lacks, 13 of them codegraph's.
 Most are calls dispatched to an override, which matching by name catches by
 linking every method of that name.
 
@@ -202,23 +213,36 @@ an interface; the overrides a call dispatches to; the users of a property; the
 constructions of a class; and the callers through any chain of calls. Keys
 come from the compiler reference and were checked against the source. Two
 were corrected after the runs, and their `note` says why: one call is reached
-through a table of functions, which the reference does not record, and one
+through a table of functions, which the reference records as no call, and one
 definition only assigns the property, which "use" may or may not include. An
-answer is the JSON list on a session's last `ANSWER:` line, mapped to
-definitions as the traces are and graded by F1.
+answer is the JSON list on a session's last `ANSWER:` line, mapped to the
+definitions the answer format names (a getter or field to its class, a
+constant that holds no function to its file) and graded by F1.
 
-Results, 168 sessions, `results/agent.json`. Medians per session; input
-tokens include every cached read:
+Results, `results/agent.json`. The seven arms ran 168 sessions on
+2026-11-16. After the converter fix that this benchmark prompted (see
+[PR diff](#pr-diff)), the Omnigraph arm was rebuilt and ran its 24 sessions
+again on 2026-11-17; `results/agent.json` holds that rerun, and the first run's
+Omnigraph row is kept below for comparison. Medians per session; input tokens
+include every cached read:
 
 | Arm | Exact answers | Cost | Wall time | Input tokens | Output tokens | Turns | Calls to its tool |
 |---|---|---|---|---|---|---|---|
 | No code graph | 24 of 24 | $0.100 | 16.1 s | 198k | 1,926 | 6 | |
-| Omnigraph | 21 of 24 | $0.059 | 11.7 s | 187k | 1,018 | 5 | 52% |
+| Omnigraph, rerun after the fix | 24 of 24 | $0.069 | 18.6 s* | 153k | 1,198 | 5 | 48% |
+| Omnigraph, first run | 21 of 24 | $0.059 | 11.7 s | 187k | 1,018 | 5 | 52% |
 | codegraph | 24 of 24 | $0.094 | 17.6 s | 221k | 1,766 | 6 | 0% |
 | Graphify | 21 of 24 | $0.100 | 16.0 s | 165k | 1,866 | 6 | 9% |
 | GitNexus | 22 of 24 | $0.102 | 14.3 s | 207k | 1,368 | 5 | 17% |
 | codebase-memory-mcp | 24 of 24 | $0.114 | 18.1 s | 207k | 2,016 | 6 | 1% |
 | code-review-graph | 24 of 24 | $0.107 | 20.1 s | 225k | 1,931 | 6 | 7% |
+
+\* Not comparable with the other rows. During the rerun the API wrote 69
+output tokens a second, against 111 in the first run. Per question the rerun
+took within two turns of the first run and wrote about as many output tokens,
+but spent 13% to 109% longer waiting on the API. Cost moves with prompt caching too: a session that writes 25k tokens to
+the cache costs about $0.13, one that writes 4k about $0.05, for the same
+answer, and with three sessions per question the median can land on either.
 
 The same sessions paired with no code graph, question by question: the
 geometric mean over the eight questions of the ratio of the two arms' medians,
@@ -226,7 +250,8 @@ and on how many questions the arm spent less:
 
 | Arm | Cost | Wall time | Output tokens | Turns |
 |---|---|---|---|---|
-| Omnigraph | 0.77×, 6 of 8 | 0.88×, 4 of 8 | 0.70×, 6 of 8 | 0.86×, 5 of 8 |
+| Omnigraph, rerun after the fix | 0.84×, 5 of 8 | not comparable | 0.75×, 5 of 8 | 0.95×, 4 of 8 |
+| Omnigraph, first run | 0.77×, 6 of 8 | 0.88×, 4 of 8 | 0.70×, 6 of 8 | 0.86×, 5 of 8 |
 | codegraph | 1.01×, 5 of 8 | 1.02×, 4 of 8 | 0.91×, 6 of 8 | 0.98×, 2 of 8 |
 | Graphify | 1.01×, 4 of 8 | 1.03×, 3 of 8 | 0.99×, 5 of 8 | 0.94×, 4 of 8 |
 | GitNexus | 0.97×, 4 of 8 | 1.01×, 3 of 8 | 0.81×, 6 of 8 | 0.87×, 4 of 8 |
@@ -236,13 +261,13 @@ and on how many questions the arm spent less:
 Input tokens are mostly the same context read again on every turn, cheap from
 the cache; cost follows what each turn adds and what the model writes. A `cg`
 read returns the definitions as one table, where a text search returns lines
-to read, so an Omnigraph session adds a median 3.8k tokens to its context
-against 9.8k to 14.4k for the other arms. The saving is largest where names
-repeat: for the callers of `HonoRequest.header` an Omnigraph session costs
-$0.042 and takes 14.6 s, against $0.161 and 34.2 s without a graph, and for
-the users of `HonoRequest.path` $0.048 and 12.7 s against $0.094 and 20.9 s.
-On questions one text search answers, such as the classes implementing
-`Router`, it costs a little more.
+to read, so in the first run an Omnigraph session added a median 3.8k tokens
+to its context against 9.8k to 14.4k for the other arms. The saving was
+largest where names repeat: for the callers of `HonoRequest.header` an
+Omnigraph session cost $0.042 and took 14.6 s, against $0.161 and 34.2 s
+without a graph, and for the users of `HonoRequest.path` $0.048 and 12.7 s
+against $0.094 and 20.9 s. On questions one text search answers, such as the
+classes implementing `Router`, it cost a little more.
 
 A tool also costs context before the question: a session without a graph
 starts at 36.2k tokens, and the tools add 0.4k (Omnigraph), 0.6k (Graphify),
@@ -255,20 +280,25 @@ adds context to every prompt, which needs no call; the context it gave for
 `header` counted 2 callers of `HonoRequest.header` and 14 of `Context.header`,
 which matching names produces, and its agents searched to check.
 
-Omnigraph's three inexact answers are the three sessions of the transitive
-question: `detectLanguage` calls `detectFromCookie` through a table of
-functions, which the compiler's references do not record as a call, so the
-agents that followed the graph stopped short of `detectLanguage` and
-`languageDetector`. Agents that read the code found both. Graphify and GitNexus
-missed them in two of three sessions, and one Graphify session missed
-`serveStatic`'s chained `header` call.
+In the first run, Omnigraph's three inexact answers were the three sessions
+of the transitive question: `detectLanguage` calls `detectFromCookie` through
+the `detectors` table, the reference from the table to `detectFromCookie`
+belonged to the module, and `impact` stopped after three hops on a five-hop
+chain, so the agents that followed the graph stopped short of `detectLanguage`
+and `languageDetector`. Agents that read the code found both. The converter
+now gives the table its own references and `impact` follows sixteen hops; in
+the rerun all three sessions answered exactly, each running `impact` and then
+reading `language.ts` once to rule out `validateOptions`, which reads the
+table's keys, and the `Detectors` type. Graphify and GitNexus missed the two
+in two of three sessions, and one Graphify session missed `serveStatic`'s
+chained `header` call.
 
 Each tool's first index of a fresh checkout, median of three, from
 `index_seconds_fresh` in `work/agent/ARM/setup.json`:
 
 | Arm | Index time | Three runs |
 |---|---|---|
-| Omnigraph: scip-typescript, convert and load | 2.0 s | 2.3, 1.9, 2.0 |
+| Omnigraph: scip-typescript, convert and load | 2.3 s | 2.2, 2.3, 2.3 |
 | codebase-memory-mcp | 2.0 s | 2.0, 1.7, 2.0 |
 | codegraph | 3.9 s | 4.2, 3.9, 3.9 |
 | Graphify, without its LLM extraction | 4.3 s | 4.3, 4.0, 4.5 |
