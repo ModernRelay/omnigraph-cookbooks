@@ -277,5 +277,6 @@ qualifies the committed files.
   `scip_index.py`, the converter's tests in `tests/`, and the locked indexer.
 - `cluster.yaml`, `policies/` — the deployment: graph `code`, roles, the
   branch-only indexer.
+- `bench/` — the [benchmarks](#benchmarks): scripts, the pinned sample and results.
 - `omnigraph-config.example.yaml` — read aliases; merge into
   `$OMNIGRAPH_HOME/config.yaml`.

@@ -14,7 +14,8 @@ The cookbook resolves references through scip-typescript, which runs the
 TypeScript compiler. A compiler-built reference therefore cannot test the
 cookbook's resolution, only its conversion and diffs: the PR-diff benchmark
 uses one for that. The execution-recall benchmark's truth comes from running
-code, not from the compiler, so it can compare the cookbook with other tools.
+code, not from the compiler, so it can compare Omnigraph, loaded with this
+cookbook's graph, with other tools.
 
 ## Requirements
 
@@ -104,41 +105,42 @@ Results, `results/recall.json`:
 | Graph | All 906 | Functions and methods (759) | Constructors (54) | Getters and setters (93) |
 |---|---|---|---|---|
 | Compiler reference | 0.892 | 0.880 | 0.907 | 0.978 |
-| Cookbook, every reference | 0.891 | 0.876 | 0.907 | 1.000 |
-| Cookbook, every reference with `Implements` | 0.930 | | | |
-| Cookbook, call edges only | 0.733 | 0.810 | 0.907 | 0 |
+| Omnigraph, every reference | 0.891 | 0.876 | 0.907 | 1.000 |
+| Omnigraph, every reference with `Implements` | 0.930 | | | |
+| Omnigraph, call edges only | 0.733 | 0.810 | 0.907 | 0 |
 | codegraph | 0.679 | 0.748 | 0.870 | 0 |
 | Graphify | 0.677 | 0.747 | 0.852 | 0 |
 | GitNexus | 0.642 | 0.705 | 0.870 | 0 |
 | codebase-memory-mcp | 0.626 | 0.685 | 0.870 | 0 |
 | code-review-graph | 0.602 | 0.718 | 0 | 0 |
 
-"Every reference" is the cookbook as its reads answer: `callers`, `callees`
-and `impact` follow every `References` edge and report `call` as a column, not
+"Every reference" is what the cookbook's reads on Omnigraph answer: `callers`,
+`callees` and `impact` follow every `References` edge and report `call` as a column, not
 a filter. "Call edges only" keeps the edges whose `call` is true. "With
 `Implements`" adds a second read, `implementers`: a call through an interface
 member also reaches the implementations the graph records.
 
 The tools record calls, so the like-for-like column is functions and
-methods, where the cookbook's call edges find 0.810 and its references 0.876.
+methods, where Omnigraph's call edges find 0.810 and its references 0.876.
 Getter calls are property reads: only a graph of references contains them. A
 graph of every reference also holds more edges than a call graph, and this
 benchmark does not count the edges the tests never ran.
 
 ### Where the difference comes from
 
-Two things separate the cookbook from the tools, and they are of different
-kinds. The first is what is recorded. The cookbook's references contain 807
+Two things separate Omnigraph from the tools, and they are of different
+kinds. The first is what is recorded. Omnigraph's references contain 807
 executed calls and its call edges 664; the 143 between them are 93 getter
 calls, which run when a property is read, and 50 calls to functions the code
 passes as values. That is most of the gap between 0.891 and the tools' best,
 0.679, and it is a choice of what to record more than better extraction.
 
-The second is resolution. The tools find definitions by name, the cookbook
-through the type checker. Recall on calls to functions and methods, from
-`functions_by_call_shape` in `results/recall.json`:
+The second is resolution. The tools find definitions by name; the graph
+loaded into Omnigraph comes from the type checker, through scip-typescript.
+Recall on calls to functions and methods, from `functions_by_call_shape` in
+`results/recall.json`:
 
-| Callee | Executed | Cookbook calls | codegraph | Graphify | GitNexus | codebase-memory-mcp | code-review-graph |
+| Callee | Executed | Omnigraph calls | codegraph | Graphify | GitNexus | codebase-memory-mcp | code-review-graph |
 |---|---|---|---|---|---|---|---|
 | Top-level function | 565 | 0.888 | 0.842 | 0.881 | 0.827 | 0.850 | 0.828 |
 | Class member | 194 | 0.582 | 0.474 | 0.356 | 0.351 | 0.206 | 0.397 |
@@ -146,13 +148,13 @@ through the type checker. Recall on calls to functions and methods, from
 | Name defined 4 or more times | 125 | 0.496 | 0.424 | 0.288 | 0.288 | 0.192 | 0.264 |
 
 Where a name identifies its definition, the tools come close: Graphify is
-within a point of the cookbook. The gap opens where it does not: a method
+within a point of Omnigraph. The gap opens where it does not: a method
 call such as `c.req.header()` resolves to `HonoRequest.header` only if the
 type of `c.req` is known, and hono defines `header` in several places. Of
 the calls to a shared class-member name each tool missed, it recorded 14 to
 26 as the caller calling another definition of that name.
 
-The tools find 26 executed calls the cookbook lacks, 16 of them codegraph's.
+The tools find 26 executed calls Omnigraph lacks, 16 of them codegraph's.
 Most are calls dispatched to an override, which matching by name catches by
 linking every method of that name.
 
@@ -160,7 +162,7 @@ The compiler reference misses 98 executed calls, about one in nine. 47 are
 function values called indirectly: a function passed as an argument, stored
 in a property or returned, then called by code that never names it. 44 are
 calls dispatched to an override, such as `this.getHeaders()` in an abstract
-class running a subclass's method; the cookbook's `Implements` edges recover
+class running a subclass's method; Omnigraph's `Implements` edges recover
 most of these. The other seven reach constructors and getters.
 
 ## Limits
