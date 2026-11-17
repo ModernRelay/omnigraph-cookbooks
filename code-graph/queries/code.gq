@@ -1,5 +1,9 @@
 // code-graph stored reads. Writes are loads of generated revisions, never
 // hand-written mutations: see README.md#index-a-pull-request.
+//
+// Every list read stops at its limit. cg reports a read that returns exactly
+// its limit as possibly cut (client/cg_cli.py LIMITS, checked against this file
+// by its tests); narrow it with symbols_named_in or a more specific symbol.
 
 query revision() @description("The git revision and indexer behind this graph state.") {
     match {
@@ -15,7 +19,18 @@ query symbols_named($name: String) @description("Symbols with this exact name, a
     }
     return { $s.symbol, $s.kind, $s.path, $l.line }
     order { $s.path asc, $l.line asc }
-    limit 50
+    limit 1000
+}
+
+query symbols_named_in($name: String, $path: String) @description("Symbols with this exact name in files whose path starts with the given prefix. Use it when a name has many definitions.") {
+    match {
+        $s: Symbol { name: $name }
+        $s.path starts_with $path
+        $s definedAt $l
+    }
+    return { $s.symbol, $s.kind, $s.path, $l.line }
+    order { $s.path asc, $l.line asc }
+    limit 1000
 }
 
 query file_symbols($path: String) @description("Every symbol a file defines, in source order.") {
@@ -25,7 +40,7 @@ query file_symbols($path: String) @description("Every symbol a file defines, in 
     }
     return { $s.symbol, $s.name, $s.kind, $l.line, $l.end_line }
     order { $l.line asc }
-    limit 500
+    limit 2000
 }
 
 query members($symbol: String) @description("Symbols declared directly inside a module, class or interface.") {
@@ -36,7 +51,7 @@ query members($symbol: String) @description("Symbols declared directly inside a 
     }
     return { $m.symbol, $m.name, $m.kind, $l.line }
     order { $l.line asc }
-    limit 500
+    limit 2000
 }
 
 query callers($symbol: String) @description("Definitions whose code names the symbol, whether one of those references is a call, and how many there are.") {
@@ -46,7 +61,7 @@ query callers($symbol: String) @description("Definitions whose code names the sy
     }
     return { $c.symbol, $c.kind, $c.path, $r.call, $r.sites }
     order { $c.symbol asc }
-    limit 200
+    limit 2000
 }
 
 query callees($symbol: String) @description("What the symbol's code names: what it calls, and the types and values it uses.") {
@@ -56,7 +71,7 @@ query callees($symbol: String) @description("What the symbol's code names: what 
     }
     return { $t.symbol, $t.kind, $t.path, $r.call, $r.sites }
     order { $t.symbol asc }
-    limit 200
+    limit 2000
 }
 
 query impact($symbol: String) @description("Every definition that reaches the symbol through a chain of up to sixteen references: what a change to it can break.") {
@@ -66,7 +81,7 @@ query impact($symbol: String) @description("Every definition that reaches the sy
     }
     return distinct { $c.symbol, $c.kind, $c.path }
     order { $c.symbol asc }
-    limit 500
+    limit 5000
 }
 
 query implementers($symbol: String) @description("Class members that implement the given interface member.") {
@@ -95,5 +110,5 @@ query unreferenced_callables() @description("Functions and methods nothing in th
     }
     return { $s.symbol, $s.kind, $s.path }
     order { $s.symbol asc }
-    limit 500
+    limit 2000
 }
