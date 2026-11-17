@@ -260,7 +260,7 @@ qualifies the committed files.
   lists `detectors`, not the code that calls through it. Telling a call
   through the table from a read of its keys would need the type checker's
   data flow, which SCIP does not record.
-- **`impact` follows at most sixteen references.** OmniGraph requires a finite
+- **`impact` follows at most sixteen references.** Omnigraph requires a finite
   bound on a multi-hop traversal. The longest chain of references to a
   callable in hono's `src/` is 13; a deeper chain is cut at sixteen.
 - **Members of union types are not indexed.** scip-typescript gives no symbol
