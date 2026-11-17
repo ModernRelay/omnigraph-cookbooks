@@ -1,0 +1,37 @@
+{
+  "order": 1,
+  "name": "Company brain",
+  "category": "Company",
+  "blurb": "A company's people, projects, claims, decisions and commitments, each tied to the exact words it rests on, shared by its people and agents.",
+  "sample": "Lanternworks, a fictional software company",
+  "questions": [
+    {
+      "q": "Which decisions are current, project by project?",
+      "query": "current_decisions"
+    },
+    {
+      "q": "Which decisions rest on a claim that someone has since contradicted?",
+      "query": "decisions_at_risk"
+    },
+    {
+      "q": "What does this decision rest on, and in whose words?",
+      "query": "decision_evidence"
+    },
+    {
+      "q": "What did this meeting commit people to?",
+      "query": "actions_from_source"
+    }
+  ],
+  "search": {
+    "title": "Company brain context graph template",
+    "keywords": [
+      "company brain",
+      "context graph",
+      "world model",
+      "company canon",
+      "llm wiki",
+      "knowledge graph",
+      "ontology"
+    ]
+  }
+}

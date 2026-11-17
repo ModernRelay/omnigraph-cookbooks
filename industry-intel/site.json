@@ -1,0 +1,33 @@
+{
+  "order": 5,
+  "name": "Industry intelligence",
+  "category": "Research",
+  "blurb": "Signals, patterns and insights about an industry, linked to the products and technologies they concern, with hybrid search over the sources.",
+  "sample": "The AI infrastructure market, from public sources",
+  "questions": [
+    {
+      "q": "Which patterns does new evidence contradict?",
+      "query": "contested_patterns"
+    },
+    {
+      "q": "Which patterns are gathering signals fastest?",
+      "query": "pattern_momentum"
+    },
+    {
+      "q": "What do the sources say about a question?",
+      "query": "hybrid_chunks"
+    },
+    {
+      "q": "What came in most recently?",
+      "query": "recent_signals"
+    }
+  ],
+  "search": {
+    "title": "Industry intelligence knowledge graph template",
+    "keywords": [
+      "knowledge graph",
+      "graphrag",
+      "ontology"
+    ]
+  }
+}
