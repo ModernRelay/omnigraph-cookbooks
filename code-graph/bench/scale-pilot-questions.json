@@ -1,0 +1,237 @@
+{
+  "suite": "vscode",
+  "revision": "5d4d801304f38e23dcbbae55b715d2333703e7a5",
+  "previous": "22c21f7d4a432914b19c090c9dcfa0639115cf06",
+  "releases": [
+    "1.145.0",
+    "1.146.0"
+  ],
+  "seed": 20261117,
+  "answer_format": "End your reply with one line that starts with ANSWER: followed by a JSON array of strings. Name each definition as path:Name for a top-level function, class, interface or constant, and as path:Class.member for a member of a class, with the path relative to the repository root, for example src/vs/platform/files/common/fileService.ts:FileService.readFile. For code that belongs to no named function, method or class, give the file path alone. Leave out test code: files under a test/ directory and files whose names end in .test.ts. Do not change any file.",
+  "families": {
+    "shared-name": {
+      "candidates": 673,
+      "rejected_by_source_check": 0,
+      "picked": 4
+    },
+    "dispatch": {
+      "candidates": 411,
+      "rejected_by_source_check": 3,
+      "picked": 4
+    },
+    "transitive": {
+      "candidates": 4503,
+      "rejected_by_source_check": 1,
+      "picked": 4
+    },
+    "construction": {
+      "candidates": 107,
+      "rejected_by_source_check": 0,
+      "picked": 4
+    },
+    "release": {
+      "candidates": 446,
+      "rejected_by_source_check": 0,
+      "picked": 4
+    },
+    "control": {
+      "candidates": 7001,
+      "rejected_by_source_check": 0,
+      "picked": 4
+    }
+  },
+  "questions": [
+    {
+      "id": "shared-name-1",
+      "family": "shared-name",
+      "question": "Which functions and methods in src/ call the getId method of IContentWidget, the interface in src/vs/editor/browser/editorBrowser.ts?",
+      "answer": [
+        "src/vs/editor/browser/viewParts/contentWidgets/contentWidgets.ts:ViewContentWidgets.removeWidget",
+        "src/vs/editor/browser/viewParts/contentWidgets/contentWidgets.ts:ViewContentWidgets.setWidgetPosition",
+        "src/vs/editor/browser/viewParts/contentWidgets/contentWidgets.ts:Widget.constructor",
+        "src/vs/editor/browser/widget/codeEditor/codeEditorWidget.ts:CodeEditorWidget.addContentWidget",
+        "src/vs/editor/browser/widget/codeEditor/codeEditorWidget.ts:CodeEditorWidget.layoutContentWidget",
+        "src/vs/editor/browser/widget/codeEditor/codeEditorWidget.ts:CodeEditorWidget.removeContentWidget"
+      ],
+      "target": "src/vs/editor/browser/editorBrowser.ts:IContentWidget.getId",
+      "grep_lines": 580,
+      "grep_pattern": "\\bgetId\\s*\\(",
+      "pilot_answer": [
+        "src/vs/editor/browser/viewParts/contentWidgets/contentWidgets.ts:ViewContentWidgets.removeWidget",
+        "src/vs/editor/browser/viewParts/contentWidgets/contentWidgets.ts:ViewContentWidgets.setWidgetPosition",
+        "src/vs/editor/browser/viewParts/contentWidgets/contentWidgets.ts:Widget.constructor",
+        "src/vs/editor/browser/widget/codeEditor/codeEditorWidget.ts:CodeEditorWidget.addContentWidget",
+        "src/vs/editor/browser/widget/codeEditor/codeEditorWidget.ts:CodeEditorWidget.layoutContentWidget",
+        "src/vs/editor/browser/widget/codeEditor/codeEditorWidget.ts:CodeEditorWidget.removeContentWidget"
+      ]
+    },
+    {
+      "id": "dispatch-1",
+      "family": "dispatch",
+      "question": "Which methods in src/ implement or override the update method of IPeekOutputRenderer, the interface in src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts, directly or through another class or interface? List only methods that have a body.",
+      "answer": [
+        "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:DiffContentProvider.update",
+        "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:MarkdownTestMessagePeek.update",
+        "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:PlainTextMessagePeek.update",
+        "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:TerminalMessagePeek.update"
+      ],
+      "target": "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:IPeekOutputRenderer.update",
+      "grep_lines": 1559,
+      "grep_pattern": "\\bupdate\\s*\\(",
+      "pilot_answer": [
+        "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:DiffContentProvider.update",
+        "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:MarkdownTestMessagePeek.update",
+        "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:PlainTextMessagePeek.update",
+        "src/vs/workbench/contrib/testing/browser/testResultsView/testResultsOutput.ts:TerminalMessagePeek.update"
+      ]
+    },
+    {
+      "id": "transitive-1",
+      "family": "transitive",
+      "question": "Which functions and methods in src/ call the _publishAgentInfos method of AgentSideEffects, the class in src/vs/platform/agentHost/node/agentSideEffects.ts, either directly or through any chain of other calls?",
+      "answer": [
+        "src/vs/platform/agentHost/node/agentHostBootstrap.ts:createAgentHostRuntime",
+        "src/vs/platform/agentHost/node/agentHostMain.ts",
+        "src/vs/platform/agentHost/node/agentHostMain.ts:startAgentHost",
+        "src/vs/platform/agentHost/node/agentHostServerMain.ts",
+        "src/vs/platform/agentHost/node/agentHostServerMain.ts:main",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._cancelAgentMergePrompt",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._cancelAutomationSession",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._createSessionServerToolAccessor",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._dispatchActionNow",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._dispatchServerToolAction",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._initializeProvider",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._resumeAutomationTurn",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._startAgentMergePrompt",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService.archiveSession",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService.constructor",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService.dispatchAction",
+        "src/vs/platform/agentHost/node/agentServiceComposition.ts:createAgentServiceComposition",
+        "src/vs/platform/agentHost/node/agentServiceComposition.ts:createSessionLifecycleAccessor",
+        "src/vs/platform/agentHost/node/agentSideEffects.ts:AgentSideEffects.constructor",
+        "src/vs/platform/agentHost/node/agentSideEffects.ts:AgentSideEffects.handleAction",
+        "src/vs/platform/agentHost/node/agentSideEffects.ts:AgentSideEffects.registerProgressListener",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._dispatchClientAction",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._dispatchClientActionNow",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleAuthorizedRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleClientNotification",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleDispatchActionRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleLegacyNotificationRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleNewConnection",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleReconnect",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._restoreReconnectSubscriptions",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._serveStateWindow",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler.constructor"
+      ],
+      "target": "src/vs/platform/agentHost/node/agentSideEffects.ts:AgentSideEffects._publishAgentInfos",
+      "grep_lines": 4,
+      "grep_pattern": "\\b_publishAgentInfos\\s*\\(",
+      "depth": 7,
+      "pilot_answer": [
+        "src/vs/platform/agentHost/node/agentHostBootstrap.ts:createAgentHostRuntime",
+        "src/vs/platform/agentHost/node/agentHostMain.ts",
+        "src/vs/platform/agentHost/node/agentHostMain.ts:startAgentHost",
+        "src/vs/platform/agentHost/node/agentHostServerMain.ts",
+        "src/vs/platform/agentHost/node/agentHostServerMain.ts:main",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._cancelAgentMergePrompt",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._cancelAutomationSession",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._createSessionServerToolAccessor",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._dispatchActionNow",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._dispatchServerToolAction",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._initializeProvider",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._resumeAutomationTurn",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._startAgentMergePrompt",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService.archiveSession",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService.constructor",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService.dispatchAction",
+        "src/vs/platform/agentHost/node/agentServiceComposition.ts:createAgentServiceComposition",
+        "src/vs/platform/agentHost/node/agentServiceComposition.ts:createSessionLifecycleAccessor",
+        "src/vs/platform/agentHost/node/agentSideEffects.ts:AgentSideEffects.constructor",
+        "src/vs/platform/agentHost/node/agentSideEffects.ts:AgentSideEffects.handleAction",
+        "src/vs/platform/agentHost/node/agentSideEffects.ts:AgentSideEffects.registerProgressListener"
+      ],
+      "note": "The key the pilot ran with had 21 entries; the current rules give 34."
+    },
+    {
+      "id": "construction-1",
+      "family": "construction",
+      "question": "Which functions and methods in src/ construct a LocalModelServingError, the class in src/vs/platform/agentHost/node/copilot/localModelBridge/shim/servingAccess.ts?",
+      "answer": [
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._acquireLock",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._confirmUnconfirmedGone",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._doStart",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._spawnUntilHealthy",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._stopOrThrow",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._throwIfAborted",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor.start",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:errorOf",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/servingAccessImpl.ts:busyTimeoutError",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/servingAccessImpl.ts:loadTimeoutError",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/servingAccessImpl.ts:notActiveError",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/shimLocalModelProvider.ts:ShimLocalModelProvider._buildLaunchPlan",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/shimLocalModelProvider.ts:ShimLocalModelProvider._startActive",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/shimLocalModelProvider.ts:notActiveError"
+      ],
+      "target": "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/servingAccess.ts:LocalModelServingError",
+      "grep_lines": 37,
+      "grep_pattern": "\\bnew\\s+LocalModelServingError\\b",
+      "pilot_answer": [
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._acquireLock",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._confirmUnconfirmedGone",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._doStart",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._spawnUntilHealthy",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._stopOrThrow",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor._throwIfAborted",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:ServerSupervisor.start",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/serverSupervisor.ts:errorOf",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/servingAccessImpl.ts:busyTimeoutError",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/servingAccessImpl.ts:loadTimeoutError",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/servingAccessImpl.ts:notActiveError",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/shimLocalModelProvider.ts:ShimLocalModelProvider._buildLaunchPlan",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/shimLocalModelProvider.ts:ShimLocalModelProvider._startActive",
+        "src/vs/platform/agentHost/node/copilot/localModelBridge/shim/shimLocalModelProvider.ts:notActiveError"
+      ]
+    },
+    {
+      "id": "release-1",
+      "family": "release",
+      "question": "Which functions and methods in src/ call the setModel method of ChatWidget, the class in src/vs/workbench/contrib/chat/browser/widget/chatWidget.ts in release 1.146.0 but did not call it in release 1.145.0? The repository is at 1.146.0; the git tag 1.145.0 is the previous release.",
+      "answer": [
+        "src/vs/workbench/contrib/sessions/browser/chat/chatView.ts:ChatView._clearCurrentChat",
+        "src/vs/workbench/contrib/sessions/browser/chat/chatView.ts:ChatView._loadChat",
+        "src/vs/workbench/contrib/sessions/browser/chat/chatView.ts:ChatView._showPreparationInput",
+        "src/vs/workbench/contrib/sessions/browser/chat/sharedChatInputComposer.ts:SharedChatInputComposer._bindModel"
+      ],
+      "target": "src/vs/workbench/contrib/chat/browser/widget/chatWidget.ts:ChatWidget.setModel",
+      "grep_lines": 157,
+      "grep_pattern": "\\bsetModel\\s*\\(",
+      "pilot_answer": [
+        "src/vs/workbench/contrib/sessions/browser/chat/chatView.ts:ChatView._clearCurrentChat",
+        "src/vs/workbench/contrib/sessions/browser/chat/chatView.ts:ChatView._loadChat",
+        "src/vs/workbench/contrib/sessions/browser/chat/chatView.ts:ChatView._showPreparationInput",
+        "src/vs/workbench/contrib/sessions/browser/chat/sharedChatInputComposer.ts:SharedChatInputComposer._bindModel"
+      ]
+    },
+    {
+      "id": "control-1",
+      "family": "control",
+      "question": "Which functions and methods in src/ call the _toResourceAttachment method of AgentHostSessionHandler, the class in src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionHandler.ts?",
+      "answer": [
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionHandler.ts:AgentHostSessionHandler._convertVariableToAttachment",
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionHandler.ts:AgentHostSessionHandler._toElementImageAttachment",
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionHandler.ts:AgentHostSessionHandler._toImageAttachment"
+      ],
+      "target": "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionHandler.ts:AgentHostSessionHandler._toResourceAttachment",
+      "grep_lines": 7,
+      "grep_pattern": "\\b_toResourceAttachment\\s*\\(",
+      "pilot_answer": [
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionHandler.ts:AgentHostSessionHandler._convertVariableToAttachment",
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionHandler.ts:AgentHostSessionHandler._toElementImageAttachment",
+        "src/vs/workbench/contrib/chat/browser/agentSessions/agentHost/agentHostSessionHandler.ts:AgentHostSessionHandler._toImageAttachment"
+      ]
+    }
+  ],
+  "note": "The pilot's questions, from be3e719, with keys from the current rules."
+}
