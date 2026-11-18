@@ -4,6 +4,7 @@
     python3 code-graph/bench/scale.py fetch       # both releases as commits of one git repository
     python3 code-graph/bench/scale.py build       # index, convert, load into Omnigraph; compiler references
     python3 code-graph/bench/scale.py questions   # pick the questions by rule, write their keys, check them
+    python3 code-graph/bench/scale.py regrade-pilot   # the pilot's answers against the current rules' keys
     python3 code-graph/bench/agent.py --suite vscode setup|run|score ...
 
 Everything is written under work/scale/, which git ignores; a step whose output
@@ -16,9 +17,9 @@ from __future__ import annotations
 
 import argparse
 import collections
+import hashlib
 import json
 import os
-import random
 import re
 import shutil
 import subprocess
@@ -186,6 +187,11 @@ class Release:
     def __init__(self, tag: str):
         self.nodes, edges = load_reference(WORK / f"ref-{tag}.json")
         self.implementers = load_implements(WORK / f"ref-{tag}.json")
+        # member -> the members it implements or overrides, at every level
+        self.overrides = collections.defaultdict(set)
+        for target, members in self.implementers.items():
+            for m in members:
+                self.overrides[m].add(target)
         self.lift = owner_lift(self.nodes)
         self.callers = collections.defaultdict(set)
         for (a, b), e in edges.items():
@@ -197,17 +203,33 @@ class Release:
     def direct(self, target: str) -> set[str]:
         return {self.lift(a) for a in self.callers.get(target, ())} - {self.lift(target)}
 
+    def runs_for(self, member: str) -> set[str]:
+        """The member and every member a call to which can run it: those it
+        implements or overrides, at every level."""
+        out, todo = {member}, [member]
+        while todo:
+            for t in self.overrides.get(todo.pop(), ()):
+                if t not in out:
+                    out.add(t)
+                    todo.append(t)
+        return out
+
     def transitive(self, target: str, cap: int) -> tuple[set[str], int, set[str]]:
-        """Every definition reaching the target through calls, the deepest hop,
-        and the chain's own definitions; stops once more than `cap` are found."""
+        """Every definition whose calls can run the target, directly or through
+        a chain, the deepest hop, and the chain's own definitions; stops once
+        more than `cap` are found. A call to an interface or base member can
+        run each method that implements or overrides it, so a chain continues
+        through it: VS Code calls its services through injected interfaces."""
         seen, frontier, depth, found = {target}, [target], 0, set()
         while frontier and len(found) <= cap:
             nxt = []
             for x in frontier:
-                for c in self.callers.get(x, ()):
-                    if c not in seen:
-                        seen.add(c)
-                        nxt.append(c)
+                for called in self.runs_for(x):
+                    seen.add(called)
+                    for c in self.callers.get(called, ()):
+                        if c not in seen:
+                            seen.add(c)
+                            nxt.append(c)
             if not nxt:
                 break
             depth += 1
@@ -338,17 +360,25 @@ def questions(per_family: int):
     fam = candidates(cur, prev)
     picked, report = [], {}
     for order, family in enumerate(("shared-name", "dispatch", "transitive", "construction", "release", "control")):
-        pool = fam.get(family, [])
-        random.Random(SEED + order).shuffle(pool)
-        kept, rejected = [], 0
+        # Ranked by a hash of the seed and the target, so changing a rule
+        # moves only the candidates it admits or refuses, not the others.
+        pool = sorted(fam.get(family, []),
+                      key=lambda it: hashlib.sha256(f"{SEED}:{family}:{it['target']}".encode()).hexdigest())
+        kept, rejected, ambiguous = [], 0, 0
         for item in pool:
             if len(kept) == per_family:
                 break
+            # A call to a method that implements another is also a call to that
+            # one, so "which call X" would have two readings.
+            if family in ("shared-name", "control", "release") and cur.overrides.get(item["target"]):
+                ambiguous += 1
+                continue
             if check(src, cur, family, item):
                 rejected += 1
                 continue
             kept.append(item)
-        report[family] = {"candidates": len(pool), "rejected_by_source_check": rejected, "picked": len(kept)}
+        report[family] = {"candidates": len(pool), "rejected_as_overriding": ambiguous,
+                          "rejected_by_source_check": rejected, "picked": len(kept)}
         for i, item in enumerate(kept, start=1):
             n = cur.nodes[item["target"]]
             text = QUESTION_TEXT[family].format(what=describe(cur.nodes, item["target"]), name=n["name"],
@@ -366,6 +396,60 @@ def questions(per_family: int):
         print(f"{q['id']:<15} {len(q['answer']):>3} answers  {q['grep_lines']:>6} grep lines  {q['question'][:110]}")
 
 
+def key_for(cur: Release, prev: Release, family: str, target: str) -> set[str]:
+    """The answer key the current rules give one question."""
+    if family in ("shared-name", "control"):
+        return cur.direct(target)
+    if family == "release":
+        return cur.direct(target) - prev.direct(target)
+    if family == "transitive":
+        return cur.transitive(target, cap=10**9)[0]
+    if family == "dispatch":
+        return cur.bodies(target)
+    ctor = f"{target}.constructor"
+    return cur.direct(ctor if ctor in cur.nodes else target)
+
+
+PILOT_RUN = "be3e719"  # the commit whose scale-questions.json the pilot ran
+
+
+def regrade_pilot():
+    """Freeze the pilot's six questions with keys from the current rules, and
+    grade each pilot session's answer against them. An answer is rebuilt from
+    what scoring recorded: the old key less what it missed, plus what was wrong."""
+    import agent  # noqa: PLC0415
+    ran = json.loads(subprocess.run(["git", "show", f"{PILOT_RUN}:code-graph/bench/scale-questions.json"],
+                                    cwd=BENCH, capture_output=True, text=True, check=True).stdout)
+    results = json.loads((BENCH / "results" / "agent-scale-pilot.json").read_text())
+    asked = {r["question"] for r in results["runs"]}
+    cur, prev = Release(CURRENT), Release(PREVIOUS)
+    questions = []
+    for q in ran["questions"]:
+        if q["id"] not in asked:
+            continue
+        key = sorted(key_for(cur, prev, q["family"], q["target"]))
+        changed = {"note": f"The key the pilot ran with had {len(q['answer'])} entries; the current rules give "
+                           f"{len(key)}."} if key != q["answer"] else {}
+        questions.append({**q, "answer": key, "pilot_answer": q["answer"], **changed})
+    pilot = {**ran, "questions": questions,
+             "note": f"The pilot's questions, from {PILOT_RUN}, with keys from the current rules."}
+    (BENCH / "scale-pilot-questions.json").write_text(json.dumps(pilot, indent=2) + "\n")
+    keys = {q["id"]: set(q["answer"]) for q in questions}
+    old = {q["id"]: set(q["pilot_answer"]) for q in questions}
+    for r in results["runs"]:
+        got = (old[r["question"]] - set(r["missed"])) | set(r["wrong"])
+        g = agent.grade(sorted(got), keys[r["question"]], {}, lambda x: x)
+        r["regraded"] = {k: g[k] for k in ("precision", "recall", "f1", "exact", "wrong", "missed")}
+    summary = {}
+    for arm in dict.fromkeys(r["arm"] for r in results["runs"]):
+        rs = [r for r in results["runs"] if r["arm"] == arm]
+        summary[arm] = {"exact": sum(r["regraded"]["exact"] for r in rs),
+                        "mean_f1": round(sum(r["regraded"]["f1"] for r in rs) / len(rs), 3), "runs": len(rs)}
+    results["regraded_summary"] = summary
+    (BENCH / "results" / "agent-scale-pilot.json").write_text(json.dumps(results, indent=2) + "\n")
+    print(json.dumps(summary, indent=2))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -373,11 +457,14 @@ def main():
     sub.add_parser("build")
     p = sub.add_parser("questions")
     p.add_argument("--per-family", type=int, default=PER_FAMILY)
+    sub.add_parser("regrade-pilot")
     args = ap.parse_args()
     if args.cmd == "fetch":
         fetch()
     elif args.cmd == "build":
         build()
+    elif args.cmd == "regrade-pilot":
+        regrade_pilot()
     else:
         questions(args.per_family)
 

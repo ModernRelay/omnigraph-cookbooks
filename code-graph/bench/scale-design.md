@@ -169,6 +169,70 @@ run. Estimated full run, four arms:
 With four arms running side by side and about a minute a session, 480 sessions
 take about two hours.
 
+## Pilot results
+
+Run on 2026-11-17 on a dev box (64 GB, Node 24.22.3, Claude Code 2.1.316,
+Sonnet 5.5) by `scale-pilot.sh`, 64 minutes end to end. Results are in
+`results/agent-scale-pilot.json`, the six questions it asked in
+`scale-pilot-questions.json`. One session per question and arm, so these are
+directions, not measurements.
+
+Setup, each tool's first index of the whole repository on the box: Omnigraph
+11 min (scip-typescript 309 s, convert 224 s, load 123 s), codegraph 13 min
+(785 s), Graphify 17 min (1,018 s). All four arms set up within budget, and
+the API's speed stayed between 108 and 156 output tokens a second across the
+24 sessions, so the wall times are comparable.
+
+| Arm | Exact, regraded | Mean F1, regraded | Median cost | Median turns | Median output tokens | Median wall time |
+|---|---|---|---|---|---|---|
+| No code graph | 5 of 6 | 0.952 | $0.158 | 8 | 2,460 | 19.5 s |
+| Omnigraph | 5 of 6 | 0.931 | $0.125 | 5.5 | 1,183 | 22.9 s |
+| codegraph | 5 of 6 | 0.953 | $0.177 | 7 | 2,552 | 43.4 s |
+| Graphify | 5 of 6 | 0.981 | $0.194 | 9.5 | 2,871 | 24.5 s |
+
+Against no graph, question by question: Omnigraph 0.70× the cost (lower on 4
+of 6), 0.53× the output tokens and 0.61× the turns; codegraph 0.99× the cost
+and 1.99× the wall time, its hook adding about 25 s a session; Graphify 1.00×.
+The costs are list prices; box sessions run on the Max plan. The 24 sessions
+came to $5.00 at list price.
+
+What the six questions showed:
+
+- **Five questions every arm answered exactly.** On the release question
+  Omnigraph's agent compared `cg callers` on both branches in 5 turns for
+  $0.109; the others diffed with git in 13 to 20 turns for $0.27 to $0.30. On
+  the shared-name and control questions it also cost least. On the dispatch
+  and construction questions, which one text search answers, it cost about
+  the same or more.
+- **The transitive key was wrong.** All four arms missed `transitive-1`, and
+  the others named `ProtocolServerHandler` methods the key left out. Those
+  are right: `_dispatchClientActionNow` calls `this._agentService.dispatchAction()`
+  on an `IAgentService`, which runs `AgentService.dispatchAction`. The key
+  followed direct calls only. The selector now continues a chain through a
+  member to everything implementing it, which takes the key from 21 to 34
+  definitions; `scale.py regrade-pilot` grades the pilot against it. It also
+  now refuses a direct-call target that implements another member, whose
+  callers have two readings, and ranks candidates by a hash so a rule change
+  moves only the candidates it affects. `scale-questions.json` is the new set
+  for the full run.
+- **Omnigraph is last on that question once regraded** (F1 0.58; Graphify
+  0.89, codegraph 0.72, no graph 0.71), with precision 1.00 and recall 0.41.
+  `impact` follows `References` only. A call through an injected interface
+  references the interface member, and `Implements` points from the
+  implementation to it; GQ 0.14 cannot walk one member of a multi-hop
+  alternation backwards, so `impact` cannot reach the implementation. This is
+  a gap in the cookbook's model, not in the engine. Two ways to close it: a
+  derived edge from an interface member to each implementation, walked as
+  `references | dispatches`, or `Implements` reversed.
+- **Graph use.** Omnigraph's agents ran `cg` for 12 of their 45 tool calls
+  (27%; on hono, about half). codegraph's and Graphify's agents ran their
+  tools for 0 and 1 of 59 and 68. The share counted `git` as a graph tool in
+  the pilot's own summary; `agent.py` no longer does.
+
+Estimate for the full run from the pilot's mean session cost, $0.21: 480
+sessions (24 questions, five sessions, four arms) at about $100 at list
+price, about 2.5 hours of sessions plus an hour of setup.
+
 ## Build order
 
 1. Fix the cookbook problems above, with tests (on #49). Done.
@@ -178,7 +242,7 @@ take about two hours.
 3. `scale.py questions`: the selector and the source check. Done; the pilot's
    six keys were also checked by hand.
 4. Pilot (`scale-pilot.sh`): one session of each family's first question in
-   four arms, 24 sessions, on a dev box with a stable network.
+   four arms, 24 sessions, on a dev box. Done; results above.
 5. Index with the other three tools; record times and failures.
 6. Decide the size of the full run; run, score, write up in `bench/README.md`
    and the cookbook README.

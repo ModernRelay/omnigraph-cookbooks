@@ -266,7 +266,8 @@ def setup_omnigraph(arm: Arm) -> dict:
         if not (arm.repo / ".claude" / "settings.json").exists():
             (arm.repo / ".claude" / "settings.json").write_text("{}\n")
         build = json.loads((SCALE / "build.json").read_text())
-        return {"index_seconds": {k: v for k, v in build.items() if "1.146.0" in k}}
+        # Index, convert and load; the reference builds answer keys, not the graph.
+        return {"index_seconds": {k: v for k, v in build.items() if "1.146.0" in k and not k.startswith("reference")}}
     og, graph = omnigraph_bin(), arm.root / "graph.omni"
     index, rows = arm.root / "index.scip", arm.root / "graph.jsonl"
     indexer = COOKBOOK / "sources" / "indexer" / "node_modules" / ".bin" / "scip-typescript"
@@ -740,7 +741,7 @@ def score(model: str):
                            for fam in families if (fr := [r for r in rs if family[r["question"]] == fam])},
             "median_tool_calls": med(calls),
             "graph_tool_share": round(sum(r["tool_calls"].get("mcp", 0) + sum(
-                v for k, v in r["tool_calls"].items() if k.startswith("Bash:") and k[5:] in Arm(arm).shell())
+                v for k, v in r["tool_calls"].items() if k.startswith("Bash:") and k[5:] in Arm(arm).shell() and k[5:] != "git")
                 for r in rs) / max(1, sum(calls)), 3),
             "per_question": {q: {"mean_f1": round(statistics.mean(r["f1"] for r in rs if r["question"] == q), 3),
                                  "median_input_tokens": med([r["input_tokens"] for r in rs if r["question"] == q]),
