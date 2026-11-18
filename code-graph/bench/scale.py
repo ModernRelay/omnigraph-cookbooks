@@ -19,6 +19,7 @@ import argparse
 import collections
 import hashlib
 import json
+import random
 import os
 import re
 import shutil
@@ -450,6 +451,104 @@ def regrade_pilot():
     print(json.dumps(summary, indent=2))
 
 
+def ranks(xs: list[float]) -> list[float]:
+    order = sorted(range(len(xs)), key=lambda i: xs[i])
+    r = [0.0] * len(xs)
+    i = 0
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and xs[order[j + 1]] == xs[order[i]]:
+            j += 1
+        for k in range(i, j + 1):
+            r[order[k]] = (i + j) / 2 + 1
+        i = j + 1
+    return r
+
+
+def spearman(xs: list[float], ys: list[float]) -> float | None:
+    if len(xs) < 3:
+        return None
+    rx, ry = ranks(xs), ranks(ys)
+    mx, my = sum(rx) / len(rx), sum(ry) / len(ry)
+    cov = sum((a - mx) * (b - my) for a, b in zip(rx, ry))
+    var = (sum((a - mx) ** 2 for a in rx) * sum((b - my) ** 2 for b in ry)) ** 0.5
+    return round(cov / var, 3) if var else None
+
+
+def analyze(results_path: Path, questions_path: Path):
+    """The design's analysis: per family and arm, exactness, F1, cost and
+    turns; against no graph, per question, the ratio of the arms' medians and
+    their geometric mean with a 95% bootstrap interval over questions; and the
+    rank correlation of each question's grep count with Omnigraph's ratio."""
+    import math  # noqa: PLC0415
+    import statistics  # noqa: PLC0415
+
+    results = json.loads(results_path.read_text())
+    spec = json.loads(questions_path.read_text())
+    family = {q["id"]: q["family"] for q in spec["questions"]}
+    grep = {q["id"]: q["grep_lines"] for q in spec["questions"]}
+    runs = [r for r in results["runs"] if r["question"] in family]
+    arms = list(dict.fromkeys(r["arm"] for r in runs))
+    med = statistics.median
+
+    def cell(rs):
+        return {"runs": len(rs), "exact": sum(r["exact"] for r in rs),
+                "mean_f1": round(statistics.mean(r["f1"] for r in rs), 3),
+                "median_cost_usd": round(med(r["cost_usd"] or 0 for r in rs), 4),
+                "median_turns": med(r["turns"] or 0 for r in rs),
+                "median_wall_seconds": round(med(r["wall_seconds"] for r in rs), 1)}
+
+    families = list(dict.fromkeys(family[q["id"]] for q in spec["questions"]))
+    table = {arm: {"all": cell([r for r in runs if r["arm"] == arm]),
+                   **{f: cell(rs) for f in families
+                      if (rs := [r for r in runs if r["arm"] == arm and family[r["question"]] == f])}}
+             for arm in arms}
+
+    def qmed(arm, q, key):
+        xs = [r[key] for r in runs if r["arm"] == arm and r["question"] == q and r[key] is not None]
+        return med(xs) if xs else None
+
+    rng = random.Random(SEED)
+    paired = {}
+    for arm in arms:
+        if arm == "bare":
+            continue
+        paired[arm] = {}
+        for key in ("cost_usd", "turns", "output_tokens", "wall_seconds"):
+            ratios = {q: qmed(arm, q, key) / qmed("bare", q, key) for q in family
+                      if qmed(arm, q, key) and qmed("bare", q, key)}
+            out = {}
+            for scope in ["all", *families]:
+                xs = [math.log(v) for q, v in ratios.items() if scope == "all" or family[q] == scope]
+                if not xs:
+                    continue
+                boot = sorted(statistics.mean(rng.choices(xs, k=len(xs))) for _ in range(2000))
+                out[scope] = {"geomean_ratio": round(math.exp(statistics.mean(xs)), 3),
+                              "ci95": [round(math.exp(boot[50]), 3), round(math.exp(boot[1949]), 3)],
+                              "questions_lower": sum(x < 0 for x in xs), "questions": len(xs)}
+            paired[arm][key] = out
+            if key == "cost_usd":
+                qs = sorted(ratios)
+                paired[arm]["grep_vs_cost_ratio_spearman"] = spearman([grep[q] for q in qs], [ratios[q] for q in qs])
+    analysis = {"results": results_path.name, "questions": questions_path.name, "by_family": table,
+                "vs_bare": paired}
+    out_path = results_path.with_name(results_path.stem + "-analysis.json")
+    out_path.write_text(json.dumps(analysis, indent=2) + "\n")
+    print(f"{'arm':<10} {'family':<13} {'runs':>4} {'exact':>5} {'F1':>6} {'cost':>7} {'turns':>5} {'wall':>6}")
+    for arm, cells in table.items():
+        for f, c in cells.items():
+            print(f"{arm:<10} {f:<13} {c['runs']:>4} {c['exact']:>5} {c['mean_f1']:>6.3f} {c['median_cost_usd']:>7.3f} "
+                  f"{c['median_turns']:>5} {c['median_wall_seconds']:>6}")
+    print("\nagainst no graph: geometric mean of per-question ratios [95% bootstrap interval], questions lower")
+    for arm, keys in paired.items():
+        for key in ("cost_usd", "turns", "output_tokens", "wall_seconds"):
+            a = keys[key]["all"]
+            print(f"{arm:<10} {key:<14} {a['geomean_ratio']:.2f}x [{a['ci95'][0]:.2f}, {a['ci95'][1]:.2f}] "
+                  f"{a['questions_lower']}/{a['questions']}")
+        print(f"{arm:<10} grep lines vs cost ratio, Spearman: {keys['grep_vs_cost_ratio_spearman']}")
+    print(f"\nwrote {out_path}")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -458,6 +557,9 @@ def main():
     p = sub.add_parser("questions")
     p.add_argument("--per-family", type=int, default=PER_FAMILY)
     sub.add_parser("regrade-pilot")
+    p = sub.add_parser("analyze")
+    p.add_argument("--results", default=str(BENCH / "results" / "agent-scale.json"))
+    p.add_argument("--questions", default=str(QUESTIONS))
     args = ap.parse_args()
     if args.cmd == "fetch":
         fetch()
@@ -465,6 +567,8 @@ def main():
         build()
     elif args.cmd == "regrade-pilot":
         regrade_pilot()
+    elif args.cmd == "analyze":
+        analyze(Path(args.results), Path(args.questions))
     else:
         questions(args.per_family)
 
