@@ -274,7 +274,10 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
                 sources[path] = f.read().split("\n")
         return sources[path]
 
-    nodes: dict[str, dict] = {}
+    # One symbol can have several definitions: an overloaded function's
+    # signatures and its implementation, or a static and an instance member of
+    # one name. Each is collected, in index order, so the node covers them all.
+    definitions: dict[str, list] = {}  # key -> [(info, path, definition range or None, name range, has a body)]
     scopes: dict[str, list] = collections.defaultdict(list)  # path -> [(definition range, key)]
     for d in idx.documents:
         for o in d.occurrences:
@@ -288,19 +291,24 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
             defined = o.enclosing_range or extent
             if defined:
                 scopes[d.relative_path].append((defined, key))
-            if key in nodes:
-                continue
-            kind = KIND[info.kind]
-            sig = signature(info.documentation)
-            callable_ = is_callable(kind, bool(o.enclosing_range) or function_initializer, sig)
-            span = defined or o.range
-            digest = None
-            if callable_ and defined:
-                text = "\n".join(lines(d.relative_path)[span[0]:span[2] + 1])
-                digest = hashlib.sha256(text.encode()).hexdigest()[:16]
-            nodes[key] = {"symbol": key, "name": parse_descriptors(key)[-1][0], "kind": kind,
-                          "callable": callable_, "path": d.relative_path, "signature": sig,
-                          "digest": digest, "line": span[0] + 1, "end_line": span[2] + 1}
+            definitions.setdefault(key, []).append(
+                (info, d.relative_path, defined, o.range, bool(o.enclosing_range) or function_initializer))
+
+    nodes: dict[str, dict] = {}
+    for key, defs in definitions.items():
+        info, path = defs[0][0], defs[0][1]
+        kind = KIND[info.kind]
+        sig = signature(info.documentation)
+        callable_ = is_callable(kind, any(d[4] for d in defs), sig)
+        # The location runs from the first definition to the last in the
+        # first one's file, and the digest covers the text of every definition,
+        # so a change to an overload's implementation changes the symbol.
+        spans = [d[2] or d[3] for d in defs if d[1] == path]
+        texts = ["\n".join(lines(p)[s[0]:s[2] + 1]) for _, p, s, _, _ in defs if s]
+        digest = hashlib.sha256("\n".join(texts).encode()).hexdigest()[:16] if callable_ and texts else None
+        nodes[key] = {"symbol": key, "name": parse_descriptors(key)[-1][0], "kind": kind,
+                      "callable": callable_, "path": path, "signature": sig, "digest": digest,
+                      "line": min(s[0] for s in spans) + 1, "end_line": max(s[2] for s in spans) + 1}
 
     references: dict[tuple[str, str], dict] = {}
     for d in idx.documents:
