@@ -440,9 +440,12 @@ def cmd_index(args, g: Graph):
 
     build_seed = _converter()
     checkout = Path(args.checkout).resolve()
-    if git(checkout, "status", "--porcelain", "--untracked-files=no") and not args.allow_dirty:
-        raise CgError(f"{checkout} has uncommitted changes, so the graph would not match its commit; "
-                      "commit them or pass --allow-dirty", EXIT_USAGE)
+    # The indexer reads every file the project includes, tracked or not, so an
+    # untracked source file would be loaded under the commit's SHA. The mode is
+    # explicit because status.showUntrackedFiles can hide untracked files.
+    if git(checkout, "status", "--porcelain", "--untracked-files=normal") and not args.allow_dirty:
+        raise CgError(f"{checkout} has uncommitted changes or untracked files, so the graph would not match "
+                      "its commit; commit or remove them, or pass --allow-dirty", EXIT_USAGE)
     revision = args.revision or git(checkout, "rev-parse", "HEAD")
     repository = args.repository or git(checkout, "remote", "get-url", "origin", required=False)
     with tempfile.TemporaryDirectory(prefix="cg-index-") as tmp:

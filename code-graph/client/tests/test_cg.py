@@ -312,6 +312,28 @@ class Commands(unittest.TestCase):
                 cg_cli.Graph("ck-agent", "code").load(Path("r.jsonl"), "pr-1", "main")
             self.assertEqual(caught.exception.status, status, effects)
 
+    def test_index_refuses_a_checkout_that_differs_from_its_commit(self):
+        # The fixture repository ignores the user's git configuration.
+        env = {"GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_NOSYSTEM": "1", "PATH": "/usr/bin:/bin"}
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            sh = lambda *a: subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.com", *a],  # noqa: E731
+                                           cwd=repo, env=env, check=True, capture_output=True)
+            sh("init", "-q")
+            (repo / "a.ts").write_text("export const a = 1\n")
+            sh("add", "a.ts")
+            sh("commit", "-q", "-m", "a")
+            # status.showUntrackedFiles=no must not hide an untracked source file.
+            sh("config", "status.showUntrackedFiles", "no")
+            args = argparse.Namespace(checkout=str(repo), allow_dirty=False)
+            for name, text in (("b.ts", "export const b = 2\n"), ("a.ts", "export const a = 3\n")):
+                (repo / name).write_text(text)
+                with mock.patch.dict(cg_cli.os.environ, env), \
+                        mock.patch.object(cg_cli, "indexer_binary", side_effect=AssertionError("indexer ran")), \
+                        self.assertRaises(cg_cli.CgError) as caught:
+                    cg_cli.cmd_index(args, cg_cli.Graph("./code.omni", "code"))
+                self.assertEqual(caught.exception.status, cg_cli.EXIT_USAGE, name)
+
     def test_a_failed_read_changes_nothing(self):
         _, patch = self.fake_cli(fail=("query", {"error": "forbidden", "code": "forbidden"}))
         with patch, self.assertRaises(cg_cli.CgError) as caught:

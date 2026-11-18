@@ -216,7 +216,8 @@ gh pr comment "$PR_NUMBER" --body-file review.md
 `cg index` runs scip-typescript from `CG_INDEXER`, the locked install in
 `sources/indexer/node_modules` after `npm ci` there, or your `PATH`; the
 converter always needs that `npm ci`, for the TypeScript parser. It refuses
-a checkout with uncommitted changes unless you pass `--allow-dirty`. The
+a checkout with uncommitted changes or untracked files unless you pass
+`--allow-dirty`, since the indexer reads untracked files too. The
 client's tests run offline against captured diffs:
 `python3 -m unittest discover -s code-graph/client/tests`.
 
