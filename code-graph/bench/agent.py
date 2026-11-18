@@ -94,6 +94,14 @@ BUILTIN_TOOLS = "Read,Grep,Glob,Bash,Skill,Task"
 READ_ONLY_SHELL = ["grep", "find", "ls", "cat", "head", "tail", "wc"]
 SYSTEM_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"
 RUN_TIMEOUT = 900
+# Claude Code's usage-limit messages (the same pattern the box's claude-accounts
+# uses). A session they end did not answer, so it is rerun, not scored.
+USAGE_LIMIT = re.compile(r"(?i)(hit your [\w -]*limit|usage limit reached|out of extra usage)")
+LIMITED_EXIT = 4
+
+
+class UsageLimited(Exception):
+    pass
 SETUP_TIMEOUT = 1800
 MAX_TURNS = 80
 NO_TELEMETRY = {"DO_NOT_TRACK": "1", "CODEGRAPH_TELEMETRY": "0", "CODEGRAPH_NO_DOWNLOAD": "1",
@@ -550,6 +558,13 @@ def run_one(arm: Arm, question: dict, rep: int, model: str, answer_format: str) 
             _, err = proc.communicate()
             timed_out = True
     wall = time.monotonic() - start
+    text = out.with_suffix(".partial").read_text()
+    result = next((json.loads(line) for line in reversed(text.splitlines())
+                   if line.startswith("{") and '"type":"result"' in line.replace(" ", "")), None)
+    said = (result or {}).get("result") or ""
+    if (proc.returncode != 0 or (result or {}).get("is_error")) and USAGE_LIMIT.search(f"{said}\n{err}"):
+        out.with_suffix(".partial").unlink()
+        raise UsageLimited((said or err).strip()[-300:])
     out.with_suffix(".partial").rename(out)
     out.with_suffix(".meta.json").write_text(json.dumps({
         "arm": arm.name, "question": question["id"], "rep": rep, "model": model, "wall_seconds": round(wall, 2),
@@ -576,17 +591,29 @@ def run(arms: list[str], qids: list[str] | None, reps: int, model: str, jobs: in
     random.Random(7).shuffle(work)
     locks = {name: threading.Lock() for name in arms}
     done = collections.Counter()
+    limited = []
 
     def task(item):
         name, q, rep = item
         with locks[name]:  # one session per arm at a time: tools share one index
-            path = run_one(Arm(name), q, rep, model, spec["answer_format"])
+            if limited:
+                return
+            try:
+                path = run_one(Arm(name), q, rep, model, spec["answer_format"])
+            except UsageLimited as e:
+                limited.append(str(e))
+                return
         done[name] += 1
         print(f"{sum(done.values())}/{len(work)} {name} {q['id']} #{rep} -> {path.name}", flush=True)
 
     with concurrent.futures.ThreadPoolExecutor(jobs) as pool:
         for f in concurrent.futures.as_completed([pool.submit(task, w) for w in work]):
             f.result()
+    if limited:
+        # Finished sessions are kept, and a run skips them, so the same command
+        # resumes once an account has usage again.
+        print(f"stopped on a usage limit after {sum(done.values())} sessions: {limited[0]}", flush=True)
+        raise SystemExit(LIMITED_EXIT)
 
 
 # --- score -------------------------------------------------------------------

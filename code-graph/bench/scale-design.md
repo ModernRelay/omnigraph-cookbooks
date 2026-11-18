@@ -1,6 +1,6 @@
 # Design: the agent benchmark at scale
 
-Status: built; the pilot runs from `scale-pilot.sh`. Measurements below were
+Status: built; the pilot runs from `scale-run.sh pilot`. Measurements below were
 taken on 2026-11-17 on one Mac (18 cores, 48 GiB) with the 0.14.0 `omnigraph`
 CLI. `scale.py` builds the repository, graph, reference and questions;
 `agent.py --suite vscode` sets up the arms and runs and scores the sessions.
@@ -172,7 +172,7 @@ take about two hours.
 ## Pilot results
 
 Run on 2026-11-17 on a dev box (64 GB, Node 24.22.3, Claude Code 2.1.316,
-Sonnet 5.5) by `scale-pilot.sh`, 64 minutes end to end. Results are in
+Sonnet 5.5) by `scale-run.sh pilot`, 64 minutes end to end. Results are in
 `results/agent-scale-pilot.json`, the six questions it asked in
 `scale-pilot-questions.json`. One session per question and arm, so these are
 directions, not measurements.
@@ -264,7 +264,7 @@ price, about 2.5 hours of sessions plus an hour of setup.
    1.145.0 on `v1.145.0`); the compiler reference of each. Done.
 3. `scale.py questions`: the selector and the source check. Done; the pilot's
    six keys were also checked by hand.
-4. Pilot (`scale-pilot.sh`): one session of each family's first question in
+4. Pilot (`scale-run.sh pilot`): one session of each family's first question in
    four arms, 24 sessions, on a dev box. Done; results above.
 5. Index with the other three tools; record times and failures.
 6. Decide the size of the full run; run, score, write up in `bench/README.md`
