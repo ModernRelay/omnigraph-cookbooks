@@ -288,10 +288,23 @@ qualifies the committed files.
   lists `detectors`, not the code that calls through it. Telling a call
   through the table from a read of its keys would need the type checker's
   data flow, which SCIP does not record.
+- **A function handed to another is a reference, not a call.** VS Code's
+  `invokeFunction(fn)` calls `fn` and `createInstance(C)` constructs a `C`,
+  but neither name is followed by `(`, so `call` is false there. `callers`
+  still lists the code that hands them over, and `impact` follows it.
+- **A static and an instance member of one name are one definition.**
+  scip-typescript gives `static equals` and `equals` in one class the same
+  symbol, so the graph holds one `equals` with the references of both.
 - **`impact` follows at most sixteen hops.** Omnigraph requires a finite
   bound on a multi-hop traversal. The longest chain of references and
   implementations to a callable in hono's `src/` is 14; a deeper chain is
   cut at sixteen.
+- **`impact` from a hub can exceed any memory limit on an indexed graph.**
+  Once `optimize` has built the indexes, 0.14 walks the sixteen hops by
+  probing them, and on VS Code a hub such as `ILogService` asks for more
+  than `query_memory_bytes` allows, 2 or 8 GiB, within half a second. Before
+  `optimize` the same read scanned the tables and returned its first 5,000
+  rows in about 34 s. Targets away from the hubs answer in about 0.1 s.
 - **Members of union types are not indexed.** scip-typescript gives no symbol
   to a property of an object type inside a union, so turning a type into a
   union looks like removing its properties.

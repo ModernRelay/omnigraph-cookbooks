@@ -43,12 +43,15 @@ sys.path.insert(0, HERE)
 from scip_index import DEFINITION, read_index  # noqa: E402
 
 # SCIP SymbolInformation.Kind values scip-typescript emits, mapped to the
-# schema's closed vocabulary. Kinds missing here are not nodes.
+# schema's closed vocabulary. Kinds missing here are not nodes. A static
+# method or property (80, 81) is a member like any other; scip-typescript
+# gives a static and an instance member of the same name one symbol, so they
+# are one definition.
 KIND = {
     7: "class", 8: "constant", 9: "constructor", 11: "enum", 12: "enum_member",
     15: "field", 16: "module", 17: "function", 18: "getter", 21: "interface",
     26: "method", 29: "module", 30: "namespace", 41: "property", 45: "setter",
-    54: "type_alias", 55: "type_alias", 61: "variable",
+    54: "type_alias", 55: "type_alias", 61: "variable", 80: "method", 81: "property",
 }
 CALLABLE_KINDS = {"function", "method", "constructor", "getter", "setter"}
 # A constant, variable or class field whose initializer is a function is
