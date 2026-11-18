@@ -41,6 +41,6 @@ edge References: Symbol -> Symbol @description("Code inside the source's definit
     @key(@src, @dst)
 }
 
-edge Implements: Symbol -> Symbol @description("The source implements or overrides the target, as the indexer reports it: a class member implementing an interface member.") {
+edge ImplementedBy: Symbol -> Symbol @description("The target implements or overrides the source, as the indexer reports it: an interface or base member and a class member implementing it. A call to the source can run the target, so the edge points the way a call goes.") {
     @key(@src, @dst)
 }

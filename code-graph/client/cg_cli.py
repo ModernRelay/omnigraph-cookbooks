@@ -33,7 +33,7 @@ BUNDLE = HERE.parent
 QUERIES = BUNDLE / "queries" / "code.gq"
 SOURCES = BUNDLE / "sources"
 EXIT_FAILED, EXIT_USAGE, EXIT_UNKNOWN = 1, 2, 3
-LINK_TYPES = {"References": "references", "Implements": "implements", "MemberOf": "members"}
+LINK_TYPES = {"References": "references", "ImplementedBy": "implementations", "MemberOf": "members"}
 # How a changed Symbol property reads in a review.
 FIELD_WORDS = {"digest": "code", "path": "file", "callable": "callability"}
 # Each list read's `limit` in queries/code.gq (the tests check they agree). A
@@ -268,11 +268,12 @@ def render(summary: dict, branch: str, into: str, markdown: bool = False) -> str
                                    f"call {r['before'].get('call')} to {r.get('call')}, "
                                    f"sites {r['before'].get('sites')} to {r.get('sites')}"
                                    for r in refs["changed"]])
-    for name, title in (("implements", "Implementations"), ("members", "Members")):
-        section(f"{title} added", [f"{code(display(r['from']))} of {code(display(r['to']))}"
-                                   for r in summary[name]["added"]])
-        section(f"{title} removed", [f"{code(display(r['from']))} of {code(display(r['to']))}"
-                                     for r in summary[name]["removed"]])
+    # Both read "X of Y": an implementation of the member it implements, a
+    # member of its container. ImplementedBy runs from Y to X, MemberOf from X to Y.
+    for name, title, flip in (("implementations", "Implementations", True), ("members", "Members", False)):
+        for op in ("added", "removed"):
+            section(f"{title} {op}", [f"{code(display(r['to' if flip else 'from']))} of "
+                                      f"{code(display(r['from' if flip else 'to']))}" for r in summary[name][op]])
     return "\n".join(lines)
 
 
@@ -468,8 +469,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(run=cmd_find)
     for name, text in (("callers", "definitions that call or name a symbol"),
                        ("callees", "what a symbol's code calls or names"),
-                       ("impact", "everything within sixteen references of a symbol"),
-                       ("implementers", "class members implementing an interface member"),
+                       ("impact", "everything within sixteen references or implementations of a symbol"),
+                       ("implementers", "class members implementing or overriding a member"),
                        ("members", "what a module, class or interface declares")):
         p = reading(sub.add_parser(name, help=text))
         p.add_argument("symbol", help="a key, or a name that matches one symbol")

@@ -74,20 +74,20 @@ query callees($symbol: String) @description("What the symbol's code names: what 
     limit 2000
 }
 
-query impact($symbol: String) @description("Every definition that reaches the symbol through a chain of up to sixteen references: what a change to it can break.") {
+query impact($symbol: String) @description("Every definition that reaches the symbol through a chain of up to sixteen references and implementations: what a change to it can break. A call to an interface or base member reaches each member implementing it.") {
     match {
         $t: Symbol { symbol: $symbol }
-        $c references{1,16} $t
+        $c (references | implementedBy){1,16} $t
     }
     return distinct { $c.symbol, $c.kind, $c.path }
     order { $c.symbol asc }
     limit 5000
 }
 
-query implementers($symbol: String) @description("Class members that implement the given interface member.") {
+query implementers($symbol: String) @description("Class members that implement or override the given interface or base member.") {
     match {
         $t: Symbol { symbol: $symbol }
-        $i implements $t
+        $t implementedBy $i
     }
     return { $i.symbol, $i.path }
     order { $i.symbol asc }
