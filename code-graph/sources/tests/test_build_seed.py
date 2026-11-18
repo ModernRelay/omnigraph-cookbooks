@@ -186,9 +186,11 @@ export class Hono {
 
 @unittest.skipUnless(HAVE_NODE or os.environ.get("CODE_GRAPH_REQUIRE_NODE") == "1",
                      "needs Node.js and `npm ci` in code-graph/sources/indexer")
-class StaticMembers(unittest.TestCase):
-    """scip-typescript gives static members kinds of their own, and one symbol
-    to a static and an instance member of the same name."""
+class SeveralDefinitions(unittest.TestCase):
+    """Symbols scip-typescript defines more than once: static members, which
+    have kinds of their own and share a symbol with an instance member of the
+    same name, and overloaded functions, whose signatures and implementation
+    share one symbol."""
     SOURCE = """\
 export class Color {
   static readonly white = new Color()
@@ -199,16 +201,27 @@ export class Color {
 export function same(a: Color, b: Color): boolean { return Color.equals(a, b) }
 export function parse(): Color { return Color.fromHex('#fff') }
 """
+    OVERLOADED = """\
+export function size(x: string): number
+export function size(x: number[]): number
+export function size(x: string | number[]): number {
+  return x.length
+}
+"""
 
-    def test_static_members_are_definitions(self):
+    def build(self, files: dict) -> list:
         with tempfile.TemporaryDirectory() as root:
             Path(root, "src").mkdir()
-            Path(root, "src", "color.ts").write_text(self.SOURCE, encoding="utf-8")
+            for name, text in files.items():
+                Path(root, "src", name).write_text(text, encoding="utf-8")
             Path(root, "tsconfig.json").write_text('{"include": ["src"]}', encoding="utf-8")
             index = Path(root, "index.scip")
             subprocess.run([str(INDEXER / "node_modules" / ".bin" / "scip-typescript"), "index",
                             "--no-progress-bar", "--output", str(index)], cwd=root, check=True, capture_output=True)
-            rows = build_seed.build(str(index), root, "0" * 40, "https://example.com/r.git", [])
+            return build_seed.build(str(index), root, "0" * 40, "https://example.com/r.git", [])
+
+    def test_static_members_are_definitions(self):
+        rows = self.build({"color.ts": self.SOURCE})
         kinds = {r["data"]["symbol"]: r["data"]["kind"] for r in rows if r.get("type") == "Symbol"}
         self.assertEqual(kinds.get("src/`color.ts`/Color#fromHex()."), "method")
         self.assertEqual(kinds.get("src/`color.ts`/Color#white."), "property")
@@ -217,6 +230,21 @@ export function parse(): Color { return Color.fromHex('#fff') }
         refs = {(r["from"], r["to"]) for r in rows if r.get("edge") == "References"}
         self.assertIn(("src/`color.ts`/same().", "src/`color.ts`/Color#equals()."), refs)
         self.assertIn(("src/`color.ts`/parse().", "src/`color.ts`/Color#fromHex()."), refs)
+
+    def test_an_overloads_implementation_is_part_of_its_definition(self):
+        def symbol(source):
+            rows = self.build({"size.ts": source})
+            key = "src/`size.ts`/size()."
+            data = next(r["data"] for r in rows if r.get("type") == "Symbol" and r["data"]["symbol"] == key)
+            where = next(r["data"] for r in rows if r.get("type") == "Location" and r["data"]["symbol"] == key)
+            return data, where
+        data, where = symbol(self.OVERLOADED)
+        self.assertTrue(data["callable"])
+        # The definition runs from the first signature to the end of the body.
+        self.assertEqual((where["line"], where["end_line"]), (1, 5))
+        # A change in the implementation alone changes the digest.
+        changed, _ = symbol(self.OVERLOADED.replace("x.length", "x.length + 1"))
+        self.assertNotEqual(data["digest"], changed["digest"])
 
 
 if __name__ == "__main__":
