@@ -214,6 +214,19 @@ class Commands(unittest.TestCase):
         self.assertEqual(argv[-5:], ["--target", "ck-reader", "--graph", "code", "--json"])
         self.assertIn("--branch", argv)
 
+    def test_impact_lifts_the_traversal_work_cap(self):
+        calls, patch = self.fake_cli()
+        with patch:
+            cg_cli.Graph("./code.omni", "code").query("impact", {"symbol": HELPER})
+            cg_cli.Graph("./code.omni", "code").query("callers", {"symbol": HELPER})
+        self.assertIn("traversal_work_limit=1000000000000", calls[0])
+        self.assertNotIn("--set", calls[1])
+        # A server's stored query takes no session settings.
+        calls, patch = self.fake_cli()
+        with patch:
+            cg_cli.Graph("ck-reader", "code").query("impact", {"symbol": HELPER})
+        self.assertNotIn("--set", calls[0])
+
     def test_a_local_target_runs_the_cookbook_query_file(self):
         calls, patch = self.fake_cli()
         with patch:
