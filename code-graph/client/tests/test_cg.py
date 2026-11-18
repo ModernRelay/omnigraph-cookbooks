@@ -6,7 +6,10 @@ The fixtures are real `omnigraph branch diff --json` output from OmniGraph
 Run with: python3 -m unittest discover -s code-graph/client/tests
 """
 
+import argparse
 import collections
+import contextlib
+import io
 import json
 import re
 import subprocess
@@ -272,6 +275,33 @@ class Commands(unittest.TestCase):
             with patch:
                 cg_cli.Graph("./code.omni", "code").load(small, "main", "main")
             self.assertNotIn("--set", calls[-1])
+
+    def test_a_local_load_onto_main_builds_its_indexes(self):
+        build_seed = cg_cli._converter()
+        with tempfile.TemporaryDirectory() as tmp:
+            revision = Path(tmp) / "r.jsonl"
+            revision.write_text("".join(json.dumps({"type": t, "data": {}}) + "\n" for t in build_seed.TYPES)
+                                + "".join(json.dumps({"edge": e, "from": "a", "to": "b"}) + "\n"
+                                          for e in build_seed.EDGES))
+            # optimize reaches main only, and only a local graph.
+            for target, branch, optimized in (("./code.omni", "main", True), ("./code.omni", "pr-1", None),
+                                              ("ck-agent", "main", None)):
+                calls, patch = self.fake_cli(branches=("main", "pr-1"))
+                args = argparse.Namespace(branch=branch, base="main", allow_missing=False, json=True)
+                out = io.StringIO()
+                with patch, contextlib.redirect_stdout(out):
+                    cg_cli._load(args, cg_cli.Graph(target, "code"), revision)
+                self.assertEqual([a[1] for a in calls].count("optimize"), int(bool(optimized)), (target, branch))
+                self.assertEqual(json.loads(out.getvalue()).get("optimized"), optimized, (target, branch))
+            # A failed optimize leaves the committed load reported, and says so.
+            _, patch = self.fake_cli(fail=("optimize", {"error": "busy"}))
+            args = argparse.Namespace(branch="main", base="main", allow_missing=False, json=True)
+            out, err = io.StringIO(), io.StringIO()
+            with patch, contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                cg_cli._load(args, cg_cli.Graph("./code.omni", "code"), revision)
+            self.assertEqual(json.loads(out.getvalue())["commit"], "c1")
+            self.assertFalse(json.loads(out.getvalue())["optimized"])
+            self.assertIn("the load committed, but optimize failed", err.getvalue())
 
     def test_a_failed_load_reports_whether_anything_changed(self):
         for effects, status in (("none", cg_cli.EXIT_FAILED), ("unknown", cg_cli.EXIT_UNKNOWN),

@@ -1,14 +1,17 @@
-"""Tests for the converter's rules that need no index: keys, callability,
-reference owners, and the definition ranges extents.mjs reads.
+"""Tests for the converter's rules: keys, callability, reference owners, the
+definition ranges extents.mjs reads, and static members, read from an index of
+a small project.
 
 Run with: python3 -m unittest discover -s code-graph/sources/tests
 
-The extents tests need Node.js and `npm ci` in code-graph/sources/indexer; they
-skip without them unless CODE_GRAPH_REQUIRE_NODE=1, as CI sets.
+The extents and static-member tests need Node.js and `npm ci` in
+code-graph/sources/indexer; they skip without them unless
+CODE_GRAPH_REQUIRE_NODE=1, as CI sets.
 """
 
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -179,6 +182,41 @@ export class Hono {
             (14, 6): ((14, 2, 14, 19), False),
             (15, 2): ((15, 2, 15, 35), True),
         })
+
+
+@unittest.skipUnless(HAVE_NODE or os.environ.get("CODE_GRAPH_REQUIRE_NODE") == "1",
+                     "needs Node.js and `npm ci` in code-graph/sources/indexer")
+class StaticMembers(unittest.TestCase):
+    """scip-typescript gives static members kinds of their own, and one symbol
+    to a static and an instance member of the same name."""
+    SOURCE = """\
+export class Color {
+  static readonly white = new Color()
+  static fromHex(hex: string): Color { return new Color() }
+  static equals(a: Color, b: Color): boolean { return a.equals(b) }
+  equals(other: Color): boolean { return other === this }
+}
+export function same(a: Color, b: Color): boolean { return Color.equals(a, b) }
+export function parse(): Color { return Color.fromHex('#fff') }
+"""
+
+    def test_static_members_are_definitions(self):
+        with tempfile.TemporaryDirectory() as root:
+            Path(root, "src").mkdir()
+            Path(root, "src", "color.ts").write_text(self.SOURCE, encoding="utf-8")
+            Path(root, "tsconfig.json").write_text('{"include": ["src"]}', encoding="utf-8")
+            index = Path(root, "index.scip")
+            subprocess.run([str(INDEXER / "node_modules" / ".bin" / "scip-typescript"), "index",
+                            "--no-progress-bar", "--output", str(index)], cwd=root, check=True, capture_output=True)
+            rows = build_seed.build(str(index), root, "0" * 40, "https://example.com/r.git", [])
+        kinds = {r["data"]["symbol"]: r["data"]["kind"] for r in rows if r.get("type") == "Symbol"}
+        self.assertEqual(kinds.get("src/`color.ts`/Color#fromHex()."), "method")
+        self.assertEqual(kinds.get("src/`color.ts`/Color#white."), "property")
+        # The two methods named equals share a key, so they are one definition.
+        self.assertEqual(kinds.get("src/`color.ts`/Color#equals()."), "method")
+        refs = {(r["from"], r["to"]) for r in rows if r.get("edge") == "References"}
+        self.assertIn(("src/`color.ts`/same().", "src/`color.ts`/Color#equals()."), refs)
+        self.assertIn(("src/`color.ts`/parse().", "src/`color.ts`/Color#fromHex()."), refs)
 
 
 if __name__ == "__main__":

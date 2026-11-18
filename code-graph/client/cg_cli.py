@@ -413,7 +413,21 @@ def _load(args, g: Graph, path: Path) -> None:
     receipt = g.load(path, args.branch, args.base)
     commit = receipt.get("commit") or {}
     data = {"branch": args.branch, "commit": commit.get("graph_commit_id"), "rows": sum(counts.values())}
-    emit(args, data, f"loaded {data['rows']} rows onto {args.branch} as commit {data['commit']}; "
+    built = ""
+    if g.direct and args.branch == "main":
+        # An overwrite load writes every table without its indexes, so a read
+        # scans whole tables until optimize builds them: on VS Code, `cg members`
+        # took 19 s before and 0.06 s after. optimize works on main only; a
+        # branch created from an optimized main shares its indexes.
+        try:
+            g.run(["optimize"])
+            data["optimized"] = True
+            built = " and built its indexes"
+        except CgError as error:
+            data["optimized"] = False
+            print(f"cg: the load committed, but optimize failed, so reads scan whole tables until "
+                  f"`omnigraph optimize` runs: {error}", file=sys.stderr)
+    emit(args, data, f"loaded {data['rows']} rows onto {args.branch} as commit {data['commit']}{built}; "
                      f"review with `cg diff {args.branch}`")
 
 

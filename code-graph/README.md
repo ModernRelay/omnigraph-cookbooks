@@ -151,7 +151,7 @@ revision with `--mode overwrite`. It takes its target from `CG_TARGET` or
 | `cg find NAME` | the keys of the symbols with that name |
 | `cg callers SYMBOL` | also `callees`, `impact`, `implementers` and `members`; SYMBOL is a key or a name that matches one symbol, `--path` narrows a name, `--branch` reads a branch |
 | `cg hubs`, `cg unreferenced`, `cg revision` | the most referenced symbols, unreferenced callables, the indexed commit |
-| `cg load FILE --branch B` | load a revision file, creating `B` from `--base` (default `main`) when it does not exist |
+| `cg load FILE --branch B` | load a revision file, creating `B` from `--base` (default `main`) when it does not exist; a load onto `main` of a local graph then builds its indexes |
 | `cg index [CHECKOUT] --branch B` | index a TypeScript checkout, convert it and load it, in one step |
 | `cg diff B` | the branch diff as a review: symbols added, removed and changed, references added and removed per caller, definitions that only moved; `--markdown` for a pull request comment |
 
@@ -173,6 +173,14 @@ probe; on a local graph `cg` lifts that `traversal_work_limit` and raises
 `query_memory_bytes` to 2 GiB. A server's stored query takes no session
 settings, so on a large served graph raise `OMNIGRAPH_TRAVERSAL_WORK_LIMIT`
 and `OMNIGRAPH_QUERY_MEMORY_BYTES` on the server instead.
+
+An overwrite load writes every table without its indexes, and until
+`omnigraph optimize` builds them a read scans whole tables. On VS Code's
+818,000 symbols `cg members` took 19 s before and 0.06 s after, so `cg load`
+onto `main` of a local graph runs `optimize` itself. In 0.14 `optimize`
+reaches `main` only: a branch created from an optimized `main` shares its
+indexes, but a branch loaded later reads without them. That costs little on a
+small repository and matters on a large one.
 
 ```bash
 export CG_TARGET=local-agent
@@ -226,7 +234,8 @@ python3 code-graph/sources/build_seed.py --index index.scip --checkout . \
   --revision "$(git rev-parse HEAD)" --repository https://example.com/repo.git --out graph.jsonl
 ```
 
-Load the first revision onto `main` and each later one with `--mode overwrite`.
+Load the first revision onto `main` and each later one with `--mode overwrite`,
+and run `omnigraph optimize` after each load onto `main`, as `cg load` does.
 `append` and `merge` stage at most 8,192 rows per type in one load; `overwrite`
 does not have that limit, and a 10,000-symbol graph loaded in one commit. A
 file larger than about 32 MiB needs a different transport; see the engine's
@@ -378,10 +387,23 @@ out static members, 5,402 of VS Code's definitions.
   lists `detectors`, not the code that calls through it. Telling a call
   through the table from a read of its keys would need the type checker's
   data flow, which SCIP does not record.
+- **A function handed to another is a reference, not a call.** VS Code's
+  `invokeFunction(fn)` calls `fn` and `createInstance(C)` constructs a `C`,
+  but neither name is followed by `(`, so `call` is false there. `callers`
+  still lists the code that hands them over, and `impact` follows it.
+- **A static and an instance member of one name are one definition.**
+  scip-typescript gives `static equals` and `equals` in one class the same
+  symbol, so the graph holds one `equals` with the references of both.
 - **`impact` follows at most sixteen hops.** Omnigraph requires a finite
   bound on a multi-hop traversal. The longest chain of references and
   implementations to a callable in hono's `src/` is 14; a deeper chain is
   cut at sixteen.
+- **`impact` from a hub can exceed any memory limit on an indexed graph.**
+  Once `optimize` has built the indexes, 0.14 walks the sixteen hops by
+  probing them, and on VS Code a hub such as `ILogService` asks for more
+  than `query_memory_bytes` allows, 2 or 8 GiB, within half a second. Before
+  `optimize` the same read scanned the tables and returned its first 5,000
+  rows in about 34 s. Targets away from the hubs answer in about 0.1 s.
 - **Members of union types are not indexed.** scip-typescript gives no symbol
   to a property of an object type inside a union, so turning a type into a
   union looks like removing its properties.
