@@ -1,0 +1,1029 @@
+{
+  "results": "agent-scale.json",
+  "questions": "scale-questions.json",
+  "by_family": {
+    "bare": {
+      "all": {
+        "runs": 115,
+        "exact": 73,
+        "mean_f1": 0.96,
+        "median_cost_usd": 0.103,
+        "median_turns": 8,
+        "median_wall_seconds": 23.6
+      },
+      "shared-name": {
+        "runs": 20,
+        "exact": 13,
+        "mean_f1": 0.965,
+        "median_cost_usd": 0.1197,
+        "median_turns": 8.0,
+        "median_wall_seconds": 22.0
+      },
+      "dispatch": {
+        "runs": 20,
+        "exact": 17,
+        "mean_f1": 0.992,
+        "median_cost_usd": 0.0826,
+        "median_turns": 5.0,
+        "median_wall_seconds": 13.1
+      },
+      "transitive": {
+        "runs": 15,
+        "exact": 1,
+        "mean_f1": 0.935,
+        "median_cost_usd": 0.185,
+        "median_turns": 15,
+        "median_wall_seconds": 37.7
+      },
+      "construction": {
+        "runs": 20,
+        "exact": 11,
+        "mean_f1": 0.949,
+        "median_cost_usd": 0.2918,
+        "median_turns": 19.0,
+        "median_wall_seconds": 60.3
+      },
+      "release": {
+        "runs": 20,
+        "exact": 12,
+        "mean_f1": 0.927,
+        "median_cost_usd": 0.0936,
+        "median_turns": 10.5,
+        "median_wall_seconds": 26.2
+      },
+      "control": {
+        "runs": 20,
+        "exact": 19,
+        "mean_f1": 0.988,
+        "median_cost_usd": 0.0357,
+        "median_turns": 5.0,
+        "median_wall_seconds": 10.1
+      }
+    },
+    "codegraph": {
+      "all": {
+        "runs": 115,
+        "exact": 73,
+        "mean_f1": 0.96,
+        "median_cost_usd": 0.1124,
+        "median_turns": 8,
+        "median_wall_seconds": 42.2
+      },
+      "shared-name": {
+        "runs": 20,
+        "exact": 14,
+        "mean_f1": 0.971,
+        "median_cost_usd": 0.0996,
+        "median_turns": 7.0,
+        "median_wall_seconds": 37.7
+      },
+      "dispatch": {
+        "runs": 20,
+        "exact": 18,
+        "mean_f1": 0.996,
+        "median_cost_usd": 0.0503,
+        "median_turns": 4.0,
+        "median_wall_seconds": 32.0
+      },
+      "transitive": {
+        "runs": 15,
+        "exact": 1,
+        "mean_f1": 0.933,
+        "median_cost_usd": 0.2016,
+        "median_turns": 15,
+        "median_wall_seconds": 62.6
+      },
+      "construction": {
+        "runs": 20,
+        "exact": 9,
+        "mean_f1": 0.953,
+        "median_cost_usd": 0.2387,
+        "median_turns": 19.5,
+        "median_wall_seconds": 68.4
+      },
+      "release": {
+        "runs": 20,
+        "exact": 11,
+        "mean_f1": 0.9,
+        "median_cost_usd": 0.1269,
+        "median_turns": 11.5,
+        "median_wall_seconds": 49.5
+      },
+      "control": {
+        "runs": 20,
+        "exact": 20,
+        "mean_f1": 1.0,
+        "median_cost_usd": 0.0316,
+        "median_turns": 3.5,
+        "median_wall_seconds": 27.8
+      }
+    },
+    "graphify": {
+      "all": {
+        "runs": 115,
+        "exact": 68,
+        "mean_f1": 0.949,
+        "median_cost_usd": 0.1213,
+        "median_turns": 10,
+        "median_wall_seconds": 25.4
+      },
+      "shared-name": {
+        "runs": 20,
+        "exact": 11,
+        "mean_f1": 0.935,
+        "median_cost_usd": 0.104,
+        "median_turns": 10.0,
+        "median_wall_seconds": 23.1
+      },
+      "dispatch": {
+        "runs": 20,
+        "exact": 18,
+        "mean_f1": 0.994,
+        "median_cost_usd": 0.0887,
+        "median_turns": 7.5,
+        "median_wall_seconds": 19.0
+      },
+      "transitive": {
+        "runs": 15,
+        "exact": 0,
+        "mean_f1": 0.958,
+        "median_cost_usd": 0.2104,
+        "median_turns": 17,
+        "median_wall_seconds": 46.7
+      },
+      "construction": {
+        "runs": 20,
+        "exact": 13,
+        "mean_f1": 0.966,
+        "median_cost_usd": 0.2925,
+        "median_turns": 17.5,
+        "median_wall_seconds": 60.4
+      },
+      "release": {
+        "runs": 20,
+        "exact": 7,
+        "mean_f1": 0.86,
+        "median_cost_usd": 0.1302,
+        "median_turns": 11.0,
+        "median_wall_seconds": 30.1
+      },
+      "control": {
+        "runs": 20,
+        "exact": 19,
+        "mean_f1": 0.983,
+        "median_cost_usd": 0.0496,
+        "median_turns": 5.0,
+        "median_wall_seconds": 10.8
+      }
+    },
+    "omnigraph": {
+      "all": {
+        "runs": 115,
+        "exact": 79,
+        "mean_f1": 0.964,
+        "median_cost_usd": 0.0756,
+        "median_turns": 5,
+        "median_wall_seconds": 41.7
+      },
+      "shared-name": {
+        "runs": 20,
+        "exact": 12,
+        "mean_f1": 0.921,
+        "median_cost_usd": 0.0869,
+        "median_turns": 9.5,
+        "median_wall_seconds": 69.7
+      },
+      "dispatch": {
+        "runs": 20,
+        "exact": 17,
+        "mean_f1": 0.993,
+        "median_cost_usd": 0.0972,
+        "median_turns": 7.5,
+        "median_wall_seconds": 67.7
+      },
+      "transitive": {
+        "runs": 15,
+        "exact": 0,
+        "mean_f1": 0.904,
+        "median_cost_usd": 0.0677,
+        "median_turns": 3,
+        "median_wall_seconds": 17.6
+      },
+      "construction": {
+        "runs": 20,
+        "exact": 11,
+        "mean_f1": 0.974,
+        "median_cost_usd": 0.2381,
+        "median_turns": 14.5,
+        "median_wall_seconds": 63.4
+      },
+      "release": {
+        "runs": 20,
+        "exact": 19,
+        "mean_f1": 0.975,
+        "median_cost_usd": 0.0418,
+        "median_turns": 5.0,
+        "median_wall_seconds": 14.3
+      },
+      "control": {
+        "runs": 20,
+        "exact": 20,
+        "mean_f1": 1.0,
+        "median_cost_usd": 0.0143,
+        "median_turns": 2.0,
+        "median_wall_seconds": 7.4
+      }
+    }
+  },
+  "vs_bare": {
+    "codegraph": {
+      "cost_usd": {
+        "all": {
+          "geomean_ratio": 0.913,
+          "ci95": [
+            0.826,
+            1.009
+          ],
+          "questions_lower": 16,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 0.828,
+          "ci95": [
+            0.705,
+            0.974
+          ],
+          "questions_lower": 3,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 0.772,
+          "ci95": [
+            0.727,
+            0.824
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 1.06,
+          "ci95": [
+            1.0,
+            1.093
+          ],
+          "questions_lower": 1,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 0.909,
+          "ci95": [
+            0.807,
+            1.024
+          ],
+          "questions_lower": 3,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 1.183,
+          "ci95": [
+            0.944,
+            1.483
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 0.825,
+          "ci95": [
+            0.57,
+            1.081
+          ],
+          "questions_lower": 3,
+          "questions": 4
+        }
+      },
+      "grep_vs_cost_ratio_spearman": -0.362,
+      "turns": {
+        "all": {
+          "geomean_ratio": 1.037,
+          "ci95": [
+            0.825,
+            1.485
+          ],
+          "questions_lower": 12,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 0.77,
+          "ci95": [
+            0.632,
+            0.889
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 0.761,
+          "ci95": [
+            0.724,
+            0.8
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 1.036,
+          "ci95": [
+            0.889,
+            1.25
+          ],
+          "questions_lower": 1,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 2.212,
+          "ci95": [
+            0.785,
+            12.819
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 1.101,
+          "ci95": [
+            0.955,
+            1.247
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 0.841,
+          "ci95": [
+            0.53,
+            1.123
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        }
+      },
+      "output_tokens": {
+        "all": {
+          "geomean_ratio": 0.944,
+          "ci95": [
+            0.859,
+            1.02
+          ],
+          "questions_lower": 12,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 0.947,
+          "ci95": [
+            0.845,
+            1.052
+          ],
+          "questions_lower": 3,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 0.896,
+          "ci95": [
+            0.827,
+            0.991
+          ],
+          "questions_lower": 3,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 0.995,
+          "ci95": [
+            0.987,
+            1.009
+          ],
+          "questions_lower": 2,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 0.902,
+          "ci95": [
+            0.793,
+            1.025
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 1.114,
+          "ci95": [
+            0.979,
+            1.268
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 0.845,
+          "ci95": [
+            0.532,
+            1.091
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        }
+      },
+      "wall_seconds": {
+        "all": {
+          "geomean_ratio": 1.877,
+          "ci95": [
+            1.652,
+            2.133
+          ],
+          "questions_lower": 1,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 1.908,
+          "ci95": [
+            1.686,
+            2.159
+          ],
+          "questions_lower": 0,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 2.041,
+          "ci95": [
+            1.51,
+            2.463
+          ],
+          "questions_lower": 0,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 1.57,
+          "ci95": [
+            1.342,
+            1.735
+          ],
+          "questions_lower": 0,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 1.446,
+          "ci95": [
+            1.058,
+            2.329
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 1.792,
+          "ci95": [
+            1.603,
+            2.002
+          ],
+          "questions_lower": 0,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 2.639,
+          "ci95": [
+            2.155,
+            3.235
+          ],
+          "questions_lower": 0,
+          "questions": 4
+        }
+      }
+    },
+    "graphify": {
+      "cost_usd": {
+        "all": {
+          "geomean_ratio": 1.124,
+          "ci95": [
+            1.023,
+            1.222
+          ],
+          "questions_lower": 5,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 0.91,
+          "ci95": [
+            0.811,
+            0.993
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 1.341,
+          "ci95": [
+            1.182,
+            1.49
+          ],
+          "questions_lower": 0,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 1.112,
+          "ci95": [
+            1.094,
+            1.126
+          ],
+          "questions_lower": 0,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 0.967,
+          "ci95": [
+            0.693,
+            1.18
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 1.366,
+          "ci95": [
+            1.209,
+            1.544
+          ],
+          "questions_lower": 0,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 1.119,
+          "ci95": [
+            1.077,
+            1.159
+          ],
+          "questions_lower": 0,
+          "questions": 4
+        }
+      },
+      "grep_vs_cost_ratio_spearman": -0.146,
+      "turns": {
+        "all": {
+          "geomean_ratio": 1.264,
+          "ci95": [
+            1.047,
+            1.706
+          ],
+          "questions_lower": 6,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 1.072,
+          "ci95": [
+            0.915,
+            1.23
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 1.341,
+          "ci95": [
+            1.168,
+            1.474
+          ],
+          "questions_lower": 0,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 1.04,
+          "ci95": [
+            0.944,
+            1.125
+          ],
+          "questions_lower": 1,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 2.047,
+          "ci95": [
+            0.799,
+            9.731
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 1.127,
+          "ci95": [
+            0.967,
+            1.288
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 1.125,
+          "ci95": [
+            0.894,
+            1.414
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        }
+      },
+      "output_tokens": {
+        "all": {
+          "geomean_ratio": 1.055,
+          "ci95": [
+            0.966,
+            1.131
+          ],
+          "questions_lower": 6,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 1.026,
+          "ci95": [
+            0.973,
+            1.098
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 1.252,
+          "ci95": [
+            1.166,
+            1.327
+          ],
+          "questions_lower": 0,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 1.057,
+          "ci95": [
+            1.019,
+            1.102
+          ],
+          "questions_lower": 0,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 0.946,
+          "ci95": [
+            0.682,
+            1.174
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 1.097,
+          "ci95": [
+            0.908,
+            1.274
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 0.98,
+          "ci95": [
+            0.822,
+            1.167
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        }
+      },
+      "wall_seconds": {
+        "all": {
+          "geomean_ratio": 1.1,
+          "ci95": [
+            1.022,
+            1.168
+          ],
+          "questions_lower": 3,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 1.131,
+          "ci95": [
+            1.067,
+            1.199
+          ],
+          "questions_lower": 0,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 1.285,
+          "ci95": [
+            1.169,
+            1.388
+          ],
+          "questions_lower": 0,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 1.114,
+          "ci95": [
+            1.029,
+            1.24
+          ],
+          "questions_lower": 0,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 0.95,
+          "ci95": [
+            0.704,
+            1.164
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 1.091,
+          "ci95": [
+            0.963,
+            1.221
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 1.06,
+          "ci95": [
+            0.955,
+            1.147
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        }
+      }
+    },
+    "omnigraph": {
+      "cost_usd": {
+        "all": {
+          "geomean_ratio": 0.579,
+          "ci95": [
+            0.442,
+            0.772
+          ],
+          "questions_lower": 17,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 0.743,
+          "ci95": [
+            0.385,
+            1.163
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 1.138,
+          "ci95": [
+            0.844,
+            1.745
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 0.275,
+          "ci95": [
+            0.183,
+            0.569
+          ],
+          "questions_lower": 3,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 0.978,
+          "ci95": [
+            0.758,
+            1.262
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 0.342,
+          "ci95": [
+            0.272,
+            0.435
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 0.403,
+          "ci95": [
+            0.262,
+            0.621
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        }
+      },
+      "grep_vs_cost_ratio_spearman": 0.622,
+      "turns": {
+        "all": {
+          "geomean_ratio": 0.712,
+          "ci95": [
+            0.48,
+            1.126
+          ],
+          "questions_lower": 15,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 0.909,
+          "ci95": [
+            0.452,
+            1.491
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 1.223,
+          "ci95": [
+            0.92,
+            1.504
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 0.245,
+          "ci95": [
+            0.111,
+            0.375
+          ],
+          "questions_lower": 3,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 2.167,
+          "ci95": [
+            0.675,
+            12.647
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 0.383,
+          "ci95": [
+            0.251,
+            0.573
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 0.442,
+          "ci95": [
+            0.355,
+            0.587
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        }
+      },
+      "output_tokens": {
+        "all": {
+          "geomean_ratio": 0.606,
+          "ci95": [
+            0.479,
+            0.754
+          ],
+          "questions_lower": 16,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 0.756,
+          "ci95": [
+            0.358,
+            1.147
+          ],
+          "questions_lower": 1,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 1.049,
+          "ci95": [
+            0.861,
+            1.319
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 0.372,
+          "ci95": [
+            0.293,
+            0.493
+          ],
+          "questions_lower": 3,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 0.934,
+          "ci95": [
+            0.767,
+            1.138
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 0.384,
+          "ci95": [
+            0.326,
+            0.451
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 0.413,
+          "ci95": [
+            0.334,
+            0.512
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        }
+      },
+      "wall_seconds": {
+        "all": {
+          "geomean_ratio": 1.277,
+          "ci95": [
+            0.877,
+            1.87
+          ],
+          "questions_lower": 13,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 3.977,
+          "ci95": [
+            2.797,
+            4.972
+          ],
+          "questions_lower": 0,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 3.06,
+          "ci95": [
+            1.799,
+            5.206
+          ],
+          "questions_lower": 0,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 0.575,
+          "ci95": [
+            0.467,
+            0.75
+          ],
+          "questions_lower": 3,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 1.524,
+          "ci95": [
+            0.868,
+            3.982
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 0.498,
+          "ci95": [
+            0.431,
+            0.584
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 0.669,
+          "ci95": [
+            0.567,
+            0.789
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        }
+      }
+    }
+  }
+}

@@ -1,15 +1,17 @@
 # code-graph benchmarks
 
-Three benchmarks for the claims this cookbook makes, all on
-[hono](https://github.com/honojs/hono), TypeScript, MIT. They are run by hand,
-not in CI, and write everything they fetch or build under `work/`, which git
-ignores.
+Four benchmarks for the claims this cookbook makes: three on
+[hono](https://github.com/honojs/hono), TypeScript, MIT, and the agent-cost
+benchmark again on [VS Code](https://github.com/microsoft/vscode), MIT. They
+are run by hand, not in CI, and write everything they fetch or build under
+`work/`, which git ignores.
 
 | Benchmark | Claim | Ground truth |
 |---|---|---|
 | [PR diff](#pr-diff) | A pull request's branch diff is exactly what it changed | Two reference graphs built with the TypeScript compiler API, at the base and the merge commit |
 | [Execution recall](#execution-recall) | The graph contains the calls the code really makes | Calls recorded while hono's own test suite runs |
 | [Agent cost](#agent-cost) | An agent with the graph answers code-structure questions for fewer tokens and less time | Eight questions with keys from the compiler reference, checked against the source |
+| [Agent cost at scale](#agent-cost-at-scale) | The same on a repository where text search answers badly | 24 questions picked by rule from a compiler reference of VS Code, with keys corrected after the run |
 
 The cookbook resolves references through scip-typescript, which runs the
 TypeScript compiler. A compiler-built reference therefore cannot test the
@@ -305,9 +307,94 @@ Each tool's first index of a fresh checkout, median of three, from
 | code-review-graph | 5.8 s | 5.8, 5.8, 4.9 |
 | GitNexus | 21.3 s | 23.0, 21.3, 20.3 |
 
+## Agent cost at scale
+
+```bash
+OMNIGRAPH_BIN=/path/to/0.14.0/omnigraph sh code-graph/bench/scale-run.sh full   # build, questions, setup, 480 sessions
+python3 code-graph/bench/scale.py rekey                                          # the asked questions, current keys
+python3 code-graph/bench/agent.py --suite vscode score                           # results/agent-scale.json
+python3 code-graph/bench/scale.py analyze                                        # by family, against no graph
+```
+
+On hono one text search returns a short list, so the agent-cost benchmark
+could not show what a graph is for. This one asks about VS Code 1.146.0, 89
+times hono's size, whose services are injected through interfaces and where
+376 names have 50 or more definitions. 24 questions in six families are
+picked from the compiler reference by rule with a fixed seed, and asked five
+times each in four arms: no code graph, Omnigraph, codegraph and Graphify.
+1.145.0 is the previous release for the release questions.
+[`scale-design.md`](scale-design.md) has the design, the hypotheses stated
+before the runs, the pilot, and every correction.
+
+The run turned up two defects in the cookbook, both fixed: the graph had
+been loaded without its indexes, which made every Omnigraph read slow but
+changed no answer, and the converter left out static members. It also turned
+up errors in its own keys. The compiler reference covered `src/vs/` rather
+than `src/`, and did not count a call or construction through dependency
+injection (`invokeFunction`, `createInstance`). Counting them leaves one
+question with 44,328 answers, so 23 are scored.
+
+Results, `results/agent-scale.json`, from 480 sessions on 2026-11-18 ($72 at
+list price). Medians per session:
+
+| Arm | Exact answers | Mean F1 | Cost | Wall time | Output tokens | Turns | Calls to its tool |
+|---|---|---|---|---|---|---|---|
+| No code graph | 73 of 115 | 0.960 | $0.103 | 23.6 s | 2,744 | 8 | |
+| Omnigraph | 79 of 115 | 0.964 | $0.076 | 41.7 s* | 1,417 | 5 | 36% |
+| codegraph | 73 of 115 | 0.960 | $0.112 | 42.2 s | 2,784 | 8 | 0.3% |
+| Graphify | 68 of 115 | 0.949 | $0.121 | 25.4 s | 2,968 | 10 | 5% |
+
+\* On the graph without indexes, where `cg members` took a median 48 s.
+
+Against no graph, question by question (geometric mean of the ratio of
+medians, 95% bootstrap interval, questions where the arm spent less):
+
+| Arm | Cost | Output tokens | Turns |
+|---|---|---|---|
+| Omnigraph | 0.58× [0.44, 0.77], 17 of 23 | 0.61× [0.48, 0.75], 16 | 0.71× [0.48, 1.13], 15 |
+| codegraph | 0.91× [0.83, 1.01], 16 of 23 | 0.94× [0.86, 1.02], 12 | 1.04× [0.82, 1.49], 12 |
+| Graphify | 1.12× [1.02, 1.22], 5 of 23 | 1.05× [0.97, 1.13], 6 | 1.26× [1.05, 1.71], 6 |
+
+A second window, `results/agent-scale-window2.json`, ran no graph and
+Omnigraph again after `optimize`, 240 sessions, still without static members:
+
+| Arm | Exact answers | Mean F1 | Cost | Wall time | Output tokens | Turns | Calls to its tool |
+|---|---|---|---|---|---|---|---|
+| No code graph | 69 of 115 | 0.951 | $0.091 | 22.9 s | 2,724 | 9 | |
+| Omnigraph | 80 of 115 | 0.953 | $0.047 | 14.1 s | 1,455 | 5 | 36% |
+
+Against no graph Omnigraph cost 0.52× [0.39, 0.69], lower on 17 of 23
+questions, and took 0.70× [0.57, 0.87] of the wall time, against 1.28×
+without indexes. `cg` answered in a median 0.2 to 0.5 s a call, the slowest
+of 453 calls in 4.0 s.
+
+Omnigraph cost less; it was not more accurate, except on release changes.
+Every arm was exact on about the same questions and went wrong on the same
+entries: a call made inside a closure or a static field's initializer, a
+construction through `createInstance` left out, a subclass's `super()`
+counted as one. Over both windows Omnigraph was exact in 17 more of 230
+sessions than no graph (95% interval over questions −4 to 43), and in 3 more
+without the release questions; no graph alone moved from 73 to 69 between
+windows. On release changes Omnigraph's agents were exact in 19 and 18 of 20
+sessions, the others in 7 to 12: `cg` reads both releases, where the others
+diff text, and when 1.146.0 moved the call to `moveEditors` into a new
+method, `doMergeGroup`, only Omnigraph's sessions named it. Omnigraph saved
+most where one `cg` read answers and least where one search for the method's
+name answers too, so its saving did not grow with the lines a search returns,
+as the design predicted. On chains of calls it was cheapest (0.28× and
+0.17×) but never exact, because `impact` follows every reference, not every
+call; and on the indexed graph `impact` from a hub ran out of memory in all
+five sessions of the question left out of the scores. codegraph's and
+Graphify's agents barely used their tools, so the run says little about
+those tools.
+
 ## Limits
 
-- One repository in one language. The ranking may differ elsewhere.
+- One repository in one language for three benchmarks, and two for the
+  agent-cost benchmark. The ranking may differ elsewhere.
+- The scale benchmark's keys were corrected after its run, from reading the
+  entries most sessions disagreed with; `scale-design.md` lists each
+  correction and why, and every question keeps the key it was asked with.
 - The agent-cost benchmark ran one model, in one harness, three sessions per
   question and arm, with list prices. Omnigraph's instructions were written
   for it, the other tools' by their authors, and the keys come from the same

@@ -259,9 +259,9 @@ qualifies the committed files.
 
 ## Benchmarks
 
-Measured on hono by the scripts in [`bench/`](bench/README.md), which has the
-methods, the adjudication of every miss and the limits. They run by hand, not
-in CI.
+Measured on hono, and the agent benchmark again on VS Code, by the scripts in
+[`bench/`](bench/README.md), which has the methods, the adjudication of every
+miss and the limits. They run by hand, not in CI.
 
 **Pull request diffs.** The 40 most recent hono pull requests before
 2026-11-01 that change `src/`, each loaded as its base and merge commit and
@@ -327,6 +327,34 @@ hops. With both fixed, the rerun answered every question exactly. Cost per
 session varies with prompt caching, by as much as $0.13 for one question in
 one arm, more than the differences between most arms' medians. Indexing hono
 takes Omnigraph 2.3 s, the tools 2.0 to 21.3 s.
+
+**Agent cost at scale.** The same benchmark on VS Code 1.146.0, 89 times
+hono's size: 24 questions picked by rule from a compiler reference, asked five
+times each in four arms, 480 sessions
+([design and corrections](bench/scale-design.md)). After the keys were
+corrected 23 questions are scored. Medians per session, and the cost paired
+with no code graph question by question:
+
+| Arm | Exact answers | Cost | Output tokens | Turns | Cost against no graph |
+|---|---|---|---|---|---|
+| No code graph | 73 of 115 | $0.103 | 2,744 | 8 | |
+| Omnigraph | 79 of 115 | $0.076 | 1,417 | 5 | 0.58× [0.44, 0.77], lower on 17 of 23 |
+| codegraph | 73 of 115 | $0.112 | 2,784 | 8 | 0.91× [0.83, 1.01] |
+| Graphify | 68 of 115 | $0.121 | 2,968 | 10 | 1.12× [1.02, 1.22] |
+
+A second window ran no graph and Omnigraph again on the graph with its
+indexes, 240 sessions. Omnigraph was exact in 80 of 115 sessions against 69,
+at $0.047 against $0.091 a session: 0.52× [0.39, 0.69] of no graph's cost and
+0.70× [0.57, 0.87] of its wall time, where without indexes it had taken
+1.28×.
+
+Omnigraph's agents were as accurate as the others except on release changes,
+where `cg` reads both releases: 19 and 18 of 20 exact in the two windows,
+against 7 to 12. The run found
+two defects in this cookbook, both fixed: the graph had been loaded without
+its indexes, so every read scanned whole tables (`cg members` took 48 s,
+0.06 s after `optimize`, which `cg load` now runs), and the converter left
+out static members, 5,402 of VS Code's definitions.
 
 ## Limits
 
