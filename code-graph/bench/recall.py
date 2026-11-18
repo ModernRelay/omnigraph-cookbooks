@@ -41,8 +41,11 @@ def implementations(cook_rows_path: str) -> dict[str, set[str]]:
     impl = collections.defaultdict(set)
     for line in open(cook_rows_path):
         r = json.loads(line)
-        if r.get("edge") == "Implements":
-            a, b = identity_from_key(r["from"]), identity_from_key(r["to"])
+        # ImplementedBy runs from the member to its implementation; conversions
+        # made before it was reversed have Implements, the other way.
+        if r.get("edge") in ("ImplementedBy", "Implements"):
+            member, implementation = (r["from"], r["to"]) if r["edge"] == "ImplementedBy" else (r["to"], r["from"])
+            a, b = identity_from_key(implementation), identity_from_key(member)
             if a and b:
                 impl[b].add(a)
     return impl

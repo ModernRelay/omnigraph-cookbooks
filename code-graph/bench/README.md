@@ -120,7 +120,7 @@ Results, `results/recall.json`:
 |---|---|---|---|---|
 | Compiler reference | 0.893 | 0.882 | 0.907 | 0.978 |
 | Omnigraph, every reference | 0.895 | 0.882 | 0.907 | 1.000 |
-| Omnigraph, every reference with `Implements` | 0.934 | | | |
+| Omnigraph, every reference with `ImplementedBy` | 0.934 | | | |
 | Omnigraph, call edges only | 0.779 | 0.865 | 0.907 | 0 |
 | codegraph | 0.680 | 0.749 | 0.870 | 0 |
 | Graphify | 0.679 | 0.749 | 0.852 | 0 |
@@ -131,7 +131,7 @@ Results, `results/recall.json`:
 "Every reference" is what the cookbook's reads on Omnigraph answer: `callers`,
 `callees` and `impact` follow every `References` edge and report `call` as a column, not
 a filter. "Call edges only" keeps the edges whose `call` is true. "With
-`Implements`" adds a second read, `implementers`: a call through an interface
+`ImplementedBy`" adds a second read, `implementers`: a call through an interface
 member also reaches the implementations the graph records.
 
 The tools record calls, so the like-for-like column is functions and
@@ -176,7 +176,7 @@ The compiler reference misses 98 executed calls, about one in nine. 47 are
 function values called indirectly: a function passed as an argument, stored
 in a property or returned, then called by code that never names it. 44 are
 calls dispatched to an override, such as `this.getHeaders()` in an abstract
-class running a subclass's method; Omnigraph's `Implements` edges recover
+class running a subclass's method; Omnigraph's `ImplementedBy` edges recover
 most of these. The other seven reach constructors and getters.
 
 ## Agent cost

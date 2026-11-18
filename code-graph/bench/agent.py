@@ -109,8 +109,8 @@ searching text; `cg --help` lists every command.
 - `cg find NAME`: the definitions with that name, and their keys
 - `cg callers SYMBOL`: every definition whose code names SYMBOL; `call` says whether one of those references is a call
 - `cg callees SYMBOL`: what SYMBOL's code calls or names
-- `cg impact SYMBOL`: every definition within sixteen references of SYMBOL
-- `cg implementers MEMBER`: the class members that implement an interface member
+- `cg impact SYMBOL`: every definition that reaches SYMBOL through up to sixteen references and implementations, so a call through an interface reaches the methods implementing it
+- `cg implementers MEMBER`: the class members that implement or override an interface or base member
 - `cg members SYMBOL`: what a module, class or interface declares
 
 SYMBOL is a name or a key from `cg find`; a name that several definitions
@@ -596,12 +596,15 @@ def owner_lift(nodes: dict):
     methods, classes, interfaces and function constants. A getter, field or
     variable lifts to its class, and a constant that holds no function to its
     file, so naming `upgradeWebSocket` and naming its file grade alike, though
-    the graph and the reference give such a constant its own code."""
+    the graph and the reference give such a constant its own code. A method
+    with no class is a member of an object literal written at the top of a
+    file, which has no name of its own, so it lifts to its file."""
     non_owner = {"getter", "setter", "property", "variable", "enum_member"}
 
     def lift(ident: str) -> str:
         n = nodes[ident]
-        while n["kind"] in non_owner or (n["kind"] == "constant" and not n["callable"]):
+        while (n["kind"] in non_owner or (n["kind"] == "constant" and not n["callable"])
+               or (n["kind"] == "method" and ":" in ident and "." not in ident.split(":", 1)[1])):
             tail = ident.split(":", 1)[-1]
             parent = ident.rsplit(".", 1)[0] if ":" in ident and "." in tail else n["path"]
             if parent not in nodes or parent == ident:

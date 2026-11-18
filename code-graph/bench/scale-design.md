@@ -215,7 +215,7 @@ What the six questions showed:
   callers have two readings, and ranks candidates by a hash so a rule change
   moves only the candidates it affects. `scale-questions.json` is the new set
   for the full run.
-- **Omnigraph is last on that question once regraded** (F1 0.58; Graphify
+- **Omnigraph was last on that question once regraded** (F1 0.58; Graphify
   0.89, codegraph 0.72, no graph 0.71), with precision 1.00 and recall 0.41.
   `impact` follows `References` only. A call through an injected interface
   references the interface member, and `Implements` points from the
@@ -224,6 +224,29 @@ What the six questions showed:
   a gap in the cookbook's model, not in the engine. Two ways to close it: a
   derived edge from an interface member to each implementation, walked as
   `references | dispatches`, or `Implements` reversed.
+- **Fixed since:** `Implements` is now `ImplementedBy`, from the interface
+  or base member to each implementation, the way a call goes, and `impact`
+  walks `(references | implementedBy){1,16}`. On the rebuilt graph, `impact`
+  on the pilot's transitive target returns all 34 of the corrected key, in
+  66 rows and 3.7 s, and on the full run's four transitive targets 10 of 10,
+  18 of 18, 32 of 32 and 0 of 17. The agents have not been rerun on it.
+  Two engine limits came with the walk over two edge types. The engine
+  admits it against every selected edge table's full row count on each
+  probe: VS Code's 1.9 million edges exceed the default
+  `traversal_work_limit` of 1 million before any row is read, and a hub then
+  needs more than the default 150 MiB of `query_memory_bytes`. `cg` lifts the
+  first and raises the second to 2 GiB for `impact` on a local graph; a hub
+  then takes about 34 s. A server's stored query takes no session settings,
+  so a served graph needs them raised on the server.
+- **Still open: `impact` is every reference, not every call.** For the fourth
+  transitive target, `logAuthenticationSessionResolution`, the key has 17
+  callers, but `impact` reaches 107,836 definitions, mostly through type
+  uses, so the read stops at its 5,000-row limit and the alphabetical first
+  5,000 hold none of them. Leaving out the references to files changes that
+  only to 103,802. A walk over calls alone needs either a filter on each hop
+  of a multi-hop traversal, which GQ 0.14 does not have (it cannot bind a
+  multi-hop edge), or calls as an edge type of their own, beside
+  `References`. Until then the agent has to follow `cg callers` itself.
 - **Graph use.** Omnigraph's agents ran `cg` for 12 of their 45 tool calls
   (27%; on hono, about half). codegraph's and Graphify's agents ran their
   tools for 0 and 1 of 59 and 68. The share counted `git` as a graph tool in

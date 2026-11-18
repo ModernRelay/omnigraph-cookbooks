@@ -10,7 +10,7 @@
   "answer_format": "End your reply with one line that starts with ANSWER: followed by a JSON array of strings. Name each definition as path:Name for a top-level function, class, interface or constant, and as path:Class.member for a member of a class, with the path relative to the repository root, for example src/vs/platform/files/common/fileService.ts:FileService.readFile. For code that belongs to no named function, method or class, give the file path alone. Leave out test code: files under a test/ directory and files whose names end in .test.ts. Do not change any file.",
   "families": {
     "shared-name": {
-      "candidates": 673,
+      "candidates": 674,
       "rejected_as_overriding": 0,
       "rejected_by_source_check": 0,
       "picked": 4
@@ -22,7 +22,7 @@
       "picked": 4
     },
     "transitive": {
-      "candidates": 850,
+      "candidates": 849,
       "rejected_as_overriding": 0,
       "rejected_by_source_check": 0,
       "picked": 4
@@ -40,7 +40,7 @@
       "picked": 4
     },
     "control": {
-      "candidates": 7001,
+      "candidates": 6999,
       "rejected_as_overriding": 0,
       "rejected_by_source_check": 0,
       "picked": 4
@@ -259,9 +259,7 @@
         "src/vs/workbench/contrib/notebook/browser/contrib/find/notebookFind.ts",
         "src/vs/workbench/contrib/notebook/browser/contrib/find/notebookFind.ts:findWidgetAction",
         "src/vs/workbench/contrib/notebook/browser/contrib/find/notebookFind.ts:openFindWidget",
-        "src/vs/workbench/contrib/notebook/browser/contrib/find/notebookFind.ts:run",
         "src/vs/workbench/contrib/notebook/browser/contrib/find/notebookFind.ts:runFind",
-        "src/vs/workbench/contrib/notebook/browser/contrib/find/notebookFind.ts:runWithContext",
         "src/vs/workbench/contrib/notebook/browser/contrib/find/notebookFindReplaceWidget.ts:SimpleFindReplaceWidget.constructor",
         "src/vs/workbench/contrib/notebook/browser/contrib/find/notebookFindWidget.ts:NotebookFindContrib.findNext",
         "src/vs/workbench/contrib/notebook/browser/contrib/find/notebookFindWidget.ts:NotebookFindContrib.findPrevious",
