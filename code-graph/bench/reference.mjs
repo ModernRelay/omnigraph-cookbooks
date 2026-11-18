@@ -252,11 +252,25 @@ export function buildReference(checkout, { project = 'tsconfig.build.json', scop
     ts.forEachChild(sf, (child) => walk(child, sf, [], moduleId, false))
   }
 
+  // Dependency injection runs what it is handed: VS Code's
+  // `instantiationService.invokeFunction(fn, ...)` calls fn, and
+  // `createInstance(C, ...)` constructs a C. Its services are reached this way,
+  // so a call or construction through either counts as one.
+  function injectedInto(id, method) {
+    let e = id
+    let p = e.parent
+    if (p && ts.isPropertyAccessExpression(p) && p.name === e) { e = p; p = e.parent }
+    while (p && (ts.isParenthesizedExpression(p) || ts.isNonNullExpression(p))) { e = p; p = e.parent }
+    if (!p || !ts.isCallExpression(p) || p.arguments[0] !== e) return false
+    const callee = ts.isPropertyAccessExpression(p.expression) ? p.expression.name : p.expression
+    return ts.isIdentifier(callee) && callee.text === method
+  }
+
   function isConstructed(id) {
     let e = id
     let p = e.parent
     if (p && ts.isPropertyAccessExpression(p) && p.name === e) { e = p; p = e.parent }
-    return !!p && ts.isNewExpression(p) && p.expression === e
+    return (!!p && ts.isNewExpression(p) && p.expression === e) || injectedInto(id, 'createInstance')
   }
 
   function isCallee(id) {
@@ -264,8 +278,9 @@ export function buildReference(checkout, { project = 'tsconfig.build.json', scop
     let p = e.parent
     if (p && ts.isPropertyAccessExpression(p) && p.name === e) { e = p; p = e.parent }
     while (p && (ts.isParenthesizedExpression(p) || ts.isNonNullExpression(p))) { e = p; p = e.parent }
-    return !!p && ((ts.isCallExpression(p) && p.expression === e) || (ts.isNewExpression(p) && p.expression === e) ||
-      (ts.isTaggedTemplateExpression(p) && p.tag === e))
+    return (!!p && ((ts.isCallExpression(p) && p.expression === e) || (ts.isNewExpression(p) && p.expression === e) ||
+      (ts.isTaggedTemplateExpression(p) && p.tag === e))) || injectedInto(id, 'invokeFunction') ||
+      injectedInto(id, 'createInstance')
   }
 
   const edges = {}

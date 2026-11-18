@@ -5,11 +5,15 @@
     python3 code-graph/bench/scale.py build       # index, convert, load into Omnigraph; compiler references
     python3 code-graph/bench/scale.py questions   # pick the questions by rule, write their keys, check them
     python3 code-graph/bench/scale.py regrade-pilot   # the pilot's answers against the current rules' keys
+    python3 code-graph/bench/scale.py rekey       # the full run's questions with the current rules' keys
+    python3 code-graph/bench/scale.py analyze     # per family, against no graph, and hypothesis 2
     python3 code-graph/bench/agent.py --suite vscode setup|run|score ...
 
 Everything is written under work/scale/, which git ignores; a step whose output
 exists is skipped, so delete an output to rebuild it. The questions and their
-keys go to scale-questions.json. Needs curl, git, Node.js 22.23.4 or later,
+keys go to scale-questions.json, which now holds the set the full run asked:
+`questions` would pick a different set under the current rules, so after the
+run a rule change goes through `rekey`. Needs curl, git, Node.js 22.23.4 or later,
 the locked indexer (`npm ci` in code-graph/sources/indexer), the 0.14.0
 omnigraph CLI (OMNIGRAPH_BIN) and about 10 GB of memory per step.
 """
@@ -38,7 +42,7 @@ REPO_URL = "https://github.com/microsoft/vscode.git"
 TARBALL = "https://codeload.github.com/microsoft/vscode/tar.gz/refs/tags/{tag}"
 PREVIOUS, CURRENT = RELEASES = ("1.145.0", "1.146.0")
 PROJECT = "src/tsconfig.json"
-SCOPE = "src/vs/"
+SCOPE = "src/"  # what the questions ask about; the reference once covered src/vs/ only
 QUESTIONS = BENCH / "scale-questions.json"
 SEED = 20261117
 PER_FAMILY = 4
@@ -220,23 +224,21 @@ class Release:
         a chain, the deepest hop, and the chain's own definitions; stops once
         more than `cap` are found. A call to an interface or base member can
         run each method that implements or overrides it, so a chain continues
-        through it: VS Code calls its services through injected interfaces."""
-        seen, frontier, depth, found = {target}, [target], 0, set()
+        through it: VS Code calls its services through injected interfaces.
+        Each hop is computed from whole sets, so the result does not depend on
+        the order in which a set yields its members."""
+        callees, callers, frontier, depth, found = set(), {target}, {target}, 0, set()
         while frontier and len(found) <= cap:
-            nxt = []
-            for x in frontier:
-                for called in self.runs_for(x):
-                    seen.add(called)
-                    for c in self.callers.get(called, ()):
-                        if c not in seen:
-                            seen.add(c)
-                            nxt.append(c)
+            called = set().union(*(self.runs_for(x) for x in frontier)) - callees
+            callees |= called
+            nxt = {c for t in called for c in self.callers.get(t, ())} - callers
             if not nxt:
                 break
+            callers |= nxt
             depth += 1
             found |= {self.lift(c) for c in nxt}
             frontier = nxt
-        return found - {self.lift(target)}, depth, seen
+        return found - {self.lift(target)}, depth, callees | callers
 
     def bodies(self, member: str) -> set[str]:
         """Methods with a body that implement or override the member, at any depth."""
@@ -411,6 +413,91 @@ def key_for(cur: Release, prev: Release, family: str, target: str) -> set[str]:
     return cur.direct(ctor if ctor in cur.nodes else target)
 
 
+FULL_RUN = "80e7ba1"  # the commit whose scale-questions.json the full run asked
+
+# Entries the compiler reference cannot decide, each read in the source after
+# the full run. `add` puts a definition in the key; `optional` makes one count
+# neither way, where the question has two fair readings.
+CORRECTIONS = {
+    "shared-name-2": {
+        "add": ["src/vs/platform/theme/common/tokenClassificationRegistry.ts:TokenStyle.equals"],
+        "optional": ["src/vs/base/common/color.ts:Color.equals",
+                     "src/vs/editor/browser/viewParts/overviewRuler/decorationsOverviewRuler.ts:Settings.equals"],
+        "note": "Color declares a static and an instance method named equals, so the question has two readings. "
+                "The static one, which calls the instance one, and Settings.equals, which calls only the static one, "
+                "count neither way. TokenStyle.equals calls the instance method on a value of type any narrowed by "
+                "instanceof, which the compiler reference does not resolve.",
+    },
+    "dispatch-1": {
+        "optional": ["src/vs/editor/contrib/floatingMenu/browser/floatingMenu.ts",
+                     "src/vs/editor/contrib/floatingMenu/browser/floatingMenu.ts:FloatingEditorToolbarWidget.constructor",
+                     "src/vs/workbench/contrib/chat/browser/widget/input/chatInputPart.ts",
+                     "src/vs/workbench/contrib/chat/browser/widget/input/chatInputPart.ts:ChatInputPart.render",
+                     "src/vs/workbench/contrib/mcp/browser/mcpCommands.ts",
+                     "src/vs/workbench/contrib/mcp/browser/mcpCommands.ts:MCPServerActionRendering.constructor",
+                     "src/vs/workbench/contrib/sessions/browser/views/sessionsList.ts",
+                     "src/vs/workbench/contrib/sessions/browser/views/sessionsList.ts:SessionItemRenderer.renderTemplate"],
+        "note": "Four anonymous classes, `class extends MenuEntryActionViewItem` or a subclass inside a method, "
+                "override render. The compiler reference does not model anonymous classes, and the answer format "
+                "does not say whether to name one by its file or by the method around it, so both spellings count "
+                "neither way.",
+    },
+    "dispatch-4": {
+        "optional": ["src/vs/workbench/contrib/mcp/browser/mcpServerEditor.ts",
+                     "src/vs/workbench/contrib/mcp/browser/mcpServerEditor.ts:McpServerEditor.createEditor"],
+        "note": "An anonymous `class extends McpServerWidget` inside McpServerEditor.createEditor overrides render. "
+                "The compiler reference does not model anonymous classes, and the answer format does not say whether "
+                "to name one by its file or by the method around it, so both spellings count neither way.",
+    },
+    "transitive-4": {
+        "drop": True,
+        "note": "The chain to the target passes through `invokeFunction(resolveProtectedResourceAuthentication, ...)`, "
+                "a call through dependency injection, which every session followed. Counting it, the chain then "
+                "reaches BaseActionViewItem.render, and every call that can dispatch to an override of that, so "
+                "44,328 definitions reach the target: the question has no answer to list, and it is left out of "
+                "the scores.",
+    },
+    "release-3": {
+        "optional": ["src/vs/workbench/contrib/sessionChanges/browser/changesView.ts:ChangesViewPane.getTreeSelection",
+                     "src/vs/workbench/contrib/sessionChanges/browser/changesView.ts:ChangesViewPane.renderSidebarList"],
+        "note": "changesView.ts moved from src/vs/sessions/contrib/changes/browser/ in 1.145.0 to "
+                "src/vs/workbench/contrib/sessionChanges/browser/ in 1.146.0, and both methods called getSelection at "
+                "the old path. By path they gained the call and by code they did not, so they count neither way.",
+    },
+}
+
+
+def rekey():
+    """Give the questions the full run asked the keys the current rules give,
+    with CORRECTIONS applied; each keeps the key it was asked with as
+    `asked_answer`. The sessions are then scored again from their transcripts."""
+    ran = json.loads(subprocess.run(["git", "show", f"{FULL_RUN}:code-graph/bench/scale-questions.json"],
+                                    cwd=BENCH, capture_output=True, text=True, check=True).stdout)
+    cur, prev = Release(CURRENT), Release(PREVIOUS)
+    questions = []
+    for q in ran["questions"]:
+        fix = CORRECTIONS.get(q["id"], {})
+        optional = set(fix.get("optional", ()))
+        key = (key_for(cur, prev, q["family"], q["target"]) | set(fix.get("add", ()))) - optional
+        notes = [f"Asked with {len(q['answer'])} entries; the current rules give {len(key)}."] \
+            if key != set(q["answer"]) else []
+        notes += [fix["note"]] if fix else []
+        if fix.get("drop"):
+            # Too large to keep: the asked key stays, with the size the rules give.
+            questions.append({**q, "asked_answer": q["answer"], "dropped": True, "current_rules_answers": len(key),
+                              "note": fix["note"]})
+            print(f"{q['id']:<15} {len(q['answer']):>3} -> {len(key):>3}  dropped")
+            continue
+        questions.append({**q, "answer": sorted(key), "asked_answer": q["answer"],
+                          **({"optional": sorted(optional)} if optional else {}),
+                          **({"note": " ".join(notes)} if notes else {})})
+        print(f"{q['id']:<15} {len(q['answer']):>3} -> {len(key):>3}{'  optional ' + str(len(optional)) if optional else ''}")
+    spec = {**ran, "questions": questions,
+            "note": f"The questions the full run asked, from {FULL_RUN}, with keys from the current rules "
+                    "and the corrections in scale.py."}
+    QUESTIONS.write_text(json.dumps(spec, indent=2) + "\n")
+
+
 PILOT_RUN = "be3e719"  # the commit whose scale-questions.json the pilot ran
 
 
@@ -485,8 +572,9 @@ def analyze(results_path: Path, questions_path: Path):
 
     results = json.loads(results_path.read_text())
     spec = json.loads(questions_path.read_text())
-    family = {q["id"]: q["family"] for q in spec["questions"]}
-    grep = {q["id"]: q["grep_lines"] for q in spec["questions"]}
+    scored = [q for q in spec["questions"] if not q.get("dropped")]
+    family = {q["id"]: q["family"] for q in scored}
+    grep = {q["id"]: q["grep_lines"] for q in scored}
     runs = [r for r in results["runs"] if r["question"] in family]
     arms = list(dict.fromkeys(r["arm"] for r in runs))
     med = statistics.median
@@ -498,7 +586,7 @@ def analyze(results_path: Path, questions_path: Path):
                 "median_turns": med(r["turns"] or 0 for r in rs),
                 "median_wall_seconds": round(med(r["wall_seconds"] for r in rs), 1)}
 
-    families = list(dict.fromkeys(family[q["id"]] for q in spec["questions"]))
+    families = list(dict.fromkeys(family[q["id"]] for q in scored))
     table = {arm: {"all": cell([r for r in runs if r["arm"] == arm]),
                    **{f: cell(rs) for f in families
                       if (rs := [r for r in runs if r["arm"] == arm and family[r["question"]] == f])}}
@@ -557,6 +645,7 @@ def main():
     p = sub.add_parser("questions")
     p.add_argument("--per-family", type=int, default=PER_FAMILY)
     sub.add_parser("regrade-pilot")
+    sub.add_parser("rekey")
     p = sub.add_parser("analyze")
     p.add_argument("--results", default=str(BENCH / "results" / "agent-scale.json"))
     p.add_argument("--questions", default=str(QUESTIONS))
@@ -567,6 +656,8 @@ def main():
         build()
     elif args.cmd == "regrade-pilot":
         regrade_pilot()
+    elif args.cmd == "rekey":
+        rekey()
     elif args.cmd == "analyze":
         analyze(Path(args.results), Path(args.questions))
     else:

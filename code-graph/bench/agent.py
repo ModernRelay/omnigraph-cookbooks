@@ -673,8 +673,11 @@ def grade(answer: list, key: set, nodes: dict, lift, optional: set = frozenset()
             "wrong": sorted(got - key), "missed": sorted(key - got)}
 
 
+ANSWER_LINE = re.compile(r"ANSWER:\s*(\[.*?\])\s*$", re.S | re.M)
+
+
 def parse_stream(path: Path) -> dict:
-    tools, text, result, init, first_context = collections.Counter(), "", None, None, None
+    tools, text, result, init, first_context, texts = collections.Counter(), "", None, None, None, []
     for line in path.read_text().splitlines():
         try:
             ev = json.loads(line)
@@ -696,20 +699,28 @@ def parse_stream(path: Path) -> dict:
                         tools[f"Bash:{first[0] if first else ''}"] += 1
                 elif block.get("type") == "text":
                     text = block["text"]
+                    texts.append(text)
         elif ev.get("type") == "result":
             result = ev
-    return {"tools": tools, "last_text": (result or {}).get("result") or text, "result": result, "init": init,
-            "first_context": first_context}
+    texts.append((result or {}).get("result") or "")
+    # The session's answer is its last ANSWER: line in any message: an agent
+    # that answers, then replies to a late tool notification with "the answer
+    # above stands", has still answered.
+    answer = next((t for t in reversed(texts) if ANSWER_LINE.search(t)), "")
+    return {"tools": tools, "answer_text": answer,
+            "result": result, "init": init, "first_context": first_context}
 
 
 def score(model: str):
     spec = json.loads(QUESTIONS.read_text())
     nodes, _ = load_reference(REFERENCE)
     lift = owner_lift(nodes)
-    keys = {q["id"]: set(q["answer"]) for q in spec["questions"]}
-    family = {q["id"]: q.get("family", q["id"]) for q in spec["questions"]}
+    # A dropped question has no answer to grade against (its `note` says why).
+    scored = [q for q in spec["questions"] if not q.get("dropped")]
+    keys = {q["id"]: set(q["answer"]) for q in scored}
+    family = {q["id"]: q.get("family", q["id"]) for q in scored}
     families = list(dict.fromkeys(family.values()))
-    optional = {q["id"]: set(q.get("optional", [])) for q in spec["questions"]}
+    optional = {q["id"]: set(q.get("optional", [])) for q in scored}
     for qid, key in keys.items():
         missing = [k for k in key | optional[qid] if k not in nodes and k.split(":")[0] not in nodes]
         if missing:
@@ -717,6 +728,8 @@ def score(model: str):
     rows = []
     for meta_path in sorted((RUNS / model).glob("*/*.meta.json")):
         meta = json.loads(meta_path.read_text())
+        if meta["question"] not in keys:
+            continue
         parsed = parse_stream(meta_path.with_name(meta_path.name.replace(".meta.json", ".jsonl")))
         res = parsed["result"] or {}
         usage = res.get("modelUsage") or {}
@@ -724,7 +737,7 @@ def score(model: str):
                         + u.get("cacheCreationInputTokens", 0) for u in usage.values())
         tokens_out = sum(u.get("outputTokens", 0) for u in usage.values())
         cache_writes = sum(u.get("cacheCreationInputTokens", 0) for u in usage.values())
-        match = re.findall(r"ANSWER:\s*(\[.*?\])\s*$", parsed["last_text"] or "", re.S | re.M)
+        match = ANSWER_LINE.findall(parsed["answer_text"])
         try:
             answer = json.loads(match[-1]) if match else []
         except json.JSONDecodeError:
@@ -812,6 +825,7 @@ def score(model: str):
 
 
 def main():
+    global RUNS, RESULTS
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--suite", choices=sorted(SUITES), default="hono",
                     help="the repository and questions: hono, or vscode (built by scale.py)")
@@ -822,6 +836,10 @@ def main():
             p.add_argument("--arms", default=",".join(ARMS))
         if name in ("run", "score"):
             p.add_argument("--model", default=DEFAULT_MODEL)
+        if name == "score":
+            # A second window of sessions keeps its transcripts and results apart.
+            p.add_argument("--runs", help="the transcripts' directory, instead of the suite's")
+            p.add_argument("--results", help="the results file's name under results/, instead of the suite's")
         if name == "index":
             p.add_argument("--reps", type=int, default=3)
         if name == "run":
@@ -843,6 +861,8 @@ def main():
     elif args.cmd == "run":
         run(arms, args.questions.split(",") if args.questions else None, args.reps, args.model, args.jobs)
     else:
+        RUNS = Path(args.runs).resolve() if args.runs else RUNS
+        RESULTS = args.results or RESULTS
         score(args.model)
 
 
