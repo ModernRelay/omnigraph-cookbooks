@@ -758,6 +758,13 @@ def score(model: str):
     if not rows:
         raise SystemExit(f"no runs under {RUNS / model}")
     med = lambda xs: statistics.median(xs) if xs else None  # noqa: E731
+    rnd = lambda x, n: round(x, n) if x is not None else None  # noqa: E731
+
+    # A session that ended without a result, such as one that timed out, has
+    # no cost, turn count or first context. Its value is unknown, not zero, so
+    # it is left out of those medians and pairs.
+    def known(rs, k):
+        return [r[k] for r in rs if r[k] is not None]
     summary = {}
     for arm in [a for a in ARMS if any(r["arm"] == a for r in rows)]:
         rs = [r for r in rows if r["arm"] == arm]
@@ -769,18 +776,18 @@ def score(model: str):
             "median_input_tokens": med([r["input_tokens"] for r in rs]),
             "median_output_tokens": med([r["output_tokens"] for r in rs]),
             "median_cache_write_tokens": med([r["cache_write_tokens"] for r in rs]),
-            "median_first_context_tokens": med([r["first_context_tokens"] or 0 for r in rs]),
-            "median_cost_usd": round(med([r["cost_usd"] or 0 for r in rs]), 4),
-            "total_cost_usd": round(sum(r["cost_usd"] or 0 for r in rs), 2),
+            "median_first_context_tokens": med(known(rs, "first_context_tokens")),
+            "median_cost_usd": rnd(med(known(rs, "cost_usd")), 4),
+            "total_cost_usd": round(sum(known(rs, "cost_usd")), 2),
             "median_wall_seconds": med([r["wall_seconds"] for r in rs]),
             "median_api_seconds": med([r["api_seconds"] for r in rs]),
-            "median_turns": med([r["turns"] or 0 for r in rs]),
+            "median_turns": med(known(rs, "turns")),
             "median_output_tokens_per_api_second": med([r["output_tokens_per_api_second"] for r in rs
                                                         if r["output_tokens_per_api_second"]]),
             "per_family": {fam: {"runs": len(fr), "exact": sum(r["exact"] for r in fr),
                                  "mean_f1": round(statistics.mean(r["f1"] for r in fr), 3),
-                                 "median_cost_usd": round(med([r["cost_usd"] or 0 for r in fr]), 4),
-                                 "median_turns": med([r["turns"] or 0 for r in fr])}
+                                 "median_cost_usd": rnd(med(known(fr, "cost_usd")), 4),
+                                 "median_turns": med(known(fr, "turns"))}
                            for fam in families if (fr := [r for r in rs if family[r["question"]] == fam])},
             "median_tool_calls": med(calls),
             "graph_tool_share": round(sum(r["tool_calls"].get("mcp", 0) + sum(
@@ -794,33 +801,38 @@ def score(model: str):
         }
     # Paired with the arm without a graph: per question, the ratio of the two
     # arms' medians over the repetitions, then the geometric mean over the
-    # questions, and on how many questions the arm spent less.
+    # questions, and on how many questions the arm spent less. A question
+    # counts for a measure once both arms have a positive median of it.
     def qmed(arm, q, k):
-        return med([r[k] for r in rows if r["arm"] == arm and r["question"] == q])
+        return med(known([r for r in rows if r["arm"] == arm and r["question"] == q], k))
     if "bare" in summary:
         for arm, s in summary.items():
-            qs = [q for q in keys if qmed(arm, q, "cost_usd") is not None and qmed("bare", q, "cost_usd")]
             s["vs_bare"] = {}
             for k in ("cost_usd", "wall_seconds", "input_tokens", "output_tokens", "turns"):
-                ratios = [qmed(arm, q, k) / qmed("bare", q, k) for q in qs]
-                s["vs_bare"][k] = {"geomean_ratio": round(math.exp(statistics.mean(math.log(x) for x in ratios)), 3),
-                                   "questions_lower": sum(x < 1 for x in ratios), "questions": len(qs)}
+                ratios = [a / b for q in keys if (a := qmed(arm, q, k)) and (b := qmed("bare", q, k))]
+                s["vs_bare"][k] = {"geomean_ratio": round(math.exp(statistics.mean(math.log(x) for x in ratios)), 3)
+                                   if ratios else None,
+                                   "questions_lower": sum(x < 1 for x in ratios), "questions": len(ratios)}
     out = BENCH / "results"
     out.mkdir(exist_ok=True)
     (out / RESULTS).write_text(json.dumps({"suite": SUITE, "model": model, "summary": summary, "runs": rows},
                                           indent=2) + "\n")
     print(f"{'arm':<11} {'runs':>4} {'F1':>6} {'exact':>5} {'in tok':>9} {'out tok':>8} {'cost $':>7} "
           f"{'wall s':>7} {'api s':>6} {'turns':>5} {'calls':>5} {'graph%':>6}")
+    def num(x, spec):
+        # A measure no session reported prints as "-" in the same width.
+        return format(x, spec) if x is not None else format("-", spec.split(".")[0])
     for arm, s in summary.items():
-        print(f"{arm:<11} {s['runs']:>4} {s['mean_f1']:>6.3f} {s['exact']:>5} {s['median_input_tokens']:>9.0f} "
-              f"{s['median_output_tokens']:>8.0f} {s['median_cost_usd']:>7.3f} {s['median_wall_seconds']:>7.1f} "
-              f"{s['median_api_seconds']:>6.1f} {s['median_turns']:>5.0f} {s['median_tool_calls']:>5.0f} "
+        print(f"{arm:<11} {s['runs']:>4} {s['mean_f1']:>6.3f} {s['exact']:>5} {num(s['median_input_tokens'], '>9.0f')} "
+              f"{num(s['median_output_tokens'], '>8.0f')} {num(s['median_cost_usd'], '>7.3f')} "
+              f"{num(s['median_wall_seconds'], '>7.1f')} {num(s['median_api_seconds'], '>6.1f')} "
+              f"{num(s['median_turns'], '>5.0f')} {num(s['median_tool_calls'], '>5.0f')} "
               f"{s['graph_tool_share'] * 100:>5.0f}%")
     if "bare" in summary:
         print(f"\n{'vs bare':<11} " + " ".join(f"{k:>16}" for k in ("cost", "wall", "input tokens", "output tokens", "turns")))
         for arm, s in summary.items():
             v = s["vs_bare"]
-            print(f"{arm:<11} " + " ".join(f"{v[k]['geomean_ratio']:>9.2f}x ({v[k]['questions_lower']}/{v[k]['questions']})"
+            print(f"{arm:<11} " + " ".join(f"{num(v[k]['geomean_ratio'], '>9.2f')}x ({v[k]['questions_lower']}/{v[k]['questions']})"
                                            for k in ("cost_usd", "wall_seconds", "input_tokens", "output_tokens", "turns")))
 
 

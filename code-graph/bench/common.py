@@ -100,5 +100,6 @@ def load_cookbook(path: Path) -> tuple[dict, dict]:
 def prf(tp: int, fp: int, fn: int) -> dict:
     p = tp / (tp + fp) if tp + fp else None
     r = tp / (tp + fn) if tp + fn else None
-    f = 2 * p * r / (p + r) if p and r else None
+    # Undefined when either is; zero when both are and nothing matched.
+    f = None if p is None or r is None else 2 * p * r / (p + r) if p + r else 0.0
     return {"tp": tp, "fp": fp, "fn": fn, "precision": p, "recall": r, "f1": f}

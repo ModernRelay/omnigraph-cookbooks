@@ -580,10 +580,14 @@ def analyze(results_path: Path, questions_path: Path):
     med = statistics.median
 
     def cell(rs):
+        # A session without a result has no cost or turns, which are unknown,
+        # not zero (agent.py score).
+        cost = [r["cost_usd"] for r in rs if r["cost_usd"] is not None]
+        turns = [r["turns"] for r in rs if r["turns"] is not None]
         return {"runs": len(rs), "exact": sum(r["exact"] for r in rs),
                 "mean_f1": round(statistics.mean(r["f1"] for r in rs), 3),
-                "median_cost_usd": round(med(r["cost_usd"] or 0 for r in rs), 4),
-                "median_turns": med(r["turns"] or 0 for r in rs),
+                "median_cost_usd": round(med(cost), 4) if cost else None,
+                "median_turns": med(turns) if turns else None,
                 "median_wall_seconds": round(med(r["wall_seconds"] for r in rs), 1)}
 
     families = list(dict.fromkeys(family[q["id"]] for q in scored))
@@ -625,8 +629,10 @@ def analyze(results_path: Path, questions_path: Path):
     print(f"{'arm':<10} {'family':<13} {'runs':>4} {'exact':>5} {'F1':>6} {'cost':>7} {'turns':>5} {'wall':>6}")
     for arm, cells in table.items():
         for f, c in cells.items():
-            print(f"{arm:<10} {f:<13} {c['runs']:>4} {c['exact']:>5} {c['mean_f1']:>6.3f} {c['median_cost_usd']:>7.3f} "
-                  f"{c['median_turns']:>5} {c['median_wall_seconds']:>6}")
+            cost = "-" if c["median_cost_usd"] is None else f"{c['median_cost_usd']:.3f}"
+            turns = "-" if c["median_turns"] is None else c["median_turns"]
+            print(f"{arm:<10} {f:<13} {c['runs']:>4} {c['exact']:>5} {c['mean_f1']:>6.3f} {cost:>7} "
+                  f"{turns:>5} {c['median_wall_seconds']:>6}")
     print("\nagainst no graph: geometric mean of per-question ratios [95% bootstrap interval], questions lower")
     for arm, keys in paired.items():
         for key in ("cost_usd", "turns", "output_tokens", "wall_seconds"):
