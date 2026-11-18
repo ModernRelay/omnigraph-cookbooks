@@ -458,6 +458,9 @@ def code_graph_journey(env):
     # cg resolves a unique name to its key, and lists the candidates of an ambiguous one.
     assert len(cg("act-reader", "callers", "createNullObject", "--branch", "pr-5267")["rows"]) == 14
     assert cg("act-reader", "implementers", "add", ok=False).returncode == 2
+    # impact walks references and implementations: a call to Router#match can run SmartRouter#match.
+    reach = {r["reaches it"] for r in cg("act-reader", "impact", "src/`router.ts`/Router#add().")["rows"]}
+    assert "src/router/smart-router/`router.ts`/SmartRouter#match()." in reach and len(reach) == 8, reach
     refused(run(env, "branch", "merge", "pr-5267", "--into", "main", *scope("act-agent"), "--json", ok=False))
     merged = run(env, "branch", "merge", "pr-5267", "--into", "main", *scope("act-writer"), "--json")
     assert merged["outcome"] == "fast_forward", merged

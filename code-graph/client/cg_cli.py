@@ -44,6 +44,16 @@ LIMITS = {"symbols_named": 1000, "symbols_named_in": 1000, "file_symbols": 2000,
 # a larger file raises the setting to the file's size; a server's load request
 # is capped at the same size and takes no settings.
 WRITE_MAX_BYTES = 32 * 1024 * 1024
+# Session settings a read runs with. impact walks two edge types, and the
+# engine admits such a walk against every selected edge table's full row count
+# on each frontier probe, hop and window of 8,192 rows: on VS Code the first
+# probe alone charges 1.9 million rows, over the default traversal_work_limit
+# of 1 million, however few neighbours the symbol has. The charge is not the
+# work, so the cap is lifted; the read's own limit and query_memory_bytes still
+# bound it, the second raised for a hub's frontier. Only a local graph takes
+# them: a server's stored query takes no session settings, so its process
+# settings (OMNIGRAPH_TRAVERSAL_WORK_LIMIT, OMNIGRAPH_QUERY_MEMORY_BYTES) apply.
+READ_SETTINGS = {"impact": {"traversal_work_limit": 10**12, "query_memory_bytes": 2 * 1024**3}}
 
 
 class CgError(Exception):
@@ -111,6 +121,8 @@ class Graph:
     def query(self, name: str, params: dict | None = None, branch: str | None = None) -> list[dict]:
         argv = ["query", "--query", str(QUERIES), name] if self.direct else ["query", name]
         argv += ["--params", json.dumps(params or {})]
+        for setting, value in (READ_SETTINGS.get(name, {}) if self.direct else {}).items():
+            argv += ["--set", f"{setting}={value}"]
         if branch:
             argv += ["--branch", branch]
         return self.run(argv)["rows"]

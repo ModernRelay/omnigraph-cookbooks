@@ -167,7 +167,12 @@ with more definitions than the limit is still found in its directory. A
 revision file over 32 MiB loads into a local graph with `write_max_bytes`
 raised to its size, which holds its largest type in memory as one batch; a
 server's load request is capped at 32 MiB, so `cg` refuses such a file for a
-server target before sending anything.
+server target before sending anything. `impact` walks two edge types, which
+the engine admits against every selected edge table's full row count on each
+probe; on a local graph `cg` lifts that `traversal_work_limit` and raises
+`query_memory_bytes` to 2 GiB. A server's stored query takes no session
+settings, so on a large served graph raise `OMNIGRAPH_TRAVERSAL_WORK_LIMIT`
+and `OMNIGRAPH_QUERY_MEMORY_BYTES` on the server instead.
 
 ```bash
 export CG_TARGET=local-agent
