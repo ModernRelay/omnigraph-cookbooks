@@ -63,6 +63,10 @@ hono's router at the parent of PR #5267 (`seed.jsonl`) and at the PR
   for call sites (`$c $r:references $t`, then `$r.call`).
 - Multi-hop reads work because every definition is one `Symbol` type; keep it
   that way rather than adding a node type per kind.
+- `ImplementedBy` runs from an interface or base member to each member
+  implementing it, the way a call through it goes, so `impact` can walk
+  `(references | implementedBy)` forwards; GQ cannot reverse one member of a
+  multi-hop alternation.
 - Lint after every edit: `omnigraph lint --schema schema.pg --query
   queries/code.gq`.
 

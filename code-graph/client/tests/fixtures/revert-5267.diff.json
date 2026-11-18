@@ -1,12 +1,46 @@
 {
-  "from_commit_id": "hb1.01M7N0BCRS4ZFFYVH8R4Q9R7WF.2.01M7N0BCRS4ZFFYVH8R4Q9R7WF",
-  "to_commit_id": "hb1.01M7N0BCWGHE6JGKFS5H2VJ5AM.3.01M7N0BCWGHE6JGKFS5H2VJ5AM",
-  "base_commit_id": "hb1.01M7N0BCRS4ZFFYVH8R4Q9R7WF.2.01M7N0BCRS4ZFFYVH8R4Q9R7WF",
+  "from_commit_id": "hb1.01M7PASBJ1WDE2Y2VH5MN3QTA9.2.01M7PASBJ1WDE2Y2VH5MN3QTA9",
+  "to_commit_id": "hb1.01M7PASBNH4Y1B91XVJ21MAW85.3.01M7PASBNH4Y1B91XVJ21MAW85",
+  "base_commit_id": "hb1.01M7PASBJ1WDE2Y2VH5MN3QTA9.2.01M7PASBJ1WDE2Y2VH5MN3QTA9",
   "changes": [
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "kSl0_UPJ_3htA_EK-EBf8AqYlN8c72g8uUJSwNDokT0",
+        "name": "Revision"
+      },
+      "id": "4b44abe1b5c7755aac8555d7943611555183450b",
+      "op": "delete",
+      "before": {
+        "properties": {
+          "sha": "4b44abe1b5c7755aac8555d7943611555183450b",
+          "indexer": "scip-typescript",
+          "indexer_version": "0.6.2",
+          "repository": "https://github.com/honojs/hono.git"
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "kSl0_UPJ_3htA_EK-EBf8AqYlN8c72g8uUJSwNDokT0",
+        "name": "Revision"
+      },
+      "id": "a10592f3e1864cbe277619633db953450a6b1e4b",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sha": "a10592f3e1864cbe277619633db953450a6b1e4b",
+          "indexer": "scip-typescript",
+          "indexer_version": "0.6.2",
+          "repository": "https://github.com/honojs/hono.git"
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/`utils.ts`/",
@@ -22,7 +56,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/`utils.ts`/createNullObject.",
@@ -38,7 +72,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/",
@@ -61,7 +95,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/Context#",
@@ -84,7 +118,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/Context#varIndex.",
@@ -107,7 +141,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/LABEL_REG_EXP_STR.",
@@ -130,7 +164,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/Node#",
@@ -153,7 +187,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/Node#`#children`.",
@@ -176,7 +210,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/Node#`#index`.",
@@ -199,7 +233,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/Node#`#varIndex`.",
@@ -222,7 +256,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr().",
@@ -245,7 +279,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/Node#insert().",
@@ -268,7 +302,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/ONLY_WILDCARD_REG_EXP_STR.",
@@ -291,7 +325,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/PATH_ERROR.",
@@ -314,7 +348,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/ParamAssocArray#",
@@ -337,7 +371,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/TAIL_WILDCARD_REG_EXP_STR.",
@@ -360,7 +394,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/compareKey().",
@@ -383,7 +417,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`node.ts`/regExpMetaChars.",
@@ -406,7 +440,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/",
@@ -429,7 +463,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/HandlerWithMetadata#",
@@ -452,7 +486,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#",
@@ -475,7 +509,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
@@ -498,7 +532,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#insertPath`().",
@@ -521,7 +555,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#middleware`.",
@@ -544,7 +578,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#routes`.",
@@ -567,7 +601,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#tries`.",
@@ -590,7 +624,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
@@ -613,7 +647,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
@@ -636,7 +670,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
@@ -659,7 +693,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#match.",
@@ -682,7 +716,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#name.",
@@ -705,7 +739,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().",
@@ -728,7 +762,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/findMiddleware().",
@@ -751,7 +785,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.",
@@ -774,7 +808,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`trie.ts`/",
@@ -797,7 +831,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`trie.ts`/ReplacementMap#",
@@ -820,7 +854,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`trie.ts`/Trie#",
@@ -843,7 +877,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`trie.ts`/Trie#`#context`.",
@@ -866,7 +900,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`trie.ts`/Trie#`#index`.",
@@ -889,7 +923,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`trie.ts`/Trie#`#root`.",
@@ -912,7 +946,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`trie.ts`/Trie#buildRegExp().",
@@ -935,7 +969,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`trie.ts`/Trie#insert().",
@@ -958,7 +992,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/reg-exp-router/`trie.ts`/Trie#paths.",
@@ -981,7 +1015,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/",
@@ -1004,7 +1038,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/HandlerParamsSet#",
@@ -1027,7 +1061,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/HandlerSet#",
@@ -1050,7 +1084,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/HandlerSet#handler.",
@@ -1073,7 +1107,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/HandlerSet#possibleKeys.",
@@ -1096,7 +1130,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/HandlerSet#score.",
@@ -1119,7 +1153,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/Node#",
@@ -1142,7 +1176,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/Node#`#children`.",
@@ -1165,7 +1199,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/Node#`#methods`.",
@@ -1188,7 +1222,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/Node#`#params`.",
@@ -1211,7 +1245,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/Node#`#pattern`.",
@@ -1234,7 +1268,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/Node#`#patterns`.",
@@ -1257,7 +1291,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
@@ -1280,7 +1314,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/Node#insert().",
@@ -1303,7 +1337,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/Node#search().",
@@ -1326,7 +1360,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/emptyParams.",
@@ -1349,7 +1383,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "598HmK-GVNNPM3g_uboWOhNbE54aZzjehZ5HlhayNP8",
+        "id": "leNhFpKyi2FUjp-rYAQ3suIbVl-DLWsyr9YincUvlNE",
         "name": "Location"
       },
       "id": "src/router/trie-router/`node.ts`/order.",
@@ -1372,7 +1406,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "9kJZPsVa8vheQ9g1xvs4jCzyTGOpcLhQBCn4-Het0nA",
+        "id": "oNO01HMnNdfhhZRbYmZqRdtUmrfAgoWTfjmaKUQzmRg",
         "name": "Symbol"
       },
       "id": "src/router/`utils.ts`/",
@@ -1392,7 +1426,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "9kJZPsVa8vheQ9g1xvs4jCzyTGOpcLhQBCn4-Het0nA",
+        "id": "oNO01HMnNdfhhZRbYmZqRdtUmrfAgoWTfjmaKUQzmRg",
         "name": "Symbol"
       },
       "id": "src/router/`utils.ts`/createNullObject.",
@@ -1412,7 +1446,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "9kJZPsVa8vheQ9g1xvs4jCzyTGOpcLhQBCn4-Het0nA",
+        "id": "oNO01HMnNdfhhZRbYmZqRdtUmrfAgoWTfjmaKUQzmRg",
         "name": "Symbol"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
@@ -1443,7 +1477,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "9kJZPsVa8vheQ9g1xvs4jCzyTGOpcLhQBCn4-Het0nA",
+        "id": "oNO01HMnNdfhhZRbYmZqRdtUmrfAgoWTfjmaKUQzmRg",
         "name": "Symbol"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
@@ -1474,7 +1508,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "9kJZPsVa8vheQ9g1xvs4jCzyTGOpcLhQBCn4-Het0nA",
+        "id": "oNO01HMnNdfhhZRbYmZqRdtUmrfAgoWTfjmaKUQzmRg",
         "name": "Symbol"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
@@ -1505,7 +1539,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "9kJZPsVa8vheQ9g1xvs4jCzyTGOpcLhQBCn4-Het0nA",
+        "id": "oNO01HMnNdfhhZRbYmZqRdtUmrfAgoWTfjmaKUQzmRg",
         "name": "Symbol"
       },
       "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
@@ -1536,7 +1570,7 @@
     {
       "kind": "node",
       "type": {
-        "id": "9kJZPsVa8vheQ9g1xvs4jCzyTGOpcLhQBCn4-Het0nA",
+        "id": "oNO01HMnNdfhhZRbYmZqRdtUmrfAgoWTfjmaKUQzmRg",
         "name": "Symbol"
       },
       "id": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
@@ -1565,51 +1599,17 @@
       }
     },
     {
-      "kind": "node",
-      "type": {
-        "id": "9s5Tepgungw6tx5ItZVLnKlubbfsgLFEYBbJA-QSfQw",
-        "name": "Revision"
-      },
-      "id": "4b44abe1b5c7755aac8555d7943611555183450b",
-      "op": "delete",
-      "before": {
-        "properties": {
-          "sha": "4b44abe1b5c7755aac8555d7943611555183450b",
-          "indexer": "scip-typescript",
-          "indexer_version": "0.6.2",
-          "repository": "https://github.com/honojs/hono.git"
-        }
-      }
-    },
-    {
-      "kind": "node",
-      "type": {
-        "id": "9s5Tepgungw6tx5ItZVLnKlubbfsgLFEYBbJA-QSfQw",
-        "name": "Revision"
-      },
-      "id": "a10592f3e1864cbe277619633db953450a6b1e4b",
-      "op": "insert",
-      "after": {
-        "properties": {
-          "sha": "a10592f3e1864cbe277619633db953450a6b1e4b",
-          "indexer": "scip-typescript",
-          "indexer_version": "0.6.2",
-          "repository": "https://github.com/honojs/hono.git"
-        }
-      }
-    },
-    {
       "kind": "edge",
       "type": {
-        "id": "ZKBquwCSio3HdINk264FV3oNo4xjVw3459Nj4dF6Pbg",
-        "name": "DefinedAt"
+        "id": "0xI8gIRV4-x1S0of0OKXzJorDP4bfmpRTC_njGduapI",
+        "name": "MemberOf"
       },
-      "id": "[\"src/router/`utils.ts`/\",\"src/router/`utils.ts`/\"]",
+      "id": "[\"src/router/`utils.ts`/createNullObject.\",\"src/router/`utils.ts`/\"]",
       "op": "delete",
       "before": {
         "properties": {},
         "endpoints": {
-          "from": "src/router/`utils.ts`/",
+          "from": "src/router/`utils.ts`/createNullObject.",
           "to": "src/router/`utils.ts`/"
         }
       }
@@ -1617,23 +1617,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "ZKBquwCSio3HdINk264FV3oNo4xjVw3459Nj4dF6Pbg",
-        "name": "DefinedAt"
-      },
-      "id": "[\"src/router/`utils.ts`/createNullObject.\",\"src/router/`utils.ts`/createNullObject.\"]",
-      "op": "delete",
-      "before": {
-        "properties": {},
-        "endpoints": {
-          "from": "src/router/`utils.ts`/createNullObject.",
-          "to": "src/router/`utils.ts`/createNullObject."
-        }
-      }
-    },
-    {
-      "kind": "edge",
-      "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`node.ts`/\",\"src/router/`utils.ts`/\"]",
@@ -1652,7 +1636,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`node.ts`/\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1671,7 +1655,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`node.ts`/Node#`#children`.\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1690,7 +1674,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`router.ts`/\",\"src/router/`utils.ts`/\"]",
@@ -1709,7 +1693,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`router.ts`/\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1728,7 +1712,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1747,7 +1731,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1766,7 +1750,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#add().\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1785,7 +1769,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1804,7 +1788,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1823,7 +1807,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`trie.ts`/\",\"src/router/`utils.ts`/\"]",
@@ -1842,7 +1826,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`trie.ts`/\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1861,7 +1845,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/reg-exp-router/`trie.ts`/Trie#paths.\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1880,7 +1864,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/trie-router/`node.ts`/\",\"src/router/`utils.ts`/\"]",
@@ -1899,7 +1883,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/trie-router/`node.ts`/\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1918,7 +1902,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/trie-router/`node.ts`/Node#`#children`.\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1937,7 +1921,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1956,7 +1940,7 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fbxj1dWhIzd8iNJUhTAyBN3VDLK0EVl2MAf4Btwwkk0",
+        "id": "XfxX0jYINqSi3nPqE8y7BG_3oF3JO_5UYmW7Zka4o9g",
         "name": "References"
       },
       "id": "[\"src/router/trie-router/`node.ts`/emptyParams.\",\"src/router/`utils.ts`/createNullObject.\"]",
@@ -1975,16 +1959,32 @@
     {
       "kind": "edge",
       "type": {
-        "id": "fonyEQvUUDlQxfxMCbtEioqMlszK-bLKeEzr8Jn-GwU",
-        "name": "MemberOf"
+        "id": "viFVKcAYeX-hDXPWlGJHRJZMO4TquLPImYTz6LAOtl0",
+        "name": "DefinedAt"
       },
-      "id": "[\"src/router/`utils.ts`/createNullObject.\",\"src/router/`utils.ts`/\"]",
+      "id": "[\"src/router/`utils.ts`/\",\"src/router/`utils.ts`/\"]",
+      "op": "delete",
+      "before": {
+        "properties": {},
+        "endpoints": {
+          "from": "src/router/`utils.ts`/",
+          "to": "src/router/`utils.ts`/"
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "viFVKcAYeX-hDXPWlGJHRJZMO4TquLPImYTz6LAOtl0",
+        "name": "DefinedAt"
+      },
+      "id": "[\"src/router/`utils.ts`/createNullObject.\",\"src/router/`utils.ts`/createNullObject.\"]",
       "op": "delete",
       "before": {
         "properties": {},
         "endpoints": {
           "from": "src/router/`utils.ts`/createNullObject.",
-          "to": "src/router/`utils.ts`/"
+          "to": "src/router/`utils.ts`/createNullObject."
         }
       }
     }

@@ -18,7 +18,8 @@ The seed is real code: the router of [hono](https://github.com/honojs/hono)
 ## What it answers
 
 - *Who calls this function, and how many times?* `callers`
-- *What breaks if I change it?* `impact`, everything within sixteen references
+- *What breaks if I change it?* `impact`, everything that reaches it through
+  up to sixteen references and implementations
 - *Which classes implement this interface method?* `implementers`
 - *What does everything else depend on?* `most_referenced`
 - *What did this pull request change in the call graph?* `branch diff` of the
@@ -38,7 +39,7 @@ every pull request is a branch you can diff, query and merge.
 | `Revision` | The commit this graph state was indexed from, and the indexer that read it. |
 | `References` | Code inside the source's definition names the target. `call` says whether one of those references is a call; `sites` counts them. |
 | `MemberOf` | A top-level symbol in its module, a member in its class or interface. |
-| `Implements` | A class member implementing an interface member. |
+| `ImplementedBy` | From an interface or base member to a class member implementing or overriding it: where a call through it can go. |
 | `DefinedAt` | A symbol's location. |
 
 The decisions that matter:
@@ -62,12 +63,15 @@ The decisions that matter:
    filter out by type.
 3. **One `Symbol` type, with `kind` as a closed vocabulary.** A multi-hop
    traversal needs the same node type at both ends, so a single type is what
-   lets `impact` follow `references{1,16}` through functions, methods and
-   classes alike.
+   lets `impact` follow `(references | implementedBy){1,16}` through
+   functions, methods and classes alike.
 4. **References, not only calls.** SCIP records that a definition's code names
    another symbol; it does not say how. An edge therefore covers calls, type
    uses, imports and value uses, which is what "what breaks if I change this"
-   needs. `call` marks the edges with at least one call site.
+   needs. `call` marks the edges with at least one call site. A call through
+   an interface or base member names that member, not the method that runs, so
+   `ImplementedBy` points from the member to each implementation, the way the
+   call goes, and `impact` follows both edges.
 5. **Provenance is the commit.** Each load is one graph commit holding one
    `Revision`, so every fact traces to the git SHA and indexer version that
    produced it, and an old state stays readable.
@@ -270,9 +274,10 @@ qualifies the committed files.
   lists `detectors`, not the code that calls through it. Telling a call
   through the table from a read of its keys would need the type checker's
   data flow, which SCIP does not record.
-- **`impact` follows at most sixteen references.** Omnigraph requires a finite
-  bound on a multi-hop traversal. The longest chain of references to a
-  callable in hono's `src/` is 13; a deeper chain is cut at sixteen.
+- **`impact` follows at most sixteen hops.** Omnigraph requires a finite
+  bound on a multi-hop traversal. The longest chain of references and
+  implementations to a callable in hono's `src/` is 14; a deeper chain is
+  cut at sixteen.
 - **Members of union types are not indexed.** scip-typescript gives no symbol
   to a property of an object type inside a union, so turning a type into a
   union looks like removing its properties.

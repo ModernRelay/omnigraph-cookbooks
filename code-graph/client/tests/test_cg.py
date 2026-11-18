@@ -53,7 +53,7 @@ class Summarize(unittest.TestCase):
         self.assertIn({"from": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().", "to": HELPER,
                        "call": True, "sites": 1}, refs["added"])
         self.assertEqual(s["members"]["added"], [{"from": HELPER, "to": MODULE}])
-        self.assertEqual(s["implements"], {"added": [], "removed": [], "changed": []})
+        self.assertEqual(s["implementations"], {"added": [], "removed": [], "changed": []})
 
     def test_revert_removes_what_the_pull_request_added(self):
         s = cg_cli.summarize(fixture("revert-5267.diff.json"))

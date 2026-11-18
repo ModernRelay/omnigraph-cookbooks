@@ -22,7 +22,7 @@ these files by hand.
 | `DefinedAt` | 132 | 134 |
 | `MemberOf` | 116 | 117 |
 | `References` | 292 | 310 |
-| `Implements` | 24 | 24 |
+| `ImplementedBy` | 24 | 24 |
 | **Rows** | **829** | **854** |
 
 The router has six implementations of `Router`: `LinearRouter`,
@@ -45,8 +45,8 @@ pass the full key from `symbols_named` as a parameter.
 | `members` | `RegExpRouter#` | 10 members: `name`, `#middleware`, `#routes`, `#tries`, the constructor, `#insertPath`, `add`, `match`, `buildAllMatchers`, `#buildMatcher` | the same |
 | `callers` | `utils.ts/createNullObject.` | none | 14: four modules, for their imports; the fields `#children` of `Node` in both routers and `paths` of `Trie`; the module constants `wildcardRegExpCache` and `emptyParams`; `RegExpRouter`'s constructor, `add`, `buildAllMatchers` and `#buildMatcher`; and trie-router `Node#pushHandlerSets` |
 | `callees` | `reg-exp-router/router.ts/RegExpRouter#add().` | 9 | 10: the same plus `createNullObject` |
-| `impact` | `utils.ts/createNullObject.` | none | 31 definitions within sixteen references, 8 of them modules |
-| `impact` | `src/router.ts` `Router#add()` | 1: `SmartRouter#match`, which calls `add` on each router it holds | the same |
+| `impact` | `utils.ts/createNullObject.` | none | 37 definitions within sixteen hops, 8 of them modules |
+| `impact` | `src/router.ts` `Router#add()` | 8: `SmartRouter#match`, which calls `add` on each router it holds, and seven that reach it, such as `Router#match`, whose calls can run `SmartRouter#match` | the same |
 | `implementers` | `src/router.ts` `Router#add()` | the six routers' `add` | the same |
 | `most_referenced` | | 20 rows, led by `Router` (19 referrers), `METHOD_NAME_ALL` (14) and `Result` (14) | |
 | `unreferenced_callables` | | 11: routers' `add` and `match` methods reached through `Router`, `buildAllMatchers` of `PreparedRegExpRouter`, and three constructors whose callers, such as `Hono`'s constructor in `src/hono.ts`, are outside the slice | |

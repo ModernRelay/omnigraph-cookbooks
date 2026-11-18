@@ -61,7 +61,7 @@ DECLARED_TYPE = re.compile(r"^(?:\(\w+\)\s*)?(?:const|let|var|property)?\s*[\w$#
 NULLISH_UNION = re.compile(r"^(?:\|\s*(?:undefined|null)\s*)+$")
 CALL_SUFFIX = ("(", "`", "?.(", "<")
 TYPES = ("Revision", "Symbol", "Location")
-EDGES = ("DefinedAt", "MemberOf", "References", "Implements")
+EDGES = ("DefinedAt", "MemberOf", "References", "ImplementedBy")
 IDENTIFIER = re.compile(r"[\w+\-$]+")
 TYPE_LITERAL = re.compile(r"^typeLiteral\d+$")
 
@@ -326,14 +326,16 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
                 member_of.add((key, parent))
                 break
 
-    implements = set()
+    # SCIP records the relationship on the implementing member; the edge runs
+    # from the member it implements, the way a call through it goes.
+    implemented_by = set()
     for sym, info in infos.items():
-        src = key_of(sym)
+        member = key_of(sym)
         for rel in info.relationships:
             if rel.is_implementation and not rel.symbol.startswith("local "):
-                dst = key_of(rel.symbol)
-                if src in nodes and dst in nodes:
-                    implements.add((src, dst))
+                implemented = key_of(rel.symbol)
+                if member in nodes and implemented in nodes:
+                    implemented_by.add((implemented, member))
 
     keep = {k for k, n in nodes.items() if in_slice(n["path"], slice_)}
     ordered_nodes = [nodes[k] for k in sorted(keep)]
@@ -348,7 +350,7 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
              if a in keep and b in keep]
     rows += [{"edge": "References", "from": a, "to": b, "data": e} for (a, b), e in sorted(references.items())
              if a in keep and b in keep]
-    rows += [{"edge": "Implements", "from": a, "to": b, "data": {}} for a, b in sorted(implements)
+    rows += [{"edge": "ImplementedBy", "from": a, "to": b, "data": {}} for a, b in sorted(implemented_by)
              if a in keep and b in keep]
     return rows
 
