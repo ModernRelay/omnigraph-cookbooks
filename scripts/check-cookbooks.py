@@ -37,9 +37,10 @@ COOKBOOKS = {
     "beads": ("beads", "ready"),
     "company-brain": ("company", "current_decisions"),
     "hardware-program": ("program", "budget_rollup"),
+    "code-graph": ("code", "most_referenced"),
 }
 # Cookbooks whose policy lets act-agent write only on unprotected branches.
-BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program"}
+BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program", "code-graph"}
 ACTORS = ("act-admin", "act-writer", "act-reader", "act-agent")
 TOKENS = {actor: f"cookbook-test-{actor}" for actor in ACTORS}
 GATEWAY = ROOT / "scripts" / "local-tls-gateway.py"
@@ -243,12 +244,15 @@ def qualify(name, graph, stored_query, workspace, env):
                 company_brain_journey(env)
             if name == "hardware-program":
                 hardware_program_journey(env)
+            if name == "code-graph":
+                code_graph_journey(env)
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
                   + (", ob client" if name == "beads" else "")
                   + (", review journey" if name == "company-brain" else "")
-                  + (", review gate" if name == "hardware-program" else ""), flush=True)
+                  + (", review gate" if name == "hardware-program" else "")
+                  + (", pull request diff, cg client" if name == "code-graph" else ""), flush=True)
         finally:
             gateway.terminate()
             process.terminate()
@@ -393,6 +397,85 @@ def hardware_program_journey(env):
     run(env, "commit", "publish", commit, *writer, "--json")
     assert rows("limit_violations") == []
     run(env, "branch", "delete", "cr-heatsink", *writer, "--yes", "--json")
+
+
+def code_graph_journey(env):
+    """The indexer loads a pull request's revision onto its own branch, the
+    branch diff is exactly what the PR changed, the reads see the new code
+    only on the branch, a person merges, and the previous main stays readable."""
+    def scope(actor):
+        return ("--target", target(actor), "--graph", "code")
+
+    def rows(query, params=None, *extra):
+        return run(env, "query", query, *scope("act-reader"), "--params", json.dumps(params or {}),
+                   *extra, "--json")["rows"]
+
+    base, head = "a10592f3e1864cbe277619633db953450a6b1e4b", "4b44abe1b5c7755aac8555d7943611555183450b"
+    helper = {"symbol": "src/router/`utils.ts`/createNullObject."}
+    assert [row["r.sha"] for row in rows("revision")] == [base]
+    routers = {"linear-router/`router.ts`/LinearRouter", "pattern-router/`router.ts`/PatternRouter",
+               "reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter", "reg-exp-router/`router.ts`/RegExpRouter",
+               "smart-router/`router.ts`/SmartRouter", "trie-router/`router.ts`/TrieRouter"}
+    implementers = {row["i.symbol"] for row in rows("implementers", {"symbol": "src/`router.ts`/Router#add()."})}
+    assert implementers == {f"src/router/{r}#add()." for r in routers}, implementers
+    previous = run(env, "commit", "list", *scope("act-reader"), "--json")["commits"][0]["graph_commit_id"]
+
+    # The cg client, through each actor's server target like any operator.
+    base_env = {k: v for k, v in env.items() if not k.startswith("CG_")}
+    base_env.update(CG_OMNIGRAPH=CLI, CG_GRAPH="code")
+
+    def cg(actor, *args, ok=True):
+        result = subprocess.run([sys.executable, str(ROOT / "code-graph/client/cg"), *args, "--json"],
+                                capture_output=True, text=True, timeout=120,
+                                env={**base_env, "CG_TARGET": target(actor)})
+        if (result.returncode == 0) != ok:
+            raise AssertionError(f"cg {args} as {actor}: exit {result.returncode}\n{result.stdout}{result.stderr}")
+        return json.loads(result.stdout) if ok else result
+
+    pr_file = str(ROOT / "code-graph/examples/pr-5267.jsonl")
+    denied = cg("act-reader", "load", pr_file, "--branch", "pr-5267", ok=False)
+    # Refused before any effect, so cg reports a plain failure, not an unknown outcome.
+    assert denied.returncode == 1 and "policy denied" in denied.stderr, (denied.returncode, denied.stderr)
+    loaded = cg("act-agent", "load", pr_file, "--branch", "pr-5267")
+    assert loaded["branch"] == "pr-5267" and loaded["commit"] and loaded["rows"] == 854, loaded
+    changes = run(env, "branch", "diff", "pr-5267", *scope("act-reader"), "--json")["changes"]
+    summary = collections.Counter((c["type"]["name"], c["op"]) for c in changes)
+    assert summary == {("Symbol", "insert"): 2, ("Symbol", "update"): 5, ("References", "insert"): 18,
+                       ("MemberOf", "insert"): 1, ("DefinedAt", "insert"): 2, ("Location", "insert"): 2,
+                       ("Location", "update"): 58, ("Revision", "insert"): 1, ("Revision", "delete"): 1}, summary
+    changed = {c["id"] for c in changes if c["type"]["name"] == "Symbol" and c["op"] == "update"}
+    assert changed == {f"src/router/reg-exp-router/`router.ts`/RegExpRouter#{m}" for m in
+                       ("`<constructor>`().", "add().", "buildAllMatchers().", "`#buildMatcher`().")} | {
+                       "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`()."}, changed
+    review = cg("act-reader", "diff", "pr-5267")
+    assert (review["from_revision"], review["to_revision"]) == (base, head), review
+    assert [r["symbol"] for r in review["added"]] == ["src/router/`utils.ts`/", helper["symbol"]], review["added"]
+    assert {r["symbol"] for r in review["changed"]} == changed and review["moved"] == 53, review
+    assert (len(review["references"]["added"]), len(review["references"]["removed"])) == (18, 0)
+
+    assert rows("callers", helper) == []
+    assert len(rows("callers", helper, "--branch", "pr-5267")) == 14
+    # cg resolves a unique name to its key, and lists the candidates of an ambiguous one.
+    assert len(cg("act-reader", "callers", "createNullObject", "--branch", "pr-5267")["rows"]) == 14
+    assert cg("act-reader", "implementers", "add", ok=False).returncode == 2
+    # impact walks references and implementations: a call to Router#match can run SmartRouter#match.
+    reach = {r["reaches it"] for r in cg("act-reader", "impact", "src/`router.ts`/Router#add().")["rows"]}
+    assert "src/router/smart-router/`router.ts`/SmartRouter#match()." in reach and len(reach) == 8, reach
+    refused(run(env, "branch", "merge", "pr-5267", "--into", "main", *scope("act-agent"), "--json", ok=False))
+    merged = run(env, "branch", "merge", "pr-5267", "--into", "main", *scope("act-writer"), "--json")
+    assert merged["outcome"] == "fast_forward", merged
+    run(env, "branch", "delete", "pr-5267", *scope("act-writer"), "--yes", "--json")
+    assert [row["r.sha"] for row in rows("revision")] == [head]
+    assert len(rows("callers", helper)) == 14
+    assert [row["r.sha"] for row in rows("revision", None, "--snapshot", previous)] == [base]
+    assert rows("callers", helper, "--snapshot", previous) == []
+
+    # Loading the base back over the merged PR removes what the PR added.
+    cg("act-agent", "load", str(ROOT / "code-graph/seed.jsonl"), "--branch", "revert-5267")
+    revert = cg("act-reader", "diff", "revert-5267")
+    assert [r["symbol"] for r in revert["removed"]] == ["src/router/`utils.ts`/", helper["symbol"]], revert
+    assert (len(revert["references"]["added"]), len(revert["references"]["removed"])) == (0, 18), revert
+    run(env, "branch", "delete", "revert-5267", *scope("act-writer"), "--yes", "--json")
 
 
 # What omnigraph.dev accepts in a site.json; its importer

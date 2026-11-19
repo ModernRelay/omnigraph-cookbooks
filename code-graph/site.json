@@ -1,0 +1,35 @@
+{
+  "order": 9,
+  "name": "Code graph",
+  "category": "Engineering",
+  "blurb": "A repository's definitions and the references between them, resolved by the TypeScript compiler, one graph state per commit, so a pull request's branch diff shows what it changed in the call graph.",
+  "sample": "hono's router, before and after a real pull request",
+  "questions": [
+    {
+      "q": "Who calls this function?",
+      "query": "callers"
+    },
+    {
+      "q": "What breaks if I change it?",
+      "query": "impact"
+    },
+    {
+      "q": "Which classes implement this interface method?",
+      "query": "implementers"
+    },
+    {
+      "q": "What does everything else depend on?",
+      "query": "most_referenced"
+    }
+  ],
+  "search": {
+    "title": "Code graph: compiler-resolved references for agents",
+    "keywords": [
+      "code graph",
+      "call graph",
+      "coding agents",
+      "pull request review",
+      "knowledge graph"
+    ]
+  }
+}

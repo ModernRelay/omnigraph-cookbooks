@@ -1,0 +1,23 @@
+# Read aliases for the code-graph cookbook (graph `code`).
+# Merge the `aliases:` entries below into $OMNIGRAPH_HOME/config.yaml, the operator
+# config from ../README.md#local-setup, whose `local-reader` target they use.
+# Run one with `omnigraph alias <name>`; pass a query's parameters by name with
+# `--params '{"name":"..."}'`. Aliases only read. Writes are loads of generated
+# revisions; see README.md#index-a-pull-request.
+aliases:
+  # ── Finding symbols ──────────────────────────────────────────
+  revision: {target: local-reader, graph: code, query: revision}
+  symbol:   {target: local-reader, graph: code, query: symbols_named}   # --params '{"name":"add"}'
+  symbol-in: {target: local-reader, graph: code, query: symbols_named_in}  # --params '{"name":"add","path":"src/router/trie-router"}'
+  file:     {target: local-reader, graph: code, query: file_symbols}    # --params '{"path":"src/router/utils.ts"}'
+  members:  {target: local-reader, graph: code, query: members}         # --params '{"symbol":"..."}'
+
+  # ── References ───────────────────────────────────────────────
+  callers:      {target: local-reader, graph: code, query: callers}        # --params '{"symbol":"..."}'
+  callees:      {target: local-reader, graph: code, query: callees}        # --params '{"symbol":"..."}'
+  impact:       {target: local-reader, graph: code, query: impact}         # --params '{"symbol":"..."}'
+  implementers: {target: local-reader, graph: code, query: implementers}   # --params '{"symbol":"..."}'
+
+  # ── Overview ─────────────────────────────────────────────────
+  hubs:         {target: local-reader, graph: code, query: most_referenced}
+  unreferenced: {target: local-reader, graph: code, query: unreferenced_callables}

@@ -1,0 +1,26 @@
+{
+  "repository": "https://github.com/honojs/hono.git",
+  "license": "MIT",
+  "project": "tsconfig.build.json",
+  "slice": ["src/router/", "src/router.ts"],
+  "indexer": {
+    "package": "@sourcegraph/scip-typescript",
+    "version": "0.6.2",
+    "lockfile": "indexer/package-lock.json"
+  },
+  "revisions": [
+    {
+      "name": "base",
+      "sha": "a10592f3e1864cbe277619633db953450a6b1e4b",
+      "note": "Parent of hono PR #5267; the graph's main.",
+      "out": "seed.jsonl"
+    },
+    {
+      "name": "pr-5267",
+      "sha": "4b44abe1b5c7755aac8555d7943611555183450b",
+      "note": "hono PR #5267, perf(router): share null object creation, merged 2026-08-20.",
+      "pull_request": "https://github.com/honojs/hono/pull/5267",
+      "out": "examples/pr-5267.jsonl"
+    }
+  ]
+}
