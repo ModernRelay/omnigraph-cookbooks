@@ -11,16 +11,17 @@ computationally, send a couple of hundred to a lab, and find out which ones
 actually stick. This graph holds one such campaign, end to end. Graph ID
 `binders`.
 
-The point is not recording which designs bound. It is that "bound" is a
-definition, not a measurement. The campaign seeded here tested 211 designs and
-reported **17** binders; its own report re-counts them under a dozen other
-rules and gets anything from **7 to 18**. The questions that decide whether to
-believe the number — which claims survive a stricter rule, which rest on
-evidence nobody wrote down, what a design was derived from, which bar a score
-cleared — are joins across the whole run, not columns in a results table. So a
-`BinderClaim` is a node here: it links to the measurements it rests on, to
-every `Criterion` it survives, and to any `EvidenceGap` recorded against it.
-Tightening the definition is a traversal, not a re-analysis.
+The point is not recording which designs bound. A results sheet, a scoring
+notebook and a lab notebook each hold one slice of a campaign, and "bound" is
+a definition rather than a measurement: the campaign seeded here tested 211
+designs and reported **17** binders, while its own report re-counts them under
+a dozen other rules and gets anything from **7 to 18**. The questions that
+decide whether to believe that number — which claims survive a stricter rule,
+which rest on evidence nobody wrote down, what a design was derived from,
+which bar a score cleared — fall between those slices. So a `BinderClaim` is a
+node here: it links to the measurements it rests on, to every `Criterion` it
+survives, and to any `EvidenceGap` recorded against it. Tightening the
+definition is a traversal, not a re-analysis.
 
 The seed is **real**, where the other cookbooks' seeds are fictional:
 Anthropic's scorpion-toxin binder campaign of October 2026, whose designs,
@@ -66,6 +67,41 @@ Merge the `aliases:` of
 `$OMNIGRAPH_HOME/config.yaml` for a short name per read, such as
 `omnigraph alias claims` or
 `omnigraph alias lost-under --params '{"criterion":"crit:no-ovalbumin"}'`.
+
+## Why not a notebook?
+
+For one campaign, analysed once, by one person: use a notebook. The released
+CSVs load into a dataframe in a line, and the sensitivity analysis above is a
+dozen lines of filtering. A graph is overhead you do not need, and it is
+better to say so than to pretend otherwise.
+
+Four things change that answer.
+
+- **The question goes more than one hop.** Design lineage is a redesign of a
+  redesign, or a fusion of two domains that were themselves selected. Asked of
+  tables, that is a join against itself, as many times as the chain is long,
+  rewritten whenever the question changes. Here it is `derivedFrom{1,3}`.
+- **A claim is not a column.** In a results sheet, "is a binder" is a column
+  somebody computed, and when the rule changes the column is overwritten.
+  There is nowhere to put who decided, under which rule, and on what evidence.
+  Separate the three and changing the rule adds a row instead of destroying
+  one.
+- **A gap has no column either.** "The construct used in this assay was never
+  written down" is not a value that fits in a results sheet. It ends up in a
+  footnote in a PDF, which is where it was. As a node it links to the four
+  claims it undermines, and a query finds them.
+- **More than one writer.** A notebook has one author. When several people and
+  agents propose changes, you want a schema enforced on every write, each
+  author on a branch, and a person merging. That is the part a dataframe has
+  no answer for.
+
+None of this argues for a graph database over any other. If that is the
+question rather than whether, see
+[open source graph databases compared](https://www.omnigraph.dev/guide/open-source-graph-databases)
+and [graph databases and agent memory](https://www.omnigraph.dev/graph-databases).
+What this cookbook leans on specifically is a typed schema checked on every
+write, branches reviewed before they merge, and history that can be read back
+as it stood when a claim was made.
 
 ## Model
 
