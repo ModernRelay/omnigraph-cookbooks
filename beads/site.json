@@ -3,6 +3,7 @@
   "name": "Agent work queue",
   "category": "Engineering",
   "blurb": "A dependency-aware issue queue for coding agents, in the style of beads: file work, link what waits on what, claim what is ready, close it.",
+  "about": "The agent work queue is a dependency-aware issue tracker for coding agents, in the style of beads. Agents file work, link what waits on what, ask for ready work, claim it and close it. Readiness is worked out on every read, claims are atomic, and the commit history is the audit trail. It is for teams running several coding agents on one codebase.",
   "sample": "Larkspur, a fictional note-taking app",
   "questions": [
     {
@@ -24,6 +25,7 @@
   ],
   "search": {
     "title": "Agent work queue: shared state for coding agents",
+    "heading": "A dependency-aware work queue that coding agents share",
     "keywords": [
       "shared state",
       "agent memory",

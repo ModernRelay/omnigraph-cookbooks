@@ -3,6 +3,7 @@
   "name": "Industry intelligence",
   "category": "Research",
   "blurb": "Signals, patterns and insights about an industry, linked to the products and technologies they concern, with hybrid search over the sources.",
+  "about": "The industry intelligence graph tracks an industry as signals, patterns and insights, linked to the products and technologies they concern. A new signal either supports a pattern or contradicts it, so an analyst or a research agent can see which beliefs new evidence has weakened. Hybrid search over the source text is optional. The sample data covers the AI infrastructure market, from public sources.",
   "sample": "The AI infrastructure market, from public sources",
   "questions": [
     {
@@ -23,7 +24,8 @@
     }
   ],
   "search": {
-    "title": "Industry intelligence knowledge graph template",
+    "title": "Industry intelligence knowledge graph",
+    "heading": "A knowledge graph for industry and market research",
     "keywords": [
       "knowledge graph",
       "graphrag",

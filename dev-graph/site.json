@@ -3,6 +3,7 @@
   "name": "Development graph",
   "category": "Engineering",
   "blurb": "Issues, epics, specs, decisions, pull requests, releases and incidents as one graph, with the Git host still the record for code.",
+  "about": "The development graph models the work around the code as one typed graph: issues, epics, specs, decisions, pull requests, releases and incidents, with the rules that constrain them. It gives coding agents the upstream decisions and the context across repositories that they lack when they review or change code. It is not a code index: the Git host stays the record for code, and this graph takes the place of the issue tracker.",
   "sample": "Meridian, a fictional collaborative-document product",
   "questions": [
     {
@@ -23,7 +24,8 @@
     }
   ],
   "search": {
-    "title": "Code graph template for coding agents",
+    "title": "Software lifecycle graph for coding agents",
+    "heading": "The decisions, specs and issues around your code, as one graph",
     "keywords": [
       "code graph",
       "ai bill of materials",
