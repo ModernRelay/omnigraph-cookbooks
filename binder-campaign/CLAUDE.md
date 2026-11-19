@@ -36,6 +36,27 @@ definition into the query, where no reader can see it.
 `EvidenceGap` saying so, citing the source that states it. Never fill a gap
 with a plausible value; add a gap instead.
 
+## The known gap in the model: a design run is not a node
+
+`MadeWithTool` goes straight from a `Design` to a `DesignTool`, which does two
+jobs at once. In PROV-O terms the tool is an **Agent** and the run is an
+**Activity**, and a backbone `wasGeneratedBy` the run, not by the tool. The
+run is where seeds, parameters and compute belong, and collapsing it loses
+them.
+
+This schema collapses it on purpose: the data release records which tool drew
+each backbone and nothing about the run that drew it, and a `DesignRun` node
+with no properties would be modelling theatre. If your campaign records its
+runs — and it should — insert one:
+
+```
+Design --generatedBy--> DesignRun --ranTool--> DesignTool
+```
+
+with the seed, parameters and wall time on `DesignRun`. That is the first
+extension to make, and the one that makes a campaign reproducible rather than
+merely attributed.
+
 ## Enum values use underscores
 
 `no_hit`, `single_domain`, `alpha_like`, `blocks_check`. The query language

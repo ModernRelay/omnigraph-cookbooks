@@ -236,6 +236,42 @@ claim that was once made is part of the record.
 - **No raw instrument traces.** The release holds the sensorgrams; the graph
   holds the fitted values and the flags on them.
 
+## Standards
+
+**There is no community ontology or reporting standard for de novo protein
+design.** Not from Rosetta Commons, the IPD, a journal or a consortium.
+Treat a claim otherwise with suspicion. The nearest thing to a shared schema
+is [Proteinbase](https://huggingface.co/datasets/adaptyvbio/proteinbase)
+(Adaptyv Biosystems), where each design carries a `designMethod` and a list of
+evaluations shaped `{type, metric, unit, value, target, method}` — close to
+the Designs and Evidence layers here, and worth matching if you publish
+designs. It does not claim to be a standard.
+
+What does exist covers the layers either side of the design itself, and this
+schema borrows from three of them at the cost of one property each.
+
+| Standard | Covers | Here |
+|---|---|---|
+| [PROV-O](https://www.w3.org/TR/prov-o/) — W3C Recommendation, 2013 | Provenance: entities, activities, agents, `wasDerivedFrom` | `DerivedFrom` is `prov:wasDerivedFrom` under another name |
+| [PSI-MI](https://www.psidev.info/groups/molecular-interactions) — HUPO-PSI, maintained | Controlled vocabulary for molecular interactions and how they were detected | `Measurement.detection_method_id` carries `MI:0107`, surface plasmon resonance |
+| [ECO](https://evidenceontology.org) — v2026-07-10 | The kind of evidence behind an assertion | `Measurement.evidence_type_id` carries `ECO:0001127`, SPR evidence |
+| [OBI](https://obi-ontology.org) — v2026-11-03 | Assays as planned processes; `OBI:0002105` is a dissociation-constant assay | Named, not modelled |
+| [Pfam / InterPro](https://www.ebi.ac.uk/interpro/) — Pfam 39.0 | Protein families | A natural target has an accession; a de novo backbone has none, which is the point |
+
+Those two ids cost nothing and make the binding values joinable with IntAct
+and IMEx, and the evidence readable by anything that speaks ECO.
+
+Not adopted, deliberately: **OBI** and **BAO** wholesale, because importing
+either drags in BFO's upper-ontology commitments and this is a cookbook, not a
+reference ontology; **SEPIO**, which models assertion, evidence line and
+criterion much as the claims layer here does and is worth reading as prior
+art, but whose OWL form is abandoned and whose LinkML successor is
+mid-migration and variant-interpretation-centric; **Allotrope** and **MIAPE**,
+which describe instrument files and proteomics, a layer below this one.
+**MIMIx**, the PSI-MI minimum-information guideline for interaction
+experiments, is the closest existing checklist to the Evidence layer if you
+need one.
+
 ## References
 
 | What | Where |

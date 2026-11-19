@@ -153,9 +153,15 @@ node Lab {
     expression_system: String
 }
 
-node Measurement {                    // one design against one target at one lab
+// One design against one target at one lab. Two external term ids travel with
+// it so the values join to the wider literature: there is no ontology for
+// protein design, but there is one for how an interaction was detected and one
+// for what counts as evidence. See "Standards" in README.md.
+node Measurement {
     slug: String @key                 // measure:02090d8c-cn2-adaptyv
     method: enum(spr, bli) @index
+    detection_method_id: String?      // PSI-MI: MI:0107 surface plasmon resonance, MI:0969 bio-layer interferometry
+    evidence_type_id: String?         // ECO: ECO:0001127 SPR evidence, ECO:0006350 BLI evidence
     result: enum(hit, no_hit, inconclusive) @index
     kd_nm: F64?
     kd_is_upper_limit: Bool           // a bound, not a value: the fit could not resolve it

@@ -1,6 +1,6 @@
 # Seed data
 
-`seed.jsonl` holds 11,395 rows describing one de novo protein design
+`seed.jsonl` holds 11,397 rows describing one de novo protein design
 campaign: Anthropic's scorpion-toxin binder campaign of October 2026.
 
 ## Where it comes from
@@ -33,7 +33,7 @@ them beyond the threshold comparison described below.
 | `Control` | 70 | published binders run alongside, per target, lab and replicate |
 | `BinderClaim` | 21 | 17 asserted, 4 admitted only by a looser rule |
 | `Criterion` | 10 | the applied rule and nine others the report counts under |
-| `EvidenceGap` | 7 | what the record does not hold |
+| `EvidenceGap` | 8 | what the record does not hold |
 | `CampaignWindow` | 3 | |
 | `SelectionRule` | 3 | including the one that replaced the diversity caps |
 | `AgentRole` | 4 | generate, score, select, orchestrate |
