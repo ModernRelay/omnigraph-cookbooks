@@ -1,15 +1,20 @@
 // Binder campaign: a de novo protein design campaign as a graph — Omnigraph schema
 //
+// These types are meant for any binder campaign, whatever is being designed
+// against: a receptor, a viral coat protein, a cytokine, a toxin. Nothing in
+// the model is specific to the seed. Where a comment names a scorpion toxin it
+// is giving the seed's example, not narrowing the type.
+//
 // Seeded from Anthropic's scorpion-toxin binder campaign (October 2026), whose
 // designs, scores and assay results are public under CC BY 4.0. The campaign
 // generated 318,484 designs, tested 211 and reported 17 binders.
 //
 // The graph is in four layers:
 //
-//   Targets      the toxins, and the residues the agent chose to aim at
+//   Targets      what is designed against, and the residues to aim at
 //   Designs      every tested design, how it was made, and what it came from
 //   Evidence     the scores that selected it and the assays that tested it
-//   Claims       "this design binds that toxin", the criteria it rests on,
+//   Claims       "this design binds that target", the criteria it rests on,
 //                and the gaps in the evidence underneath it
 //
 // The fourth layer is the point. A binder claim is a node, not a row in a
@@ -27,27 +32,30 @@
 // Targets
 // ──────────────────────────────────────────────
 
-node Toxin {
-    slug: String @key                 // toxin:cn2
+// What the campaign designs against. A free-text family rather than an enum:
+// the useful grouping differs by campaign (a toxin family, a receptor class,
+// a Pfam accession), and an enum would pin it to one domain.
+node Target {
+    slug: String @key                 // target:cn2
     name: String @index               // Cn2
-    family: enum(alpha, beta, alpha_like) @index
-    receptor_site: String             // site 4
-    organism: String                  // Centruroides noxius
-    region: String?                   // where stings by this species occur
-    uniprot: String @index
+    family: String? @index            // the seed's: alpha, beta, alpha-like
+    binding_site: String?             // the surface designs must cover: "site 4"
+    organism: String?
+    region: String?                   // where the source organism is found
+    uniprot: String? @index           // the accession, where the target has one
     length_aa: I32
     sequence: String
-    structure_used: String            // the structure the agent chose for design: 25IH chain D
-    structure_is_predicted: Bool      // AaH I had no experimental structure
+    structure_used: String            // what designs were built against: 25IH chain D
+    structure_is_predicted: Bool      // true for a predicted model, as AaH I used
 }
 
-node Hotspot {                        // a residue the agent chose for designs to contact
+node Hotspot {                        // a residue chosen for designs to contact
     slug: String @key                 // hotspot:cn2-e15
     residue: String                   // E15
     design_models_in_contact: I32     // how many released design models actually reach it
 }
 
-edge HotspotOn: Hotspot -> Toxin @card(1..1) { @key(@src, @dst) }
+edge HotspotOn: Hotspot -> Target @card(1..1) { @key(@src, @dst) }
 
 
 // ──────────────────────────────────────────────
@@ -95,8 +103,8 @@ edge HasDomain: Design -> Design {
     @key(@src, @dst)
 }
 
-edge IntendedAgainst: Design -> Toxin { @key(@src, @dst) }
-edge BackboneMadeAgainst: Design -> Toxin { @key(@src, @dst) }
+edge IntendedAgainst: Design -> Target { @key(@src, @dst) }
+edge BackboneMadeAgainst: Design -> Target { @key(@src, @dst) }
 
 
 // ──────────────────────────────────────────────
@@ -108,7 +116,7 @@ node Predictor {
     name: String @index
 }
 
-// Set once per toxin and predictor BEFORE any design was scored, from decoys
+// Set once per target and predictor BEFORE any design was scored, from decoys
 // and negative controls. Recording it as its own node is what lets a claim
 // name the bar it cleared, rather than asserting that a bar existed.
 node Threshold {
@@ -118,11 +126,11 @@ node Threshold {
     set_before_scoring: Bool
 }
 
-edge ThresholdForToxin: Threshold -> Toxin @card(1..1) { @key(@src, @dst) }
+edge ThresholdForTarget: Threshold -> Target @card(1..1) { @key(@src, @dst) }
 edge ThresholdByPredictor: Threshold -> Predictor @card(1..1) { @key(@src, @dst) }
 
-// One score per design and toxin, carrying each predictor's value. A design
-// passed against a toxin only if all three predictors cleared their thresholds.
+// One score per design and target, carrying each predictor's value. A design
+// passed against a target only if all three predictors cleared their thresholds.
 node Score {
     slug: String @key                 // score:02090d8c-cn2
     final_score: F64?                 // the campaign's weighted rank value
@@ -137,7 +145,7 @@ node Score {
 }
 
 edge ScoreOf: Score -> Design @card(1..1) { @key(@src, @dst) }
-edge ScoreAgainst: Score -> Toxin @card(1..1) { @key(@src, @dst) }
+edge ScoreAgainst: Score -> Target @card(1..1) { @key(@src, @dst) }
 
 node Lab {
     slug: String @key
@@ -145,7 +153,7 @@ node Lab {
     expression_system: String
 }
 
-node Measurement {                    // one design against one toxin at one lab
+node Measurement {                    // one design against one target at one lab
     slug: String @key                 // measure:02090d8c-cn2-adaptyv
     method: enum(spr, bli) @index
     result: enum(hit, no_hit, inconclusive) @index
@@ -156,7 +164,7 @@ node Measurement {                    // one design against one toxin at one lab
 }
 
 edge MeasurementOf: Measurement -> Design @card(1..1) { @key(@src, @dst) }
-edge MeasurementAgainst: Measurement -> Toxin @card(1..1) { @key(@src, @dst) }
+edge MeasurementAgainst: Measurement -> Target @card(1..1) { @key(@src, @dst) }
 edge MeasurementAtLab: Measurement -> Lab @card(1..1) { @key(@src, @dst) }
 
 node SpecificityCheck {               // binding to something it was never meant to bind
@@ -178,7 +186,7 @@ node Control {                        // a published binder run alongside, to sh
     kd_nm: F64?
 }
 
-edge ControlAgainst: Control -> Toxin @card(1..1) { @key(@src, @dst) }
+edge ControlAgainst: Control -> Target @card(1..1) { @key(@src, @dst) }
 edge ControlAtLab: Control -> Lab @card(1..1) { @key(@src, @dst) }
 
 
@@ -186,7 +194,7 @@ edge ControlAtLab: Control -> Lab @card(1..1) { @key(@src, @dst) }
 // Claims: what the campaign says it found, and what that rests on
 // ──────────────────────────────────────────────
 
-// "This design binds this toxin." Asserted by people, from measurements,
+// "This design binds this target." Asserted by people, from measurements,
 // under a criterion. Everything that would make a reader doubt it hangs here.
 node BinderClaim {
     slug: String @key                 // claim:cn2-b1-cn2
@@ -197,7 +205,7 @@ node BinderClaim {
 }
 
 edge ClaimAbout: BinderClaim -> Design @card(1..1) { @key(@src, @dst) }
-edge ClaimAgainst: BinderClaim -> Toxin @card(1..1) { @key(@src, @dst) }
+edge ClaimAgainst: BinderClaim -> Target @card(1..1) { @key(@src, @dst) }
 edge ClaimRestsOn: BinderClaim -> Measurement { @key(@src, @dst) }
 
 // A rule for calling a design a binder. The campaign applied one; the report
@@ -226,7 +234,7 @@ node EvidenceGap {
 
 edge GapAffectsClaim: EvidenceGap -> BinderClaim { @key(@src, @dst) }
 edge GapAffectsDesign: EvidenceGap -> Design { @key(@src, @dst) }
-edge GapAffectsToxin: EvidenceGap -> Toxin { @key(@src, @dst) }
+edge GapAffectsTarget: EvidenceGap -> Target { @key(@src, @dst) }
 
 
 // ──────────────────────────────────────────────

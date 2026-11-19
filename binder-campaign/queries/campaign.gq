@@ -78,33 +78,33 @@ query uncited_gaps()
     order { $g.slug }
 }
 
-// The toxins, and how the campaign fared against each. A toxin with no
+// The targets, and how the campaign fared against each. A target with no
 // claims is a target the campaign did not reach.
-query toxins()
-    @description("The five target toxins, their family and the structure used to design against each") {
+query targets()
+    @description("The five target targets, their family and the structure used to design against each") {
     match {
-        $t: Toxin
+        $t: Target
     }
-    return { $t.slug, $t.name, $t.family, $t.receptor_site, $t.organism, $t.region,
+    return { $t.slug, $t.name, $t.family, $t.binding_site, $t.organism, $t.region,
              $t.uniprot, $t.structure_used, $t.structure_is_predicted }
     order { $t.family, $t.name }
 }
 
 // The residues the agent chose to aim designs at, and how many released
 // design models actually reach each one.
-query hotspots($toxin: String)
-    @description("The residues the agent chose for designs to contact on one toxin") {
+query hotspots($target: String)
+    @description("The residues the agent chose for designs to contact on one target") {
     match {
-        $t: Toxin { slug: $toxin }
+        $t: Target { slug: $target }
         $h hotspotOn $t
     }
     return { $t.name, $h.residue, $h.design_models_in_contact }
     order { $h.design_models_in_contact desc }
 }
 
-// Claims against each toxin, counted. Ts1 has none.
-query claims_by_toxin()
-    @description("How many designs are claimed to bind each toxin") {
+// Claims against each target, counted. Ts1 has none.
+query claims_by_target()
+    @description("How many designs are claimed to bind each target") {
     match {
         $c: BinderClaim { asserted: true }
         $c claimAgainst $t

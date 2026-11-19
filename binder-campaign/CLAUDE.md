@@ -11,7 +11,7 @@ One AI-run de novo protein design campaign, end to end, in four layers:
 
 | Layer | Types |
 |---|---|
-| Targets | `Toxin`, `Hotspot` |
+| Targets | `Target`, `Hotspot` |
 | Designs | `Design`, `DesignTool`, `BackboneFamily`, `SequenceMethod` |
 | Evidence | `Score`, `Threshold`, `Predictor`, `Measurement`, `Lab`, `SpecificityCheck`, `Control` |
 | Claims | `BinderClaim`, `Criterion`, `EvidenceGap` |

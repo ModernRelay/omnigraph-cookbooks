@@ -9,7 +9,7 @@
 
 // Record a measurement a lab reported. Evidence first: a claim may only rest
 // on a measurement that is already in the graph.
-query add_measurement($slug: String, $design: String, $toxin: String, $lab: String,
+query add_measurement($slug: String, $design: String, $target: String, $lab: String,
                       $method: String, $result: String, $kd_nm: F64?,
                       $kd_is_upper_limit: Bool, $rmax_ratio: F64?, $note: String?) {
     insert Measurement {
@@ -22,15 +22,15 @@ query link_measurement_design($measurement: String, $design: String) {
     insert MeasurementOf { from: $measurement, to: $design }
 }
 
-query link_measurement_toxin($measurement: String, $toxin: String) {
-    insert MeasurementAgainst { from: $measurement, to: $toxin }
+query link_measurement_target($measurement: String, $target: String) {
+    insert MeasurementAgainst { from: $measurement, to: $target }
 }
 
 query link_measurement_lab($measurement: String, $lab: String) {
     insert MeasurementAtLab { from: $measurement, to: $lab }
 }
 
-// Assert that a design binds a toxin. The claim is not the result; it is
+// Assert that a design binds a target. The claim is not the result; it is
 // somebody's reading of the results, recorded with their name and the day.
 query assert_binder_claim($slug: String, $statement: String, $recorded_at: DateTime,
                           $recorded_by: String) {
@@ -44,8 +44,8 @@ query link_claim_design($claim: String, $design: String) {
     insert ClaimAbout { from: $claim, to: $design }
 }
 
-query link_claim_toxin($claim: String, $toxin: String) {
-    insert ClaimAgainst { from: $claim, to: $toxin }
+query link_claim_target($claim: String, $target: String) {
+    insert ClaimAgainst { from: $claim, to: $target }
 }
 
 // Ground a claim in a measurement. A claim with no edge here rests on
@@ -91,8 +91,8 @@ query gap_affects_design($gap: String, $design: String) {
     insert GapAffectsDesign { from: $gap, to: $design }
 }
 
-query gap_affects_toxin($gap: String, $toxin: String) {
-    insert GapAffectsToxin { from: $gap, to: $toxin }
+query gap_affects_target($gap: String, $target: String) {
+    insert GapAffectsTarget { from: $gap, to: $target }
 }
 
 query cite_gap($gap: String, $source: String) {

@@ -4,7 +4,7 @@
 // agreement between them is the evidence, disagreement is a finding.
 
 query measurements_for_design($slug: String)
-    @description("Every binding measurement for one design, lab by lab and toxin by toxin") {
+    @description("Every binding measurement for one design, lab by lab and target by target") {
     match {
         $d: Design { slug: $slug }
         $m measurementOf $d
@@ -15,10 +15,10 @@ query measurements_for_design($slug: String)
     order { $t.name, $l.name }
 }
 
-// Where the two labs disagree on the same design and toxin. A hit at one
+// Where the two labs disagree on the same design and target. A hit at one
 // lab and not the other is the single most useful row in this graph.
 query lab_disagreements()
-    @description("Design and toxin pairs called a hit at one lab and not at the other") {
+    @description("Design and target pairs called a hit at one lab and not at the other") {
     match {
         $m1: Measurement
         $m1.result = "hit"
@@ -74,11 +74,11 @@ query specificity_for_design($slug: String)
 }
 
 // Did the assay work at all? A published binder run alongside the designs
-// shows the instrument and the toxin preparation behaved.
-query controls_for_toxin($toxin: String)
-    @description("The published binders run as controls against one toxin, and whether each worked") {
+// shows the instrument and the target preparation behaved.
+query controls_for_target($target: String)
+    @description("The published binders run as controls against one target, and whether each worked") {
     match {
-        $t: Toxin { slug: $toxin }
+        $t: Target { slug: $target }
         $ctl controlAgainst $t
         $ctl controlAtLab $l
     }
@@ -86,10 +86,10 @@ query controls_for_toxin($toxin: String)
     order { $l.name, $ctl.name }
 }
 
-// Toxins whose control failed at a lab. Every claim measured there rests on
+// Targets whose control failed at a lab. Every claim measured there rests on
 // an assay that could not be shown to work.
 query failed_controls()
-    @description("Toxin and lab pairs where the positive control did not work") {
+    @description("Target and lab pairs where the positive control did not work") {
     match {
         $ctl: Control
         $ctl.control_worked = "fails"
@@ -100,7 +100,7 @@ query failed_controls()
     order { $t.name }
 }
 
-// The tightest measured binding, across every design and toxin.
+// The tightest measured binding, across every design and target.
 query tightest_binding()
     @description("The strongest measured binding values, lowest first") {
     match {

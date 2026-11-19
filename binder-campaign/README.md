@@ -1,33 +1,45 @@
 # Binder campaign: a protein design run, and whether its results hold up
 
-Some venoms carry proteins — *toxins* — that jam one precise part of a nerve
-cell, which is what makes a sting dangerous. A *binder* is a small protein
-designed to latch onto a chosen spot on another protein; one that covers the
-damaging face of a toxin can block it, which is roughly what an antivenom
-does. Designing a binder *de novo* means generating it in software rather than
-harvesting it from an immunised animal. A *campaign* is one run of that:
-choose the targets, generate candidates by the hundred thousand, score them
-computationally, send a couple of hundred to a lab, and find out which ones
-actually stick. This graph holds one such campaign, end to end. Graph ID
-`binders`.
+Protein design is the business of building a protein that does a chosen job:
+grip a particular target, catalyse a reaction, carry something somewhere. Most
+of the work now happens in software. Generative models propose structures,
+structure predictors estimate how well each proposal would fold and how
+tightly it would hold its target, and only a short list is ever made and
+tested at a bench. A *campaign* is one pass down that funnel against one set
+of targets: typically hundreds of thousands of candidates generated, a few
+hundred ordered, and a handful that work.
 
-The point is not recording which designs bound. A results sheet, a scoring
-notebook and a lab notebook each hold one slice of a campaign, and "bound" is
-a definition rather than a measurement: the campaign seeded here tested 211
-designs and reported **17** binders, while its own report re-counts them under
-a dozen other rules and gets anything from **7 to 18**. The questions that
-decide whether to believe that number — which claims survive a stricter rule,
-which rest on evidence nobody wrote down, what a design was derived from,
-which bar a score cleared — fall between those slices. So a `BinderClaim` is a
-node here: it links to the measurements it rests on, to every `Criterion` it
-survives, and to any `EvidenceGap` recorded against it. Tightening the
-definition is a traversal, not a re-analysis.
+A campaign produces far more knowledge than it produces molecules, and nearly
+all of it is about how one stage led to the next — which tool drew a backbone
+and from which parent, which predictors scored a design against which target
+and against what bar, which designs were selected and under which rule, which
+of them expressed, what each lab measured and in how many replicates. Every
+stage has its own unit (a backbone, a design, a design-target pair, a well, a
+replicate), its own tools and its own file: a scoring notebook, a results
+sheet, a contract lab's report, an electronic lab notebook. The links between
+those stages are what somebody needs six months later, and they are the part
+nobody writes down.
+
+The last link is the one that matters most and survives least. "This design
+binds that target" is a judgement under a rule — how strong a signal counts,
+how many replicates must agree, whether two labs must agree, what off-target
+binding disqualifies. Change the rule and the list changes. Campaigns record
+the list and not the rule. This graph holds one campaign end to end with that
+link made explicit: a claim, the measurements beneath it, the rule it holds
+under, and anything the record does not contain. Tightening the definition is
+then a traversal, not a re-analysis. Graph ID `binders`.
 
 The seed is **real**, where the other cookbooks' seeds are fictional:
-Anthropic's scorpion-toxin binder campaign of October 2026, whose designs,
-scores and both labs' assay results are public under CC BY 4.0. The campaign
-process and the criteria come from its technical report, transcribed and
-cited. See [seed.md](seed.md) and [References](#references).
+Anthropic's scorpion-toxin binder campaign of October 2026. Its targets are
+the neurotoxins in scorpion venom that jam sodium channels in nerve cells,
+which is what makes a sting dangerous; a binder covering the face a toxin uses
+to grip the channel should block it, which is roughly how an antivenom works.
+The campaign generated 318,484 designs, tested 211 at two contract labs and
+reported **17** binders — while its own report re-counts them under a dozen
+other rules and gets anything from **7 to 18**. The designs, scores and both
+labs' results are public under CC BY 4.0; the process and the criteria are
+transcribed from the technical report and cited. See [seed.md](seed.md) and
+[References](#references).
 
 Sibling cookbook: [pharma-intel](../pharma-intel/) is the business around a
 drug program — compounds, trials, deals, and the sponsor's own assumptions.
@@ -42,14 +54,14 @@ and gateway up:
 
 ```bash
 omnigraph query binder_claims --target local-reader --graph binders
-omnigraph query claims_by_toxin --target local-reader --graph binders
+omnigraph query claims_by_target --target local-reader --graph binders
 omnigraph query criteria_all --target local-reader --graph binders
 omnigraph query claims_lost_under --target local-reader --graph binders \
   --params '{"criterion":"crit:aahi-mature-mass"}'
 omnigraph query evidence_gaps --target local-reader --graph binders
 ```
 
-`binder_claims` lists the 17, and `claims_by_toxin` splits them: Cn2 7,
+`binder_claims` lists the 17, and `claims_by_target` splits them: Cn2 7,
 AaH II 4, AaH I 4, LqhIII 2, and none at all against Ts1. `criteria_all` is
 the interesting one — ten different rules for calling a design a binder, each
 with the count the report gives it, from 18 down to 11. (The report's table
@@ -116,7 +128,7 @@ config:
 ---
 flowchart LR
   classDef L0 fill:#e8f0fe,stroke:#4a6fd1,color:#1d1d1f,stroke-width:1.5px
-  Toxin["<b>Toxin</b>"]:::L0
+  Target["<b>Target</b>"]:::L0
   Hotspot["<b>Hotspot</b>"]:::L0
   classDef L1 fill:#e7f6ec,stroke:#3c9a5f,color:#1d1d1f,stroke-width:1.5px
   Design["<b>Design</b><br/><small>↻ derived from, has domain</small>"]:::L1
@@ -132,16 +144,16 @@ flowchart LR
   EvidenceGap["<b>EvidenceGap</b>"]:::L3
   classDef L4 fill:#eeeeee,stroke:#888888,color:#1d1d1f,stroke-width:1.5px
   Source["<b>Source</b>"]:::L4
-  Hotspot -->|"on"| Toxin
+  Hotspot -->|"on"| Target
   Design -->|"made with"| DesignTool
-  Design -->|"intended against"| Toxin
+  Design -->|"intended against"| Target
   Score -->|"of"| Design
-  Score -->|"against"| Toxin
-  Threshold -->|"for"| Toxin
+  Score -->|"against"| Target
+  Threshold -->|"for"| Target
   Measurement -->|"of"| Design
   Measurement -->|"at lab"| Lab
   BinderClaim -->|"about"| Design
-  BinderClaim -->|"against"| Toxin
+  BinderClaim -->|"against"| Target
   BinderClaim -->|"rests on"| Measurement
   BinderClaim -->|"survives"| Criterion
   EvidenceGap -->|"affects"| BinderClaim
@@ -156,7 +168,7 @@ in a box is an edge between two nodes of that type.
 
 | Layer | Types | Holds |
 |---|---|---|
-| Targets | `Toxin`, `Hotspot` | The five toxins, and the five residues per toxin the agent chose for designs to contact |
+| Targets | `Target`, `Hotspot` | What the campaign designs against, and the residues on each chosen for designs to contact |
 | Designs | `Design`, `DesignTool`, `BackboneFamily`, `SequenceMethod` | Every tested design, the tool that drew its backbone, the design it was redesigned from, the two domains a fusion joins |
 | Evidence | `Score`, `Threshold`, `Predictor`, `Measurement`, `Lab`, `SpecificityCheck`, `Control` | What selected a design before any lab saw it, and what each lab then measured, including binding to things it was never meant to bind |
 | Claims | `BinderClaim`, `Criterion`, `EvidenceGap` | Somebody's reading of the measurements, the rule it holds under, and what the record does not contain |
@@ -187,10 +199,11 @@ names them all with their parameters.
 | [`campaign.gq`](queries/campaign.gq) | The windows the run passed through, the rules that changed between them, and the duties the agents were held to |
 | [`mutations.gq`](queries/mutations.gq) | The writes below |
 
-`cleared_but_did_not_bind` with `{"toxin":"toxin:ts1"}` is worth running on
-its own. Every threshold cleared, and nothing bound — the report finds the
-same thing, that the final score tracked success across design sets but did
-not pick out binders within one.
+`cleared_but_did_not_bind` with `{"target":"target:ts1"}` is worth running on
+its own. It returns **131** designs that cleared every predictor's threshold
+against Ts1, not one of which bound it — the report reaches the same
+conclusion, that the final score tracked success rates across design sets but
+did not pick out binders within one.
 
 ## Writing to it
 

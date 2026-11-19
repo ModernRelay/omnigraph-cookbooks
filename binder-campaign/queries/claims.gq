@@ -1,9 +1,9 @@
 // Claims: what the campaign says it found, what that rests on, and what
 // cannot be checked. These are the reads the cookbook exists for.
 
-// Every asserted binder claim, with its design and toxin.
+// Every asserted binder claim, with its design and target.
 query binder_claims()
-    @description("Every design asserted to bind a toxin, under the applied criterion") {
+    @description("Every design asserted to bind a target, under the applied criterion") {
     match {
         $c: BinderClaim { asserted: true }
         $c claimAbout $d

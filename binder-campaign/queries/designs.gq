@@ -82,27 +82,27 @@ query designs_added_after()
     order { $d.name }
 }
 
-// A design and the toxins it was meant to bind. A design made against five
-// toxins is a much harder ask than one made against a single toxin.
+// A design and the targets it was meant to bind. A design made against five
+// targets is a much harder ask than one made against a single target.
 query design_targets($slug: String)
-    @description("The toxins one design was intended to bind, and the toxin its backbone was made against") {
+    @description("The targets one design was intended to bind, and the target its backbone was made against") {
     match {
         $d: Design { slug: $slug }
         $d intendedAgainst $t
     }
-    return { $d.name, $t.name, $t.family, $t.receptor_site }
+    return { $d.name, $t.name, $t.family, $t.binding_site }
     order { $t.name }
 }
 
-// Designs aimed at more than one toxin. The campaign asked for these; none
+// Designs aimed at more than one target. The campaign asked for these; none
 // met the criteria against more than one.
-query multi_toxin_designs()
-    @description("Designs intended against more than one toxin, with how many they were aimed at") {
+query multi_target_designs()
+    @description("Designs intended against more than one target, with how many they were aimed at") {
     match {
         $d: Design
         $d intendedAgainst $t
         count { $d intendedAgainst $x } > 1
     }
-    return { $d.slug, $d.name, $d.format, count($t) as toxins_intended }
+    return { $d.slug, $d.name, $d.format, count($t) as targets_intended }
     order { count($t) desc }
 }

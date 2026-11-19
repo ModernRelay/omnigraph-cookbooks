@@ -37,16 +37,16 @@ aliases:
   tools-behind-binders: { server: local, graph: binders, query: tools_behind_binders }
   added-after: { server: local, graph: binders, query: designs_added_after }
   design-targets: { server: local, graph: binders, query: design_targets, args: [slug] }
-  multi-toxin: { server: local, graph: binders, query: multi_toxin_designs }
+  multi-target: { server: local, graph: binders, query: multi_target_designs }
 
   # Scores and the bars they were judged against
   thresholds: { server: local, graph: binders, query: thresholds_all }
   design-scores: { server: local, graph: binders, query: design_scores, args: [slug] }
   score-behind-claim: { server: local, graph: binders, query: score_behind_claim, args: [claim] }
-  top-scores: { server: local, graph: binders, query: top_scores, args: [toxin] }
+  top-scores: { server: local, graph: binders, query: top_scores, args: [target] }
   rerun-scores: { server: local, graph: binders, query: scores_from_rerun }
-  cleared: { server: local, graph: binders, query: cleared_against, args: [toxin] }
-  cleared-but-missed: { server: local, graph: binders, query: cleared_but_did_not_bind, args: [toxin] }
+  cleared: { server: local, graph: binders, query: cleared_against, args: [target] }
+  cleared-but-missed: { server: local, graph: binders, query: cleared_but_did_not_bind, args: [target] }
 
   # What the labs measured
   measurements: { server: local, graph: binders, query: measurements_for_design, args: [slug] }
@@ -54,7 +54,7 @@ aliases:
   upper-limits: { server: local, graph: binders, query: upper_limit_only }
   off-target: { server: local, graph: binders, query: off_target_hits }
   specificity: { server: local, graph: binders, query: specificity_for_design, args: [slug] }
-  controls: { server: local, graph: binders, query: controls_for_toxin, args: [toxin] }
+  controls: { server: local, graph: binders, query: controls_for_target, args: [target] }
   failed-controls: { server: local, graph: binders, query: failed_controls }
   tightest: { server: local, graph: binders, query: tightest_binding }
 
@@ -65,6 +65,6 @@ aliases:
   agent-roles: { server: local, graph: binders, query: agent_roles }
   sources: { server: local, graph: binders, query: sources }
   uncited-gaps: { server: local, graph: binders, query: uncited_gaps }
-  toxins: { server: local, graph: binders, query: toxins }
-  hotspots: { server: local, graph: binders, query: hotspots, args: [toxin] }
-  claims-by-toxin: { server: local, graph: binders, query: claims_by_toxin }
+  targets: { server: local, graph: binders, query: targets }
+  hotspots: { server: local, graph: binders, query: hotspots, args: [target] }
+  claims-by-target: { server: local, graph: binders, query: claims_by_target }

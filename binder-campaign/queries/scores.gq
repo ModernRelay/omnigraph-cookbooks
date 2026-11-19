@@ -1,15 +1,15 @@
 // Scores and thresholds: what selected a design before any lab saw it.
 //
-// Thresholds were set per toxin and predictor BEFORE any design was scored.
+// Thresholds were set per target and predictor BEFORE any design was scored.
 // They are nodes, so a score names the bar it was judged against instead of
 // a reader taking on trust that a bar existed.
 
-// The bar, per toxin and predictor.
+// The bar, per target and predictor.
 query thresholds_all()
-    @description("The ipSAE and scDockQ thresholds, per toxin and predictor, fixed before scoring") {
+    @description("The ipSAE and scDockQ thresholds, per target and predictor, fixed before scoring") {
     match {
         $th: Threshold
-        $th thresholdForToxin $t
+        $th thresholdForTarget $t
         $th thresholdByPredictor $p
     }
     return { $t.name, $p.name, $th.ipsae, $th.scdockq, $th.set_before_scoring }
@@ -18,7 +18,7 @@ query thresholds_all()
 
 // The bars one design had to clear, and whether it did.
 query design_scores($slug: String)
-    @description("Every in-silico score for one design, toxin by toxin, and whether it cleared") {
+    @description("Every in-silico score for one design, target by target, and whether it cleared") {
     match {
         $d: Design { slug: $slug }
         $s scoreOf $d
@@ -40,7 +40,7 @@ query score_behind_claim($claim: String)
         $c claimAgainst $t
         $s scoreOf $d
         $s scoreAgainst $t
-        $th thresholdForToxin $t
+        $th thresholdForTarget $t
         $th thresholdByPredictor $p
     }
     return { $d.name, $t.name, $s.final_score, $s.cleared_thresholds,
@@ -48,11 +48,11 @@ query score_behind_claim($claim: String)
     order { $p.name }
 }
 
-// The best-scoring designs against one toxin, whether or not they bound.
-query top_scores($toxin: String)
-    @description("The highest in-silico scores against one toxin, with the lab outcome beside each") {
+// The best-scoring designs against one target, whether or not they bound.
+query top_scores($target: String)
+    @description("The highest in-silico scores against one target, with the lab outcome beside each") {
     match {
-        $t: Toxin { slug: $toxin }
+        $t: Target { slug: $target }
         $s scoreAgainst $t
         $s scoreOf $d
     }
@@ -74,12 +74,12 @@ query scores_from_rerun()
     order { $d.name, $t.name }
 }
 
-// Designs that cleared every threshold against a toxin. Selection drew from
+// Designs that cleared every threshold against a target. Selection drew from
 // this pool; the lab then tested how well it predicted binding.
-query cleared_against($toxin: String)
-    @description("Designs that cleared every predictor's threshold against one toxin") {
+query cleared_against($target: String)
+    @description("Designs that cleared every predictor's threshold against one target") {
     match {
-        $t: Toxin { slug: $toxin }
+        $t: Target { slug: $target }
         $s scoreAgainst $t
         $s: Score { cleared_thresholds: true }
         $s scoreOf $d
@@ -91,10 +91,10 @@ query cleared_against($toxin: String)
 // The gap between prediction and result: designs that cleared every
 // threshold and still did not bind. The report's own finding is that the
 // final score tracked success across sets but not within one.
-query cleared_but_did_not_bind($toxin: String)
-    @description("Designs that cleared every threshold against a toxin and were not claimed as binders") {
+query cleared_but_did_not_bind($target: String)
+    @description("Designs that cleared every threshold against a target and were not claimed as binders") {
     match {
-        $t: Toxin { slug: $toxin }
+        $t: Target { slug: $target }
         $s: Score { cleared_thresholds: true }
         $s scoreAgainst $t
         $s scoreOf $d
