@@ -14,6 +14,7 @@ and a cluster declaration. Local examples use filesystem storage.
 | [Beads](beads/) | `beads` | A beads-style work queue for coding agents, with the `ob` client |
 | [Company brain](company-brain/) | `company` | Claims, decisions and action items with the exact source text they rest on, shared by a company's people and agents |
 | [Hardware program](hardware-program/) | `program` | Requirements, budgets, interfaces and verification for a hardware program |
+| [Binder campaign](binder-campaign/) | `binders` | A de novo protein design campaign: every design's provenance, the scores that selected it, and the evidence under each binder claim |
 
 ## Local setup
 

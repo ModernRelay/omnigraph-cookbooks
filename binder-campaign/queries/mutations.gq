@@ -1,0 +1,115 @@
+// Writes. Run these on a branch and merge after review:
+//   omnigraph branch create review/<topic> --from main --target $TARGET --graph binders
+//   omnigraph mutate <name> --target $TARGET --graph binders --branch review/<topic> --params '{...}'
+//   omnigraph branch merge review/<topic> --into main --target $TARGET --graph binders
+//
+// The campaign's own record is read-only history. What people add is the
+// editorial layer: a new criterion to count under, a gap someone notices, a
+// claim retired when the evidence under it moves.
+
+// Record a measurement a lab reported. Evidence first: a claim may only rest
+// on a measurement that is already in the graph.
+query add_measurement($slug: String, $design: String, $toxin: String, $lab: String,
+                      $method: String, $result: String, $kd_nm: F64?,
+                      $kd_is_upper_limit: Bool, $rmax_ratio: F64?, $note: String?) {
+    insert Measurement {
+        slug: $slug, method: $method, result: $result, kd_nm: $kd_nm,
+        kd_is_upper_limit: $kd_is_upper_limit, rmax_ratio: $rmax_ratio, note: $note
+    }
+}
+
+query link_measurement_design($measurement: String, $design: String) {
+    insert MeasurementOf { from: $measurement, to: $design }
+}
+
+query link_measurement_toxin($measurement: String, $toxin: String) {
+    insert MeasurementAgainst { from: $measurement, to: $toxin }
+}
+
+query link_measurement_lab($measurement: String, $lab: String) {
+    insert MeasurementAtLab { from: $measurement, to: $lab }
+}
+
+// Assert that a design binds a toxin. The claim is not the result; it is
+// somebody's reading of the results, recorded with their name and the day.
+query assert_binder_claim($slug: String, $statement: String, $recorded_at: DateTime,
+                          $recorded_by: String) {
+    insert BinderClaim {
+        slug: $slug, statement: $statement, asserted: true,
+        recorded_at: $recorded_at, recorded_by: $recorded_by
+    }
+}
+
+query link_claim_design($claim: String, $design: String) {
+    insert ClaimAbout { from: $claim, to: $design }
+}
+
+query link_claim_toxin($claim: String, $toxin: String) {
+    insert ClaimAgainst { from: $claim, to: $toxin }
+}
+
+// Ground a claim in a measurement. A claim with no edge here rests on
+// nothing recorded, which `claims_with_gaps` will show.
+query ground_claim($claim: String, $measurement: String) {
+    insert ClaimRestsOn { from: $claim, to: $measurement }
+}
+
+// Withdraw a claim rather than delete it. The row stays, with asserted
+// false, so a reader can see that it was once made.
+query withdraw_claim($slug: String, $statement: String) {
+    update BinderClaim set { asserted: false, statement: $statement } where slug = $slug
+}
+
+// Add a rule to count binders under, then record which claims survive it.
+query add_criterion($slug: String, $name: String, $rule: String, $applied: Bool,
+                    $binders_under_rule: I32, $recorded_at: DateTime) {
+    insert Criterion {
+        slug: $slug, name: $name, rule: $rule, applied: $applied,
+        binders_under_rule: $binders_under_rule, recorded_at: $recorded_at
+    }
+}
+
+query claim_survives_criterion($claim: String, $criterion: String) {
+    insert ClaimSurvives { from: $claim, to: $criterion }
+}
+
+// Record something the evidence does not hold. A gap is a first-class fact:
+// it names what cannot be checked and what that costs.
+query record_gap($slug: String, $what: String, $effect: String, $severity: String,
+                 $recorded_at: DateTime) {
+    insert EvidenceGap {
+        slug: $slug, what: $what, effect: $effect, severity: $severity,
+        recorded_at: $recorded_at
+    }
+}
+
+query gap_affects_claim($gap: String, $claim: String) {
+    insert GapAffectsClaim { from: $gap, to: $claim }
+}
+
+query gap_affects_design($gap: String, $design: String) {
+    insert GapAffectsDesign { from: $gap, to: $design }
+}
+
+query gap_affects_toxin($gap: String, $toxin: String) {
+    insert GapAffectsToxin { from: $gap, to: $toxin }
+}
+
+query cite_gap($gap: String, $source: String) {
+    insert GapCitedIn { from: $gap, to: $source }
+}
+
+// Record a source, and move its fetched date when it is read again. The
+// first read sets fetched_on; every re-read moves it, even one that changed
+// nothing, so a stale copy can be told from a current one.
+query add_source($slug: String, $kind: String, $title: String, $url: String,
+                 $published_on: Date?, $fetched_on: Date, $licence: String?) {
+    insert Source {
+        slug: $slug, kind: $kind, title: $title, url: $url,
+        published_on: $published_on, fetched_on: $fetched_on, licence: $licence
+    }
+}
+
+query mark_source_fetched($slug: String, $fetched_on: Date) {
+    update Source set { fetched_on: $fetched_on } where slug = $slug
+}

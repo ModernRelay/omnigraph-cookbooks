@@ -1,0 +1,292 @@
+// Binder campaign: a de novo protein design campaign as a graph — Omnigraph schema
+//
+// Seeded from Anthropic's scorpion-toxin binder campaign (October 2026), whose
+// designs, scores and assay results are public under CC BY 4.0. The campaign
+// generated 318,484 designs, tested 211 and reported 17 binders.
+//
+// The graph is in four layers:
+//
+//   Targets      the toxins, and the residues the agent chose to aim at
+//   Designs      every tested design, how it was made, and what it came from
+//   Evidence     the scores that selected it and the assays that tested it
+//   Claims       "this design binds that toxin", the criteria it rests on,
+//                and the gaps in the evidence underneath it
+//
+// The fourth layer is the point. A binder claim is a node, not a row in a
+// results table: it links to the measurements it rests on, to the criterion
+// that defines it, and to any recorded gap in that evidence. Tighten the
+// criterion and the surviving claims are a query, not a re-analysis.
+//
+// Bulk rows (Score, Measurement, SpecificityCheck, Control) carry no
+// timestamps: they are observations with a fixed date, recorded once by the
+// lab that made them. The editorial layer (Claim, Criterion, EvidenceGap,
+// CampaignWindow, Source) carries `recorded_at`, because people add to it.
+
+
+// ──────────────────────────────────────────────
+// Targets
+// ──────────────────────────────────────────────
+
+node Toxin {
+    slug: String @key                 // toxin:cn2
+    name: String @index               // Cn2
+    family: enum(alpha, beta, alpha_like) @index
+    receptor_site: String             // site 4
+    organism: String                  // Centruroides noxius
+    region: String?                   // where stings by this species occur
+    uniprot: String @index
+    length_aa: I32
+    sequence: String
+    structure_used: String            // the structure the agent chose for design: 25IH chain D
+    structure_is_predicted: Bool      // AaH I had no experimental structure
+}
+
+node Hotspot {                        // a residue the agent chose for designs to contact
+    slug: String @key                 // hotspot:cn2-e15
+    residue: String                   // E15
+    design_models_in_contact: I32     // how many released design models actually reach it
+}
+
+edge HotspotOn: Hotspot -> Toxin @card(1..1) { @key(@src, @dst) }
+
+
+// ──────────────────────────────────────────────
+// Designs, and how each was made
+// ──────────────────────────────────────────────
+
+node Design {
+    slug: String @key                 // design:02090d8c
+    uuid: String @index
+    name: String @index               // Cn2-B4, or the uuid again where the campaign gave no name
+    design_set: I32 @index            // 1..10; set 10 was added after the campaign
+    rank_in_set: I32?
+    format: enum(single_domain, fusion) @index
+    length_aa: I32
+    sequence: String
+    redesign_round: I32?              // how many rounds of redesign produced it
+    substitutions_from_parent: String?   // the substitutions themselves: N6R,A12V,…
+    linker: String?                   // fusions only
+    added_after_campaign: Bool @index // set 10: designed in a later session, scored in a re-run
+}
+
+node DesignTool {
+    slug: String @key
+    name: String @index
+}
+node BackboneFamily {
+    slug: String @key
+    name: String @index
+}
+node SequenceMethod {
+    slug: String @key
+    name: String @index
+}
+
+edge MadeWithTool: Design -> DesignTool { @key(@src, @dst) }
+edge OnBackbone: Design -> BackboneFamily { @key(@src, @dst) }
+edge SequencedWith: Design -> SequenceMethod { @key(@src, @dst) }
+
+// Lineage. A redesign points at the design it came from; a fusion points at
+// the two single domains it joins. Both are how a tested molecule traces back
+// to the backbone a tool first produced.
+edge DerivedFrom: Design -> Design { @key(@src, @dst) }
+edge HasDomain: Design -> Design {
+    position: enum(a, b)
+    @key(@src, @dst)
+}
+
+edge IntendedAgainst: Design -> Toxin { @key(@src, @dst) }
+edge BackboneMadeAgainst: Design -> Toxin { @key(@src, @dst) }
+
+
+// ──────────────────────────────────────────────
+// Evidence: the scores that selected, the assays that tested
+// ──────────────────────────────────────────────
+
+node Predictor {
+    slug: String @key
+    name: String @index
+}
+
+// Set once per toxin and predictor BEFORE any design was scored, from decoys
+// and negative controls. Recording it as its own node is what lets a claim
+// name the bar it cleared, rather than asserting that a bar existed.
+node Threshold {
+    slug: String @key                 // threshold:cn2-esmfold2-fast
+    ipsae: F64
+    scdockq: F64                      // 0.23 throughout
+    set_before_scoring: Bool
+}
+
+edge ThresholdForToxin: Threshold -> Toxin @card(1..1) { @key(@src, @dst) }
+edge ThresholdByPredictor: Threshold -> Predictor @card(1..1) { @key(@src, @dst) }
+
+// One score per design and toxin, carrying each predictor's value. A design
+// passed against a toxin only if all three predictors cleared their thresholds.
+node Score {
+    slug: String @key                 // score:02090d8c-cn2
+    final_score: F64?                 // the campaign's weighted rank value
+    ipsae_esmfold2: F64?
+    ipsae_esmfold2_fast: F64?
+    ipsae_protenix: F64?
+    scdockq_esmfold2: F64?
+    scdockq_esmfold2_fast: F64?
+    scdockq_protenix: F64?
+    cleared_thresholds: Bool @index
+    from_later_rerun: Bool @index     // scored after the campaign closed, not by it
+}
+
+edge ScoreOf: Score -> Design @card(1..1) { @key(@src, @dst) }
+edge ScoreAgainst: Score -> Toxin @card(1..1) { @key(@src, @dst) }
+
+node Lab {
+    slug: String @key
+    name: String @index
+    expression_system: String
+}
+
+node Measurement {                    // one design against one toxin at one lab
+    slug: String @key                 // measure:02090d8c-cn2-adaptyv
+    method: enum(spr, bli) @index
+    result: enum(hit, no_hit, inconclusive) @index
+    kd_nm: F64?
+    kd_is_upper_limit: Bool           // a bound, not a value: the fit could not resolve it
+    rmax_ratio: F64?                  // fitted over theoretical; far from 1 flags a shaky fit
+    note: String?
+}
+
+edge MeasurementOf: Measurement -> Design @card(1..1) { @key(@src, @dst) }
+edge MeasurementAgainst: Measurement -> Toxin @card(1..1) { @key(@src, @dst) }
+edge MeasurementAtLab: Measurement -> Lab @card(1..1) { @key(@src, @dst) }
+
+node SpecificityCheck {               // binding to something it was never meant to bind
+    slug: String @key
+    protein: enum(clec12a, ovalbumin, baculovirus_particles) @index
+    result: enum(hit, no_hit, not_assessed, ambiguous) @index
+    run: I32?
+}
+
+edge SpecificityOf: SpecificityCheck -> Design @card(1..1) { @key(@src, @dst) }
+
+node Control {                        // a published binder run alongside, to show the assay worked
+    slug: String @key
+    name: String @index
+    format: String?                   // Fab or scFv; blank where the release does not say
+    method: enum(spr, bli, reverse_bli)
+    control_worked: enum(works, fails, inconclusive, not_stated) @index
+    result: String?
+    kd_nm: F64?
+}
+
+edge ControlAgainst: Control -> Toxin @card(1..1) { @key(@src, @dst) }
+edge ControlAtLab: Control -> Lab @card(1..1) { @key(@src, @dst) }
+
+
+// ──────────────────────────────────────────────
+// Claims: what the campaign says it found, and what that rests on
+// ──────────────────────────────────────────────
+
+// "This design binds this toxin." Asserted by people, from measurements,
+// under a criterion. Everything that would make a reader doubt it hangs here.
+node BinderClaim {
+    slug: String @key                 // claim:cn2-b1-cn2
+    statement: String
+    asserted: Bool @index             // reported as a binder under the applied criterion
+    recorded_at: DateTime
+    recorded_by: String
+}
+
+edge ClaimAbout: BinderClaim -> Design @card(1..1) { @key(@src, @dst) }
+edge ClaimAgainst: BinderClaim -> Toxin @card(1..1) { @key(@src, @dst) }
+edge ClaimRestsOn: BinderClaim -> Measurement { @key(@src, @dst) }
+
+// A rule for calling a design a binder. The campaign applied one; the report
+// re-ran the count under a dozen others. Each is a node, so "which claims
+// survive this rule" is a traversal rather than a re-analysis.
+node Criterion {
+    slug: String @key
+    name: String @index
+    rule: String
+    applied: Bool @index              // the one the reported count uses
+    binders_under_rule: I32           // the count the report gives for it
+    recorded_at: DateTime
+}
+
+edge ClaimSurvives: BinderClaim -> Criterion { @key(@src, @dst) }
+
+// Something the record does not hold, written down as its own fact. A gap
+// does not refute a claim; it says what cannot be checked.
+node EvidenceGap {
+    slug: String @key
+    what: String                      // the AaH I construct is undocumented
+    effect: String                    // four claims lose their mass basis
+    severity: enum(blocks_check, weakens_claim, noted) @index
+    recorded_at: DateTime
+}
+
+edge GapAffectsClaim: EvidenceGap -> BinderClaim { @key(@src, @dst) }
+edge GapAffectsDesign: EvidenceGap -> Design { @key(@src, @dst) }
+edge GapAffectsToxin: EvidenceGap -> Toxin { @key(@src, @dst) }
+
+
+// ──────────────────────────────────────────────
+// The campaign as a process
+// ──────────────────────────────────────────────
+
+// The campaign ran in three windows, each ending in a release of frozen
+// designs. Selection rules changed between them, so a design's place in the
+// final list depends on which window selected it.
+node CampaignWindow {
+    slug: String @key
+    ordinal: I32 @index
+    name: String
+    opened_by: String                 // the prompt, or the follow-up that extended it
+    what_changed: String
+    recorded_at: DateTime
+}
+
+node SelectionRule {
+    slug: String @key
+    name: String @index
+    rule: String
+    replaced: String?                 // the rule it superseded, where it superseded one
+    recorded_at: DateTime
+}
+
+edge RuleAppliedIn: SelectionRule -> CampaignWindow { @key(@src, @dst) }
+
+// Separation of duties, as the report states it: the agent that generated a
+// design neither scored nor selected it. Recorded so the separation is a fact
+// in the graph with a source, not a sentence in a PDF.
+node AgentRole {
+    slug: String @key
+    name: String @index
+    duty: enum(generate, score, select, orchestrate) @index
+    note: String
+    recorded_at: DateTime
+}
+
+
+// ──────────────────────────────────────────────
+// Sources
+// ──────────────────────────────────────────────
+
+// A type whose fields copy an outside source records when we last read it.
+// The first read sets fetched_on; every re-read moves it, even one that
+// changed nothing, so a stale copy can be told from a current one.
+node Source {
+    slug: String @key
+    kind: enum(report, dataset, preprint, article, page) @index
+    title: String
+    url: String
+    published_on: Date?
+    fetched_on: Date
+    licence: String?
+}
+
+edge GapCitedIn: EvidenceGap -> Source { @key(@src, @dst) }
+edge CriterionCitedIn: Criterion -> Source { @key(@src, @dst) }
+edge WindowCitedIn: CampaignWindow -> Source { @key(@src, @dst) }
+edge RuleCitedIn: SelectionRule -> Source { @key(@src, @dst) }
+edge RoleCitedIn: AgentRole -> Source { @key(@src, @dst) }
+edge ClaimCitedIn: BinderClaim -> Source { @key(@src, @dst) }

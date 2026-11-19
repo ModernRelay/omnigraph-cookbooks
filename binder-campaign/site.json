@@ -1,0 +1,35 @@
+{
+  "order": 9,
+  "name": "Binder campaign",
+  "category": "Research",
+  "blurb": "A de novo protein design campaign as a graph: every tested design, how it was made, the scores that selected it, the assays that tested it, and the gaps under each claim.",
+  "about": "The binder campaign graph holds one AI-run protein design campaign end to end. Designs link to the tool that drew them and the design they came from; scores link to the thresholds they were judged against; claims link to the measurements they rest on and to anything the record does not hold. Tightening the definition of a binder is a query over the claims, not a re-analysis of the results.",
+  "sample": "Anthropic's scorpion-toxin binder campaign, from its public data release",
+  "questions": [
+    {
+      "q": "Which binder claims survive a stricter rule?",
+      "query": "claims_under_criterion"
+    },
+    {
+      "q": "Which claims rest on evidence nobody can check?",
+      "query": "claims_with_gaps"
+    },
+    {
+      "q": "How was a design made, and what did it come from?",
+      "query": "design_provenance"
+    },
+    {
+      "q": "Which score selected a design, and against which bar?",
+      "query": "score_behind_claim"
+    }
+  ],
+  "search": {
+    "title": "Protein design campaign as a knowledge graph",
+    "heading": "A binder design campaign, with the evidence under every claim",
+    "keywords": [
+      "knowledge graph",
+      "ontology",
+      "graphrag"
+    ]
+  }
+}

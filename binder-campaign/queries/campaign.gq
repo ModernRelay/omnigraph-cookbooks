@@ -1,0 +1,114 @@
+// The campaign as a process: the windows it ran in, the rules that selected
+// designs in each, and the duties the agents were held to.
+//
+// None of this is in the results tables. It is in the report's prose, which
+// is why it belongs in the graph: a claim about how a result was produced is
+// a fact with a source, not a sentence a reader has to take on trust.
+
+query campaign_windows()
+    @description("The windows the campaign ran in, what opened each and what changed") {
+    match {
+        $w: CampaignWindow
+    }
+    return { $w.ordinal, $w.name, $w.opened_by, $w.what_changed }
+    order { $w.ordinal }
+}
+
+// The selection rules, and which window each applied in. A rule that
+// replaced another is the reason a design's place in the final list depends
+// on when it was selected.
+query selection_rules()
+    @description("The rules that selected designs, and the window each applied in") {
+    match {
+        $r: SelectionRule
+        $r ruleAppliedIn $w
+    }
+    return { $w.ordinal, $w.name, $r.name, $r.rule, $r.replaced }
+    order { $w.ordinal, $r.name }
+}
+
+// The rules that superseded an earlier one. These are the places where the
+// final list stopped being produced by a single set of rules.
+query rules_that_replaced()
+    @description("Selection rules that superseded an earlier rule, and what they replaced") {
+    match {
+        $r: SelectionRule
+        $r.replaced is not null
+        $r ruleAppliedIn $w
+    }
+    return { $r.name, $r.rule, $r.replaced, $w.ordinal, $w.name }
+    order { $w.ordinal }
+}
+
+// Separation of duties: which role generated, which scored, which selected.
+// The report states that no agent that generated a design also scored or
+// selected it. Here that is a row with a citation, not an assurance.
+query agent_roles()
+    @description("The agent roles in the campaign and the duty each was held to") {
+    match {
+        $a: AgentRole
+        $a roleCitedIn $s
+    }
+    return { $a.duty, $a.name, $a.note, $s.title, $s.url }
+    order { $a.duty }
+}
+
+// Every source the campaign record cites, and when it was last read.
+query sources()
+    @description("The sources this graph's claims cite, with the day each was last read") {
+    match {
+        $s: Source
+    }
+    return { $s.slug, $s.kind, $s.title, $s.url, $s.published_on, $s.fetched_on, $s.licence }
+    order { $s.fetched_on desc }
+}
+
+// Anything in the editorial layer with no source behind it. A claim about
+// how the campaign ran that cites nothing is the next thing to fix.
+query uncited_gaps()
+    @description("Recorded evidence gaps that cite no source") {
+    match {
+        $g: EvidenceGap
+        not {
+            $s: Source
+            $g gapCitedIn $s
+        }
+    }
+    return { $g.slug, $g.what, $g.severity }
+    order { $g.slug }
+}
+
+// The toxins, and how the campaign fared against each. A toxin with no
+// claims is a target the campaign did not reach.
+query toxins()
+    @description("The five target toxins, their family and the structure used to design against each") {
+    match {
+        $t: Toxin
+    }
+    return { $t.slug, $t.name, $t.family, $t.receptor_site, $t.organism, $t.region,
+             $t.uniprot, $t.structure_used, $t.structure_is_predicted }
+    order { $t.family, $t.name }
+}
+
+// The residues the agent chose to aim designs at, and how many released
+// design models actually reach each one.
+query hotspots($toxin: String)
+    @description("The residues the agent chose for designs to contact on one toxin") {
+    match {
+        $t: Toxin { slug: $toxin }
+        $h hotspotOn $t
+    }
+    return { $t.name, $h.residue, $h.design_models_in_contact }
+    order { $h.design_models_in_contact desc }
+}
+
+// Claims against each toxin, counted. Ts1 has none.
+query claims_by_toxin()
+    @description("How many designs are claimed to bind each toxin") {
+    match {
+        $c: BinderClaim { asserted: true }
+        $c claimAgainst $t
+    }
+    return { $t.name, $t.family, count($c) as claims }
+    order { count($c) desc }
+}

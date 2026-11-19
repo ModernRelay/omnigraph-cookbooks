@@ -1,0 +1,18 @@
+version: 1
+metadata:
+  name: binder-campaign
+state:
+  backend: cluster
+  lock: true
+graphs:
+  binders:
+    schema: schema.pg
+    queries: queries/
+
+policies:
+  graph-access:
+    file: policies/graph.policy.yaml
+    applies_to: [binders]
+  cluster-access:
+    file: policies/server.policy.yaml
+    applies_to: [cluster]

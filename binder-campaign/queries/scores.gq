@@ -1,0 +1,109 @@
+// Scores and thresholds: what selected a design before any lab saw it.
+//
+// Thresholds were set per toxin and predictor BEFORE any design was scored.
+// They are nodes, so a score names the bar it was judged against instead of
+// a reader taking on trust that a bar existed.
+
+// The bar, per toxin and predictor.
+query thresholds_all()
+    @description("The ipSAE and scDockQ thresholds, per toxin and predictor, fixed before scoring") {
+    match {
+        $th: Threshold
+        $th thresholdForToxin $t
+        $th thresholdByPredictor $p
+    }
+    return { $t.name, $p.name, $th.ipsae, $th.scdockq, $th.set_before_scoring }
+    order { $t.name, $p.name }
+}
+
+// The bars one design had to clear, and whether it did.
+query design_scores($slug: String)
+    @description("Every in-silico score for one design, toxin by toxin, and whether it cleared") {
+    match {
+        $d: Design { slug: $slug }
+        $s scoreOf $d
+        $s scoreAgainst $t
+    }
+    return { $t.name, $s.final_score, $s.cleared_thresholds, $s.from_later_rerun,
+             $s.ipsae_esmfold2, $s.ipsae_esmfold2_fast, $s.ipsae_protenix,
+             $s.scdockq_esmfold2, $s.scdockq_esmfold2_fast, $s.scdockq_protenix }
+    order { $s.final_score desc }
+}
+
+// The score that decided a claim, beside the thresholds it was judged
+// against. This is the join the report's prose asks the reader to make.
+query score_behind_claim($claim: String)
+    @description("The score that selected a claimed binder, with the thresholds it was judged against") {
+    match {
+        $c: BinderClaim { slug: $claim }
+        $c claimAbout $d
+        $c claimAgainst $t
+        $s scoreOf $d
+        $s scoreAgainst $t
+        $th thresholdForToxin $t
+        $th thresholdByPredictor $p
+    }
+    return { $d.name, $t.name, $s.final_score, $s.cleared_thresholds,
+             $p.name, $th.ipsae, $th.scdockq }
+    order { $p.name }
+}
+
+// The best-scoring designs against one toxin, whether or not they bound.
+query top_scores($toxin: String)
+    @description("The highest in-silico scores against one toxin, with the lab outcome beside each") {
+    match {
+        $t: Toxin { slug: $toxin }
+        $s scoreAgainst $t
+        $s scoreOf $d
+    }
+    return { $d.name, $s.final_score, $s.cleared_thresholds, $d.design_set }
+    order { $s.final_score desc }
+    limit 25
+}
+
+// Scores produced by the later re-run rather than by the campaign. The
+// report notes that the two disagree on how many designs passed.
+query scores_from_rerun()
+    @description("Scores produced after the campaign closed, which disagree with the campaign's own") {
+    match {
+        $s: Score { from_later_rerun: true }
+        $s scoreOf $d
+        $s scoreAgainst $t
+    }
+    return { $d.name, $t.name, $s.final_score, $s.cleared_thresholds }
+    order { $d.name, $t.name }
+}
+
+// Designs that cleared every threshold against a toxin. Selection drew from
+// this pool; the lab then tested how well it predicted binding.
+query cleared_against($toxin: String)
+    @description("Designs that cleared every predictor's threshold against one toxin") {
+    match {
+        $t: Toxin { slug: $toxin }
+        $s scoreAgainst $t
+        $s: Score { cleared_thresholds: true }
+        $s scoreOf $d
+    }
+    return { $d.name, $d.design_set, $s.final_score }
+    order { $s.final_score desc }
+}
+
+// The gap between prediction and result: designs that cleared every
+// threshold and still did not bind. The report's own finding is that the
+// final score tracked success across sets but not within one.
+query cleared_but_did_not_bind($toxin: String)
+    @description("Designs that cleared every threshold against a toxin and were not claimed as binders") {
+    match {
+        $t: Toxin { slug: $toxin }
+        $s: Score { cleared_thresholds: true }
+        $s scoreAgainst $t
+        $s scoreOf $d
+        not {
+            $c: BinderClaim { asserted: true }
+            $c claimAbout $d
+            $c claimAgainst $t
+        }
+    }
+    return { $d.name, $d.design_set, $s.final_score }
+    order { $s.final_score desc }
+}
