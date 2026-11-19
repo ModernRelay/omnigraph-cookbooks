@@ -159,7 +159,15 @@ omnigraph alias momentum --params '{"since":"2026-05-01T00:00:00Z"}'
    or mutates a graph; `--reembed-all` replaces selected vectors only in its
    output file. The offline and server providers must use the same model and
    vector dimension. See the engine's
-   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.14.0/docs/user/search/embeddings.md#offline-file-pipeline)
+   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.15.0/docs/user/search/embeddings.md#offline-file-pipeline)
    for the spec format.
+
+A ranked read answers a `ranking` object beside its rows, naming the search
+(`bm25`, `nearest` or `rrf`), whether a higher or a lower score is better, and
+whether it was `exhaustive`. Read it: on a vector search, `exhaustive: false`
+means the `ann_nprobes` cap left partitions unsearched, so an empty or short
+answer is not evidence that the graph holds nothing closer. Project a
+score by repeating the leading order key, for example `nearest($c.embedding,
+$q) as distance`.
 
 See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.

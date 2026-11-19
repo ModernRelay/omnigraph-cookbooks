@@ -175,7 +175,7 @@ With an embedding provider configured (see [cluster.yaml](cluster.yaml)),
 memory body exactly as written, as a query embeds its text. Vectors stored with
 OmniGraph 0.13 embedded a templated line instead; regenerate them with
 `omnigraph embed --reembed-all` and reload them, as the engine's
-[embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.14.0/docs/user/search/embeddings.md#offline-file-pipeline)
+[embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.15.0/docs/user/search/embeddings.md#offline-file-pipeline)
 describes. Set `OMNIGRAPH_EMBEDDINGS_MOCK=1` for deterministic test vectors.
 
 ## Compared with beads

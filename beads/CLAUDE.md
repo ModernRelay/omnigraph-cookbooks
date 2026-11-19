@@ -48,6 +48,6 @@ that concurrent agents need. The seed is a fictional note-taking app,
   trees.
 - After a query or client change, run `python3 -m unittest discover -s tests`
   from `client/` (local graphs, and a served one behind the local HTTPS
-  gateway; it needs the 0.14.0 `omnigraph` and `omnigraph-server`, and
+  gateway; it needs the 0.15.0 `omnigraph` and `omnigraph-server`, and
   `openssl`) and `../scripts/check-cookbooks.py`, which also drives `ob` against
   the served cookbook. `SeedTests` pins the ready and blocked sets in `seed.md`.

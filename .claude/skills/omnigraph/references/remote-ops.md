@@ -1,10 +1,11 @@
 # Remote Graph Operations
 
-Managed env/file/exec profiles keep exchanged data credentials only in invocation
-memory; ordinary resource access and credential export need no OS store. They
-still verify identity with the control plane. Human/store profiles and explicit
-`cluster token` administration require secure custody; there is no plaintext or
-provider fallback.
+Managed env/file/exec and `oauth_client_credentials` profiles keep exchanged
+credentials only in invocation memory; ordinary resource access and credential
+export need no OS store. They still verify identity with the control plane.
+Human/store profiles, and explicit `cluster token` for providers other than
+OAuth, require secure custody; OAuth `cluster token` reports issuance metadata
+without persisting anything. There is no plaintext or provider fallback.
 
 Remote commands address an `omnigraph-server`; the server executes the graph
 operation and the CLI only receives its HTTP response. Network failure can hide
@@ -24,8 +25,8 @@ omnigraph query get_person --target production --graph knowledge \
 
 `--target NAME` selects a registered resource; otherwise `defaults.target` applies.
 `--graph` or its `default_graph` selects the graph. Remote inline URLs and Unix
-socket targets are unsupported. The selected profile is the only credential
-source. Do not use deployment `--config` on data commands. Folder metadata never
+socket targets are unsupported. A server target's own `auth` provider (for a
+managed target, its pinned profile) is the only credential source. Do not use deployment `--config` on data commands. Folder metadata never
 routes operations; diagnostics go to stderr.
 
 ## Successful write receipts
@@ -104,21 +105,22 @@ route.
 - `key_conflict`: an append or strict insert found an existing id. Decide
   whether that entity is the intended one; do not silently turn the operation
   into an upsert.
-- `recovery_required` (HTTP `503` with `recovery_required.operation_id`): no
-  0.12 mutation, load or branch merge returns it, because a write that fails
-  before its single publication leaves the graph unchanged. It remains for a
-  graph that still holds a `__recovery/` sidecar from a pre-0.12 build (open
-  it read-write with that build first) and for a schema apply or
-  system-column upgrade that fails after its commit was published; the named
-  commit already contains the change. Follow the error message's remedy and
-  do not replay.
+- `recovery_required` (HTTP `503` with `recovery_required.operation_id`):
+  when it identifies an already published schema apply or system-column upgrade,
+  the table pins and accepted schema contract are durable together; only the
+  process view may still need refresh. Reopen the graph read-write or restart
+  its server rather than replaying the change. Follow the error message's
+  remedy; do not replay the write.
 
 The effect-free conflict details are distinct from a lost response or a recovery
 requirement. Neither HTTP `409`/`503` nor a CLI failure exit is a universal retry
-signal. On data-plane commands, exit `1` means nothing started, exit `2` that the
-effects are unknown, exit `4` a failed condition such as a precondition, and exit
-`75` a busy refusal that may be retried after `Retry-After` (managed
-`cluster plan`/`apply` use exit `4` for recovery required instead).
+signal. On data-plane commands, exit `1` means nothing started, exit `2` that
+effects are unknown or partial, exit `4` a failed condition such as a
+precondition or `--as` assertion, exit `75` a busy refusal that may be retried
+after `Retry-After`, and exit `64` a refused command line. Managed `cluster
+plan`/`apply` keep their own mapping (refusal `2`, local deadline `5`); managed
+lifecycle commands (`cluster create`, `delete`, `undo-delete`, `operation`)
+exit `4` for recovery required.
 
 ## macOS credential-store failures
 

@@ -136,6 +136,10 @@ omnigraph branch merge cr-lv-mass --into main --dry-run --target local-writer --
 omnigraph branch merge cr-lv-mass --into main --target local-writer --graph program
 ```
 
+`omnigraph branch list --detailed --target local-writer --graph program` lists
+every open change request with its head and when it last moved, in one read
+rather than a history read per branch.
+
 `revise_requirement` is a compare-and-swap on `updated_at`: if someone changed
 the requirement since you read it, it matches nothing and you re-read. The
 revision stamps a new `updated_at`, so every test that passed against the old
@@ -238,12 +242,14 @@ registered target, so the token never enters the agent's configuration:
  "env": {"OMNIGRAPH_HOME": "/Users/you/.omnigraph-cookbooks", "OG_LOCAL_AGENT_TOKEN": "local-agent-token"}}
 ```
 
-Each stored read is then a call to the `query` tool. Write tools appear only
-when the server runs with `--mcp-allow-writes` and the bridge with `--write`,
-and the policy still refuses the agent on `main`. The MCP `mutate` tool takes
-GQ text rather than a stored mutation's name, so have the agent write through
-`omnigraph mutate <stored-mutation> --target local-agent`, which keeps it on
-the reviewed write shapes.
+Each stored read is then a call to the `query` tool. Add `--write` to the
+bridge for the write tools; there is no server flag for them, so the graph
+policy is the only thing that decides what the agent may run, and it still
+refuses `act-agent` on `main`. The `mutate` tool runs a stored mutation by
+`name`, so an agent reaches the same reviewed write shapes as `omnigraph
+mutate <stored-mutation>` without composing GQ. A ranked read's result carries
+a `ranking` object, so the agent can tell an exhaustive search from one that
+stopped early.
 
 [`skill/SKILL.md`](skill/SKILL.md) is a skill for such an agent: the checks to
 run, how to write a checkable requirement, and the guardrails. Agents mark what
