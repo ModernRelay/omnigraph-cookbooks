@@ -3,6 +3,7 @@
   "name": "Pharma intelligence",
   "category": "Research",
   "blurb": "Competitive intelligence for a biotech program: the compounds, trials and deals around it, the program's own assumptions, and which signals contradict them.",
+  "about": "The pharma intelligence graph is competitive intelligence for one biotech program, seen from the sponsor's side. It holds the external pipeline (compounds, trials, deals and regulatory actions) next to the program's own assumptions, decisions and open questions. The graph shows which outside signals contradict which internal assumptions, and what still needs an answer before an upcoming decision.",
   "sample": "Viking Therapeutics' obesity program, from public sources",
   "questions": [
     {
@@ -23,7 +24,8 @@
     }
   ],
   "search": {
-    "title": "Pharma intelligence knowledge graph template",
+    "title": "Pharma competitive intelligence knowledge graph",
+    "heading": "Competitive intelligence for a biotech program, as a knowledge graph",
     "keywords": [
       "knowledge graph",
       "graphrag",

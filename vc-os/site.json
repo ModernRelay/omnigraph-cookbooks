@@ -3,6 +3,7 @@
   "name": "Venture firm",
   "category": "Investing",
   "blurb": "A venture firm's deals, portfolio, people and investment theses, with every signal tied to the beliefs it supports or contradicts.",
+  "about": "The venture firm graph covers pipeline, diligence, decisions, portfolio and network in one typed graph, with every signal tied to the investment thesis it supports or contradicts. It is for firms whose agents work across a CRM, a wiki, chat, call notes and spreadsheets that do not talk to each other. One graph with typed writes, search and commit history takes the place of that per-firm glue.",
   "sample": "Quito Capital, a fictional AI-infrastructure fund",
   "questions": [
     {
@@ -23,7 +24,8 @@
     }
   ],
   "search": {
-    "title": "Venture firm context graph template",
+    "title": "Venture firm context graph: deals, theses, portfolio",
+    "heading": "A context graph for a venture firm's deals, theses and portfolio",
     "keywords": [
       "context graph",
       "world model",

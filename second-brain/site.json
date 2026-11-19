@@ -3,6 +3,7 @@
   "name": "Second brain",
   "category": "Personal",
   "blurb": "One person's people, projects, notes, tasks, habits and reading, with where each piece came from.",
+  "about": "This second brain is a personal knowledge graph: one person's people, places, projects, notes, tasks, habits and reading, with a record of where each piece came from. It is for individuals who want an agent to answer questions such as what they still owe someone or what to do next. It keeps the structure and provenance that a folder of notes does not.",
   "sample": "A fictional person's life",
   "questions": [
     {
@@ -23,7 +24,8 @@
     }
   ],
   "search": {
-    "title": "Second brain knowledge graph template",
+    "title": "Second brain: a personal knowledge graph for agents",
+    "heading": "A personal knowledge graph your agents can read and write",
     "keywords": [
       "second brain",
       "agent memory",

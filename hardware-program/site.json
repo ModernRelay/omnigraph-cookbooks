@@ -3,6 +3,7 @@
   "name": "Hardware program",
   "category": "Hardware",
   "blurb": "Requirements, budgets, interfaces and verification for a hardware program, with \"verified\" and \"over budget\" worked out from the evidence on every read.",
+  "about": "The hardware program graph holds a program's requirements and how they flow down, the architecture blocks and interfaces they constrain, the design values that feed budgets, and the tests that verify them. It makes requirements traceability a query: whether a requirement is verified, or a budget is over, is worked out from the evidence on every read. It is for systems engineers whose requirement tools, spreadsheets, CAD and test reports each hold one slice of the program.",
   "sample": "Petrel, a fictional 150 kg Earth-observation satellite",
   "questions": [
     {
@@ -23,7 +24,8 @@
     }
   ],
   "search": {
-    "title": "Hardware program systems graph template",
+    "title": "Hardware program graph: requirements to verification",
+    "heading": "A hardware program from requirements to verification, as one graph",
     "keywords": [
       "systems graph",
       "digital twin",

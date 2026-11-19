@@ -258,9 +258,10 @@ lives in its `site.json`:
 |---|---|
 | `order` | its place in the directory |
 | `name`, `category`, `blurb` | the card and the page header; `category` is one of Company, Engineering, Hardware, Research, Investing, Personal |
+| `about` | optional, 600 characters at most: the "What it is" paragraph under the header. Two to four sentences on what the graph is, who it is for and what it takes the place of |
 | `sample` | what the seed data depicts, beside its counts |
 | `questions` | "Questions it answers": each `q` names a stored **read** query in `queries/*.gq` |
-| `search` | the page's `<title>` (60 characters at most) and the keywords its structured data carries |
+| `search` | the page's `<title>` (60 characters at most, leading with the phrase people search), an optional `heading` (70 at most: the second line of the page's H1, in the searcher's words) and the keywords its structured data carries |
 
 `python3 scripts/check-cookbooks.py --site` checks every `site.json` offline
 in under a second; the full run checks them first. Rename or remove a query in

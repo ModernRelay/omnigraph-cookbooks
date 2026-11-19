@@ -399,6 +399,8 @@ def hardware_program_journey(env):
 # (ModernRelay/brand apps/omnigraph/scripts/sync-cookbooks.mjs) checks the same.
 SITE_CATEGORIES = {"Company", "Engineering", "Hardware", "Research", "Investing", "Personal"}
 SITE_TITLE_MAX = 60  # a search result shows about this much; the site appends " | Omnigraph"
+SITE_HEADING_MAX = 70  # the second line of the page's H1
+SITE_ABOUT_MAX = 600  # two to four sentences: what the graph is, who it is for, what it takes the place of
 QUERY_START = re.compile(r"^query\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(", re.M)
 WRITES = re.compile(r"\b(insert|update|delete)\b")
 
@@ -441,6 +443,12 @@ def check_site(folder):
         f"{where}: search.title must be 1 to {SITE_TITLE_MAX} characters"
     assert isinstance(keywords, list) and keywords and all(isinstance(k, str) and k == k.lower() and k for k in keywords), \
         f"{where}: search.keywords must be a non-empty list of lowercase phrases"
+    # optional: the page's second H1 line, and its "What it is" paragraph
+    heading, about = search.get("heading"), site.get("about")
+    assert heading is None or (isinstance(heading, str) and 0 < len(heading) <= SITE_HEADING_MAX), \
+        f"{where}: search.heading, when given, must be 1 to {SITE_HEADING_MAX} characters"
+    assert about is None or (isinstance(about, str) and 0 < len(about) <= SITE_ABOUT_MAX), \
+        f"{where}: about, when given, must be 1 to {SITE_ABOUT_MAX} characters"
     return site
 
 
