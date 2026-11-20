@@ -99,7 +99,8 @@ query cleared_but_did_not_bind($target: String)
         $s scoreAgainst $t
         $s scoreOf $d
         not {
-            $c: BinderClaim { asserted: true }
+            $c: BinderClaim
+        $c.status = "asserted"
             $c claimAbout $d
             $c claimAgainst $t
         }

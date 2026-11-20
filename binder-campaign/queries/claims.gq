@@ -5,7 +5,8 @@
 query binder_claims()
     @description("Every design asserted to bind a target, under the applied criterion") {
     match {
-        $c: BinderClaim { asserted: true }
+        $c: BinderClaim
+        $c.status = "asserted"
         $c claimAbout $d
         $c claimAgainst $t
     }
@@ -70,7 +71,8 @@ query criterion_survivor_counts()
 query claims_lost_under($criterion: String)
     @description("Claims counted under some criterion that do not survive the one named") {
     match {
-        $c: BinderClaim { asserted: true }
+        $c: BinderClaim
+        $c.status = "asserted"
         $c claimAbout $d
         $c claimAgainst $t
         exists { $c claimSurvives $any }
@@ -124,7 +126,8 @@ query gap_reach()
 query claims_fully_evidenced()
     @description("Asserted claims with no recorded gap and a resolved value at both labs") {
     match {
-        $c: BinderClaim { asserted: true }
+        $c: BinderClaim
+        $c.status = "asserted"
         $c claimAbout $d
         $c claimAgainst $t
         $c claimRestsOn $m
@@ -135,4 +138,44 @@ query claims_fully_evidenced()
     }
     return { $d.name, $t.name, count($m) as measurements }
     order { $t.name, $d.name }
+}
+
+// Claims by standing. Three states, and the difference between them matters:
+// provisional was never asserted, withdrawn was asserted and taken back.
+query claims_by_status()
+    @description("How many binder claims stand asserted, provisional or withdrawn") {
+    match {
+        $c: BinderClaim
+    }
+    return { $c.status, count($c) as claims }
+    order { count($c) desc }
+}
+
+// The designs only a looser rule admits. They were never claimed as binders;
+// they are here so that "no limit on the binding value" has something to
+// point at when someone asks what a looser rule would buy.
+query provisional_claims()
+    @description("Designs that bind only under a looser rule than the one applied") {
+    match {
+        $c: BinderClaim
+        $c.status = "provisional"
+        $c claimAbout $d
+        $c claimAgainst $t
+    }
+    return { $d.name, $t.name, $c.statement }
+    order { $t.name, $d.name }
+}
+
+// Claims taken back after they were made. The row stays; the record shows it
+// was once asserted, which a deletion would hide.
+query withdrawn_claims()
+    @description("Binder claims that were asserted and later retracted") {
+    match {
+        $c: BinderClaim
+        $c.status = "withdrawn"
+        $c claimAbout $d
+        $c claimAgainst $t
+    }
+    return { $d.name, $t.name, $c.statement, $c.recorded_by }
+    order { $d.name }
 }

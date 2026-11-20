@@ -12,7 +12,7 @@ One AI-run de novo protein design campaign, end to end, in four layers:
 | Layer | Types |
 |---|---|
 | Targets | `Target`, `Hotspot` |
-| Designs | `Design`, `DesignTool`, `BackboneFamily`, `SequenceMethod` |
+| Designs | `Design`, `Designer`, `DesignTool`, `BackboneFamily`, `SequenceMethod` |
 | Evidence | `Score`, `Threshold`, `Predictor`, `Measurement`, `Lab`, `SpecificityCheck`, `Control` |
 | Claims | `BinderClaim`, `Criterion`, `EvidenceGap` |
 | Process | `CampaignWindow`, `SelectionRule`, `AgentRole`, `Source` |
@@ -21,6 +21,13 @@ The claims layer carries the weight. A `BinderClaim` is somebody's reading of
 the measurements, not the measurements: it links to the `Measurement` rows it
 rests on (`ClaimRestsOn`), to every `Criterion` it survives (`ClaimSurvives`),
 and to any `EvidenceGap` recorded against it. Three rules follow.
+
+**A claim has three standings, not two.** `status` is `asserted` (holds under
+the applied criterion), `provisional` (only a looser rule admits it, and it
+was never claimed as a binder) or `withdrawn` (asserted once, later taken
+back). A boolean conflated the last two, which hid the difference between a
+claim nobody made and a claim somebody retracted. `withdraw_claim` moves a
+claim to `withdrawn`; nothing deletes one.
 
 **A claim never carries its own evidence.** Properties on `BinderClaim` say
 who recorded it and when; the binding values live on `Measurement`. Adding a
@@ -35,6 +42,30 @@ definition into the query, where no reader can see it.
 **A gap is a fact, not an omission.** Where the record is silent, there is an
 `EvidenceGap` saying so, citing the source that states it. Never fill a gap
 with a plausible value; add a gap instead.
+
+## Descriptions are the interface, not the comments
+
+Every node, most edges and the properties that need it carry `@description`,
+and the types with write rules carry `@instruction`. They are what
+`omnigraph schema show` hands an agent; a `//` comment reaches nobody but
+someone reading the file. When you add a type, describe it there — say what it
+is for and what it is not, not what its name already says.
+
+## An empty field is not a defect
+
+`kon_per_ms`, `koff_per_s`, `binding_strength`, `replicates` and `measured_on`
+are null throughout this seed. They are not speculative: ProteinBase records
+every one of them, and the schema has to hold a second campaign, not only this
+one. Do not strip them because the seed does not use them, and do not
+back-fill them with a plausible value — if a campaign records them, populate
+them; if it does not, leave them and let the absence show.
+
+`fit_model` is the exception that earns the rest. A KD is derived from the
+rate constants by a chosen model, so a value whose model nobody recorded
+cannot be reproduced. The report states every value here came from a 1:1 fit,
+so every measurement carrying a value names it, and
+`values_without_a_fit_model` returns nothing against this seed. Run it against
+your own and it probably will not.
 
 ## The known gap in the model: a design run is not a node
 

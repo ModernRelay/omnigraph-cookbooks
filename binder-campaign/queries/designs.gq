@@ -62,7 +62,8 @@ query designs_by_tool($tool: String)
 query tools_behind_binders()
     @description("The design tools behind the designs asserted to bind, counted") {
     match {
-        $c: BinderClaim { asserted: true }
+        $c: BinderClaim
+        $c.status = "asserted"
         $c claimAbout $d
         $d madeWithTool $tool
     }
@@ -105,4 +106,27 @@ query multi_target_designs()
     }
     return { $d.slug, $d.name, $d.format, count($t) as targets_intended }
     order { count($t) desc }
+}
+
+// Who made the designs. One campaign has one designer; a public benchmark has
+// hundreds of entrants against the same target, and the same query answers
+// both.
+query designers()
+    @description("Who made the designs, and how many each contributed") {
+    match {
+        $d: Design
+        $d designedBy $who
+    }
+    return { $who.slug, $who.name, $who.kind, $who.affiliation, count($d) as designs }
+    order { count($d) desc }
+}
+
+query designs_by_designer($designer: String)
+    @description("The tested designs one designer contributed") {
+    match {
+        $who: Designer { slug: $designer }
+        $d designedBy $who
+    }
+    return { $d.slug, $d.name, $d.design_set, $d.format }
+    order { $d.name }
 }

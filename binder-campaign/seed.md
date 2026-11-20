@@ -1,6 +1,6 @@
 # Seed data
 
-`seed.jsonl` holds 11,397 rows describing one de novo protein design
+`seed.jsonl` holds 11,609 rows describing one de novo protein design
 campaign: Anthropic's scorpion-toxin binder campaign of October 2026.
 
 ## Where it comes from
@@ -21,6 +21,7 @@ them beyond the threshold comparison described below.
 | `Target` | 5 | Cn2, Ts1, AaH II, AaH I, LqhIII |
 | `Hotspot` | 25 | five per target, with how many released design models reach each |
 | `Design` | 211 | the designs that reached a lab |
+| `Designer` | 1 | the campaign's agents; a public benchmark would have hundreds |
 | `DesignTool` | 10 | the tools that drew backbones |
 | `BackboneFamily` | 85 | |
 | `SequenceMethod` | 6 | |
@@ -31,7 +32,7 @@ them beyond the threshold comparison described below.
 | `Measurement` | 1,477 | every non-empty result cell, at either lab |
 | `SpecificityCheck` | 523 | CLEC12A (two runs), ovalbumin, baculovirus particles |
 | `Control` | 70 | published binders run alongside, per target, lab and replicate |
-| `BinderClaim` | 21 | 17 asserted, 4 admitted only by a looser rule |
+| `BinderClaim` | 21 | 17 `asserted`, 4 `provisional` — admitted only by a looser rule, never claimed as binders |
 | `Criterion` | 10 | the applied rule and nine others the report counts under |
 | `EvidenceGap` | 8 | what the record does not hold |
 | `CampaignWindow` | 3 | |
@@ -42,6 +43,20 @@ them beyond the threshold comparison described below.
 Edges follow the same counts: 665 `IntendedAgainst`, 1,477 each of
 `MeasurementOf`, `MeasurementAgainst` and `MeasurementAtLab`, 140
 `ClaimSurvives`, 36 `DerivedFrom`, 33 `HasDomain`.
+
+## Two facts not in the CSVs
+
+`Measurement.fit_model` is `1:1` on every measurement that carries a value.
+The release does not put it in a column; the technical report states that all
+KD values come from 1:1 fits. It is here because a KD is not observed, it is
+what a chosen model returns from the rate constants — a value whose model is
+unrecorded cannot be reproduced. `values_without_a_fit_model` is the query
+that finds those; against this seed it returns nothing.
+
+`Designer` is one node standing for the campaign's agents, with every design
+linked to it. One campaign has one designer and the node looks redundant; it
+is there because the same schema has to hold a public benchmark, where a
+single target draws designs from hundreds of independent entrants.
 
 ## The one derived field
 
@@ -56,9 +71,10 @@ Everything else is carried across as written.
 
 ## Counts that surprise people
 
-**17 binders, 21 claims.** Four claims carry `asserted: false`: designs that
-only a looser rule admits, recorded so that "no limit on the binding value"
-has something to point at.
+**17 binders, 21 claims.** Four claims carry `status: provisional`: designs
+that only a looser rule admits, recorded so that "no limit on the binding
+value" has something to point at. Provisional is not withdrawn — nothing in
+this seed was asserted and then taken back.
 
 **15 claims in the sensitivity analysis, not 17.** Two LqhIII claims were
 assessed at one lab only, so the report's table varies the other 15. The

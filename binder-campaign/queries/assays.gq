@@ -11,8 +11,29 @@ query measurements_for_design($slug: String)
         $m measurementAgainst $t
         $m measurementAtLab $l
     }
-    return { $t.name, $l.name, $m.method, $m.result, $m.kd_nm, $m.kd_is_upper_limit, $m.rmax_ratio, $m.note }
+    return { $t.name, $l.name, $m.method, $m.result, $m.binding_strength,
+             $m.kd_nm, $m.kd_is_upper_limit, $m.fit_model,
+             $m.kon_per_ms, $m.koff_per_s, $m.replicates, $m.measured_on,
+             $m.rmax_ratio, $m.note }
     order { $t.name, $l.name }
+}
+
+// A binding value with no record of the model fitted to produce it. The value
+// is derived from the rate constants by a chosen model, so without the model
+// nobody can reproduce it. In this seed every fitted value names its model;
+// run this against your own campaign and see.
+query values_without_a_fit_model()
+    @description("Binding values with no record of the kinetic model that produced them") {
+    match {
+        $m: Measurement
+        $m.kd_nm is not null
+        $m.fit_model is null
+        $m measurementOf $d
+        $m measurementAgainst $t
+        $m measurementAtLab $l
+    }
+    return { $d.name, $t.name, $l.name, $m.kd_nm }
+    order { $d.name }
 }
 
 // Where the two labs disagree on the same design and target. A hit at one

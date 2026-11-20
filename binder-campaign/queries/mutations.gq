@@ -32,10 +32,10 @@ query link_measurement_lab($measurement: String, $lab: String) {
 
 // Assert that a design binds a target. The claim is not the result; it is
 // somebody's reading of the results, recorded with their name and the day.
-query assert_binder_claim($slug: String, $statement: String, $recorded_at: DateTime,
-                          $recorded_by: String) {
+query assert_binder_claim($slug: String, $statement: String, $status: String,
+                          $recorded_at: DateTime, $recorded_by: String) {
     insert BinderClaim {
-        slug: $slug, statement: $statement, asserted: true,
+        slug: $slug, statement: $statement, status: $status,
         recorded_at: $recorded_at, recorded_by: $recorded_by
     }
 }
@@ -57,7 +57,7 @@ query ground_claim($claim: String, $measurement: String) {
 // Withdraw a claim rather than delete it. The row stays, with asserted
 // false, so a reader can see that it was once made.
 query withdraw_claim($slug: String, $statement: String) {
-    update BinderClaim set { asserted: false, statement: $statement } where slug = $slug
+    update BinderClaim set { status: "withdrawn", statement: $statement } where slug = $slug
 }
 
 // Add a rule to count binders under, then record which claims survive it.

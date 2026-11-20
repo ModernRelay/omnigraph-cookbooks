@@ -106,7 +106,8 @@ query hotspots($target: String)
 query claims_by_target()
     @description("How many designs are claimed to bind each target") {
     match {
-        $c: BinderClaim { asserted: true }
+        $c: BinderClaim
+        $c.status = "asserted"
         $c claimAgainst $t
     }
     return { $t.name, $t.family, count($c) as claims }

@@ -115,6 +115,37 @@ What this cookbook leans on specifically is a typed schema checked on every
 write, branches reviewed before they merge, and history that can be read back
 as it stood when a claim was made.
 
+## Does it fit another campaign?
+
+Tested against [ProteinBase](https://huggingface.co/datasets/adaptyvbio/proteinbase)
+(Adaptyv Biosystems, ODC-BY), which holds 4,280 designs against 40 targets —
+these five scorpion toxins among them, and 35 that are nothing like them.
+
+The spine takes a non-toxin slice unchanged. Nipah glycoprotein G there is
+1,030 designs, 103 that bound and 928 that did not, from 206 independent
+designers using 98 design methods. `Target`, `Design`, `DesignTool`,
+`Measurement`, `Lab`, `BinderClaim`, `Criterion` and `EvidenceGap` all take it
+as they stand.
+
+Four fields exist here because that slice needs them, even though this seed
+leaves three of them empty:
+
+- `Designer` — 206 of them against one target there; one here, standing for
+  the campaign's agents. A benchmark is many people designing against the same
+  protein, and that has to be a node.
+- `kon_per_ms` and `koff_per_s` — recorded there, absent here. A KD is not
+  observed: it is what a model returns from the rate constants.
+- `fit_model` — **populated here**, and the reason the pair above matters.
+  Every value in this seed comes from a 1:1 fit.
+- `binding_strength`, `replicates`, `measured_on` — an ordinal call, a count
+  and a date that the release does not carry and ProteinBase does.
+
+An empty column is not an admission; it is the shape of what a second campaign
+would fill. The one that is filled, `fit_model`, is there because a value
+whose model nobody wrote down cannot be reproduced —
+`values_without_a_fit_model` finds those, and against this seed it returns
+nothing.
+
 ## Model
 
 [`schema.pg`](schema.pg) has 20 node types and 32 edge types in four layers,
@@ -169,9 +200,9 @@ in a box is an edge between two nodes of that type.
 | Layer | Types | Holds |
 |---|---|---|
 | Targets | `Target`, `Hotspot` | What the campaign designs against, and the residues on each chosen for designs to contact |
-| Designs | `Design`, `DesignTool`, `BackboneFamily`, `SequenceMethod` | Every tested design, the tool that drew its backbone, the design it was redesigned from, the two domains a fusion joins |
-| Evidence | `Score`, `Threshold`, `Predictor`, `Measurement`, `Lab`, `SpecificityCheck`, `Control` | What selected a design before any lab saw it, and what each lab then measured, including binding to things it was never meant to bind |
-| Claims | `BinderClaim`, `Criterion`, `EvidenceGap` | Somebody's reading of the measurements, the rule it holds under, and what the record does not contain |
+| Designs | `Design`, `Designer`, `DesignTool`, `BackboneFamily`, `SequenceMethod` | Every tested design, who made it, the tool that drew its backbone, the design it was redesigned from, the two domains a fusion joins |
+| Evidence | `Score`, `Threshold`, `Predictor`, `Measurement`, `Lab`, `SpecificityCheck`, `Control` | What selected a design before any lab saw it, and what each lab then measured — rate constants, the model fitted to them, and binding to things it was never meant to bind |
+| Claims | `BinderClaim`, `Criterion`, `EvidenceGap` | Somebody's verdict on the measurements, the rule it holds under, and what the record does not contain. A claim is `asserted`, `provisional` or `withdrawn` — provisional was never claimed, withdrawn was claimed and taken back |
 | Process | `CampaignWindow`, `SelectionRule`, `AgentRole`, `Source` | How the run itself was organised, and where each transcribed fact comes from |
 
 Three rules keep the claims layer honest, and the cookbook's
@@ -221,7 +252,7 @@ omnigraph branch merge review/ova-rule --into main --target local-writer --graph
 Evidence comes before the claim that rests on it: `assert_binder_claim`
 records a reading of the results with a name and a date, and `ground_claim`
 ties it to a `Measurement` already in the graph. Retire a claim with
-`withdraw_claim`, which sets `asserted` to false, rather than deleting it — a
+`withdraw_claim`, which sets its status to `withdrawn`, rather than deleting it — a
 claim that was once made is part of the record.
 
 ## What it does not hold
