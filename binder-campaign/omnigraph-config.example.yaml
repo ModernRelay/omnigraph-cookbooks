@@ -1,0 +1,70 @@
+# Operator-config example for the Pharma Intel cookbook.
+# Your operator config lives at ~/.omnigraph/config.yaml (per-user, NOT committed).
+# Merge the `aliases:` below into it for short names over this graph's stored
+# queries. Point `local` at your running cluster server (`omnigraph-server
+# --cluster .`); alias invocation needs the server up.
+#
+# Alias args bind by NAME to the stored query's $params (`args: [slug]` fills
+# `$slug`), so `omnigraph alias signal sig-x` == `omnigraph query get_signal
+# --params '{"slug":"sig-x"}'`. Aliases are READ-ONLY: run the
+# stored *mutations* with `omnigraph mutate <name> --params '{…}'` (see the
+# bottom of this file), never through an alias.
+servers:
+  local:
+    url: http://127.0.0.1:8080
+defaults:
+  server: local
+  default_graph: binders
+aliases:
+  # Claims: what the campaign says it found, and what that rests on
+  claims: { server: local, graph: binders, query: binder_claims }
+  claim-evidence: { server: local, graph: binders, query: claim_evidence, args: [claim] }
+  criteria: { server: local, graph: binders, query: criteria_all }
+  criterion-counts: { server: local, graph: binders, query: criterion_survivor_counts }
+  survives: { server: local, graph: binders, query: claims_under_criterion, args: [criterion] }
+  lost-under: { server: local, graph: binders, query: claims_lost_under, args: [criterion] }
+  claims-with-gaps: { server: local, graph: binders, query: claims_with_gaps }
+  gaps: { server: local, graph: binders, query: evidence_gaps }
+  gap-reach: { server: local, graph: binders, query: gap_reach }
+  solid-claims: { server: local, graph: binders, query: claims_fully_evidenced }
+
+  # Designs, and how each was made
+  design: { server: local, graph: binders, query: get_design, args: [slug], format: kv }
+  design-provenance: { server: local, graph: binders, query: design_provenance, args: [slug] }
+  design-lineage: { server: local, graph: binders, query: design_lineage, args: [slug] }
+  fusion-domains: { server: local, graph: binders, query: fusion_domains, args: [slug] }
+  designs-by-tool: { server: local, graph: binders, query: designs_by_tool, args: [tool] }
+  tools-behind-binders: { server: local, graph: binders, query: tools_behind_binders }
+  added-after: { server: local, graph: binders, query: designs_added_after }
+  design-targets: { server: local, graph: binders, query: design_targets, args: [slug] }
+  multi-target: { server: local, graph: binders, query: multi_target_designs }
+
+  # Scores and the bars they were judged against
+  thresholds: { server: local, graph: binders, query: thresholds_all }
+  design-scores: { server: local, graph: binders, query: design_scores, args: [slug] }
+  score-behind-claim: { server: local, graph: binders, query: score_behind_claim, args: [claim] }
+  top-scores: { server: local, graph: binders, query: top_scores, args: [target] }
+  rerun-scores: { server: local, graph: binders, query: scores_from_rerun }
+  cleared: { server: local, graph: binders, query: cleared_against, args: [target] }
+  cleared-but-missed: { server: local, graph: binders, query: cleared_but_did_not_bind, args: [target] }
+
+  # What the labs measured
+  measurements: { server: local, graph: binders, query: measurements_for_design, args: [slug] }
+  lab-disagreements: { server: local, graph: binders, query: lab_disagreements }
+  upper-limits: { server: local, graph: binders, query: upper_limit_only }
+  off-target: { server: local, graph: binders, query: off_target_hits }
+  specificity: { server: local, graph: binders, query: specificity_for_design, args: [slug] }
+  controls: { server: local, graph: binders, query: controls_for_target, args: [target] }
+  failed-controls: { server: local, graph: binders, query: failed_controls }
+  tightest: { server: local, graph: binders, query: tightest_binding }
+
+  # The campaign as a process
+  windows: { server: local, graph: binders, query: campaign_windows }
+  selection-rules: { server: local, graph: binders, query: selection_rules }
+  rules-that-replaced: { server: local, graph: binders, query: rules_that_replaced }
+  agent-roles: { server: local, graph: binders, query: agent_roles }
+  sources: { server: local, graph: binders, query: sources }
+  uncited-gaps: { server: local, graph: binders, query: uncited_gaps }
+  targets: { server: local, graph: binders, query: targets }
+  hotspots: { server: local, graph: binders, query: hotspots, args: [target] }
+  claims-by-target: { server: local, graph: binders, query: claims_by_target }

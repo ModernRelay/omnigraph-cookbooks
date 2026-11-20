@@ -1,0 +1,138 @@
+// Assays: what the labs measured, where they disagree, and whether the
+// assay itself was working. Two contract research organisations tested the
+// same designs in different expression systems, which is the whole point:
+// agreement between them is the evidence, disagreement is a finding.
+
+query measurements_for_design($slug: String)
+    @description("Every binding measurement for one design, lab by lab and target by target") {
+    match {
+        $d: Design { slug: $slug }
+        $m measurementOf $d
+        $m measurementAgainst $t
+        $m measurementAtLab $l
+    }
+    return { $t.name, $l.name, $m.method, $m.result, $m.binding_strength,
+             $m.kd_nm, $m.kd_is_upper_limit, $m.fit_model,
+             $m.kon_per_ms, $m.koff_per_s, $m.replicates, $m.measured_on,
+             $m.rmax_ratio, $m.note }
+    order { $t.name, $l.name }
+}
+
+// A binding value with no record of the model fitted to produce it. The value
+// is derived from the rate constants by a chosen model, so without the model
+// nobody can reproduce it. In this seed every fitted value names its model;
+// run this against your own campaign and see.
+query values_without_a_fit_model()
+    @description("Binding values with no record of the kinetic model that produced them") {
+    match {
+        $m: Measurement
+        $m.kd_nm is not null
+        $m.fit_model is null
+        $m measurementOf $d
+        $m measurementAgainst $t
+        $m measurementAtLab $l
+    }
+    return { $d.name, $t.name, $l.name, $m.kd_nm }
+    order { $d.name }
+}
+
+// Where the two labs disagree on the same design and target. A hit at one
+// lab and not the other is the single most useful row in this graph.
+query lab_disagreements()
+    @description("Design and target pairs called a hit at one lab and not at the other") {
+    match {
+        $m1: Measurement
+        $m1.result = "hit"
+        $m1 measurementOf $d
+        $m1 measurementAgainst $t
+        $m2: Measurement
+        $m2.result = "no_hit"
+        $m2 measurementOf $d
+        $m2 measurementAgainst $t
+    }
+    return distinct { $d.name, $t.name, $m1.kd_nm }
+    order { $d.name, $t.name }
+}
+
+// A binding value that is only an upper limit is a bound, not a number.
+// Requiring a resolved value at both labs is one of the report's criteria,
+// and it drops the tightest binder.
+query upper_limit_only()
+    @description("Measurements whose binding value is an upper limit rather than a resolved number") {
+    match {
+        $m: Measurement { kd_is_upper_limit: true }
+        $m measurementOf $d
+        $m measurementAgainst $t
+        $m measurementAtLab $l
+    }
+    return { $d.name, $t.name, $l.name, $m.kd_nm, $m.note }
+    order { $d.name }
+}
+
+// Binding to something it was never meant to bind. Two of the reported
+// binders, including the tightest, were hits against ovalbumin.
+query off_target_hits()
+    @description("Designs that bound a protein they were never designed against") {
+    match {
+        $sc: SpecificityCheck
+        $sc.result = "hit"
+        $sc specificityOf $d
+    }
+    return { $d.name, $sc.protein, $sc.run }
+    order { $d.name, $sc.protein }
+}
+
+// The specificity record for one design, including the checks that came
+// back clean. An absent check is not a clean check.
+query specificity_for_design($slug: String)
+    @description("Every off-target check run on one design, clean or not") {
+    match {
+        $d: Design { slug: $slug }
+        $sc specificityOf $d
+    }
+    return { $sc.protein, $sc.result, $sc.run }
+    order { $sc.protein }
+}
+
+// Did the assay work at all? A published binder run alongside the designs
+// shows the instrument and the target preparation behaved.
+query controls_for_target($target: String)
+    @description("The published binders run as controls against one target, and whether each worked") {
+    match {
+        $t: Target { slug: $target }
+        $ctl controlAgainst $t
+        $ctl controlAtLab $l
+    }
+    return { $ctl.name, $ctl.format, $l.name, $ctl.method, $ctl.control_worked, $ctl.result, $ctl.kd_nm }
+    order { $l.name, $ctl.name }
+}
+
+// Targets whose control failed at a lab. Every claim measured there rests on
+// an assay that could not be shown to work.
+query failed_controls()
+    @description("Target and lab pairs where the positive control did not work") {
+    match {
+        $ctl: Control
+        $ctl.control_worked = "fails"
+        $ctl controlAgainst $t
+        $ctl controlAtLab $l
+    }
+    return { $t.name, $l.name, $ctl.name, $ctl.format, $ctl.result }
+    order { $t.name }
+}
+
+// The tightest measured binding, across every design and target.
+query tightest_binding()
+    @description("The strongest measured binding values, lowest first") {
+    match {
+        $m: Measurement
+        $m.result = "hit"
+        $m measurementOf $d
+        $m measurementAgainst $t
+        $m measurementAtLab $l
+        $m.kd_nm is not null
+    }
+    return { $d.name, $t.name, $l.name, $m.kd_nm, $m.kd_is_upper_limit }
+    order { $m.kd_nm }
+    limit 25
+}

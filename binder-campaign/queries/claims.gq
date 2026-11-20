@@ -1,0 +1,181 @@
+// Claims: what the campaign says it found, what that rests on, and what
+// cannot be checked. These are the reads the cookbook exists for.
+
+// Every asserted binder claim, with its design and target.
+query binder_claims()
+    @description("Every design asserted to bind a target, under the applied criterion") {
+    match {
+        $c: BinderClaim
+        $c.status = "asserted"
+        $c claimAbout $d
+        $c claimAgainst $t
+    }
+    return { $c.slug, $d.name, $t.name, $c.statement }
+    order { $t.name, $d.name }
+}
+
+// The evidence under one claim: every measurement it rests on, at both labs.
+query claim_evidence($claim: String)
+    @description("The measurements one binder claim rests on, lab by lab") {
+    match {
+        $c: BinderClaim { slug: $claim }
+        $c claimRestsOn $m
+        $m measurementAtLab $l
+        $m measurementAgainst $t
+    }
+    return { $l.name, $t.name, $m.method, $m.result, $m.kd_nm, $m.kd_is_upper_limit, $m.rmax_ratio }
+    order { $l.name }
+}
+
+// Which claims survive a given rule. Tightening the definition is a
+// traversal, not a re-analysis: swap the criterion and read the rows.
+query claims_under_criterion($criterion: String)
+    @description("The binder claims that survive one criterion for calling a design a binder") {
+    match {
+        $k: Criterion { slug: $criterion }
+        $c claimSurvives $k
+        $c claimAbout $d
+        $c claimAgainst $t
+    }
+    return { $d.name, $t.name, $c.slug }
+    order { $t.name, $d.name }
+}
+
+// Every criterion the report counted under, with the count it reported and
+// how many claims in this graph survive it.
+query criteria_all()
+    @description("Every criterion for calling a design a binder, and the count under each") {
+    match {
+        $k: Criterion
+    }
+    return { $k.slug, $k.name, $k.rule, $k.applied, $k.binders_under_rule }
+    order { $k.binders_under_rule desc }
+}
+
+// The same list, counted against this graph rather than quoted from the
+// report. The two should agree; where they do not, the seed is incomplete.
+query criterion_survivor_counts()
+    @description("How many claims in this graph survive each criterion, beside the count the report gives") {
+    match {
+        $k: Criterion
+        $c claimSurvives $k
+    }
+    return { $k.slug, $k.name, $k.binders_under_rule, count($c) as survives_here }
+    order { count($c) desc }
+}
+
+// The claims a tighter rule would drop. Asserted today, gone under
+// $criterion. Only claims the report's table actually counts are considered:
+// a claim that survives no criterion at all was never in that table, and
+// `claims_with_gaps` is where it shows up instead.
+query claims_lost_under($criterion: String)
+    @description("Claims counted under some criterion that do not survive the one named") {
+    match {
+        $c: BinderClaim
+        $c.status = "asserted"
+        $c claimAbout $d
+        $c claimAgainst $t
+        exists { $c claimSurvives $any }
+        not {
+            $k: Criterion { slug: $criterion }
+            $c claimSurvives $k
+        }
+    }
+    return { $d.name, $t.name, $c.slug }
+    order { $t.name, $d.name }
+}
+
+// Claims with a recorded gap in the evidence beneath them. A gap does not
+// refute a claim; it names what nobody can check.
+query claims_with_gaps()
+    @description("Binder claims with a recorded gap in their evidence, and what the gap blocks") {
+    match {
+        $g: EvidenceGap
+        $g gapAffectsClaim $c
+        $c claimAbout $d
+        $c claimAgainst $t
+    }
+    return { $d.name, $t.name, $g.severity, $g.what, $g.effect }
+    order { $g.severity, $d.name }
+}
+
+// Every recorded gap, with its source and how far it reaches.
+query evidence_gaps()
+    @description("Every recorded gap in the campaign's evidence, with the source that states it") {
+    match {
+        $g: EvidenceGap
+        $g gapCitedIn $s
+    }
+    return { $g.slug, $g.severity, $g.what, $g.effect, $s.title, $s.url }
+    order { $g.severity }
+}
+
+// How far each gap reaches: the claims it touches, counted.
+query gap_reach()
+    @description("How many binder claims each recorded evidence gap touches") {
+    match {
+        $g: EvidenceGap
+        $g gapAffectsClaim $c
+    }
+    return { $g.slug, $g.severity, $g.what, count($c) as claims_affected }
+    order { count($c) desc }
+}
+
+// A claim with no gap recorded against it and a value at both labs is the
+// strongest thing the campaign produced. This is that list.
+query claims_fully_evidenced()
+    @description("Asserted claims with no recorded gap and a resolved value at both labs") {
+    match {
+        $c: BinderClaim
+        $c.status = "asserted"
+        $c claimAbout $d
+        $c claimAgainst $t
+        $c claimRestsOn $m
+        not {
+            $g: EvidenceGap
+            $g gapAffectsClaim $c
+        }
+    }
+    return { $d.name, $t.name, count($m) as measurements }
+    order { $t.name, $d.name }
+}
+
+// Claims by standing. Three states, and the difference between them matters:
+// provisional was never asserted, withdrawn was asserted and taken back.
+query claims_by_status()
+    @description("How many binder claims stand asserted, provisional or withdrawn") {
+    match {
+        $c: BinderClaim
+    }
+    return { $c.status, count($c) as claims }
+    order { count($c) desc }
+}
+
+// The designs only a looser rule admits. They were never claimed as binders;
+// they are here so that "no limit on the binding value" has something to
+// point at when someone asks what a looser rule would buy.
+query provisional_claims()
+    @description("Designs that bind only under a looser rule than the one applied") {
+    match {
+        $c: BinderClaim
+        $c.status = "provisional"
+        $c claimAbout $d
+        $c claimAgainst $t
+    }
+    return { $d.name, $t.name, $c.statement }
+    order { $t.name, $d.name }
+}
+
+// Claims taken back after they were made. The row stays; the record shows it
+// was once asserted, which a deletion would hide.
+query withdrawn_claims()
+    @description("Binder claims that were asserted and later retracted") {
+    match {
+        $c: BinderClaim
+        $c.status = "withdrawn"
+        $c claimAbout $d
+        $c claimAgainst $t
+    }
+    return { $d.name, $t.name, $c.statement, $c.recorded_by }
+    order { $d.name }
+}
