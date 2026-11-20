@@ -1,6 +1,6 @@
 # OmniGraph Cookbooks
 
-Ready-to-run graph examples for **OmniGraph 0.14.0**. Each folder contains a
+Ready-to-run graph examples for **OmniGraph 0.15.0**. Each folder contains a
 schema, real or clearly identified fictional seed data, stored queries, policies,
 and a cluster declaration. Local examples use filesystem storage.
 
@@ -17,9 +17,9 @@ and a cluster declaration. Local examples use filesystem storage.
 
 ## Local setup
 
-Install the matching 0.14.0 CLI and server from the
-[engine release](https://github.com/ModernRelay/omnigraph/releases/tag/v0.14.0).
-Check `omnigraph version`; it should report 0.14.0 and HTTP contract 0.14.
+Install the matching 0.15.0 CLI and server from the
+[engine release](https://github.com/ModernRelay/omnigraph/releases/tag/v0.15.0).
+Check `omnigraph version`; it should report 0.15.0 and HTTP contract 0.14.
 You also need Python 3 and `openssl` for the local HTTPS gateway below.
 The examples use `industry-intel` / `spike`; substitute the folder and Graph ID
 from the table for another cookbook.
@@ -57,16 +57,19 @@ your own secrets for a shared deployment. The roles are: admin manages
 configuration and data; writer reads and writes data and branches; reader reads
 and invokes stored read queries. Cookbooks with agents, such as company-brain
 and hardware-program, also define `act-agent`, which writes only on review
-branches. Policies are part of each bundle.
+branches. Policies are part of each bundle, and they are the only gate: an
+agent reaching the graph over MCP (`omnigraph mcp --target <t> --graph <id>`,
+plus `--write` for the write tools) gets exactly the operations its role
+allows, with no server-side MCP switch to set.
 
 Stopping the server with Ctrl-C releases its writer lock, so the next start
 needs no unlock. A server that was killed keeps the lock; follow the engine's
-[ownership-transfer rules](https://github.com/ModernRelay/omnigraph/blob/v0.14.0/docs/user/deployment.md#writer-topology)
+[ownership-transfer rules](https://github.com/ModernRelay/omnigraph/blob/v0.15.0/docs/user/deployment.md#writer-topology)
 before clearing it.
 
 ### 2. Reach the server over HTTPS
 
-The 0.14 CLI sends tokens only over HTTPS, and `omnigraph-server` speaks plain
+The CLI sends tokens only over HTTPS, and `omnigraph-server` speaks plain
 HTTP. In a second terminal, run the local gateway from the repository root. It
 creates a private CA and a `localhost` certificate on first use and relays
 `https://localhost:8443` to the server:
@@ -146,8 +149,11 @@ omnigraph query recent_signals --target local-reader --graph spike
 omnigraph access --target local-reader --graph spike --branch main
 ```
 
-Use a query from your cookbook if it has a different Graph ID. Seeds are inputs,
-not live state: query the server to answer questions. Loading does not generate
+Use a query from your cookbook if it has a different Graph ID. Reads take
+`--format table|json|jsonl|csv|kv|toon`; `toon` carries the same document as
+`json` but names each field once across uniform rows, so it is the cheaper
+shape to put in an agent's prompt. Seeds are inputs, not live state: query the
+server to answer questions. Loading does not generate
 embeddings; cookbooks with vector fields explain the optional offline pipeline.
 Do not replay a load after a timeout without checking its outcome. `overwrite`
 replaces every node/edge type present in the batch; use it only when that
@@ -185,23 +191,42 @@ omnigraph cluster status --target local \
 ```
 
 Use `/readyz` for readiness. Raw graph and cluster HTTP calls must send and
-verify `Omnigraph-Http-Api: 0.14`; the 0.14 CLI and SDK handle this
-automatically. Failed calls answer a `code` and a `disposition` whose `effects`
-(`none`, `partial` or `unknown`) say whether anything changed. Process settings
-and static tokens still require a server restart.
+verify `Omnigraph-Http-Api: 0.14`, which 0.15 keeps unchanged; the CLI and SDK
+handle this automatically. Failed calls answer a `code` and a `disposition`
+whose `effects` (`none`, `partial` or `unknown`) say whether anything changed.
+Process settings and static tokens still require a server restart.
 
 ## Upgrading
 
-Upgrade the CLI, server and client integrations together. These examples create
-format-16 graphs. A graph written by 0.13 opens in 0.14 without a rebuild; its
-next write moves it to format 16. The operator configuration has a new format
-with no importer: recreate your targets as above, and replace old commands
-(`--server`, `--store`, `--cluster`, `login`, token environment variables,
-positional alias arguments) with `--target`, `--config` and `--params`. A
-cluster created with 0.11 or earlier needs an export and rebuild into a **new
-cluster root** with the matching old and new tools. Follow the engine's
-[0.13 to 0.14 checklist](https://github.com/ModernRelay/omnigraph/blob/3602c30896f6696c17cfdef28135d1749cd593ca/docs/user/operations/upgrade-0.14.md)
-and [upgrade guide](https://github.com/ModernRelay/omnigraph/blob/v0.14.0/docs/user/operations/upgrade.md).
+Upgrade the CLI, server and client integrations together. 0.15 keeps the 0.14
+HTTP contract and the 0.14 storage formats, so these bundles move across
+unchanged: a graph these examples created opens in 0.15 with no rebuild and no
+offline `upgrade`, and a graph written by 0.13 is still served as it is and
+stamped format 16 by its next publication.
+
+Two 0.15 changes can refuse a bundle that 0.14 accepted:
+
+- **An edge `@card` minimum is now checked on every write.** `@card(1..1)` and
+  `@card(1..)` edges, which several cookbooks here declare, mean a node must
+  arrive with those edges in one mutation query or one JSONL load; 0.14 only
+  checked some write paths, so a graph could hold nodes that broke its own
+  schema. Find them with a `not { $n someEdge $_ }` query before upgrading, and
+  note that `schema apply` refuses a new edge type that puts a minimum on an
+  existing node type (`OG-MF-107`).
+- **`@unique` on a list or vector property is refused.** 0.14 parsed it but
+  every write that set the property failed. Drop those properties in one apply
+  and add them back without the constraint in the next.
+
+If you serve MCP, read the release's upgrade actions first: `/mcp` now lists
+every tool the caller's policy allows, writes included, and the
+`--mcp-allow-writes` / `--mcp-allow-adhoc` flags are gone. Policy is the only
+place that decides what an agent may run.
+
+The operator configuration is unchanged from 0.14 (`version: 1`). Coming from
+0.13 or earlier, follow the engine's
+[0.15 release notes](https://github.com/ModernRelay/omnigraph/releases/tag/v0.15.0),
+[0.13 to 0.14 checklist](https://github.com/ModernRelay/omnigraph/blob/v0.15.0/docs/user/operations/upgrade-0.14.md)
+and [upgrade guide](https://github.com/ModernRelay/omnigraph/blob/v0.15.0/docs/user/operations/upgrade.md).
 
 ## SPIKE framework
 
@@ -211,13 +236,19 @@ subject). This is a cookbook modeling convention, not an engine requirement.
 
 ## Skills and deployment
 
-The [OmniGraph skill](.claude/skills/omnigraph/SKILL.md) is vendored for Claude
-Code and linked from `.agents/skills/omnigraph` for Codex. Its immutable source
-revision is in `scripts/omnigraph-skill.ref`; `scripts/sync-skill.sh` refreshes it
-and records a content hash. This lets documentation corrections follow the
-released engine without pretending the binary changed. To give an agent the
-skill that matches the CLI it runs, export it from the binary instead:
-`omnigraph skill export ~/.claude/skills/omnigraph`.
+The OmniGraph skill is not kept here. Every `omnigraph` binary carries the copy
+written for its own commands and HTTP contract, so an agent gets the matching
+one from the CLI it runs:
+
+```bash
+omnigraph skill export ~/.claude/skills/omnigraph --force   # or ~/.codex/skills
+omnigraph skill show references/queries.md                  # read one file
+```
+
+A copy committed beside the cookbooks would be a second source that drifts from
+the pinned release; `skills/omnigraph` in
+[ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph) is the one
+that does not.
 
 The [industry bootstrap skill](industry-intel/skill/) guides domain selection,
 research and seed preparation. Install it with:

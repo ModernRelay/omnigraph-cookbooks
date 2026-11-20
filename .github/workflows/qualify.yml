@@ -11,7 +11,7 @@ permissions:
 
 env:
   # The OmniGraph release every journey is qualified against.
-  OMNIGRAPH_VERSION: v0.14.0
+  OMNIGRAPH_VERSION: v0.15.0
 
 jobs:
   cookbooks:

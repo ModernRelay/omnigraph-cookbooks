@@ -57,7 +57,7 @@ def token_variable(actor):
 
 def write_operator_config(home, endpoint, ca):
     """One server target per actor, as the root README's local setup has.
-    The 0.14 CLI sends tokens only over HTTPS, so each target trusts the
+    The CLI sends tokens only over HTTPS, so each target trusts the
     local gateway's CA and reads its token from one named variable."""
     lines = ["version: 1", "targets:"]
     for actor in ACTORS:
@@ -471,7 +471,7 @@ def main():
     if site_only:
         return
     if not CLI or not SERVER:
-        raise SystemExit("Put 0.14.0 omnigraph and omnigraph-server on PATH or set OMNIGRAPH_BIN / OMNIGRAPH_SERVER_BIN")
+        raise SystemExit("Put 0.15.0 omnigraph and omnigraph-server on PATH or set OMNIGRAPH_BIN / OMNIGRAPH_SERVER_BIN")
     workspace = Path(tempfile.mkdtemp(prefix="omnigraph-cookbooks-test-"))
     env = {k: v for k, v in os.environ.items()
            if not k.startswith(("OMNIGRAPH_", "OG_", "AWS_", "AZURE_"))}
@@ -485,7 +485,7 @@ def main():
     gateway.ensure_certificates(workspace / "tls")
     try:
         version = run(env, "version").stdout
-        assert version.splitlines()[0] == "omnigraph 0.14.0", version
+        assert version.splitlines()[0] == "omnigraph 0.15.0", version
         for name in selected:
             graph, query = COOKBOOKS[name]
             qualify(name, graph, query, workspace, env)
@@ -494,7 +494,7 @@ def main():
         raise
     else:
         shutil.rmtree(workspace)
-        print(f"All {len(selected)} selected cookbooks passed against OmniGraph 0.14.0.")
+        print(f"All {len(selected)} selected cookbooks passed against OmniGraph 0.15.0.")
 
 
 if __name__ == "__main__":

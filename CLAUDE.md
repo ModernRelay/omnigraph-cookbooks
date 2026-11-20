@@ -5,7 +5,7 @@ links to the corresponding `CLAUDE.md`; edit the target once.
 
 ## Scope and sources
 
-These are eight self-contained OmniGraph **0.14.0** bundles: schemas, seed data,
+These are eight self-contained OmniGraph **0.15.0** bundles: schemas, seed data,
 stored queries and applied policies. The only application code is the beads
 cookbook's `ob` client in `beads/client/`, with its own tests, and the local
 HTTPS gateway `scripts/local-tls-gateway.py`. The root
@@ -27,10 +27,14 @@ The graph ID is the key in `cluster.yaml`, not the folder name. Configurations
 omit `storage`, so local roots default to their directory. Explicit storage
 belongs in the deployment configuration. Never commit graph or ledger state.
 
-The vendored [OmniGraph skill](.claude/skills/omnigraph/SKILL.md) owns command and
-language detail. Its immutable source is `scripts/omnigraph-skill.ref`, separate
-from the released binary pin in `.github/workflows/qualify.yml`. Refresh with
-`scripts/sync-skill.sh`; do not hand-edit vendored references.
+The **omnigraph** skill owns command and language detail, and this repository
+does not carry a copy of it. It ships inside the CLI, so the copy that matches
+the binary you are running comes from that binary: `omnigraph skill export
+~/.claude/skills/omnigraph --force` installs it, and `omnigraph skill show
+references/<file>.md` prints one file without installing anything. Its source
+of truth is `skills/omnigraph` in
+[ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph). Read it
+before a schema change, a bulk load or a retry after an uncertain write.
 
 ## Changes and validation
 
@@ -66,7 +70,7 @@ it on a clean shutdown. Only clear an exact lock after its owner and accepted
 I/O have stopped. Never automatically force-unlock or edit the ledger; never
 direct-apply while serving.
 
-The 0.14 CLI selects destinations with `--target` and source folders with
+The 0.15 CLI selects destinations with `--target` and source folders with
 `--config`; it sends tokens only over HTTPS, which is why local setup puts the
 gateway in front of the server. Use `cluster plan/apply --target NAME --config
 DIR` for live schema, query, policy and provider changes. Review deletions:
@@ -103,4 +107,10 @@ embedding pipeline; query-time providers must match its model and dimensions.
 Full-text calls (`bm25`, `fuzzy`, `match_text`, ...) need the property declared
 `@index`.
 Never claim empty semantic results prove there are no matching facts without
-checking vector coverage.
+checking vector coverage: a ranked read answers a `ranking` object, and
+`exhaustive: false` means the search left vector partitions unsearched, so a
+nearer row may exist. Rows written on a branch are not covered by the graph's
+indexes, so a read over them scans; `index build --branch B` covers them and
+`optimize` covers only `main`. Both address the storage root directly and
+refuse a server target with `target_incompatible`, so a served cookbook builds
+a branch's indexes with its server stopped.

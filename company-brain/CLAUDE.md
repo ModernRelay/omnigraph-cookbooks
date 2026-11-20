@@ -35,9 +35,12 @@ fictional company, "Lanternworks"; all names are made up.
   `decisions_at_risk`) before promoting them with `promote_claim`,
   `propose_successor` or `add_action_item`.
 - Write facts with the stored mutations, not raw inserts: they write the fact
-  and the edge to what it rests on in one commit. `@card(1..)` on `BasedOn`
-  and `ClaimFrom` does not stop an insert without one; `unsupported_decisions`
-  and `claims_without_source` catch it.
+  and the edge to what it rests on in one commit. The `@card` minimums on
+  `BasedOn` (`1..`) and `ClaimFrom` (`1..1`) refuse a write that leaves the
+  node short, so a raw insert or load of a bare `Claim` or `Decision` fails
+  with a `@card` violation and changes nothing. `unsupported_decisions` and `claims_without_source` still earn
+  their place: a minimum counts a node only when a write touches it, so they
+  are the only thing that finds rows an earlier release let in.
 - Creates refuse an existing slug. Inserting a keyed node replaces the whole
   row, so `ClaimFrom`, `DecisionAbout`, `AssignedTo` and `ActsFor` are
   unkeyed and capped at one: `record_claim`, `promote_claim`,
@@ -46,7 +49,8 @@ fictional company, "Lanternworks"; all names are made up.
   edges unkeyed; pick a new slug on refusal. `add_person` has no edge to
   guard with: run it only when `person_by_handle` resolves nobody.
 - Every claim has a speaker: `ClaimedBy` is `@card(1..1)` and `record_claim`
-  requires one. A raw load without it shows up in `claims_without_speaker`.
+  requires one. A load whose batch has the claim but not its `ClaimedBy` is
+  refused; `claims_without_speaker` finds claims an earlier release admitted.
 - Never edit a claim's `quote` or `statement`, or a decision's `statement`.
   Reject the claim and record a new one; change a decision with
   `propose_successor`, which needs a claim and a reason. Do not store

@@ -18,7 +18,7 @@ ask only when it is unclear.
 
 Locate or clone `ModernRelay/omnigraph-cookbooks`, then read its root README and
 the selected cookbook's guidance. Check `omnigraph version`; these instructions
-target CLI and server 0.14. Use matching release binaries. The filesystem
+target CLI and server 0.15. Use matching release binaries. The filesystem
 setup needs no object store or Docker. Existing data follows
 the repository's [upgrade procedure][upgrading], never an automatic reset.
 

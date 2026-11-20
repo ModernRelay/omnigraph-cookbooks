@@ -254,7 +254,7 @@ To enable semantic search:
 
    Set `GEMINI_API_KEY` for this command too. `omnigraph embed` transforms files;
    ordinary load preserves supplied vectors and does not generate them. See the
-   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.14.0/docs/user/search/embeddings.md#offline-file-pipeline)
+   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.15.0/docs/user/search/embeddings.md#offline-file-pipeline)
    for the spec format. Use `seed.jsonl` only for a fresh demo.
 3. Run `omnigraph alias sem-issue --params '{"q":"tenant isolation"}'`.
    Structural queries also work without embeddings; text-vector queries require

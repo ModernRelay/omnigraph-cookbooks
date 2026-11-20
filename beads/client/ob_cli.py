@@ -214,7 +214,7 @@ def find_config_dir(start: Path) -> Path | None:
 
 
 def refuse_retired_settings() -> None:
-    """OmniGraph 0.14 reaches a server only through a registered target, so the
+    """OmniGraph reaches a server only through a registered target, so the
     old server URL and token settings would be silently wrong; refuse them."""
     found = [name for name in RETIRED_ENV if os.environ.get(name)]
     if found:
@@ -231,7 +231,7 @@ def load_config(args) -> tuple[Path | None, dict]:
         if cfg.get("store"):
             cfg["store"] = local_store(cfg["store"], cfg_dir)
     if "server" in cfg:
-        raise ObError(f'{cfg_dir / CONFIG_FILE} names a "server", which OmniGraph 0.14 no longer accepts: '
+        raise ObError(f'{cfg_dir / CONFIG_FILE} names a "server", which OmniGraph no longer accepts: '
                       "register the server as a target in the operator configuration, then replace "
                       '"server" with "target": "<name>" in that file, or set OB_TARGET')
     if os.environ.get("OB_STORE"):
@@ -251,7 +251,7 @@ def local_store(store: str, base: Path) -> str:
     if store.startswith("file://"):
         return store
     if "://" in store:
-        raise ObError(f"{store}: OmniGraph 0.14 reaches remote storage only through a server; serve the "
+        raise ObError(f"{store}: OmniGraph reaches remote storage only through a server; serve the "
                       "graph and set OB_TARGET to its server target")
     return str((base / store).resolve())
 
