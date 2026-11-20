@@ -27,10 +27,14 @@ The graph ID is the key in `cluster.yaml`, not the folder name. Configurations
 omit `storage`, so local roots default to their directory. Explicit storage
 belongs in the deployment configuration. Never commit graph or ledger state.
 
-The vendored [OmniGraph skill](.claude/skills/omnigraph/SKILL.md) owns command and
-language detail. Its immutable source is `scripts/omnigraph-skill.ref`, separate
-from the released binary pin in `.github/workflows/qualify.yml`. Refresh with
-`scripts/sync-skill.sh`; do not hand-edit vendored references.
+The **omnigraph** skill owns command and language detail, and this repository
+does not carry a copy of it. It ships inside the CLI, so the copy that matches
+the binary you are running comes from that binary: `omnigraph skill export
+~/.claude/skills/omnigraph --force` installs it, and `omnigraph skill show
+references/<file>.md` prints one file without installing anything. Its source
+of truth is `skills/omnigraph` in
+[ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph). Read it
+before a schema change, a bulk load or a retry after an uncertain write.
 
 ## Changes and validation
 

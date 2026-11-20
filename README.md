@@ -236,13 +236,19 @@ subject). This is a cookbook modeling convention, not an engine requirement.
 
 ## Skills and deployment
 
-The [OmniGraph skill](.claude/skills/omnigraph/SKILL.md) is vendored for Claude
-Code and linked from `.agents/skills/omnigraph` for Codex. Its immutable source
-revision is in `scripts/omnigraph-skill.ref`; `scripts/sync-skill.sh` refreshes it
-and records a content hash. This lets documentation corrections follow the
-released engine without pretending the binary changed. To give an agent the
-skill that matches the CLI it runs, export it from the binary instead:
-`omnigraph skill export ~/.claude/skills/omnigraph`.
+The OmniGraph skill is not kept here. Every `omnigraph` binary carries the copy
+written for its own commands and HTTP contract, so an agent gets the matching
+one from the CLI it runs:
+
+```bash
+omnigraph skill export ~/.claude/skills/omnigraph --force   # or ~/.codex/skills
+omnigraph skill show references/queries.md                  # read one file
+```
+
+A copy committed beside the cookbooks would be a second source that drifts from
+the pinned release; `skills/omnigraph` in
+[ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph) is the one
+that does not.
 
 The [industry bootstrap skill](industry-intel/skill/) guides domain selection,
 research and seed preparation. Install it with:
