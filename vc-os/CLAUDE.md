@@ -11,7 +11,7 @@ The reference seed is a **fictional Berlin-based AI-infra fund** ("Quito Capital
 ## Key Files
 
 - `schema.pg` — Executable Omnigraph schema. Source of truth.
-- `README.md` — Design rationale, collapsed stack analysis, killer queries.
+- `README.md` — The landing page: data model, workflows, sources, questions. Follows the root template; commands live here, not there.
 - `seed.md` / `seed.jsonl` — Reference seed (human-readable / loadable).
 - `queries/*.gq` — Read and mutation queries. One file per domain.
 - `cluster.yaml` — Deployment declaration (graph `vcos`, schema, stored queries).
@@ -181,19 +181,99 @@ These are the queries the seed is shaped to light up. Preserve them when iterati
 
 If a schema or seed change breaks any of these, the OS lens is not delivering — fix the seed rather than compromising the schema.
 
-## Agent Workflow
+## Questions
 
-Use this cookbook as a decision-intelligence + audit loop, not a lookup table:
+The four questions `site.json` features, and the command for each:
 
-1. **Start from intent** — a Deal, a Signal, a Thesis, an upcoming board meeting.
-2. **Expand context** with aliases like `deal-signals`, `deal-decisions`, `thesis-assumptions`, `board-prep-pack`.
-3. **Trace evidence** with `assumption-supports` / `assumption-contradictions`, `signal-supports-assumptions` / `signal-contradicts-assumptions`.
-4. **Capture new input** as an `Artifact` first (raw), then derived `Insight` / `Signal` if synthesized (use `ArtifactDerivedFrom` with `activity` enum).
-5. **Wire mentions** — `SignalAboutOrganization`, `ArtifactMentionsPerson`, etc., so future queries find it.
-6. **Promote to action** — Decision or Commitment with the full provenance chain.
-7. **Distill into Lessons** — when a Pattern emerges across multiple Decisions, capture as a `Lesson` on a branch; merge after human review.
+```bash
+omnigraph query contradicted_active_theses --target local-reader --graph vcos
+omnigraph query pre_ic_brief_evidence --target local-reader --graph vcos --params '{"slug":"deal-helix-series-a"}'
+omnigraph query intro_path_to_founder --target local-reader --graph vcos --params '{"slug":"per-helix-yuki"}'
+omnigraph query board_prep_pack --target local-reader --graph vcos --params '{"slug":"org-aetherbrick"}'
+```
 
-For longer-form captures (transcripts, decks), chunk into `Chunk` records linked via `ChunkOfArtifact`. Hybrid search runs on those once embeddings are populated.
+`board_prep_pack` returns every signal about the organization, newest first. It does not cut at the last board meeting; compare dates with `board_meetings_for_organization`.
+
+## Workflows
+
+Common shape: the agent proposes on a branch (`omnigraph branch create <name> --target local-writer --graph vcos`, then `--branch <name>` on each mutation), a partner reads `omnigraph branch diff` and `omnigraph branch merge <name> --into main --dry-run`, then merges. Agents never invent slugs or people: run `search_organizations`, `search_people` or `search_signals` first and flag what does not resolve. Slugs use the prefixes under "Design choices". Every write supplies `createdAt` and `updatedAt`.
+
+### Call intake (capture)
+
+Starts: a call ends. Reads: `get_meeting`, `meeting_attendees`, the deal's `pre_ic_brief_thesis` and `deal_open_questions`, and `search_signals` so a new signal is not a duplicate. Branch `ingest-<meeting-slug>`.
+
+```bash
+omnigraph mutate add_artifact --target local-writer --graph vcos --branch ingest-mtg-x --params '{"slug":"art-x","name":"Call transcript","kind":"transcript","source":"meeting-tool","source_app":"granola","date":"2026-09-14","captured_at":"2026-09-14T12:00:00Z","createdAt":"2026-09-14T12:00:00Z","updatedAt":"2026-09-14T12:00:00Z"}'
+omnigraph mutate link_artifact_from_meeting --target local-writer --graph vcos --branch ingest-mtg-x --params '{"artifact":"art-x","meeting":"mtg-x"}'
+```
+
+Then `add_signal` with `link_signal_sourced_from_artifact`, `link_signal_about_organization` and `link_supports_assumption` or `link_contradicts_assumption`; and `add_commitment` with `link_commitment_from_meeting` and `link_commitment_assigned_to`. Create the Meeting first with `add_meeting` if none exists. Person: a partner reviews the branch. Repeat: the transcript's Artifact exists, so check `search_signals` and `meeting_artifacts` before ingesting the same meeting.
+
+### Signal intake (capture)
+
+Starts: an article, scout note, founder update or outbound reply. Reads `search_organizations` (a name that matches a passed deal: read `deal_decisions` and tie to the pass), `search_signals`. Writes on `signal-<org>-<date>`: `add_artifact` for the source, `link_published_by_organization`, `add_signal`, `link_signal_about_organization`, `link_signal_sourced_from_artifact`, and `link_informs_question` where a live question is concerned. Add a new organization only when search finds none.
+
+### Wiki sync (capture)
+
+Starts: a commit to the partners' notes repository. Writes `add_markdown_artifact` (see its signature) and `link_artifact_documents_thesis`, `link_artifact_documents_lesson` or `link_artifact_documents_pattern`. Reads `markdown_artifacts_in_repo`, `theses_active_for_doc_review`.
+
+### Belief check (maintain)
+
+Starts: a signal is merged. Reads `signal_contradicts_assumptions`, `signal_contradicts_theses`, `signal_portfolio_impact`, `signal_engagement_impact`, `contradicted_active_theses`. Writes on a branch: `add_question` (status open) and `link_question_about_deal` where the contradiction needs an answer. It does not change a thesis's status; the stored mutations only add. A partner decides what a contradicted thesis means.
+
+### Source reliability sweep (maintain)
+
+Starts: a source's `reliability` drops. Reads `sources_by_reliability`, then `source_downstream_signals` for each source. Output is the list of signals to re-read; no stored mutation changes a rating or a signal.
+
+### IC debate (maintain)
+
+Starts: an IC meeting 48 hours away. Three agents (bull, bear, neutral) read `pre_ic_brief_thesis`, `pre_ic_brief_evidence`, `debate_stances`, then each writes one insight on the shared branch `ic-debate-<deal>`:
+
+```bash
+omnigraph mutate add_insight_with_stance --target local-writer --graph vcos --branch ic-debate-deal-x --params '{"slug":"ins-x-bear","name":"Bear case","kind":"memo","stance":"bear","summary":"...","createdAt":"2026-09-14T00:00:00Z","updatedAt":"2026-09-14T00:00:00Z"}'
+```
+
+Link it with `link_insight_about_deal` and `link_insight_relies_on_signal` for each cited signal. Cite only linked signals. The neutral agent names the evidence that would settle the disagreement.
+
+### Learning sweep (maintain)
+
+Starts: quarter end. Reads `patterns_all`, `pattern_decisions`, `lessons_active`. For a pattern with three or more decisions of one outcome and no active lesson, write on `tentative-<date>`:
+
+```bash
+omnigraph mutate add_lesson --target local-writer --graph vcos --branch tentative-2026-q3 --params '{...}'   # status tentative, as in Writing above
+omnigraph mutate link_lesson_distilled_from --target local-writer --graph vcos --branch tentative-2026-q3 --params '{"lesson":"lsn-x","pattern":"pat-x"}'
+```
+
+Add `link_lesson_applies_to_market`. A partner merges or deletes the branch; `lessons_tentative` lists what waits. Report what was already covered and what had too little evidence.
+
+### Pre-IC brief (act)
+
+Starts: `meetings_upcoming` shows an IC within 24 hours. Reads, all with the deal slug: `pre_ic_brief_organization`, `pre_ic_brief_thesis`, `pre_ic_brief_evidence`, `pre_ic_brief_questions`, `pre_ic_brief_debate`, `ic_prep_meeting_history`, `ic_prep_open_commitments`. Writes nothing. The agent drafts the brief for the partners and sends it with its own tools; the record keeps no note that it went out, so the agent tracks that. Re-running is harmless.
+
+### Board prep pack (act)
+
+Starts: `upcoming_board_meetings_for_organization` returns a meeting within the week. Reads `board_prep_pack`, `board_prep_open_questions`, `board_prep_commitments`, `board_meetings_for_organization`. Keep only signals dated after the last board. Draft and send to the lead partner. No record of sending.
+
+### Commitment nudges (act)
+
+Starts: a daily date check. Reads `commitments_open`, `portfolio_open_commitments`, `commitment_assigned_to`. Messages each owner with the open commitments past `due_date`. The record has no reminder field, and no stored mutation sets a commitment's status or `completed_at`, so the agent keeps its own log and a partner closes a commitment with an ad-hoc `omnigraph mutate -e` on a branch.
+
+### Intro requests (act)
+
+Starts: a partner asks for an intro to a founder. Reads `direct_team_knowers`, then `intro_path_to_founder`. Drafts the ask to the person in between; a partner sends it.
+
+### Agents and access
+
+The policy has `act-admin`, `act-writer` and `act-reader` only. `act-writer` can write `main` and merge. Run read-only agents as `local-reader`. For an agent that writes, add an `act-agent` role as in `../hardware-program/policies/graph.policy.yaml` through `cluster plan` and `apply`, with task authorization. Until then, review is by convention: the agent writes on a branch and every commit records its actor. Over MCP, `omnigraph mcp --target local-reader --graph vcos` relays reads.
+
+## What it does not do
+
+- No connectors: Granola, Gmail, Slack, CRMs, PitchBook and the rest are read by your own script or agent.
+- No stored mutation updates or deletes: `add_*` and `link_*` only. Changing a commitment's status, a thesis's status or a rating, merging duplicate organizations, or retiring a stale signal needs an ad-hoc mutation on a branch.
+- No agent role in the access policy (see above).
+- No place to record that a brief or reminder was sent.
+- No embeddings, blobs or `Chunk` rows in the seed, so hybrid search returns nothing until you ingest.
+- Money fields are USD only.
 
 ## When Editing
 

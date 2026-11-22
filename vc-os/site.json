@@ -3,7 +3,7 @@
   "name": "Venture firm",
   "category": "Investing",
   "blurb": "A venture firm's deals, portfolio, people and investment theses, with every signal tied to the beliefs it supports or contradicts.",
-  "about": "The venture firm graph covers pipeline, diligence, decisions, portfolio and network in one typed graph, with every signal tied to the investment thesis it supports or contradicts. It is for firms whose agents work across a CRM, a wiki, chat, call notes and spreadsheets that do not talk to each other. One graph with typed writes, search and commit history takes the place of that per-firm glue.",
+  "about": "Build a living system of record for a venture firm, and the agent workflows around it. It keeps deals, investment theses and the assumptions under them, signals, meetings, decisions, commitments, and the people and organizations involved linked, so they stay aligned as evidence arrives. Which active theses are contradicted is worked out from the signals each time you ask, so no status drifts from the evidence. Agents capture calls and news and re-check beliefs on branches a partner reviews before anything reaches the baseline.",
   "sample": "Quito Capital, a fictional AI-infrastructure fund",
   "questions": [
     {
@@ -12,15 +12,24 @@
     },
     {
       "q": "Before investment committee, what contradicts the assumptions behind this deal?",
-      "query": "pre_ic_brief_evidence"
+      "query": "pre_ic_brief_evidence",
+      "params": {
+        "slug": "deal-helix-series-a"
+      }
     },
     {
       "q": "Who on the team can get an introduction to this founder?",
-      "query": "intro_path_to_founder"
+      "query": "intro_path_to_founder",
+      "params": {
+        "slug": "per-helix-yuki"
+      }
     },
     {
-      "q": "What has happened at a portfolio company since the last board meeting?",
-      "query": "board_prep_pack"
+      "q": "What recent signals bear on a portfolio company before its next board meeting?",
+      "query": "board_prep_pack",
+      "params": {
+        "slug": "org-aetherbrick"
+      }
     }
   ],
   "search": {
@@ -32,5 +41,26 @@
       "knowledge graph",
       "ontology"
     ]
-  }
+  },
+  "use_case": "usecase:org-knowledge",
+  "needs": [
+    {
+      "need": "need:context-scattered",
+      "shown_in": "The data model"
+    },
+    {
+      "need": "need:agents-act-on-changes",
+      "shown_in": "Agents and workflows"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "cap:typed-schema",
+      "shown_in": "The data model"
+    },
+    {
+      "capability": "cap:graph-traversal",
+      "shown_in": "The data model"
+    }
+  ]
 }
