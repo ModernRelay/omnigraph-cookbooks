@@ -99,11 +99,15 @@ use case, and each answer is a workflow:
 | Kind | Ask | Example |
 |---|---|---|
 | Capture: the world changes, the record learns | What happens outside that the record has to know about, and in which tool does it happen? | A meeting ends; a mass changes in CAD; a test run finishes |
-| Check: the record changes, something in it may no longer hold | What can go wrong, go stale or contradict when something changes? | A pass predates its requirement; a decision rests on a disputed claim |
+| Maintain: work done on the record itself | What has gone stale or now contradicts something? What can be concluded, linked or summarised from what is already there? What is worth working out ahead of time? | A pass predates its requirement; a decision rests on a disputed claim; two entries are the same person; signals add up to a pattern |
 | Act: the record is in a state, someone outside has to know or do something | Who has to know or act when this state appears, and where do they work? | An action item is overdue, so its owner is reminded; a review is blocked, so the board gets the list |
 
-Look for all three kinds. A cookbook that only has checks is a linter, and one
-that only captures is a log. The acting workflows are what make the record
+Look for all three kinds. A cookbook that only maintains is a linter, and one
+that only captures is a log. Maintaining is more than checking: it includes
+retiring what is stale, resolving what contradicts, merging duplicates and
+drawing conclusions from what is there. Store a derived result only when a
+query cannot work it out on read, and then say which workflow keeps it
+current. The acting workflows are what make the record
 part of the work: they take an action outside the record, such as a message, a
 ticket or a report, from what the record says.
 
@@ -165,7 +169,7 @@ graph LR
 | Kind | Workflow | What it does | Stored queries |
 |---|---|---|---|
 | Capture | <Name> | <What it records, and from where> | `<stored_query>` |
-| Check | <Name> | <What it looks for when the record changes> | `<stored_query>`, `<stored_query>` |
+| Maintain | <Name> | <What it checks, resolves, links or derives in the record> | `<stored_query>`, `<stored_query>` |
 | Act | <Name> | <Who it tells or what it does outside, from which state> | `<stored_query>` |
 
 <The parts every workflow has, numbered: what starts it, what the agent reads,
@@ -221,7 +225,7 @@ exact command for each question and workflow on this page.
 | Title and intro | The opening sentence as in the template, where X is what the use case keeps: a system of record for a hardware program, a company brain. Then the problem and three benefits | That opening; the first paragraph equal to `about` in `site.json`; a link to `AGENTS.md` |
 | The data model | The ontology of this use case, drawn, then the type table and the few modelling choices that matter. Say what OmniGraph provides, such as object storage, only where this use case has its own reason for it | Every backticked type exists in `schema.pg` |
 | Branching and merging | What a branch is used for in this use case, by people or by agents. In some, engineers branch for change requests; in others only agents do | Not empty |
-| Agents and workflows | The workflows by name and kind (capture, check, act), worked out as in "Working out the workflows", each with the stored queries behind it, reads and writes alike. Then what an agent may not do, and what the record does not hold back | Names stored queries, and only ones the cookbook has |
+| Agents and workflows | The workflows by name and kind (capture, maintain, act), worked out as in "Working out the workflows", each with the stored queries behind it, reads and writes alike. Then what an agent may not do, and what the record does not hold back | Names stored queries, and only ones the cookbook has |
 | Data sources | The tools a team brings data in from, by product name, and the types each feeds | Every backticked type exists in `schema.pg` |
 | Questions you can ask | The questions `site.json` features, three to five. Feature only questions the sample data answers. One that is rightly empty on a fresh load, such as a check that finds nothing wrong, belongs in the workflow table | Each listed word for word on a line with its query; each returns rows on the seed |
 | Sample data | What the seed depicts and what the questions return on it | A link to `seed.md` |

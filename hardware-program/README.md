@@ -87,7 +87,7 @@ baseline moves only when the branch is merged.
 
 ## Agents and workflows
 
-Agents keep the record current, check it on every change and tell people what
+Agents bring changes into the record, keep it consistent and tell people what
 needs them. Engineers make the decisions. These are the workflows the cookbook
 supports, each backed by stored queries:
 
@@ -95,10 +95,10 @@ supports, each backed by stored queries:
 |---|---|---|---|
 | Capture | Design value sync | Writes a mass, power or other value from CAD or analysis, with whether it is estimated, calculated or measured | `set_parameter` |
 | Capture | Test result intake | Records a test run with its measured value and report, and updates the test's status in the same change | `record_test_run` |
-| Check | Budget watch | Re-adds every budget when a design value changes; flags totals over their allocation and values past their limit | `budget_rollup`, `limit_check` |
-| Check | Verification coverage | Finds requirements with no test, failed tests, stale passes and tests that measure the wrong value | `unverified_requirements`, `failing_requirements`, `stale_verification`, `measurement_mismatch` |
-| Check | Traceability audit | Finds requirements with no parent or owner, components no requirement asks for, and frozen work resting on weak assumptions | `untraced_requirements`, `unowned_requirements`, `unexplained_components`, `assumptions_under_frozen_work` |
-| Check | Requirement review | Raises a finding where a requirement has no quantity or limit a test could verify, and lists what waits for a person | `raise_finding`, `awaiting_review`, `open_findings` |
+| Maintain | Budget watch | Re-adds every budget when a design value changes; flags totals over their allocation and values past their limit | `budget_rollup`, `limit_check` |
+| Maintain | Verification coverage | Finds requirements with no test, failed tests, stale passes and tests that measure the wrong value | `unverified_requirements`, `failing_requirements`, `stale_verification`, `measurement_mismatch` |
+| Maintain | Traceability audit | Finds requirements with no parent or owner, components no requirement asks for, and frozen work resting on weak assumptions | `untraced_requirements`, `unowned_requirements`, `unexplained_components`, `assumptions_under_frozen_work` |
+| Maintain | Requirement review | Raises a finding where a requirement has no quantity or limit a test could verify, and lists what waits for a person | `raise_finding`, `awaiting_review`, `open_findings` |
 | Act | Change impact notice | When a change request is opened, tells the owners of the requirements it reaches, with the tests and interfaces affected | `impacted_requirements`, `impacted_tests`, `impacted_interfaces` |
 | Act | Retest requests | For each pass that predates a requirement change, asks for the test to be run again | `stale_verification` |
 | Act | Design review pack | Before a PDR or CDR, sends the board what in its scope is unverified, failing, stale or not frozen | `gate_unverified`, `gate_not_passing`, `gate_stale_verification`, `gate_unfrozen_interfaces` |

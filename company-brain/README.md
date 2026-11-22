@@ -90,8 +90,8 @@ one.
 
 ## Agents and workflows
 
-Agents read the company's meetings and threads, keep the record current and
-tell people what needs them. People verify what was recorded and accept what
+Agents bring what was said into the record, keep it consistent and tell people
+what needs them. People verify what was recorded and accept what
 was proposed. These are the workflows the cookbook supports, each backed by
 stored queries:
 
@@ -99,9 +99,9 @@ stored queries:
 |---|---|---|---|
 | Capture | Meeting and thread capture | Records a meeting, thread or document and each claim made in it, with its quote, speaker and position | `record_source`, `record_claim` |
 | Capture | Commitment capture | Turns a commitment someone made into an action item with an owner and a due date | `add_action_item` |
-| Check | Contradiction check | Compares a new claim with what current decisions rest on, links the dispute and lists the decisions it puts in question | `decision_evidence`, `mark_contradiction`, `contested_claims`, `decisions_at_risk` |
-| Check | Decision proposal | Promotes a claim to a decision, or proposes a replacement for a decision that a new claim disputes | `promote_claim`, `propose_successor` |
-| Check | Record hygiene | Finds decisions with no supporting claim, accepted decisions resting on unverified claims and action items with no owner | `unsupported_decisions`, `accepted_on_unverified`, `unowned_actions` |
+| Maintain | Contradiction check | Compares a new claim with what current decisions rest on, links the dispute and lists the decisions it puts in question | `decision_evidence`, `mark_contradiction`, `contested_claims`, `decisions_at_risk` |
+| Maintain | Decision proposal | Promotes a claim to a decision, or proposes a replacement for a decision that a new claim disputes | `promote_claim`, `propose_successor` |
+| Maintain | Record hygiene | Finds decisions with no supporting claim, accepted decisions resting on unverified claims and action items with no owner | `unsupported_decisions`, `accepted_on_unverified`, `unowned_actions` |
 | Act | Meeting follow-up | After a meeting is captured, sends out the decisions and action items that came out of it | `decisions_from_source`, `actions_from_source` |
 | Act | Overdue reminders | Reminds the owner of each overdue action item, on the handle the record holds for them | `overdue_actions`, `person_handles` |
 | Act | Decision at risk alert | When a new claim disputes one a current decision rests on, tells the people who made that decision | `decisions_at_risk`, `decision_deciders` |
