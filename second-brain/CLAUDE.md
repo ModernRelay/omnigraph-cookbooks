@@ -11,7 +11,8 @@ The reference seed is **Alex Chen**, a fictional 36-year-old senior product desi
 ## Key Files
 
 - `schema.pg` — Executable Omnigraph schema. Source of truth.
-- `README.md` — Layered architecture, reference seed description, schema essentials, wow queries.
+- `README.md` — The landing page: data model, workflows, data sources, questions and sample data, in the shared template (see `../CLAUDE.md`).
+- `site.json` — The copy omnigraph.dev shows, and the mr-ops use case (`usecase:agent-memory`) the README is held to.
 - `seed.md` / `seed.jsonl` — Seed dataset (human-readable / loadable).
 - `queries/*.gq` — Read and mutation queries.
 - `cluster.yaml` — Deployment declaration (graph `brain`, schema, stored queries).
@@ -113,18 +114,98 @@ These are the queries the seed is shaped to light up — preserve them when iter
 
 If a schema or seed change breaks any of these, the personal-life lens is not delivering — fix the seed rather than compromising the schema.
 
-## Agent Workflow
+## Questions
 
-Use this cookbook as a personal-context lookup, not a chat log. Typical flow:
+The four questions in `site.json`, as run against the served graph:
 
-1. **Start from intent** — a person, project, area, or upcoming event.
-2. **Expand context** with aliases like `person-recent-events`, `person-tasks-i-owe`, `project-tasks`, `area-projects`.
-3. **Capture new input** — incoming message, conversation, idea — as an `Artifact` first (raw), then a derived `Note` if synthesized (use `DerivedFromArtifact` with `activity` enum).
-4. **Wire mentions** — `MentionsPerson`, `ArtifactFromPerson`, `ArtifactForProject` so future queries can find it.
-5. **Promote to action** — if the input implies a commitment, create a `Task` with `direction` and link `TaskFromArtifact`.
-6. **Preserve provenance** — every `Note` should ideally link back to the `Artifact` or `Event` it came from via `NoteFromArtifact` / `NoteFromEvent`.
+```bash
+omnigraph query person_tasks_i_owe --target local-reader --graph brain --params '{"slug":"per-theo"}'
+omnigraph query tasks_next --target local-reader --graph brain
+omnigraph query reading_queue --target local-reader --graph brain
+omnigraph query media_recommended_by --target local-reader --graph brain --params '{"slug":"med-outlive-attia"}'
+```
 
-For longer captures, chunk into `Chunk` records linked via `ChunkOf` — semantic search across the graph runs on those embeddings.
+## Workflows
+
+Use this cookbook as a personal-context lookup, not a chat log. Run the reads as
+`local-reader` and the writes as `local-writer`. Every workflow: something
+starts it, the agent reads, it writes on its own branch or tells the user, and
+the user decides. Create the branch first, pass `--branch` to every write, then
+`omnigraph branch diff <b>` and `omnigraph branch merge <b> --into main --dry-run`
+before the user merges. The example policy gives `local-writer` the right to
+write `main` and merge, and there is no agent role, so staying on the branch is
+the agent's discipline.
+
+```bash
+omnigraph branch create agent-intake-0914 --target local-writer --graph brain
+```
+
+**Capture**
+
+- *Message intake.* A message arrives. Check `artifacts_by_thread` (param
+  `thread_id`) so the thread is not recorded twice. `add_artifact`, then
+  `link_artifact_from_person`, `link_mentions_person`, `link_artifact_for_project`
+  and, for a reply, `link_in_reply_to`. Resolve people with `people_all` or
+  `get_person` first; never invent a `per-` slug.
+- *Promise capture.* The message implies a commitment: `add_task`, then
+  `link_task_for_person` and `link_task_from_artifact`. `add_task` cannot set
+  `direction`, `due` or `kind`; without `direction` the task never appears in
+  `tasks_i_owe` or `person_tasks_i_owe`. Set them with an ad hoc
+  `omnigraph mutate -e` (an `update Task set ...` statement) on the same
+  branch.
+- *Notes and preferences.* `add_note`, then `link_note_about_person` or
+  `link_note_about_project`, and `link_note_from_artifact` or
+  `link_note_from_event`. `add_note` cannot set `content`; set it the same way.
+- *Event log.* `add_event`, `link_attended_by`, `link_happened_at`; add
+  `link_event_for_person` when the event is about someone.
+
+```bash
+omnigraph mutate add_artifact --target local-writer --graph brain --branch agent-intake-0914 --params '{"slug":"art-marco-text-0914","name":"Marco: playdate Saturday?","kind":"message","source":"whatsapp","timestamp":"2026-09-14T09:00:00Z","createdAt":"2026-09-14T09:00:00Z","updatedAt":"2026-09-14T09:00:00Z"}'
+omnigraph mutate link_artifact_from_person --target local-writer --graph brain --branch agent-intake-0914 --params '{"artifact":"art-marco-text-0914","person":"per-marco"}'
+```
+
+**Maintain**
+
+- *Inbox review.* Read `tasks_inbox` and `projects_active`; link each task with
+  `link_task_for_project`, `link_task_for_area` or `link_task_for_goal`.
+  Clarifying `status` is an ad hoc update.
+- *Note linking.* Read `notes_recent` and `note_related`; add `link_related_note`
+  where two notes say related things. Read `open_questions` and list those a
+  newer note answers; the user closes them.
+- *Stale review.* Read `tasks_next` and `tasks_waiting`; list those whose `due`
+  has passed. The user finishes, drops or moves them.
+- *Habit streaks.* `Habit.streak_current` and `streak_best` are stored from
+  `completions`. When a completion is logged, the same ad hoc update must
+  recompute both; `habits_active` shows them.
+
+**Act** (nothing here reviews an outside action; draft and tell, never send to
+another person unapproved; use the agent's own tools, as the cookbook has no
+integration)
+
+- *Owed and overdue.* `tasks_i_owe`, or `person_tasks_i_owe` per person; tell the
+  user what is past `due`.
+- *Chase.* `tasks_they_owe`, `tasks_waiting_on_person`; draft a nudge.
+- *Stay in touch.* `close_friends` gives `cadence_days`; the last contact is the
+  latest of `person_recent_events` and `person_artifacts_from` (no stored query
+  computes the gap, so compare in the agent). Draft a message.
+- *Briefing.* For an upcoming event from `events_chronological`: `event_attendees`,
+  then per person `person_notes`, `preferences_for_person`,
+  `person_tasks_i_owe`, `person_recent_events`.
+
+The record has no place to note that a reminder or nudge went out. The agent
+keeps that itself, or records a follow-up task with `remind_at` (no stored read
+filters on it).
+
+For longer captures, chunk into `Chunk` records linked via `ChunkOf`; semantic
+search needs the offline embedding pass first.
+
+## What it does not do
+
+- No connectors; a sync is a script or an agent writing through the stored mutations or a merge load.
+- The stored writes only insert and only set core fields. Nothing updates or deletes a row.
+- No agent role: nothing enforces branch-only writes.
+- No stored read for overdue contacts, past-due tasks or duplicate people.
+- No embeddings in the seed; `Chunk` is empty.
 
 ## When Editing
 

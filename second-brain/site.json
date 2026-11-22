@@ -3,12 +3,15 @@
   "name": "Second brain",
   "category": "Personal",
   "blurb": "One person's people, projects, notes, tasks, habits and reading, with where each piece came from.",
-  "about": "This second brain is a personal knowledge graph: one person's people, places, projects, notes, tasks, habits and reading, with a record of where each piece came from. It is for individuals who want an agent to answer questions such as what they still owe someone or what to do next. It keeps the structure and provenance that a folder of notes does not.",
+  "about": "Build a living second brain, and the agent workflows around it. It keeps the people, projects, notes, tasks, habits and reading of one life linked to the messages and events they came from, so what you owe someone and what to do next stay answerable as life changes. Agents capture each message and promise as it arrives, tidy the record and tell you what needs you. They write on a branch, and you merge what you accept.",
   "sample": "A fictional person's life",
   "questions": [
     {
       "q": "What do I still owe this person?",
-      "query": "person_tasks_i_owe"
+      "query": "person_tasks_i_owe",
+      "params": {
+        "slug": "per-theo"
+      }
     },
     {
       "q": "What should I do next?",
@@ -20,7 +23,10 @@
     },
     {
       "q": "Who recommended this book?",
-      "query": "media_recommended_by"
+      "query": "media_recommended_by",
+      "params": {
+        "slug": "med-outlive-attia"
+      }
     }
   ],
   "search": {
@@ -32,5 +38,34 @@
       "llm wiki",
       "knowledge graph"
     ]
-  }
+  },
+  "use_case": "usecase:agent-memory",
+  "needs": [
+    {
+      "need": "need:agents-diverge",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "need": "need:context-carried-across-tasks",
+      "shown_in": "Agents and workflows"
+    },
+    {
+      "need": "need:agent-state-held-once",
+      "shown_in": "The data model"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "cap:branch-per-agent",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "capability": "cap:three-way-merge",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "capability": "cap:mcp-server",
+      "shown_in": "Agents and workflows"
+    }
+  ]
 }
