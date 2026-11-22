@@ -3,24 +3,30 @@
   "name": "Industry intelligence",
   "category": "Research",
   "blurb": "Signals, patterns and insights about an industry, linked to the products and technologies they concern, with hybrid search over the sources.",
-  "about": "The industry intelligence graph tracks an industry as signals, patterns and insights, linked to the products and technologies they concern. A new signal either supports a pattern or contradicts it, so an analyst or a research agent can see which beliefs new evidence has weakened. Hybrid search over the source text is optional. The sample data covers the AI infrastructure market, from public sources.",
-  "sample": "The AI infrastructure market, from public sources",
+  "about": "Build a living intelligence record of an industry, and the agent workflows around it. It keeps signals, the patterns they support or contradict, and the insights drawn from them linked to the products, technologies and companies they concern, and to the sources they came from. Which patterns are gathering evidence, which are contested and which have gone quiet is worked out from the record each time you ask. Agents triage new evidence and propose links on branches that an analyst reviews before they are merged.",
+  "sample": "The AI industry in early 2026, from public sources",
   "questions": [
     {
-      "q": "Which patterns does new evidence contradict?",
-      "query": "contested_patterns"
-    },
-    {
       "q": "Which patterns are gathering signals fastest?",
-      "query": "pattern_momentum"
-    },
-    {
-      "q": "What do the sources say about a question?",
-      "query": "hybrid_chunks"
+      "query": "pattern_momentum",
+      "params": {
+        "since": "2026-03-01T00:00:00Z"
+      }
     },
     {
       "q": "What came in most recently?",
       "query": "recent_signals"
+    },
+    {
+      "q": "Which signals form this pattern?",
+      "query": "pattern_signals",
+      "params": {
+        "slug": "pat-context-graphs"
+      }
+    },
+    {
+      "q": "Which signals have no source?",
+      "query": "unsourced_signals"
     }
   ],
   "search": {
@@ -31,5 +37,34 @@
       "graphrag",
       "ontology"
     ]
-  }
+  },
+  "use_case": "usecase:research-substrate",
+  "needs": [
+    {
+      "need": "need:agents-diverge",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "need": "need:agent-changes-checked-before-truth",
+      "shown_in": "Agents and workflows"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "cap:typed-schema",
+      "shown_in": "The data model"
+    },
+    {
+      "capability": "cap:branching",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "capability": "cap:three-way-merge",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "capability": "cap:branch-per-agent",
+      "shown_in": "Agents and workflows"
+    }
+  ]
 }

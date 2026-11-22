@@ -1,173 +1,190 @@
-# Industry Intel — SPIKE Cookbook
+# Industry intelligence: signals, patterns and insights
 
-Knowledge graph cookbook modeling AI/ML industry intelligence. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph) using the [SPIKE framework](../README.md#spike-framework).
+Build a living intelligence record of an industry, and the agent workflows around it. It keeps signals, the patterns they support or contradict, and the insights drawn from them linked to the products, technologies and companies they concern, and to the sources they came from. Which patterns are gathering evidence, which are contested and which have gone quiet is worked out from the record each time you ask. Agents triage new evidence and propose links on branches that an analyst reviews before they are merged.
 
-## Core Analytical Loop
+Market and competitor intelligence usually lives in a feed reader, a shared
+document and a few people's heads. A new announcement is read, discussed and
+forgotten, and nobody can say which of the team's beliefs it supports, which it
+weakens or where it came from. This cookbook sets OmniGraph up as the one place
+the evidence, the beliefs and the sources are held.
 
-Signals and Patterns form the analytical core. Insights interpret them. Elements and KnowHows map the domain around them.
+- **Beliefs tied to evidence.** Every pattern lists the signals that form it
+  and the signals that contradict it.
+- **Provenance on every signal.** You see the article, report or person a claim
+  came from, and which claims have no source.
+- **Review before the record changes.** An agent's triage waits on a branch for
+  an analyst.
 
-```
-  Signal ── FormsPattern ──────────▶ Pattern
-    │                                  │
-    ├── ContradictsPattern ──────────▶ │
-    │                                  │
-    │                                  ├── DrivesPattern ──────▶ Pattern
-    │                                  └── ReliesOnPattern ────▶ Pattern
-    │
-    ├── OnElement ──▶ Element
-    │                   │
-    │                   ├── ExemplifiesPattern ──▶ Pattern
-    │                   ├── EnablesPattern ──────▶ Pattern
-    │                   │
-    │                   ├── EnablesElement ──▶ Element
-    │                   └── UsesElement ────▶ Element
-    │
-  Insight ── HighlightsPattern ──────▶ Pattern
-    │
-    └── ReliesOnElement ─────────────▶ Element
+> If you are an agent: the commands, roles and workflows are in
+> [AGENTS.md](AGENTS.md). Read that file before running anything.
 
-  KnowHow ── ReferencesElement ───────▶ Element
-```
+## The data model
 
-## Reference Seed: AI Industry, Early 2026
-
-Five live patterns in the AI industry:
-
-| Pattern | Kind | What it captures |
-|---------|------|------------------|
-| **Sovereign AI** | disruption | Enterprises moving AI off public cloud — driven by regulation (DORA, EU AI Act) and collapsing on-prem setup cost |
-| **SaaSpocalypse** | disruption | Per-seat SaaS pricing breaking as agents replace workflows — $830B wiped from S&P software index in six days |
-| **Context Graphs** | dynamic | Decision traces + ontology + temporal reasoning as a new infrastructure layer above databases |
-| **New Cyber Threats** | challenge | AI models autonomously exploiting vulnerabilities + agentic attack surfaces inside enterprises |
-| **Accelerated Research** | dynamic | AI agents running 100s of experiments autonomously — from Karpathy loops to AlphaEvolve to AI-proven math |
-
-Each pattern is backed by ~3 real, dated signals with source URLs. Signals connect to the Elements (products, frameworks, concepts) they're about, which in turn connect to Companies that built them.
-
-**Totals:** 109 nodes, 154 edges.
-
-## Schema Essentials
-
-**Nodes (10):** Signal, Pattern, Insight, KnowHow, Element + Company, SourceEntity, Expert, InformationArtifact, Chunk
-
-**Enums that carry the analytical lens:**
-
-| Enum | Values |
-|------|--------|
-| **PatternKind** | `challenge, disruption, dynamic` |
-| **ElementKind** | `product, technology, framework, concept, ops` |
-| **Domain** | `training, inference, infra, harness, robotics, security, data-eng, context` |
-
-**Edges that carry the analytical logic** (everything else is provenance or classification):
-
-| Edge | Route | Meaning |
-|------|-------|---------|
-| `FormsPattern` | Signal → Pattern | this movement supports that theme |
-| `ContradictsPattern` | Signal → Pattern | this movement pushes back against that theme |
-| `DrivesPattern` / `ReliesOnPattern` / `ContradictsToPattern` | Pattern → Pattern | causality and structure between themes |
-| `HighlightsPattern` | Insight → Pattern | this observation illuminates a theme |
-| `ReliesOnElement` | Insight → Element | this insight is grounded in a concrete thing |
-| `ExemplifiesPattern` / `EnablesPattern` | Element → Pattern | concrete examples or enablers of a theme |
-| `OnElement` | Signal → Element | which thing the signal is about |
-| `EnablesElement` / `UsesElement` | Element → Element | capability and dependency relationships |
-| `ReferencesElement` | KnowHow → Element | practice grounded in a specific tool/concept |
-
-**Key design choices:**
-
-- Flat node types with `kind` enums (no subtypes or interfaces)
-- Domain is a property, not a node
-- Edges follow `VerbTargetType` naming so direction is obvious
-- `slug` is the external identity everywhere (`sig-`, `pat-`, `el-`, `ins-`, `how-to-`, `co-`, `exp-`, `ia-`, `source-`)
-- Embeddings only on Chunk (`Vector(3072)`, supplied by the offline embedding pipeline using the same model as query-time search)
-
-Full property tables and constraints in `schema.pg`.
-
-## Files
-
-- `schema.pg` — Executable Omnigraph schema (source of truth)
-- `seed.md` / `seed.jsonl` — Seed dataset (human-readable / loadable)
-- `queries/*.gq` — Read and mutation queries
-- `omnigraph-config.example.yaml` — read aliases over the stored queries; merge its `aliases:` into the operator config from the [local setup](../README.md#local-setup)
-- `.env.omni` — optional RustFS/S3 credentials (not committed)
-
-## Quick Start
-
-Follow the shared [local setup](../README.md#local-setup) with
-`industry-intel` and graph ID `spike`. It creates the filesystem-backed cluster,
-starts the authenticated server behind a local HTTPS gateway, and loads the
-seed through it. Merge this cookbook's `omnigraph-config.example.yaml` into
-your operator config for aliases.
-
-```bash
-omnigraph alias pattern-signals --params '{"slug":"pat-sovereign-ai"}'
-omnigraph query recent_signals --target local-reader --graph spike
+```mermaid
+graph LR
+  Signal -- forms --> Pattern
+  Signal -- contradicts --> Pattern
+  Signal -- concerns --> Element
+  Signal -- relevant to --> Company
+  Pattern -- drives --> Pattern
+  Pattern -- relies on --> Pattern
+  Pattern -- contradicts --> Pattern
+  Insight -- highlights --> Pattern
+  Insight -- relies on --> Element
+  Element -- exemplifies --> Pattern
+  Element -- enables --> Pattern
+  Element -- enables --> Element
+  Element -- uses --> Element
+  Element -- developed by --> Company
+  KnowHow -- references --> Element
+  Signal -- spotted in --> InformationArtifact
+  InformationArtifact -- published by --> SourceEntity
+  InformationArtifact -- contributed by --> Expert
+  Expert -- affiliated with --> Company
+  Chunk -- part of --> InformationArtifact
 ```
 
-Schema, query, policy and provider edits use the [live update workflow](../README.md#live-updates).
+| Area | Types | Holds |
+|---|---|---|
+| Analysis | `Signal`, `Pattern`, `Insight` | Dated movements in the industry, the themes they add up to, and the conclusions an analyst draws |
+| Domain map | `Element`, `Company` | Products, technologies, frameworks, concepts and practices, and who builds them |
+| Practice | `KnowHow` | Guidance grounded in specific elements |
+| Sources | `InformationArtifact`, `SourceEntity`, `Expert`, `Chunk` | Articles and reports, who published them, who wrote them, and their text in searchable pieces |
 
-### Authorization
+- **Signals support or contradict.** A signal either forms a pattern or
+  contradicts it, so one pattern can carry evidence for and against.
+- **Patterns have kinds.** A pattern is a challenge, a disruption or a dynamic,
+  and an element is a product, technology, framework, concept or ops practice.
+  These are properties, not separate types, and a signal or element also
+  carries a domain such as security or inference.
+- **Patterns relate to each other.** One pattern drives, relies on or
+  contradicts another.
+- **Search is optional.** Source text is cut into chunks with embeddings for
+  search by meaning and by keyword. The sample data has no chunks.
+- **Yours to change.** The model is one file, [`schema.pg`](schema.pg), with 10
+  node types and 23 edge types. Change the domains and kinds to fit your
+  industry.
 
-`cluster.yaml` binds `policies/intel.policy.yaml` to `spike` and
-`policies/server.policy.yaml` to the cluster. In the shared setup, the `local`
-target (`act-admin`) administers the deployment, `local-writer` (`act-writer`)
-can run stored mutations and `local-reader` (`act-reader`) can read. Use
-distinct private credentials for these actors outside the local demo. Stored
-mutations require both query invocation and write permission.
-`omnigraph access --target local-reader --graph spike` lists what the reader
-may do.
+## Branching and merging
 
-## The weekly review (operating loop)
+A change is made on a branch, which is a version of the whole record. The
+baseline moves only when the branch is merged.
 
-The graph earns its keep through a recurring loop, supported by the
-`queries/workflow.gq` set (aliases in parentheses):
+- **Triage batches.** An agent attaches a day's new signals to patterns on its
+  own branch. The analyst reads the diff, fixes a wrong link and merges.
+- **Competing readings.** Two analysts read the same signal differently, one as
+  forming a pattern and one as contradicting it. Each uses a branch, and the
+  merge shows where they differ.
+- **As the team saw it.** Ask the record any question as it stood at an earlier
+  commit, such as the state behind last quarter's briefing.
 
-1. **Triage** (`triage`) — `orphan_signals`: every signal not yet attached to
-   a pattern, newest first. Work it to zero: attach with the `link_*`
-   mutations, or drop the signal.
-2. **Momentum** (`momentum`, takes `since`) — `pattern_momentum`: signals per
-   pattern since the cutoff. Rising counts are where insights come from.
-3. **Staleness** (`stale`, takes `since`) — `stale_patterns`: patterns with
-   no new evidence since the cutoff. Prune, or push research at them.
-4. **Tension** (`contested`) — `contested_patterns`: patterns accumulating
-   contradicting signals. High counts deserve an Insight either way.
-5. **Provenance** (`unsourced`) — `unsourced_signals`: claims with no
-   artifact or source attached — an agent cannot verify them. Fix or drop.
+## Agents and workflows
 
-```bash
-omnigraph alias triage
-omnigraph alias momentum --params '{"since":"2026-05-01T00:00:00Z"}'
+Agents bring evidence into the record, keep it organised and tell people what
+changed. Analysts decide what a signal means.
+
+| Kind | Workflow | What it does | Stored queries |
+|---|---|---|---|
+| Capture | Signal intake | Reads a new article, report or post and records it as a signal with its source, artifact and the elements and companies it concerns | `add_signal`, `add_artifact`, `add_source`, `link_signal_spotted_in`, `link_signal_sourced_from`, `link_signal_on_element`, `link_signal_relevant_company` |
+| Maintain | Triage | Takes each signal that is not yet attached to a pattern and links it as forming or contradicting one | `orphan_signals`, `link_signal_forms_pattern`, `link_signal_contradicts_pattern` |
+| Maintain | Evidence lookup | Before linking, searches the source text and earlier signals for what already bears on the claim | `hybrid_chunks`, `search_signals`, `search_patterns` |
+| Maintain | Tension review | Finds patterns with contradicting signals and proposes an insight that weighs both sides | `contested_patterns`, `signal_contradictions`, `add_insight`, `link_insight_highlights_pattern` |
+| Maintain | Momentum and staleness | Compares signal counts since a cutoff to show which patterns are gaining evidence and which have gone quiet | `pattern_momentum`, `stale_patterns`, `pattern_signals` |
+| Maintain | Provenance audit | Finds signals with no artifact and no source, which nobody can check, and attaches the source or flags the signal | `unsourced_signals`, `link_signal_spotted_in` |
+| Act | Weekly briefing | Drafts the briefing for the team: what came in, which patterns moved, which are contested | `recent_signals`, `pattern_momentum`, `contested_patterns` |
+| Act | Research requests | For each pattern with no new signal since the cutoff, asks the analyst who follows it whether to research it or drop it | `stale_patterns` |
+
+Every workflow has the same parts:
+
+1. Something starts it: a new item in a source, a scheduled review, or a person
+   asking.
+2. The agent reads the state it needs through stored queries.
+3. It acts. It writes to the record on its own branch, or it tells someone
+   outside the record: a message, a ticket, a briefing.
+4. A person decides. An analyst reviews the branch and merges it, or acts on
+   what they were told.
+
+- **Stored writes only add.** The cookbook has stored mutations that add nodes
+  and links, and none that change or delete one. Retiring a stale pattern or
+  correcting a signal is a person's edit.
+- **The sample roles do not keep agents off the baseline.** The writer role can
+  write on any branch and merge into `main`; this cookbook has no agent role
+  that is limited to branches. Give an agent the writer credential only with
+  the instruction to use its own branch, or add a role like the one in
+  hardware-program.
+- **Outside actions are not held back by the record.** A briefing or request
+  goes out through the agent's own tools, and nothing here reviews it first.
+  Keep these workflows to telling and drafting. The cookbook has no
+  integrations for them, and the record does not note that a briefing was
+  sent, so the agent has to keep track of that itself.
+- **Bring your own agent.** It connects through OmniGraph's MCP server from
+  Claude Code, Codex, Cursor or another MCP client.
+  [`skill/SKILL.md`](skill/SKILL.md) is a ready skill for setting the cookbook
+  up for your own industry.
+
+## Data sources
+
+The record connects what your team reads. Each source stays the authority for
+its own content.
+
+| Source | Examples | Feeds |
+|---|---|---|
+| News and analyst reports | Bloomberg, Forbes, Gartner, Forrester | `InformationArtifact`, `SourceEntity`, `Signal` |
+| Research papers | arXiv | `InformationArtifact`, `Expert`, `Signal` |
+| Code and open source | GitHub, Hugging Face | `Element`, `Signal` |
+| Funding and company data | Crunchbase, PitchBook | `Company`, `Signal` |
+| Social and community | X, Hacker News, Reddit | `Signal`, `Expert` |
+| Documents and transcripts | Reports, podcasts, call notes | `Chunk`, `InformationArtifact` |
+
+The cookbook does not include connectors for these. A sync is a script, or an
+agent, that reads from the source and writes to the record through the stored
+mutations, or a merge load for chunks.
+
+## Questions you can ask
+
+Nobody keeps a tally of evidence per theme or a list of unsourced claims by
+hand for these.
+
+| Question | Stored query |
+|---|---|
+| Which patterns are gathering signals fastest? | `pattern_momentum` |
+| What came in most recently? | `recent_signals` |
+| Which signals form this pattern? | `pattern_signals` |
+| Which signals have no source? | `unsourced_signals` |
+
+The cookbook has 42 stored reads and 31 stored writes. AGENTS.md lists them.
+
+## Sample data
+
+The cookbook comes with the AI industry in early 2026, from public sources:
+five patterns, 15 signals, 24 elements, four insights and two know-hows, with
+20 articles and reports from 16 sources. On a fresh load, the questions above
+return:
+
+- Since 1 March 2026, Context Graphs gathered three signals and New Cyber
+  Threats two. The other three patterns gathered one each.
+- The newest signal is the Mythos Preview exploit result, from 7 April 2026,
+  then Forbes on context graphs from 3 April.
+- Context Graphs is formed by three signals: Forbes, Gartner and Edra's Series A.
+- One signal has no source: Gartner's forecast that half of agent systems will
+  use context graphs by 2028.
+
+No signal in the sample contradicts a pattern, so the tension review finds
+nothing to review on a fresh load.
+
+[seed.md](seed.md) describes the data and lists what it holds.
+
+## Run it
+
+Paste this prompt into a coding agent such as Claude Code or Codex:
+
+```text
+Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the industry intelligence cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/industry-intel
 ```
 
-## Enable embeddings (hybrid retrieval)
+The agent installs OmniGraph if needed, creates the graph, loads the sample and
+runs the questions above.
 
-`queries/hybrid.gq` adds semantic and hybrid search over chunk embeddings
-(`related_chunks`, `hybrid_chunks` — RRF of `nearest` + `bm25`). To enable it:
-
-1. Make the provider secret available in the server environment. Declare the
-   provider in `cluster.yaml`, bind it to `spike`, and use
-   [live apply](../README.md#live-updates). A shell export cannot change an
-   already running process; provision new secrets before starting that process.
-2. Prepare raw `Chunk` JSONL and a matching embedding spec, then run the
-   offline file pipeline:
-
-   ```bash
-   omnigraph embed --input chunks.raw.jsonl --output chunks.embedded.jsonl \
-     --spec /path/to/embeddings.json --reembed-all
-   ```
-
-3. Load `chunks.embedded.jsonl` through the running server with `--mode append`
-   for new chunks or `--mode merge` for updates. `omnigraph embed` never opens
-   or mutates a graph; `--reembed-all` replaces selected vectors only in its
-   output file. The offline and server providers must use the same model and
-   vector dimension. See the engine's
-   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.15.0/docs/user/search/embeddings.md#offline-file-pipeline)
-   for the spec format.
-
-A ranked read answers a `ranking` object beside its rows, naming the search
-(`bm25`, `nearest` or `rrf`), whether a higher or a lower score is better, and
-whether it was `exhaustive`. Read it: on a vector search, `exhaustive: false`
-means the `ann_nprobes` cap left partitions unsearched, so an empty or short
-answer is not evidence that the graph holds nothing closer. Project a
-score by repeating the leading order key, for example `nearest($c.embedding,
-$q) as distance`.
-
-See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.
+To do it by hand, follow the shared [local setup](../README.md#local-setup)
+using folder `industry-intel` and Graph ID `spike`. [AGENTS.md](AGENTS.md) has
+the exact command for each question and workflow on this page.
