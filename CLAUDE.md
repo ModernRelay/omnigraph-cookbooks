@@ -58,8 +58,172 @@ before a schema change, a bulk load or a retry after an uncertain write.
   same change; `check-cookbooks.py --site` catches a miss offline. Its search
   keywords come from the market vocabulary in ModernRelay's mr-ops graph:
   change them there first.
+- Write a cookbook README from the template in
+  [Writing a cookbook README](#writing-a-cookbook-readme). The same check
+  covers it offline once its `site.json` names a `use_case`.
 - Update user instructions in the same change as a command or behavior. Prefer
   a link to an existing owner over copying another lifecycle walkthrough.
+
+## Writing a cookbook README
+
+A cookbook README is the landing page of OmniGraph for one use case. It tells
+an engineer in that field what they get: a living source of truth for the
+people and agents doing the work, and the agent workflows that run around it.
+It is not a manual. Commands, roles and step-by-step workflows go in the
+cookbook's own `AGENTS.md`.
+
+[hardware-program/README.md](hardware-program/README.md) is the worked
+example. A cookbook whose `site.json` names a `use_case` is held to this
+structure by `check-cookbooks.py --site`; the others move over one at a time.
+
+### Before you write
+
+- Read the cookbook's `schema.pg`, `queries/*.gq` and `seed.md`. Every claim in
+  the README has to be something these files do.
+- Read the use case in ModernRelay's mr-ops graph: its `UseCase`, the `Need`s
+  it meets, the `Capability`s it uses and the `Keyword`s that name it. The
+  slugs go in `site.json`; the wording informs the intro.
+- Read how the best product in that field describes itself, for its
+  vocabulary and for the tools it integrates with. For hardware-program that
+  was Flow Engineering's product pages. Take the field's words, not the
+  product's claims.
+
+### The template
+
+````markdown
+# <Use case>: <what it covers>
+
+Build a living <what the use case keeps>, and the agent workflows around it.
+<What it keeps linked, in the field's words.> <Why it stays current.> <What
+agents do, and that a person reviews it.>
+
+<The problem in two sentences: where the data lives today and what goes wrong.>
+This cookbook sets OmniGraph up as <the one place it is held>.
+
+- **<Benefit>.** <One sentence.>
+- **<Benefit>.** <One sentence.>
+- **<Benefit>.** <One sentence.>
+
+> If you are an agent: the commands, roles and workflows are in
+> [AGENTS.md](AGENTS.md). Read that file before running anything.
+
+## The data model
+
+<One sentence naming what the ontology covers.>
+
+```mermaid
+graph LR
+  <Type> -- <link in plain words> --> <Type>
+```
+
+| Area | Types | Holds |
+|---|---|---|
+| <Area> | `<Type>`, `<Type>` | <What they hold> |
+
+- **<Modelling choice>.** <What it is and why it matters, in one or two sentences.>
+
+## Branching and merging
+
+<One or two sentences: a change is made on a branch and the baseline moves on merge.>
+
+- **<What people use branches for here>.** <One or two sentences.>
+
+## Agents and workflows
+
+<One sentence: what agents do and what stays with people.>
+
+| Workflow | What it does | Stored queries |
+|---|---|---|
+| <Name> | <What it checks or produces> | `<stored_query>`, `<stored_query>` |
+
+<The steps every workflow follows, numbered, ending with a person's merge.>
+
+- **<What an agent may not do>.** <One sentence.>
+- **Bring your own agent.** <How it connects, and the skill if the cookbook has one.>
+
+## Data sources
+
+<One sentence: the record connects the tools; each tool stays the authority for its data.>
+
+| Source | Examples | Feeds |
+|---|---|---|
+| <Kind of tool> | <Named products> | `<Type>`, `<Type>` |
+
+<Say plainly whether the cookbook includes connectors, and how a sync writes to the record.>
+
+## Questions you can ask
+
+<One sentence: each is answered from the current data by a stored query.>
+
+| Question | Stored query |
+|---|---|
+| <The question, word for word as in site.json> | `<stored_query>` |
+
+## Sample data
+
+<What the seed depicts, with its size.> On a fresh load, the questions above return:
+
+- <One result per question, with its numbers.>
+
+[seed.md](seed.md) describes it and lists what every stored read returns.
+
+## Run it
+
+Paste this prompt into a coding agent such as Claude Code or Codex:
+
+```text
+Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the <name> cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/<folder>
+```
+
+To do it by hand, follow the shared [local setup](../README.md#local-setup)
+using folder `<folder>` and Graph ID `<graph>`. [AGENTS.md](AGENTS.md) has the
+exact command for each question and workflow on this page.
+````
+
+### Section by section
+
+| Section | Write | The check holds you to |
+|---|---|---|
+| Title and intro | The opening sentence as in the template, where X is what the use case keeps: a system of record for a hardware program, a company brain. Then the problem and three benefits | That opening; the first paragraph equal to `about` in `site.json`; a link to `AGENTS.md` |
+| The data model | The ontology of this use case, drawn, then the type table and the few modelling choices that matter. Say what OmniGraph provides, such as object storage, only where this use case has its own reason for it | Every backticked type exists in `schema.pg` |
+| Branching and merging | What people in this field use a branch for | Not empty |
+| Agents and workflows | The workflows by name, each with the stored queries behind it, then what an agent may not do | Names stored queries, and only ones the cookbook has |
+| Data sources | The tools a team brings data in from, by product name, and the types each feeds | Every backticked type exists in `schema.pg` |
+| Questions you can ask | The questions `site.json` features, three to five | Each listed word for word on a line with its query; each returns rows on the seed |
+| Sample data | What the seed depicts and what the questions return on it | A link to `seed.md` |
+| Run it | The prompt, and where the commands are | Links to local setup and `AGENTS.md`; the Graph ID |
+
+No other `##` is allowed. `README_SECTIONS` in `scripts/check-cookbooks.py` is
+the list the check uses; change the two together.
+
+### How to write it
+
+- Use the field's vocabulary first and OmniGraph's second. Say "design
+  review", "baseline" and "impact analysis" before "schema", "stored query" or
+  "MCP".
+- Write short sentences that say who does what and when. Prefer "an engineer
+  reviews the branch and merges it" to a noun phrase.
+- Use short labelled points, where the label names a feature. Do not write
+  slogans or taglines.
+- Keep the sample data in its own section. Every other section has to make
+  sense to a reader who has not looked at the seed, so numbers from the seed
+  go only there.
+- Claim only what the cookbook does. If it has no connectors, no automatic
+  sync or no enforced approval, do not imply them; say what is there.
+- Name data sources by product, as tools a team brings data in from. This is
+  what people search for.
+- Keep it to about 200 lines.
+
+### What goes with it
+
+- `site.json`: `about` is the README's first paragraph. `use_case`, `needs`
+  and `capabilities` carry the mr-ops slugs, and each need and capability
+  names in `shown_in` the README heading that shows it. A question whose query
+  takes parameters gives them in `params`.
+- The cookbook's `AGENTS.md`: how to run it, the command for each question,
+  each workflow step by step, and what the cookbook does not do.
+- Run `python3 scripts/check-cookbooks.py --site` until it passes. The full
+  run also runs each question against the seed.
 
 ## Operational rules
 

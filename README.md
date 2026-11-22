@@ -278,6 +278,20 @@ temporary fixture and server logs.
 Keep schemas, queries, seeds and cookbook-specific explanations together. Link
 to the engine guides for general syntax and operations.
 
+## Cookbook READMEs
+
+A cookbook README reads as the landing page of OmniGraph for one use case: a
+living source of truth for the people and agents doing that work, and the
+agent workflows that run around it. It follows one template, and omnigraph.dev
+will draw its use-case page from the same sections. Commands, roles and
+step-by-step workflows belong in the cookbook's `AGENTS.md`.
+
+The template, the rules for each section and how to write one are in
+[AGENTS.md](AGENTS.md#writing-a-cookbook-readme).
+[hardware-program](hardware-program/README.md) is the worked example. A
+cookbook whose `site.json` names a `use_case` is held to the template by the
+check; the others move over one at a time.
+
 ## The website
 
 [omnigraph.dev/use-cases](https://www.omnigraph.dev/use-cases) is built from
@@ -291,11 +305,14 @@ lives in its `site.json`:
 | `name`, `category`, `blurb` | the card and the page header; `category` is one of Company, Engineering, Hardware, Research, Investing, Personal |
 | `about` | optional, 600 characters at most: the "What it is" paragraph under the header. Two to four sentences on what the graph is, who it is for and what it takes the place of |
 | `sample` | what the seed data depicts, beside its counts |
-| `questions` | "Questions it answers": each `q` names a stored **read** query in `queries/*.gq` |
+| `questions` | "Questions it answers": each `q` names a stored **read** query in `queries/*.gq`, with the `params` to run it with where it takes any |
 | `search` | the page's `<title>` (60 characters at most, leading with the phrase people search), an optional `heading` (70 at most: the second line of the page's H1, in the searcher's words) and the keywords its structured data carries |
+| `use_case`, `needs`, `capabilities` | not shown yet. The use case the cookbook serves, the needs it meets and the capabilities it uses, by their slugs in ModernRelay's mr-ops graph. Each need and capability names, in `shown_in`, the heading of the README that shows it. Naming a `use_case` holds the README to the [shared sections](#cookbook-readmes) |
 
-`python3 scripts/check-cookbooks.py --site` checks every `site.json` offline
-in under a second; the full run checks them first. Rename or remove a query in
+`python3 scripts/check-cookbooks.py --site` checks every `site.json`, and the
+README sections where they apply, offline in under a second; the full run
+checks them first and, for those cookbooks, runs each question against the
+seed. Rename or remove a query in
 the same change as the question that names it. A push to `main` that touches a
 cookbook rebuilds the site (`.github/workflows/refresh-site.yml`); a cookbook
 without a `site.json` still appears there, under "More", with its README's

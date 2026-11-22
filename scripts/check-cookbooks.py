@@ -4,8 +4,9 @@
 Usage: check-cookbooks.py [--site] [COOKBOOK ...]   (default: every cookbook)
 
 Every run first checks each cookbook's site.json, the copy omnigraph.dev shows
-for it (see "The website" in the README). --site runs only that check: it is
-offline and needs no binaries.
+for it (see "The website" in the README), and the sections of its README where
+the site.json names a use_case (see "Cookbook READMEs" there). --site runs only
+that check: it is offline and needs no binaries.
 """
 
 import re
@@ -189,6 +190,11 @@ def qualify(name, graph, stored_query, workspace, env):
             count()
             read = run(env, "query", stored_query, *scope("act-reader"), "--json")
             assert read["rows"], f"{stored_query} must demonstrate populated seed data"
+            # An answer the README promises is a read that finds something in the seed.
+            answers = promised_answers(name)
+            for question, answer, params in answers:
+                shown = run(env, "query", answer, *scope("act-reader"), "--params", json.dumps(params), "--json")
+                assert shown["rows"], f"{name}/site.json: {question!r} runs {answer}, which returns no rows on the seed"
             # Writers can create and retire a review branch but cannot deploy.
             run(env, "branch", "create", "cookbook-review", *scope("act-writer"), "--json")
             run(env, "branch", "delete", "cookbook-review", *scope("act-writer"), "--yes", "--json")
@@ -246,6 +252,7 @@ def qualify(name, graph, stored_query, workspace, env):
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
+                  + (f", {len(answers)} README answers" if answers else "")
                   + (", ob client" if name == "beads" else "")
                   + (", review journey" if name == "company-brain" else "")
                   + (", review gate" if name == "hardware-program" else ""), flush=True)
@@ -449,7 +456,124 @@ def check_site(folder):
         f"{where}: search.heading, when given, must be 1 to {SITE_HEADING_MAX} characters"
     assert about is None or (isinstance(about, str) and 0 < len(about) <= SITE_ABOUT_MAX), \
         f"{where}: about, when given, must be 1 to {SITE_ABOUT_MAX} characters"
+    if "use_case" in site:
+        check_readme(folder, site, queries)
     return site
+
+
+# The sections of a cookbook README. It reads as the landing page of OmniGraph for one
+# use case: a living source of truth and the agent workflows around it. It makes sense
+# without the sample data, which has its own section, and omnigraph.dev draws its
+# use-case page from the same sections (see "Cookbook READMEs" in the README).
+# Commands belong in the cookbook's AGENTS.md.
+# Checked for a cookbook whose site.json names its use_case; the others still
+# carry their earlier READMEs.
+README_SECTIONS = ("The data model", "Branching and merging", "Agents and workflows",
+                   "Data sources", "Questions you can ask", "Sample data", "Run it")
+QUESTIONS = range(3, 6)   # how many questions a cookbook features
+QUERY_NAME = re.compile(r"`([a-z][a-z0-9]*(?:_[a-z0-9]+)+)`")
+INVOCATION = re.compile(r"omnigraph\s+(query|mutate)\s+([A-Za-z_][A-Za-z0-9_]*)")
+TYPE_NAME = re.compile(r"`([A-Z][A-Za-z0-9]*)`")
+SCHEMA_TYPE = re.compile(r"^(?:node|edge)\s+([A-Za-z_][A-Za-z0-9_]*)", re.M)
+# What a site.json claims from the market vocabulary: the list, its slug prefix, the key holding the slug.
+CLAIMS = (("needs", "need:", "need"), ("capabilities", "cap:", "capability"))
+
+
+def readme_sections(folder):
+    """A README as its lead and its `##` sections, each with its text and its `###` parts.
+    A `#` line inside a code fence is a shell comment, not a heading."""
+    lead, sections, section, part, fenced = [], {}, None, None, False
+    for line in (ROOT / folder / "README.md").read_text().splitlines():
+        if line.startswith("```"):
+            fenced = not fenced
+        heading = None if fenced else re.match(r"(#{1,3}) (.+)", line)
+        if heading and heading[1] == "##":
+            section, part = sections.setdefault(heading[2], {"text": [], "parts": {}}), None
+        elif heading and heading[1] == "###" and section:
+            part = section["parts"].setdefault(heading[2], [])
+        elif heading and heading[1] == "#":
+            continue
+        elif section is None:
+            lead.append(line)
+        else:
+            section["text"].append(line)
+            if part is not None:
+                part.append(line)
+    return lead, sections
+
+
+def check_readme(folder, site, queries):
+    """The README in the shared sections, each claim backed by something the cookbook holds."""
+    where, there = f"{folder}/README.md", f"{folder}/site.json"
+    lead, sections = readme_sections(folder)
+    assert tuple(sections) == README_SECTIONS, \
+        f"{where}: its ## sections must be exactly {', '.join(README_SECTIONS)}, in that order; " \
+        f"found {', '.join(sections) or 'none'}"
+    for title, section in sections.items():
+        assert "".join(section["text"]).strip(), f"{where}: ## {title} is empty"
+    # The intro: the living thing the use case builds and the agent workflows around it, in the
+    # words site.json's about carries, and where an agent finds the commands.
+    intro = "\n".join(lead).strip()
+    first = " ".join(intro.split("\n\n")[0].split())
+    assert first and first == site.get("about"), \
+        f"{where}: its first paragraph and about in site.json must be the same text"
+    opening = first.split(". ")[0]
+    assert opening.startswith("Build a living ") and "agent workflows around it" in opening, \
+        f"{where}: the intro opens 'Build a living <what the use case keeps> ..., and the agent workflows around it.'"
+    assert "(AGENTS.md)" in intro, f"{where}: the intro must point agents at AGENTS.md"
+    # The questions are site.json's, word for word, each on a line with its stored read.
+    asked = sections["Questions you can ask"]["text"]
+    assert len(site["questions"]) in QUESTIONS, \
+        f"{there}: feature {QUESTIONS.start} to {QUESTIONS.stop - 1} questions, found {len(site['questions'])}"
+    for question in site["questions"]:
+        assert any(question["q"] in line and f"`{question['query']}`" in line for line in asked), \
+            f"{where}: ## Questions you can ask must list {question['q']!r} with its stored query, `{question['query']}`"
+        assert isinstance(question.get("params", {}), dict), f"{there}: params of {question['q']!r} must be an object"
+    # A workflow or question names the stored queries behind it, and only ones the cookbook has.
+    for title in ("Agents and workflows", "Questions you can ask"):
+        named = QUERY_NAME.findall("\n".join(sections[title]["text"]))
+        assert named, f"{where}: ## {title} must name the stored queries behind it"
+        for name in named:
+            assert name in queries, f"{where}: ## {title} names `{name}`, which queries/*.gq does not define"
+    assert "(seed.md)" in "\n".join(sections["Sample data"]["text"]), \
+        f"{where}: ## Sample data must link seed.md"
+    # A type the data model or the data sources name is one the schema declares.
+    types = set(SCHEMA_TYPE.findall((ROOT / folder / "schema.pg").read_text()))
+    for title in ("The data model", "Data sources"):
+        for name in TYPE_NAME.findall("\n".join(sections[title]["text"])):
+            assert name in types, f"{where}: ## {title} names `{name}`, which schema.pg does not declare"
+    run_it = "\n".join(sections["Run it"]["text"])
+    graph = COOKBOOKS[folder][0]
+    for needed in ("../README.md#local-setup", "(AGENTS.md)", f"`{graph}`"):
+        assert needed in run_it, f"{where}: ## Run it must link local setup and AGENTS.md and give the Graph ID; {needed} is missing"
+    # The commands live in the agent guide: each stored query it or the README runs exists, with the verb that fits.
+    guide = (ROOT / folder / "AGENTS.md").read_text()
+    for source, text in ((where, (ROOT / folder / "README.md").read_text()), (f"{folder}/AGENTS.md", guide)):
+        for verb, name in INVOCATION.findall(text):
+            assert name in queries, f"{source}: `omnigraph {verb} {name}` names no stored query in queries/*.gq"
+            assert queries[name] == (verb == "mutate"), \
+                f"{source}: {name} {'writes' if queries[name] else 'reads'}, so `omnigraph {verb} {name}` cannot run it"
+    assert any(verb == "mutate" for verb, _ in INVOCATION.findall(guide)), \
+        f"{folder}/AGENTS.md: must run at least one stored mutation; a cookbook is written to, not only read"
+    # A need met or a capability used points at the heading that shows it.
+    assert isinstance(site["use_case"], str) and site["use_case"].startswith("usecase:"), \
+        f"{there}: use_case must be a use case slug, usecase:<name>"
+    headings = set(sections) | {heading for section in sections.values() for heading in section["parts"]}
+    for key, prefix, field in CLAIMS:
+        claims = site.get(key)
+        assert isinstance(claims, list) and claims, f"{there}: {key} must be a non-empty list"
+        for claim in claims:
+            slug, shown_in = claim.get(field), claim.get("shown_in")
+            assert isinstance(slug, str) and slug.startswith(prefix), \
+                f"{there}: every entry of {key} needs its slug in {field}, {prefix}<name>"
+            assert shown_in in headings, \
+                f"{there}: {slug} is shown in {shown_in!r}, which is not a heading in the README"
+
+
+def promised_answers(folder):
+    """The questions a README in the shared sections answers, as (question, stored read, params); none for the others."""
+    site = json.loads((ROOT / folder / "site.json").read_text())
+    return [(q["q"], q["query"], q.get("params", {})) for q in site["questions"]] if "use_case" in site else []
 
 
 def check_sites(selected):
