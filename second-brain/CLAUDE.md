@@ -8,14 +8,13 @@ An Omnigraph schema + seed for a personal-life "second brain" — people, places
 
 The reference seed is **Alex Chen**, a fictional 36-year-old senior product designer in Brooklyn. All seed names, places, and dates are fabricated. The seed exists to shape demo queries, not to model a real person.
 
-## Key Files
+## Where things are
 
-- `schema.pg` — Executable Omnigraph schema. Source of truth.
-- `README.md` — Layered architecture, reference seed description, schema essentials, wow queries.
-- `seed.md` / `seed.jsonl` — Seed dataset (human-readable / loadable).
-- `queries/*.gq` — Read and mutation queries.
-- `cluster.yaml` — Deployment declaration (graph `brain`, schema, stored queries).
-- `omnigraph-config.example.yaml` — Read aliases; merge them into the operator config from the [local setup](../README.md#local-setup).
+`README.md` is the landing page, written to the template in `../CLAUDE.md`.
+It holds no commands: they are here. Keep it in step with `schema.pg`, the
+stored queries and `site.json`, and run `python3 ../scripts/check-cookbooks.py
+--site` after changing any of them. `seed.md` describes the seed and lists what
+the main reads return.
 
 For general Omnigraph ops — schema language, queries, loading, branches,
 cluster commands, CLI — see the **omnigraph** skill and
@@ -42,6 +41,65 @@ omnigraph mutate link_task_for_person --target local-writer --graph brain --para
 ```
 
 `--graph` can be omitted only for a target with `default_graph`; the shared setup's targets have none.
+
+## Questions the README promises
+
+`seed.md` lists what each returns on the fresh seed:
+
+```bash
+omnigraph query person_tasks_i_owe --target local-reader --graph brain --params '{"slug":"per-theo"}'
+omnigraph query tasks_next --target local-reader --graph brain
+omnigraph query reading_queue --target local-reader --graph brain
+omnigraph query media_recommended_by --target local-reader --graph brain --params '{"slug":"med-jiro"}'
+```
+
+## Access
+
+`policies/graph.policy.yaml` has three roles: `act-reader` reads and invokes
+stored queries; `act-writer` and `act-admin` also change data on any branch,
+including `main`, and create, delete and merge branches; only `act-admin`
+applies schema changes. There is no agent role, so nothing keeps an agent off
+`main`. Review of an agent's work is a practice: give it a token that can write
+a branch only, and merge it yourself. Do not add or change a role without
+authorization.
+
+## Workflows
+
+Each workflow reads through stored queries, writes on a branch, and ends with
+the owner merging. Names are the stored queries; run reads with `omnigraph
+query` as `local-reader` and writes with `omnigraph mutate` as `local-writer`.
+
+| Workflow | Steps |
+|---|---|
+| Message capture | `add_artifact`, then `link_artifact_from_person` for the sender, `link_mentions_person` for each name, `link_in_reply_to` for a thread |
+| Commitment capture | `add_task`, `link_task_for_person`, `link_task_from_artifact` |
+| Note capture | `add_note`, then `link_note_about_person` / `link_note_about_project` / `link_note_about_area`, and `link_note_from_artifact` or `link_note_from_event` |
+| Event and reading capture | `add_event`, `link_attended_by`, `link_happened_at`; `add_media`, `link_media_recommended_by` |
+| Provenance check | `notes_recent`, then `note_from_artifact` per note; where it returns nothing, find the source and `link_note_from_artifact` |
+| Relationship upkeep | `person_knows` and `person_family` per person; add the missing inverse with `link_knows` or `link_related` (invert `relation`) |
+| Weekly review | `projects_active`, `project_tasks`, `goal_tasks`; draft a reflection with `add_note` and link it with `link_note_about_project` |
+| Open questions | `open_questions`, `principles_all`, `notes_by_kind`; draft an insight note |
+| Morning briefing | `tasks_next`, `tasks_waiting`, `events_chronological` (it lists past events too; filter by `when`) |
+| Stay in touch | `close_friends` for `cadence_days`, `person_recent_events` for the last event; compare. No stored read gives last contact |
+| Follow-up draft | `tasks_they_owe`, `tasks_waiting_on_person` |
+| Meeting prep | `event_attendees`, `preferences_for_person`, `person_tasks_i_owe` per attendee |
+
+The act workflows (briefing, stay in touch, follow-up, prep) tell the owner or
+draft a message. Sending to another person is the owner's step; the record
+cannot hold an outside action back, and has no field that says a reminder was
+sent.
+
+## What the cookbook does not do
+
+- No stored write sets `Task.direction`, `due`, `status`, `priority`,
+  `remind_at` or `context`; `add_task` takes only slug, name, status and
+  timestamps. A commitment captured with it does not appear in `tasks_i_owe`
+  until its direction is set by another route.
+- No stored write completes a task, logs a habit completion or streak, edits a
+  record, retires one or merges duplicates.
+- `add_artifact` does not take `content`, `thread_id` or `url`; there is no
+  stored write for `Chunk`.
+- No connectors and no automatic sync. The example policy has no agent role.
 
 ## Domain Model
 

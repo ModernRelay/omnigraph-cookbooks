@@ -1,194 +1,194 @@
-# Second Brain — Personal Life Ontology
+# Second brain: a personal knowledge graph for people and their agents
 
-A minimal-but-comprehensive Omnigraph cookbook for individuals. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph).
+Build a living second brain, and the agent workflows around it. It keeps one
+person's people, projects, notes, tasks, habits and reading linked, with the
+message, email or memo each piece came from. It stays current because agents
+capture what arrives and tidy what is there, and the owner reviews their work on
+a branch before it joins the record.
 
-This cookbook is opinionated for personal life: people, places, projects, notes, tasks, habits, media - plus the provenance layer needed to capture from any channel. **13 node types, 43 edge types**, designed to feel light when you start and scale up gracefully.
+Today a life is spread over messages, email, calendars, a notes app, a reading
+app and a task list. Nothing connects "Theo loves Islay malts" to the text
+where you promised him a book, so an agent that reads them answers from
+whichever it found. This cookbook sets OmniGraph up as the one place your
+people, commitments and thinking are held.
 
-> For operating Omnigraph — schema authoring, queries, loading, branches, cluster ops, CLI — see the **omnigraph** skill. This README covers only what's specific to Second Brain.
->
-> No object store needed — this is a filesystem-backed cluster.
+- **Every note has its source.** A note, task or fact links back to the
+  message, email or voice memo it came from.
+- **Debts are visible both ways.** What you owe a person and what they owe you
+  are tasks with a direction, so neither is lost in a thread.
+- **Agents capture, you decide.** An agent files what arrives and drafts the
+  follow-ups. You review its work on a branch and merge it.
 
-## What This Is
+> If you are an agent: the commands, roles and workflows are in
+> [AGENTS.md](AGENTS.md). Read that file before running anything.
 
-A graph schema for the things people actually want their second brain to answer:
+## The data model
 
-- *Who haven't I talked to in a while that I want to?*
-- *What did Sarah recommend that I haven't read yet?*
-- *What do I still owe Theo?*
-- *What's on my mind about parenting / work / health?*
-- *Which projects are blocking which goals?*
-- *Where do my principles, habits, and decisions actually connect?*
-
-No SPIKE pattern layer — we deliberately skipped it. This is for individual life, not industry analysis. The strategy layer can come back as an extension if you want belief/decision tracking.
-
-## Layered Architecture
-
+```mermaid
+graph LR
+  Person -- knows --> Person
+  Person -- related to --> Person
+  Person -- lives in --> Place
+  Person -- works at --> Organization
+  Person -- involved in --> Project
+  Event -- attended by --> Person
+  Event -- happened at --> Place
+  Event -- about --> Person
+  Note -- about --> Person
+  Note -- about --> Project
+  Note -- related to --> Note
+  Note -- from --> Artifact
+  Task -- for --> Person
+  Task -- for --> Project
+  Task -- depends on --> Task
+  Task -- from --> Artifact
+  Project -- in --> Area
+  Goal -- for --> Area
+  Habit -- for --> Goal
+  Habit -- from principle --> Note
+  Media -- recommended by --> Person
+  Media -- authored by --> Person
+  Artifact -- from --> Person
+  Artifact -- mentions --> Person
+  Artifact -- derived from --> Artifact
+  Artifact -- in reply to --> Artifact
+  Chunk -- part of --> Artifact
 ```
-   ┌─── People & Roles ────────┐    ┌─── World & Time ─────────┐
-   │  Person, Organization     │    │  Place, Event            │
-   └───────────────────────────┘    └──────────────────────────┘
-                  │                              │
-                  └──────────────┬───────────────┘
-                                 │
-   ┌─── Capture ────────────────────────────────────────────┐
-   │  Note (idea / journal / insight / principle /          │
-   │        preference / quote / dream / question / decision)│
-   └────────────────────────────────────────────────────────┘
-                                 │
-   ┌─── Action & Structure (GTD + PARA + Atomic Habits) ────┐
-   │  Task → Project / Area / Goal                          │
-   │  Habit → Area / Goal                                   │
-   │  Project → Area                                        │
-   └────────────────────────────────────────────────────────┘
-                                 │
-   ┌─── Media ─────────────────┐  ┌─── Provenance & Search ─┐
-   │  Media (12 kinds)         │  │  Artifact, Chunk         │
-   └───────────────────────────┘  └──────────────────────────┘
-```
 
-## Reference Seed: Alex Chen
-
-The seed populates the life of a fictional 36-year-old senior product designer in Brooklyn — partner Maya, two kids, a side project, a half-marathon, a kitchen renovation, and a preschool decision in progress. All names, places, and dates are fabricated. See `seed.md` for the full layout.
-
-**Totals:** 121 nodes across 12 types, 228 edges across 36 types. `Knows` and `RelatedToPerson` are stored bidirectionally — see `CLAUDE.md` for the load-discipline convention.
-
-| Dimension | Count | Includes |
+| Area | Types | Holds |
 |---|---|---|
-| People | 16 | Self, partner, 2 kids, parents + in-laws, sibling, 4 close friends, 3 colleagues, mentor |
-| Organizations | 5 | Employer, partner's firm, side-project LLC, preschool, pediatrician |
-| Places | 9 | Home, office, favorite restaurant, park, three out-of-town cities |
-| Areas | 5 | Health, Career, Family, Learning, Creativity |
-| Goals | 4 | Ship side project beta, run a half-marathon, read 24 books, save $30k |
-| Projects | 6 | 4 active + 2 exploring |
-| Habits | 5 | Morning pages, 3x weekly run, Sunday family dinner, read before bed, deep work block |
-| Events | 12 | 7 past (Theo's birthday, Hannah's visit, Maya's promotion, etc.) + 5 upcoming |
-| Notes | 21 | Principles (3), preferences (5), journal (2), insights (3), reflections (2), questions (2), and idea / decision / quote / dream |
-| Tasks | 15 | next, waiting, someday, inbox — including `i-owe` and `they-owe` directions |
-| Media | 12 | Books finished/want/consuming, podcasts, a documentary recommended by partner |
-| Artifacts | 11 | Email, WhatsApp, iMessage, meeting notes, voice memo, calendar invite, web clip, journal — plus 2 derived |
+| People and places | `Person`, `Organization`, `Place` | Family, friends, colleagues and mentors, with how often you want to be in touch; where they work and live |
+| Time | `Event` | Past and upcoming birthdays, trips, milestones and meetings, with who was there |
+| Thinking | `Note` | Ideas, journal entries, principles, preferences, questions and decisions, one kind of note told apart by its `kind` |
+| Doing | `Task`, `Project`, `Area`, `Goal`, `Habit` | Next actions and promises, efforts with an end, the parts of life they serve, goals and routines |
+| Reading | `Media` | Books, articles, podcasts and shows, with who recommended them |
+| Sources | `Artifact`, `Chunk` | The raw message, email, memo or clip, and its text split for semantic search |
 
-## Schema Essentials
+- **You are a person in the graph.** The record holds you as `per-self`, so
+  your links to everyone else read like any other.
+- **A debt is a task with a direction.** `i-owe`, `they-owe` or `mutual`, linked
+  to the person. "Waiting on" is a waiting task linked to that person.
+- **Capture the raw thing first.** A message or memo is stored as an
+  `Artifact`. A note or task derived from it links back, so the source can be
+  checked.
+- **Both sides of a friendship are stored.** If A knows B, the record also holds
+  B knows A, and family links carry the inverse relation.
+- **Health, money and hobbies are areas.** They are an `Area` with notes
+  attached, not new types.
+- **Yours to change.** The model is one file, [`schema.pg`](schema.pg), with 13
+  node types and 43 edge types. Specialty cookbooks can extend it.
 
-**Nodes (13):** Person · Organization · Place · Event · Note · Task · Project · Area · Goal · Habit · Media · Artifact · Chunk
+## Branching and merging
 
-**The enums that carry the lens:**
+A change is made on a branch, and the baseline moves when the branch is
+merged.
 
-| Enum | Values |
+- **Agent captures.** An agent files a batch of messages, notes and tasks on
+  its own branch. You read the branch and merge it, so a misread message does
+  not become a fact.
+- **Tidying.** Added links, such as the missing side of a friendship, wait on a
+  branch, and you compare it with `main` before it lands.
+- **Trying something.** A new way of organising projects or areas can be
+  tried on a branch and dropped.
+- **Review is a habit here.** The example access policy lets a writer change
+  `main` directly, and has no separate agent role. Give an agent a token that
+  can write only a branch, and treat a merge by it as your decision.
+
+## Agents and workflows
+
+Agents bring what arrives into the record, keep it connected and tell you what
+needs you. You review what they wrote and decide what to do.
+
+| Kind | Workflow | What it does | Stored queries |
+|---|---|---|---|
+| Capture | Message capture | Files an incoming message, email or voice memo as a source, linked to who sent it and who it names | `add_artifact`, `link_artifact_from_person`, `link_mentions_person`, `link_in_reply_to` |
+| Capture | Commitment capture | Turns a promise made in a message into a task for the person it concerns, linked to the source | `add_task`, `link_task_for_person`, `link_task_from_artifact` |
+| Capture | Note capture | Files an idea, a journal entry or a preference as a note linked to the people and projects it is about | `add_note`, `link_note_about_person`, `link_note_about_project`, `link_note_from_artifact` |
+| Capture | Event and reading capture | Records a gathering with who was there, and a book someone recommended | `add_event`, `link_attended_by`, `add_media`, `link_media_recommended_by` |
+| Maintain | Provenance check | Finds notes that do not trace to a source and links them to the message or event they came from | `notes_recent`, `note_from_artifact`, `link_note_from_artifact` |
+| Maintain | Relationship upkeep | Checks that both sides of each friendship and family link are stored, and adds the missing one | `person_knows`, `person_family`, `link_knows`, `link_related` |
+| Maintain | Weekly review | Reads active projects, their tasks and the goals above them, and drafts a reflection note | `projects_active`, `project_tasks`, `goal_tasks`, `add_note` |
+| Maintain | Open questions | Gathers the questions and principles you have noted and drafts how recent notes bear on them | `open_questions`, `principles_all`, `notes_by_kind` |
+| Act | Morning briefing | Tells you the next actions, what you are waiting on and the events coming up | `tasks_next`, `tasks_waiting`, `events_chronological` |
+| Act | Stay in touch | Compares each close friend's wanted contact interval with their last event and suggests whom to reach | `close_friends`, `person_recent_events` |
+| Act | Follow-up draft | Drafts a nudge to a person who owes you something, for you to send | `tasks_they_owe`, `tasks_waiting_on_person` |
+| Act | Meeting prep | Before an event, lists who is coming, what they like and what you owe them | `event_attendees`, `preferences_for_person`, `person_tasks_i_owe` |
+
+Every workflow has the same parts:
+
+1. Something starts it: a message arriving, a date, or you asking.
+2. The agent reads the state it needs through stored queries.
+3. It acts. It writes to the record on a branch, or it tells you or drafts
+   something outside the record.
+4. You decide. You merge the branch, or you send the message yourself.
+
+- **The cookbook has no stored write for every change.** Stored writes add
+  records and links. None sets a task's direction, due date or status, marks a
+  task done, logs a habit completion or merges two people, so those changes
+  are not available as stored workflows and the list above leaves them out.
+- **Nothing records that you were reminded.** The briefing, the nudge and the
+  draft leave no mark, so the agent repeats them each time it is asked. Run
+  them on a schedule you choose.
+- **The record does not hold back outside actions.** A reminder or a message
+  goes out through the agent's own tools, and nothing here reviews it first.
+  Keep these workflows to telling and drafting, and send anything to another
+  person yourself. The cookbook includes no integrations for them.
+- **Bring your own agent.** Any agent that can run the `omnigraph` CLI can use
+  the stored queries; the commands are in [AGENTS.md](AGENTS.md). This cookbook
+  ships no skill of its own.
+
+## Data sources
+
+The record connects your tools, and each tool stays the authority for its own
+data.
+
+| Source | Examples | Feeds |
+|---|---|---|
+| Messaging | WhatsApp, iMessage, Telegram, Slack, SMS | `Artifact`, `Person`, `Task` |
+| Email | Gmail, Apple Mail | `Artifact`, `Person`, `Task` |
+| Calendar | Google Calendar, Apple Calendar | `Event`, `Person`, `Place` |
+| Notes and journals | Apple Notes, Notion, Obsidian, voice memos | `Note`, `Artifact` |
+| Reading | Readwise, Kindle, Pocket, Goodreads | `Media`, `Artifact` |
+| Contacts and social | Apple Contacts, LinkedIn, Instagram, X | `Person`, `Organization` |
+
+The cookbook includes no connectors. An agent reads a tool with its own access
+and writes to the record through the stored writes, on a branch. The schema
+names these sources in `Artifact.source`.
+
+## Questions you can ask
+
+Nobody has to keep these lists by hand.
+
+| Question | Stored query |
 |---|---|
-| `Person.relation` | `self, family, partner, close-friend, friend, colleague, mentor, mentee, acquaintance, professional` |
-| `Note.kind` | `idea, journal, reflection, insight, principle, preference, quote, dream, question, decision` |
-| `Task.status` | `inbox, next, waiting, someday, done, cancelled` |
-| `Task.direction` | `i-owe, they-owe, mutual` |
-| `Task.context` | `phone, computer, errand, home, office, anywhere` |
-| `Project.status` | `exploring, active, paused, completed, abandoned` |
-| `Area.kind` | `health, career, finance, relationships, learning, creativity, community, spirituality, home, family, other` |
-| `Habit.frequency` | `daily, weekly, monthly` |
-| `Media.kind` | 13 values: book, article, movie, show, podcast, episode, album, paper, video, game, blog, newsletter, website |
-| `Artifact.source` | 16 values: whatsapp, email, slack, telegram, imessage, sms, linkedin, instagram, x, calendar, web, manual, voice, notes-app, readwise, other |
+| What do I still owe this person? | `person_tasks_i_owe` |
+| What should I do next? | `tasks_next` |
+| What is on my reading list? | `reading_queue` |
+| Who recommended this book? | `media_recommended_by` |
 
-**Edges that carry the work** (everything else is provenance or classification):
+## Sample data
 
-| Edge | Route | Meaning |
-|---|---|---|
-| `Knows` | Person → Person | Friend, colleague, acquaintance — with context and since |
-| `RelatedToPerson` | Person → Person | Family/partnership structure, with `relation` enum on the edge |
-| `LivesIn` / `WorksAt` | Person → Place / Organization | The "where they are" data |
-| `AttendedBy` / `HappenedAt` | Event → Person / Place | Who was there, where it happened |
-| `EventForPerson` | Event → Person | Milestones affecting someone (e.g. their wedding) without them "attending" |
-| `NoteAbout{Person,Project,Area,Place,Organization,Media}` | Note → world | What this note is about |
-| `RelatedNote` | Note → Note | Zettelkasten-style atomic links |
-| `HabitFromPrinciple` | Habit → Note | The principle (kind=principle) that motivated the habit |
-| `Task.direction = i-owe/they-owe` + `TaskForPerson` | Task → Person | Relationship-debt tracking without a separate Commitment node |
-| `MediaRecommendedBy` / `MediaAuthoredBy` | Media → Person | Who pointed you at this; who wrote it |
-| `MentionsPerson` / `ArtifactFromPerson` | Artifact → Person | Provenance: who's named, who sent it |
-| `DerivedFromArtifact` | Artifact → Artifact | AI/manual transforms with `activity` enum (transcribed, summarized, ocr, etc.) |
-| `ChunkOf` | Chunk → Artifact | Embedding-driven semantic search |
+The cookbook comes with Alex Chen, a made-up 36-year-old product designer in
+Brooklyn: 121 records of 16 people, 12 events, 21 notes, 15 tasks, 12 media
+items and 11 sources, with 228 links. On a fresh load, the questions above
+return:
 
-**Key design choices:**
+- Alex owes Theo one thing: sending a link to a book.
+- Twelve tasks are next actions, the first of them replying to Marco's
+  playdate text.
+- Two books are on the reading list: Outlive and Pachinko.
+- Maya recommended the documentary Jiro Dreams of Sushi.
 
-- **Slug prefix convention** is mandatory: `per-`, `org-`, `pl-`, `ev-`, `nt-`, `tk-`, `proj-`, `area-`, `goal-`, `hab-`, `med-`, `art-`
-- **"Me" convention**: `per-self` with `relation = self`. All edges from self use that slug.
-- **Email and conversation collapse into `Artifact`** — `thread_id` property handles threading; `InReplyTo` edges for replies. No separate `Email` or `Conversation` types.
-- **Habit completions are a `[Date]` array on the Habit** — no separate `HabitCompletion` node. Promote to a node only if per-completion notes become valuable.
-- **Cadence as a single `cadence_days` field** on `Person` — desired contact frequency. Drives "stale close friends" queries. No 3-axis priority — overkill for most lives.
-- **Health, finance, hobbies** live as `Area` nodes with `Note`s attached — not their own node types. Domain-specific cookbooks (e.g. a health-intel one) can extend later.
-- **Chunk + embedding** stays for semantic search. Population is a separate ingest, not in the static seed.
+[seed.md](seed.md) describes it and lists what the main stored reads return.
 
-Full property tables and constraints in [`schema.pg`](./schema.pg).
+## Run it
 
-## Wow Queries — what the seed lights up
+Paste this prompt into a coding agent such as Claude Code or Codex:
 
-```bash
-# Close friends and their preferred cadence
-omnigraph alias close-friends
-
-# What did Theo and I do recently, and what do I owe him
-omnigraph alias person-recent-events --params '{"slug":"per-theo"}'
-omnigraph alias person-tasks-i-owe --params '{"slug":"per-theo"}'
-omnigraph alias preferences-for-person --params '{"slug":"per-theo"}'
-
-# Open relationship debts across everyone
-omnigraph alias tasks-i-owe
-omnigraph alias tasks-they-owe
-
-# My operating principles + the habits motivated by them
-omnigraph alias principles
-omnigraph alias habit-principle --params '{"slug":"hab-morning-pages"}'
-
-# What's on my mind right now
-omnigraph alias open-questions
-omnigraph alias notes-by-kind --params '{"kind":"reflection"}'
-
-# Project rollups: what tasks are open for Quiet Coach, what events are coming up
-omnigraph alias project-tasks --params '{"slug":"proj-quietcoach"}'
-omnigraph alias project-events --params '{"slug":"proj-quietcoach"}'
-
-# Area drill-down: everything attached to Family
-omnigraph alias area-projects --params '{"slug":"area-family"}'
-omnigraph alias area-tasks --params '{"slug":"area-family"}'
-omnigraph alias area-habits --params '{"slug":"area-family"}'
-
-# Reading queue + who recommended what
-omnigraph alias reading-queue
-omnigraph alias person-recommendations --params '{"slug":"per-kenji"}'
-
-# Life events affecting people I care about
-omnigraph alias person-recent-events --params '{"slug":"per-maya"}'
-omnigraph alias events-recent
+```text
+Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the second-brain cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/second-brain
 ```
 
-## Files
-
-- `schema.pg` — Executable Omnigraph schema (source of truth)
-- `seed.md` / `seed.jsonl` — Reference seed (human-readable / loadable)
-- `queries/*.gq` — Read queries (8 files) + mutations (`mutations.gq`)
-- `cluster.yaml` — Deployment declaration (graph `brain`, schema, stored queries)
-- `omnigraph-config.example.yaml` — Read aliases: merge its `aliases:` into the operator config from the [local setup](../README.md#local-setup)
-
-## Quick Start
-
-Follow the shared [local setup](../README.md#local-setup) with
-`second-brain` and graph ID `brain`. Merge this cookbook's
-`omnigraph-config.example.yaml` into your operator config, then query:
-
-```bash
-omnigraph alias close-friends
-omnigraph alias person-recent-events --params '{"slug":"per-theo"}'
-omnigraph alias tasks-i-owe
-omnigraph query close_friends --target local-reader --graph brain
-```
-
-Apply schema and stored query edits with the [live update workflow](../README.md#live-updates).
-Send ongoing data changes through the server with `mutate` or `load`; the seed
-is only the initial demo dataset.
-
-## Extending
-
-This schema is the minimal core. Common extensions:
-
-- **Strategy layer** — add `Belief` / `OpenQuestion` / `Decision` as first-class nodes (as in `pharma-intel/`) with `SupportsBelief` / `ContradictsBelief` / `InformsQuestion` edges from `Note` or `Artifact`. Turns this into a *thinking partner*, not just a data store.
-- **Health cookbook** — a separate cookbook with full FHIR-grade `HealthRecord` / `Measurement` / `Condition` ontology. 
-- **Communication style / writing tone** — a `WritingStyle` node per channel/audience for "draft a message in my voice."
-- **Pattern emergence** — add a single `Theme` node + `NoteFormsTheme` edge if you want explicit emergent-theme tracking without going full SPIKE.
-
-When in doubt, prefer extending in a sibling cookbook over bloating this one.
+To do it by hand, follow the shared [local setup](../README.md#local-setup)
+using folder `second-brain` and Graph ID `brain`. [AGENTS.md](AGENTS.md) has
+the exact command for each question and workflow on this page.
