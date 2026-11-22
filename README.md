@@ -289,9 +289,10 @@ step-by-step workflows belong in the cookbook's `AGENTS.md`.
 The template, the rules for each section and how to write one are in
 [AGENTS.md](AGENTS.md#writing-a-cookbook-readme).
 [hardware-program](hardware-program/README.md) and
-[company-brain](company-brain/README.md) are the worked examples. A
-cookbook whose `site.json` names a `use_case` is held to the template by the
-check; the others move over one at a time.
+[company-brain](company-brain/README.md) are the worked examples. The
+check holds a cookbook to the template once it is moved; the ones still on
+their earlier README are listed as `EARLIER_READMES` in
+`scripts/check-cookbooks.py`.
 
 ## The website
 
@@ -308,7 +309,7 @@ lives in its `site.json`:
 | `sample` | what the seed data depicts, beside its counts |
 | `questions` | "Questions it answers": each `q` names a stored **read** query in `queries/*.gq`, with the `params` to run it with where it takes any |
 | `search` | the page's `<title>` (60 characters at most, leading with the phrase people search), an optional `heading` (70 at most: the second line of the page's H1, in the searcher's words) and the keywords its structured data carries |
-| `use_case`, `needs`, `capabilities` | not shown yet. The use case the cookbook serves, the needs it meets and the capabilities it uses, by their slugs in ModernRelay's mr-ops graph. Each need and capability names, in `shown_in`, the heading of the README that shows it. Naming a `use_case` holds the README to the [shared sections](#cookbook-readmes) |
+| `use_case`, `needs`, `capabilities` | not shown yet. The use case the cookbook serves, the needs it meets and the capabilities it uses, by their slugs in ModernRelay's mr-ops graph. Each need and capability names, in `shown_in`, the heading of the README that shows it. Leave all three out where mr-ops has no use case for the cookbook |
 
 `python3 scripts/check-cookbooks.py --site` checks every `site.json`, and the
 README sections where they apply, offline in under a second; the full run

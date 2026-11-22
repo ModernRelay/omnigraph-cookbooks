@@ -73,20 +73,51 @@ It is not a manual. Commands, roles and step-by-step workflows go in the
 cookbook's own `AGENTS.md`.
 
 [hardware-program/README.md](hardware-program/README.md) and
-[company-brain/README.md](company-brain/README.md) are the worked examples. A cookbook whose `site.json` names a `use_case` is held to this
-structure by `check-cookbooks.py --site`; the others move over one at a time.
+[company-brain/README.md](company-brain/README.md) are the worked examples.
+`check-cookbooks.py --site` holds a cookbook to this structure once it is
+moved. To move one, take its name out of `EARLIER_READMES` in
+`scripts/check-cookbooks.py`; that is what switches the check on for it.
+
+A cookbook's `AGENTS.md` is a link to its `CLAUDE.md`. Edit `CLAUDE.md`.
 
 ### Before you write
 
 - Read the cookbook's `schema.pg`, `queries/*.gq` and `seed.md`. Every claim in
   the README has to be something these files do.
 - Read the use case in ModernRelay's mr-ops graph: its `UseCase`, the `Need`s
-  it meets, the `Capability`s it uses and the `Keyword`s that name it. The
-  slugs go in `site.json`; the wording informs the intro.
-- Read how the best product in that field describes itself, for its
-  vocabulary and for the tools it integrates with. For hardware-program that
-  was Flow Engineering's product pages. Take the field's words, not the
-  product's claims.
+  it meets, the `Capability`s it uses and the `Keyword`s that name it. Read
+  the schema with `omnigraph schema show` and list the stored reads with
+  `omnigraph queries list`; `use_case_capabilities` and `personas` are two of
+  them. `omnigraph skill show` covers the query language.
+- Pick the reference product: the one a buyer in this field would compare
+  first. Read its product and integrations pages for the field's vocabulary
+  and the tools it connects to, and take its words, not its claims. For
+  hardware-program that was Flow Engineering. If the field has no clear
+  leader, or you cannot reach the web, use the terms the cookbook's own
+  schema and seed use, and say in your report which pages you read or that
+  you read none.
+
+### What a README change does not do
+
+Moving a cookbook to the template changes its README, its `CLAUDE.md` and its
+`site.json`. Other things you will find stay as they are; report each one.
+
+- **mr-ops.** You do not write to it. If it has no use case for the cookbook,
+  leave `use_case`, `needs` and `capabilities` out of `site.json`. Do not pick
+  the nearest one. If it lacks a link the cookbook shows, leave that need or
+  capability out. Leave `search.keywords` as they are.
+- **Roles.** Only company-brain and hardware-program have an agent role that
+  is kept to branches. In any other cookbook a writer can change `main` and
+  merge, so say plainly that review of an agent's work is a practice there and
+  not enforced. Do not add or change a role.
+- **Schema, queries and seed.** If a workflow needs a stored write the
+  cookbook does not have, leave the workflow out or name the gap. Do not
+  document an ad-hoc mutation as the way to do it. If the record has no place
+  to note that an outside action was taken, say so. Do not add a type or a
+  field. Errors in `seed.md` or a query go in your report.
+- **Featured questions.** Keep the ones `site.json` has. Change one only if it
+  returns nothing on the seed or says more than its query does, because the
+  change shows on the site.
 
 ### Working out the workflows
 
@@ -271,22 +302,45 @@ the list the check uses; change the two together.
 - Draw the ontology in plain Mermaid: type names as nodes and each link as a
   labelled arrow, including a type's link to itself. Put no HTML in a label;
   tags such as `<b>` show as text in some viewers.
-- Keep it to about 200 lines.
+- In the workflow table, name at most four stored queries for a workflow, and
+  list eight to twelve workflows. In that table and the questions table, put
+  backticks around a snake_case word only when it is a stored query; the check
+  reads it as one.
+- Wrap prose at 80 columns, and keep the whole file to about 200 lines.
 
 ### What goes with it
 
-- `site.json`: `about` is the README's first paragraph. `use_case`, `needs`
-  and `capabilities` carry the mr-ops slugs, and each need and capability
-  names in `shown_in` the README heading that shows it. List a need only if
-  mr-ops links it to the use case and the cookbook shows it. List a capability
-  if mr-ops links it to the use case or to one of those needs. Where the
-  cookbook shows something mr-ops does not link, add the link in mr-ops first.
-  A question whose query takes parameters gives them in `params`.
-- The cookbook's `AGENTS.md`: how to run it, the command for each question,
-  each workflow step by step, the detailed modelling rules, and what the
-  cookbook does not do.
-- Run `python3 scripts/check-cookbooks.py --site` until it passes. The full
-  run also runs each question against the seed.
+- `site.json`: `about` is the README's first paragraph. A question whose query
+  takes parameters gives them in `params`. Where mr-ops has a use case for the
+  cookbook, `use_case`, `needs` and `capabilities` carry its slugs, and each
+  need and capability names in `shown_in` the README heading that shows it.
+  List a need only if mr-ops links it to the use case and the README shows it.
+  List a capability only if the README shows it and mr-ops links it to the use
+  case or to one of those needs.
+- The cookbook's `CLAUDE.md`: everything the old README held that the
+  template has no place for. That is how to run it, the command for each
+  question, each workflow step by step, the detailed modelling rules,
+  optional set-up such as embeddings, and what the cookbook does not do. Drop
+  file lists. Change any line there that still describes the old README.
+- `seed.md`: say in the Sample data section what it actually holds. Do not
+  promise that it lists every read unless it does.
+
+### Before you say it is done
+
+- Run `python3 scripts/check-cookbooks.py --site` until it passes. It checks
+  structure and names. It does not check that a sentence is true.
+- Check the truth yourself. Load the seed into a scratch graph and run every
+  query the README names, with the parameters `site.json` gives:
+  `omnigraph init --schema schema.pg <dir>/g.omni`, then
+  `omnigraph load --target <dir>/g.omni --data seed.jsonl --mode append`, then
+  `omnigraph query <name> --query queries/<file>.gq --target <dir>/g.omni`.
+  Every featured question must return rows, and every number in Sample data
+  must match what you see.
+- The full `check-cookbooks.py` run does the same against a served graph. It
+  needs the released `omnigraph-server` on the PATH (see
+  [local setup](README.md#local-setup)); CI runs it on every pull request.
+- Report what you left alone: missing links in mr-ops, missing roles, missing
+  stored writes and errors you found in the cookbook.
 
 ## Operational rules
 

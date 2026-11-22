@@ -4,8 +4,8 @@
 Usage: check-cookbooks.py [--site] [COOKBOOK ...]   (default: every cookbook)
 
 Every run first checks each cookbook's site.json, the copy omnigraph.dev shows
-for it (see "The website" in the README), and the sections of its README where
-the site.json names a use_case (see "Cookbook READMEs" there). --site runs only
+for it (see "The website" in the README), and the sections of its README once it
+is on the template (see "Cookbook READMEs" there). --site runs only
 that check: it is offline and needs no binaries.
 """
 
@@ -456,7 +456,7 @@ def check_site(folder):
         f"{where}: search.heading, when given, must be 1 to {SITE_HEADING_MAX} characters"
     assert about is None or (isinstance(about, str) and 0 < len(about) <= SITE_ABOUT_MAX), \
         f"{where}: about, when given, must be 1 to {SITE_ABOUT_MAX} characters"
-    if "use_case" in site:
+    if folder not in EARLIER_READMES:
         check_readme(folder, site, queries)
     return site
 
@@ -466,8 +466,8 @@ def check_site(folder):
 # without the sample data, which has its own section, and omnigraph.dev draws its
 # use-case page from the same sections (see "Cookbook READMEs" in the README).
 # Commands belong in the cookbook's AGENTS.md.
-# Checked for a cookbook whose site.json names its use_case; the others still
-# carry their earlier READMEs.
+# Cookbooks not yet moved to the template. Take one out when it is moved; the set ends empty.
+EARLIER_READMES = {"industry-intel", "pharma-intel", "second-brain", "vc-os", "dev-graph", "beads"}
 README_SECTIONS = ("The data model", "Branching and merging", "Agents and workflows",
                    "Data sources", "Questions you can ask", "Sample data", "Run it")
 QUESTIONS = range(3, 6)   # how many questions a cookbook features
@@ -555,13 +555,17 @@ def check_readme(folder, site, queries):
                 f"{source}: {name} {'writes' if queries[name] else 'reads'}, so `omnigraph {verb} {name}` cannot run it"
     assert any(verb == "mutate" for verb, _ in INVOCATION.findall(guide)), \
         f"{folder}/AGENTS.md: must run at least one stored mutation; a cookbook is written to, not only read"
-    # A need met or a capability used points at the heading that shows it.
-    assert isinstance(site["use_case"], str) and site["use_case"].startswith("usecase:"), \
-        f"{there}: use_case must be a use case slug, usecase:<name>"
+    # Where mr-ops has a use case for the cookbook: a need met or a capability used
+    # points at the heading that shows it. Where it has none, all three are left out.
+    use_case = site.get("use_case")
+    assert use_case is None or (isinstance(use_case, str) and use_case.startswith("usecase:")), \
+        f"{there}: use_case, when given, must be a use case slug, usecase:<name>"
     headings = set(sections) | {heading for section in sections.values() for heading in section["parts"]}
     for key, prefix, field in CLAIMS:
-        claims = site.get(key)
-        assert isinstance(claims, list) and claims, f"{there}: {key} must be a non-empty list"
+        claims = site.get(key, [])
+        assert isinstance(claims, list), f"{there}: {key} must be a list"
+        assert use_case or not claims, \
+            f"{there}: {key} needs a use_case; leave all three out where mr-ops has no use case for the cookbook"
         for claim in claims:
             slug, shown_in = claim.get(field), claim.get("shown_in")
             assert isinstance(slug, str) and slug.startswith(prefix), \
@@ -573,7 +577,7 @@ def check_readme(folder, site, queries):
 def promised_answers(folder):
     """The questions a README in the shared sections answers, as (question, stored read, params); none for the others."""
     site = json.loads((ROOT / folder / "site.json").read_text())
-    return [(q["q"], q["query"], q.get("params", {})) for q in site["questions"]] if "use_case" in site else []
+    return [] if folder in EARLIER_READMES else [(q["q"], q["query"], q.get("params", {})) for q in site["questions"]]
 
 
 def check_sites(selected):
