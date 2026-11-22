@@ -174,3 +174,84 @@ Seed data for `schema.pg`. Scope: the GLP-1 obesity competitive landscape, seede
 | ContradictsPattern | `sig-redefine-cagrisema-readout` | `pat-efficacy-ceiling` | The "more weight loss is always better" assumption gets challenged |
 
 **Totals:** 113 nodes, 200 edges.
+
+---
+
+## What every stored read returns
+
+On a fresh load of `seed.jsonl`, each stored read in `queries/` (the mutations excluded) returns the following. Params are the slug or value used; the last column is the first rows, by slug.
+
+| Stored query | Params | Rows | First rows |
+|---|---|---|---|
+| `get_compound` | `comp-vk2735-sc` | 1 | `comp-vk2735-sc` |
+| `compounds_all` | none | 12 | `comp-semaglutide`, `comp-tirzepatide`, `comp-danuglipron` |
+| `compounds_by_phase` | `phase-3` | 6 | `comp-cagrisema`, `comp-maritide`, `comp-vk2735-sc` |
+| `compounds_by_mechanism` | `mech-gip-glp1-dual` | 3 | `comp-tirzepatide`, `comp-vk2735-oral`, `comp-vk2735-sc` |
+| `compound_sponsor` | `comp-vk2735-sc` | 1 | `co-viking-therapeutics` |
+| `compound_trials` | `comp-vk2735-sc` | 2 | `trial-venture`, `trial-vanquish` |
+| `compound_signals` | `comp-vk2735-sc` | 2 | `sig-viking-vanquish-init`, `sig-viking-venture-p2` |
+| `get_mechanism` | `mech-gip-glp1-dual` | 1 | `mech-gip-glp1-dual` |
+| `mechanisms_all` | none | 6 | `mech-gip-glp1-dual`, `mech-glp1-amylin`, `mech-triple-agonist` |
+| `mechanism_compounds` | `mech-gip-glp1-dual` | 3 | `comp-tirzepatide`, `comp-vk2735-oral`, `comp-vk2735-sc` |
+| `mechanism_signals` | `mech-gip-glp1-dual` | 1 | `sig-lilly-surmount-5-headhead` |
+| `mechanism_signals_via_compound` | `mech-gip-glp1-dual` | 5 | `sig-viking-vanquish-init`, `sig-zepbound-osa-approval`, `sig-lilly-surmount-5-headhead` |
+| `get_pattern` | `pat-oral-glp1-thesis` | 1 | `pat-oral-glp1-thesis` |
+| `patterns_all` | none | 4 | `pat-efficacy-ceiling`, `pat-glp1-pipeline-explosion`, `pat-oral-glp1-thesis` |
+| `patterns_by_kind` | `disruption` | 1 | `pat-oral-glp1-thesis` |
+| `pattern_signals` | `pat-oral-glp1-thesis` | 2 | `sig-lilly-attain-positive`, `sig-viking-oral-p2-init` |
+| `pattern_contradictions` | `pat-oral-glp1-thesis` | 2 | `sig-structure-gsbr-p2a-disappointing`, `sig-pfizer-danuglipron-discontinued` |
+| `pattern_drives` | `pat-glp1-pipeline-explosion` | 1 | `pat-efficacy-ceiling` |
+| `pattern_contradicts_patterns` | `pat-oral-glp1-thesis` | 0 | none |
+| `pattern_insights` | `pat-oral-glp1-thesis` | 1 | `ins-pfizer-failure-is-formulation-not-mechanism` |
+| `get_trial` | `trial-vanquish` | 1 | `trial-vanquish` |
+| `trials_by_status` | `enrolling` | 2 | `trial-maritime`, `trial-vanquish` |
+| `trial_sponsor` | `trial-vanquish` | 1 | `co-viking-therapeutics` |
+| `get_deal` | `deal-roche-carmot` | 1 | `deal-roche-carmot` |
+| `deals_all` | none | 3 | `deal-pfizer-metsera`, `deal-roche-carmot`, `deal-lilly-versanis` |
+| `deal_parties` | `deal-roche-carmot` | 1 | `co-roche` |
+| `get_regulatory` | `reg-zepbound-osa` | 1 | `reg-zepbound-osa` |
+| `regulatory_recent` | none | 4 | `reg-zepbound-osa`, `reg-medicare-glp1-cvd`, `reg-wegovy-cvd-label` |
+| `regulatory_compound` | `reg-zepbound-osa` | 1 | `comp-tirzepatide` |
+| `get_company` | `co-viking-therapeutics` | 1 | `co-viking-therapeutics` |
+| `company_compounds` | `co-viking-therapeutics` | 2 | `comp-vk2735-oral`, `comp-vk2735-sc` |
+| `get_insight` | `ins-mechanism-validated-formulation-is-moat` | 1 | `ins-mechanism-validated-formulation-is-moat` |
+| `insights_all` | none | 3 | `ins-mechanism-validated-formulation-is-moat`, `ins-pfizer-failure-is-formulation-not-mechanism`, `ins-cagrisema-miss-is-about-expectations` |
+| `insight_patterns` | `ins-mechanism-validated-formulation-is-moat` | 1 | `pat-glp1-pipeline-explosion` |
+| `get_program` | `prog-vk2735-sc` | 1 | `prog-vk2735-sc` |
+| `programs_all` | none | 2 | `prog-vk2735-oral`, `prog-vk2735-sc` |
+| `program_compound` | `prog-vk2735-sc` | 1 | `comp-vk2735-sc` |
+| `program_mechanism` | `prog-vk2735-sc` | 1 | `mech-gip-glp1-dual` |
+| `program_assumptions` | `prog-vk2735-sc` | 4 | `asmp-best-in-class-tolerability`, `asmp-efficacy-matches-tirzepatide`, `asmp-payer-coverage-sustainable` |
+| `program_decisions` | `prog-vk2735-sc` | 1 | `dec-vanquish-interim-readout` |
+| `program_competitors` | `prog-vk2735-sc` | 3 | `comp-tirzepatide`, `comp-vk2735-oral`, `comp-vk2735-sc` |
+| `program_signals` | `prog-vk2735-sc` | 2 | `sig-viking-vanquish-init`, `sig-viking-venture-p2` |
+| `program_landscape_signals` | `prog-vk2735-sc` | 5 | `sig-viking-vanquish-init`, `sig-zepbound-osa-approval`, `sig-lilly-surmount-5-headhead` |
+| `get_assumption` | `asmp-oral-displaces-injectable` | 1 | `asmp-oral-displaces-injectable` |
+| `assumptions_all` | none | 5 | `asmp-efficacy-matches-tirzepatide`, `asmp-best-in-class-tolerability`, `asmp-payer-coverage-sustainable` |
+| `assumption_supporting_signals` | `asmp-oral-displaces-injectable` | 1 | `sig-lilly-attain-positive` |
+| `assumption_contradicting_signals` | `asmp-oral-displaces-injectable` | 2 | `sig-structure-gsbr-p2a-disappointing`, `sig-pfizer-danuglipron-discontinued` |
+| `get_decision` | `dec-oral-phase3-start` | 1 | `dec-oral-phase3-start` |
+| `decisions_upcoming` | none | 2 | `dec-vanquish-interim-readout`, `dec-oral-phase3-start` |
+| `decisions_all` | none | 2 | `dec-vanquish-interim-readout`, `dec-oral-phase3-start` |
+| `decision_program` | `dec-oral-phase3-start` | 1 | `prog-vk2735-oral` |
+| `decision_questions` | `dec-vanquish-interim-readout` | 1 | `q-payer-coverage-trajectory` |
+| `decision_assumptions` | `dec-oral-phase3-start` | 2 | `asmp-oral-displaces-injectable`, `asmp-mechanism-safe-at-scale` |
+| `get_question` | `q-pfizer-failure-mechanism-risk` | 1 | `q-pfizer-failure-mechanism-risk` |
+| `questions_open` | none | 3 | `q-orforglipron-competitive-window`, `q-pfizer-failure-mechanism-risk`, `q-payer-coverage-trajectory` |
+| `question_signals` | `q-pfizer-failure-mechanism-risk` | 1 | `sig-pfizer-danuglipron-discontinued` |
+| `get_signal` | `sig-pfizer-danuglipron-discontinued` | 1 | `sig-pfizer-danuglipron-discontinued` |
+| `recent_signals` | none | 18 | `sig-viking-q4-2025-earnings`, `sig-structure-gsbr-p2a-disappointing`, `sig-pfizer-metsera-acq` |
+| `search_signals` | `danuglipron` | 1 | `sig-pfizer-danuglipron-discontinued` |
+| `signals_by_domain` | `obesity` | 13 | `sig-viking-q4-2025-earnings`, `sig-structure-gsbr-p2a-disappointing`, `sig-pfizer-metsera-acq` |
+| `signal_patterns` | `sig-viking-venture-p2` | 1 | `pat-glp1-pipeline-explosion` |
+| `signal_contradictions` | `sig-structure-gsbr-p2a-disappointing` | 1 | `pat-oral-glp1-thesis` |
+| `signal_compound` | `sig-pfizer-danuglipron-discontinued` | 1 | `comp-danuglipron` |
+| `signal_mechanism` | `sig-pfizer-danuglipron-discontinued` | 1 | `mech-glp1r-agonist` |
+| `signal_trial` | `sig-viking-vanquish-init` | 1 | `trial-vanquish` |
+| `signal_companies` | `sig-pfizer-danuglipron-discontinued` | 1 | `co-pfizer` |
+| `signal_supports_assumptions` | `sig-viking-venture-p2` | 2 | `asmp-best-in-class-tolerability`, `asmp-efficacy-matches-tirzepatide` |
+| `signal_contradicts_assumptions` | `sig-pfizer-danuglipron-discontinued` | 1 | `asmp-oral-displaces-injectable` |
+| `signal_informs_questions` | `sig-pfizer-danuglipron-discontinued` | 1 | `q-pfizer-failure-mechanism-risk` |
+| `signal_artifacts` | `sig-pfizer-danuglipron-discontinued` | 1 | `art-pfizer-danuglipron-pr` |
+
+One read is empty on the seed by construction: `pattern_contradicts_patterns`, because the seed links no pattern as contradicting another.

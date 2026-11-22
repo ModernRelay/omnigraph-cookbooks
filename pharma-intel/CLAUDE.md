@@ -57,6 +57,59 @@ omnigraph mutate link_about_compound --target local-writer --graph pharma --para
 - Edge naming: `VerbTargetType` for pipeline/analytical edges (`FormsPattern`, `DevelopedByCompany`), `SignalIntentInternal` for bridge edges (`SupportsAssumption`, `ContradictsAssumption`, `InformsQuestion`)
 - Seed data must be real and publicly sourced — every signal traces to an `InformationArtifact` with a live URL
 
+## The questions the README promises
+
+Run as `local-reader` (or `local-writer`); `seed.md` lists what each returns on the fresh seed:
+
+```bash
+omnigraph query assumption_contradicting_signals --target local-reader --graph pharma --params '{"slug":"asmp-oral-displaces-injectable"}'
+omnigraph query decisions_upcoming --target local-reader --graph pharma
+omnigraph query decision_questions --target local-reader --graph pharma --params '{"slug":"dec-vanquish-interim-readout"}'
+omnigraph query program_competitors --target local-reader --graph pharma --params '{"slug":"prog-vk2735-sc"}'
+omnigraph query program_landscape_signals --target local-reader --graph pharma --params '{"slug":"prog-vk2735-sc"}'
+```
+
+## Workflows
+
+The README names eight. All writes go on a branch (`omnigraph branch create <name> --target local-writer --graph pharma`),
+pass `--branch <name>` to `mutate` and `query`, and are reviewed with `omnigraph branch diff` and
+`omnigraph branch merge <name> --into main --dry-run` before the merge. There is no `act-agent`
+role here: `local-writer` can write `main`, so the branch is a habit the agent must keep, not a
+policy.
+
+**Signal intake** (capture). Starts when a source publishes. Per document:
+
+1. Read `search_signals` and `recent_signals` to see whether the event is already recorded. `InformationArtifact.link` is `@unique`, but `add_artifact` does not take it, so nothing stops a duplicate: this search is the only guard. To record the URL, set `link` with `omnigraph mutate -e` after the insert, which also makes a repeat of that URL fail.
+2. `add_source` (once per publisher), `add_artifact` with its URL, `add_signal`, then `link_signal_artifact` and `link_artifact_source`.
+3. Classify: `link_about_compound`, `link_about_trial`, `link_about_mechanism`, `link_relevant_company`.
+4. Keep the Writing example's required fields: `stagingTimestamp`, `createdAt`, `updatedAt`.
+
+**Pipeline update** (capture). When a trial registry, regulator or deal announcement adds an asset: `add_compound`, `add_trial`, `add_deal` or `add_regulatory`, then `link_compound_mechanism`, `link_compound_company`, `link_trial_compound`. There is no stored link for a deal's parties or a regulatory action's target; use `omnigraph mutate -e` with an inline insert of `DealLeadParty`, `DealCounterParty` or `TargetsCompound`, and check it with `deal_parties` or `regulatory_compound`.
+
+**Signal triage** (maintain). Starts when a signal is merged. Read what the signal already links to (`signal_supports_assumptions`, `signal_contradicts_assumptions`, `signal_informs_questions`, `signal_contradictions`, `signal_patterns`), find candidate assumptions with `program_assumptions`, `questions_open` and `patterns_all`, then propose links with `link_signal_supports_assumption`, `link_signal_contradicts_assumption`, `link_signal_informs_question`, `link_forms_pattern`, `link_contradicts_pattern`. A link is a judgement: say in the branch commit why.
+
+**Evidence review** (maintain). For each assumption of a program, compare `assumption_supporting_signals` with `assumption_contradicting_signals`. Report an assumption with more against than for; do not edit it.
+
+**Pattern synthesis** (maintain). Read `pattern_signals` and `pattern_contradictions`; where they add up, `add_insight` and `link_highlights_pattern`. `link_drives_pattern` ties one pattern to another.
+
+**Decision brief** (act). Starts when `decisions_upcoming` shows a date within the agent's lead time. Read `decision_program`, `decision_assumptions` (then `assumption_supporting_signals` and `assumption_contradicting_signals` for each) and `decision_questions`. Draft the brief; send it only with the human's approval, through the agent's own tools.
+
+**Competitor alert** (act). Starts when a merged signal appears in `program_landscape_signals`. Draft a note with `signal_contradicts_assumptions` and `signal_informs_questions`; a person approves it before it goes out.
+
+**Question owner nudge** (act). For each row of `questions_open`, read `question_signals`; if a signal is newer than the last nudge, draft a note to `asked_by`.
+
+Nothing in the schema records that a brief, alert or nudge was sent. The agent must keep that
+record itself, or it will repeat them.
+
+## What it does not do
+
+- No `act-agent` role: nothing in policy stops an agent writing `main`.
+- No stored mutation updates or retires anything: not an assumption's text, a question's `status` (`open` to `resolved`), a decision's `status` or `outcome`. Use `omnigraph mutate -e` for those and review it as a branch.
+- `program_competitors` returns every compound targeting a mechanism the program competes in, including the program's own compounds.
+- No connectors, no embeddings, no notifications and no record of what was sent.
+- `add_artifact` and `add_signal` set only their required fields; `link`, `description` and `domain` need an inline update.
+- `Signal` has no link to the `Decision` it bears on; read it through the assumption or question.
+
 ## The Demo "Wow" Queries
 
 These are the queries the seed is shaped to light up — preserve them when iterating:

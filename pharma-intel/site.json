@@ -3,24 +3,65 @@
   "name": "Pharma intelligence",
   "category": "Research",
   "blurb": "Competitive intelligence for a biotech program: the compounds, trials and deals around it, the program's own assumptions, and which signals contradict them.",
-  "about": "The pharma intelligence graph is competitive intelligence for one biotech program, seen from the sponsor's side. It holds the external pipeline (compounds, trials, deals and regulatory actions) next to the program's own assumptions, decisions and open questions. The graph shows which outside signals contradict which internal assumptions, and what still needs an answer before an upcoming decision.",
+  "about": "Build a living competitive-intelligence record for a biotech program, and the agent workflows around it. It keeps the external pipeline (compounds, trials, deals and regulatory actions) linked to the program's own assumptions, decisions and open questions, so you can see which outside signals support or contradict which internal belief, and what still needs an answer before a decision. Agents map each new public signal to the record on a branch that an analyst reviews before it reaches the baseline.",
   "sample": "Viking Therapeutics' obesity program, from public sources",
   "questions": [
     {
       "q": "Which signals contradict an assumption the program relies on?",
-      "query": "assumption_contradicting_signals"
+      "query": "assumption_contradicting_signals",
+      "params": {
+        "slug": "asmp-oral-displaces-injectable"
+      }
     },
     {
       "q": "Which decisions are coming up?",
       "query": "decisions_upcoming"
     },
     {
-      "q": "Which compounds compete with the program?",
-      "query": "program_competitors"
+      "q": "What does the committee still need answered before this decision?",
+      "query": "decision_questions",
+      "params": {
+        "slug": "dec-vanquish-interim-readout"
+      }
     },
     {
-      "q": "Which compounds target a mechanism?",
-      "query": "compounds_by_mechanism"
+      "q": "Which compounds compete with the program?",
+      "query": "program_competitors",
+      "params": {
+        "slug": "prog-vk2735-sc"
+      }
+    },
+    {
+      "q": "What is happening around the program's mechanism?",
+      "query": "program_landscape_signals",
+      "params": {
+        "slug": "prog-vk2735-sc"
+      }
+    }
+  ],
+  "use_case": "usecase:research-substrate",
+  "needs": [
+    {
+      "need": "need:context-scattered",
+      "shown_in": "The data model"
+    },
+    {
+      "need": "need:agent-changes-checked-before-truth",
+      "shown_in": "Agents and workflows"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "cap:typed-schema",
+      "shown_in": "The data model"
+    },
+    {
+      "capability": "cap:branch-per-agent",
+      "shown_in": "Agents and workflows"
+    },
+    {
+      "capability": "cap:three-way-merge",
+      "shown_in": "Branching and merging"
     }
   ],
   "search": {
