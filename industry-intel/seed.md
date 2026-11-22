@@ -73,10 +73,16 @@ not `FormsPattern`.
 The counter-evidence, and the rows `contested_patterns` returns. Two
 contradictions land on `pat-saaspocalypse`, one each on `pat-sovereign-ai` and
 `pat-accelerated-research`; `pat-context-graphs` and `pat-new-cyber-threats`
-have none, so the query leaves them out. A contradicting signal is still an
-attached signal, so none of these appears in `orphan_signals`, and each carries
-a `SpottedInArtifact` and a `SourcedFromSource` edge, so none appears in
-`unsourced_signals` either.
+have none, so the query leaves them out.
+
+A contradicting signal is still an attached signal, and the rest of the weekly
+review treats it as one: `orphan_signals` counts it as attached, and
+`pattern_momentum` and `stale_patterns` count it as evidence, so a pattern that
+drew a contradiction last month does not read as idle. Each also carries a
+`SpottedInArtifact` and a `SourcedFromSource` edge, so none appears in
+`unsourced_signals`. These four are the newest rows in the seed, dated July to
+October 2026, which is why the README's `2026-05-01` cutoff now returns
+something.
 
 | signal | pattern | what it contests |
 |--------|---------|------------------|

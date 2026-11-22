@@ -132,10 +132,13 @@ The graph earns its keep through a recurring loop, supported by the
 1. **Triage** (`triage`) — `orphan_signals`: every signal not yet attached to
    a pattern, newest first. Work it to zero: attach with the `link_*`
    mutations, or drop the signal.
-2. **Momentum** (`momentum`, takes `since`) — `pattern_momentum`: signals per
-   pattern since the cutoff. Rising counts are where insights come from.
-3. **Staleness** (`stale`, takes `since`) — `stale_patterns`: patterns with
-   no new evidence since the cutoff. Prune, or push research at them.
+2. **Momentum** (`momentum`, takes `since`) — `pattern_momentum`: evidence per
+   pattern since the cutoff, supporting and contradicting together. Rising
+   counts are where insights come from, whichever way the evidence points.
+3. **Staleness** (`stale`, takes `since`) — `stale_patterns`: patterns no
+   evidence of either kind has touched since the cutoff. Prune, or push
+   research at them. A pattern that just drew a contradiction is the opposite
+   of stale, so it stays off this list.
 4. **Tension** (`contested`) — `contested_patterns`: patterns accumulating
    contradicting signals. High counts deserve an Insight either way.
 5. **Provenance** (`unsourced`) — `unsourced_signals`: claims with no
