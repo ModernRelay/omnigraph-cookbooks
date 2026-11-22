@@ -105,30 +105,42 @@ one.
 
 ## Agents and workflows
 
-Agents read the company's meetings and threads and keep the record current.
-People verify what they recorded and accept what they proposed. These are the
-workflows the cookbook supports, each backed by stored queries:
+Agents read the company's meetings and threads, keep the record current and
+tell people what needs them. People verify what was recorded and accept what
+was proposed. These are the workflows the cookbook supports, each backed by
+stored queries:
 
-| Workflow | What it does | Stored queries |
-|---|---|---|
-| Meeting and thread capture | Records a meeting, thread or document and each claim made in it, with its quote, speaker and position | `record_source`, `record_claim` |
-| Contradiction check | Compares a new claim with what current decisions rest on, links the dispute and lists the decisions it puts in question | `decision_evidence`, `mark_contradiction`, `contested_claims`, `decisions_at_risk` |
-| Decision proposal | Promotes a claim to a decision, or proposes a replacement for a decision that a new claim disputes | `promote_claim`, `propose_successor` |
-| Review queue | Lists the claims waiting for a person to verify and the decisions waiting to be accepted | `unverified_claims`, `proposed_decisions` |
-| Commitment tracking | Turns a commitment someone made into an action item and lists what is open, overdue or owed by one person | `add_action_item`, `open_actions`, `overdue_actions`, `person_actions` |
-| Meeting follow-up | Lists the claims, decisions and action items that came out of one meeting | `claims_from_source`, `decisions_from_source`, `actions_from_source` |
-| Decision history | Shows why a decision was replaced, by what, and on which contradiction | `why_superseded`, `superseding_contradictions`, `decision_lineage` |
-| Record hygiene | Finds decisions with no supporting claim, accepted decisions resting on unverified claims and action items with no owner | `unsupported_decisions`, `accepted_on_unverified`, `unowned_actions` |
+| Kind | Workflow | What it does | Stored queries |
+|---|---|---|---|
+| Capture | Meeting and thread capture | Records a meeting, thread or document and each claim made in it, with its quote, speaker and position | `record_source`, `record_claim` |
+| Capture | Commitment capture | Turns a commitment someone made into an action item with an owner and a due date | `add_action_item` |
+| Check | Contradiction check | Compares a new claim with what current decisions rest on, links the dispute and lists the decisions it puts in question | `decision_evidence`, `mark_contradiction`, `contested_claims`, `decisions_at_risk` |
+| Check | Decision proposal | Promotes a claim to a decision, or proposes a replacement for a decision that a new claim disputes | `promote_claim`, `propose_successor` |
+| Check | Record hygiene | Finds decisions with no supporting claim, accepted decisions resting on unverified claims and action items with no owner | `unsupported_decisions`, `accepted_on_unverified`, `unowned_actions` |
+| Act | Meeting follow-up | After a meeting is captured, sends out the decisions and action items that came out of it | `decisions_from_source`, `actions_from_source` |
+| Act | Overdue reminders | Reminds the owner of each overdue action item, on the handle the record holds for them | `overdue_actions`, `person_handles` |
+| Act | Decision at risk alert | When a new claim disputes one a current decision rests on, tells the people who made that decision | `decisions_at_risk`, `decision_deciders` |
+| Act | Review digest | Sends reviewers the claims waiting to be verified and the decisions waiting to be accepted | `unverified_claims`, `proposed_decisions` |
+| Act | Quiet project check-in | Asks the owner of a project that has had no new source for a while whether it is still active | `quiet_projects`, `project_owner` |
 
-Every workflow runs the same way:
+Every workflow has the same parts:
 
-1. Something is said in a meeting, a thread or a document.
-2. An agent records it on its own branch as claims, each with its quote.
-3. The agent checks the claims against the record and proposes what follows.
-4. A person reviews the branch, merges it, then verifies and accepts.
+1. Something starts it: a meeting or thread in a source tool, a change in the
+   record, or a date such as a due date passing.
+2. The agent reads the state it needs through stored queries.
+3. It acts. It writes to the record on its own branch, or it tells someone
+   outside the record: a message, a reminder, a digest.
+4. A person decides. They review the branch and merge it, then verify and
+   accept, or they act on what they were told.
 
 - **Agents cannot reach the shared record alone.** The access policy lets an
   agent write only on branches other than `main`, and it cannot merge.
+- **Outside actions are not held back by the record.** A reminder or a digest
+  goes out through the agent's own tools, and nothing here reviews it first.
+  Keep those workflows to telling and drafting, and give the agent only the
+  outside access they need. The cookbook includes no integrations for them,
+  and the record does not note that a message was sent, so the agent has to
+  keep track of that itself.
 - **Each agent has a name and an owner.** Every agent has its own identity and
   a person who answers for it.
 - **Bring your own agent.** It connects through OmniGraph's MCP server from

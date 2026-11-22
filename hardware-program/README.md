@@ -87,30 +87,41 @@ baseline moves only when the branch is merged.
 
 ## Agents and workflows
 
-Agents do the routine checking on every change, and engineers make the
-decisions. These are the workflows the cookbook supports, each backed by stored
-queries:
+Agents keep the record current, check it on every change and tell people what
+needs them. Engineers make the decisions. These are the workflows the cookbook
+supports, each backed by stored queries:
 
-| Workflow | What it does | Stored queries |
-|---|---|---|
-| Budget watch | Re-adds every budget when a design value changes; flags totals over their allocation and values past their limit | `budget_rollup`, `limit_check` |
-| Change impact analysis | For a proposed requirement change, lists the derived requirements, tests and interfaces it reaches | `impacted_requirements`, `impacted_tests`, `impacted_interfaces` |
-| Verification coverage | Finds requirements with no test, failed tests, stale passes and tests that measure the wrong value | `unverified_requirements`, `failing_requirements`, `stale_verification`, `measurement_mismatch` |
-| Design review readiness | For a PDR or CDR, lists what in its scope is unverified, failing, stale or resting on an interface that is not frozen | `gate_unverified`, `gate_not_passing`, `gate_stale_verification`, `gate_unfrozen_interfaces` |
-| Requirement review | Lists agent-drafted requirements waiting for a person, and open findings | `awaiting_review`, `open_findings` |
-| Traceability audit | Finds requirements with no parent or owner, and components no requirement asks for | `untraced_requirements`, `unowned_requirements`, `unexplained_components` |
-| Assumption and risk watch | Finds frozen work resting on weak or overdue assumptions, and risks nothing mitigates | `assumptions_under_frozen_work`, `assumptions_due`, `unmitigated_risks` |
-| Compliance matrix | Shows each requirement's stance on the clauses of a standard, with its justification | `compliance_matrix` |
+| Kind | Workflow | What it does | Stored queries |
+|---|---|---|---|
+| Capture | Design value sync | Writes a mass, power or other value from CAD or analysis, with whether it is estimated, calculated or measured | `set_parameter` |
+| Capture | Test result intake | Records a test run with its measured value and report, and updates the test's status in the same change | `record_test_run` |
+| Check | Budget watch | Re-adds every budget when a design value changes; flags totals over their allocation and values past their limit | `budget_rollup`, `limit_check` |
+| Check | Verification coverage | Finds requirements with no test, failed tests, stale passes and tests that measure the wrong value | `unverified_requirements`, `failing_requirements`, `stale_verification`, `measurement_mismatch` |
+| Check | Traceability audit | Finds requirements with no parent or owner, components no requirement asks for, and frozen work resting on weak assumptions | `untraced_requirements`, `unowned_requirements`, `unexplained_components`, `assumptions_under_frozen_work` |
+| Check | Requirement review | Raises a finding where a requirement has no quantity or limit a test could verify, and lists what waits for a person | `raise_finding`, `awaiting_review`, `open_findings` |
+| Act | Change impact notice | When a change request is opened, tells the owners of the requirements it reaches, with the tests and interfaces affected | `impacted_requirements`, `impacted_tests`, `impacted_interfaces` |
+| Act | Retest requests | For each pass that predates a requirement change, asks for the test to be run again | `stale_verification` |
+| Act | Design review pack | Before a PDR or CDR, sends the board what in its scope is unverified, failing, stale or not frozen | `gate_unverified`, `gate_not_passing`, `gate_stale_verification`, `gate_unfrozen_interfaces` |
+| Act | Compliance report | Produces each requirement's stance on the clauses of a standard, with its justification, for an audit | `compliance_matrix` |
 
-Every workflow runs the same way:
+Every workflow has the same parts:
 
-1. A requirement, design value or test result changes.
-2. The agent sees the change and re-runs its checks.
-3. It raises findings, or drafts a fix, on its own branch.
-4. An engineer reviews the branch and merges it.
+1. Something starts it: a change in a source tool, a change in the record, or
+   a date such as a review coming up.
+2. The agent reads the state it needs through stored queries.
+3. It acts. It writes to the record on its own branch, or it tells someone
+   outside the record: a message, a ticket, a report.
+4. A person decides. An engineer reviews the branch and merges it, or acts on
+   what they were told.
 
 - **Agents cannot reach the baseline alone.** The access policy lets an agent
   write only on branches other than `main`, and it cannot merge.
+- **Outside actions are not held back by the record.** A message or a ticket
+  goes out through the agent's own tools, and nothing here reviews it first.
+  Keep those workflows to telling and drafting, and give the agent only the
+  outside access they need. The cookbook includes no integrations for them,
+  and the record does not note that a message was sent, so the agent has to
+  keep track of that itself.
 - **Drafts are marked.** A requirement an agent drafted is labelled as
   agent-generated until a person reviews it.
 - **Bring your own agent.** It connects through OmniGraph's MCP server from

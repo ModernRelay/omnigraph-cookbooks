@@ -88,6 +88,36 @@ structure by `check-cookbooks.py --site`; the others move over one at a time.
   was Flow Engineering's product pages. Take the field's words, not the
   product's claims.
 
+### Working out the workflows
+
+Do not start from the stored queries and ask what could be done with them.
+Start from the work. A workflow around a living record is a loop with five
+parts: what starts it, what the agent reads, what it does, where a person
+decides, and how the record shows it happened. Ask these questions about the
+use case, and each answer is a workflow:
+
+| Kind | Ask | Example |
+|---|---|---|
+| Capture: the world changes, the record learns | What happens outside that the record has to know about, and in which tool does it happen? | A meeting ends; a mass changes in CAD; a test run finishes |
+| Check: the record changes, something in it may no longer hold | What can go wrong, go stale or contradict when something changes? | A pass predates its requirement; a decision rests on a disputed claim |
+| Act: the record is in a state, someone outside has to know or do something | Who has to know or act when this state appears, and where do they work? | An action item is overdue, so its owner is reminded; a review is blocked, so the board gets the list |
+
+Look for all three kinds. A cookbook that only has checks is a linter, and one
+that only captures is a log. The acting workflows are what make the record
+part of the work: they take an action outside the record, such as a message, a
+ticket or a report, from what the record says.
+
+For each workflow, say what starts it and name the stored queries it reads or
+writes. Then be exact about review:
+
+- What an agent writes to the record waits on a branch for a person.
+- What an agent does outside the record is not held back by the record. The
+  policy cannot stop a message being sent. Say so, keep these workflows to
+  notifying and drafting unless a person approves the action, and say that the
+  agent uses its own tools for it where the cookbook has no integration.
+- Say how a repeat is avoided: what in the record shows the action was taken.
+  If the schema has no place for that, say it or add one.
+
 ### The template
 
 ````markdown
@@ -132,13 +162,17 @@ graph LR
 
 <One sentence: what agents do and what stays with people.>
 
-| Workflow | What it does | Stored queries |
-|---|---|---|
-| <Name> | <What it checks or produces> | `<stored_query>`, `<stored_query>` |
+| Kind | Workflow | What it does | Stored queries |
+|---|---|---|---|
+| Capture | <Name> | <What it records, and from where> | `<stored_query>` |
+| Check | <Name> | <What it looks for when the record changes> | `<stored_query>`, `<stored_query>` |
+| Act | <Name> | <Who it tells or what it does outside, from which state> | `<stored_query>` |
 
-<The steps every workflow follows, numbered, ending with a person's merge.>
+<The parts every workflow has, numbered: what starts it, what the agent reads,
+what it does, where a person decides.>
 
-- **<What an agent may not do>.** <One sentence.>
+- **<What an agent may not do in the record>.** <One sentence.>
+- **<What the record does not hold back>.** <Outside actions, and how to limit them.>
 - **Bring your own agent.** <How it connects, and the skill if the cookbook has one.>
 
 ## Data sources
@@ -187,7 +221,7 @@ exact command for each question and workflow on this page.
 | Title and intro | The opening sentence as in the template, where X is what the use case keeps: a system of record for a hardware program, a company brain. Then the problem and three benefits | That opening; the first paragraph equal to `about` in `site.json`; a link to `AGENTS.md` |
 | The data model | The ontology of this use case, drawn, then the type table and the few modelling choices that matter. Say what OmniGraph provides, such as object storage, only where this use case has its own reason for it | Every backticked type exists in `schema.pg` |
 | Branching and merging | What a branch is used for in this use case, by people or by agents. In some, engineers branch for change requests; in others only agents do | Not empty |
-| Agents and workflows | The workflows by name, each with the stored queries behind it, reads and writes alike, then what an agent may not do | Names stored queries, and only ones the cookbook has |
+| Agents and workflows | The workflows by name and kind (capture, check, act), worked out as in "Working out the workflows", each with the stored queries behind it, reads and writes alike. Then what an agent may not do, and what the record does not hold back | Names stored queries, and only ones the cookbook has |
 | Data sources | The tools a team brings data in from, by product name, and the types each feeds | Every backticked type exists in `schema.pg` |
 | Questions you can ask | The questions `site.json` features, three to five. Feature only questions the sample data answers. One that is rightly empty on a fresh load, such as a check that finds nothing wrong, belongs in the workflow table | Each listed word for word on a line with its query; each returns rows on the seed |
 | Sample data | What the seed depicts and what the questions return on it | A link to `seed.md` |
