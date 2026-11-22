@@ -11,7 +11,7 @@ The reference seed is a **fictional Berlin-based AI-infra fund** ("Quito Capital
 ## Key Files
 
 - `schema.pg` — Executable Omnigraph schema. Source of truth.
-- `README.md` — Design rationale, collapsed stack analysis, killer queries.
+- `README.md` — The landing page, written to the template in `../CLAUDE.md`. Commands, workflows and modelling rules live in this file, not in the README.
 - `seed.md` / `seed.jsonl` — Reference seed (human-readable / loadable).
 - `queries/*.gq` — Read and mutation queries. One file per domain.
 - `cluster.yaml` — Deployment declaration (graph `vcos`, schema, stored queries).
@@ -195,11 +195,116 @@ Use this cookbook as a decision-intelligence + audit loop, not a lookup table:
 
 For longer-form captures (transcripts, decks), chunk into `Chunk` records linked via `ChunkOfArtifact`. Hybrid search runs on those once embeddings are populated.
 
+## Commands for the README's questions
+
+Aliases come from `omnigraph-config.example.yaml`; each is `omnigraph query <name> --target local-reader --graph vcos`.
+
+| Question | Command |
+|---|---|
+| Which active theses has new evidence contradicted? | `omnigraph alias contradicted-active-theses` |
+| Before investment committee, what contradicts the assumptions behind this deal? | `omnigraph alias pre-ic-brief-evidence --params '{"slug":"deal-helix-series-a"}'` |
+| Who on the team can get an introduction to this founder? | `omnigraph alias intro-path-to-founder --params '{"slug":"per-helix-yuki"}'` |
+| What have the portfolio companies reported recently? | `omnigraph query portfolio_updates_recent --target local-reader --graph vcos` |
+
+More reads, with the alias bundles grouped by meeting view in the example config (`VIEW: IC Meeting`, `VIEW: Weekly Pipeline Meeting`, `VIEW: Portfolio Support Meeting`, `VIEW: LPAC / Fund Reporting`):
+
+```bash
+omnigraph alias team
+omnigraph alias founders-enriched
+omnigraph alias signal-portfolio-impact --params '{"slug":"sig-vector-forge-aws-deal"}'
+omnigraph alias exit-landscape --params '{"slug":"org-pinion-infer"}'
+omnigraph alias debate-stances --params '{"slug":"deal-helix-series-a"}'
+omnigraph alias board-prep-pack --params '{"slug":"org-aetherbrick"}'
+omnigraph alias reserve-pressure --params '{"fund_slug":"fund-iii"}'
+omnigraph alias lessons-active
+omnigraph alias source-downstream-signals --params '{"slug":"org-techcrunch"}'
+omnigraph alias observed-organizations
+```
+
+`board_prep_pack` returns every signal about the organization, newest first. It does not cut at the last board meeting. Pair it with `board_meetings_for_organization` and compare dates yourself.
+
+## Workflows, step by step
+
+The README's table names the workflows; the detail is here. All writes go on a branch (`--branch tentative/<topic>`), and a partner merges. Nothing in the policy forces this: `act-writer` may write and merge `main` (see `policies/graph.policy.yaml`). There is no agent role, so run agents with their own branch and review the commit actors before merging.
+
+The record has no stored write that updates an existing node: the 87 stored writes are `add_*` and `link_*`. So a workflow cannot close a commitment, resolve a question, change a thesis's status, activate a tentative lesson, lower a source's reliability or note that a reminder was sent. A person does these, or an ad-hoc mutation on a branch that a person reviews. The README does not document an ad-hoc mutation as the way.
+
+### Call intake (capture)
+
+Starts when a call recording lands (for example Granola). Read the Meeting and attendees, the deal's thesis and assumptions, its open questions and prior similar signals (`ic_prep_meeting_history`, `deal_open_questions`, `thesis_assumptions`). Write on `tentative/ingest-<meeting-slug>`: the transcript as an Artifact (`source=meeting-tool`, `source_app=granola`), `link_artifact_from_meeting`, 0–3 Signals each linked `supports`/`contradicts` against the right Assumption, and Commitments with assignee, due date and `link_commitment_from_meeting`. Resolve mentioned people and organizations; flag the ones that do not resolve instead of inventing them. One atomic branch, so a failed mutation leaves no orphan signals. The agent keeps its own cursor of the last call it ingested.
+
+### Scout triage (capture)
+
+Starts daily, from the scout list, launch feeds, watches or founder messages. For each mention run `search_organizations` for the dedup verdict. A match with `status=passed` resurfaces the prior pass Decision (`organization_deals`, `deal_decisions`). A new one gets `add_organization` (`status=watching`), `link_organization_in_market`, a discovery Signal and the source as an Artifact (`link_signal_sourced_from_artifact`), on `tentative/scout-<org>-<date>`. Look at active Lessons and failure-mode Patterns in the market (`market_lessons`). Do not invent founder names.
+
+### Evidence check and thesis review (maintain)
+
+Starts when a signal lands. Run `recent_contradictions` and `signal_portfolio_impact` for it, then `contradicted_active_theses` and `thesis_contradictions_via_assumptions`. The result is a report for a partner; changing a thesis's status is a person's edit.
+
+### Bull and bear cases (maintain)
+
+Starts 48 hours before a high-conviction IC. One agent per stance reads the deal, thesis, assumptions, market signals and existing insights, then writes one Insight on the shared branch `tentative/ic-debate-<deal>`:
+
+```bash
+omnigraph mutate add_insight_with_stance --target local-writer --graph vcos --branch tentative/ic-debate-<deal> --params '{…}'
+```
+
+Cite signals with `link_insight_relies_on_signal`, the deal with `link_insight_about_deal` and any pattern with `link_insight_highlights_pattern`. The neutral agent names the evidence that would settle the disagreement. Bull and bear linking the same pattern with opposite framings makes the disagreement legible.
+
+### Learning sweep (maintain)
+
+Starts quarterly. Read the window's Decisions, Patterns with `pattern_decisions`, and `lessons_active`. A Pattern with three or more supporting Decisions and one consistent outcome, not already covered by an active Lesson, gets a tentative `add_lesson` with `link_lesson_distilled_from` and `link_lesson_applies_to_market` on its own branch. Report what landed, what was covered and where evidence is thin; a sweep that always proposes a lesson is hallucinating.
+
+### Pre-IC brief, board prep, founder call brief (act)
+
+Start from the calendar (`meetings_upcoming`), 24 hours ahead. Read by meeting kind. IC: `pre_ic_brief_organization`, `pre_ic_brief_thesis`, `pre_ic_brief_evidence`, `pre_ic_brief_questions`, `pre_ic_brief_debate`, `ic_prep_meeting_history`, `ic_prep_open_commitments`; all take the Deal slug. Board: `board_prep_pack`, `board_prep_open_questions`, `board_prep_commitments`. Founder call: `get_person`, `person_insights`, `intro_path_to_founder`. These write nothing; the brief goes back through the channel that asked. About eight reads against one commit-pinned snapshot, so the brief can be re-run at the same commit months later.
+
+## Key enums
+
+| Enum | Values |
+|---|---|
+| `Organization.kind` | `startup, lp-institution, vc-firm, acquirer, customer, bank, regulator, association, accelerator, university, family-office, publisher, database, expert-network, other` |
+| `Organization.status` | `cold, watching, pipeline, evaluating, portfolio, exited, passed, observed` - nullable for non-startup kinds |
+| `Organization.reliability` | `low, medium, high` - meaningful for `kind` in (publisher, database, expert-network); null elsewhere |
+| `Deal.stage` | `sourced, qualified, in-diligence, ic-ready, decided, closed, dead` |
+| `Deal.outcome` | `open, invested, passed, lost, withdrawn, observed` (`observed` = external round we tracked but didn't engage with) |
+| `Decision.kind` | `invest, pass, follow-on, double-down, write-off, exit-plan, no-decision` (intros, follow-ups, schedule-another-meeting, flag-at-next-board are `Commitment`s) |
+| `Assumption.level` | `market, founder, product, competitive, financial, strategic` |
+| `Question.status` | `open, partial, resolved` |
+| `Signal.kind` | `discovery, launch, fundraise, exit, founder-event, market-move, competitive, customer, regulatory, team-change, portfolio-update, board-decision` |
+| `Insight.kind` | `memo, brief, observation, recap` - open uncertainties live on `Question`, not here |
+| `Insight.stance` | `bull, bear, neutral` |
+| `Artifact.kind` | `email, ticket, chat-msg, meeting-note, transcript, deck, web-page, screenshot, doc, audio, image, summary, markdown` |
+| `Artifact.source` | `email, chat, meeting-tool, web, doc-tool, crm, outbound, manual, derived, repo, other` - coarse category, vendor name in `source_app` |
+| `Pattern.kind` | `gtm, pricing, founder-archetype, market-timing, exit, failure-mode, tech-adoption, capital-structure, regulatory` |
+| `Lesson.kind` | `protocol, rule-of-thumb, anti-pattern, runbook` |
+| `Lesson.status` | `tentative, active, retired` - `tentative` lives on a review branch awaiting human merge |
+| `Thesis.status` | `active, retired, contradicted` |
+| `Meeting.kind` | `ic, board, partner-1on1, pipeline-review, portfolio-1on1, lp-update, founder-call, dd-call, expert-call, internal, external-other` |
+| `Meeting.status` | `scheduled, occurred, cancelled, rescheduled` |
+
+
+## What this cookbook does not do
+
+- No connectors. Syncs are scripts or agents calling the stored mutations.
+- No stored update, so status changes need an ad-hoc mutation on a branch.
+- No agent role limited to branches (unlike company-brain and hardware-program).
+- No embeddings or blobs in the seed; real ones are a separate ingest (see Known gaps).
+- Deferred: firm-specific authorization for team, LP and portfolio access; sector-specialist Pattern and Lesson packs as sibling cookbooks; a `Measurement` node for KPI, cash and runway time series (today loosely `Signal{kind=portfolio-update}`).
+
+## Adapting for your firm
+
+1. Keep the schema; most firms fit the 17 nodes.
+2. Replace the seed with your organizations, theses, people and decisions: current pipeline and portfolio first, history later.
+3. Change `Market` rows and the Pattern and Lesson content for a different sector focus.
+4. Wire tools as ingest: Granola → `Artifact{kind=transcript, source=meeting-tool, source_app=granola}`; Slack → `Artifact{kind=chat-msg, source=chat, source_app=slack}`; email → `Artifact{kind=email, source=email, source_app=gmail}`. The CRM is replaced; everything else feeds in by mutation.
+5. Run the example reads on your data. An empty one means the seed under-models the loop; fix the seed, not the schema.
+
 ## When Editing
 
 - Consult [Omnigraph schema principles](https://github.com/ModernRelay/omnigraph) for design guidance.
 - Use `@rename_from(...)` on property/type renames for migration support.
-- Keep README.md in sync with schema.pg.
+- Keep README.md in sync with schema.pg: it names types, and the check reads them.
 - Prefer semantic edge names (`ContradictsAssumption`, `DecisionBasedOnAssumption`, not `RelatedTo`).
 - Required vs optional is deliberate — don't add `?` without reason.
 - New node types need a strong case — most concepts fit as a `kind` enum on an existing node.
