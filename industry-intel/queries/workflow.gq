@@ -14,24 +14,28 @@ query orphan_signals() {
     order { $s.stagingTimestamp desc }
 }
 
-// Momentum: how many signals each pattern attracted since a cutoff.
+// Momentum: how much evidence each pattern attracted since a cutoff. Both
+// kinds count — a pattern drawing contradictions is moving, not idling, and
+// which way it points is `contested_patterns` below.
 // Params: since — e.g. {"since": "2026-05-01T00:00:00Z"}
 query pattern_momentum($since: DateTime) {
     match {
         $p: Pattern
-        $s formsPattern $p
+        $s (formsPattern | contradictsPattern) $p
         $s.stagingTimestamp >= $since
     }
     return { $p.slug, $p.name, count($s) as recent_signals }
 }
 
-// Staleness: patterns with no new signal since the cutoff — prune them or
-// push research. Params: since — e.g. {"since": "2026-05-01T00:00:00Z"}
+// Staleness: patterns no evidence of either kind has touched since the
+// cutoff — prune them or push research. A contradicted pattern is the
+// opposite of stale, so contradictions keep a pattern out of this list.
+// Params: since — e.g. {"since": "2026-05-01T00:00:00Z"}
 query stale_patterns($since: DateTime) {
     match {
         $p: Pattern
         not {
-            $s formsPattern $p
+            $s (formsPattern | contradictsPattern) $p
             $s.stagingTimestamp >= $since
         }
     }
