@@ -29,39 +29,24 @@ threads and documents it learned from, the claims people made in them, and the
 decisions and action items that follow.
 
 ```mermaid
----
-config:
-  flowchart:
-    wrappingWidth: 320
----
-flowchart LR
-  classDef L0 fill:#e8f0fe,stroke:#4a6fd1,color:#1d1d1f,stroke-width:1.5px
-  Person["<b>Person</b>"]:::L0
-  Actor["<b>Actor</b>"]:::L0
-  Team["<b>Team</b><br/><small>↻ part of</small>"]:::L0
-  Project["<b>Project</b>"]:::L0
-  classDef L1 fill:#e7f6ec,stroke:#3c9a5f,color:#1d1d1f,stroke-width:1.5px
-  Source["<b>Source</b>"]:::L1
-  classDef L2 fill:#f3e8fd,stroke:#8a4fd1,color:#1d1d1f,stroke-width:1.5px
-  Claim["<b>Claim</b><br/><small>↻ contradicts</small>"]:::L2
-  classDef L3 fill:#fdf0e2,stroke:#d08a2b,color:#1d1d1f,stroke-width:1.5px
-  Decision["<b>Decision</b><br/><small>↻ superseded by</small>"]:::L3
-  ActionItem["<b>ActionItem</b>"]:::L3
-  Person -->|"member of"| Team
-  Person -->|"left"| Team
-  Actor -->|"acts for"| Person
-  Project -->|"owned by"| Person
-  Project -->|"run by"| Team
-  Source -->|"about"| Project
-  Claim -->|"from"| Source
-  Claim -->|"claimed by"| Person
-  Decision -->|"based on"| Claim
-  Decision -->|"decided by"| Person
-  Decision -->|"about"| Project
-  ActionItem -->|"from"| Claim
-  ActionItem -->|"follows from"| Decision
-  ActionItem -->|"assigned to"| Person
-  ActionItem -->|"about"| Project
+graph LR
+  Person -- member of --> Team
+  Team -- part of --> Team
+  Actor -- acts for --> Person
+  Project -- owned by --> Person
+  Project -- run by --> Team
+  Source -- about --> Project
+  Claim -- from --> Source
+  Claim -- claimed by --> Person
+  Claim -- contradicts --> Claim
+  Decision -- based on --> Claim
+  Decision -- decided by --> Person
+  Decision -- about --> Project
+  Decision -- superseded by --> Decision
+  ActionItem -- from --> Claim
+  ActionItem -- follows from --> Decision
+  ActionItem -- assigned to --> Person
+  ActionItem -- about --> Project
 ```
 
 | Area | Types | Holds |

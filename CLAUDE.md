@@ -246,6 +246,9 @@ the list the check uses; change the two together.
   sync or no enforced approval, do not imply them; say what is there.
 - Name data sources by product, as tools a team brings data in from. This is
   what people search for.
+- Draw the ontology in plain Mermaid: type names as nodes and each link as a
+  labelled arrow, including a type's link to itself. Put no HTML in a label;
+  tags such as `<b>` show as text in some viewers.
 - Keep it to about 200 lines.
 
 ### What goes with it
