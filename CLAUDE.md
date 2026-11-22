@@ -78,24 +78,28 @@ cookbook's own `AGENTS.md`.
 moved. To move one, take its name out of `EARLIER_READMES` in
 `scripts/check-cookbooks.py`; that is what switches the check on for it.
 
-A cookbook's `AGENTS.md` is a link to its `CLAUDE.md`. Edit `CLAUDE.md`.
+`AGENTS.md` and `CLAUDE.md` are one file, here and in each cookbook: the
+first is a link to the second. Edit `CLAUDE.md`, and link `AGENTS.md` from a
+README.
 
 ### Before you write
 
 - Read the cookbook's `schema.pg`, `queries/*.gq` and `seed.md`. Every claim in
   the README has to be something these files do.
-- Read the use case in ModernRelay's mr-ops graph: its `UseCase`, the `Need`s
-  it meets, the `Capability`s it uses and the `Keyword`s that name it. Read
-  the schema with `omnigraph schema show` and list the stored reads with
-  `omnigraph queries list`; `use_case_capabilities` and `personas` are two of
-  them. `omnigraph skill show` covers the query language.
+- Read the use case in ModernRelay's mr-ops graph (graph `mr-ops`; `omnigraph
+  target list` shows the target your setup has for it): its `UseCase`, the
+  `Need`s it meets, the `Capability`s it uses and the `Keyword`s that name it.
+  Read the schema with `omnigraph schema show`. No stored read lists every
+  use case, so list the `UseCase` nodes with an ad-hoc read and follow their
+  links from there. `omnigraph skill show` covers the query language.
 - Pick the reference product: the one a buyer in this field would compare
   first. Read its product and integrations pages for the field's vocabulary
   and the tools it connects to, and take its words, not its claims. For
-  hardware-program that was Flow Engineering. If the field has no clear
-  leader, or you cannot reach the web, use the terms the cookbook's own
-  schema and seed use, and say in your report which pages you read or that
-  you read none.
+  hardware-program that was Flow Engineering. Where several products share
+  the field, read one or two. Where a product has no integrations page, take
+  the tools its product pages name. If you cannot reach the web, use the
+  terms the cookbook's own schema and seed use. Say in your report which
+  pages you read, or that you read none.
 
 ### What a README change does not do
 
@@ -107,17 +111,22 @@ Moving a cookbook to the template changes its README, its `CLAUDE.md` and its
   the nearest one. If it lacks a link the cookbook shows, leave that need or
   capability out. Leave `search.keywords` as they are.
 - **Roles.** Only company-brain and hardware-program have an agent role that
-  is kept to branches. In any other cookbook a writer can change `main` and
-  merge, so say plainly that review of an agent's work is a practice there and
-  not enforced. Do not add or change a role.
+  is kept to branches. For any other cookbook, read its
+  `policies/graph.policy.yaml` and say what it does: who can write `main` and
+  who can merge. Where nothing keeps an agent on a branch, say that review of
+  its work is a practice there and not enforced. Do not add or change a role.
 - **Schema, queries and seed.** If a workflow needs a stored write the
   cookbook does not have, leave the workflow out or name the gap. Do not
   document an ad-hoc mutation as the way to do it. If the record has no place
   to note that an outside action was taken, say so. Do not add a type or a
   field. Errors in `seed.md` or a query go in your report.
-- **Featured questions.** Keep the ones `site.json` has. Change one only if it
-  returns nothing on the seed or says more than its query does, because the
-  change shows on the site.
+- **Featured questions.** Keep the ones `site.json` has, and give each one
+  whose query takes parameters a `params` that returns rows on the seed;
+  adding `params` does not change the question. Replace a question only if it
+  returns nothing on the seed or says more than its query does, with the
+  stored read nearest to it that does return rows, because the change shows
+  on the site. `about` does change, to the new first paragraph; that is
+  intended.
 
 ### Working out the workflows
 
@@ -302,11 +311,13 @@ the list the check uses; change the two together.
 - Draw the ontology in plain Mermaid: type names as nodes and each link as a
   labelled arrow, including a type's link to itself. Put no HTML in a label;
   tags such as `<b>` show as text in some viewers.
-- In the workflow table, name at most four stored queries for a workflow, and
-  list eight to twelve workflows. In that table and the questions table, put
-  backticks around a snake_case word only when it is a stored query; the check
-  reads it as one.
-- Wrap prose at 80 columns, and keep the whole file to about 200 lines.
+- In the workflow table, name the main stored queries of a workflow, four at
+  most, and aim for eight to twelve workflows. List fewer when the cookbook's
+  stored queries do not support more; do not pad. In that table and the
+  questions table, put backticks around a snake_case word only when it is a
+  stored query; the check reads it as one.
+- Wrap prose at 80 columns; tables and the prompt are exempt. Aim for about
+  200 lines. Neither is checked.
 
 ### What goes with it
 
@@ -334,8 +345,9 @@ the list the check uses; change the two together.
   `omnigraph init --schema schema.pg <dir>/g.omni`, then
   `omnigraph load --target <dir>/g.omni --data seed.jsonl --mode append`, then
   `omnigraph query <name> --query queries/<file>.gq --target <dir>/g.omni`.
-  Every featured question must return rows, and every number in Sample data
-  must match what you see.
+  Set `OMNIGRAPH_HOME` to a scratch directory first, so the run does not touch
+  your own operator configuration. Every featured question must return rows,
+  and every number in Sample data must match what you see.
 - The full `check-cookbooks.py` run does the same against a served graph. It
   needs the released `omnigraph-server` on the PATH (see
   [local setup](README.md#local-setup)); CI runs it on every pull request.
