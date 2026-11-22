@@ -288,7 +288,8 @@ step-by-step workflows belong in the cookbook's `AGENTS.md`.
 
 The template, the rules for each section and how to write one are in
 [AGENTS.md](AGENTS.md#writing-a-cookbook-readme).
-[hardware-program](hardware-program/README.md) is the worked example. A
+[hardware-program](hardware-program/README.md) and
+[company-brain](company-brain/README.md) are the worked examples. A
 cookbook whose `site.json` names a `use_case` is held to the template by the
 check; the others move over one at a time.
 

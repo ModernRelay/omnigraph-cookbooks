@@ -72,8 +72,8 @@ people and agents doing the work, and the agent workflows that run around it.
 It is not a manual. Commands, roles and step-by-step workflows go in the
 cookbook's own `AGENTS.md`.
 
-[hardware-program/README.md](hardware-program/README.md) is the worked
-example. A cookbook whose `site.json` names a `use_case` is held to this
+[hardware-program/README.md](hardware-program/README.md) and
+[company-brain/README.md](company-brain/README.md) are the worked examples. A cookbook whose `site.json` names a `use_case` is held to this
 structure by `check-cookbooks.py --site`; the others move over one at a time.
 
 ### Before you write
@@ -126,7 +126,7 @@ graph LR
 
 <One or two sentences: a change is made on a branch and the baseline moves on merge.>
 
-- **<What people use branches for here>.** <One or two sentences.>
+- **<What a branch is used for here, by people or by agents>.** <One or two sentences.>
 
 ## Agents and workflows
 
@@ -186,10 +186,10 @@ exact command for each question and workflow on this page.
 |---|---|---|
 | Title and intro | The opening sentence as in the template, where X is what the use case keeps: a system of record for a hardware program, a company brain. Then the problem and three benefits | That opening; the first paragraph equal to `about` in `site.json`; a link to `AGENTS.md` |
 | The data model | The ontology of this use case, drawn, then the type table and the few modelling choices that matter. Say what OmniGraph provides, such as object storage, only where this use case has its own reason for it | Every backticked type exists in `schema.pg` |
-| Branching and merging | What people in this field use a branch for | Not empty |
-| Agents and workflows | The workflows by name, each with the stored queries behind it, then what an agent may not do | Names stored queries, and only ones the cookbook has |
+| Branching and merging | What a branch is used for in this use case, by people or by agents. In some, engineers branch for change requests; in others only agents do | Not empty |
+| Agents and workflows | The workflows by name, each with the stored queries behind it, reads and writes alike, then what an agent may not do | Names stored queries, and only ones the cookbook has |
 | Data sources | The tools a team brings data in from, by product name, and the types each feeds | Every backticked type exists in `schema.pg` |
-| Questions you can ask | The questions `site.json` features, three to five | Each listed word for word on a line with its query; each returns rows on the seed |
+| Questions you can ask | The questions `site.json` features, three to five. Feature only questions the sample data answers. One that is rightly empty on a fresh load, such as a check that finds nothing wrong, belongs in the workflow table | Each listed word for word on a line with its query; each returns rows on the seed |
 | Sample data | What the seed depicts and what the questions return on it | A link to `seed.md` |
 | Run it | The prompt, and where the commands are | Links to local setup and `AGENTS.md`; the Graph ID |
 
@@ -218,10 +218,14 @@ the list the check uses; change the two together.
 
 - `site.json`: `about` is the README's first paragraph. `use_case`, `needs`
   and `capabilities` carry the mr-ops slugs, and each need and capability
-  names in `shown_in` the README heading that shows it. A question whose query
-  takes parameters gives them in `params`.
+  names in `shown_in` the README heading that shows it. List a need only if
+  mr-ops links it to the use case and the cookbook shows it. List a capability
+  if mr-ops links it to the use case or to one of those needs. Where the
+  cookbook shows something mr-ops does not link, add the link in mr-ops first.
+  A question whose query takes parameters gives them in `params`.
 - The cookbook's `AGENTS.md`: how to run it, the command for each question,
-  each workflow step by step, and what the cookbook does not do.
+  each workflow step by step, the detailed modelling rules, and what the
+  cookbook does not do.
 - Run `python3 scripts/check-cookbooks.py --site` until it passes. The full
   run also runs each question against the seed.
 
