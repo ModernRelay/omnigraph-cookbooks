@@ -3,12 +3,15 @@
   "name": "Pharma intelligence",
   "category": "Research",
   "blurb": "Competitive intelligence for a biotech program: the compounds, trials and deals around it, the program's own assumptions, and which signals contradict them.",
-  "about": "The pharma intelligence graph is competitive intelligence for one biotech program, seen from the sponsor's side. It holds the external pipeline (compounds, trials, deals and regulatory actions) next to the program's own assumptions, decisions and open questions. The graph shows which outside signals contradict which internal assumptions, and what still needs an answer before an upcoming decision.",
+  "about": "Build a living competitive intelligence record for a biotech program, and the agent workflows around it. It keeps the compounds, trials, deals and regulatory actions around the program linked to the program's own assumptions, decisions and open questions, so each outside signal shows what it supports or threatens. New public signals are linked as they appear, so a decision briefing is a read and not a rebuilt slide deck. Agents propose signals and links on branches for an analyst to review.",
   "sample": "Viking Therapeutics' obesity program, from public sources",
   "questions": [
     {
       "q": "Which signals contradict an assumption the program relies on?",
-      "query": "assumption_contradicting_signals"
+      "query": "assumption_contradicting_signals",
+      "params": {
+        "slug": "asmp-oral-displaces-injectable"
+      }
     },
     {
       "q": "Which decisions are coming up?",
@@ -16,11 +19,17 @@
     },
     {
       "q": "Which compounds compete with the program?",
-      "query": "program_competitors"
+      "query": "program_competitors",
+      "params": {
+        "slug": "prog-vk2735-sc"
+      }
     },
     {
       "q": "Which compounds target a mechanism?",
-      "query": "compounds_by_mechanism"
+      "query": "compounds_by_mechanism",
+      "params": {
+        "mechanism": "mech-gip-glp1-dual"
+      }
     }
   ],
   "search": {
