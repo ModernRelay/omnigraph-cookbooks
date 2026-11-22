@@ -3,7 +3,7 @@
   "name": "Development graph",
   "category": "Engineering",
   "blurb": "Issues, epics, specs, decisions, pull requests, releases and incidents as one graph, with the Git host still the record for code.",
-  "about": "The development graph models the work around the code as one typed graph: issues, epics, specs, decisions, pull requests, releases and incidents, with the rules that constrain them. It gives coding agents the upstream decisions and the context across repositories that they lack when they review or change code. It is not a code index: the Git host stays the record for code, and this graph takes the place of the issue tracker.",
+  "about": "Build a living system of record for software development, and the agent workflows around it. It keeps issues, epics, specs, decisions, pull requests, releases and incidents linked to the components they touch and to the invariants and principles that constrain them. Whether work is ready, blocked or stale is worked out from those links on every read, so no status drifts. Agents triage, trace and report, writing on branches for a person to review.",
   "sample": "Meridian, a fictional collaborative-document product",
   "questions": [
     {
@@ -16,11 +16,24 @@
     },
     {
       "q": "Which spec describes this epic?",
-      "query": "epic_spec"
+      "query": "epic_spec",
+      "params": {
+        "epic": "epc-offline-sync"
+      }
     },
     {
       "q": "Which pull requests shipped in this release?",
-      "query": "release_prs"
+      "query": "release_prs",
+      "params": {
+        "release": "rel-v1-4-0"
+      }
+    },
+    {
+      "q": "Which pull request caused this incident?",
+      "query": "incident_root_cause",
+      "params": {
+        "incident": "inc-presence-leak"
+      }
     }
   ],
   "search": {
@@ -33,5 +46,34 @@
       "knowledge graph",
       "coding agents"
     ]
-  }
+  },
+  "use_case": "usecase:dev-graph",
+  "needs": [
+    {
+      "need": "need:context-scattered",
+      "shown_in": "The data model"
+    },
+    {
+      "need": "need:agent-changes-checked-before-truth",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "need": "need:history-kept-and-restorable",
+      "shown_in": "Branching and merging"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "cap:typed-schema",
+      "shown_in": "The data model"
+    },
+    {
+      "capability": "cap:branching",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "capability": "cap:time-travel",
+      "shown_in": "Branching and merging"
+    }
+  ]
 }
