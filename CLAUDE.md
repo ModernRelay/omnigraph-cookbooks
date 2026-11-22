@@ -74,9 +74,7 @@ cookbook's own `AGENTS.md`.
 
 [hardware-program/README.md](hardware-program/README.md) and
 [company-brain/README.md](company-brain/README.md) are the worked examples.
-`check-cookbooks.py --site` holds a cookbook to this structure once it is
-moved. To move one, take its name out of `EARLIER_READMES` in
-`scripts/check-cookbooks.py`; that is what switches the check on for it.
+`check-cookbooks.py --site` holds every cookbook to this structure.
 
 `AGENTS.md` and `CLAUDE.md` are one file, here and in each cookbook: the
 first is a link to the second. Edit `CLAUDE.md`, and link `AGENTS.md` from a
