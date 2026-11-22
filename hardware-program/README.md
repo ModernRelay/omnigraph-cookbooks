@@ -25,10 +25,6 @@ as the one place those links are held.
 
 ## The data model
 
-The ontology is a hardware program's own: requirements, the architecture they
-are allocated to, design values, tests, reviews and risks, and the links
-between them.
-
 ```mermaid
 graph LR
   Requirement -- derives from --> Requirement
@@ -88,8 +84,7 @@ baseline moves only when the branch is merged.
 ## Agents and workflows
 
 Agents bring changes into the record, keep it consistent and tell people what
-needs them. Engineers make the decisions. These are the workflows the cookbook
-supports, each backed by stored queries:
+needs them. Engineers make the decisions.
 
 | Kind | Workflow | What it does | Stored queries |
 |---|---|---|---|
@@ -150,8 +145,7 @@ mutations or a merge load.
 
 ## Questions you can ask
 
-Each is answered from the current data by a stored query. Nobody maintains a
-status field, a roll-up sheet or a matrix for it.
+Nobody maintains a status field, a roll-up sheet or a matrix for these.
 
 | Question | Stored query |
 |---|---|

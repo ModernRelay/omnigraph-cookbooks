@@ -143,8 +143,6 @@ This cookbook sets OmniGraph up as <the one place it is held>.
 
 ## The data model
 
-<One sentence naming what the ontology covers.>
-
 ```mermaid
 graph LR
   <Type> -- <link in plain words> --> <Type>
@@ -191,7 +189,7 @@ what it does, where a person decides.>
 
 ## Questions you can ask
 
-<One sentence: each is answered from the current data by a stored query.>
+<One sentence on what nobody has to keep up by hand for these.>
 
 | Question | Stored query |
 |---|---|
@@ -243,6 +241,9 @@ the list the check uses; change the two together.
   reviews the branch and merges it" to a noun phrase.
 - Use short labelled points, where the label names a feature. Do not write
   slogans or taglines.
+- Cut every sentence that only announces what follows, restates its heading
+  or says what the diagram or table beside it already shows. "The ontology is
+  a company's own" tells the reader nothing; start with the diagram.
 - Keep the sample data in its own section. Every other section has to make
   sense to a reader who has not looked at the seed, so numbers from the seed
   go only there.

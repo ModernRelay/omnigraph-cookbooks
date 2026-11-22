@@ -24,10 +24,6 @@ record they all read and write.
 
 ## The data model
 
-The ontology is a company's own: its people, teams and projects, the meetings,
-threads and documents it learned from, the claims people made in them, and the
-decisions and action items that follow.
-
 ```mermaid
 graph LR
   Person -- member of --> Team
@@ -91,9 +87,7 @@ one.
 ## Agents and workflows
 
 Agents bring what was said into the record, keep it consistent and tell people
-what needs them. People verify what was recorded and accept what
-was proposed. These are the workflows the cookbook supports, each backed by
-stored queries:
+what needs them. People verify what was recorded and accept what was proposed.
 
 | Kind | Workflow | What it does | Stored queries |
 |---|---|---|---|
@@ -152,8 +146,7 @@ twice does not duplicate it.
 
 ## Questions you can ask
 
-Each is answered from the current record by a stored query. Nobody maintains a
-decision log or a status page for it.
+Nobody maintains a decision log or a status page for these.
 
 | Question | Stored query |
 |---|---|
