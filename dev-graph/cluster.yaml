@@ -22,7 +22,7 @@ graphs:
 # environment, uncomment both the provider below and the graph binding above,
 # then plan/apply through the running server. Generate stored vectors with
 # the offline omnigraph embed pipeline and load the resulting JSONL;
-# load never generates @embed fields. See README.md#semantic-search-optional.
+# load never generates @embed fields. See CLAUDE.md, "Semantic search (optional)".
 #
 # providers:
 #   embedding:

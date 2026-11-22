@@ -467,7 +467,7 @@ def check_site(folder):
 # use-case page from the same sections (see "Cookbook READMEs" in the README).
 # Commands belong in the cookbook's AGENTS.md.
 # Cookbooks not yet moved to the template. Take one out when it is moved; the set ends empty.
-EARLIER_READMES = {"industry-intel", "pharma-intel", "second-brain", "vc-os", "dev-graph", "beads"}
+EARLIER_READMES = {"industry-intel", "pharma-intel", "second-brain", "vc-os", "beads"}
 README_SECTIONS = ("The data model", "Branching and merging", "Agents and workflows",
                    "Data sources", "Questions you can ask", "Sample data", "Run it")
 QUESTIONS = range(3, 6)   # how many questions a cookbook features
