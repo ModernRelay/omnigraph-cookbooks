@@ -1,6 +1,11 @@
 # SPIKE Seed Dataset
 
-Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
+Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-11-21.
+
+Every pattern carries supporting signals, and three of them carry contradicting
+ones. That is deliberate: a pattern nothing argues with is a pattern nobody has
+tested, and `contested_patterns` exists to find the ones under pressure. See
+[Signal → Pattern edges (ContradictsPattern)](#signal--pattern-edges-contradictspattern).
 
 ---
 
@@ -16,7 +21,7 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 
 ---
 
-## Signals (15)
+## Signals (19)
 
 | slug | name | brief | domain | stagingTimestamp |
 |------|------|-------|--------|-----------------|
@@ -35,6 +40,13 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `sig-karpathy-autoresearch-700` | Karpathy autoresearch: 700 experiments in 2 days | 70.5k stars. Single GPU, 5-min cycles. Human writes program.md; agent writes train.py. Fortune coverage. | training | 2026-03-07 |
 | `sig-alphaevolve-matrix-multiply` | AlphaEvolve: first improvement to matrix multiplication in 56 years | Gemini-powered. 48 scalar ops for 4×4 complex (beat Strassen 1969). 23% kernel speedup. UK lab 2026. | inference | 2025-06-16 |
 | `sig-tao-erdos-728` | Terence Tao: AI autonomously solves Erdos problem #728 | ChatGPT generated proof, Aristotle auto-repaired, Lean-verified. First AI Erdos solution not in literature. | inference | 2026-01-07 |
+| `sig-servicenow-seats-hold` | ServiceNow: 98% renewal rate and a rising seat count | Q2 2026 subscription revenue $3.877B, up 24.5%. 98% renewal rate. McDermott: active seats are still growing, and half of new business is already non-seat. | harness | 2026-07-22 |
+| `sig-software-index-recovery` | Software stocks recover the 2026 selloff | MarketWatch, 30 Aug 2026: "AI isn't eating software after all." The software index gave back February's losses and rallied through the autumn on strong earnings. | harness | 2026-08-30 |
+| `sig-hyperscaler-ai-acceleration` | Public-cloud AI revenue accelerates in Q3 2026 | Q3 2026: Google Cloud +103% to $30.7B, Azure +48% to $33.2B, AWS +39% to $46B. AI spend is concentrating in public cloud, not leaving it. | infra | 2026-10-29 |
+| `sig-ai-proof-trust-gap` | AI-generated proofs fail audit: Lean code weaker than the prose | Science, 27 Oct 2026: mathematicians found OpenAI's Navier-Stokes Lean formalisation proved weaker claims than its manuscript. OpenAI had already withdrawn GPT-5's ten Erdos "solutions" as a literature search. | inference | 2026-10-27 |
+
+The last four are counter-evidence; they attach with `ContradictsPattern` below,
+not `FormsPattern`.
 
 ### Signal → Pattern edges (FormsPattern)
 
@@ -55,6 +67,23 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `sig-karpathy-autoresearch-700` | `pat-accelerated-research` |
 | `sig-alphaevolve-matrix-multiply` | `pat-accelerated-research` |
 | `sig-tao-erdos-728` | `pat-accelerated-research` |
+
+### Signal → Pattern edges (ContradictsPattern)
+
+The counter-evidence, and the rows `contested_patterns` returns. Two
+contradictions land on `pat-saaspocalypse`, one each on `pat-sovereign-ai` and
+`pat-accelerated-research`; `pat-context-graphs` and `pat-new-cyber-threats`
+have none, so the query leaves them out. A contradicting signal is still an
+attached signal, so none of these appears in `orphan_signals`, and each carries
+a `SpottedInArtifact` and a `SourcedFromSource` edge, so none appears in
+`unsourced_signals` either.
+
+| signal | pattern | what it contests |
+|--------|---------|------------------|
+| `sig-servicenow-seats-hold` | `pat-saaspocalypse` | Per-seat pricing is meant to evaporate once agents stop sitting in seats. At the vendor most exposed to that, seats grew and renewals held at 98%. |
+| `sig-software-index-recovery` | `pat-saaspocalypse` | The $830B drawdown is the pattern's headline fact. The index took it back within six months, which makes it a repricing rather than a structural break. |
+| `sig-hyperscaler-ai-acceleration` | `pat-sovereign-ai` | If 93% of enterprises were moving AI off public cloud, hyperscaler AI revenue would decelerate. All three accelerated instead. |
+| `sig-ai-proof-trust-gap` | `pat-accelerated-research` | The loop runs no faster than its verification. Audits found AI proofs claiming more than their formalisation established, and one Erdos result withdrawn outright. |
 
 ### Signal → Element edges (OnElement)
 
@@ -200,7 +229,7 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 
 ---
 
-## Companies (13 + 3 for experts = 16 total)
+## Companies (15 + 3 for experts = 18 total)
 
 | slug | name | type | brief |
 |------|------|------|-------|
@@ -217,6 +246,8 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `co-nousresearch` | NousResearch | developer | Hermes Agent. Open-source agent framework. |
 | `co-klarna` | Klarna | developer | Replaced Salesforce with homegrown AI. |
 | `co-salesforce` | Salesforce | bigtech | CRM incumbent being replaced. |
+| `co-servicenow` | ServiceNow | bigtech | Enterprise workflow platform. Q2 2026: $3.877B subscription revenue, 98% renewal rate. |
+| `co-openai` | OpenAI | developer | Frontier model developer. Withdrew three maths claims across 2025-2026 after human audit. |
 
 ### Element → Company edges (DevelopedByCompany)
 
@@ -252,6 +283,8 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `sig-mythos-181-exploits` | `co-anthropic` |
 | `sig-meta-rogue-agent-breach` | `co-meta` |
 | `sig-alphaevolve-matrix-multiply` | `co-google-deepmind` |
+| `sig-servicenow-seats-hold` | `co-servicenow` |
+| `sig-ai-proof-trust-gap` | `co-openai` |
 
 ---
 
@@ -279,7 +312,7 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 
 ---
 
-## SourceEntity (16)
+## SourceEntity (20)
 
 | slug | name | type | platform | url |
 |------|------|------|----------|-----|
@@ -299,10 +332,14 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `source-cloudian-bl` | Cloudian / EnterpriseNews | blog | web | https://enterprisenews.com |
 | `source-moonshot-bl` | Moonshot AI | blog | web | https://kimi.com |
 | `source-zylon-bl` | Zylon | blog | web | https://zylon.ai |
+| `source-servicenow-news` | ServiceNow Newsroom | blog | web | https://newsroom.servicenow.com |
+| `source-marketwatch-nl` | MarketWatch | newsletter | web | https://marketwatch.com |
+| `source-cnbc-nl` | CNBC | newsletter | web | https://cnbc.com |
+| `source-science-aaas` | Science (AAAS) | academic_repository | web | https://science.org |
 
 ---
 
-## InformationArtifact (20)
+## InformationArtifact (24)
 
 | slug | name | artifactType | link | stagingTimestamp |
 |------|------|-------------|------|-----------------|
@@ -326,6 +363,10 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `ia-levie-agents-legacy` | Aaron Levie on AI agents and legacy systems (a16z podcast) | youtube | https://www.youtube.com/watch?v=dvt_74kV-RM | 2026-04-01 |
 | `ia-altshuler-informed-walkers` | Andrew Altshuler on agents as informed walkers | article | https://x.com/1eo/status/2028566640145670413 | 2026-03-01 |
 | `ia-balaji-functionality-portable` | Balaji on functionality portability via Claude Code | article | https://x.com/balajis/status/2008847069386273211 | 2026-01-08 |
+| `ia-servicenow-q2-2026-results` | ServiceNow Reports Second Quarter 2026 Financial Results | article | https://newsroom.servicenow.com/press-releases/details/2026/ServiceNow-Reports-Second-Quarter-2026-Financial-Results/default.aspx | 2026-07-22 |
+| `ia-marketwatch-ai-not-eating-software` | AI isn't eating software after all | article | https://www.marketwatch.com/story/ai-isnt-eating-software-after-all-and-the-sectors-epic-rally-could-run-through-october-a4610583 | 2026-08-30 |
+| `ia-cnbc-aws-q3-2026` | AWS Q3 earnings report 2026 | article | https://www.cnbc.com/2026/10/29/aws-q3-earnings-report-2026.html | 2026-10-29 |
+| `ia-science-ai-proofs-trusted` | AI is shaking up math. But can its proofs be trusted? | article | https://www.science.org/content/article/ai-shaking-math-can-its-proofs-be-trusted | 2026-10-27 |
 
 ### InformationArtifact → SourceEntity edges (PublishedBySource)
 
@@ -348,6 +389,10 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `ia-cloudian-93pct-survey` | `source-cloudian-bl` |
 | `ia-kimi-k25-release` | `source-moonshot-bl` |
 | `ia-zylon-deployment-options` | `source-zylon-bl` |
+| `ia-servicenow-q2-2026-results` | `source-servicenow-news` |
+| `ia-marketwatch-ai-not-eating-software` | `source-marketwatch-nl` |
+| `ia-cnbc-aws-q3-2026` | `source-cnbc-nl` |
+| `ia-science-ai-proofs-trusted` | `source-science-aaas` |
 
 ### InformationArtifact → Expert edges (ContributedByExpert)
 
@@ -379,6 +424,10 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `sig-karpathy-autoresearch-700` | `ia-fortune-karpathy-loop` |
 | `sig-alphaevolve-matrix-multiply` | `ia-deepmind-alphaevolve` |
 | `sig-tao-erdos-728` | `ia-tao-erdos-728` |
+| `sig-servicenow-seats-hold` | `ia-servicenow-q2-2026-results` |
+| `sig-software-index-recovery` | `ia-marketwatch-ai-not-eating-software` |
+| `sig-hyperscaler-ai-acceleration` | `ia-cnbc-aws-q3-2026` |
+| `sig-ai-proof-trust-gap` | `ia-science-ai-proofs-trusted` |
 
 ### Signal → SourceEntity edges (SourcedFromSource)
 
@@ -395,6 +444,10 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | `sig-mythos-181-exploits` | `source-red-anthropic-bl` |
 | `sig-alphaevolve-matrix-multiply` | `source-deepmind-bl` |
 | `sig-tao-erdos-728` | `source-tao-mastodon-bl` |
+| `sig-servicenow-seats-hold` | `source-servicenow-news` |
+| `sig-software-index-recovery` | `source-marketwatch-nl` |
+| `sig-hyperscaler-ai-acceleration` | `source-cnbc-nl` |
+| `sig-ai-proof-trust-gap` | `source-science-aaas` |
 
 ---
 
@@ -496,6 +549,16 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 
 **`sig-tao-erdos-728`** — On January 7, 2026, Terence Tao posted on Mastodon that AI tools had "more or less autonomously" solved Erdos problem #728 — a 1975 question about prime factorization of binomial coefficients. ChatGPT generated the proof after some feedback from an initial attempt; the AI tool Aristotle then automatically repaired minor errors and produced a Lean-verified proof. Tao noted the result was "not replicated in existing literature," making it the first AI solution to an Erdos problem that was genuinely new. He later found the methods were similar to a 2014 paper by Pomerance, but the AI-generated solution was the first to explicitly address this specific problem formulation.
 
+The four below are the contradicting signals. Each one weakens a pattern rather than supporting it; see [ContradictsPattern](#signal--pattern-edges-contradictspattern) for which, and why.
+
+**`sig-servicenow-seats-hold`** — ServiceNow reported Q2 2026 subscription revenue of $3,877 million, up 24.5% year over year, with a 98% renewal rate. Asked about seat compression on the earnings call, CEO Bill McDermott said he was not worried: active seats are still increasing, and about 50% of new business is already non-seat based. Management keeps a hybrid licence-and-usage model deliberately, because customers prefer the predictability of a seat line. This is the per-seat thesis tested at a company that sells exactly the workflow software agents are supposed to displace, and in this quarter it did not break.
+
+**`sig-software-index-recovery`** — MarketWatch reported on 30 August 2026 that the software sector's rally had undone the February selloff, under the headline "AI isn't eating software after all". Software multiples had been marked down on the assumption that agents would take the seats; the recovery followed quarters in which the companies kept growing. The iShares Expanded Tech-Software ETF (IGV) bottomed on 10 April 2026, roughly 36% below its October 2025 peak, then climbed back through the autumn. The $830B drawdown was a repricing of expectations, and the expectations moved back.
+
+**`sig-hyperscaler-ai-acceleration`** — The three largest public clouds all accelerated in the third quarter of 2026: Google Cloud grew 103% year over year to $30.7 billion, Microsoft Azure 48% to $33.2 billion, and AWS 39% to $46 billion. If 93% of enterprises were moving AI workloads off public cloud, that spend would show up as decelerating hyperscaler revenue. It did the opposite. What the repatriation research describes is better read as selective rebalancing — particular workloads placed by unit economics or sovereignty rules — than as a general exit, and no named enterprise has been reported reversing a full-scale move to public cloud.
+
+**`sig-ai-proof-trust-gap`** — Science surveyed the trust problem in AI-generated mathematics on 27 October 2026. Mathematicians auditing OpenAI's Navier-Stokes work found gaps between the natural-language manuscript and the Lean formalisation offered as its certificate: the formal proof established weaker claims than the prose stated, so the machine-checked part did not cover the result being announced. The pattern was not new. In October 2025 OpenAI withdrew the claim that GPT-5 had solved ten Erdos problems once it emerged the model had performed a literature search and surfaced problems already settled; in December 2025 an AI-claimed solution to Erdos problem 333 turned out to have been settled by Erdos himself in 1977. A PNAS paper the same month ("The more you automate, the less you see") argued the failure mode is structural: the more of the loop is automated, the fewer of its errors anyone sees. Verification, not generation, is where the research loop is still human-paced.
+
 ### Elements
 
 **`el-zylon`** — Full-stack on-prem AI platform from the PrivateGPT creators (57k stars). Air-gapped, fixed-cost, production-ready in days. Three tiers: cloud VPC, managed on-prem (via certified partners), or "Zylon in a Box" pre-configured server.
@@ -579,13 +642,13 @@ Seed data for five-patterns, mapped to `schema.pg`. Updated: 2026-04-14.
 | Node type | Count | Complete? |
 |-----------|-------|-----------|
 | Pattern | 5 | Yes (brief + description) |
-| Signal | 15 | Yes (brief + description + domain) |
+| Signal | 19 | Yes (brief + description + domain) |
 | Element | 24 | Yes (brief + description + metadata) |
 | Insight | 4 | Yes (brief + description) |
 | KnowHow | 2 | Yes (brief + description + guidelines) |
-| Company | 16 | Brief only |
+| Company | 18 | Brief only |
 | Expert | 7 | Affiliations complete |
-| SourceEntity | 16 | Yes |
-| InformationArtifact | 20 | Yes |
-| **Total nodes** | **109** | |
-| Edges | 154 | FormsPattern, OnElement, ExemplifiesPattern, EnablesPattern, EnablesElement/UsesElement, HighlightsPattern, ReliesOnElement, ReferencesElement, SpottedInArtifact, SourcedFromSource, PublishedBySource, ContributedByExpert, DevelopedByCompany, AffiliatedWithCompany, RelevantCompany, SourcedFromArtifact |
+| SourceEntity | 20 | Yes |
+| InformationArtifact | 24 | Yes |
+| **Total nodes** | **123** | |
+| Edges | 172 | FormsPattern, ContradictsPattern, OnElement, ExemplifiesPattern, EnablesPattern, EnablesElement/UsesElement, HighlightsPattern, ReliesOnElement, ReferencesElement, SpottedInArtifact, SourcedFromSource, PublishedBySource, ContributedByExpert, DevelopedByCompany, AffiliatedWithCompany, RelevantCompany, SourcedFromArtifact |

@@ -43,7 +43,16 @@ Five live patterns in the AI industry:
 
 Each pattern is backed by ~3 real, dated signals with source URLs. Signals connect to the Elements (products, frameworks, concepts) they're about, which in turn connect to Companies that built them.
 
-**Totals:** 109 nodes, 154 edges.
+Three of the five patterns also carry contradicting signals — later evidence
+that cuts against the thesis rather than supporting it: ServiceNow's seats and
+renewals holding and the software index recovering, against SaaSpocalypse;
+accelerating public-cloud AI revenue, against Sovereign AI; and audits finding
+AI-generated proofs weaker than claimed, against Accelerated Research. They are
+what `contested_patterns` returns, and they are the reason the cookbook models
+`ContradictsPattern` at all: a pattern nothing argues with is one nobody has
+tested yet.
+
+**Totals:** 123 nodes, 172 edges.
 
 ## Schema Essentials
 
