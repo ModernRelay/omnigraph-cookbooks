@@ -216,6 +216,23 @@ using folder `<folder>` and Graph ID `<graph>`. [AGENTS.md](AGENTS.md) has the
 exact command for each question and workflow on this page.
 ````
 
+### What each section is for
+
+Every section has three readers: a person deciding, an agent setting the
+cookbook up or working in it, and a search engine or AI answer matching the
+page to a question. Write each section so it serves all three.
+
+| Section | For the person | For an agent | For search |
+|---|---|---|---|
+| Intro | Decide in a few seconds whether this is their problem | Choose between cookbooks; find `AGENTS.md` | The page's description: it is `about` in `site.json`, so it carries the words people search |
+| The data model | Recognise their own domain in the types and links | Learn the types before reading or writing | Queries for the field's data model, ontology or schema |
+| Branching and merging | See how a change is proposed and reviewed, in their field's terms, and that nothing lands unreviewed | Know that its writes go on a branch and wait for a person | Queries about review, change control and versioning in the field |
+| Agents and workflows | Picture what agents would do for them, and get ideas for workflows to run | A menu of workflows with the stored queries each one uses | Queries for the field's tasks plus "agent" or "automation" |
+| Data sources | Think of what they could bring in from tools they already use | Know which tools to read from and which types to write | People search by tool name, so each product named is a match |
+| Questions you can ask | See answers they cannot get today | The named queries to call | The questions are the site's featured questions and read as an FAQ |
+| Sample data | Check the claims against real numbers | Know what a correct load returns | Little; it keeps the rest of the page free of sample detail |
+| Run it | The one action to take | The prompt it is started with, and where the commands are | Little |
+
 ### Section by section
 
 | Section | Write | The check holds you to |
