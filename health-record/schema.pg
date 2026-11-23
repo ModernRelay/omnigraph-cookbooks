@@ -1,0 +1,383 @@
+// health-record — one person's health record as one typed graph
+//
+// The graph holds what a person collects about their health: the documents
+// they received, the results read from them, readings from devices, the
+// targets they set, the hypotheses they and their clinicians hold, what they
+// take or do about them, the vaccine doses they were given and what is due
+// next. Everything they ask of it — which result is off target, what is
+// overdue, whether a change moved the marker it aimed at, which vaccine
+// series is incomplete — is derived by the stored queries on every read,
+// never stored as a status that can drift.
+//
+// It keeps and surfaces facts. It does not diagnose: a hypothesis is the
+// person's or a clinician's, and an agent may only propose one for review.
+//
+// The reference seed (seed.jsonl / seed.md) is an invented person, "Noa
+// Brandt". Every name, date and value is made up.
+//
+// 16 node classes:
+//   Who and where — Person, Organization, Visit
+//   Evidence      — HealthRecord, Measurable, Measurement, ExternalCode
+//   Judgement     — Target, Hypothesis, Condition, ConditionOccurrence
+//   Action        — Intervention, InterventionEpisode, Immunization,
+//                   Recommendation, Notification
+//
+// Records are written once. Each kind of record has one required edge to its
+// owner that is left unkeyed on purpose: inserting a slug that already exists
+// adds a second such edge, which breaks its @card(1..1), and the whole write
+// is refused. So filing a document, a result or a dose twice cannot replace
+// what is there. Catalogue nodes (Person, Organization, Measurable, Condition,
+// ExternalCode) have no such edge: an insert on an existing slug replaces them.
+
+// ── Who and where ─────────────────────────────────────────────────
+
+node Person @description("Someone the record is about, or a clinician who appears in it.") {
+    slug: String @key
+    name: String @index
+    role: enum(subject, clinician, other)
+    born_on: Date?
+}
+
+node Organization @description("A laboratory, clinic, hospital or pharmacy that produced a document or gave a dose.") {
+    slug: String @key
+    name: String @index
+    kind: enum(laboratory, clinic, hospital, pharmacy, other)
+}
+
+node Visit @description("An appointment, planned or past. Completing it can record the graph commit the clinician saw.") {
+    slug: String @key
+    title: String
+    kind: enum(checkup, consultation, lab_draw, procedure, vaccination, telehealth)
+    scheduled_at: DateTime @index
+    status: enum(planned, completed, cancelled) @index
+    reason: String?
+    summary: String?
+    baseline_commit: String?
+}
+
+// ── Evidence ──────────────────────────────────────────────────────
+
+node HealthRecord @description("A document the record learned from: a lab report, a clinic letter, a vaccination card, a wearable export.")
+                  @instruction("File the document first, as raw, with its file. An agent that reads values from it sets extraction to extracted; only a person who has checked the values against the file sets reviewed.") {
+    slug: String @key
+    title: String @index
+    kind: enum(lab_report, imaging_report, clinic_letter, prescription, vaccination_record, wearable_export, other) @index
+    document_date: Date
+    received_at: DateTime
+    // raw: filed, nothing read from it yet; extracted: values were read from
+    // it; reviewed: a person checked those values against the file.
+    extraction: enum(raw, extracted, reviewed) @index
+    file: Blob?
+    notes: String?
+}
+
+node Measurable @description("Something that can be measured about a person: a lab analyte, a vital sign, a body composition figure, a daily sleep or activity figure, a symptom score.") {
+    slug: String @key
+    name: String @index
+    kind: enum(lab_analyte, vital, body_composition, activity, sleep, symptom, score) @index
+    category: String? @index
+    // The unit targets and canonical values use, as a UCUM code.
+    canonical_unit: String
+    // Other names the same thing is printed under.
+    aliases: [String]?
+    description: String? @index
+}
+
+node Measurement @description("One value of one measurable for one person: a lab result as reported, a reading, or a summary over a period.")
+                 @instruction("Copy the value, unit, reference range and flag as the source printed them, and keep the printed line in source_line so a reviewer can check it. Set canonical_value only when the unit is the measurable's canonical unit or the conversion is certain. A correction is a new Measurement with status amended that supersedes the old one; never overwrite a reported value.") {
+    slug: String @key
+    // The instant of a reading, or the end of the period a summary covers.
+    measured_at: DateTime @index
+    // Set when the value summarises a period, such as one night or one day.
+    period_start: DateTime?
+    statistic: enum(point, mean, minimum, maximum, total, median)
+    value: F64?
+    // "<5" is reported as comparator lt with value 5: the detection limit,
+    // not a measured 5. Reads judge such a result only where the limit
+    // settles it: "<5" is under a floor of 5 or more and never over a ceiling.
+    comparator: enum(lt, le, gt, ge)?
+    value_text: String?
+    unit: String?
+    // The value in the measurable's canonical unit.
+    canonical_value: F64?
+    // The source's own range and flag, in the source's unit.
+    reference_low: F64?
+    reference_high: F64?
+    flag: enum(low, normal, high, critical)?
+    status: enum(preliminary, final, amended, entered_in_error) @index
+    fasting: Bool?
+    // The device or app that measured it, when there was one.
+    device: String?
+    // The name and the whole line as the source printed them.
+    source_name: String?
+    source_line: String?
+}
+
+node ExternalCode @description("A code from a standard system for a measurable, a condition or a vaccine: LOINC, ICD-10, CVX.") {
+    slug: String @key
+    system: enum(loinc, icd10, cvx, atc, rxnorm, snomed, other) @index
+    code: String @index
+    display: String?
+}
+
+// ── Judgement ─────────────────────────────────────────────────────
+
+node Target @description("The range a person wants a marker to stay in, with who set it and why. Off target is worked out against the latest result.") {
+    slug: String @key
+    low: F64?
+    high: F64?
+    // The measurable's canonical unit.
+    unit: String
+    set_on: Date
+    set_by: String
+    rationale: String?
+    status: enum(active, retired) @index
+}
+
+node Hypothesis @description("A possible explanation someone holds, with the results that support and contradict it.")
+                @instruction("The status is a person's or a clinician's verdict, never an agent's. Anything an agent proposes stays review_status ai_generated until a person reviews it. Link the results for and against it; do not restate them in the thesis.") {
+    slug: String @key
+    title: String @index
+    thesis: String @index
+    status: enum(open, supported, rejected, superseded) @index
+    review_status: enum(ai_generated, human_reviewed) @index
+    raised_on: Date
+}
+
+node Condition @description("A disease, a diagnosis or a kind of reaction, as a concept. A person's own case of it is a ConditionOccurrence.") {
+    slug: String @key
+    name: String @index
+    category: enum(infectious_disease, cardiovascular, metabolic, endocrine, musculoskeletal, reaction, other) @index
+}
+
+node ConditionOccurrence @description("One person's case of a condition, or one reaction they had, with how certain it is.") {
+    slug: String @key
+    status: enum(suspected, active, resolved, ruled_out) @index
+    certainty: enum(self_reported, clinician_suspected, confirmed)
+    onset_on: Date?
+    resolved_on: Date?
+    severity: enum(mild, moderate, severe)?
+    notes: String?
+}
+
+// ── Action ────────────────────────────────────────────────────────
+
+node Intervention @description("Something a person takes or does for their health: a medication, a supplement, a change of diet, exercise or sleep. The markers it is meant to move and the hypothesis behind it hang on this node; the dose is on its episodes.") {
+    slug: String @key
+    name: String @index
+    kind: enum(medication, supplement, diet, exercise, sleep, behavioural, procedure, other) @index
+    status: enum(planned, active, paused, stopped) @index
+    started_at: DateTime?
+    stopped_at: DateTime?
+    reason: String?
+}
+
+node InterventionEpisode @description("One period of an intervention at one dose and frequency. The current dose is the latest episode's; a change of dose is a new episode, so the intervention keeps its markers and its history.") {
+    slug: String @key
+    dose: String?
+    frequency: String?
+    started_at: DateTime @index
+    reason: String?
+}
+
+node Immunization @description("One vaccine dose given to a person, or one that was due and not given. Which diseases it counts towards, and as which dose of each series, is on its ProtectsAgainst links.")
+                  @instruction("One node per dose. A combined vaccine is one Immunization with one ProtectsAgainst link per disease, each with its own dose number. Set origin to what the entry rests on: recall means the person remembers it and no document shows it.") {
+    slug: String @key
+    // The vaccine as the source names it, such as "Tdap-IPV".
+    vaccine: String @index
+    product: String?
+    manufacturer: String?
+    lot_number: String? @index
+    expires_on: Date?
+    administered_on: Date @index
+    // How exactly the date is known: an old card may give only the year.
+    date_precision: enum(day, month, year)
+    site: enum(left_arm, right_arm, left_thigh, right_thigh, other)?
+    route: enum(intramuscular, subcutaneous, oral, intranasal, intradermal)?
+    status: enum(completed, not_done, entered_in_error) @index
+    status_reason: String?
+    origin: enum(provider_record, vaccination_card, registry, recall) @index
+}
+
+node Recommendation @description("Something due by a date: a retest, a screening, a vaccine dose or a follow-up, with the authority that set it. Whether it has been met is worked out from the result or the dose linked as fulfilling it.")
+                    @instruction("Record a recommendation with who made it. Do not work one out from a national schedule: schedules differ by country, age and history, and deciding which applies is a clinician's call. Link what met it with fulfil_with_result or fulfil_with_dose and leave status open; status records only a person's closure.") {
+    slug: String @key
+    title: String @index
+    kind: enum(retest, screening, vaccine_dose, follow_up) @index
+    // The clinician, guideline or body that set it.
+    authority: String
+    earliest_at: DateTime?
+    due_at: DateTime @index
+    latest_at: DateTime?
+    // Set when it recurs, so the next one can be raised once this is done.
+    repeats_every_days: I32?
+    dose_number: I32?
+    series_doses: I32?
+    // open until a person closes it: done without a result or dose on record,
+    // declined, or superseded. Met by a result or a dose is derived, not set.
+    status: enum(open, done, declined, superseded) @index
+    reason: String?
+}
+
+node Notification @description("A prompt put in front of the person, with whether it was sent and acknowledged. Its slug says what it is about, so the same prompt cannot be raised twice.")
+                  @instruction("Build the slug from the kind and the thing it is about, such as ntf-overdue-rcm-tsh-2026. Raising a slug that already exists is refused, whatever its status: a dismissed prompt stays dismissed.") {
+    slug: String @key
+    title: String
+    body: String?
+    kind: enum(retest_due, dose_due, off_target, critical_result, visit_prep, other) @index
+    status: enum(pending, sent, acknowledged, dismissed) @index
+    raised_at: DateTime
+    sent_at: DateTime?
+    channel: String?
+    acknowledged_at: DateTime?
+}
+
+// ── Documents and visits ──────────────────────────────────────────
+
+edge RecordFor: HealthRecord -> Person @card(1..1) @description("Unkeyed: the record is written once.")
+
+edge RecordFrom: HealthRecord -> Organization @card(0..1) @description("The laboratory or clinic that issued the document.") {
+    @key(@src, @dst)
+}
+
+edge RecordOfVisit: HealthRecord -> Visit @card(0..1) @description("The visit the document came out of.") {
+    @key(@src, @dst)
+}
+
+edge VisitOf: Visit -> Person @card(1..1) @description("Unkeyed: the record is written once.")
+
+edge VisitWith: Visit -> Person @card(0..1) @description("The clinician seen.") {
+    @key(@src, @dst)
+}
+
+// ── Results ───────────────────────────────────────────────────────
+
+edge MeasurementOf: Measurement -> Measurable @card(1..1) {
+    @key(@src, @dst)
+}
+
+edge MeasurementFor: Measurement -> Person @card(1..1) @description("Unkeyed: the record is written once.")
+
+edge MeasurementIn: Measurement -> HealthRecord @card(0..1) @description("The document the value was read from. A reading from a device has none.") {
+    @key(@src, @dst)
+}
+
+edge MeasurementSupersedes: Measurement -> Measurement @card(0..1) @description("The source corrected an earlier result; the earlier one stays on record.") {
+    @key(@src, @dst)
+}
+
+edge CodeForMeasurable: ExternalCode -> Measurable {
+    @key(@src, @dst)
+}
+
+edge CodeForCondition: ExternalCode -> Condition {
+    @key(@src, @dst)
+}
+
+edge CodeForImmunization: ExternalCode -> Immunization @description("The vaccine type given, as a code.") {
+    @key(@src, @dst)
+}
+
+// ── Targets and hypotheses ────────────────────────────────────────
+
+edge TargetFor: Target -> Measurable @card(1..1) {
+    @key(@src, @dst)
+}
+
+edge TargetOf: Target -> Person @card(1..1) @description("Unkeyed: the record is written once.")
+
+edge HypothesisFor: Hypothesis -> Person @card(1..1) @description("Unkeyed: the record is written once.")
+
+edge HypothesisAbout: Hypothesis -> Measurable @description("The marker the hypothesis tries to explain.") {
+    @key(@src, @dst)
+}
+
+edge SupportedBy: Hypothesis -> Measurement {
+    @key(@src, @dst)
+}
+
+edge ContradictedBy: Hypothesis -> Measurement {
+    @key(@src, @dst)
+}
+
+// ── Conditions and reactions ──────────────────────────────────────
+
+edge OccurrenceOf: ConditionOccurrence -> Condition @card(1..1) {
+    @key(@src, @dst)
+}
+
+edge OccurrenceFor: ConditionOccurrence -> Person @card(1..1) @description("Unkeyed: the record is written once.")
+
+edge ReactionToIntervention: ConditionOccurrence -> Intervention @card(0..1) @description("The occurrence is attributed to this intervention.") {
+    @key(@src, @dst)
+}
+
+edge ReactionToImmunization: ConditionOccurrence -> Immunization @card(0..1) @description("The occurrence followed this dose.") {
+    @key(@src, @dst)
+}
+
+// ── Interventions ─────────────────────────────────────────────────
+
+edge InterventionFor: Intervention -> Person @card(1..1) @description("Unkeyed: the record is written once.")
+
+edge Targets: Intervention -> Measurable @description("The marker the intervention is meant to move.") {
+    @key(@src, @dst)
+}
+
+edge MotivatedBy: Intervention -> Hypothesis {
+    @key(@src, @dst)
+}
+
+edge Treats: Intervention -> ConditionOccurrence {
+    @key(@src, @dst)
+}
+
+edge EpisodeOf: InterventionEpisode -> Intervention @card(1..1) @description("Unkeyed: an episode is written once.")
+
+// ── Immunizations ─────────────────────────────────────────────────
+
+edge ImmunizationFor: Immunization -> Person @card(1..1) @description("Unkeyed: the record is written once.")
+
+edge ProtectsAgainst: Immunization -> Condition @card(1..) @description("A disease the dose counts towards, with which dose of that disease's series it is. One combined vaccine carries a different dose number for each disease.") {
+    dose_number: I32?
+    series_doses: I32?
+    @key(@src, @dst)
+}
+
+edge AdministeredAt: Immunization -> Organization @card(0..1) {
+    @key(@src, @dst)
+}
+
+edge ImmunizationIn: Immunization -> HealthRecord @card(0..1) @description("The document that shows the dose.") {
+    @key(@src, @dst)
+}
+
+// ── What is due and who was told ──────────────────────────────────
+
+edge RecommendationFor: Recommendation -> Person @card(1..1) @description("Unkeyed: the record is written once.")
+
+edge RecommendsMeasuring: Recommendation -> Measurable {
+    @key(@src, @dst)
+}
+
+edge RecommendsVaccineAgainst: Recommendation -> Condition {
+    @key(@src, @dst)
+}
+
+edge FulfilledByMeasurement: Recommendation -> Measurement {
+    @key(@src, @dst)
+}
+
+edge FulfilledByImmunization: Recommendation -> Immunization {
+    @key(@src, @dst)
+}
+
+edge NotificationFor: Notification -> Person @card(1..1) @description("Unkeyed: the record is written once.")
+
+edge AboutRecommendation: Notification -> Recommendation @card(0..1) {
+    @key(@src, @dst)
+}
+
+edge AboutMeasurement: Notification -> Measurement @card(0..1) {
+    @key(@src, @dst)
+}

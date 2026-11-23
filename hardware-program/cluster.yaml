@@ -1,7 +1,7 @@
 # hardware-program deployment, declared as code (omnigraph cluster model).
 #
 # Filesystem-backed cluster; storage defaults to this directory.
-# Follow ../README.md#local-setup for bootstrap and writer-lock handoff.
+# Follow ../docs/local-setup.md for bootstrap and writer-lock handoff.
 # Later configuration updates go through cluster plan/apply --target <server target>.
 version: 1
 
@@ -22,7 +22,7 @@ graphs:
 # GEMINI_API_KEY in the server environment, uncomment both the provider below
 # and the graph binding above, then plan/apply through the running server.
 # Stored vectors come from the offline `omnigraph embed` pipeline; load never
-# generates them. See README.md#similar-requirements-optional.
+# generates them. See CLAUDE.md#semantic-search-optional.
 #
 # providers:
 #   embedding:

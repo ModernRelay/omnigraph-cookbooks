@@ -3,6 +3,7 @@
   "name": "Development graph",
   "category": "Engineering",
   "blurb": "Issues, epics, specs, decisions, pull requests, releases and incidents as one graph, with the Git host still the record for code.",
+  "about": "Build a living system of record for software development, and the agent workflows around it. It keeps issues, epics, specs, decisions, pull requests, releases and incidents linked, with the rules that constrain them, so a coding agent sees the upstream decisions and cross-repository context that a diff lacks. Whether work is ready or blocked is worked out from the links on every read. Agents propose changes on branches that a person reviews. The Git host stays the record for code.",
   "sample": "Meridian, a fictional collaborative-document product",
   "questions": [
     {
@@ -15,15 +16,22 @@
     },
     {
       "q": "Which spec describes this epic?",
-      "query": "epic_spec"
+      "query": "epic_spec",
+      "params": {
+        "epic": "epc-offline-sync"
+      }
     },
     {
       "q": "Which pull requests shipped in this release?",
-      "query": "release_prs"
+      "query": "release_prs",
+      "params": {
+        "release": "rel-v1-4-0"
+      }
     }
   ],
   "search": {
-    "title": "Code graph template for coding agents",
+    "title": "Software lifecycle graph for coding agents",
+    "heading": "The decisions, specs and issues around your code, as one graph",
     "keywords": [
       "code graph",
       "ai bill of materials",
@@ -31,5 +39,34 @@
       "knowledge graph",
       "coding agents"
     ]
-  }
+  },
+  "use_case": "usecase:dev-graph",
+  "needs": [
+    {
+      "need": "need:context-scattered",
+      "shown_in": "The data model"
+    },
+    {
+      "need": "need:agent-changes-checked-before-truth",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "need": "need:history-kept-and-restorable",
+      "shown_in": "Branching and merging"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "cap:typed-schema",
+      "shown_in": "The data model"
+    },
+    {
+      "capability": "cap:branching",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "capability": "cap:time-travel",
+      "shown_in": "Branching and merging"
+    }
+  ]
 }

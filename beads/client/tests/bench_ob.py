@@ -10,7 +10,7 @@ no issue may be claimed by two agents.
 
 By default it uses a scratch local graph. `--target` measures a running
 beads server instead, through a server target with a writer token in the
-operator configuration (see ../README.md#local-setup; set OMNIGRAPH_HOME, or
+operator configuration (see ../docs/local-setup.md; set OMNIGRAPH_HOME, or
 OB_OPERATOR_CONFIG, as for ob). Everything happens on a scratch branch,
 deleted afterwards, so the graph's main branch is untouched. The benchmark
 never starts or bootstraps a server itself.

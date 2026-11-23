@@ -1,215 +1,194 @@
-# Pharma Intel — Viking Therapeutics (GLP-1 Obesity)
+# Pharma intelligence: competitive pipeline to program decisions
 
-Knowledge graph starter modeling competitive pharma intelligence from the perspective of a public biotech sponsor. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph) using the [SPIKE framework](../README.md#spike-framework) plus two additional layers — an **external pipeline** layer (compounds, trials, deals, regulatory actions) and an **internal context** layer (programs, assumptions, decisions, open questions).
+Build a living competitive intelligence record for a biotech program, and the
+agent workflows around it. It keeps the compounds, trials, deals and regulatory
+actions around the program linked to the program's own assumptions, decisions
+and open questions, so each outside signal shows what it supports or threatens.
+New public signals are linked as they appear, so a decision briefing is a read
+and not a rebuilt slide deck. Agents propose signals and links on branches for
+an analyst to review.
 
-Where `industry-intel/` demos SPIKE as a pure intelligence lens, `pharma-intel/` demos the same lens grounded against a real sponsor's investment thesis — so the graph surfaces which external signals contradict which internal assumptions, and what still needs to be answered before an upcoming decision.
+Competitive intelligence usually sits in a pipeline database, a folder of
+press-release clippings and a strategy deck, and nothing connects them. A
+readout lands, and nobody can say which assumption it weakens or which decision
+it touches. This cookbook sets OmniGraph up as the one place the outside
+pipeline and the program's own beliefs are held together.
 
-## The Three Layers
+- **Evidence against each assumption.** See which signals support or contradict
+  a belief the program rests on, from any team's reading of the market.
+- **Briefing before a decision.** For a go/no-go date, list the assumptions it
+  rests on and the open questions it still needs answered.
+- **Sources you can check.** Each signal links to the filing, registry entry or
+  press release it came from.
 
-```
-                          ┌─────────── External Pipeline ───────────┐
-                          │                                          │
-                          │   Compound ── targetsMechanism ──▶ Mechanism
-                          │       │                                  │
-                          │       ├── developedByCompany ──▶ Company │
-                          │       │                                  │
-                          │   Trial ── investigatesCompound ──▶ Compound
-                          │                                          │
-                          │   Deal, RegulatoryAction                 │
-                          └──────────────────────────────────────────┘
-                                         ▲
-                                         │ aboutCompound / aboutMechanism /
-                                         │ aboutTrial / relevantCompany
-                                         │
-     ┌────── SPIKE Intelligence ──────┐  │
-     │                                │  │
-     │   Signal ── FormsPattern ────▶ Pattern ◀── HighlightsPattern ── Insight
-     │      │     ContradictsPattern                                    │
-     │      │                                                           │
-     │      │                               ReliesOnElement /           │
-     │      │                               (pipeline node)             │
-     │      └── SpottedInArtifact ──▶ InformationArtifact ── PublishedBySource ──▶ SourceEntity
-     │                                                                  │
-     └──────────────────────────────────────────────────────────────────┘
-                                         │
-                    SupportsAssumption / ContradictsAssumption / InformsQuestion
-                                         ▼
-     ┌─────── Internal Context (the value layer) ──────┐
-     │                                                  │
-     │   Program ── ProgramDependsOnAssumption ──▶ Assumption
-     │                                                  │
-     │   Decision ── DecisionRegardingProgram ──▶ Program
-     │       │                                          │
-     │       ├── DecisionBasedOnAssumption ──▶ Assumption
-     │       └── DecisionNeedsAnswer ────────▶ OpenQuestion
-     │                                                  │
-     └──────────────────────────────────────────────────┘
-```
+> If you are an agent: the commands, roles and workflows are in
+> [AGENTS.md](AGENTS.md). Read that file before running anything.
 
-Each signal is an external fact. Each pattern is a theme. But because the signal also edges to internal `Assumption`s and `OpenQuestion`s, the graph answers questions like:
+## The data model
 
-- *"Which signals contradict my oral-displaces-injectable thesis?"*
-- *"Before the Phase 3 start decision, which assumptions need re-validation?"*
-- *"What open questions from my clinical team does this new regulatory signal inform?"*
-
-## Reference Seed: Viking Therapeutics, Mid-2026
-
-Viking Therapeutics (NASDAQ: VKTX) is a real public company with a GLP-1/GIP dual-agonist pipeline competing in obesity. All data in the seed is sourced from SEC filings, investor presentations, clinicaltrials.gov, and press releases — no MNPI.
-
-**External pipeline (what's happening in the market):**
-
-| Dimension | Count | Includes |
-|-----------|-------|----------|
-| Compounds | 12 | VK2735 (SC + oral), tirzepatide, semaglutide, CagriSema, orforglipron, retatrutide, MariTide, danuglipron (discontinued), CT-996, GSBR-209, survodutide |
-| Mechanisms | 6 | GLP-1/GIP dual, GLP-1 mono, triple agonist, oral small-molecule GLP-1, amylin co-agonist, GLP-1/glucagon |
-| Trials | 8 | Real NCT IDs including VANQUISH (NCT05930405), SURMOUNT-5, SELECT, ATTAIN-1, REDEFINE-1 |
-| Deals | 3 | Roche/Carmot ($3.1B, Dec 2023), Lilly/Versanis ($1.925B, Aug 2023), Pfizer/Metsera ($4.9B, Nov 2025) |
-| Regulatory | 4 | Zepbound OSA approval, Wegovy CV label, CMS Medicare memo, ERAs |
-| Companies | 13 | Viking, Novo, Lilly, Pfizer, Amgen, Roche, BI, Zealand, Structure, Express Scripts, Carmot, Versanis, Metsera |
-
-**Four live patterns in GLP-1 obesity:**
-
-| Pattern | Kind | What it captures |
-|---------|------|------------------|
-| **GLP-1 Pipeline Explosion** | dynamic | 30+ candidates across 10+ sponsors racing an addressable market ≥$150B |
-| **Oral GLP-1 Thesis** | dynamic | Primary-care unlock via oral formulation — *and the signals contradicting it* |
-| **Efficacy Ceiling** | challenge | Weight-loss magnitude plateauing; tolerability now the differentiator |
-| **Payer Pushback** | challenge | PBM prior-auth + CMS coverage ambiguity squeezing commercial upside |
-
-**Internal context (Viking's thesis as a structured object):**
-
-| Dimension | Count | Includes |
-|-----------|-------|----------|
-| Programs | 2 | VK2735 SC (Phase 3), VK2735 oral (Phase 2) |
-| Assumptions | 5 | Oral displaces injectable · efficacy matches tirzepatide · best-in-class tolerability · payer coverage sustainable · mechanism safe at scale |
-| Upcoming decisions | 2 | VANQUISH interim readout go/no-go (2026-07-15) · Phase 3 start for oral (2026-09-30) |
-| Open questions | 4 | Pfizer failure mechanism risk · orforglipron competitive window · payer coverage trajectory · manufacturing scale-up path |
-
-**Demo edges** (surfaced by the graph, not buried in prose):
-
-| Signal | Edge | Internal target | Why it matters |
-|--------|------|-----------------|----------------|
-| Pfizer discontinues danuglipron (liver injury) | `ContradictsAssumption` | `asmp-oral-displaces-injectable` | Regulatory event invalidates a strategic assumption from a completely different silo |
-| CagriSema REDEFINE miss (22.7% vs consensus) | `ContradictsAssumption` | `asmp-efficacy-matches-tirzepatide` | Competitor readout directly resets the efficacy bar Viking is targeting |
-| Express Scripts adds prior-auth | `ContradictsAssumption` | `asmp-payer-coverage-sustainable` | Payer signal challenges investment-layer assumption |
-| Lilly orforglipron ATTAIN-1 positive | `InformsQuestion` | `q-orforglipron-competitive-window` | Competitive readout answers (partially) a Viking open question |
-| Pfizer danuglipron discontinuation | `InformsQuestion` | `q-pfizer-failure-mechanism-risk` | Cross-sponsor hepatotoxicity risk flagged for Viking's clinical team |
-
-**Totals:** 113 nodes across 15 node types, 200 edges across 34 edge types.
-
-## Schema Essentials
-
-**Nodes (15):** `Compound`, `Mechanism`, `Trial`, `Company`, `Deal`, `RegulatoryAction` · `Signal`, `Pattern`, `Insight` · `SourceEntity`, `InformationArtifact` · `Program`, `Assumption`, `Decision`, `OpenQuestion`
-
-**Enums that carry the analytical lens:**
-
-| Enum | Values |
-|------|--------|
-| **Phase** | `preclinical, phase-1, phase-2, phase-3, approved, discontinued, withdrawn` |
-| **Modality** | `small-molecule, peptide, biologic, antibody, gene-therapy, cell-therapy` |
-| **Route** | `oral, subcutaneous, iv, intranasal, other` |
-| **Domain** (Signal) | `obesity, t2d, nash, cardiovascular, neuro, oncology, rare, payer, regulatory, manufacturing` |
-| **PatternKind** | `challenge, disruption, dynamic` |
-| **AssumptionLevel** | `investment, scientific, competitive, strategic` |
-| **DecisionStatus** | `upcoming, decided, deferred` |
-| **QuestionStatus** | `open, resolved` |
-
-**Edges that carry the analytical logic** (everything else is classification or provenance):
-
-| Edge | Route | Meaning |
-|------|-------|---------|
-| `FormsPattern` / `ContradictsPattern` | Signal → Pattern | evidence for/against a theme |
-| `HighlightsPattern` | Insight → Pattern | synthesis lens on a theme |
-| `DrivesPattern` | Pattern → Pattern | causal relationship between themes |
-| `AboutCompound` / `AboutMechanism` / `AboutTrial` / `RelevantCompany` | Signal → pipeline node | what the signal is about |
-| `SupportsAssumption` / `ContradictsAssumption` | Signal → Assumption | external → internal bridge |
-| `InformsQuestion` | Signal → OpenQuestion | external event answers an internal question |
-| `ProgramDependsOnAssumption` | Program → Assumption | what the program rests on |
-| `DecisionRegardingProgram` | Decision → Program | which program a decision affects |
-| `DecisionBasedOnAssumption` / `DecisionNeedsAnswer` | Decision → Assumption/OpenQuestion | decision prerequisites |
-| `TargetsMechanism` / `DevelopedByCompany` / `InvestigatesCompound` | pipeline structure | industry topology |
-| `SpottedInArtifact` / `PublishedBySource` | provenance | evidence chain |
-
-**Key design choices:**
-
-- Three stacked layers: external pipeline, SPIKE intelligence, internal context — each layer adds a perspective, not another domain
-- Assumption / Decision / OpenQuestion are **first-class nodes**, not just properties — so they can be queried, traced, and edged to signals
-- `slug` is external identity everywhere (`comp-`, `mech-`, `trial-`, `co-`, `deal-`, `reg-`, `sig-`, `pat-`, `ins-`, `src-`, `art-`, `prog-`, `asmp-`, `dec-`, `q-`)
-- Flat `kind` / `level` / `status` enums — no interfaces or subtypes
-- No embeddings in this cookbook — narrative surfaces are graph-structured, not vector-search-driven
-
-Full property tables and constraints in `schema.pg`.
-
-## Files
-
-- `schema.pg` — Executable Omnigraph schema (source of truth)
-- `seed.md` / `seed.jsonl` — Seed dataset (human-readable / loadable)
-- `queries/*.gq` — Read queries (5 files, 70 queries) + mutations (1 file, 35 queries)
-- `omnigraph-config.example.yaml` — Read aliases, with examples for stored mutations. Merge its `aliases:` into the operator config from the [local setup](../README.md#local-setup) (never committed).
-- `.env.omni` — RustFS credentials (not committed; see `.env.omni.example`)
-
-## Quick Start
-
-Follow the shared [local setup](../README.md#local-setup) with
-`pharma-intel` and graph ID `pharma`. Merge this cookbook's
-`omnigraph-config.example.yaml` into your operator config for the aliases below.
-The setup uses a filesystem-backed cluster and loads the reference seed through
-the running server, reached over a local HTTPS gateway.
-
-```bash
-omnigraph alias assumption-contradictions --params '{"slug":"asmp-oral-displaces-injectable"}'
-omnigraph alias decision-questions --params '{"slug":"dec-vanquish-interim-readout"}'
-omnigraph query decisions_upcoming --target local-reader --graph pharma
+```mermaid
+graph LR
+  Compound -- targets --> Mechanism
+  Compound -- developed by --> Company
+  Trial -- investigates --> Compound
+  Trial -- sponsored by --> Company
+  Deal -- lead party --> Company
+  RegulatoryAction -- targets --> Compound
+  Signal -- about --> Compound
+  Signal -- about --> Trial
+  Signal -- forms --> Pattern
+  Signal -- contradicts --> Pattern
+  Insight -- highlights --> Pattern
+  Pattern -- drives --> Pattern
+  Signal -- spotted in --> InformationArtifact
+  InformationArtifact -- published by --> SourceEntity
+  Program -- develops --> Compound
+  Program -- competes in --> Mechanism
+  Program -- depends on --> Assumption
+  Signal -- supports --> Assumption
+  Signal -- contradicts --> Assumption
+  Signal -- informs --> OpenQuestion
+  Decision -- regards --> Program
+  Decision -- based on --> Assumption
+  Decision -- needs answer --> OpenQuestion
 ```
 
-Use the [live update workflow](../README.md#live-updates) for schema and stored
-query edits.
+| Area | Types | Holds |
+|---|---|---|
+| Pipeline | `Compound`, `Mechanism`, `Trial`, `Company`, `Deal`, `RegulatoryAction` | The market around the program: drugs, how they work, who makes them, their trials, deals and agency actions |
+| Intelligence | `Signal`, `Pattern`, `Insight` | Dated outside events, the themes they form or contradict, and the conclusions drawn from them |
+| Provenance | `SourceEntity`, `InformationArtifact` | The publisher and the document each signal was spotted in |
+| Program | `Program`, `Assumption`, `Decision`, `OpenQuestion` | The sponsor's own programs, the beliefs they rest on, upcoming decisions and what is still unanswered |
 
-## Demo Walkthrough
+- **Beliefs are records.** An assumption, a decision and an open question are
+  each their own entry with their own evidence, not a note on a program.
+- **Outside events link inward.** A signal links to the assumption it supports
+  or contradicts and the question it informs, so evidence crosses team
+  boundaries: a safety event reaches a strategy bet.
+- **Plain categories.** Phase, route, modality, assumption level and decision
+  status are fixed lists, so counts and filters mean the same thing for
+  everyone.
+- **Yours to change.** The model is one file, [`schema.pg`](schema.pg), with 15
+  node types and 34 edge types. Add forecasts, indications or patents.
 
-Four queries that show the three-layer model in action:
+## Branching and merging
 
-```bash
-# 1. Cross-silo contradiction: a regulatory-domain signal hits a strategic assumption
-omnigraph alias assumption-contradictions --params '{"slug":"asmp-oral-displaces-injectable"}'
-# → Pfizer danuglipron discontinued + Structure GSBR-209 Phase 2a disappoints
+A change is made on a branch, which is a version of the whole record. The
+baseline moves when the branch is merged.
 
-# 2. Pre-committee briefing: what rests on the upcoming Phase 3 start decision?
-omnigraph alias decision-assumptions --params '{"slug":"dec-oral-phase3-start"}'
-# → asmp-oral-displaces-injectable (now contradicted) + asmp-mechanism-safe-at-scale
+- **Signal intake.** An agent files a week's signals, their sources and their
+  links on its own branch. An analyst reads the branch's diff and merges it.
+- **Scenarios.** Add an imagined signal, such as a competitor approval, on a
+  branch and read the assumptions and decisions as they would then stand.
+  Discard the branch if the scenario does not happen.
+- **Competing readings.** Two analysts who read the same readout differently
+  each use a branch, and the record shows both before one is merged.
 
-# 3. Competitive landscape: all compounds targeting the same mechanism
-omnigraph alias program-competitors --params '{"slug":"prog-vk2735-sc"}'
-# → tirzepatide, VK2735 oral (self), VK2735 SC — mechanism peers across phase
+Review is a practice here. The writer role can change `main` and merge, so
+nothing enforces that an agent's branch waits for a person.
 
-# 4. Proactive alert: what internal questions does a new signal inform?
-omnigraph alias signal-informs-questions --params '{"slug":"sig-pfizer-danuglipron-discontinued"}'
-# → q-pfizer-failure-mechanism-risk (Viking clinical team)
+## Agents and workflows
 
-# 5. Landscape feed: every signal touching any compound in my mechanism
-omnigraph alias program-landscape-signals --params '{"slug":"prog-vk2735-sc"}'
-# → 5 signals across VK2735 (SC + oral) + tirzepatide, time-sorted
+Agents bring public signals into the record, link them to what they affect and
+tell people what changed. Analysts decide what a signal means for the program.
+
+| Kind | Workflow | What it does | Stored queries |
+|---|---|---|---|
+| Capture | Signal intake | Records a press release, filing, registry entry or agency letter as a signal with its document and publisher | `add_signal`, `add_artifact`, `link_signal_artifact`, `link_artifact_source` |
+| Capture | Pipeline tracking | Adds a new compound, trial, deal or agency action and links it to its mechanism and sponsor | `add_compound`, `add_trial`, `link_compound_mechanism`, `link_compound_company` |
+| Capture | Signal mapping | Links a new signal to the compounds, companies and patterns it concerns | `link_about_compound`, `link_relevant_company`, `link_forms_pattern`, `link_contradicts_pattern` |
+| Maintain | Assumption review | Links a signal to the assumptions it supports or contradicts, and re-reads the evidence for each | `link_signal_contradicts_assumption`, `link_signal_supports_assumption`, `assumption_contradicting_signals` |
+| Maintain | Open question watch | Links signals that inform an open question and lists the questions still open | `link_signal_informs_question`, `questions_open`, `question_signals` |
+| Maintain | Pattern synthesis | Reads the signals for and against a theme and writes an insight that sums them up | `pattern_signals`, `pattern_contradictions`, `add_insight`, `link_highlights_pattern` |
+| Maintain | Landscape check | Lists recent signals about every compound that shares the program's mechanism | `program_landscape_signals`, `mechanism_signals_via_compound`, `recent_signals` |
+| Act | Decision briefing | Before a decision date, sends its decider the assumptions, open questions and contradicting signals | `decisions_upcoming`, `decision_assumptions`, `decision_questions`, `assumption_contradicting_signals` |
+| Act | Signal alert | When a signal informs an open question, tells the team that asked it; when it contradicts an assumption, flags the program team | `signal_informs_questions`, `questions_open`, `signal_contradicts_assumptions` |
+| Act | Competitor digest | Sends the strategy team a periodic list of new signals, rival compounds and deals | `recent_signals`, `program_competitors`, `deals_all` |
+
+Every workflow has the same parts:
+
+1. Something starts it: a new public document, a change in the record, or a
+   date such as a decision coming up.
+2. The agent reads the state it needs through stored queries.
+3. It acts. It writes to the record on its own branch, or it tells someone
+   outside the record: a message or a briefing.
+4. A person decides. An analyst reviews the branch and merges it, or acts on
+   what they were told.
+
+- **Agents are not held to branches.** No role here is limited to branches, so
+  an agent that should not touch `main` has to be told to use its own branch.
+- **Outside actions are not held back by the record.** A message or briefing
+  goes out through the agent's own tools, and nothing here reviews it first.
+  Keep those workflows to telling and drafting. The record has no place to note
+  that an alert was sent, so the agent has to keep track of that itself.
+- **Some changes have no stored write.** The cookbook only adds. It has no
+  stored write to resolve a question, record a decision's outcome or change a
+  compound's phase, so those changes are made by a person outside it.
+- **Bring your own agent.** It connects through OmniGraph's MCP server from
+  Claude Code, Codex, Cursor or another MCP client. The cookbook has no skill
+  of its own.
+
+## Data sources
+
+The record holds the links between your sources. Each source stays the
+authority for its own data.
+
+| Source | Examples | Feeds |
+|---|---|---|
+| Trial registries | ClinicalTrials.gov, EU Clinical Trials Register | `Trial`, `Compound` |
+| Regulators | FDA, EMA, CMS | `RegulatoryAction` |
+| Company filings and releases | SEC EDGAR, PR Newswire, Business Wire | `Signal`, `InformationArtifact`, `Deal` |
+| Earnings and conferences | Investor presentations, earnings call transcripts, ASCO, ADA | `Signal`, `InformationArtifact` |
+| Commercial pipeline databases | Citeline Pharmaprojects and Trialtrove, Evaluate Pharma | `Compound`, `Mechanism`, `Company` |
+| Internal planning | Strategy decks, portfolio reviews, meeting notes | `Program`, `Assumption`, `Decision`, `OpenQuestion` |
+
+The cookbook does not include connectors for these. A sync is a script, or an
+agent, that reads from the source and writes to the record through the stored
+mutations or a merge load. Assumptions, decisions and questions come from
+people, not from a feed.
+
+## Questions you can ask
+
+Nobody keeps a contradiction log or a competitor sheet up to date for these.
+
+| Question | Stored query |
+|---|---|
+| Which signals contradict an assumption the program relies on? | `assumption_contradicting_signals` |
+| Which decisions are coming up? | `decisions_upcoming` |
+| Which compounds compete with the program? | `program_competitors` |
+| Which compounds target a mechanism? | `compounds_by_mechanism` |
+
+The cookbook has 70 stored reads and 35 stored writes. AGENTS.md lists the
+commands.
+
+## Sample data
+
+The cookbook comes with Viking Therapeutics' obesity program in mid-2026, from
+public filings, registries and press releases: 13 companies, 12 compounds,
+8 trials, 18 signals, 5 assumptions, 2 decisions and 4 open questions. On a
+fresh load, the questions above return:
+
+- Two signals contradict the belief that oral GLP-1 displaces injectables:
+  Pfizer ending danuglipron and Structure's disappointing Phase 2a.
+- Two decisions are upcoming: the VANQUISH interim go/no-go on 2026-07-15 and
+  the oral Phase 3 start on 2026-09-30.
+- The program's subcutaneous compound shares its mechanism with tirzepatide
+  and with Viking's own oral compound.
+- The dual GLP-1/GIP mechanism has the same three compounds.
+
+[seed.md](seed.md) describes the seed and its key links.
+
+## Run it
+
+Paste this prompt into a coding agent such as Claude Code or Codex:
+
+```text
+Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the pharma intelligence cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/pharma-intel
 ```
 
-## Agent Analyst Loop
+The agent installs OmniGraph if needed, creates the graph, loads the sample
+and runs the questions above.
 
-Agents should operate the graph in this order:
-
-```bash
-# 1. Pick a decision and expand its dependencies
-omnigraph alias decisions-upcoming
-omnigraph alias decision-assumptions --params '{"slug":"dec-oral-phase3-start"}'
-omnigraph alias decision-questions --params '{"slug":"dec-oral-phase3-start"}'
-
-# 2. Gather evidence for the key assumptions
-omnigraph alias assumption-supports --params '{"slug":"asmp-oral-displaces-injectable"}'
-omnigraph alias assumption-contradictions --params '{"slug":"asmp-oral-displaces-injectable"}'
-
-# 3. Trace a new or existing signal into internal impact
-omnigraph alias signal-contradicts-assumptions --params '{"slug":"sig-pfizer-danuglipron-discontinued"}'
-omnigraph alias signal-informs-questions --params '{"slug":"sig-pfizer-danuglipron-discontinued"}'
-```
-
-For fresh web findings, first map the signal to existing companies, compounds, patterns, assumptions, and open questions; then propose the minimal seed or mutation update.
-
-See the [Omnigraph](https://github.com/ModernRelay/omnigraph) repo for full CLI reference.
+To do it by hand, follow the shared [local setup](../docs/local-setup.md)
+using folder `pharma-intel` and Graph ID `pharma`. [AGENTS.md](AGENTS.md) has
+the exact command for each question and workflow on this page.

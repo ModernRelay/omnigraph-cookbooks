@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Serve a local omnigraph-server over HTTPS for the CLI.
 
-The 0.14 CLI sends bearer tokens only over HTTPS; plain HTTP is allowed only
+The CLI sends bearer tokens only over HTTPS; plain HTTP is allowed only
 to an anonymous loopback server. This gateway terminates TLS on a loopback
 port and relays bytes unchanged to the server's loopback listener, so a local
 server keeps its token-selected actors and policies. It is for local demos and

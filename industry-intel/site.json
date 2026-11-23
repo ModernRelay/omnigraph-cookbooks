@@ -3,6 +3,7 @@
   "name": "Industry intelligence",
   "category": "Research",
   "blurb": "Signals, patterns and insights about an industry, linked to the products and technologies they concern, with hybrid search over the sources.",
+  "about": "Build a living record of an industry's signals and patterns, and the agent workflows around it. It keeps each signal, the pattern it supports or contradicts, the products and companies it concerns and the source it came from linked, so a new signal shows which beliefs it weakens. Agents file evidence and flag what is stale or contested, on branches for an analyst to review.",
   "sample": "The AI infrastructure market, from public sources",
   "questions": [
     {
@@ -11,19 +12,26 @@
     },
     {
       "q": "Which patterns are gathering signals fastest?",
-      "query": "pattern_momentum"
-    },
-    {
-      "q": "What do the sources say about a question?",
-      "query": "hybrid_chunks"
+      "query": "pattern_momentum",
+      "params": {
+        "since": "2026-05-01T00:00:00Z"
+      }
     },
     {
       "q": "What came in most recently?",
       "query": "recent_signals"
+    },
+    {
+      "q": "What evidence supports a pattern?",
+      "query": "pattern_signals",
+      "params": {
+        "slug": "pat-saaspocalypse"
+      }
     }
   ],
   "search": {
-    "title": "Industry intelligence knowledge graph template",
+    "title": "Industry intelligence knowledge graph",
+    "heading": "A knowledge graph for industry and market research",
     "keywords": [
       "knowledge graph",
       "graphrag",

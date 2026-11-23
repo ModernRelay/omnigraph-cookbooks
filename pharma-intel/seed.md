@@ -2,6 +2,10 @@
 
 Seed data for `schema.pg`. Scope: the GLP-1 obesity competitive landscape, seeded from the perspective of **Viking Therapeutics (VKTX)** as the public-company sponsor. Current date frame: **2026-04-17**. All external data points are real, dated, and URL-sourced.
 
+This file describes the seed: its records and its key links. It does not list
+what each stored read returns; `queries/*.gq` holds the reads and `CLAUDE.md`
+runs the featured ones.
+
 ---
 
 ## Companies (13)

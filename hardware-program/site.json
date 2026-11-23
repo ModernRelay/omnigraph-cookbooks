@@ -3,6 +3,7 @@
   "name": "Hardware program",
   "category": "Hardware",
   "blurb": "Requirements, budgets, interfaces and verification for a hardware program, with \"verified\" and \"over budget\" worked out from the evidence on every read.",
+  "about": "Build a living system of record for a hardware program, and the agent workflows around it. It keeps requirements, the architecture they are allocated to, design values, budgets and test evidence linked, so they stay aligned as the design changes. Whether a requirement is verified or a budget closes is worked out from the current data each time you ask, so no status drifts from the evidence. Agents re-check the program on every change, on branches an engineer reviews before anything reaches the baseline.",
   "sample": "Petrel, a fictional 150 kg Earth-observation satellite",
   "questions": [
     {
@@ -11,19 +12,70 @@
     },
     {
       "q": "If this requirement changes, which test results no longer hold?",
-      "query": "impacted_tests"
+      "query": "impacted_tests",
+      "params": {
+        "slug": "req-lv-mass"
+      }
     },
     {
       "q": "Which mission goals does this requirement serve?",
-      "query": "trace_up"
+      "query": "trace_up",
+      "params": {
+        "slug": "dc-adcs-jitter"
+      }
     },
     {
       "q": "Which requirements has no test verified?",
       "query": "unverified_requirements"
+    },
+    {
+      "q": "What stands between the program and its design review?",
+      "query": "gate_not_passing",
+      "params": {
+        "milestone": "ms-cdr"
+      }
+    }
+  ],
+  "use_case": "usecase:hardware-program",
+  "needs": [
+    {
+      "need": "need:context-scattered",
+      "shown_in": "The data model"
+    },
+    {
+      "need": "need:agents-diverge",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "need": "need:agent-changes-checked-before-truth",
+      "shown_in": "Agents and workflows"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "cap:typed-schema",
+      "shown_in": "The data model"
+    },
+    {
+      "capability": "cap:branching",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "capability": "cap:three-way-merge",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "capability": "cap:time-travel",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "capability": "cap:branch-per-agent",
+      "shown_in": "Agents and workflows"
     }
   ],
   "search": {
-    "title": "Hardware program systems graph template",
+    "title": "Hardware program graph: requirements to verification",
+    "heading": "A hardware program from requirements to verification, as one graph",
     "keywords": [
       "systems graph",
       "digital twin",
