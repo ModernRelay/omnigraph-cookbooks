@@ -4,8 +4,9 @@
 Usage: check-cookbooks.py [--site] [COOKBOOK ...]   (default: every cookbook)
 
 Every run first checks each cookbook's site.json, the copy omnigraph.dev shows
-for it (see "The website" in the README). --site runs only that check: it is
-offline and needs no binaries.
+for it (see "The website" in AGENTS.md), and the sections of its README (see
+"Writing a cookbook README" there). --site runs only
+that check: it is offline and needs no binaries.
 """
 
 import re
@@ -37,10 +38,11 @@ COOKBOOKS = {
     "beads": ("beads", "ready"),
     "company-brain": ("company", "current_decisions"),
     "hardware-program": ("program", "budget_rollup"),
+    "health-record": ("health", "latest_results"),
     "code-graph": ("code", "most_referenced"),
 }
 # Cookbooks whose policy lets act-agent write only on unprotected branches.
-BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program", "code-graph"}
+BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program", "health-record", "code-graph"}
 ACTORS = ("act-admin", "act-writer", "act-reader", "act-agent")
 TOKENS = {actor: f"cookbook-test-{actor}" for actor in ACTORS}
 GATEWAY = ROOT / "scripts" / "local-tls-gateway.py"
@@ -57,8 +59,8 @@ def token_variable(actor):
 
 
 def write_operator_config(home, endpoint, ca):
-    """One server target per actor, as the root README's local setup has.
-    The 0.14 CLI sends tokens only over HTTPS, so each target trusts the
+    """One server target per actor, as docs/local-setup.md has.
+    The CLI sends tokens only over HTTPS, so each target trusts the
     local gateway's CA and reads its token from one named variable."""
     lines = ["version: 1", "targets:"]
     for actor in ACTORS:
@@ -190,6 +192,11 @@ def qualify(name, graph, stored_query, workspace, env):
             count()
             read = run(env, "query", stored_query, *scope("act-reader"), "--json")
             assert read["rows"], f"{stored_query} must demonstrate populated seed data"
+            # An answer the README promises is a read that finds something in the seed.
+            answers = promised_answers(name)
+            for question, answer, params in answers:
+                shown = run(env, "query", answer, *scope("act-reader"), "--params", json.dumps(params), "--json")
+                assert shown["rows"], f"{name}/site.json: {question!r} runs {answer}, which returns no rows on the seed"
             # Writers can create and retire a review branch but cannot deploy.
             run(env, "branch", "create", "cookbook-review", *scope("act-writer"), "--json")
             run(env, "branch", "delete", "cookbook-review", *scope("act-writer"), "--yes", "--json")
@@ -244,14 +251,18 @@ def qualify(name, graph, stored_query, workspace, env):
                 company_brain_journey(env)
             if name == "hardware-program":
                 hardware_program_journey(env)
+            if name == "health-record":
+                health_record_journey(env)
             if name == "code-graph":
                 code_graph_journey(env)
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
+                  + (f", {len(answers)} README answers" if answers else "")
                   + (", ob client" if name == "beads" else "")
                   + (", review journey" if name == "company-brain" else "")
                   + (", review gate" if name == "hardware-program" else "")
+                  + (", intake review" if name == "health-record" else "")
                   + (", pull request diff, cg client" if name == "code-graph" else ""), flush=True)
         finally:
             gateway.terminate()
@@ -399,6 +410,42 @@ def hardware_program_journey(env):
     run(env, "branch", "delete", "cr-heatsink", *writer, "--yes", "--json")
 
 
+def health_record_journey(env):
+    """Off target and an unfinished vaccine series are derived from the results and doses.
+    An agent cannot record a dose on main; on its own branch the dose completes the series
+    there while main stays put, and the series is complete on main once a person merges.
+    Recording the same dose again is refused."""
+    def scope(actor):
+        return ("--target", target(actor), "--graph", "health")
+
+    def rows(query, *extra, params=None):
+        return run(env, "query", query, *scope("act-reader"), "--params", json.dumps(params or {}),
+                   *extra, "--json")["rows"]
+
+    assert {row["marker"] for row in rows("off_target")} == {"mk-ldl", "mk-vitd"}
+    assert [row["disease"] for row in rows("incomplete_series")] == ["cond-hepatitis-b"]
+    assert all(row["m.slug"] != "m-2026-01-weight-typo" for row in rows("marker_history", params={"marker": "mk-weight"}))
+
+    agent, writer = scope("act-agent"), scope("act-writer")
+    dose = json.dumps({"slug": "imm-hepb-3", "vaccine": "Hepatitis B", "administered_on": "2026-11-20",
+                       "date_precision": "day", "origin": "provider_record", "person": "per-noa",
+                       "disease": "cond-hepatitis-b", "dose_number": 3, "series_doses": 3})
+    refused(run(env, "mutate", "record_dose", *agent, "--params", dose, "--json", ok=False))
+    run(env, "branch", "create", "intake-vaccines", *agent, "--json")
+    run(env, "mutate", "record_dose", *agent, "--branch", "intake-vaccines", "--params", dose, "--json")
+    assert rows("incomplete_series", "--branch", "intake-vaccines") == []
+    assert [row["disease"] for row in rows("incomplete_series")] == ["cond-hepatitis-b"], "main moved before the merge"
+    run(env, "branch", "merge", "intake-vaccines", "--into", "main", *writer, "--json")
+    assert rows("incomplete_series") == []
+    run(env, "branch", "delete", "intake-vaccines", *writer, "--yes", "--json")
+    # A record is written once: the same slug again, with other values, is refused and changes nothing.
+    replay = json.dumps({**json.loads(dose), "vaccine": "Hepatitis B, replayed"})
+    again = run(env, "mutate", "record_dose", *writer, "--params", replay, "--json", ok=False)
+    assert "@card violation" in again.stdout + again.stderr, (again.stdout, again.stderr)
+    doses = rows("disease_doses", params={"disease": "cond-hepatitis-b"})
+    assert [row["i.vaccine"] for row in doses] == ["Hepatitis B"] * 3, doses
+
+
 def code_graph_journey(env):
     """The indexer loads a pull request's revision onto its own branch, the
     branch diff is exactly what the PR changed, the reads see the new code
@@ -452,6 +499,19 @@ def code_graph_journey(env):
     assert [r["symbol"] for r in review["added"]] == ["src/router/`utils.ts`/", helper["symbol"]], review["added"]
     assert {r["symbol"] for r in review["changed"]} == changed and review["moved"] == 53, review
     assert (len(review["references"]["added"]), len(review["references"]["removed"])) == (18, 0)
+    # The review workflow records the posted comment on the branch, once per revision.
+    comment = json.dumps({"sha": head, "pull_request": "https://github.com/honojs/hono/pull/5267",
+                          "url": "https://github.com/honojs/hono/pull/5267#issuecomment-1",
+                          "posted_at": "2026-08-20T12:00:00Z"})
+    record = ("mutate", "record_review_comment")
+    refused(run(env, *record, *scope("act-reader"), "--branch", "pr-5267", "--params", comment, "--json", ok=False))
+    refused(run(env, *record, *scope("act-agent"), "--params", comment, "--json", ok=False))
+    run(env, *record, *scope("act-agent"), "--branch", "pr-5267", "--params", comment, "--json")
+    # A revision has one review: recording it again replaces the record, it does not add one.
+    run(env, *record, *scope("act-agent"), "--branch", "pr-5267", "--params", comment, "--json")
+    posted = rows("review_comment", {"sha": head}, "--branch", "pr-5267")
+    assert [r["r.url"] for r in posted] == ["https://github.com/honojs/hono/pull/5267#issuecomment-1"], posted
+    assert rows("review_comment", {"sha": head}) == []
 
     assert rows("callers", helper) == []
     assert len(rows("callers", helper, "--branch", "pr-5267")) == 14
@@ -467,6 +527,7 @@ def code_graph_journey(env):
     run(env, "branch", "delete", "pr-5267", *scope("act-writer"), "--yes", "--json")
     assert [row["r.sha"] for row in rows("revision")] == [head]
     assert len(rows("callers", helper)) == 14
+    assert len(rows("review_comment", {"sha": head})) == 1
     assert [row["r.sha"] for row in rows("revision", None, "--snapshot", previous)] == [base]
     assert rows("callers", helper, "--snapshot", previous) == []
 
@@ -482,6 +543,8 @@ def code_graph_journey(env):
 # (ModernRelay/brand apps/omnigraph/scripts/sync-cookbooks.mjs) checks the same.
 SITE_CATEGORIES = {"Company", "Engineering", "Hardware", "Research", "Investing", "Personal"}
 SITE_TITLE_MAX = 60  # a search result shows about this much; the site appends " | Omnigraph"
+SITE_HEADING_MAX = 70  # the second line of the page's H1
+SITE_ABOUT_MAX = 600  # two to four sentences: what the graph is, who it is for, what it takes the place of
 QUERY_START = re.compile(r"^query\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(", re.M)
 WRITES = re.compile(r"\b(insert|update|delete)\b")
 
@@ -524,7 +587,198 @@ def check_site(folder):
         f"{where}: search.title must be 1 to {SITE_TITLE_MAX} characters"
     assert isinstance(keywords, list) and keywords and all(isinstance(k, str) and k == k.lower() and k for k in keywords), \
         f"{where}: search.keywords must be a non-empty list of lowercase phrases"
+    # optional: the page's second H1 line, and its "What it is" paragraph
+    heading, about = search.get("heading"), site.get("about")
+    assert heading is None or (isinstance(heading, str) and 0 < len(heading) <= SITE_HEADING_MAX), \
+        f"{where}: search.heading, when given, must be 1 to {SITE_HEADING_MAX} characters"
+    assert about is None or (isinstance(about, str) and 0 < len(about) <= SITE_ABOUT_MAX), \
+        f"{where}: about, when given, must be 1 to {SITE_ABOUT_MAX} characters"
+    check_readme(folder, site, queries)
     return site
+
+
+# The sections of a cookbook README. It reads as the landing page of OmniGraph for one
+# use case: a living source of truth and the agent workflows around it. It makes sense
+# without the sample data, which has its own section, and omnigraph.dev draws its
+# use-case page from the same sections (see "Writing a cookbook README" in AGENTS.md).
+# Commands belong in the cookbook's AGENTS.md.
+README_SECTIONS = ("The data model", "Branching and merging", "Agents and workflows",
+                   "Data sources", "Questions you can ask", "Sample data", "Run it")
+QUESTIONS = range(3, 6)   # how many questions a cookbook features
+QUERY_NAME = re.compile(r"`([a-z][a-z0-9]*(?:_[a-z0-9]+)+)`")
+CODE = re.compile(r"`([^`]+)`")
+INVOCATION = re.compile(r"omnigraph\s+(query|mutate)\s+([A-Za-z_][A-Za-z0-9_]*)")
+TYPE_NAME = re.compile(r"`([A-Z][A-Za-z0-9]*)`")
+SCHEMA_TYPE = re.compile(r"^(?:node|edge)\s+([A-Za-z_][A-Za-z0-9_]*)", re.M)
+# What a site.json claims from the market vocabulary: the list, its slug prefix, the key holding the slug.
+CLAIMS = (("needs", "need:", "need"), ("capabilities", "cap:", "capability"))
+
+
+def readme_sections(folder):
+    """A README as its lead and its `##` sections, each with its text and its `###` parts.
+    A `#` line inside a code fence is a shell comment, not a heading."""
+    lead, sections, section, part, fenced = [], {}, None, None, False
+    for line in (ROOT / folder / "README.md").read_text().splitlines():
+        if line.startswith("```"):
+            fenced = not fenced
+        heading = None if fenced else re.match(r"(#{1,3}) (.+)", line)
+        if heading and heading[1] == "##":
+            assert heading[2] not in sections, f"{folder}/README.md: ## {heading[2]} appears twice"
+            section, part = sections.setdefault(heading[2], {"text": [], "parts": {}}), None
+        elif heading and heading[1] == "###" and section:
+            part = section["parts"].setdefault(heading[2], [])
+        elif heading and heading[1] == "#":
+            continue
+        elif section is None:
+            lead.append(line)
+        else:
+            section["text"].append(line)
+            if part is not None:
+                part.append(line)
+    return lead, sections
+
+
+def tables(lines):
+    """The Markdown tables in some lines: each a list of rows, a row its cells by column header.
+    A table is a header line, a delimiter line with as many cells, then its rows; lines of
+    cells without that delimiter do not render as a table and are not read as one."""
+    found, block = [], []
+    for line in [*lines, ""]:
+        if line.lstrip().startswith("|"):
+            block.append([cell.strip() for cell in line.strip().strip("|").split("|")])
+            continue
+        if len(block) > 1 and len(block[1]) == len(block[0]) and all(re.fullmatch(r":?-+:?", cell) for cell in block[1]):
+            found.append([dict(zip(block[0], cells)) for cells in block[2:]])
+        block = []
+    return found
+
+
+def fences(lines):
+    """The fenced blocks in some lines, each as (label, body lines). One left open runs to the end."""
+    found, body = [], None
+    for line in lines:
+        if line.startswith("```"):
+            if body is None:
+                body = []
+                found.append((line[3:].strip(), body))
+            else:
+                body = None
+        elif body is not None:
+            body.append(line)
+    return found
+
+
+def prompt(name, folder):
+    """What a reader pastes into a coding agent to have a cookbook set up."""
+    return ("Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the "
+            f"{name} cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/{folder}")
+
+
+def check_readme(folder, site, queries):
+    """The README in the shared sections, each claim backed by something the cookbook holds."""
+    where, there = f"{folder}/README.md", f"{folder}/site.json"
+    lead, sections = readme_sections(folder)
+    assert tuple(sections) == README_SECTIONS, \
+        f"{where}: its ## sections must be exactly {', '.join(README_SECTIONS)}, in that order; " \
+        f"found {', '.join(sections) or 'none'}"
+    for title, section in sections.items():
+        assert "".join(section["text"]).strip(), f"{where}: ## {title} is empty"
+    # The intro: the living thing the use case builds and the agent workflows around it, in the
+    # words site.json's about carries, and where an agent finds the commands.
+    intro = "\n".join(lead).strip()
+    first = " ".join(intro.split("\n\n")[0].split())
+    assert first and first == site.get("about"), \
+        f"{where}: its first paragraph and about in site.json must be the same text"
+    opening = first.split(". ")[0]
+    assert opening.startswith("Build a living ") and "agent workflows around it" in opening, \
+        f"{where}: the intro opens 'Build a living <what the use case keeps> ..., and the agent workflows around it.'"
+    assert "(AGENTS.md)" in intro, f"{where}: the intro must point agents at AGENTS.md"
+    # The questions table is site.json's questions: the same ones, word for word, in the same
+    # order, each with its stored read.
+    assert len(site["questions"]) in QUESTIONS, \
+        f"{there}: feature {QUESTIONS.start} to {QUESTIONS.stop - 1} questions, found {len(site['questions'])}"
+    for question in site["questions"]:
+        assert isinstance(question.get("params", {}), dict), f"{there}: params of {question['q']!r} must be an object"
+    listed = [(row.get("Question"), row.get("Stored query"))
+              for table in tables(sections["Questions you can ask"]["text"]) for row in table]
+    featured = [(question["q"], f"`{question['query']}`") for question in site["questions"]]
+    assert listed == featured, \
+        f"{where}: the Question and Stored query columns of ## Questions you can ask must be the questions of " \
+        f"site.json, in order; the README has {listed}, site.json has {featured}"
+    # A workflow or question names the stored queries behind it, and only ones the cookbook has:
+    # everything in code in a stored-query column, and any snake_case name in code beside it.
+    for title in ("Agents and workflows", "Questions you can ask"):
+        text = sections[title]["text"]
+        named = QUERY_NAME.findall("\n".join(text))
+        named += [name for table in tables(text) for row in table for column, cell in row.items()
+                  if column.startswith("Stored quer") for name in CODE.findall(cell)]
+        assert named, f"{where}: ## {title} must name the stored queries behind it"
+        for name in named:
+            assert name in queries, f"{where}: ## {title} names `{name}`, which queries/*.gq does not define"
+    assert "(seed.md)" in "\n".join(sections["Sample data"]["text"]), \
+        f"{where}: ## Sample data must link seed.md"
+    # A type the data model or the data sources name is one the schema declares.
+    types = set(SCHEMA_TYPE.findall((ROOT / folder / "schema.pg").read_text()))
+    for title in ("The data model", "Data sources"):
+        for name in TYPE_NAME.findall("\n".join(sections[title]["text"])):
+            assert name in types, f"{where}: ## {title} names `{name}`, which schema.pg does not declare"
+    run_it = "\n".join(sections["Run it"]["text"])
+    graph = COOKBOOKS[folder][0]
+    for needed in ("../docs/local-setup.md", "(AGENTS.md)", f"`{graph}`"):
+        assert needed in run_it, f"{where}: ## Run it must link local setup and AGENTS.md and give the Graph ID; {needed} is missing"
+    head, tail = prompt("|", folder).split("|")
+    assert any(label == "text" and len(body) == 1 and body[0].startswith(head) and body[0].endswith(tail)
+               and len(body[0]) > len(head) + len(tail) for label, body in fences(sections["Run it"]["text"])), \
+        f"{where}: ## Run it must give the onboarding prompt in a text block: {prompt('<name>', folder)}"
+    # The commands live in the agent guide: each stored query it or the README runs exists, with the verb that fits.
+    # AGENTS.md is a link to CLAUDE.md, which a checkout without symlinks does not follow.
+    guide = (ROOT / folder / "CLAUDE.md").read_text()
+    for source, text in ((where, (ROOT / folder / "README.md").read_text()), (f"{folder}/CLAUDE.md", guide)):
+        for verb, name in INVOCATION.findall(text):
+            assert name in queries, f"{source}: `omnigraph {verb} {name}` names no stored query in queries/*.gq"
+            assert queries[name] == (verb == "mutate"), \
+                f"{source}: {name} {'writes' if queries[name] else 'reads'}, so `omnigraph {verb} {name}` cannot run it"
+    assert any(verb == "mutate" for verb, _ in INVOCATION.findall(guide)), \
+        f"{folder}/CLAUDE.md: must run at least one stored mutation; a cookbook is written to, not only read"
+    # Where mr-ops has a use case for the cookbook: a need met or a capability used
+    # points at the heading that shows it. Where it has none, all three are left out.
+    use_case = site.get("use_case")
+    assert use_case is None or (isinstance(use_case, str) and use_case.startswith("usecase:")), \
+        f"{there}: use_case, when given, must be a use case slug, usecase:<name>"
+    headings = set(sections) | {heading for section in sections.values() for heading in section["parts"]}
+    for key, prefix, field in CLAIMS:
+        claims = site.get(key, [])
+        assert isinstance(claims, list), f"{there}: {key} must be a list"
+        assert use_case or not claims, \
+            f"{there}: {key} needs a use_case; leave all three out where mr-ops has no use case for the cookbook"
+        for claim in claims:
+            slug, shown_in = claim.get(field), claim.get("shown_in")
+            assert isinstance(slug, str) and slug.startswith(prefix), \
+                f"{there}: every entry of {key} needs its slug in {field}, {prefix}<name>"
+            assert shown_in in headings, \
+                f"{there}: {slug} is shown in {shown_in!r}, which is not a heading in the README"
+
+
+def promised_answers(folder):
+    """The questions a cookbook's README answers, as (question, stored read, params)."""
+    site = json.loads((ROOT / folder / "site.json").read_text())
+    return [(q["q"], q["query"], q.get("params", {})) for q in site["questions"]]
+
+
+def check_root_readme(sites):
+    """The root README is the landing page for the collection: its table is each cookbook's
+    name, blurb and first question from site.json, in order, and it carries no commands."""
+    lines = (ROOT / "README.md").read_text().splitlines()
+    listed = [tuple(row.values()) for table in tables(lines) for row in table]
+    wanted = [(f"[{site['name']}]({folder}/)", site["blurb"], site["questions"][0]["q"])
+              for folder, site in sorted(sites.items(), key=lambda item: item[1]["order"])]
+    for have, want in zip(listed, wanted):
+        assert have == want, f"README.md: a row of the cookbook table is {have}; site.json makes it {want}"
+    assert len(listed) == len(wanted), \
+        f"README.md: the cookbook table has {len(listed)} rows for {len(wanted)} cookbooks"
+    assert fences(lines) == [("text", [prompt("<name>", "<folder>")])], \
+        "README.md: its only fenced block is the onboarding prompt, in a text block; commands belong in " \
+        "docs/local-setup.md and each cookbook's AGENTS.md"
 
 
 def check_sites(selected):
@@ -532,6 +786,7 @@ def check_sites(selected):
     if len(selected) == len(COOKBOOKS):
         orders = [site["order"] for site in sites.values()]
         assert len(set(orders)) == len(orders), f"site.json order values repeat: {sorted(orders)}"
+        check_root_readme(sites)
     print(f"site.json passed for {len(selected)} cookbooks.")
 
 
@@ -546,7 +801,7 @@ def main():
     if site_only:
         return
     if not CLI or not SERVER:
-        raise SystemExit("Put 0.14.0 omnigraph and omnigraph-server on PATH or set OMNIGRAPH_BIN / OMNIGRAPH_SERVER_BIN")
+        raise SystemExit("Put 0.15.0 omnigraph and omnigraph-server on PATH or set OMNIGRAPH_BIN / OMNIGRAPH_SERVER_BIN")
     workspace = Path(tempfile.mkdtemp(prefix="omnigraph-cookbooks-test-"))
     env = {k: v for k, v in os.environ.items()
            if not k.startswith(("OMNIGRAPH_", "OG_", "AWS_", "AZURE_"))}
@@ -560,7 +815,7 @@ def main():
     gateway.ensure_certificates(workspace / "tls")
     try:
         version = run(env, "version").stdout
-        assert version.splitlines()[0] == "omnigraph 0.14.0", version
+        assert version.splitlines()[0] == "omnigraph 0.15.0", version
         for name in selected:
             graph, query = COOKBOOKS[name]
             qualify(name, graph, query, workspace, env)
@@ -569,7 +824,7 @@ def main():
         raise
     else:
         shutil.rmtree(workspace)
-        print(f"All {len(selected)} selected cookbooks passed against OmniGraph 0.14.0.")
+        print(f"All {len(selected)} selected cookbooks passed against OmniGraph 0.15.0.")
 
 
 if __name__ == "__main__":

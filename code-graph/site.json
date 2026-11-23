@@ -1,21 +1,31 @@
 {
-  "order": 9,
+  "order": 10,
   "name": "Code graph",
   "category": "Engineering",
   "blurb": "A repository's definitions and the references between them, resolved by the TypeScript compiler, one graph state per commit, so a pull request's branch diff shows what it changed in the call graph.",
+  "about": "Build a living code graph of a repository, and the agent workflows around it. It keeps every definition and the references between them, resolved by the TypeScript compiler, so callers, implementations and the impact of a change are exact rather than guessed from names. CI indexes each pull request onto a branch of its own, so the graph follows the code commit by commit. Coding agents read it while they work and post what a change does to the call graph, and a person merges each branch.",
   "sample": "hono's router, before and after a real pull request",
   "questions": [
     {
       "q": "Who calls this function?",
-      "query": "callers"
+      "query": "callers",
+      "params": {
+        "symbol": "src/router/reg-exp-router/`matcher.ts`/match()."
+      }
     },
     {
       "q": "What breaks if I change it?",
-      "query": "impact"
+      "query": "impact",
+      "params": {
+        "symbol": "src/`router.ts`/Router#add()."
+      }
     },
     {
       "q": "Which classes implement this interface method?",
-      "query": "implementers"
+      "query": "implementers",
+      "params": {
+        "symbol": "src/`router.ts`/Router#add()."
+      }
     },
     {
       "q": "What does everything else depend on?",
@@ -24,6 +34,7 @@
   ],
   "search": {
     "title": "Code graph: compiler-resolved references for agents",
+    "heading": "Every call, reference and implementation in your code, as one graph",
     "keywords": [
       "code graph",
       "call graph",

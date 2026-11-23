@@ -3,11 +3,15 @@
   "name": "Second brain",
   "category": "Personal",
   "blurb": "One person's people, projects, notes, tasks, habits and reading, with where each piece came from.",
+  "about": "Build a living second brain, and the agent workflows around it. It keeps one person's people, projects, notes, tasks, habits and reading linked, with the message, email or memo each piece came from. It stays current because agents capture what arrives and tidy what is there, and the owner reviews their work on a branch before it joins the record.",
   "sample": "A fictional person's life",
   "questions": [
     {
       "q": "What do I still owe this person?",
-      "query": "person_tasks_i_owe"
+      "query": "person_tasks_i_owe",
+      "params": {
+        "slug": "per-theo"
+      }
     },
     {
       "q": "What should I do next?",
@@ -19,11 +23,15 @@
     },
     {
       "q": "Who recommended this book?",
-      "query": "media_recommended_by"
+      "query": "media_recommended_by",
+      "params": {
+        "slug": "med-pachinko"
+      }
     }
   ],
   "search": {
-    "title": "Second brain knowledge graph template",
+    "title": "Second brain: a personal knowledge graph for agents",
+    "heading": "A personal knowledge graph your agents can read and write",
     "keywords": [
       "second brain",
       "agent memory",

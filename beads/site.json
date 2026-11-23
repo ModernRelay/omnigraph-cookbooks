@@ -3,6 +3,7 @@
   "name": "Agent work queue",
   "category": "Engineering",
   "blurb": "A dependency-aware issue queue for coding agents, in the style of beads: file work, link what waits on what, claim what is ready, close it.",
+  "about": "Build a living work queue for coding agents, and the agent workflows around it. It keeps issues, what waits on what, parent and child work, comments and project memories linked, so several agents and the people directing them share one current plan. Whether work is ready or blocked is worked out from the links on every read, and a claim is atomic, so no status drifts and no two agents take the same issue. Agents file, claim, close and re-plan work, and a person reviews the plans they put on a branch.",
   "sample": "Larkspur, a fictional note-taking app",
   "questions": [
     {
@@ -15,15 +16,22 @@
     },
     {
       "q": "Which blocks does an issue inherit from its parents?",
-      "query": "ancestor_blockers"
+      "query": "ancestor_blockers",
+      "params": {
+        "id": "lk-share-api"
+      }
     },
     {
       "q": "What depends on this issue, directly or not?",
-      "query": "downstream"
+      "query": "downstream",
+      "params": {
+        "id": "lk-queue"
+      }
     }
   ],
   "search": {
     "title": "Agent work queue: shared state for coding agents",
+    "heading": "A dependency-aware work queue that coding agents share",
     "keywords": [
       "shared state",
       "agent memory",

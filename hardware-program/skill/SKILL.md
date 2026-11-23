@@ -18,7 +18,7 @@ every decision to a person.
 
 ## Setup
 
-Check `omnigraph version` (0.14). Use the server target you were given, here
+Check `omnigraph version` (0.15). Use the server target you were given, here
 `local-agent` from the cookbook's local setup; its token selects the
 `act-agent` actor and never appears in your commands. That actor can read,
 invoke stored queries, and create and write unprotected branches. It cannot
@@ -36,9 +36,11 @@ omnigraph query open_findings --target local-agent --graph program --json
 ```
 
 If your host connects through MCP (`omnigraph mcp --target local-agent --graph
-program`), each stored read is a call to the `query` tool. Write through the
-stored mutations below with `omnigraph mutate`, not with MCP's `mutate` tool,
-which takes free GQ text.
+program`, plus `--write` for the write tools), each stored read is a call to
+the `query` tool with the query's `name`, and each stored mutation below is a
+call to `mutate` with its `name` and `params`. Write that way rather than
+composing GQ: the stored shapes encode the program's rules. The policy decides
+every call, so a write addressed to `main` is still refused.
 
 ## Read before you write
 

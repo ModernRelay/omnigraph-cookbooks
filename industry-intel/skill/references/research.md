@@ -228,8 +228,8 @@ omnigraph cluster validate --config .
 ```
 
 These checks validate schema/query compatibility and configuration, not seed
-rows. Follow the root README's
-[local setup](https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#local-setup)
+rows. Follow the repository's
+[local setup](https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/docs/local-setup.md)
 for initial apply, writer-lock handoff, server startup, and served seed loading.
 
 If load reports a deterministic pre-effect validation refusal, correct the
