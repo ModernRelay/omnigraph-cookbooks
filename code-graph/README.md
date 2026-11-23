@@ -120,6 +120,11 @@ Every workflow has the same parts:
   server from Claude Code, Codex, Cursor or another MCP client. The `cg` client
   in `client/` wraps the reads, the indexing and the review in one command
   each.
+- **Measured with agents.** Claude Code agents answering code-structure
+  questions with the graph spent 0.52 to 0.84 times what the same questions
+  cost without it, on hono and on VS Code, and the graph holds 89% of the
+  calls hono's test suite makes. [bench/README.md](bench/README.md) has the
+  methods and every result.
 
 ## Data sources
 

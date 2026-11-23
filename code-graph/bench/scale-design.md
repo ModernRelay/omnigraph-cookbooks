@@ -469,7 +469,7 @@ What the second window shows:
 5. **`impact` from a hub ran out of memory.** All five Omnigraph sessions on
    `transitive-4`, the question left out of the scores, hit the 2 GiB
    `query_memory_bytes` limit, 18 times in all. On the graph without indexes
-   no session did. The cookbook README lists this under Limits.
+   no session did. The cookbook's CLAUDE.md lists this under What it does not do.
 
 ## Build order
 
@@ -484,8 +484,8 @@ What the second window shows:
 5. Index with the other three tools; record times and failures. Not done:
    their Linux installs are not scripted, so the full run had four arms.
 6. Full run, 480 sessions, then a second window for no graph and Omnigraph
-   on the optimized graph; scored, written up here, in `bench/README.md` and
-   in the cookbook README. Done.
+   on the optimized graph; scored, written up here, in `bench/README.md`
+   (Results). Done.
 
 ## Limits
 

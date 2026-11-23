@@ -9,8 +9,8 @@ These are ten self-contained OmniGraph **0.15.0** bundles: schemas, seed data,
 stored queries and applied policies. The only application code is the beads
 cookbook's `ob` client in `beads/client/`, the code-graph cookbook's `cg`
 client in `code-graph/client/` and its seed tools in `code-graph/sources/`,
-each with its own tests, and the local HTTPS gateway
-`scripts/local-tls-gateway.py`. The root
+each with its own tests, the code-graph benchmarks in `code-graph/bench/`, and
+the local HTTPS gateway `scripts/local-tls-gateway.py`. The root
 [README](README.md) is the landing page for the collection.
 [docs/local-setup.md](docs/local-setup.md) owns serving a cookbook locally,
 live updates and upgrades. Individual cookbook guides own their domain model

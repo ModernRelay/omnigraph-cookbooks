@@ -13,7 +13,7 @@ converted and loaded with `cg load`, and `cg diff` is scored twice:
 
 The sample is pinned in pr-sample.json on the first run and reused after.
 Needs git, Node.js 22.23.4+, the locked indexer (`npm ci` in
-sources/indexer) and the 0.14.0 omnigraph CLI (OMNIGRAPH_BIN).
+sources/indexer) and the omnigraph CLI the cookbooks pin (OMNIGRAPH_BIN).
 """
 from __future__ import annotations
 
