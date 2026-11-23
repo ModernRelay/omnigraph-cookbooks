@@ -502,19 +502,39 @@ def readme_sections(folder):
 
 
 def tables(lines):
-    """The Markdown tables in some lines: each a list of rows, a row its cells by column header."""
-    found, header = [], None
-    for line in lines:
-        if not line.lstrip().startswith("|"):
-            header = None
+    """The Markdown tables in some lines: each a list of rows, a row its cells by column header.
+    A table is a header line, a delimiter line with as many cells, then its rows; lines of
+    cells without that delimiter do not render as a table and are not read as one."""
+    found, block = [], []
+    for line in [*lines, ""]:
+        if line.lstrip().startswith("|"):
+            block.append([cell.strip() for cell in line.strip().strip("|").split("|")])
             continue
-        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
-        if header is None:
-            header = cells
-            found.append([])
-        elif not all(set(cell) <= set("-: ") for cell in cells):
-            found[-1].append(dict(zip(header, cells)))
+        if len(block) > 1 and len(block[1]) == len(block[0]) and all(re.fullmatch(r":?-+:?", cell) for cell in block[1]):
+            found.append([dict(zip(block[0], cells)) for cells in block[2:]])
+        block = []
     return found
+
+
+def fences(lines):
+    """The fenced blocks in some lines, each as (label, body lines). One left open runs to the end."""
+    found, body = [], None
+    for line in lines:
+        if line.startswith("```"):
+            if body is None:
+                body = []
+                found.append((line[3:].strip(), body))
+            else:
+                body = None
+        elif body is not None:
+            body.append(line)
+    return found
+
+
+def prompt(name, folder):
+    """What a reader pastes into a coding agent to have a cookbook set up."""
+    return ("Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the "
+            f"{name} cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/{folder}")
 
 
 def check_readme(folder, site, queries):
@@ -569,6 +589,10 @@ def check_readme(folder, site, queries):
     graph = COOKBOOKS[folder][0]
     for needed in ("../docs/local-setup.md", "(AGENTS.md)", f"`{graph}`"):
         assert needed in run_it, f"{where}: ## Run it must link local setup and AGENTS.md and give the Graph ID; {needed} is missing"
+    head, tail = prompt("|", folder).split("|")
+    assert any(label == "text" and len(body) == 1 and body[0].startswith(head) and body[0].endswith(tail)
+               and len(body[0]) > len(head) + len(tail) for label, body in fences(sections["Run it"]["text"])), \
+        f"{where}: ## Run it must give the onboarding prompt in a text block: {prompt('<name>', folder)}"
     # The commands live in the agent guide: each stored query it or the README runs exists, with the verb that fits.
     # AGENTS.md is a link to CLAUDE.md, which a checkout without symlinks does not follow.
     guide = (ROOT / folder / "CLAUDE.md").read_text()
@@ -615,8 +639,9 @@ def check_root_readme(sites):
         assert have == want, f"README.md: a row of the cookbook table is {have}; site.json makes it {want}"
     assert len(listed) == len(wanted), \
         f"README.md: the cookbook table has {len(listed)} rows for {len(wanted)} cookbooks"
-    assert not any(line.startswith("```") and line[3:].strip() not in ("", "text") for line in lines), \
-        "README.md: commands belong in docs/local-setup.md and each cookbook's AGENTS.md, not in the root README"
+    assert fences(lines) == [("text", [prompt("<name>", "<folder>")])], \
+        "README.md: its only fenced block is the onboarding prompt, in a text block; commands belong in " \
+        "docs/local-setup.md and each cookbook's AGENTS.md"
 
 
 def check_sites(selected):
