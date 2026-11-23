@@ -38,9 +38,10 @@ COOKBOOKS = {
     "beads": ("beads", "ready"),
     "company-brain": ("company", "current_decisions"),
     "hardware-program": ("program", "budget_rollup"),
+    "health-record": ("health", "latest_results"),
 }
 # Cookbooks whose policy lets act-agent write only on unprotected branches.
-BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program"}
+BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program", "health-record"}
 ACTORS = ("act-admin", "act-writer", "act-reader", "act-agent")
 TOKENS = {actor: f"cookbook-test-{actor}" for actor in ACTORS}
 GATEWAY = ROOT / "scripts" / "local-tls-gateway.py"
@@ -249,13 +250,16 @@ def qualify(name, graph, stored_query, workspace, env):
                 company_brain_journey(env)
             if name == "hardware-program":
                 hardware_program_journey(env)
+            if name == "health-record":
+                health_record_journey(env)
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
                   + (f", {len(answers)} README answers" if answers else "")
                   + (", ob client" if name == "beads" else "")
                   + (", review journey" if name == "company-brain" else "")
-                  + (", review gate" if name == "hardware-program" else ""), flush=True)
+                  + (", review gate" if name == "hardware-program" else "")
+                  + (", intake review" if name == "health-record" else ""), flush=True)
         finally:
             gateway.terminate()
             process.terminate()
@@ -400,6 +404,42 @@ def hardware_program_journey(env):
     run(env, "commit", "publish", commit, *writer, "--json")
     assert rows("limit_violations") == []
     run(env, "branch", "delete", "cr-heatsink", *writer, "--yes", "--json")
+
+
+def health_record_journey(env):
+    """Off target and an unfinished vaccine series are derived from the results and doses.
+    An agent cannot record a dose on main; on its own branch the dose completes the series
+    there while main stays put, and the series is complete on main once a person merges.
+    Recording the same dose again is refused."""
+    def scope(actor):
+        return ("--target", target(actor), "--graph", "health")
+
+    def rows(query, *extra, params=None):
+        return run(env, "query", query, *scope("act-reader"), "--params", json.dumps(params or {}),
+                   *extra, "--json")["rows"]
+
+    assert {row["marker"] for row in rows("off_target")} == {"mk-ldl", "mk-vitd"}
+    assert [row["disease"] for row in rows("incomplete_series")] == ["cond-hepatitis-b"]
+    assert all(row["m.slug"] != "m-2026-01-weight-typo" for row in rows("marker_history", params={"marker": "mk-weight"}))
+
+    agent, writer = scope("act-agent"), scope("act-writer")
+    dose = json.dumps({"slug": "imm-hepb-3", "vaccine": "Hepatitis B", "administered_on": "2026-11-20",
+                       "date_precision": "day", "origin": "provider_record", "person": "per-noa",
+                       "disease": "cond-hepatitis-b", "dose_number": 3, "series_doses": 3})
+    refused(run(env, "mutate", "record_dose", *agent, "--params", dose, "--json", ok=False))
+    run(env, "branch", "create", "intake-vaccines", *agent, "--json")
+    run(env, "mutate", "record_dose", *agent, "--branch", "intake-vaccines", "--params", dose, "--json")
+    assert rows("incomplete_series", "--branch", "intake-vaccines") == []
+    assert [row["disease"] for row in rows("incomplete_series")] == ["cond-hepatitis-b"], "main moved before the merge"
+    run(env, "branch", "merge", "intake-vaccines", "--into", "main", *writer, "--json")
+    assert rows("incomplete_series") == []
+    run(env, "branch", "delete", "intake-vaccines", *writer, "--yes", "--json")
+    # A record is written once: the same slug again, with other values, is refused and changes nothing.
+    replay = json.dumps({**json.loads(dose), "vaccine": "Hepatitis B, replayed"})
+    again = run(env, "mutate", "record_dose", *writer, "--params", replay, "--json", ok=False)
+    assert "@card violation" in again.stdout + again.stderr, (again.stdout, again.stderr)
+    doses = rows("disease_doses", params={"disease": "cond-hepatitis-b"})
+    assert [row["i.vaccine"] for row in doses] == ["Hepatitis B"] * 3, doses
 
 
 # What omnigraph.dev accepts in a site.json; its importer

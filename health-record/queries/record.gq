@@ -1,0 +1,611 @@
+// Reads for the health-record cookbook. Every status here (latest, out of
+// range, off target, overdue, incomplete) is derived on each read from the
+// results, targets, doses and recommendations, never stored.
+//
+// A current result is one that was not entered in error and that no standing
+// correction supersedes, directly or through a chain of corrections. A
+// correction that was itself entered in error no longer hides what it
+// replaced. The latest result of a marker is the current one with no newer
+// current result of the same marker for the same person.
+//
+// A result at a detection limit ("<5") is judged only where the limit settles
+// it: it is below a floor of 5 or more, and it is never above a ceiling.
+//
+// A recommendation is still due while its status is open and nothing valid
+// fulfils it: no result that was not entered in error, and no given dose.
+
+// ── Results ───────────────────────────────────────────────────────
+
+query latest_results() @description("The latest current result of each marker, per person.") {
+    match {
+        $m: Measurement
+        $m measurementFor $p
+        $m measurementOf $x
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
+        not { $n measurementOf $x  $n measurementFor $p  $n.status != "entered_in_error"
+              not { $d measurementSupersedes{1,8} $n  $d.status != "entered_in_error" }
+              $n.measured_at > $m.measured_at }
+    }
+    return { $p.slug as person, $x.slug as marker, $x.name, $m.value, $m.comparator, $m.unit, $m.flag, $m.status, $m.measured_at }
+    order { $p.slug asc, $x.slug asc }
+    limit 1000
+}
+
+query out_of_range() @description("Latest results outside the range their own source printed.") {
+    match {
+        $m: Measurement
+        $m measurementFor $p
+        $m measurementOf $x
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
+        not { $n measurementOf $x  $n measurementFor $p  $n.status != "entered_in_error"
+              not { $d measurementSupersedes{1,8} $n  $d.status != "entered_in_error" }
+              $n.measured_at > $m.measured_at }
+        ($m.comparator is null and ($m.value > $m.reference_high or $m.value < $m.reference_low))
+            or (($m.comparator = "lt" or $m.comparator = "le") and $m.value <= $m.reference_low)
+            or (($m.comparator = "gt" or $m.comparator = "ge") and $m.value >= $m.reference_high)
+    }
+    return { $p.slug as person, $x.slug as marker, $m.comparator, $m.value, $m.unit, $m.reference_low, $m.reference_high, $m.flag, $m.measured_at }
+    order { $p.slug asc, $x.slug asc }
+    limit 500
+}
+
+query off_target() @description("Latest results outside the person's own active target for that marker.") {
+    match {
+        $t: Target { status: "active" }
+        $t targetOf $p
+        $t targetFor $x
+        $m measurementFor $p
+        $m measurementOf $x
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
+        not { $n measurementOf $x  $n measurementFor $p  $n.status != "entered_in_error"
+              not { $d measurementSupersedes{1,8} $n  $d.status != "entered_in_error" }
+              $n.measured_at > $m.measured_at }
+        ($m.comparator is null and ($m.canonical_value > $t.high or $m.canonical_value < $t.low))
+            or (($m.comparator = "lt" or $m.comparator = "le") and $m.canonical_value <= $t.low)
+            or (($m.comparator = "gt" or $m.comparator = "ge") and $m.canonical_value >= $t.high)
+    }
+    return { $p.slug as person, $x.slug as marker, $m.comparator, $m.canonical_value as value, $t.low, $t.high, $t.unit, $m.measured_at, $t.slug as target }
+    order { $p.slug asc, $x.slug asc }
+    limit 500
+}
+
+query targets() @description("Each active target beside the latest result it is judged against.") {
+    match {
+        $t: Target { status: "active" }
+        $t targetOf $p
+        $t targetFor $x
+        $m measurementFor $p
+        $m measurementOf $x
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
+        not { $n measurementOf $x  $n measurementFor $p  $n.status != "entered_in_error"
+              not { $d measurementSupersedes{1,8} $n  $d.status != "entered_in_error" }
+              $n.measured_at > $m.measured_at }
+    }
+    return {
+        $p.slug as person, $x.slug as marker, $t.low, $t.high, $t.unit, $t.set_by, $m.comparator, $m.canonical_value as latest, $m.measured_at,
+        ($m.comparator is null and ($m.canonical_value > $t.high or $m.canonical_value < $t.low))
+            or (($m.comparator = "lt" or $m.comparator = "le") and $m.canonical_value <= $t.low)
+            or (($m.comparator = "gt" or $m.comparator = "ge") and $m.canonical_value >= $t.high) as off_target
+    }
+    order { $p.slug asc, $x.slug asc }
+    limit 500
+}
+
+query marker_history($marker: String) @description("Every current result of one marker, oldest first.") {
+    match {
+        $x: Measurable { slug: $marker }
+        $m measurementOf $x
+        $m measurementFor $p
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
+    }
+    return { $p.slug as person, $m.slug, $m.measured_at, $m.value, $m.comparator, $m.unit, $m.canonical_value, $m.flag, $m.statistic, $m.device }
+    order { $m.measured_at asc }
+    limit 2000
+}
+
+query record_results($record: String) @description("The results read from one document, with the line each was read from.") {
+    match {
+        $h: HealthRecord { slug: $record }
+        $m measurementIn $h
+        $m measurementOf $x
+    }
+    return { $m.slug, $x.slug as marker, $m.value, $m.comparator, $m.unit, $m.reference_low, $m.reference_high, $m.flag, $m.status, $m.source_line }
+    order { $x.slug asc }
+    limit 500
+}
+
+query records_awaiting_review() @description("Documents an agent read values from that no person has checked against the file yet, and documents nothing was read from.") {
+    match {
+        $h: HealthRecord
+        $h.extraction != "reviewed"
+        $h recordFor $p
+    }
+    return { $p.slug as person, $h.slug, $h.title, $h.kind, $h.document_date, $h.extraction }
+    order { $h.document_date asc }
+    limit 500
+}
+
+query unconverted_results() @description("Current results in a unit other than their marker's canonical unit, with no canonical value: they cannot be judged against a target.") {
+    match {
+        $m: Measurement
+        $m measurementOf $x
+        $m measurementFor $p
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
+        $m.value is not null
+        $m.canonical_value is null
+    }
+    return { $p.slug as person, $m.slug, $x.slug as marker, $m.value, $m.unit, $x.canonical_unit, $m.measured_at }
+    order { $m.measured_at asc }
+    limit 500
+}
+
+query corrected_results() @description("Results a source corrected, each beside the value it replaced. A correction entered in error is left out.") {
+    match {
+        $new: Measurement
+        $new.status != "entered_in_error"
+        $new measurementSupersedes $old
+        $new measurementOf $x
+        $new measurementFor $p
+    }
+    return { $p.slug as person, $x.slug as marker, $old.slug as replaced, $old.value as old_value, $new.slug as correction, $new.value as new_value, $new.unit, $new.measured_at }
+    order { $new.measured_at asc }
+    limit 500
+}
+
+query preliminary_results() @description("Results the source marked preliminary that no final result has replaced.") {
+    match {
+        $m: Measurement { status: "preliminary" }
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
+        $m measurementOf $x
+        $m measurementFor $p
+    }
+    return { $p.slug as person, $m.slug, $x.slug as marker, $m.value, $m.unit, $m.measured_at }
+    order { $m.measured_at asc }
+    limit 500
+}
+
+query detection_limit_results() @description("Latest results reported at a detection limit, such as \"<0.3\". They are judged against a range or a target only where the limit settles it.") {
+    match {
+        $m: Measurement
+        $m.comparator is not null
+        $m measurementFor $p
+        $m measurementOf $x
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
+        not { $n measurementOf $x  $n measurementFor $p  $n.status != "entered_in_error"
+              not { $d measurementSupersedes{1,8} $n  $d.status != "entered_in_error" }
+              $n.measured_at > $m.measured_at }
+    }
+    return { $p.slug as person, $x.slug as marker, $m.comparator, $m.value, $m.unit, $m.reference_low, $m.reference_high, $m.measured_at }
+    order { $x.slug asc }
+    limit 500
+}
+
+// ── Markers and codes ─────────────────────────────────────────────
+
+query markers() @description("Every marker with its kind, category and canonical unit.") {
+    match { $x: Measurable }
+    return { $x.slug, $x.name, $x.kind, $x.category, $x.canonical_unit }
+    order { $x.kind asc, $x.slug asc }
+    limit 1000
+}
+
+query marker_codes() @description("The standard codes recorded for each marker.") {
+    match {
+        $c: ExternalCode
+        $c codeForMeasurable $x
+    }
+    return { $x.slug as marker, $c.system, $c.code, $c.display }
+    order { $x.slug asc, $c.system asc }
+    limit 1000
+}
+
+query search_markers($q: String) @description("Markers matching words in their name or description.") {
+    match { $x: Measurable }
+    return { $x.slug, $x.name, $x.kind, $x.canonical_unit }
+    order { rrf(bm25($x.name, $q), bm25($x.description, $q)) }
+    limit 25
+}
+
+query unmeasured_markers() @description("Markers with no current result for anyone.") {
+    match {
+        $x: Measurable
+        not { $m measurementOf $x  $m.status != "entered_in_error" }
+    }
+    return { $x.slug, $x.name, $x.kind }
+    order { $x.slug asc }
+    limit 500
+}
+
+// ── What is due ───────────────────────────────────────────────────
+
+query open_recommendations() @description("Everything still due, soonest first: open, and not met by a valid result or a given dose.") {
+    match {
+        $r: Recommendation { status: "open" }
+        not { $r fulfilledByMeasurement $fm  $fm.status != "entered_in_error" }
+        not { $r fulfilledByImmunization $fi  $fi.status = "completed" }
+        $r recommendationFor $p
+    }
+    return { $p.slug as person, $r.slug, $r.title, $r.kind, $r.authority, $r.due_at, $r.latest_at }
+    order { $r.due_at asc }
+    limit 500
+}
+
+query overdue_recommendations() @description("Recommendations still due whose date has passed.") {
+    match {
+        $r: Recommendation { status: "open" }
+        $r.due_at < now()
+        not { $r fulfilledByMeasurement $fm  $fm.status != "entered_in_error" }
+        not { $r fulfilledByImmunization $fi  $fi.status = "completed" }
+        $r recommendationFor $p
+    }
+    return { $p.slug as person, $r.slug, $r.title, $r.kind, $r.authority, $r.due_at }
+    order { $r.due_at asc }
+    limit 500
+}
+
+query targets_without_retest() @description("Active targets whose marker has no recommendation still due to measure it again.") {
+    match {
+        $t: Target { status: "active" }
+        $t targetOf $p
+        $t targetFor $x
+        not { $r recommendsMeasuring $x  $r recommendationFor $p  $r.status = "open"
+              not { $r fulfilledByMeasurement $fm  $fm.status != "entered_in_error" } }
+    }
+    return { $p.slug as person, $x.slug as marker, $t.slug as target }
+    order { $x.slug asc }
+    limit 500
+}
+
+query overdue_not_notified() @description("Overdue recommendations nobody has been told about: no notification about them exists. A dismissed one counts as told.") {
+    match {
+        $r: Recommendation { status: "open" }
+        $r.due_at < now()
+        not { $r fulfilledByMeasurement $fm  $fm.status != "entered_in_error" }
+        not { $r fulfilledByImmunization $fi  $fi.status = "completed" }
+        $r recommendationFor $p
+        not { $n aboutRecommendation $r }
+    }
+    return { $p.slug as person, $r.slug, $r.title, $r.kind, $r.due_at }
+    order { $r.due_at asc }
+    limit 500
+}
+
+query met_by_result() @description("Recommendations a valid result has met, each with the result.") {
+    match {
+        $r: Recommendation
+        $r fulfilledByMeasurement $m
+        $m.status != "entered_in_error"
+        $m measurementOf $x
+    }
+    return { $r.slug, $r.title, $r.due_at, $m.slug as result, $x.slug as marker, $m.measured_at }
+    order { $r.due_at asc }
+    limit 500
+}
+
+query met_by_dose() @description("Dose recommendations a given dose has met, each with the dose.") {
+    match {
+        $r: Recommendation
+        $r fulfilledByImmunization $i
+        $i.status = "completed"
+    }
+    return { $r.slug, $r.title, $r.due_at, $i.slug as dose, $i.vaccine, $i.administered_on }
+    order { $r.due_at asc }
+    limit 500
+}
+
+// ── Immunizations ─────────────────────────────────────────────────
+
+query immunization_history() @description("Every dose on record, oldest first, with what the entry rests on.") {
+    match {
+        $i: Immunization
+        $i immunizationFor $p
+        $i.status != "entered_in_error"
+    }
+    return { $p.slug as person, $i.slug, $i.vaccine, $i.product, $i.lot_number, $i.administered_on, $i.date_precision, $i.status, $i.origin }
+    order { $i.administered_on asc, $i.slug asc }
+    limit 1000
+}
+
+query doses_by_disease() @description("For each disease, how many doses were given and the highest dose number reached in its series.") {
+    match {
+        $i: Immunization
+        $i immunizationFor $p
+        $i.status = "completed"
+        $i $w:protectsAgainst $d
+    }
+    return { $p.slug as person, $d.slug as disease, count($i) as doses, max($w.dose_number) as highest_dose, max($w.series_doses) as series_doses, max($i.administered_on) as last_dose_on }
+    order { $d.slug asc }
+    limit 500
+}
+
+query incomplete_series() @description("Diseases whose latest given dose is not the last of its series.") {
+    match {
+        $i: Immunization
+        $i immunizationFor $p
+        $i.status = "completed"
+        $i $w:protectsAgainst $d
+        $w.dose_number < $w.series_doses
+        not { $j immunizationFor $p  $j.status = "completed"  $j $v:protectsAgainst $d
+              $v.dose_number > $w.dose_number }
+    }
+    return { $p.slug as person, $d.slug as disease, $w.dose_number as doses_given, $w.series_doses, $i.vaccine, $i.administered_on as last_dose_on }
+    order { $d.slug asc }
+    limit 500
+}
+
+query undocumented_doses() @description("Doses no document shows: entered from recall, or with no record linked.") {
+    match {
+        $i: Immunization
+        $i immunizationFor $p
+        $i.status = "completed"
+        not { $i immunizationIn $h }
+    }
+    return { $p.slug as person, $i.slug, $i.vaccine, $i.administered_on, $i.date_precision, $i.origin }
+    order { $i.administered_on asc }
+    limit 500
+}
+
+query doses_not_given() @description("Doses that were due and not given, with the reason.") {
+    match {
+        $i: Immunization { status: "not_done" }
+        $i immunizationFor $p
+    }
+    return { $p.slug as person, $i.slug, $i.vaccine, $i.administered_on, $i.status_reason }
+    order { $i.administered_on asc }
+    limit 500
+}
+
+query doses_by_lot($lot: String) @description("Every dose given from one lot, for a recall notice. Doses not given or entered in error are left out.") {
+    match {
+        $i: Immunization { lot_number: $lot, status: "completed" }
+        $i immunizationFor $p
+    }
+    return { $p.slug as person, $i.slug, $i.vaccine, $i.product, $i.manufacturer, $i.administered_on, $i.expires_on }
+    order { $i.administered_on asc }
+    limit 500
+}
+
+query disease_doses($disease: String) @description("The doses that count towards one disease, in order.") {
+    match {
+        $d: Condition { slug: $disease }
+        $i $w:protectsAgainst $d
+        $i immunizationFor $p
+        $i.status != "entered_in_error"
+    }
+    return { $p.slug as person, $i.slug, $i.vaccine, $w.dose_number, $w.series_doses, $i.administered_on, $i.status, $i.origin }
+    order { $i.administered_on asc }
+    limit 500
+}
+
+query reactions() @description("Reactions on record, each with the dose or the intervention it is attributed to.") {
+    match {
+        $o: ConditionOccurrence
+        $o occurrenceOf $c
+        $c.category = "reaction"
+        $o occurrenceFor $p
+    }
+    return { $p.slug as person, $o.slug, $c.name, $o.severity, $o.onset_on, $o.status, $o.notes }
+    order { $o.onset_on asc }
+    limit 500
+}
+
+query dose_reactions() @description("Reactions that followed a vaccine dose.") {
+    match {
+        $o: ConditionOccurrence
+        $o reactionToImmunization $i
+        $o occurrenceOf $c
+    }
+    return { $i.slug as dose, $i.vaccine, $i.administered_on, $c.name as reaction, $o.severity, $o.onset_on }
+    order { $i.administered_on asc }
+    limit 500
+}
+
+query intervention_reactions() @description("Reactions attributed to something the person takes or does.") {
+    match {
+        $o: ConditionOccurrence
+        $o reactionToIntervention $v
+        $o occurrenceOf $c
+    }
+    return { $v.slug as intervention, $v.name, $c.name as reaction, $o.severity, $o.onset_on, $o.status }
+    order { $o.onset_on asc }
+    limit 500
+}
+
+// ── Hypotheses ────────────────────────────────────────────────────
+
+query hypotheses() @description("Every hypothesis with its standing and whether a person has reviewed it.") {
+    match {
+        $h: Hypothesis
+        $h hypothesisFor $p
+    }
+    return { $p.slug as person, $h.slug, $h.title, $h.status, $h.review_status, $h.raised_on }
+    order { $h.raised_on asc }
+    limit 500
+}
+
+query hypothesis_support($hypothesis: String) @description("The current results linked as supporting one hypothesis.") {
+    match {
+        $h: Hypothesis { slug: $hypothesis }
+        $h supportedBy $m
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
+        $m measurementOf $x
+    }
+    return { $m.slug, $x.slug as marker, $m.value, $m.unit, $m.flag, $m.measured_at }
+    order { $m.measured_at asc }
+    limit 500
+}
+
+query hypothesis_contradiction($hypothesis: String) @description("The current results linked as contradicting one hypothesis.") {
+    match {
+        $h: Hypothesis { slug: $hypothesis }
+        $h contradictedBy $m
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
+        $m measurementOf $x
+    }
+    return { $m.slug, $x.slug as marker, $m.value, $m.unit, $m.flag, $m.measured_at }
+    order { $m.measured_at asc }
+    limit 500
+}
+
+query contested_hypotheses() @description("Hypotheses still open or held as supported that a current result contradicts.") {
+    match {
+        $h: Hypothesis
+        $h.status = "open" or $h.status = "supported"
+        $h contradictedBy $m
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
+        $m measurementOf $x
+    }
+    return { $h.slug, $h.title, $h.status, $m.slug as result, $x.slug as marker, $m.value, $m.unit, $m.measured_at }
+    order { $h.slug asc, $m.measured_at asc }
+    limit 500
+}
+
+query hypotheses_without_evidence() @description("Open hypotheses with no current result linked for or against them.") {
+    match {
+        $h: Hypothesis { status: "open" }
+        not { $h supportedBy $a  $a.status != "entered_in_error"
+              not { $c measurementSupersedes{1,8} $a  $c.status != "entered_in_error" } }
+        not { $h contradictedBy $b  $b.status != "entered_in_error"
+              not { $d measurementSupersedes{1,8} $b  $d.status != "entered_in_error" } }
+    }
+    return { $h.slug, $h.title, $h.review_status, $h.raised_on }
+    order { $h.raised_on asc }
+    limit 500
+}
+
+query hypotheses_awaiting_review() @description("Hypotheses an agent proposed that no person has reviewed.") {
+    match {
+        $h: Hypothesis { review_status: "ai_generated" }
+    }
+    return { $h.slug, $h.title, $h.thesis, $h.raised_on }
+    order { $h.raised_on asc }
+    limit 500
+}
+
+// ── Interventions ─────────────────────────────────────────────────
+
+query active_interventions() @description("What the person takes or does now, at its current dose, with the marker each is meant to move.") {
+    match {
+        $v: Intervention { status: "active" }
+        $v interventionFor $p
+        $v targets $x
+        $e episodeOf $v
+        not { $l episodeOf $v  $l.started_at > $e.started_at }
+    }
+    return { $p.slug as person, $v.slug, $v.name, $v.kind, $e.dose, $e.frequency, $v.started_at, $x.slug as marker }
+    order { $v.started_at asc }
+    limit 500
+}
+
+query intervention_effect($intervention: String) @description("Every current result of the markers one intervention targets, marked as before or after it started.") {
+    match {
+        $v: Intervention { slug: $intervention }
+        $v interventionFor $p
+        $v targets $x
+        $m measurementOf $x
+        $m measurementFor $p
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
+    }
+    return { $x.slug as marker, $m.measured_at, $m.canonical_value as value, $x.canonical_unit as unit, $m.measured_at >= $v.started_at as after_start }
+    order { $x.slug asc, $m.measured_at asc }
+    limit 2000
+}
+
+query interventions_without_followup() @description("Active interventions whose target marker has not been measured since they started.") {
+    match {
+        $v: Intervention { status: "active" }
+        $v interventionFor $p
+        $v targets $x
+        not { $m measurementOf $x  $m measurementFor $p  $m.status != "entered_in_error"
+              $m.measured_at > $v.started_at }
+    }
+    return { $p.slug as person, $v.slug, $v.name, $v.started_at, $x.slug as marker }
+    order { $v.started_at asc }
+    limit 500
+}
+
+query dose_history() @description("Every dose period of every intervention, oldest first: a change of dose or frequency starts a new one.") {
+    match {
+        $e: InterventionEpisode
+        $e episodeOf $v
+        $v interventionFor $p
+    }
+    return { $p.slug as person, $v.slug as intervention, $v.name, $e.slug as episode, $e.dose, $e.frequency, $e.started_at, $e.reason }
+    order { $v.slug asc, $e.started_at asc }
+    limit 1000
+}
+
+query active_conditions() @description("A person's suspected and active conditions, with how certain each is.") {
+    match {
+        $o: ConditionOccurrence
+        $o occurrenceOf $c
+        $o occurrenceFor $p
+        $o.status = "suspected" or $o.status = "active"
+        $c.category != "reaction"
+    }
+    return { $p.slug as person, $o.slug, $c.name, $o.status, $o.certainty, $o.onset_on }
+    order { $c.name asc }
+    limit 500
+}
+
+// ── Visits ────────────────────────────────────────────────────────
+
+query visits() @description("Every visit, newest first, with the commit a completed one baselined.") {
+    match {
+        $v: Visit
+        $v visitOf $p
+    }
+    return { $p.slug as person, $v.slug, $v.title, $v.kind, $v.scheduled_at, $v.status, $v.baseline_commit }
+    order { $v.scheduled_at desc }
+    limit 500
+}
+
+query upcoming_visits() @description("Planned visits that have not happened yet, soonest first.") {
+    match {
+        $v: Visit { status: "planned" }
+        $v.scheduled_at >= now()
+        $v visitOf $p
+    }
+    return { $p.slug as person, $v.slug, $v.title, $v.kind, $v.scheduled_at, $v.reason }
+    order { $v.scheduled_at asc }
+    limit 100
+}
+
+query visit_records($visit: String) @description("The documents that came out of one visit.") {
+    match {
+        $v: Visit { slug: $visit }
+        $h recordOfVisit $v
+    }
+    return { $h.slug, $h.title, $h.kind, $h.document_date, $h.extraction }
+    order { $h.document_date asc }
+    limit 100
+}
+
+// ── Notifications ─────────────────────────────────────────────────
+
+query notification($slug: String) @description("One notification by its slug: read it before raising the same prompt again.") {
+    match { $n: Notification { slug: $slug } }
+    return { $n.slug, $n.title, $n.kind, $n.status, $n.raised_at, $n.sent_at, $n.channel, $n.acknowledged_at }
+}
+
+query unacknowledged_notifications() @description("Prompts raised or sent that the person has not acknowledged or dismissed.") {
+    match {
+        $n: Notification
+        $n.status = "pending" or $n.status = "sent"
+        $n notificationFor $p
+    }
+    return { $p.slug as person, $n.slug, $n.title, $n.kind, $n.status, $n.raised_at, $n.sent_at, $n.channel }
+    order { $n.raised_at asc }
+    limit 500
+}
