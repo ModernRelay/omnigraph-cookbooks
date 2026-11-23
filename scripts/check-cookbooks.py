@@ -4,8 +4,8 @@
 Usage: check-cookbooks.py [--site] [COOKBOOK ...]   (default: every cookbook)
 
 Every run first checks each cookbook's site.json, the copy omnigraph.dev shows
-for it (see "The website" in the README), and the sections of its README once it
-is on the template (see "Cookbook READMEs" there). --site runs only
+for it (see "The website" in the README), and the sections of its README (see
+"Cookbook READMEs" there). --site runs only
 that check: it is offline and needs no binaries.
 """
 
@@ -456,8 +456,7 @@ def check_site(folder):
         f"{where}: search.heading, when given, must be 1 to {SITE_HEADING_MAX} characters"
     assert about is None or (isinstance(about, str) and 0 < len(about) <= SITE_ABOUT_MAX), \
         f"{where}: about, when given, must be 1 to {SITE_ABOUT_MAX} characters"
-    if folder not in EARLIER_READMES:
-        check_readme(folder, site, queries)
+    check_readme(folder, site, queries)
     return site
 
 
@@ -466,8 +465,6 @@ def check_site(folder):
 # without the sample data, which has its own section, and omnigraph.dev draws its
 # use-case page from the same sections (see "Cookbook READMEs" in the README).
 # Commands belong in the cookbook's AGENTS.md.
-# Cookbooks not yet moved to the template. Take one out when it is moved; the set ends empty.
-EARLIER_READMES = {"industry-intel", "pharma-intel", "second-brain", "vc-os", "dev-graph", "beads"}
 README_SECTIONS = ("The data model", "Branching and merging", "Agents and workflows",
                    "Data sources", "Questions you can ask", "Sample data", "Run it")
 QUESTIONS = range(3, 6)   # how many questions a cookbook features
@@ -602,9 +599,9 @@ def check_readme(folder, site, queries):
 
 
 def promised_answers(folder):
-    """The questions a README in the shared sections answers, as (question, stored read, params); none for the others."""
+    """The questions a cookbook's README answers, as (question, stored read, params)."""
     site = json.loads((ROOT / folder / "site.json").read_text())
-    return [] if folder in EARLIER_READMES else [(q["q"], q["query"], q.get("params", {})) for q in site["questions"]]
+    return [(q["q"], q["query"], q.get("params", {})) for q in site["questions"]]
 
 
 def check_sites(selected):

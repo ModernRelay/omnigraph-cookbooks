@@ -3,7 +3,7 @@
   "name": "Venture firm",
   "category": "Investing",
   "blurb": "A venture firm's deals, portfolio, people and investment theses, with every signal tied to the beliefs it supports or contradicts.",
-  "about": "The venture firm graph covers pipeline, diligence, decisions, portfolio and network in one typed graph, with every signal tied to the investment thesis it supports or contradicts. It is for firms whose agents work across a CRM, a wiki, chat, call notes and spreadsheets that do not talk to each other. One graph with typed writes, search and commit history takes the place of that per-firm glue.",
+  "about": "Build a living operating record for a venture firm, and the agent workflows around it. It keeps deals, portfolio companies, people, meetings, investment theses and the evidence for and against them linked, so every decision traces back to the beliefs it rests on. New evidence is tied to the assumptions it supports or contradicts as it arrives. Agents prepare briefs, capture calls and propose lessons, and a partner reviews what they write.",
   "sample": "Quito Capital, a fictional AI-infrastructure fund",
   "questions": [
     {
@@ -12,15 +12,21 @@
     },
     {
       "q": "Before investment committee, what contradicts the assumptions behind this deal?",
-      "query": "pre_ic_brief_evidence"
+      "query": "pre_ic_brief_evidence",
+      "params": {
+        "slug": "deal-helix-series-a"
+      }
     },
     {
       "q": "Who on the team can get an introduction to this founder?",
-      "query": "intro_path_to_founder"
+      "query": "intro_path_to_founder",
+      "params": {
+        "slug": "per-helix-yuki"
+      }
     },
     {
-      "q": "What has happened at a portfolio company since the last board meeting?",
-      "query": "board_prep_pack"
+      "q": "What have the portfolio companies reported recently?",
+      "query": "portfolio_updates_recent"
     }
   ],
   "search": {

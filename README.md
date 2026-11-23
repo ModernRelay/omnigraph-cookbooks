@@ -290,9 +290,7 @@ The template, the rules for each section and how to write one are in
 [AGENTS.md](AGENTS.md#writing-a-cookbook-readme).
 [hardware-program](hardware-program/README.md) and
 [company-brain](company-brain/README.md) are the worked examples. The
-check holds a cookbook to the template once it is moved; the ones still on
-their earlier README are listed as `EARLIER_READMES` in
-`scripts/check-cookbooks.py`.
+check holds every cookbook to the template.
 
 ## The website
 

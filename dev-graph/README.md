@@ -1,291 +1,207 @@
-# dev-graph — a software-development knowledge graph
+# Software development: issues to incidents
 
-Opinionated Omnigraph cookbook that models **software-development work** as one
-typed graph: planning, code, release, operations, and the governance/substrate
-rules that constrain them. Built on [Omnigraph](https://github.com/ModernRelay/omnigraph).
-It is a **tracker replacement** — Issue, Epic, Decision, SpecFile, and a whole
-governance layer are native here — while your VCS host stays authoritative for
-code (`PR`/`Commit`/`Release` carry a `githubRef`).
+Build a living system of record for software development, and the agent
+workflows around it. It keeps issues, epics, specs, decisions, pull requests,
+releases and incidents linked, with the rules that constrain them, so a coding
+agent sees the upstream decisions and cross-repository context that a diff
+lacks. Whether work is ready or blocked is worked out from the links on every
+read. Agents propose changes on branches that a person reviews. The Git host
+stays the record for code.
 
-> For operating Omnigraph — schema authoring, queries, loading, branches, cluster
-> ops, the CLI — use the **omnigraph** skill. This README covers only what's
-> specific to dev-graph. No object store needed — this is a filesystem-backed cluster.
+Issues live in a tracker, code in a Git host, specs in a wiki, decisions in
+old threads and incident notes in another tool. A coding agent, or a new
+engineer, reviews a diff without the decision that shaped it, and the links
+between these things are kept in people's heads. This cookbook sets OmniGraph
+up as the one place those links are held.
 
-The reference seed is a **fictional real-time-collaboration product, "Meridian"**
-(a self-hostable collaborative document platform). Every name is fabricated; the
-seed exists to make the queries land, not to model a real team.
+- **Context for every change.** An agent or engineer reads the decisions,
+  specs and open issues that touch a component before changing it.
+- **Ready and blocked, worked out.** What can be picked up, and what waits on
+  what, comes from the links on every read, so no status field goes stale.
+- **Decisions that stay put.** A decision is never rewritten; a later one
+  supersedes it, so the reasoning behind the code stays on record.
 
-## Why a graph, not another tracker
+> If you are an agent: the commands, roles and workflows are in
+> [AGENTS.md](AGENTS.md). Read that file before running anything.
 
-A stock issue tracker (Linear/Jira) answers "what's assigned to me" well and
-everything cross-cutting badly. The questions that actually govern an engineering
-org cut *across* stages, and a tracker has no model for them:
+## The data model
 
-- *What's ready to work on, and what's blocking everything else?*
-- *Which spec describes this epic? Which components does this PR touch?*
-- *Which PRs landed in v1.4.0, and what incident did that release cause?*
-- *Which open architectural gaps undermine an invariant we claim holds?*
-- *Which issues are stuck on an upstream library fix — and which version ships it?*
-- *Semantic:* *"find the work about tenant isolation"* / *"the presence-leak postmortem."*
-
-Every one of these is a 1–3 hop graph traversal here. Dependencies are **typed
-edges**, not a flag; work state (**ready / blocked / stale / critical-path**) is
-**derived by query**, not stored; and provenance (`createdBy`/`updatedBy`) is
-**structural**, on every node. Influences: [beads](https://github.com/gastownhall/beads)
-(typed work dependencies), ADR practice (immutable decisions), and SRE
-incident-review culture.
-
-## The ontology at a glance — 22 node classes across 8 layers
-
-| Layer | Node classes | Purpose |
-|---|---|---|
-| **Planning** | `Epic`, `SpecFile`, `Decision` | Why we're building it |
-| **Work** | `Issue`, `Comment` | What we're doing day-to-day |
-| **Code** | `Repo`, `Component`, `PR`, `Commit` | Where the work lands |
-| **Release** | `Release`, `Deployment` | What shipped, where |
-| **Operations** | `Incident`, `Learning` | What broke and why |
-| **People** | `Actor` | Who did / owns it |
-| **Governance & substrate** | `Invariant`, `Principle`, `Gap`, `ExternalBlocker`, `Assumption`, `Capability` | The rules and external dependencies that constrain the work |
-| **Cross-cutting** | `Label`, `Gate` | Tagging, gating |
-
-## Design principles (the load-bearing decisions)
-
-1. **Mutability is enforced by node class.** 17 **pointer** nodes update in place;
-   5 **append-only** nodes (`Decision`, `Commit`, `Deployment`, `Learning`,
-   `Comment`) are never overwritten — corrections create a *new* node linked by a
-   `Supersedes` edge. Provenance lives in columns (`createdAt`/`createdBy`, plus
-   `updatedAt`/`updatedBy` on pointer nodes), not a separate audit node.
-2. **State is queryable, not stored.** "Ready", "blocked", "stale", "critical
-   path", "what's in the next release" are **none** of them properties — all are
-   derived in `queries/queries.gq`.
-3. **Dependencies are typed edges, not generic links.** Whether a relationship
-   blocks work (`Blocks`, `ParentChild`, `WaitsFor`, `ConditionalBlocks`), traces
-   lineage, or just annotates (`Related`, `DiscoveredFrom`) is the *edge type*.
-4. **Identity is stable.** Slugged ids (`iss-a1b2`, `epc-…`, `pr-…`) survive
-   rename, retype, rescope. Edges and events follow identity, not labels.
-5. **Layer boundaries are explicit.** Planning artifacts connect to code
-   artifacts through named edges (`SpecSpecifies`, `PrTouchesComponent`), never by
-   string-matching titles or paths.
-6. **Polymorphic edges are split per target.** PGSchema penalizes polymorphism, so
-   `CommentOnIssue`/`CommentOnPr`/… are separate edges. Repetition in the schema
-   is cheap; blurred queries are not.
-
-## The governance & substrate layer (what makes this more than a tracker)
-
-The distinctive part of the model. The split that matters is **checkable
-properties** (violation = a bug) vs. **prescriptive rules** (violation = a
-rejected PR):
-
-- **`Invariant`** — a checkable property the system maintains ("concurrent edits
-  converge", "no document data crosses a tenant boundary"). `status: holds |
-  violated`, an optional `guardRef` (the test that enforces it). Violation is a
-  *bug*.
-- **`Principle`** — a prescriptive design rule reviewed against on every PR;
-  violation = rejected PR. Carries a `polarity`: `prescribes` (a must-do) or
-  `forbids` (a rejected design, with a `correctAlternative`). Relaxed only via a
-  `Decision`; per-PR exceptions are records (`PrExceptionToPrinciple`), not a
-  status change.
-- **`Gap`** — tracked architectural debt: a desired `Invariant` not yet held. A
-  `Gap` can be **widened by a PR** (`PrWidensGap`) — a relationship a generic
-  tracker can't express.
-- **`ExternalBlocker`** — an upstream issue/PR/release that gates internal work
-  (an upstream library fix shipping in a specific version). The durable cousin of
-  a `Gate`.
-- **`Assumption`** — a checkable belief about an *external* system's behavior,
-  optionally guard-backed. The external twin of `Invariant`; an **unguarded**
-  Assumption (no `guardRef`) is a silent dependency worth surfacing.
-- **`Capability`** — a functional capability of the product, tagged by provenance
-  (`owned` vs `inherited`). A *different axis* from `Component` (structural),
-  mapped M:N via `CapabilityImplementedBy`.
-
-A `Decision` **establishes** or **relaxes** Invariants and Principles; a `Gap`
-**undermines** an Invariant; an `Issue`/`PR` **narrows** (or **widens**) a Gap.
-That web is what lets you ask *"which open gaps undermine an invariant we claim
-holds, and what PR made one worse?"*
-
-## Node classes
-
-**Pointer (mutable, updated in place):** `Epic` · `SpecFile` · `Component` ·
-`Repo` · `PR` · `Release` · `Incident` · `Issue` · `Actor` · `Gate` · `Label` ·
-`Invariant` · `Principle` · `Gap` · `ExternalBlocker` · `Assumption` · `Capability`
-
-**Append-only (never overwritten; corrections via `Supersedes`):** `Decision` ·
-`Commit` · `Deployment` · `Learning` · `Comment`
-
-`Epic` and `SpecFile` are **not** `Issue` subtypes — they have their own
-lifecycles, owners, and edges (Epics target Releases and aggregate Issues;
-SpecFiles have a review/approval flow and `Supersedes` chains). Conversely there
-is **one** `Issue` class, not per-type subclasses: bug/feature/task/chore/
-question/risk share fields and lifecycle, so `issueType` is a triage label, not a
-different schema.
-
-## Edge classes
-
-92 edge types, grouped by intent (full list in `schema.pg`):
-
-- **Containment** — `RepoHasComponent`, `ComponentHasSubcomponent`,
-  `EpicContainsIssue`, `ReleaseIncludesPr` (single-direction/canonical; traverse
-  backward for the inverse).
-- **Specification & decisions** — `SpecSpecifies`, `SpecDescribes`,
-  `Spec/DecisionSupersedes`, `DecisionAppliesTo{Component,Spec}`,
-  `DecisionEmergedFrom{Issue,Incident}`.
-- **Work targeting & implementation** — `IssueTargetsComponent`,
-  `EpicTargetsRelease`, `IssueImplementedBy`, `PrClosesIssue`,
-  `PrTouchesComponent`, `PrIncludesCommit`.
-- **Release / deploy** — `ReleaseInRepo`, `ReleaseSupersedes`, `DeploymentOfRelease`.
-- **Incident & learning** — `IncidentAffectsComponent`,
-  `IncidentCausedBy{Pr,Deployment,Commit}`, `LearningAnalyzesIncident`,
-  `LearningAbout{Component,Blocker,Assumption,Gap}`.
-- **Dependencies** — blocking: `IssueBlocksIssue`, `EpicBlocksEpic`, `PrBlocksPr`,
-  `*ParentChild*`, `IssueConditionalBlocksIssue`, `*WaitsFor{Issue,Gate,Blocker}`;
-  non-blocking: `IssueRelated`, `IssueDiscoveredFrom`.
-- **Ownership / authorship** — `*OwnedBy`, `*AuthoredBy`, `PrReviewedBy`,
-  `IncidentCommandedBy`, `DeploymentTriggeredBy`.
-- **Discussion & tagging** — `CommentOn*` + `CommentPostedBy`; `*Tagged → Label`.
-- **Governance** — `DecisionEstablishes/Relaxes{Invariant,Principle}`,
-  `GapUnderminesInvariant`, `Issue/PrNarrowsGap`, `PrWidensGap`,
-  `AssumptionCoversBlocker`, `CapabilityImplementedBy/TrackedBy`, `*DescribedIn → SpecFile`.
-
-## Killer queries (derived — computed, not stored)
-
-Shipped as stored queries in `queries/` and exposed as operator aliases in
-`omnigraph-config.example.yaml`. Run with `omnigraph alias <name>`, passing any
-parameters by name with `--params`.
-
-| Concept | Alias | What it answers |
-|---|---|---|
-| **Ready** | `ready` | Backlog/todo issues with no incoming block and no outgoing wait |
-| **Blocked** | `blocked` · `blocked-parent` · `blocked-epic` · `blocked-gate` · `blocked-wait` · `blocked-upstream` | One view per blocking dimension (`IssueBlocksIssue` / parent issue / parent epic / `Gate` / `WaitsForIssue` / `ExternalBlocker`), so every issue `ready` excludes shows up in exactly one — GQ has no `OR`, so the dimensions are separate queries |
-| **Stale** | `stale` | Non-terminal issues, oldest-updated first (threshold client-side) |
-| **Epic completion** | `epic-open` | Open issues remaining in an epic |
-| **Release diff** | `release-prs` | PRs in a release (the changeset) |
-| **Incident root cause** | `incident-cause` | `Incident → causing PR → its Commits` (multi-hop) |
-| **Incident blast radius** | `incident-blast` | Components an incident affected |
-| **Unheld invariants** | `unheld-invariants` | Invariants currently `violated` |
-| **Gaps undermining invariants** | `gaps` | Open gaps and the invariants they fall short of |
-| **Unguarded assumptions** | `assumptions` | Assumptions with an empty `guardRef` (silent dependencies) |
-| **Spec coverage** | `no-spec` | Components with no `SpecFile` describing them |
-| **Capability coverage** | `no-cap-impl` | Capabilities with no implementing component (planning gap) |
-| **Decision impact** | `decisions-comp` | Accepted ADRs applying to a component |
-
-Plus a per-issue triage set in `queries/issues-dashboard.gq`
-(`issue-detail`, `issue-blockers`, `issue-comments`, `epic-counts`, `open-epics`, …).
-
-## The reference seed — "Meridian"
-
-A fabricated collaborative-document platform. **102 nodes across all 22 types,
-239 edges across 83 edge types.** It's built so every killer query returns
-something interesting:
-
-- **Team (`Actor`):** Nadia (eng lead), Ravi (backend), Mei (frontend), Tomas
-  (SRE), Priya (PM) + an `agent:orion` triage agent + a `svc-ci` service actor.
-- **Components:** `sync-core` (the CRDT engine), `api-gateway`, `auth`,
-  `presence`, `web-client`, `storage`, `billing`, `webhooks`.
-- **A live storyline:** a **presence memory-leak incident** (`inc-presence-leak`,
-  S2) caused by a perf PR → traced to its commit → a hotfix + a backpressure
-  `Decision` + a postmortem `Learning`. `incident-cause` with
-  `{"incident":"inc-presence-leak"}` walks it.
-- **Governance in motion:** `inv-single-writer` is **violated**; `gap-single-writer`
-  undermines it and was **widened**; a partition-guard PR **narrows** it.
-  `gaps` and `unheld-invariants` surface this. One **unguarded assumption**
-  (`asm-storage-ordering`) shows up in `assumptions`.
-- **Upstream dependency:** `iss-offline-queue` is `blocked-upstream` on
-  `blk-crdt-lib` (a fictional `automerge-rs` fix); `asm-crdt-gc` covers it.
-
-See [`seed.md`](seed.md) for the full human-readable inventory (kept in sync with
-`seed.jsonl`).
-
-## Quick start
-
-Follow the shared [local setup](../README.md#local-setup) with
-`dev-graph` and graph ID `dev`. Merge this cookbook's
-`omnigraph-config.example.yaml` into your operator config, then explore:
-
-```bash
-omnigraph alias ready
-omnigraph alias blocked-upstream
-omnigraph alias incident-cause --params '{"incident":"inc-presence-leak"}'
-omnigraph alias gaps
-omnigraph query ready --target local-reader --graph dev
+```mermaid
+graph LR
+  Repo -- has --> Component
+  Epic -- contains --> Issue
+  SpecFile -- specifies --> Epic
+  Epic -- targets --> Release
+  Issue -- targets --> Component
+  Issue -- blocks --> Issue
+  Issue -- waits for --> ExternalBlocker
+  PR -- closes --> Issue
+  PR -- touches --> Component
+  PR -- includes --> Commit
+  Release -- includes --> PR
+  Deployment -- deploys --> Release
+  Incident -- caused by --> PR
+  Incident -- affects --> Component
+  Learning -- analyzes --> Incident
+  Decision -- applies to --> Component
+  Decision -- supersedes --> Decision
+  Decision -- establishes --> Invariant
+  Gap -- undermines --> Invariant
+  PR -- narrows --> Gap
+  Assumption -- covers --> ExternalBlocker
+  Capability -- implemented by --> Component
 ```
 
-Use the [live update workflow](../README.md#live-updates) for schema, stored
-queries and optional provider configuration.
+| Area | Types | Holds |
+|---|---|---|
+| Planning | `Epic`, `SpecFile`, `Decision` | Why the work exists: goals, specifications and the decisions behind them |
+| Work | `Issue`, `Comment`, `Gate` | Day-to-day tasks and bugs, the discussion on them, and approvals that hold them |
+| Code | `Repo`, `Component`, `PR`, `Commit` | Where the work lands, as pointers into the Git host |
+| Release | `Release`, `Deployment` | What shipped, and where and when it was deployed |
+| Operations | `Incident`, `Learning` | What broke, its cause, and what was learned |
+| Governance | `Invariant`, `Principle`, `Gap`, `ExternalBlocker`, `Assumption`, `Capability` | Checkable properties, design rules, known debt, upstream dependencies, beliefs about outside systems and what the product can do |
+| People | `Actor`, `Label` | Humans, agents and services that own or author work; tags |
 
-### Loading
+- **The Git host stays the record for code.** A pull request, commit or
+  release holds a reference to the host, and this record holds everything
+  around it.
+- **Nothing is overwritten that should be remembered.** Decisions, commits,
+  deployments, learnings and comments are only added to. A correction is a
+  new record that supersedes the old one.
+- **State is never stored.** Ready, blocked and stale are worked out from the
+  links, so they cannot drift from them.
+- **Rules are separate from debt.** An invariant is a property that must hold,
+  and breaking it is a bug. A principle is a design rule, and breaking it
+  rejects a pull request. A gap is a known shortfall against an invariant.
+- **An unguarded assumption is visible.** A belief about an outside system
+  with no test pinning it shows up as a silent dependency.
+- **Yours to change.** The model is one file, [`schema.pg`](schema.pg), with 22
+  node types and 92 edge types. Add services, teams or whatever you track.
 
-- **Reference seed:** load once into a fresh demo graph through the server,
-  following the shared setup. Do not overwrite a working graph from this seed.
-- **Ongoing changes:** use the stored mutations in `queries/queries.gq`
-  (`create_issue`, `update_issue_status`, `add_comment_on_issue`, `record_decision`,
-  …) to preserve the pointer/append-only conventions. Review bulk loads on a
-  branch before merging.
-- **Dates are ISO strings** (`"2026-07-09"`); `load` accepts ISO for the `Date`
-  columns and stores day-granularity. There is no `DateTime` in this schema — the
-  mutations take a `$at: Date`, so `now()` (a DateTime) can't be assigned.
+## Branching and merging
 
-## Semantic search (optional)
+A change is made on a branch, which is a version of the whole record. The
+baseline moves only when the branch is merged, and every earlier version stays
+readable.
 
-The prose-bearing nodes (`Issue`, `Epic`, `SpecFile`, `Decision`, `Learning`,
-`Invariant`, `Principle`, `Gap`, `Capability`, `Incident`, `PR`, `Assumption`,
-`Comment`) declare an embedding column with its source and index:
-`embedding: Vector(3072)? @embed("title"|"statement"|"name"|"body") @index`. The
-column stays **null until vectors are supplied in input data** — so the seed
-loads without a provider. Semantic retrieval needs populated vectors and a
-configured query provider.
+- **Agent changes.** A triage or sync agent writes on its own branch. A person
+  reads the diff and merges it, or discards the branch.
+- **Bulk imports.** Load a tracker export or a backfill on a branch, check it
+  against the questions below, then merge.
+- **Reorganising work.** Re-plan an epic, or split and merge issues, on a
+  branch, and read what is ready and blocked as it would be afterwards.
+- **History.** Read the record as it stood at any earlier commit, such as when
+  a release was cut, to see what was known and decided then.
 
-To enable semantic search:
+## Agents and workflows
 
-1. Provide `GEMINI_API_KEY` in the server environment before starting it.
-   Uncomment `providers:` and `graphs.dev.embedding_provider` in `cluster.yaml`,
-   then [plan and apply live](../README.md#live-updates). Exporting a new secret
-   in a client shell does not change the running server's environment.
-2. Prepare JSONL containing the current node rows and an embedding spec for their
-   source/target fields. Select the same provider and model for the offline
-   pipeline:
+Agents bring changes into the record, keep it consistent and tell people what
+needs them. Engineers decide.
 
-   ```bash
-   export OMNIGRAPH_EMBED_PROVIDER=gemini
-   export OMNIGRAPH_EMBED_MODEL=gemini-embedding-2
-   omnigraph embed --input rows.jsonl --output rows.embedded.jsonl \
-     --spec /path/to/embeddings.json --reembed-all
-   omnigraph load --target local --graph dev --data rows.embedded.jsonl --mode merge
-   ```
+| Kind | Workflow | What it does | Stored queries |
+|---|---|---|---|
+| Capture | Pull request sync | Records a pull request when it opens or merges and links it to the issues it closes | `create_pr`, `update_pr_status`, `link_pr_closes_issue` |
+| Capture | Issue intake | Turns a bug report or alert into an issue under its epic, aimed at a component and given an owner | `create_issue`, `add_issue_to_epic`, `link_issue_targets_component`, `assign_issue_owner` |
+| Capture | Deployment log | Records each deployment of a release with its environment and outcome | `record_deployment` |
+| Capture | Incident close-out | Resolves an incident, records the decision that came out of it and adds the post-mortem | `resolve_incident`, `record_decision`, `add_learning` |
+| Maintain | Backlog triage | Finds issues that have not moved, then sets their status or priority | `stale_candidates`, `update_issue_status`, `set_issue_priority` |
+| Maintain | Upstream watch | When an upstream fix ships, marks the blocker shipped and checks the assumptions that covered it | `blocked_on_upstream`, `assumptions_for_blocker`, `mark_blocker_shipped` |
+| Maintain | Invariant check | Lists violated invariants and the gaps behind them, and updates their status | `unheld_invariants`, `gaps_undermining_invariants`, `set_invariant_status`, `update_gap_state` |
+| Maintain | Decision upkeep | Records the decision that replaces one that no longer holds and links the two; a person changes the old one's status | `decisions_for_component`, `record_decision`, `supersede_decision` |
+| Maintain | Coverage audit | Finds components with no spec, capabilities nothing implements and assumptions with no guard | `components_without_spec`, `capabilities_without_component`, `assumptions` |
+| Act | Review context | Before an agent reviews or changes a component, hands it the decisions, open issues and recent pull requests | `decisions_for_component`, `issues_for_component`, `prs_for_component` |
+| Act | Unblock notice | When a blocker ships, tells the owners of the issues that waited on it | `blocked_on_upstream`, `issue_owner` |
+| Act | Release and incident brief | Writes release notes from the pull requests in a release, or a brief on an incident's cause, reach and post-mortem | `release_prs`, `incident_root_cause`, `incident_components`, `learnings_for_incident` |
 
-   Set `GEMINI_API_KEY` for this command too. `omnigraph embed` transforms files;
-   ordinary load preserves supplied vectors and does not generate them. See the
-   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.15.0/docs/user/search/embeddings.md#offline-file-pipeline)
-   for the spec format. Use `seed.jsonl` only for a fresh demo.
-3. Run `omnigraph alias sem-issue --params '{"q":"tenant isolation"}'`.
-   Structural queries also work without embeddings; text-vector queries require
-   the configured provider.
+Every workflow has the same parts:
 
-## Identifier scheme
+1. Something starts it: an event in a source tool, a change in the record, or
+   a date such as a release being cut.
+2. The agent reads the state it needs through stored queries.
+3. It acts. It writes to the record on its own branch, or it tells someone
+   outside the record: a message, a ticket, a report.
+4. A person decides. An engineer reviews the branch and merges it, or acts on
+   what they were told.
 
-Slug prefixes (hash-based 4–6 char suffix, beads convention):
-`iss-` Issue · `epc-` Epic · `spc-` SpecFile · `dec-` Decision · `cmp-` Component ·
-`repo-` Repo · `pr-` PR · `commit-` Commit (or raw SHA) · `rel-` Release ·
-`dep-` Deployment · `inc-` Incident · `lrn-` Learning · `act-` Actor (`agent:<name>`
-for agents) · `gate-` Gate · `lbl-` Label · `inv-` Invariant · `prn-` Principle ·
-`gap-` Gap · `blk-` ExternalBlocker · `asm-` Assumption · `cap-` Capability.
+- **Nothing here keeps an agent on a branch.** The shipped roles let a writer
+  change and merge the baseline, and there is no agent role. Review of an
+  agent's work is a practice: give the agent a token that cannot write the
+  baseline, or have it branch every time.
+- **Some writes are missing.** No stored write creates an incident, a release,
+  a commit, an invariant, a gap or an assumption, so those are added by a
+  merge load. The workflows above only update or read them.
+- **Outside actions are not held back by the record.** A message or ticket
+  goes out through the agent's own tools, and nothing here reviews it first.
+  Keep those workflows to telling and drafting, and give the agent only the
+  outside access it needs. The cookbook includes no integrations, and an issue
+  comment is the only place to note that a message was sent, so a repeat has
+  to be avoided by the agent checking that comment first.
+- **Bring your own agent.** It connects through OmniGraph's MCP server from
+  Claude Code, Codex, Cursor or another MCP client. The cookbook has no skill
+  of its own; [AGENTS.md](AGENTS.md) is what it reads.
 
-## Files
+## Data sources
 
-- `schema.pg` — executable Omnigraph schema. Source of truth.
-- `queries/queries.gq` — derived reads, semantic search, and stored mutations.
-- `queries/issues-dashboard.gq` — per-issue / per-epic triage reads.
-- `seed.jsonl` / `seed.md` — reference seed (loadable / human-readable twin).
-- `cluster.yaml` — deployment declaration (graph `dev`, schema, stored queries).
-- `omnigraph-config.example.yaml` — example operator aliases; merge into
-  `$OMNIGRAPH_HOME/config.yaml` (per-user, never committed).
+The record holds the links between your tools. Each tool stays the authority
+for its own data.
 
-## What this deliberately does NOT model
+| Source | Examples | Feeds |
+|---|---|---|
+| Issue trackers | Linear, Jira, GitHub Issues | `Issue`, `Epic`, `Comment` |
+| Code hosts | GitHub, GitLab | `Repo`, `PR`, `Commit`, `Release` |
+| CI and deployment | GitHub Actions, GitLab CI, Argo CD | `Deployment`, `Gate` |
+| Errors and monitoring | Sentry, Datadog | `Incident`, `Issue` |
+| Incident management | PagerDuty, incident.io | `Incident`, `Learning` |
+| Docs and specs | Notion, Confluence, Google Docs | `SpecFile`, `Decision` |
+| Coding agents | Claude Code, Codex, Cursor, GitHub Copilot | `Actor`, `Comment` |
 
-Linked externally, not mirrored in: customer/CRM data · strategy/OKRs · test
-results & coverage (query CI) · security findings/CVEs (only `Incident` lives
-here) · alerts/monitoring (aggregate to `Incident`) · doc-site content (link via
-`SpecFile.url`) · Slack/email threads (link by URL on a `Comment`) · `Branch` as a
-node (folded into PR string fields) · `Env` as a node (folded into
-`Deployment.env`; current-release-per-env is derived from deployment history).
+The cookbook does not include connectors for these. A sync is a script, or an
+agent, that reads from the tool and writes to the record through the stored
+mutations or a merge load. Specs and chat threads stay where they are and are
+linked by URL.
 
-Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).
+## Questions you can ask
+
+Nobody maintains a status field or a triage board for these.
+
+| Question | Stored query |
+|---|---|
+| What is ready to pick up? | `ready` |
+| Which issues are waiting on a fix upstream? | `blocked_on_upstream` |
+| Which spec describes this epic? | `epic_spec` |
+| Which pull requests shipped in this release? | `release_prs` |
+
+The cookbook has 80 stored queries, 57 reads and 23 writes. AGENTS.md
+describes how to run them.
+
+## Sample data
+
+The cookbook comes with Meridian, a made-up real-time collaborative-document
+product with a five-person team, a triage agent and a CI service: 102 records
+across all 22 types and 239 links. On a fresh load, the questions above return:
+
+- Five issues are ready, led by TOTP sign-in, a flaky CI test and a Safari
+  login bug.
+- One issue, the offline edit queue, waits on a fix in the CRDT library
+  automerge-rs.
+- The offline-sync epic is specified by an approved RFC, version 2.1.
+- Release 1.4.0 shipped two pull requests, one of which caused the presence
+  leak incident.
+
+[seed.md](seed.md) describes the product and the records. It does not list
+what every stored read returns.
+
+## Run it
+
+Paste this prompt into a coding agent such as Claude Code or Codex:
+
+```text
+Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the development graph cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/dev-graph
+```
+
+The agent installs OmniGraph if needed, creates the graph, loads Meridian and
+runs the questions above.
+
+To do it by hand, follow the shared [local setup](../README.md#local-setup)
+using folder `dev-graph` and Graph ID `dev`. [AGENTS.md](AGENTS.md) has the
+exact command for each question and workflow on this page.
