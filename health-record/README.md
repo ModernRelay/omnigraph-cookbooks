@@ -1,12 +1,12 @@
-# Health record: results, targets and vaccinations
+# Personal health record: results, targets and vaccinations
 
-Build a living health record for one person, and the agent workflows around it.
-It keeps lab results, device readings, targets, hypotheses, what you take and
-the vaccine doses you were given linked to the documents they came from.
-Whether a result is off target, a retest is overdue or a vaccine series is
-incomplete is worked out from the current data each time you ask. Agents read
-your reports and tell you what is due, on branches you review before anything
-reaches the record.
+Build a living personal health record, and the agent workflows around it. It
+keeps lab results, device readings, targets, hypotheses, what you take and the
+vaccine doses you were given linked to the documents they came from. Whether a
+result is off target, a retest is overdue or a vaccine series is incomplete is
+worked out from the current data each time you ask. Agents read your reports
+and tell you what is due, on branches you review before anything reaches the
+record.
 
 Most people's health data sits in lab PDFs, a patient portal, a wearable's app
 and a paper vaccination card. Nobody connects a result to the target it was
@@ -201,7 +201,7 @@ returns.
 Paste this prompt into a coding agent such as Claude Code or Codex:
 
 ```text
-Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the health record cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/health-record
+Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the personal health record cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/health-record
 ```
 
 The agent installs OmniGraph if needed, creates the graph, loads Noa Brandt
