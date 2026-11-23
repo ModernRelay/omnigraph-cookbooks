@@ -31,9 +31,10 @@ questions you can ask.
   and agents make to it, each with a name.
 - **Agent workflows.** What agents bring into the record, what they keep
   consistent in it, and whom they tell when something needs a person.
-- **Roles.** Every cookbook has reader, writer and admin roles. company-brain
-  and hardware-program add an agent role that writes only on branches and
-  cannot merge, so a person reviews an agent's work before it reaches `main`.
+- **Review on branches.** An agent makes its changes on a branch, and a person
+  reads the difference and merges it. company-brain and hardware-program
+  enforce this: an agent there cannot write the main record or merge. In the
+  others it is how the workflows are written, and nothing enforces it.
 - **Sample data.** A made-up case, described in `seed.md`, that every featured
   question returns an answer on.
 
@@ -52,8 +53,8 @@ trims the cookbook to that.
 [omnigraph.dev/onboarding.md](https://www.omnigraph.dev/onboarding.md) is the
 guide it follows, and the place to read what each step does.
 
-To serve a cookbook with its roles, the way a team or several agents would
-share it, follow [local setup](docs/local-setup.md).
+To serve a cookbook the way a team or several agents would share it, follow
+[local setup](docs/local-setup.md).
 
 ## Version
 
