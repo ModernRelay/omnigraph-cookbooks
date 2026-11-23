@@ -288,7 +288,7 @@ Start from the calendar (`meetings_upcoming`), 24 hours ahead. Read by meeting k
 
 - No connectors. Syncs are scripts or agents calling the stored mutations.
 - No stored update, so status changes need an ad-hoc mutation on a branch.
-- No agent role limited to branches (unlike company-brain and hardware-program).
+- No agent role limited to branches (unlike company-brain, hardware-program and health-record).
 - No embeddings or blobs in the seed; real ones are a separate ingest (see Known gaps).
 - Deferred: firm-specific authorization for team, LP and portfolio access; sector-specialist Pattern and Lesson packs as sibling cookbooks; a `Measurement` node for KPI, cash and runway time series (today loosely `Signal{kind=portfolio-update}`).
 

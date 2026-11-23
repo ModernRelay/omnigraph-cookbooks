@@ -1,0 +1,805 @@
+{"type": "Person", "data": {"slug": "per-noa", "name": "Noa Brandt", "role": "subject", "born_on": "1988-03-14"}}
+{"type": "Person", "data": {"slug": "per-vermeer", "name": "Dr Ilse Vermeer", "role": "clinician"}}
+{"type": "Person", "data": {"slug": "per-okonjo", "name": "Dr Tunde Okonjo", "role": "clinician"}}
+{"type": "Organization", "data": {"slug": "org-northbank", "name": "Northbank Laboratory", "kind": "laboratory"}}
+{"type": "Organization", "data": {"slug": "org-harbour", "name": "Harbour Street Practice", "kind": "clinic"}}
+{"type": "Organization", "data": {"slug": "org-quay", "name": "Quay Travel Clinic", "kind": "clinic"}}
+{"type": "Organization", "data": {"slug": "org-meridian", "name": "Meridian Imaging", "kind": "clinic"}}
+{"type": "Visit", "data": {"slug": "vis-2025-01-27", "title": "Annual check-up", "kind": "checkup", "scheduled_at": "2025-01-27T09:30:00.000Z", "status": "completed", "reason": "Tired for some months; family history of early heart disease.", "summary": "Raised ApoB and LDL, low vitamin D and ferritin. Diet change, vitamin D and iron started. ApoB target set."}}
+{"edge": "VisitOf", "from": "vis-2025-01-27", "to": "per-noa", "data": {}}
+{"edge": "VisitWith", "from": "vis-2025-01-27", "to": "per-vermeer", "data": {}}
+{"type": "Visit", "data": {"slug": "vis-2025-07-28", "title": "Six-month review", "kind": "consultation", "scheduled_at": "2025-07-28T09:30:00.000Z", "status": "completed", "reason": "Review of the July results.", "summary": "ApoB down a little. TSH raised once: repeat it. Vitamin D dose doubled."}}
+{"edge": "VisitOf", "from": "vis-2025-07-28", "to": "per-noa", "data": {}}
+{"edge": "VisitWith", "from": "vis-2025-07-28", "to": "per-vermeer", "data": {}}
+{"type": "Visit", "data": {"slug": "vis-2026-01-26", "title": "Annual check-up", "kind": "checkup", "scheduled_at": "2026-01-26T09:30:00.000Z", "status": "completed", "reason": "Yearly review.", "summary": "ApoB still above target after a year of diet change: rosuvastatin started, LDL target tightened. Iron stopped."}}
+{"edge": "VisitOf", "from": "vis-2026-01-26", "to": "per-noa", "data": {}}
+{"edge": "VisitWith", "from": "vis-2026-01-26", "to": "per-vermeer", "data": {}}
+{"type": "Visit", "data": {"slug": "vis-2026-08-03", "title": "Results call", "kind": "telehealth", "scheduled_at": "2026-08-03T09:30:00.000Z", "status": "completed", "reason": "July results on rosuvastatin.", "summary": "ApoB at target. Omega-3 suggested for triglycerides. TSH was not on the July panel."}}
+{"edge": "VisitOf", "from": "vis-2026-08-03", "to": "per-noa", "data": {}}
+{"edge": "VisitWith", "from": "vis-2026-08-03", "to": "per-vermeer", "data": {}}
+{"type": "Visit", "data": {"slug": "vis-2027-01-25", "title": "Annual check-up", "kind": "checkup", "scheduled_at": "2027-01-25T09:30:00.000Z", "status": "planned", "reason": "Yearly review."}}
+{"edge": "VisitOf", "from": "vis-2027-01-25", "to": "per-noa", "data": {}}
+{"edge": "VisitWith", "from": "vis-2027-01-25", "to": "per-vermeer", "data": {}}
+{"type": "HealthRecord", "data": {"slug": "rec-lab-2025-01", "title": "Northbank blood panel, January 2025", "kind": "lab_report", "document_date": "2025-01-21", "received_at": "2025-01-21T16:00:00.000Z", "extraction": "reviewed"}}
+{"edge": "RecordFor", "from": "rec-lab-2025-01", "to": "per-noa", "data": {}}
+{"edge": "RecordFrom", "from": "rec-lab-2025-01", "to": "org-northbank", "data": {}}
+{"edge": "RecordOfVisit", "from": "rec-lab-2025-01", "to": "vis-2025-01-27", "data": {}}
+{"type": "HealthRecord", "data": {"slug": "rec-lab-2025-07", "title": "Northbank blood panel, July 2025", "kind": "lab_report", "document_date": "2025-07-22", "received_at": "2025-07-22T16:00:00.000Z", "extraction": "reviewed"}}
+{"edge": "RecordFor", "from": "rec-lab-2025-07", "to": "per-noa", "data": {}}
+{"edge": "RecordFrom", "from": "rec-lab-2025-07", "to": "org-northbank", "data": {}}
+{"edge": "RecordOfVisit", "from": "rec-lab-2025-07", "to": "vis-2025-07-28", "data": {}}
+{"type": "HealthRecord", "data": {"slug": "rec-lab-2025-07-amended", "title": "Northbank amended report, July 2025", "kind": "lab_report", "document_date": "2025-07-25", "received_at": "2025-07-25T16:00:00.000Z", "extraction": "reviewed", "notes": "Corrects the ferritin result of 22 July."}}
+{"edge": "RecordFor", "from": "rec-lab-2025-07-amended", "to": "per-noa", "data": {}}
+{"edge": "RecordFrom", "from": "rec-lab-2025-07-amended", "to": "org-northbank", "data": {}}
+{"edge": "RecordOfVisit", "from": "rec-lab-2025-07-amended", "to": "vis-2025-07-28", "data": {}}
+{"type": "HealthRecord", "data": {"slug": "rec-lab-2026-01", "title": "Northbank blood panel, January 2026", "kind": "lab_report", "document_date": "2026-01-20", "received_at": "2026-01-20T16:00:00.000Z", "extraction": "reviewed", "notes": "Glucose printed in mg/dL on this report."}}
+{"edge": "RecordFor", "from": "rec-lab-2026-01", "to": "per-noa", "data": {}}
+{"edge": "RecordFrom", "from": "rec-lab-2026-01", "to": "org-northbank", "data": {}}
+{"edge": "RecordOfVisit", "from": "rec-lab-2026-01", "to": "vis-2026-01-26", "data": {}}
+{"type": "HealthRecord", "data": {"slug": "rec-lab-2026-07", "title": "Northbank blood panel, July 2026", "kind": "lab_report", "document_date": "2026-07-21", "received_at": "2026-07-21T16:00:00.000Z", "extraction": "extracted"}}
+{"edge": "RecordFor", "from": "rec-lab-2026-07", "to": "per-noa", "data": {}}
+{"edge": "RecordFrom", "from": "rec-lab-2026-07", "to": "org-northbank", "data": {}}
+{"edge": "RecordOfVisit", "from": "rec-lab-2026-07", "to": "vis-2026-08-03", "data": {}}
+{"type": "HealthRecord", "data": {"slug": "rec-dexa-2026-03", "title": "Body composition scan, March 2026", "kind": "imaging_report", "document_date": "2026-03-16", "received_at": "2026-03-16T16:00:00.000Z", "extraction": "reviewed"}}
+{"edge": "RecordFor", "from": "rec-dexa-2026-03", "to": "per-noa", "data": {}}
+{"edge": "RecordFrom", "from": "rec-dexa-2026-03", "to": "org-meridian", "data": {}}
+{"type": "HealthRecord", "data": {"slug": "rec-letter-2026-01", "title": "Letter after the January 2026 check-up", "kind": "clinic_letter", "document_date": "2026-01-28", "received_at": "2026-01-28T16:00:00.000Z", "extraction": "reviewed"}}
+{"edge": "RecordFor", "from": "rec-letter-2026-01", "to": "per-noa", "data": {}}
+{"edge": "RecordFrom", "from": "rec-letter-2026-01", "to": "org-harbour", "data": {}}
+{"edge": "RecordOfVisit", "from": "rec-letter-2026-01", "to": "vis-2026-01-26", "data": {}}
+{"type": "HealthRecord", "data": {"slug": "rec-letter-2026-08", "title": "Letter after the August 2026 results call", "kind": "clinic_letter", "document_date": "2026-08-05", "received_at": "2026-08-05T16:00:00.000Z", "extraction": "raw"}}
+{"edge": "RecordFor", "from": "rec-letter-2026-08", "to": "per-noa", "data": {}}
+{"edge": "RecordFrom", "from": "rec-letter-2026-08", "to": "org-harbour", "data": {}}
+{"edge": "RecordOfVisit", "from": "rec-letter-2026-08", "to": "vis-2026-08-03", "data": {}}
+{"type": "HealthRecord", "data": {"slug": "rec-vacc-card", "title": "Childhood vaccination card, transcribed", "kind": "vaccination_record", "document_date": "2004-09-01", "received_at": "2004-09-01T16:00:00.000Z", "extraction": "reviewed", "notes": "Paper card; some entries give only the month or the year."}}
+{"edge": "RecordFor", "from": "rec-vacc-card", "to": "per-noa", "data": {}}
+{"type": "HealthRecord", "data": {"slug": "rec-travel-2023", "title": "Quay Travel Clinic vaccination record, 2023 to 2024", "kind": "vaccination_record", "document_date": "2024-01-15", "received_at": "2024-01-15T16:00:00.000Z", "extraction": "reviewed"}}
+{"edge": "RecordFor", "from": "rec-travel-2023", "to": "per-noa", "data": {}}
+{"edge": "RecordFrom", "from": "rec-travel-2023", "to": "org-quay", "data": {}}
+{"type": "HealthRecord", "data": {"slug": "rec-registry-covid", "title": "Vaccination registry extract, COVID-19", "kind": "vaccination_record", "document_date": "2022-01-10", "received_at": "2022-01-10T16:00:00.000Z", "extraction": "reviewed"}}
+{"edge": "RecordFor", "from": "rec-registry-covid", "to": "per-noa", "data": {}}
+{"type": "HealthRecord", "data": {"slug": "rec-practice-vacc", "title": "Harbour Street Practice vaccination printout", "kind": "vaccination_record", "document_date": "2026-10-12", "received_at": "2026-10-12T16:00:00.000Z", "extraction": "reviewed"}}
+{"edge": "RecordFor", "from": "rec-practice-vacc", "to": "per-noa", "data": {}}
+{"edge": "RecordFrom", "from": "rec-practice-vacc", "to": "org-harbour", "data": {}}
+{"type": "Measurable", "data": {"slug": "mk-ldl", "name": "LDL cholesterol", "kind": "lab_analyte", "category": "lipids", "canonical_unit": "mmol/L", "aliases": ["LDL-C", "LDL chol."], "description": "Cholesterol carried in low-density lipoprotein."}}
+{"type": "Measurable", "data": {"slug": "mk-hdl", "name": "HDL cholesterol", "kind": "lab_analyte", "category": "lipids", "canonical_unit": "mmol/L", "aliases": ["HDL-C"], "description": "Cholesterol carried in high-density lipoprotein."}}
+{"type": "Measurable", "data": {"slug": "mk-chol", "name": "Total cholesterol", "kind": "lab_analyte", "category": "lipids", "canonical_unit": "mmol/L", "aliases": ["Cholesterol"]}}
+{"type": "Measurable", "data": {"slug": "mk-tg", "name": "Triglycerides", "kind": "lab_analyte", "category": "lipids", "canonical_unit": "mmol/L", "aliases": ["TG", "Triglyceride"]}}
+{"type": "Measurable", "data": {"slug": "mk-apob", "name": "Apolipoprotein B", "kind": "lab_analyte", "category": "lipids", "canonical_unit": "g/L", "aliases": ["ApoB", "Apo B"], "description": "The protein on every atherogenic lipoprotein particle."}}
+{"type": "Measurable", "data": {"slug": "mk-lpa", "name": "Lipoprotein(a)", "kind": "lab_analyte", "category": "lipids", "canonical_unit": "nmol/L", "aliases": ["Lp(a)"]}}
+{"type": "Measurable", "data": {"slug": "mk-hba1c", "name": "HbA1c", "kind": "lab_analyte", "category": "glucose", "canonical_unit": "mmol/mol", "aliases": ["Glycated haemoglobin", "A1c"], "description": "Average blood glucose over about three months."}}
+{"type": "Measurable", "data": {"slug": "mk-glucose", "name": "Fasting glucose", "kind": "lab_analyte", "category": "glucose", "canonical_unit": "mmol/L", "aliases": ["Glucose (fasting)"]}}
+{"type": "Measurable", "data": {"slug": "mk-crp", "name": "hs-CRP", "kind": "lab_analyte", "category": "inflammation", "canonical_unit": "mg/L", "aliases": ["High-sensitivity C-reactive protein"]}}
+{"type": "Measurable", "data": {"slug": "mk-tsh", "name": "TSH", "kind": "lab_analyte", "category": "thyroid", "canonical_unit": "m[IU]/L", "aliases": ["Thyrotropin", "Thyroid stimulating hormone"]}}
+{"type": "Measurable", "data": {"slug": "mk-vitd", "name": "Vitamin D (25-OH)", "kind": "lab_analyte", "category": "vitamins", "canonical_unit": "nmol/L", "aliases": ["25-hydroxyvitamin D", "25(OH)D"]}}
+{"type": "Measurable", "data": {"slug": "mk-b12", "name": "Vitamin B12", "kind": "lab_analyte", "category": "vitamins", "canonical_unit": "pmol/L", "aliases": ["Cobalamin"]}}
+{"type": "Measurable", "data": {"slug": "mk-ferritin", "name": "Ferritin", "kind": "lab_analyte", "category": "iron", "canonical_unit": "ug/L", "aliases": ["Serum ferritin"], "description": "Iron stores."}}
+{"type": "Measurable", "data": {"slug": "mk-hb", "name": "Haemoglobin", "kind": "lab_analyte", "category": "blood count", "canonical_unit": "g/L", "aliases": ["Hb", "Hemoglobin"]}}
+{"type": "Measurable", "data": {"slug": "mk-alt", "name": "ALT", "kind": "lab_analyte", "category": "liver", "canonical_unit": "U/L", "aliases": ["Alanine aminotransferase", "SGPT"]}}
+{"type": "Measurable", "data": {"slug": "mk-creatinine", "name": "Creatinine", "kind": "lab_analyte", "category": "kidney", "canonical_unit": "umol/L", "aliases": ["Creat."]}}
+{"type": "Measurable", "data": {"slug": "mk-antihbs", "name": "Hepatitis B surface antibody", "kind": "lab_analyte", "category": "immunity", "canonical_unit": "[IU]/L", "aliases": ["Anti-HBs"], "description": "Antibody level after hepatitis B vaccination."}}
+{"type": "Measurable", "data": {"slug": "mk-sbp", "name": "Systolic blood pressure", "kind": "vital", "category": "blood pressure", "canonical_unit": "mm[Hg]", "aliases": ["SBP"]}}
+{"type": "Measurable", "data": {"slug": "mk-dbp", "name": "Diastolic blood pressure", "kind": "vital", "category": "blood pressure", "canonical_unit": "mm[Hg]", "aliases": ["DBP"]}}
+{"type": "Measurable", "data": {"slug": "mk-weight", "name": "Body weight", "kind": "vital", "category": "body", "canonical_unit": "kg", "aliases": ["Weight"]}}
+{"type": "Measurable", "data": {"slug": "mk-bodyfat", "name": "Body fat", "kind": "body_composition", "category": "body", "canonical_unit": "%", "aliases": ["Fat mass percentage"]}}
+{"type": "Measurable", "data": {"slug": "mk-lean", "name": "Lean mass", "kind": "body_composition", "category": "body", "canonical_unit": "kg"}}
+{"type": "Measurable", "data": {"slug": "mk-rhr", "name": "Resting heart rate", "kind": "sleep", "category": "heart", "canonical_unit": "/min", "aliases": ["RHR"], "description": "Mean heart rate over a night's sleep."}}
+{"type": "Measurable", "data": {"slug": "mk-hrv", "name": "Overnight heart rate variability", "kind": "sleep", "category": "heart", "canonical_unit": "ms", "aliases": ["HRV", "RMSSD"], "description": "Mean RMSSD over a night's sleep."}}
+{"type": "Measurable", "data": {"slug": "mk-sleep", "name": "Sleep duration", "kind": "sleep", "category": "sleep", "canonical_unit": "h", "aliases": ["Time asleep"], "description": "Total time asleep in one night."}}
+{"type": "Measurable", "data": {"slug": "mk-fatigue", "name": "Tiredness score", "kind": "symptom", "category": "symptoms", "canonical_unit": "{score}", "aliases": ["Fatigue"], "description": "Self-rated tiredness, 0 (none) to 10 (worst)."}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-22748-8", "system": "loinc", "code": "22748-8", "display": "Cholesterol in LDL [Moles/volume] in Serum or Plasma"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-22748-8", "to": "mk-ldl", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-14646-4", "system": "loinc", "code": "14646-4", "display": "Cholesterol in HDL [Moles/volume] in Serum or Plasma"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-14646-4", "to": "mk-hdl", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-14647-2", "system": "loinc", "code": "14647-2", "display": "Cholesterol [Moles/volume] in Serum or Plasma"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-14647-2", "to": "mk-chol", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-14927-8", "system": "loinc", "code": "14927-8", "display": "Triglyceride [Moles/volume] in Serum or Plasma"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-14927-8", "to": "mk-tg", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-1884-6", "system": "loinc", "code": "1884-6", "display": "Apolipoprotein B [Mass/volume] in Serum or Plasma"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-1884-6", "to": "mk-apob", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-30522-7", "system": "loinc", "code": "30522-7", "display": "C reactive protein [Mass/volume] in Serum or Plasma by High sensitivity method"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-30522-7", "to": "mk-crp", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-3016-3", "system": "loinc", "code": "3016-3", "display": "Thyrotropin [Units/volume] in Serum or Plasma"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-3016-3", "to": "mk-tsh", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-2276-4", "system": "loinc", "code": "2276-4", "display": "Ferritin [Mass/volume] in Serum or Plasma"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-2276-4", "to": "mk-ferritin", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-718-7", "system": "loinc", "code": "718-7", "display": "Hemoglobin [Mass/volume] in Blood"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-718-7", "to": "mk-hb", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-1742-6", "system": "loinc", "code": "1742-6", "display": "Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-1742-6", "to": "mk-alt", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-14682-9", "system": "loinc", "code": "14682-9", "display": "Creatinine [Moles/volume] in Serum or Plasma"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-14682-9", "to": "mk-creatinine", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-8480-6", "system": "loinc", "code": "8480-6", "display": "Systolic blood pressure"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-8480-6", "to": "mk-sbp", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-8462-4", "system": "loinc", "code": "8462-4", "display": "Diastolic blood pressure"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-8462-4", "to": "mk-dbp", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-loinc-29463-7", "system": "loinc", "code": "29463-7", "display": "Body weight"}}
+{"edge": "CodeForMeasurable", "from": "code-loinc-29463-7", "to": "mk-weight", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-ldl", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 3.9, "unit": "mmol/L", "canonical_value": 3.9, "reference_high": 3.0, "flag": "high", "status": "final", "fasting": true, "source_name": "LDL cholesterol", "source_line": "LDL cholesterol 3.9 mmol/L (<3) H"}}
+{"edge": "MeasurementOf", "from": "m-p1-ldl", "to": "mk-ldl", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-ldl", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-ldl", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-ldl", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 3.6, "unit": "mmol/L", "canonical_value": 3.6, "reference_high": 3.0, "flag": "high", "status": "final", "fasting": true, "source_name": "LDL cholesterol", "source_line": "LDL cholesterol 3.6 mmol/L (<3) H"}}
+{"edge": "MeasurementOf", "from": "m-p2-ldl", "to": "mk-ldl", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-ldl", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-ldl", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-ldl", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 3.4, "unit": "mmol/L", "canonical_value": 3.4, "reference_high": 3.0, "flag": "high", "status": "final", "fasting": true, "source_name": "LDL cholesterol", "source_line": "LDL cholesterol 3.4 mmol/L (<3) H"}}
+{"edge": "MeasurementOf", "from": "m-p3-ldl", "to": "mk-ldl", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-ldl", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-ldl", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-ldl", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 2.1, "unit": "mmol/L", "canonical_value": 2.1, "reference_high": 3.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "LDL cholesterol", "source_line": "LDL cholesterol 2.1 mmol/L (<3)"}}
+{"edge": "MeasurementOf", "from": "m-p4-ldl", "to": "mk-ldl", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-ldl", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-ldl", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-hdl", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 1.4, "unit": "mmol/L", "canonical_value": 1.4, "reference_low": 1.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "HDL cholesterol", "source_line": "HDL cholesterol 1.4 mmol/L (>1)"}}
+{"edge": "MeasurementOf", "from": "m-p1-hdl", "to": "mk-hdl", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-hdl", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-hdl", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-hdl", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 1.5, "unit": "mmol/L", "canonical_value": 1.5, "reference_low": 1.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "HDL cholesterol", "source_line": "HDL cholesterol 1.5 mmol/L (>1)"}}
+{"edge": "MeasurementOf", "from": "m-p2-hdl", "to": "mk-hdl", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-hdl", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-hdl", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-hdl", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 1.5, "unit": "mmol/L", "canonical_value": 1.5, "reference_low": 1.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "HDL cholesterol", "source_line": "HDL cholesterol 1.5 mmol/L (>1)"}}
+{"edge": "MeasurementOf", "from": "m-p3-hdl", "to": "mk-hdl", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-hdl", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-hdl", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-hdl", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 1.5, "unit": "mmol/L", "canonical_value": 1.5, "reference_low": 1.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "HDL cholesterol", "source_line": "HDL cholesterol 1.5 mmol/L (>1)"}}
+{"edge": "MeasurementOf", "from": "m-p4-hdl", "to": "mk-hdl", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-hdl", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-hdl", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-chol", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 5.9, "unit": "mmol/L", "canonical_value": 5.9, "reference_high": 5.0, "flag": "high", "status": "final", "fasting": true, "source_name": "Cholesterol", "source_line": "Cholesterol 5.9 mmol/L (<5) H"}}
+{"edge": "MeasurementOf", "from": "m-p1-chol", "to": "mk-chol", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-chol", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-chol", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-chol", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 5.6, "unit": "mmol/L", "canonical_value": 5.6, "reference_high": 5.0, "flag": "high", "status": "final", "fasting": true, "source_name": "Cholesterol", "source_line": "Cholesterol 5.6 mmol/L (<5) H"}}
+{"edge": "MeasurementOf", "from": "m-p2-chol", "to": "mk-chol", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-chol", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-chol", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-chol", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 5.4, "unit": "mmol/L", "canonical_value": 5.4, "reference_high": 5.0, "flag": "high", "status": "final", "fasting": true, "source_name": "Cholesterol", "source_line": "Cholesterol 5.4 mmol/L (<5) H"}}
+{"edge": "MeasurementOf", "from": "m-p3-chol", "to": "mk-chol", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-chol", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-chol", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-chol", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 4.0, "unit": "mmol/L", "canonical_value": 4.0, "reference_high": 5.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "Cholesterol", "source_line": "Cholesterol 4 mmol/L (<5)"}}
+{"edge": "MeasurementOf", "from": "m-p4-chol", "to": "mk-chol", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-chol", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-chol", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-tg", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 1.3, "unit": "mmol/L", "canonical_value": 1.3, "reference_high": 1.7, "flag": "normal", "status": "final", "fasting": true, "source_name": "Triglycerides", "source_line": "Triglycerides 1.3 mmol/L (<1.7)"}}
+{"edge": "MeasurementOf", "from": "m-p1-tg", "to": "mk-tg", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-tg", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-tg", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-tg", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 1.1, "unit": "mmol/L", "canonical_value": 1.1, "reference_high": 1.7, "flag": "normal", "status": "final", "fasting": true, "source_name": "Triglycerides", "source_line": "Triglycerides 1.1 mmol/L (<1.7)"}}
+{"edge": "MeasurementOf", "from": "m-p2-tg", "to": "mk-tg", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-tg", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-tg", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-tg", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 1.0, "unit": "mmol/L", "canonical_value": 1.0, "reference_high": 1.7, "flag": "normal", "status": "final", "fasting": true, "source_name": "Triglycerides", "source_line": "Triglycerides 1 mmol/L (<1.7)"}}
+{"edge": "MeasurementOf", "from": "m-p3-tg", "to": "mk-tg", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-tg", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-tg", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-tg", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 1.9, "unit": "mmol/L", "canonical_value": 1.9, "reference_high": 1.7, "flag": "high", "status": "final", "fasting": true, "source_name": "Triglycerides", "source_line": "Triglycerides 1.9 mmol/L (<1.7) H"}}
+{"edge": "MeasurementOf", "from": "m-p4-tg", "to": "mk-tg", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-tg", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-tg", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-apob", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 1.15, "unit": "g/L", "canonical_value": 1.15, "reference_high": 1.0, "flag": "high", "status": "final", "fasting": true, "source_name": "Apolipoprotein B", "source_line": "Apolipoprotein B 1.15 g/L (<1) H"}}
+{"edge": "MeasurementOf", "from": "m-p1-apob", "to": "mk-apob", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-apob", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-apob", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-apob", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 1.08, "unit": "g/L", "canonical_value": 1.08, "reference_high": 1.0, "flag": "high", "status": "final", "fasting": true, "source_name": "Apolipoprotein B", "source_line": "Apolipoprotein B 1.08 g/L (<1) H"}}
+{"edge": "MeasurementOf", "from": "m-p2-apob", "to": "mk-apob", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-apob", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-apob", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-apob", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 1.02, "unit": "g/L", "canonical_value": 1.02, "reference_high": 1.0, "flag": "high", "status": "final", "fasting": true, "source_name": "Apolipoprotein B", "source_line": "Apolipoprotein B 1.02 g/L (<1) H"}}
+{"edge": "MeasurementOf", "from": "m-p3-apob", "to": "mk-apob", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-apob", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-apob", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-apob", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 0.72, "unit": "g/L", "canonical_value": 0.72, "reference_high": 1.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "Apolipoprotein B", "source_line": "Apolipoprotein B 0.72 g/L (<1)"}}
+{"edge": "MeasurementOf", "from": "m-p4-apob", "to": "mk-apob", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-apob", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-apob", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-lpa", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 38, "unit": "nmol/L", "canonical_value": 38, "reference_high": 75, "flag": "normal", "status": "final", "fasting": true, "source_name": "Lipoprotein(a)", "source_line": "Lipoprotein(a) 38 nmol/L (<75)"}}
+{"edge": "MeasurementOf", "from": "m-p1-lpa", "to": "mk-lpa", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-lpa", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-lpa", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-hba1c", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 36, "unit": "mmol/mol", "canonical_value": 36, "reference_high": 42, "flag": "normal", "status": "final", "fasting": true, "source_name": "HbA1c (IFCC)", "source_line": "HbA1c (IFCC) 36 mmol/mol (<42)"}}
+{"edge": "MeasurementOf", "from": "m-p1-hba1c", "to": "mk-hba1c", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-hba1c", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-hba1c", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-hba1c", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 35, "unit": "mmol/mol", "canonical_value": 35, "reference_high": 42, "flag": "normal", "status": "final", "fasting": true, "source_name": "HbA1c (IFCC)", "source_line": "HbA1c (IFCC) 35 mmol/mol (<42)"}}
+{"edge": "MeasurementOf", "from": "m-p2-hba1c", "to": "mk-hba1c", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-hba1c", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-hba1c", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-hba1c", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 36, "unit": "mmol/mol", "canonical_value": 36, "reference_high": 42, "flag": "normal", "status": "final", "fasting": true, "source_name": "HbA1c (IFCC)", "source_line": "HbA1c (IFCC) 36 mmol/mol (<42)"}}
+{"edge": "MeasurementOf", "from": "m-p3-hba1c", "to": "mk-hba1c", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-hba1c", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-hba1c", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-hba1c", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 35, "unit": "mmol/mol", "canonical_value": 35, "reference_high": 42, "flag": "normal", "status": "final", "fasting": true, "source_name": "HbA1c (IFCC)", "source_line": "HbA1c (IFCC) 35 mmol/mol (<42)"}}
+{"edge": "MeasurementOf", "from": "m-p4-hba1c", "to": "mk-hba1c", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-hba1c", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-hba1c", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-glucose", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 5.1, "unit": "mmol/L", "canonical_value": 5.1, "reference_low": 3.9, "reference_high": 5.6, "flag": "normal", "status": "final", "fasting": true, "source_name": "Glucose (fasting)", "source_line": "Glucose (fasting) 5.1 mmol/L (3.9-5.6)"}}
+{"edge": "MeasurementOf", "from": "m-p1-glucose", "to": "mk-glucose", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-glucose", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-glucose", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-glucose", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 4.9, "unit": "mmol/L", "canonical_value": 4.9, "reference_low": 3.9, "reference_high": 5.6, "flag": "normal", "status": "final", "fasting": true, "source_name": "Glucose (fasting)", "source_line": "Glucose (fasting) 4.9 mmol/L (3.9-5.6)"}}
+{"edge": "MeasurementOf", "from": "m-p2-glucose", "to": "mk-glucose", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-glucose", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-glucose", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-glucose", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 5.0, "unit": "mmol/L", "canonical_value": 5.0, "reference_low": 3.9, "reference_high": 5.6, "flag": "normal", "status": "final", "fasting": true, "source_name": "Glucose (fasting)", "source_line": "Glucose (fasting) 5 mmol/L (3.9-5.6)"}}
+{"edge": "MeasurementOf", "from": "m-p4-glucose", "to": "mk-glucose", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-glucose", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-glucose", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-crp", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 0.8, "unit": "mg/L", "canonical_value": 0.8, "reference_high": 3.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "hs-CRP", "source_line": "hs-CRP 0.8 mg/L (<3)"}}
+{"edge": "MeasurementOf", "from": "m-p1-crp", "to": "mk-crp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-crp", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-crp", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-crp", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 0.6, "unit": "mg/L", "canonical_value": 0.6, "reference_high": 3.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "hs-CRP", "source_line": "hs-CRP 0.6 mg/L (<3)"}}
+{"edge": "MeasurementOf", "from": "m-p2-crp", "to": "mk-crp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-crp", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-crp", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-crp", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 1.9, "unit": "mg/L", "canonical_value": 1.9, "reference_high": 3.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "hs-CRP", "source_line": "hs-CRP 1.9 mg/L (<3)"}}
+{"edge": "MeasurementOf", "from": "m-p3-crp", "to": "mk-crp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-crp", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-crp", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-crp", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 0.7, "unit": "mg/L", "canonical_value": 0.7, "reference_high": 3.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "hs-CRP", "source_line": "hs-CRP 0.7 mg/L (<3)"}}
+{"edge": "MeasurementOf", "from": "m-p4-crp", "to": "mk-crp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-crp", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-crp", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-tsh", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 2.1, "unit": "mIU/L", "canonical_value": 2.1, "reference_low": 0.4, "reference_high": 4.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "TSH", "source_line": "TSH 2.1 mIU/L (0.4-4)"}}
+{"edge": "MeasurementOf", "from": "m-p1-tsh", "to": "mk-tsh", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-tsh", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-tsh", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-tsh", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 4.6, "unit": "mIU/L", "canonical_value": 4.6, "reference_low": 0.4, "reference_high": 4.0, "flag": "high", "status": "final", "fasting": true, "source_name": "TSH", "source_line": "TSH 4.6 mIU/L (0.4-4) H"}}
+{"edge": "MeasurementOf", "from": "m-p2-tsh", "to": "mk-tsh", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-tsh", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-tsh", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-tsh", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 3.2, "unit": "mIU/L", "canonical_value": 3.2, "reference_low": 0.4, "reference_high": 4.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "TSH", "source_line": "TSH 3.2 mIU/L (0.4-4)"}}
+{"edge": "MeasurementOf", "from": "m-p3-tsh", "to": "mk-tsh", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-tsh", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-tsh", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-vitd", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 41, "unit": "nmol/L", "canonical_value": 41, "reference_low": 50, "reference_high": 125, "flag": "low", "status": "final", "fasting": true, "source_name": "25-OH vitamin D", "source_line": "25-OH vitamin D 41 nmol/L (50-125) L"}}
+{"edge": "MeasurementOf", "from": "m-p1-vitd", "to": "mk-vitd", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-vitd", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-vitd", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-vitd", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 68, "unit": "nmol/L", "canonical_value": 68, "reference_low": 50, "reference_high": 125, "flag": "normal", "status": "final", "fasting": true, "source_name": "25-OH vitamin D", "source_line": "25-OH vitamin D 68 nmol/L (50-125)"}}
+{"edge": "MeasurementOf", "from": "m-p2-vitd", "to": "mk-vitd", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-vitd", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-vitd", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-vitd", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 82, "unit": "nmol/L", "canonical_value": 82, "reference_low": 50, "reference_high": 125, "flag": "normal", "status": "final", "fasting": true, "source_name": "25-OH vitamin D", "source_line": "25-OH vitamin D 82 nmol/L (50-125)"}}
+{"edge": "MeasurementOf", "from": "m-p3-vitd", "to": "mk-vitd", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-vitd", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-vitd", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-vitd", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 71, "unit": "nmol/L", "canonical_value": 71, "reference_low": 50, "reference_high": 125, "flag": "normal", "status": "final", "fasting": true, "source_name": "25-OH vitamin D", "source_line": "25-OH vitamin D 71 nmol/L (50-125)"}}
+{"edge": "MeasurementOf", "from": "m-p4-vitd", "to": "mk-vitd", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-vitd", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-vitd", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-b12", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 310, "unit": "pmol/L", "canonical_value": 310, "reference_low": 145, "reference_high": 570, "flag": "normal", "status": "final", "fasting": true, "source_name": "Vitamin B12", "source_line": "Vitamin B12 310 pmol/L (145-570)"}}
+{"edge": "MeasurementOf", "from": "m-p1-b12", "to": "mk-b12", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-b12", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-b12", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-b12", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 295, "unit": "pmol/L", "canonical_value": 295, "reference_low": 145, "reference_high": 570, "flag": "normal", "status": "final", "fasting": true, "source_name": "Vitamin B12", "source_line": "Vitamin B12 295 pmol/L (145-570)"}}
+{"edge": "MeasurementOf", "from": "m-p3-b12", "to": "mk-b12", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-b12", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-b12", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-ferritin", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 28, "unit": "ug/L", "canonical_value": 28, "reference_low": 30, "reference_high": 300, "flag": "low", "status": "final", "fasting": true, "source_name": "Ferritin", "source_line": "Ferritin 28 ug/L (30-300) L"}}
+{"edge": "MeasurementOf", "from": "m-p1-ferritin", "to": "mk-ferritin", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-ferritin", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-ferritin", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-ferritin", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 43, "unit": "ug/L", "canonical_value": 43, "reference_low": 30, "reference_high": 300, "flag": "normal", "status": "final", "fasting": true, "source_name": "Ferritin", "source_line": "Ferritin 43 ug/L (30-300)"}}
+{"edge": "MeasurementOf", "from": "m-p2-ferritin", "to": "mk-ferritin", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-ferritin", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-ferritin", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-ferritin", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 61, "unit": "ug/L", "canonical_value": 61, "reference_low": 30, "reference_high": 300, "flag": "normal", "status": "final", "fasting": true, "source_name": "Ferritin", "source_line": "Ferritin 61 ug/L (30-300)"}}
+{"edge": "MeasurementOf", "from": "m-p3-ferritin", "to": "mk-ferritin", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-ferritin", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-ferritin", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-ferritin", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 58, "unit": "ug/L", "canonical_value": 58, "reference_low": 30, "reference_high": 300, "flag": "normal", "status": "final", "fasting": true, "source_name": "Ferritin", "source_line": "Ferritin 58 ug/L (30-300)"}}
+{"edge": "MeasurementOf", "from": "m-p4-ferritin", "to": "mk-ferritin", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-ferritin", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-ferritin", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-hb", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 138, "unit": "g/L", "canonical_value": 138, "reference_low": 120, "reference_high": 160, "flag": "normal", "status": "final", "fasting": true, "source_name": "Haemoglobin", "source_line": "Haemoglobin 138 g/L (120-160)"}}
+{"edge": "MeasurementOf", "from": "m-p1-hb", "to": "mk-hb", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-hb", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-hb", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-hb", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 141, "unit": "g/L", "canonical_value": 141, "reference_low": 120, "reference_high": 160, "flag": "normal", "status": "final", "fasting": true, "source_name": "Haemoglobin", "source_line": "Haemoglobin 141 g/L (120-160)"}}
+{"edge": "MeasurementOf", "from": "m-p2-hb", "to": "mk-hb", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-hb", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-hb", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-hb", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 140, "unit": "g/L", "canonical_value": 140, "reference_low": 120, "reference_high": 160, "flag": "normal", "status": "final", "fasting": true, "source_name": "Haemoglobin", "source_line": "Haemoglobin 140 g/L (120-160)"}}
+{"edge": "MeasurementOf", "from": "m-p3-hb", "to": "mk-hb", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-hb", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-hb", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-hb", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 142, "unit": "g/L", "canonical_value": 142, "reference_low": 120, "reference_high": 160, "flag": "normal", "status": "final", "fasting": true, "source_name": "Haemoglobin", "source_line": "Haemoglobin 142 g/L (120-160)"}}
+{"edge": "MeasurementOf", "from": "m-p4-hb", "to": "mk-hb", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-hb", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-hb", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-alt", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 22, "unit": "U/L", "canonical_value": 22, "reference_high": 45, "flag": "normal", "status": "final", "fasting": true, "source_name": "ALT", "source_line": "ALT 22 U/L (<45)"}}
+{"edge": "MeasurementOf", "from": "m-p1-alt", "to": "mk-alt", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-alt", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-alt", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-alt", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 24, "unit": "U/L", "canonical_value": 24, "reference_high": 45, "flag": "normal", "status": "final", "fasting": true, "source_name": "ALT", "source_line": "ALT 24 U/L (<45)"}}
+{"edge": "MeasurementOf", "from": "m-p2-alt", "to": "mk-alt", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-alt", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-alt", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-alt", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 21, "unit": "U/L", "canonical_value": 21, "reference_high": 45, "flag": "normal", "status": "final", "fasting": true, "source_name": "ALT", "source_line": "ALT 21 U/L (<45)"}}
+{"edge": "MeasurementOf", "from": "m-p3-alt", "to": "mk-alt", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-alt", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-alt", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-alt", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 31, "unit": "U/L", "canonical_value": 31, "reference_high": 45, "flag": "normal", "status": "final", "fasting": true, "source_name": "ALT", "source_line": "ALT 31 U/L (<45)"}}
+{"edge": "MeasurementOf", "from": "m-p4-alt", "to": "mk-alt", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-alt", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-alt", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p1-creatinine", "measured_at": "2025-01-20T08:10:00.000Z", "statistic": "point", "value": 71, "unit": "umol/L", "canonical_value": 71, "reference_low": 45, "reference_high": 90, "flag": "normal", "status": "final", "fasting": true, "source_name": "Creatinine", "source_line": "Creatinine 71 umol/L (45-90)"}}
+{"edge": "MeasurementOf", "from": "m-p1-creatinine", "to": "mk-creatinine", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p1-creatinine", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p1-creatinine", "to": "rec-lab-2025-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-creatinine", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 73, "unit": "umol/L", "canonical_value": 73, "reference_low": 45, "reference_high": 90, "flag": "normal", "status": "final", "fasting": true, "source_name": "Creatinine", "source_line": "Creatinine 73 umol/L (45-90)"}}
+{"edge": "MeasurementOf", "from": "m-p2-creatinine", "to": "mk-creatinine", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-creatinine", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-creatinine", "to": "rec-lab-2025-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-creatinine", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 70, "unit": "umol/L", "canonical_value": 70, "reference_low": 45, "reference_high": 90, "flag": "normal", "status": "final", "fasting": true, "source_name": "Creatinine", "source_line": "Creatinine 70 umol/L (45-90)"}}
+{"edge": "MeasurementOf", "from": "m-p3-creatinine", "to": "mk-creatinine", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-creatinine", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-creatinine", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-creatinine", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 72, "unit": "umol/L", "canonical_value": 72, "reference_low": 45, "reference_high": 90, "flag": "normal", "status": "final", "fasting": true, "source_name": "Creatinine", "source_line": "Creatinine 72 umol/L (45-90)"}}
+{"edge": "MeasurementOf", "from": "m-p4-creatinine", "to": "mk-creatinine", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-creatinine", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-creatinine", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-glucose", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 92, "unit": "mg/dL", "reference_low": 70, "reference_high": 100, "flag": "normal", "status": "final", "fasting": true, "source_name": "Glucose (fasting)", "source_line": "Glucose (fasting) 92 mg/dL (70-100)"}}
+{"edge": "MeasurementOf", "from": "m-p3-glucose", "to": "mk-glucose", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-glucose", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-glucose", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p2-ferritin-corrected", "measured_at": "2025-07-21T08:10:00.000Z", "statistic": "point", "value": 34, "unit": "ug/L", "canonical_value": 34, "reference_low": 30, "reference_high": 300, "flag": "normal", "status": "amended", "fasting": true, "source_name": "Ferritin (corrected)", "source_line": "Ferritin (corrected) 34 ug/L (30-300)"}}
+{"edge": "MeasurementOf", "from": "m-p2-ferritin-corrected", "to": "mk-ferritin", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p2-ferritin-corrected", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p2-ferritin-corrected", "to": "rec-lab-2025-07-amended", "data": {}}
+{"edge": "MeasurementSupersedes", "from": "m-p2-ferritin-corrected", "to": "m-p2-ferritin", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p4-lpa", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 41, "unit": "nmol/L", "canonical_value": 41, "reference_high": 75, "flag": "normal", "status": "preliminary", "fasting": true, "source_name": "Lipoprotein(a) (preliminary)", "source_line": "Lipoprotein(a) (preliminary) 41 nmol/L (<75)"}}
+{"edge": "MeasurementOf", "from": "m-p4-lpa", "to": "mk-lpa", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p4-lpa", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p4-lpa", "to": "rec-lab-2026-07", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-p3-antihbs", "measured_at": "2026-01-19T08:10:00.000Z", "statistic": "point", "value": 6, "unit": "IU/L", "canonical_value": 6, "reference_low": 10, "flag": "low", "status": "final", "source_name": "Anti-HBs", "source_line": "Anti-HBs 6 IU/L (>10) L"}}
+{"edge": "MeasurementOf", "from": "m-p3-antihbs", "to": "mk-antihbs", "data": {}}
+{"edge": "MeasurementFor", "from": "m-p3-antihbs", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-p3-antihbs", "to": "rec-lab-2026-01", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-dexa-bodyfat", "measured_at": "2026-03-16T10:40:00.000Z", "statistic": "point", "value": 24.8, "unit": "%", "canonical_value": 24.8, "flag": "normal", "status": "final", "source_name": "Total body fat", "source_line": "Total body fat 24.8 %"}}
+{"edge": "MeasurementOf", "from": "m-dexa-bodyfat", "to": "mk-bodyfat", "data": {}}
+{"edge": "MeasurementFor", "from": "m-dexa-bodyfat", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-dexa-bodyfat", "to": "rec-dexa-2026-03", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-dexa-lean", "measured_at": "2026-03-16T10:40:00.000Z", "statistic": "point", "value": 52.6, "unit": "kg", "canonical_value": 52.6, "flag": "normal", "status": "final", "source_name": "Lean mass", "source_line": "Lean mass 52.6 kg"}}
+{"edge": "MeasurementOf", "from": "m-dexa-lean", "to": "mk-lean", "data": {}}
+{"edge": "MeasurementFor", "from": "m-dexa-lean", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-dexa-lean", "to": "rec-dexa-2026-03", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-dexa-weight", "measured_at": "2026-03-16T10:40:00.000Z", "statistic": "point", "value": 72.9, "unit": "kg", "canonical_value": 72.9, "flag": "normal", "status": "final", "source_name": "Scale weight", "source_line": "Scale weight 72.9 kg"}}
+{"edge": "MeasurementOf", "from": "m-dexa-weight", "to": "mk-weight", "data": {}}
+{"edge": "MeasurementFor", "from": "m-dexa-weight", "to": "per-noa", "data": {}}
+{"edge": "MeasurementIn", "from": "m-dexa-weight", "to": "rec-dexa-2026-03", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-2025-01-sbp", "measured_at": "2025-01-27T09:40:00.000Z", "statistic": "point", "value": 132, "unit": "mm[Hg]", "canonical_value": 132, "status": "final", "device": "Practice blood pressure monitor"}}
+{"edge": "MeasurementOf", "from": "m-2025-01-sbp", "to": "mk-sbp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-2025-01-sbp", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-2025-01-dbp", "measured_at": "2025-01-27T09:40:00.000Z", "statistic": "point", "value": 84, "unit": "mm[Hg]", "canonical_value": 84, "status": "final", "device": "Practice blood pressure monitor"}}
+{"edge": "MeasurementOf", "from": "m-2025-01-dbp", "to": "mk-dbp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-2025-01-dbp", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-2025-01-weight", "measured_at": "2025-01-27T09:35:00.000Z", "statistic": "point", "value": 74.2, "unit": "kg", "canonical_value": 74.2, "status": "final", "device": "Practice scale"}}
+{"edge": "MeasurementOf", "from": "m-2025-01-weight", "to": "mk-weight", "data": {}}
+{"edge": "MeasurementFor", "from": "m-2025-01-weight", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-2026-01-sbp", "measured_at": "2026-01-26T09:40:00.000Z", "statistic": "point", "value": 134, "unit": "mm[Hg]", "canonical_value": 134, "status": "final", "device": "Practice blood pressure monitor"}}
+{"edge": "MeasurementOf", "from": "m-2026-01-sbp", "to": "mk-sbp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-2026-01-sbp", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-2026-01-dbp", "measured_at": "2026-01-26T09:40:00.000Z", "statistic": "point", "value": 82, "unit": "mm[Hg]", "canonical_value": 82, "status": "final", "device": "Practice blood pressure monitor"}}
+{"edge": "MeasurementOf", "from": "m-2026-01-dbp", "to": "mk-dbp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-2026-01-dbp", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-2026-01-weight", "measured_at": "2026-01-26T09:35:00.000Z", "statistic": "point", "value": 73.1, "unit": "kg", "canonical_value": 73.1, "status": "final", "device": "Practice scale"}}
+{"edge": "MeasurementOf", "from": "m-2026-01-weight", "to": "mk-weight", "data": {}}
+{"edge": "MeasurementFor", "from": "m-2026-01-weight", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-2026-01-weight-typo", "measured_at": "2026-01-26T09:36:00.000Z", "statistic": "point", "value": 731, "unit": "kg", "canonical_value": 731, "status": "entered_in_error", "device": "Practice scale"}}
+{"edge": "MeasurementOf", "from": "m-2026-01-weight-typo", "to": "mk-weight", "data": {}}
+{"edge": "MeasurementFor", "from": "m-2026-01-weight-typo", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-home-sbp-1", "measured_at": "2026-09-07T07:15:00.000Z", "statistic": "point", "value": 126, "unit": "mm[Hg]", "canonical_value": 126, "status": "final", "device": "Home blood pressure monitor"}}
+{"edge": "MeasurementOf", "from": "m-home-sbp-1", "to": "mk-sbp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-home-sbp-1", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-home-dbp-1", "measured_at": "2026-09-07T07:15:00.000Z", "statistic": "point", "value": 80, "unit": "mm[Hg]", "canonical_value": 80, "status": "final", "device": "Home blood pressure monitor"}}
+{"edge": "MeasurementOf", "from": "m-home-dbp-1", "to": "mk-dbp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-home-dbp-1", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-home-sbp-2", "measured_at": "2026-10-05T07:15:00.000Z", "statistic": "point", "value": 128, "unit": "mm[Hg]", "canonical_value": 128, "status": "final", "device": "Home blood pressure monitor"}}
+{"edge": "MeasurementOf", "from": "m-home-sbp-2", "to": "mk-sbp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-home-sbp-2", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-home-dbp-2", "measured_at": "2026-10-05T07:15:00.000Z", "statistic": "point", "value": 79, "unit": "mm[Hg]", "canonical_value": 79, "status": "final", "device": "Home blood pressure monitor"}}
+{"edge": "MeasurementOf", "from": "m-home-dbp-2", "to": "mk-dbp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-home-dbp-2", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-home-sbp-3", "measured_at": "2026-11-02T07:15:00.000Z", "statistic": "point", "value": 124, "unit": "mm[Hg]", "canonical_value": 124, "status": "final", "device": "Home blood pressure monitor"}}
+{"edge": "MeasurementOf", "from": "m-home-sbp-3", "to": "mk-sbp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-home-sbp-3", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-home-dbp-3", "measured_at": "2026-11-02T07:15:00.000Z", "statistic": "point", "value": 78, "unit": "mm[Hg]", "canonical_value": 78, "status": "final", "device": "Home blood pressure monitor"}}
+{"edge": "MeasurementOf", "from": "m-home-dbp-3", "to": "mk-dbp", "data": {}}
+{"edge": "MeasurementFor", "from": "m-home-dbp-3", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-2025-01-fatigue", "measured_at": "2025-01-27T09:45:00.000Z", "statistic": "point", "value": 7, "unit": "{score}", "canonical_value": 7, "status": "final"}}
+{"edge": "MeasurementOf", "from": "m-2025-01-fatigue", "to": "mk-fatigue", "data": {}}
+{"edge": "MeasurementFor", "from": "m-2025-01-fatigue", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-2025-07-fatigue", "measured_at": "2025-07-28T09:45:00.000Z", "statistic": "point", "value": 6, "unit": "{score}", "canonical_value": 6, "status": "final"}}
+{"edge": "MeasurementOf", "from": "m-2025-07-fatigue", "to": "mk-fatigue", "data": {}}
+{"edge": "MeasurementFor", "from": "m-2025-07-fatigue", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-2026-01-fatigue", "measured_at": "2026-01-26T09:45:00.000Z", "statistic": "point", "value": 6, "unit": "{score}", "canonical_value": 6, "status": "final"}}
+{"edge": "MeasurementOf", "from": "m-2026-01-fatigue", "to": "mk-fatigue", "data": {}}
+{"edge": "MeasurementFor", "from": "m-2026-01-fatigue", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-20-rhr", "measured_at": "2026-10-20T06:30:00.000Z", "period_start": "2026-10-19T22:30:00.000Z", "statistic": "mean", "value": 54, "unit": "/min", "canonical_value": 54, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-20-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-20-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-20-hrv", "measured_at": "2026-10-20T06:30:00.000Z", "period_start": "2026-10-19T22:30:00.000Z", "statistic": "mean", "value": 61, "unit": "ms", "canonical_value": 61, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-20-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-20-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-20-sleep", "measured_at": "2026-10-20T06:30:00.000Z", "period_start": "2026-10-19T22:30:00.000Z", "statistic": "total", "value": 7.4, "unit": "h", "canonical_value": 7.4, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-20-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-20-sleep", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-21-rhr", "measured_at": "2026-10-21T06:30:00.000Z", "period_start": "2026-10-20T22:30:00.000Z", "statistic": "mean", "value": 55, "unit": "/min", "canonical_value": 55, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-21-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-21-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-21-hrv", "measured_at": "2026-10-21T06:30:00.000Z", "period_start": "2026-10-20T22:30:00.000Z", "statistic": "mean", "value": 58, "unit": "ms", "canonical_value": 58, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-21-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-21-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-21-sleep", "measured_at": "2026-10-21T06:30:00.000Z", "period_start": "2026-10-20T22:30:00.000Z", "statistic": "total", "value": 7.1, "unit": "h", "canonical_value": 7.1, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-21-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-21-sleep", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-22-rhr", "measured_at": "2026-10-22T06:30:00.000Z", "period_start": "2026-10-21T22:30:00.000Z", "statistic": "mean", "value": 53, "unit": "/min", "canonical_value": 53, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-22-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-22-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-22-hrv", "measured_at": "2026-10-22T06:30:00.000Z", "period_start": "2026-10-21T22:30:00.000Z", "statistic": "mean", "value": 64, "unit": "ms", "canonical_value": 64, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-22-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-22-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-22-sleep", "measured_at": "2026-10-22T06:30:00.000Z", "period_start": "2026-10-21T22:30:00.000Z", "statistic": "total", "value": 7.8, "unit": "h", "canonical_value": 7.8, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-22-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-22-sleep", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-23-rhr", "measured_at": "2026-10-23T06:30:00.000Z", "period_start": "2026-10-22T22:30:00.000Z", "statistic": "mean", "value": 57, "unit": "/min", "canonical_value": 57, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-23-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-23-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-23-hrv", "measured_at": "2026-10-23T06:30:00.000Z", "period_start": "2026-10-22T22:30:00.000Z", "statistic": "mean", "value": 49, "unit": "ms", "canonical_value": 49, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-23-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-23-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-23-sleep", "measured_at": "2026-10-23T06:30:00.000Z", "period_start": "2026-10-22T22:30:00.000Z", "statistic": "total", "value": 6.2, "unit": "h", "canonical_value": 6.2, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-23-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-23-sleep", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-24-rhr", "measured_at": "2026-10-24T06:30:00.000Z", "period_start": "2026-10-23T22:30:00.000Z", "statistic": "mean", "value": 56, "unit": "/min", "canonical_value": 56, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-24-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-24-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-24-hrv", "measured_at": "2026-10-24T06:30:00.000Z", "period_start": "2026-10-23T22:30:00.000Z", "statistic": "mean", "value": 52, "unit": "ms", "canonical_value": 52, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-24-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-24-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-24-sleep", "measured_at": "2026-10-24T06:30:00.000Z", "period_start": "2026-10-23T22:30:00.000Z", "statistic": "total", "value": 6.6, "unit": "h", "canonical_value": 6.6, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-24-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-24-sleep", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-25-rhr", "measured_at": "2026-10-25T06:30:00.000Z", "period_start": "2026-10-24T22:30:00.000Z", "statistic": "mean", "value": 54, "unit": "/min", "canonical_value": 54, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-25-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-25-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-25-hrv", "measured_at": "2026-10-25T06:30:00.000Z", "period_start": "2026-10-24T22:30:00.000Z", "statistic": "mean", "value": 60, "unit": "ms", "canonical_value": 60, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-25-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-25-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-25-sleep", "measured_at": "2026-10-25T06:30:00.000Z", "period_start": "2026-10-24T22:30:00.000Z", "statistic": "total", "value": 7.5, "unit": "h", "canonical_value": 7.5, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-25-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-25-sleep", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-26-rhr", "measured_at": "2026-10-26T06:30:00.000Z", "period_start": "2026-10-25T22:30:00.000Z", "statistic": "mean", "value": 53, "unit": "/min", "canonical_value": 53, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-26-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-26-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-26-hrv", "measured_at": "2026-10-26T06:30:00.000Z", "period_start": "2026-10-25T22:30:00.000Z", "statistic": "mean", "value": 63, "unit": "ms", "canonical_value": 63, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-26-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-26-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-26-sleep", "measured_at": "2026-10-26T06:30:00.000Z", "period_start": "2026-10-25T22:30:00.000Z", "statistic": "total", "value": 7.9, "unit": "h", "canonical_value": 7.9, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-26-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-26-sleep", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-27-rhr", "measured_at": "2026-10-27T06:30:00.000Z", "period_start": "2026-10-26T22:30:00.000Z", "statistic": "mean", "value": 55, "unit": "/min", "canonical_value": 55, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-27-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-27-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-27-hrv", "measured_at": "2026-10-27T06:30:00.000Z", "period_start": "2026-10-26T22:30:00.000Z", "statistic": "mean", "value": 57, "unit": "ms", "canonical_value": 57, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-27-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-27-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-27-sleep", "measured_at": "2026-10-27T06:30:00.000Z", "period_start": "2026-10-26T22:30:00.000Z", "statistic": "total", "value": 7.0, "unit": "h", "canonical_value": 7.0, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-27-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-27-sleep", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-28-rhr", "measured_at": "2026-10-28T06:30:00.000Z", "period_start": "2026-10-27T22:30:00.000Z", "statistic": "mean", "value": 58, "unit": "/min", "canonical_value": 58, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-28-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-28-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-28-hrv", "measured_at": "2026-10-28T06:30:00.000Z", "period_start": "2026-10-27T22:30:00.000Z", "statistic": "mean", "value": 47, "unit": "ms", "canonical_value": 47, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-28-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-28-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-28-sleep", "measured_at": "2026-10-28T06:30:00.000Z", "period_start": "2026-10-27T22:30:00.000Z", "statistic": "total", "value": 5.9, "unit": "h", "canonical_value": 5.9, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-28-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-28-sleep", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-29-rhr", "measured_at": "2026-10-29T06:30:00.000Z", "period_start": "2026-10-28T22:30:00.000Z", "statistic": "mean", "value": 56, "unit": "/min", "canonical_value": 56, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-29-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-29-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-29-hrv", "measured_at": "2026-10-29T06:30:00.000Z", "period_start": "2026-10-28T22:30:00.000Z", "statistic": "mean", "value": 53, "unit": "ms", "canonical_value": 53, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-29-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-29-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-29-sleep", "measured_at": "2026-10-29T06:30:00.000Z", "period_start": "2026-10-28T22:30:00.000Z", "statistic": "total", "value": 6.8, "unit": "h", "canonical_value": 6.8, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-29-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-29-sleep", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-30-rhr", "measured_at": "2026-10-30T06:30:00.000Z", "period_start": "2026-10-29T22:30:00.000Z", "statistic": "mean", "value": 54, "unit": "/min", "canonical_value": 54, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-30-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-30-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-30-hrv", "measured_at": "2026-10-30T06:30:00.000Z", "period_start": "2026-10-29T22:30:00.000Z", "statistic": "mean", "value": 62, "unit": "ms", "canonical_value": 62, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-30-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-30-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-30-sleep", "measured_at": "2026-10-30T06:30:00.000Z", "period_start": "2026-10-29T22:30:00.000Z", "statistic": "total", "value": 7.6, "unit": "h", "canonical_value": 7.6, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-30-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-30-sleep", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-31-rhr", "measured_at": "2026-10-31T06:30:00.000Z", "period_start": "2026-10-30T22:30:00.000Z", "statistic": "mean", "value": 53, "unit": "/min", "canonical_value": 53, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-31-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-31-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-31-hrv", "measured_at": "2026-10-31T06:30:00.000Z", "period_start": "2026-10-30T22:30:00.000Z", "statistic": "mean", "value": 65, "unit": "ms", "canonical_value": 65, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-31-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-31-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-10-31-sleep", "measured_at": "2026-10-31T06:30:00.000Z", "period_start": "2026-10-30T22:30:00.000Z", "statistic": "total", "value": 8.0, "unit": "h", "canonical_value": 8.0, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-10-31-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-10-31-sleep", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-11-01-rhr", "measured_at": "2026-11-01T06:30:00.000Z", "period_start": "2026-10-31T22:30:00.000Z", "statistic": "mean", "value": 55, "unit": "/min", "canonical_value": 55, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-11-01-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-11-01-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-11-01-hrv", "measured_at": "2026-11-01T06:30:00.000Z", "period_start": "2026-10-31T22:30:00.000Z", "statistic": "mean", "value": 59, "unit": "ms", "canonical_value": 59, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-11-01-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-11-01-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-11-01-sleep", "measured_at": "2026-11-01T06:30:00.000Z", "period_start": "2026-10-31T22:30:00.000Z", "statistic": "total", "value": 7.2, "unit": "h", "canonical_value": 7.2, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-11-01-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-11-01-sleep", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-11-02-rhr", "measured_at": "2026-11-02T06:30:00.000Z", "period_start": "2026-11-01T22:30:00.000Z", "statistic": "mean", "value": 54, "unit": "/min", "canonical_value": 54, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-11-02-rhr", "to": "mk-rhr", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-11-02-rhr", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-11-02-hrv", "measured_at": "2026-11-02T06:30:00.000Z", "period_start": "2026-11-01T22:30:00.000Z", "statistic": "mean", "value": 61, "unit": "ms", "canonical_value": 61, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-11-02-hrv", "to": "mk-hrv", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-11-02-hrv", "to": "per-noa", "data": {}}
+{"type": "Measurement", "data": {"slug": "m-night-2026-11-02-sleep", "measured_at": "2026-11-02T06:30:00.000Z", "period_start": "2026-11-01T22:30:00.000Z", "statistic": "total", "value": 7.4, "unit": "h", "canonical_value": 7.4, "status": "final", "device": "Tessel Band 2"}}
+{"edge": "MeasurementOf", "from": "m-night-2026-11-02-sleep", "to": "mk-sleep", "data": {}}
+{"edge": "MeasurementFor", "from": "m-night-2026-11-02-sleep", "to": "per-noa", "data": {}}
+{"type": "Target", "data": {"slug": "tgt-apob", "high": 0.8, "unit": "g/L", "set_on": "2025-01-27", "set_by": "Dr Ilse Vermeer", "rationale": "Family history of early heart disease.", "status": "active"}}
+{"edge": "TargetFor", "from": "tgt-apob", "to": "mk-apob", "data": {}}
+{"edge": "TargetOf", "from": "tgt-apob", "to": "per-noa", "data": {}}
+{"type": "Target", "data": {"slug": "tgt-ldl-2025", "high": 2.6, "unit": "mmol/L", "set_on": "2025-01-27", "set_by": "Dr Ilse Vermeer", "rationale": "First target, before medication.", "status": "retired"}}
+{"edge": "TargetFor", "from": "tgt-ldl-2025", "to": "mk-ldl", "data": {}}
+{"edge": "TargetOf", "from": "tgt-ldl-2025", "to": "per-noa", "data": {}}
+{"type": "Target", "data": {"slug": "tgt-ldl", "high": 1.8, "unit": "mmol/L", "set_on": "2026-01-26", "set_by": "Dr Ilse Vermeer", "rationale": "Tightened when rosuvastatin was started.", "status": "active"}}
+{"edge": "TargetFor", "from": "tgt-ldl", "to": "mk-ldl", "data": {}}
+{"edge": "TargetOf", "from": "tgt-ldl", "to": "per-noa", "data": {}}
+{"type": "Target", "data": {"slug": "tgt-vitd", "low": 75, "high": 125, "unit": "nmol/L", "set_on": "2025-01-27", "set_by": "Noa Brandt", "rationale": "Own target, above the lab's lower limit of 50.", "status": "active"}}
+{"edge": "TargetFor", "from": "tgt-vitd", "to": "mk-vitd", "data": {}}
+{"edge": "TargetOf", "from": "tgt-vitd", "to": "per-noa", "data": {}}
+{"type": "Target", "data": {"slug": "tgt-sbp", "high": 130, "unit": "mm[Hg]", "set_on": "2026-01-26", "set_by": "Dr Ilse Vermeer", "rationale": "Home readings should stay under 130.", "status": "active"}}
+{"edge": "TargetFor", "from": "tgt-sbp", "to": "mk-sbp", "data": {}}
+{"edge": "TargetOf", "from": "tgt-sbp", "to": "per-noa", "data": {}}
+{"type": "Hypothesis", "data": {"slug": "hyp-apob-diet", "title": "Raised ApoB comes from diet", "thesis": "Noa's ApoB is high mainly because of saturated fat in the diet, so changing the diet will bring it to target.", "status": "open", "review_status": "human_reviewed", "raised_on": "2025-01-27"}}
+{"edge": "HypothesisFor", "from": "hyp-apob-diet", "to": "per-noa", "data": {}}
+{"edge": "HypothesisAbout", "from": "hyp-apob-diet", "to": "mk-apob", "data": {}}
+{"edge": "SupportedBy", "from": "hyp-apob-diet", "to": "m-p2-apob", "data": {}}
+{"edge": "ContradictedBy", "from": "hyp-apob-diet", "to": "m-p3-apob", "data": {}}
+{"type": "Hypothesis", "data": {"slug": "hyp-apob-inherited", "title": "Raised ApoB is mostly inherited", "thesis": "Noa's ApoB stays high on a careful diet because of an inherited tendency, so it needs medication to reach target.", "status": "supported", "review_status": "human_reviewed", "raised_on": "2026-01-26"}}
+{"edge": "HypothesisFor", "from": "hyp-apob-inherited", "to": "per-noa", "data": {}}
+{"edge": "HypothesisAbout", "from": "hyp-apob-inherited", "to": "mk-apob", "data": {}}
+{"edge": "SupportedBy", "from": "hyp-apob-inherited", "to": "m-p3-apob", "data": {}}
+{"edge": "SupportedBy", "from": "hyp-apob-inherited", "to": "m-p4-apob", "data": {}}
+{"type": "Hypothesis", "data": {"slug": "hyp-fatigue-iron", "title": "Tiredness comes from low iron stores", "thesis": "The tiredness of the last months is caused by low ferritin and will lift once iron stores recover.", "status": "open", "review_status": "human_reviewed", "raised_on": "2025-01-27"}}
+{"edge": "HypothesisFor", "from": "hyp-fatigue-iron", "to": "per-noa", "data": {}}
+{"edge": "HypothesisAbout", "from": "hyp-fatigue-iron", "to": "mk-fatigue", "data": {}}
+{"edge": "SupportedBy", "from": "hyp-fatigue-iron", "to": "m-p1-ferritin", "data": {}}
+{"edge": "ContradictedBy", "from": "hyp-fatigue-iron", "to": "m-p3-ferritin", "data": {}}
+{"edge": "ContradictedBy", "from": "hyp-fatigue-iron", "to": "m-2026-01-fatigue", "data": {}}
+{"type": "Hypothesis", "data": {"slug": "hyp-tsh-transient", "title": "The raised TSH of July 2025 was a one-off", "thesis": "The TSH of 4.6 in July 2025 was a transient rise, not the start of an underactive thyroid.", "status": "open", "review_status": "ai_generated", "raised_on": "2026-01-21"}}
+{"edge": "HypothesisFor", "from": "hyp-tsh-transient", "to": "per-noa", "data": {}}
+{"edge": "HypothesisAbout", "from": "hyp-tsh-transient", "to": "mk-tsh", "data": {}}
+{"edge": "SupportedBy", "from": "hyp-tsh-transient", "to": "m-p3-tsh", "data": {}}
+{"type": "Hypothesis", "data": {"slug": "hyp-hrv-late-training", "title": "Late training lowers overnight HRV", "thesis": "Nights after an evening training session show lower heart rate variability and less sleep.", "status": "open", "review_status": "ai_generated", "raised_on": "2026-11-03"}}
+{"edge": "HypothesisFor", "from": "hyp-hrv-late-training", "to": "per-noa", "data": {}}
+{"edge": "HypothesisAbout", "from": "hyp-hrv-late-training", "to": "mk-hrv", "data": {}}
+{"type": "Condition", "data": {"slug": "cond-tetanus", "name": "Tetanus", "category": "infectious_disease"}}
+{"type": "Condition", "data": {"slug": "cond-diphtheria", "name": "Diphtheria", "category": "infectious_disease"}}
+{"type": "Condition", "data": {"slug": "cond-pertussis", "name": "Pertussis", "category": "infectious_disease"}}
+{"type": "Condition", "data": {"slug": "cond-polio", "name": "Poliomyelitis", "category": "infectious_disease"}}
+{"type": "Condition", "data": {"slug": "cond-measles", "name": "Measles", "category": "infectious_disease"}}
+{"type": "Condition", "data": {"slug": "cond-mumps", "name": "Mumps", "category": "infectious_disease"}}
+{"type": "Condition", "data": {"slug": "cond-rubella", "name": "Rubella", "category": "infectious_disease"}}
+{"type": "Condition", "data": {"slug": "cond-hepatitis-a", "name": "Hepatitis A", "category": "infectious_disease"}}
+{"type": "Condition", "data": {"slug": "cond-hepatitis-b", "name": "Hepatitis B", "category": "infectious_disease"}}
+{"type": "Condition", "data": {"slug": "cond-yellow-fever", "name": "Yellow fever", "category": "infectious_disease"}}
+{"type": "Condition", "data": {"slug": "cond-influenza", "name": "Influenza", "category": "infectious_disease"}}
+{"type": "Condition", "data": {"slug": "cond-covid-19", "name": "COVID-19", "category": "infectious_disease"}}
+{"type": "Condition", "data": {"slug": "cond-raised-cholesterol", "name": "Raised cholesterol", "category": "cardiovascular"}}
+{"type": "Condition", "data": {"slug": "cond-vitamin-d-deficiency", "name": "Vitamin D deficiency", "category": "metabolic"}}
+{"type": "Condition", "data": {"slug": "cond-fever", "name": "Fever", "category": "reaction"}}
+{"type": "Condition", "data": {"slug": "cond-sore-arm", "name": "Pain at the injection site", "category": "reaction"}}
+{"type": "Condition", "data": {"slug": "cond-constipation", "name": "Constipation", "category": "reaction"}}
+{"type": "ConditionOccurrence", "data": {"slug": "occ-raised-cholesterol", "status": "active", "certainty": "confirmed", "onset_on": "2025-01-27", "notes": "Stated in the letter of 28 January 2026."}}
+{"edge": "OccurrenceOf", "from": "occ-raised-cholesterol", "to": "cond-raised-cholesterol", "data": {}}
+{"edge": "OccurrenceFor", "from": "occ-raised-cholesterol", "to": "per-noa", "data": {}}
+{"type": "ConditionOccurrence", "data": {"slug": "occ-vitamin-d-deficiency", "status": "resolved", "certainty": "confirmed", "onset_on": "2025-01-27", "resolved_on": "2025-07-28"}}
+{"edge": "OccurrenceOf", "from": "occ-vitamin-d-deficiency", "to": "cond-vitamin-d-deficiency", "data": {}}
+{"edge": "OccurrenceFor", "from": "occ-vitamin-d-deficiency", "to": "per-noa", "data": {}}
+{"type": "Intervention", "data": {"slug": "int-diet", "name": "Less saturated fat, more fibre", "kind": "diet", "status": "active", "frequency": "daily", "started_at": "2025-02-03T07:00:00.000Z", "reason": "To lower ApoB without medication."}}
+{"edge": "InterventionFor", "from": "int-diet", "to": "per-noa", "data": {}}
+{"edge": "Targets", "from": "int-diet", "to": "mk-apob", "data": {}}
+{"edge": "Targets", "from": "int-diet", "to": "mk-ldl", "data": {}}
+{"edge": "MotivatedBy", "from": "int-diet", "to": "hyp-apob-diet", "data": {}}
+{"edge": "Treats", "from": "int-diet", "to": "occ-raised-cholesterol", "data": {}}
+{"type": "Intervention", "data": {"slug": "int-vitd-1000", "name": "Vitamin D3", "kind": "supplement", "status": "stopped", "dose": "1000 IU", "frequency": "daily", "started_at": "2025-01-28T07:00:00.000Z", "stopped_at": "2025-07-29T07:00:00.000Z", "reason": "Low vitamin D."}}
+{"edge": "InterventionFor", "from": "int-vitd-1000", "to": "per-noa", "data": {}}
+{"edge": "Targets", "from": "int-vitd-1000", "to": "mk-vitd", "data": {}}
+{"edge": "Treats", "from": "int-vitd-1000", "to": "occ-vitamin-d-deficiency", "data": {}}
+{"type": "Intervention", "data": {"slug": "int-vitd-2000", "name": "Vitamin D3", "kind": "supplement", "status": "active", "dose": "2000 IU", "frequency": "daily", "started_at": "2025-07-29T07:00:00.000Z", "reason": "Still under the personal target on 1000 IU."}}
+{"edge": "InterventionFor", "from": "int-vitd-2000", "to": "per-noa", "data": {}}
+{"edge": "Targets", "from": "int-vitd-2000", "to": "mk-vitd", "data": {}}
+{"edge": "InterventionSupersedes", "from": "int-vitd-2000", "to": "int-vitd-1000", "data": {}}
+{"type": "Intervention", "data": {"slug": "int-iron", "name": "Iron bisglycinate", "kind": "supplement", "status": "stopped", "dose": "25 mg", "frequency": "every other day", "started_at": "2025-01-28T07:00:00.000Z", "stopped_at": "2026-01-27T07:00:00.000Z", "reason": "Low ferritin."}}
+{"edge": "InterventionFor", "from": "int-iron", "to": "per-noa", "data": {}}
+{"edge": "Targets", "from": "int-iron", "to": "mk-ferritin", "data": {}}
+{"edge": "MotivatedBy", "from": "int-iron", "to": "hyp-fatigue-iron", "data": {}}
+{"type": "Intervention", "data": {"slug": "int-rosuvastatin", "name": "Rosuvastatin", "kind": "medication", "status": "active", "dose": "5 mg", "frequency": "daily", "started_at": "2026-02-02T07:00:00.000Z", "reason": "ApoB above target after a year of diet change."}}
+{"edge": "InterventionFor", "from": "int-rosuvastatin", "to": "per-noa", "data": {}}
+{"edge": "Targets", "from": "int-rosuvastatin", "to": "mk-apob", "data": {}}
+{"edge": "Targets", "from": "int-rosuvastatin", "to": "mk-ldl", "data": {}}
+{"edge": "MotivatedBy", "from": "int-rosuvastatin", "to": "hyp-apob-inherited", "data": {}}
+{"edge": "Treats", "from": "int-rosuvastatin", "to": "occ-raised-cholesterol", "data": {}}
+{"type": "Intervention", "data": {"slug": "int-omega3", "name": "Omega-3 (EPA and DHA)", "kind": "supplement", "status": "active", "dose": "2 g", "frequency": "daily", "started_at": "2026-08-10T07:00:00.000Z", "reason": "Triglycerides just above the lab's range in July 2026."}}
+{"edge": "InterventionFor", "from": "int-omega3", "to": "per-noa", "data": {}}
+{"edge": "Targets", "from": "int-omega3", "to": "mk-tg", "data": {}}
+{"type": "ExternalCode", "data": {"slug": "code-cvx-03", "system": "cvx", "code": "03", "display": "MMR"}}
+{"type": "ExternalCode", "data": {"slug": "code-cvx-213", "system": "cvx", "code": "213", "display": "SARS-COV-2 (COVID-19) vaccine, UNSPECIFIED"}}
+{"type": "ExternalCode", "data": {"slug": "code-cvx-52", "system": "cvx", "code": "52", "display": "Hep A, adult"}}
+{"type": "ExternalCode", "data": {"slug": "code-cvx-43", "system": "cvx", "code": "43", "display": "Hep B, adult"}}
+{"type": "ExternalCode", "data": {"slug": "code-cvx-37", "system": "cvx", "code": "37", "display": "yellow fever live"}}
+{"type": "ExternalCode", "data": {"slug": "code-cvx-88", "system": "cvx", "code": "88", "display": "influenza, unspecified formulation"}}
+{"type": "Immunization", "data": {"slug": "imm-dtp-ipv-1", "vaccine": "DTP-IPV", "administered_on": "1988-05-01", "date_precision": "month", "status": "completed", "origin": "vaccination_card"}}
+{"edge": "ImmunizationFor", "from": "imm-dtp-ipv-1", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-1", "to": "cond-diphtheria", "data": {"dose_number": 1, "series_doses": 4}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-1", "to": "cond-tetanus", "data": {"dose_number": 1, "series_doses": 4}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-1", "to": "cond-pertussis", "data": {"dose_number": 1, "series_doses": 4}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-1", "to": "cond-polio", "data": {"dose_number": 1, "series_doses": 4}}
+{"edge": "ImmunizationIn", "from": "imm-dtp-ipv-1", "to": "rec-vacc-card", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-dtp-ipv-2", "vaccine": "DTP-IPV", "administered_on": "1988-07-01", "date_precision": "month", "status": "completed", "origin": "vaccination_card"}}
+{"edge": "ImmunizationFor", "from": "imm-dtp-ipv-2", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-2", "to": "cond-diphtheria", "data": {"dose_number": 2, "series_doses": 4}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-2", "to": "cond-tetanus", "data": {"dose_number": 2, "series_doses": 4}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-2", "to": "cond-pertussis", "data": {"dose_number": 2, "series_doses": 4}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-2", "to": "cond-polio", "data": {"dose_number": 2, "series_doses": 4}}
+{"edge": "ImmunizationIn", "from": "imm-dtp-ipv-2", "to": "rec-vacc-card", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-dtp-ipv-3", "vaccine": "DTP-IPV", "administered_on": "1988-09-01", "date_precision": "month", "status": "completed", "origin": "vaccination_card"}}
+{"edge": "ImmunizationFor", "from": "imm-dtp-ipv-3", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-3", "to": "cond-diphtheria", "data": {"dose_number": 3, "series_doses": 4}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-3", "to": "cond-tetanus", "data": {"dose_number": 3, "series_doses": 4}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-3", "to": "cond-pertussis", "data": {"dose_number": 3, "series_doses": 4}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-3", "to": "cond-polio", "data": {"dose_number": 3, "series_doses": 4}}
+{"edge": "ImmunizationIn", "from": "imm-dtp-ipv-3", "to": "rec-vacc-card", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-dtp-ipv-4", "vaccine": "DTP-IPV", "administered_on": "1989-10-01", "date_precision": "month", "status": "completed", "origin": "vaccination_card"}}
+{"edge": "ImmunizationFor", "from": "imm-dtp-ipv-4", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-4", "to": "cond-diphtheria", "data": {"dose_number": 4, "series_doses": 4}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-4", "to": "cond-tetanus", "data": {"dose_number": 4, "series_doses": 4}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-4", "to": "cond-pertussis", "data": {"dose_number": 4, "series_doses": 4}}
+{"edge": "ProtectsAgainst", "from": "imm-dtp-ipv-4", "to": "cond-polio", "data": {"dose_number": 4, "series_doses": 4}}
+{"edge": "ImmunizationIn", "from": "imm-dtp-ipv-4", "to": "rec-vacc-card", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-mmr-1", "vaccine": "MMR", "administered_on": "1989-06-01", "date_precision": "month", "status": "completed", "origin": "vaccination_card"}}
+{"edge": "ImmunizationFor", "from": "imm-mmr-1", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-mmr-1", "to": "cond-measles", "data": {"dose_number": 1, "series_doses": 2}}
+{"edge": "ProtectsAgainst", "from": "imm-mmr-1", "to": "cond-mumps", "data": {"dose_number": 1, "series_doses": 2}}
+{"edge": "ProtectsAgainst", "from": "imm-mmr-1", "to": "cond-rubella", "data": {"dose_number": 1, "series_doses": 2}}
+{"edge": "ImmunizationIn", "from": "imm-mmr-1", "to": "rec-vacc-card", "data": {}}
+{"edge": "CodeForImmunization", "from": "code-cvx-03", "to": "imm-mmr-1", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-mmr-2", "vaccine": "MMR", "administered_on": "1999-01-01", "date_precision": "year", "status": "completed", "origin": "recall"}}
+{"edge": "ImmunizationFor", "from": "imm-mmr-2", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-mmr-2", "to": "cond-measles", "data": {"dose_number": 2, "series_doses": 2}}
+{"edge": "ProtectsAgainst", "from": "imm-mmr-2", "to": "cond-mumps", "data": {"dose_number": 2, "series_doses": 2}}
+{"edge": "ProtectsAgainst", "from": "imm-mmr-2", "to": "cond-rubella", "data": {"dose_number": 2, "series_doses": 2}}
+{"edge": "CodeForImmunization", "from": "code-cvx-03", "to": "imm-mmr-2", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-td-ipv-2004", "vaccine": "Td-IPV", "administered_on": "2004-01-01", "date_precision": "year", "status": "completed", "origin": "vaccination_card"}}
+{"edge": "ImmunizationFor", "from": "imm-td-ipv-2004", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-td-ipv-2004", "to": "cond-tetanus", "data": {"dose_number": 5}}
+{"edge": "ProtectsAgainst", "from": "imm-td-ipv-2004", "to": "cond-diphtheria", "data": {"dose_number": 5}}
+{"edge": "ProtectsAgainst", "from": "imm-td-ipv-2004", "to": "cond-polio", "data": {"dose_number": 5}}
+{"edge": "ImmunizationIn", "from": "imm-td-ipv-2004", "to": "rec-vacc-card", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-covid-1", "vaccine": "COVID-19 mRNA", "lot_number": "FN2184", "administered_on": "2021-06-02", "date_precision": "day", "site": "left_arm", "route": "intramuscular", "status": "completed", "origin": "registry"}}
+{"edge": "ImmunizationFor", "from": "imm-covid-1", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-covid-1", "to": "cond-covid-19", "data": {"dose_number": 1, "series_doses": 2}}
+{"edge": "ImmunizationIn", "from": "imm-covid-1", "to": "rec-registry-covid", "data": {}}
+{"edge": "CodeForImmunization", "from": "code-cvx-213", "to": "imm-covid-1", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-covid-2", "vaccine": "COVID-19 mRNA", "lot_number": "FP6630", "administered_on": "2021-07-14", "date_precision": "day", "site": "left_arm", "route": "intramuscular", "status": "completed", "origin": "registry"}}
+{"edge": "ImmunizationFor", "from": "imm-covid-2", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-covid-2", "to": "cond-covid-19", "data": {"dose_number": 2, "series_doses": 2}}
+{"edge": "ImmunizationIn", "from": "imm-covid-2", "to": "rec-registry-covid", "data": {}}
+{"edge": "CodeForImmunization", "from": "code-cvx-213", "to": "imm-covid-2", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-covid-3", "vaccine": "COVID-19 mRNA", "lot_number": "GK0917", "administered_on": "2021-12-20", "date_precision": "day", "site": "left_arm", "route": "intramuscular", "status": "completed", "origin": "registry"}}
+{"edge": "ImmunizationFor", "from": "imm-covid-3", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-covid-3", "to": "cond-covid-19", "data": {"dose_number": 3}}
+{"edge": "ImmunizationIn", "from": "imm-covid-3", "to": "rec-registry-covid", "data": {}}
+{"edge": "CodeForImmunization", "from": "code-cvx-213", "to": "imm-covid-3", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-hepa-1", "vaccine": "Hepatitis A", "product": "Havrest", "manufacturer": "Halden Biologics", "lot_number": "HA2291", "expires_on": "2025-02-28", "administered_on": "2023-05-08", "date_precision": "day", "site": "left_arm", "route": "intramuscular", "status": "completed", "origin": "provider_record"}}
+{"edge": "ImmunizationFor", "from": "imm-hepa-1", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-hepa-1", "to": "cond-hepatitis-a", "data": {"dose_number": 1, "series_doses": 2}}
+{"edge": "ImmunizationIn", "from": "imm-hepa-1", "to": "rec-travel-2023", "data": {}}
+{"edge": "AdministeredAt", "from": "imm-hepa-1", "to": "org-quay", "data": {}}
+{"edge": "CodeForImmunization", "from": "code-cvx-52", "to": "imm-hepa-1", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-hepa-2", "vaccine": "Hepatitis A", "product": "Havrest", "manufacturer": "Halden Biologics", "lot_number": "HA3107", "expires_on": "2025-09-30", "administered_on": "2024-01-15", "date_precision": "day", "site": "left_arm", "route": "intramuscular", "status": "completed", "origin": "provider_record"}}
+{"edge": "ImmunizationFor", "from": "imm-hepa-2", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-hepa-2", "to": "cond-hepatitis-a", "data": {"dose_number": 2, "series_doses": 2}}
+{"edge": "ImmunizationIn", "from": "imm-hepa-2", "to": "rec-travel-2023", "data": {}}
+{"edge": "AdministeredAt", "from": "imm-hepa-2", "to": "org-quay", "data": {}}
+{"edge": "CodeForImmunization", "from": "code-cvx-52", "to": "imm-hepa-2", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-hepb-1", "vaccine": "Hepatitis B", "product": "Benvax B", "manufacturer": "Corvane Vaccines", "lot_number": "B7745", "expires_on": "2025-06-30", "administered_on": "2023-05-08", "date_precision": "day", "site": "right_arm", "route": "intramuscular", "status": "completed", "origin": "provider_record"}}
+{"edge": "ImmunizationFor", "from": "imm-hepb-1", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-hepb-1", "to": "cond-hepatitis-b", "data": {"dose_number": 1, "series_doses": 3}}
+{"edge": "ImmunizationIn", "from": "imm-hepb-1", "to": "rec-travel-2023", "data": {}}
+{"edge": "AdministeredAt", "from": "imm-hepb-1", "to": "org-quay", "data": {}}
+{"edge": "CodeForImmunization", "from": "code-cvx-43", "to": "imm-hepb-1", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-hepb-2", "vaccine": "Hepatitis B", "product": "Benvax B", "manufacturer": "Corvane Vaccines", "lot_number": "B7745", "expires_on": "2025-06-30", "administered_on": "2023-06-12", "date_precision": "day", "site": "right_arm", "route": "intramuscular", "status": "completed", "origin": "provider_record"}}
+{"edge": "ImmunizationFor", "from": "imm-hepb-2", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-hepb-2", "to": "cond-hepatitis-b", "data": {"dose_number": 2, "series_doses": 3}}
+{"edge": "ImmunizationIn", "from": "imm-hepb-2", "to": "rec-travel-2023", "data": {}}
+{"edge": "AdministeredAt", "from": "imm-hepb-2", "to": "org-quay", "data": {}}
+{"edge": "CodeForImmunization", "from": "code-cvx-43", "to": "imm-hepb-2", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-yellow-fever", "vaccine": "Yellow fever", "product": "Flavimune", "manufacturer": "Halden Biologics", "lot_number": "YF0412", "expires_on": "2024-11-30", "administered_on": "2023-05-08", "date_precision": "day", "site": "left_arm", "route": "subcutaneous", "status": "completed", "origin": "provider_record"}}
+{"edge": "ImmunizationFor", "from": "imm-yellow-fever", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-yellow-fever", "to": "cond-yellow-fever", "data": {"dose_number": 1, "series_doses": 1}}
+{"edge": "ImmunizationIn", "from": "imm-yellow-fever", "to": "rec-travel-2023", "data": {}}
+{"edge": "AdministeredAt", "from": "imm-yellow-fever", "to": "org-quay", "data": {}}
+{"edge": "CodeForImmunization", "from": "code-cvx-37", "to": "imm-yellow-fever", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-tdap-ipv-2024", "vaccine": "Tdap-IPV", "product": "Quadrivent", "manufacturer": "Corvane Vaccines", "lot_number": "K4471", "expires_on": "2026-01-31", "administered_on": "2024-03-11", "date_precision": "day", "site": "left_arm", "route": "intramuscular", "status": "completed", "origin": "provider_record"}}
+{"edge": "ImmunizationFor", "from": "imm-tdap-ipv-2024", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-tdap-ipv-2024", "to": "cond-tetanus", "data": {"dose_number": 6}}
+{"edge": "ProtectsAgainst", "from": "imm-tdap-ipv-2024", "to": "cond-diphtheria", "data": {"dose_number": 6}}
+{"edge": "ProtectsAgainst", "from": "imm-tdap-ipv-2024", "to": "cond-pertussis", "data": {"dose_number": 5}}
+{"edge": "ProtectsAgainst", "from": "imm-tdap-ipv-2024", "to": "cond-polio", "data": {"dose_number": 6}}
+{"edge": "ImmunizationIn", "from": "imm-tdap-ipv-2024", "to": "rec-practice-vacc", "data": {}}
+{"edge": "AdministeredAt", "from": "imm-tdap-ipv-2024", "to": "org-harbour", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-flu-2024", "vaccine": "Influenza, 2024 season", "lot_number": "FL24-118", "expires_on": "2025-06-30", "administered_on": "2024-10-14", "date_precision": "day", "site": "left_arm", "route": "intramuscular", "status": "completed", "origin": "provider_record"}}
+{"edge": "ImmunizationFor", "from": "imm-flu-2024", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-flu-2024", "to": "cond-influenza", "data": {}}
+{"edge": "ImmunizationIn", "from": "imm-flu-2024", "to": "rec-practice-vacc", "data": {}}
+{"edge": "AdministeredAt", "from": "imm-flu-2024", "to": "org-harbour", "data": {}}
+{"edge": "CodeForImmunization", "from": "code-cvx-88", "to": "imm-flu-2024", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-flu-2025", "vaccine": "Influenza, 2025 season", "lot_number": "FL25-204", "expires_on": "2026-06-30", "administered_on": "2025-10-13", "date_precision": "day", "site": "left_arm", "route": "intramuscular", "status": "completed", "origin": "provider_record"}}
+{"edge": "ImmunizationFor", "from": "imm-flu-2025", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-flu-2025", "to": "cond-influenza", "data": {}}
+{"edge": "ImmunizationIn", "from": "imm-flu-2025", "to": "rec-practice-vacc", "data": {}}
+{"edge": "AdministeredAt", "from": "imm-flu-2025", "to": "org-harbour", "data": {}}
+{"edge": "CodeForImmunization", "from": "code-cvx-88", "to": "imm-flu-2025", "data": {}}
+{"type": "Immunization", "data": {"slug": "imm-flu-2026", "vaccine": "Influenza, 2026 season", "administered_on": "2026-10-12", "date_precision": "day", "status": "not_done", "status_reason": "Had a fever on the day; the practice asked to rebook.", "origin": "provider_record"}}
+{"edge": "ImmunizationFor", "from": "imm-flu-2026", "to": "per-noa", "data": {}}
+{"edge": "ProtectsAgainst", "from": "imm-flu-2026", "to": "cond-influenza", "data": {}}
+{"edge": "ImmunizationIn", "from": "imm-flu-2026", "to": "rec-practice-vacc", "data": {}}
+{"edge": "AdministeredAt", "from": "imm-flu-2026", "to": "org-harbour", "data": {}}
+{"type": "ConditionOccurrence", "data": {"slug": "occ-fever-covid-2", "status": "resolved", "certainty": "self_reported", "onset_on": "2021-07-15", "resolved_on": "2021-07-16", "severity": "mild", "notes": "38.4 C the day after the dose."}}
+{"edge": "OccurrenceOf", "from": "occ-fever-covid-2", "to": "cond-fever", "data": {}}
+{"edge": "OccurrenceFor", "from": "occ-fever-covid-2", "to": "per-noa", "data": {}}
+{"edge": "ReactionToImmunization", "from": "occ-fever-covid-2", "to": "imm-covid-2", "data": {}}
+{"type": "ConditionOccurrence", "data": {"slug": "occ-sore-arm-tdap", "status": "resolved", "certainty": "self_reported", "onset_on": "2024-03-11", "resolved_on": "2024-03-14", "severity": "moderate", "notes": "Could not lift the arm for two days."}}
+{"edge": "OccurrenceOf", "from": "occ-sore-arm-tdap", "to": "cond-sore-arm", "data": {}}
+{"edge": "OccurrenceFor", "from": "occ-sore-arm-tdap", "to": "per-noa", "data": {}}
+{"edge": "ReactionToImmunization", "from": "occ-sore-arm-tdap", "to": "imm-tdap-ipv-2024", "data": {}}
+{"type": "ConditionOccurrence", "data": {"slug": "occ-constipation-iron", "status": "resolved", "certainty": "self_reported", "onset_on": "2025-02-10", "resolved_on": "2025-03-01", "severity": "mild", "notes": "Eased after switching to every other day."}}
+{"edge": "OccurrenceOf", "from": "occ-constipation-iron", "to": "cond-constipation", "data": {}}
+{"edge": "OccurrenceFor", "from": "occ-constipation-iron", "to": "per-noa", "data": {}}
+{"edge": "ReactionToIntervention", "from": "occ-constipation-iron", "to": "int-iron", "data": {}}
+{"type": "Recommendation", "data": {"slug": "rcm-tsh-repeat-2025", "title": "Repeat TSH", "kind": "retest", "authority": "Dr Ilse Vermeer", "due_at": "2025-09-08T00:00:00.000Z", "status": "done", "reason": "TSH 4.6 in July 2025."}}
+{"edge": "RecommendationFor", "from": "rcm-tsh-repeat-2025", "to": "per-noa", "data": {}}
+{"edge": "RecommendsMeasuring", "from": "rcm-tsh-repeat-2025", "to": "mk-tsh", "data": {}}
+{"edge": "FulfilledByMeasurement", "from": "rcm-tsh-repeat-2025", "to": "m-p3-tsh", "data": {}}
+{"type": "Recommendation", "data": {"slug": "rcm-tsh-2026", "title": "TSH again in six months", "kind": "retest", "authority": "Dr Ilse Vermeer", "due_at": "2026-07-31T00:00:00.000Z", "repeats_every_days": 180, "status": "open", "reason": "One raised value in the last year."}}
+{"edge": "RecommendationFor", "from": "rcm-tsh-2026", "to": "per-noa", "data": {}}
+{"edge": "RecommendsMeasuring", "from": "rcm-tsh-2026", "to": "mk-tsh", "data": {}}
+{"type": "Recommendation", "data": {"slug": "rcm-lipids-2026-07", "title": "Lipid panel six months after starting rosuvastatin", "kind": "retest", "authority": "Dr Ilse Vermeer", "due_at": "2026-07-31T00:00:00.000Z", "repeats_every_days": 180, "status": "done"}}
+{"edge": "RecommendationFor", "from": "rcm-lipids-2026-07", "to": "per-noa", "data": {}}
+{"edge": "RecommendsMeasuring", "from": "rcm-lipids-2026-07", "to": "mk-apob", "data": {}}
+{"edge": "RecommendsMeasuring", "from": "rcm-lipids-2026-07", "to": "mk-ldl", "data": {}}
+{"edge": "FulfilledByMeasurement", "from": "rcm-lipids-2026-07", "to": "m-p4-apob", "data": {}}
+{"type": "Recommendation", "data": {"slug": "rcm-hepb-dose-3", "title": "Hepatitis B, third dose", "kind": "vaccine_dose", "authority": "Quay Travel Clinic", "earliest_at": "2023-11-08T00:00:00.000Z", "due_at": "2023-11-08T00:00:00.000Z", "dose_number": 3, "series_doses": 3, "status": "open", "reason": "Third dose six months after the first."}}
+{"edge": "RecommendationFor", "from": "rcm-hepb-dose-3", "to": "per-noa", "data": {}}
+{"edge": "RecommendsVaccineAgainst", "from": "rcm-hepb-dose-3", "to": "cond-hepatitis-b", "data": {}}
+{"type": "Recommendation", "data": {"slug": "rcm-flu-2026", "title": "Influenza dose, 2026 season", "kind": "vaccine_dose", "authority": "Harbour Street Practice", "due_at": "2026-10-31T00:00:00.000Z", "status": "open", "reason": "Deferred on 12 October because of a fever."}}
+{"edge": "RecommendationFor", "from": "rcm-flu-2026", "to": "per-noa", "data": {}}
+{"edge": "RecommendsVaccineAgainst", "from": "rcm-flu-2026", "to": "cond-influenza", "data": {}}
+{"type": "Recommendation", "data": {"slug": "rcm-tetanus-2034", "title": "Tetanus booster", "kind": "vaccine_dose", "authority": "Dr Ilse Vermeer", "earliest_at": "2034-03-11T00:00:00.000Z", "due_at": "2034-03-11T00:00:00.000Z", "status": "open", "reason": "Ten years after the March 2024 dose."}}
+{"edge": "RecommendationFor", "from": "rcm-tetanus-2034", "to": "per-noa", "data": {}}
+{"edge": "RecommendsVaccineAgainst", "from": "rcm-tetanus-2034", "to": "cond-tetanus", "data": {}}
+{"type": "Recommendation", "data": {"slug": "rcm-hepa-dose-2", "title": "Hepatitis A, second dose", "kind": "vaccine_dose", "authority": "Quay Travel Clinic", "earliest_at": "2023-11-08T00:00:00.000Z", "due_at": "2023-11-08T00:00:00.000Z", "latest_at": "2024-05-08T00:00:00.000Z", "dose_number": 2, "series_doses": 2, "status": "done"}}
+{"edge": "RecommendationFor", "from": "rcm-hepa-dose-2", "to": "per-noa", "data": {}}
+{"edge": "RecommendsVaccineAgainst", "from": "rcm-hepa-dose-2", "to": "cond-hepatitis-a", "data": {}}
+{"edge": "FulfilledByImmunization", "from": "rcm-hepa-dose-2", "to": "imm-hepa-2", "data": {}}
+{"type": "Notification", "data": {"slug": "ntf-overdue-rcm-tsh-2026", "title": "TSH retest is overdue", "body": "Dr Vermeer asked for a TSH by 31 July 2026. It was not on the July panel.", "kind": "retest_due", "status": "sent", "raised_at": "2026-08-07T07:00:00.000Z", "sent_at": "2026-08-07T07:05:00.000Z", "channel": "email"}}
+{"edge": "NotificationFor", "from": "ntf-overdue-rcm-tsh-2026", "to": "per-noa", "data": {}}
+{"edge": "AboutRecommendation", "from": "ntf-overdue-rcm-tsh-2026", "to": "rcm-tsh-2026", "data": {}}
+{"type": "Notification", "data": {"slug": "ntf-overdue-rcm-hepb-dose-3", "title": "Hepatitis B third dose is overdue", "body": "Two of three doses are on record. The third was due on 8 November 2023.", "kind": "dose_due", "status": "acknowledged", "raised_at": "2026-01-21T07:00:00.000Z", "sent_at": "2026-01-21T07:05:00.000Z", "channel": "email", "acknowledged_at": "2026-01-21T19:20:00.000Z"}}
+{"edge": "NotificationFor", "from": "ntf-overdue-rcm-hepb-dose-3", "to": "per-noa", "data": {}}
+{"edge": "AboutRecommendation", "from": "ntf-overdue-rcm-hepb-dose-3", "to": "rcm-hepb-dose-3", "data": {}}
+{"type": "Notification", "data": {"slug": "ntf-off-target-m-p3-apob", "title": "ApoB is above target", "body": "1.02 g/L on 19 January 2026 against a target of 0.80 or less.", "kind": "off_target", "status": "acknowledged", "raised_at": "2026-01-21T07:00:00.000Z", "sent_at": "2026-01-21T07:05:00.000Z", "channel": "email", "acknowledged_at": "2026-01-22T19:20:00.000Z"}}
+{"edge": "NotificationFor", "from": "ntf-off-target-m-p3-apob", "to": "per-noa", "data": {}}
+{"edge": "AboutMeasurement", "from": "ntf-off-target-m-p3-apob", "to": "m-p3-apob", "data": {}}

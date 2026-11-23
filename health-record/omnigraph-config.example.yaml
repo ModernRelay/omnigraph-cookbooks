@@ -1,0 +1,68 @@
+# Read aliases for the health-record cookbook (graph `health`).
+# Merge the `aliases:` entries below into $OMNIGRAPH_HOME/config.yaml, the operator
+# config from ../docs/local-setup.md, whose `local-reader` target they use.
+# Run one with `omnigraph alias <name>`; pass a query's parameters by name with
+# `--params '{"marker":"..."}'`. Aliases only read; run stored mutations with
+# `omnigraph mutate <name> --target local-writer --graph health --params '{...}'`,
+# or as an agent with `--target local-agent --branch <your branch>`.
+aliases:
+
+  # ── Results ─────────────────────────────────────────────────────
+  latest:            {target: local-reader, graph: health, query: latest_results}
+  out-of-range:      {target: local-reader, graph: health, query: out_of_range}
+  off-target:        {target: local-reader, graph: health, query: off_target}
+  targets:           {target: local-reader, graph: health, query: targets}
+  history:           {target: local-reader, graph: health, query: marker_history}   # --params '{"marker":"mk-apob"}'
+  record:            {target: local-reader, graph: health, query: record_results}   # --params '{"record":"rec-lab-2026-07"}'
+  to-review:         {target: local-reader, graph: health, query: records_awaiting_review}
+  unconverted:       {target: local-reader, graph: health, query: unconverted_results}
+  corrected:         {target: local-reader, graph: health, query: corrected_results}
+  preliminary:       {target: local-reader, graph: health, query: preliminary_results}
+
+  # ── Markers and codes ───────────────────────────────────────────
+  markers:           {target: local-reader, graph: health, query: markers}
+  codes:             {target: local-reader, graph: health, query: marker_codes}
+  find-marker:       {target: local-reader, graph: health, query: search_markers}   # --params '{"q":"cholesterol"}'
+  unmeasured:        {target: local-reader, graph: health, query: unmeasured_markers}
+
+  # ── What is due ─────────────────────────────────────────────────
+  due:               {target: local-reader, graph: health, query: open_recommendations}
+  overdue:           {target: local-reader, graph: health, query: overdue_recommendations}
+  no-retest:         {target: local-reader, graph: health, query: targets_without_retest}
+  not-told:          {target: local-reader, graph: health, query: overdue_not_notified}
+
+  # ── Immunizations ───────────────────────────────────────────────
+  doses:             {target: local-reader, graph: health, query: immunization_history}
+  by-disease:        {target: local-reader, graph: health, query: doses_by_disease}
+  incomplete:        {target: local-reader, graph: health, query: incomplete_series}
+  undocumented:      {target: local-reader, graph: health, query: undocumented_doses}
+  not-given:         {target: local-reader, graph: health, query: doses_not_given}
+  lot:               {target: local-reader, graph: health, query: doses_by_lot}   # --params '{"lot":"B7745"}'
+  disease:           {target: local-reader, graph: health, query: disease_doses}   # --params '{"disease":"cond-tetanus"}'
+  reactions:         {target: local-reader, graph: health, query: reactions}
+  dose-reactions:    {target: local-reader, graph: health, query: dose_reactions}
+  side-effects:      {target: local-reader, graph: health, query: intervention_reactions}
+
+  # ── Hypotheses ──────────────────────────────────────────────────
+  hypotheses:        {target: local-reader, graph: health, query: hypotheses}
+  support:           {target: local-reader, graph: health, query: hypothesis_support}   # --params '{"hypothesis":"hyp-apob-inherited"}'
+  against:           {target: local-reader, graph: health, query: hypothesis_contradiction}   # --params '{"hypothesis":"hyp-fatigue-iron"}'
+  contested:         {target: local-reader, graph: health, query: contested_hypotheses}
+  no-evidence:       {target: local-reader, graph: health, query: hypotheses_without_evidence}
+  proposed:          {target: local-reader, graph: health, query: hypotheses_awaiting_review}
+
+  # ── Interventions ───────────────────────────────────────────────
+  taking:            {target: local-reader, graph: health, query: active_interventions}
+  effect:            {target: local-reader, graph: health, query: intervention_effect}   # --params '{"intervention":"int-rosuvastatin"}'
+  no-followup:       {target: local-reader, graph: health, query: interventions_without_followup}
+  dose-changes:      {target: local-reader, graph: health, query: intervention_history}
+  conditions:        {target: local-reader, graph: health, query: active_conditions}
+
+  # ── Visits ──────────────────────────────────────────────────────
+  visits:            {target: local-reader, graph: health, query: visits}
+  upcoming:          {target: local-reader, graph: health, query: upcoming_visits}
+  visit-records:     {target: local-reader, graph: health, query: visit_records}   # --params '{"visit":"vis-2026-01-26"}'
+
+  # ── Notifications ───────────────────────────────────────────────
+  prompt:            {target: local-reader, graph: health, query: notification}   # --params '{"slug":"ntf-overdue-rcm-tsh-2026"}'
+  prompts:           {target: local-reader, graph: health, query: unacknowledged_notifications}
