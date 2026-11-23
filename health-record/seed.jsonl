@@ -239,7 +239,7 @@
 {"edge": "MeasurementOf", "from": "m-p3-crp", "to": "mk-crp", "data": {}}
 {"edge": "MeasurementFor", "from": "m-p3-crp", "to": "per-noa", "data": {}}
 {"edge": "MeasurementIn", "from": "m-p3-crp", "to": "rec-lab-2026-01", "data": {}}
-{"type": "Measurement", "data": {"slug": "m-p4-crp", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 0.7, "unit": "mg/L", "canonical_value": 0.7, "reference_high": 3.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "hs-CRP", "source_line": "hs-CRP 0.7 mg/L (<3)"}}
+{"type": "Measurement", "data": {"slug": "m-p4-crp", "measured_at": "2026-07-20T08:10:00.000Z", "statistic": "point", "value": 0.3, "comparator": "lt", "unit": "mg/L", "canonical_value": 0.3, "reference_high": 3.0, "flag": "normal", "status": "final", "fasting": true, "source_name": "hs-CRP", "source_line": "hs-CRP <0.3 mg/L (<3)"}}
 {"edge": "MeasurementOf", "from": "m-p4-crp", "to": "mk-crp", "data": {}}
 {"edge": "MeasurementFor", "from": "m-p4-crp", "to": "per-noa", "data": {}}
 {"edge": "MeasurementIn", "from": "m-p4-crp", "to": "rec-lab-2026-07", "data": {}}
@@ -607,33 +607,43 @@
 {"type": "ConditionOccurrence", "data": {"slug": "occ-vitamin-d-deficiency", "status": "resolved", "certainty": "confirmed", "onset_on": "2025-01-27", "resolved_on": "2025-07-28"}}
 {"edge": "OccurrenceOf", "from": "occ-vitamin-d-deficiency", "to": "cond-vitamin-d-deficiency", "data": {}}
 {"edge": "OccurrenceFor", "from": "occ-vitamin-d-deficiency", "to": "per-noa", "data": {}}
-{"type": "Intervention", "data": {"slug": "int-diet", "name": "Less saturated fat, more fibre", "kind": "diet", "status": "active", "frequency": "daily", "started_at": "2025-02-03T07:00:00.000Z", "reason": "To lower ApoB without medication."}}
+{"type": "Intervention", "data": {"slug": "int-diet", "name": "Less saturated fat, more fibre", "kind": "diet", "status": "active", "started_at": "2025-02-03T07:00:00.000Z", "reason": "To lower ApoB without medication."}}
 {"edge": "InterventionFor", "from": "int-diet", "to": "per-noa", "data": {}}
 {"edge": "Targets", "from": "int-diet", "to": "mk-apob", "data": {}}
 {"edge": "Targets", "from": "int-diet", "to": "mk-ldl", "data": {}}
 {"edge": "MotivatedBy", "from": "int-diet", "to": "hyp-apob-diet", "data": {}}
 {"edge": "Treats", "from": "int-diet", "to": "occ-raised-cholesterol", "data": {}}
-{"type": "Intervention", "data": {"slug": "int-vitd-1000", "name": "Vitamin D3", "kind": "supplement", "status": "stopped", "dose": "1000 IU", "frequency": "daily", "started_at": "2025-01-28T07:00:00.000Z", "stopped_at": "2025-07-29T07:00:00.000Z", "reason": "Low vitamin D."}}
-{"edge": "InterventionFor", "from": "int-vitd-1000", "to": "per-noa", "data": {}}
-{"edge": "Targets", "from": "int-vitd-1000", "to": "mk-vitd", "data": {}}
-{"edge": "Treats", "from": "int-vitd-1000", "to": "occ-vitamin-d-deficiency", "data": {}}
-{"type": "Intervention", "data": {"slug": "int-vitd-2000", "name": "Vitamin D3", "kind": "supplement", "status": "active", "dose": "2000 IU", "frequency": "daily", "started_at": "2025-07-29T07:00:00.000Z", "reason": "Still under the personal target on 1000 IU."}}
-{"edge": "InterventionFor", "from": "int-vitd-2000", "to": "per-noa", "data": {}}
-{"edge": "Targets", "from": "int-vitd-2000", "to": "mk-vitd", "data": {}}
-{"edge": "InterventionSupersedes", "from": "int-vitd-2000", "to": "int-vitd-1000", "data": {}}
-{"type": "Intervention", "data": {"slug": "int-iron", "name": "Iron bisglycinate", "kind": "supplement", "status": "stopped", "dose": "25 mg", "frequency": "every other day", "started_at": "2025-01-28T07:00:00.000Z", "stopped_at": "2026-01-27T07:00:00.000Z", "reason": "Low ferritin."}}
+{"type": "InterventionEpisode", "data": {"slug": "ep-diet-1", "frequency": "daily", "started_at": "2025-02-03T07:00:00.000Z"}}
+{"edge": "EpisodeOf", "from": "ep-diet-1", "to": "int-diet", "data": {}}
+{"type": "Intervention", "data": {"slug": "int-vitd", "name": "Vitamin D3", "kind": "supplement", "status": "active", "started_at": "2025-01-28T07:00:00.000Z", "reason": "Low vitamin D."}}
+{"edge": "InterventionFor", "from": "int-vitd", "to": "per-noa", "data": {}}
+{"edge": "Targets", "from": "int-vitd", "to": "mk-vitd", "data": {}}
+{"edge": "Treats", "from": "int-vitd", "to": "occ-vitamin-d-deficiency", "data": {}}
+{"type": "InterventionEpisode", "data": {"slug": "ep-vitd-1", "dose": "1000 IU", "frequency": "daily", "started_at": "2025-01-28T07:00:00.000Z"}}
+{"edge": "EpisodeOf", "from": "ep-vitd-1", "to": "int-vitd", "data": {}}
+{"type": "InterventionEpisode", "data": {"slug": "ep-vitd-2", "dose": "2000 IU", "frequency": "daily", "started_at": "2025-07-29T07:00:00.000Z", "reason": "Still under the personal target on 1000 IU."}}
+{"edge": "EpisodeOf", "from": "ep-vitd-2", "to": "int-vitd", "data": {}}
+{"type": "Intervention", "data": {"slug": "int-iron", "name": "Iron bisglycinate", "kind": "supplement", "status": "stopped", "started_at": "2025-01-28T07:00:00.000Z", "stopped_at": "2026-01-27T07:00:00.000Z", "reason": "Low ferritin."}}
 {"edge": "InterventionFor", "from": "int-iron", "to": "per-noa", "data": {}}
 {"edge": "Targets", "from": "int-iron", "to": "mk-ferritin", "data": {}}
 {"edge": "MotivatedBy", "from": "int-iron", "to": "hyp-fatigue-iron", "data": {}}
-{"type": "Intervention", "data": {"slug": "int-rosuvastatin", "name": "Rosuvastatin", "kind": "medication", "status": "active", "dose": "5 mg", "frequency": "daily", "started_at": "2026-02-02T07:00:00.000Z", "reason": "ApoB above target after a year of diet change."}}
+{"type": "InterventionEpisode", "data": {"slug": "ep-iron-1", "dose": "25 mg", "frequency": "daily", "started_at": "2025-01-28T07:00:00.000Z"}}
+{"edge": "EpisodeOf", "from": "ep-iron-1", "to": "int-iron", "data": {}}
+{"type": "InterventionEpisode", "data": {"slug": "ep-iron-2", "dose": "25 mg", "frequency": "every other day", "started_at": "2025-03-01T07:00:00.000Z", "reason": "Constipation on the daily dose."}}
+{"edge": "EpisodeOf", "from": "ep-iron-2", "to": "int-iron", "data": {}}
+{"type": "Intervention", "data": {"slug": "int-rosuvastatin", "name": "Rosuvastatin", "kind": "medication", "status": "active", "started_at": "2026-02-02T07:00:00.000Z", "reason": "ApoB above target after a year of diet change."}}
 {"edge": "InterventionFor", "from": "int-rosuvastatin", "to": "per-noa", "data": {}}
 {"edge": "Targets", "from": "int-rosuvastatin", "to": "mk-apob", "data": {}}
 {"edge": "Targets", "from": "int-rosuvastatin", "to": "mk-ldl", "data": {}}
 {"edge": "MotivatedBy", "from": "int-rosuvastatin", "to": "hyp-apob-inherited", "data": {}}
 {"edge": "Treats", "from": "int-rosuvastatin", "to": "occ-raised-cholesterol", "data": {}}
-{"type": "Intervention", "data": {"slug": "int-omega3", "name": "Omega-3 (EPA and DHA)", "kind": "supplement", "status": "active", "dose": "2 g", "frequency": "daily", "started_at": "2026-08-10T07:00:00.000Z", "reason": "Triglycerides just above the lab's range in July 2026."}}
+{"type": "InterventionEpisode", "data": {"slug": "ep-rosuvastatin-1", "dose": "5 mg", "frequency": "daily", "started_at": "2026-02-02T07:00:00.000Z"}}
+{"edge": "EpisodeOf", "from": "ep-rosuvastatin-1", "to": "int-rosuvastatin", "data": {}}
+{"type": "Intervention", "data": {"slug": "int-omega3", "name": "Omega-3 (EPA and DHA)", "kind": "supplement", "status": "active", "started_at": "2026-08-10T07:00:00.000Z", "reason": "Triglycerides just above the lab's range in July 2026."}}
 {"edge": "InterventionFor", "from": "int-omega3", "to": "per-noa", "data": {}}
 {"edge": "Targets", "from": "int-omega3", "to": "mk-tg", "data": {}}
+{"type": "InterventionEpisode", "data": {"slug": "ep-omega3-1", "dose": "2 g", "frequency": "daily", "started_at": "2026-08-10T07:00:00.000Z"}}
+{"edge": "EpisodeOf", "from": "ep-omega3-1", "to": "int-omega3", "data": {}}
 {"type": "ExternalCode", "data": {"slug": "code-cvx-03", "system": "cvx", "code": "03", "display": "MMR"}}
 {"type": "ExternalCode", "data": {"slug": "code-cvx-213", "system": "cvx", "code": "213", "display": "SARS-COV-2 (COVID-19) vaccine, UNSPECIFIED"}}
 {"type": "ExternalCode", "data": {"slug": "code-cvx-52", "system": "cvx", "code": "52", "display": "Hep A, adult"}}
@@ -769,14 +779,14 @@
 {"edge": "OccurrenceOf", "from": "occ-constipation-iron", "to": "cond-constipation", "data": {}}
 {"edge": "OccurrenceFor", "from": "occ-constipation-iron", "to": "per-noa", "data": {}}
 {"edge": "ReactionToIntervention", "from": "occ-constipation-iron", "to": "int-iron", "data": {}}
-{"type": "Recommendation", "data": {"slug": "rcm-tsh-repeat-2025", "title": "Repeat TSH", "kind": "retest", "authority": "Dr Ilse Vermeer", "due_at": "2025-09-08T00:00:00.000Z", "status": "done", "reason": "TSH 4.6 in July 2025."}}
+{"type": "Recommendation", "data": {"slug": "rcm-tsh-repeat-2025", "title": "Repeat TSH", "kind": "retest", "authority": "Dr Ilse Vermeer", "due_at": "2025-09-08T00:00:00.000Z", "status": "open", "reason": "TSH 4.6 in July 2025."}}
 {"edge": "RecommendationFor", "from": "rcm-tsh-repeat-2025", "to": "per-noa", "data": {}}
 {"edge": "RecommendsMeasuring", "from": "rcm-tsh-repeat-2025", "to": "mk-tsh", "data": {}}
 {"edge": "FulfilledByMeasurement", "from": "rcm-tsh-repeat-2025", "to": "m-p3-tsh", "data": {}}
 {"type": "Recommendation", "data": {"slug": "rcm-tsh-2026", "title": "TSH again in six months", "kind": "retest", "authority": "Dr Ilse Vermeer", "due_at": "2026-07-31T00:00:00.000Z", "repeats_every_days": 180, "status": "open", "reason": "One raised value in the last year."}}
 {"edge": "RecommendationFor", "from": "rcm-tsh-2026", "to": "per-noa", "data": {}}
 {"edge": "RecommendsMeasuring", "from": "rcm-tsh-2026", "to": "mk-tsh", "data": {}}
-{"type": "Recommendation", "data": {"slug": "rcm-lipids-2026-07", "title": "Lipid panel six months after starting rosuvastatin", "kind": "retest", "authority": "Dr Ilse Vermeer", "due_at": "2026-07-31T00:00:00.000Z", "repeats_every_days": 180, "status": "done"}}
+{"type": "Recommendation", "data": {"slug": "rcm-lipids-2026-07", "title": "Lipid panel six months after starting rosuvastatin", "kind": "retest", "authority": "Dr Ilse Vermeer", "due_at": "2026-07-31T00:00:00.000Z", "repeats_every_days": 180, "status": "open"}}
 {"edge": "RecommendationFor", "from": "rcm-lipids-2026-07", "to": "per-noa", "data": {}}
 {"edge": "RecommendsMeasuring", "from": "rcm-lipids-2026-07", "to": "mk-apob", "data": {}}
 {"edge": "RecommendsMeasuring", "from": "rcm-lipids-2026-07", "to": "mk-ldl", "data": {}}
@@ -787,10 +797,12 @@
 {"type": "Recommendation", "data": {"slug": "rcm-flu-2026", "title": "Influenza dose, 2026 season", "kind": "vaccine_dose", "authority": "Harbour Street Practice", "due_at": "2026-10-31T00:00:00.000Z", "status": "open", "reason": "Deferred on 12 October because of a fever."}}
 {"edge": "RecommendationFor", "from": "rcm-flu-2026", "to": "per-noa", "data": {}}
 {"edge": "RecommendsVaccineAgainst", "from": "rcm-flu-2026", "to": "cond-influenza", "data": {}}
+{"type": "Recommendation", "data": {"slug": "rcm-dental-2026", "title": "Dental check-up", "kind": "screening", "authority": "Noa Brandt", "due_at": "2026-06-30T00:00:00.000Z", "repeats_every_days": 365, "status": "done", "reason": "Went in June 2026; no document on record."}}
+{"edge": "RecommendationFor", "from": "rcm-dental-2026", "to": "per-noa", "data": {}}
 {"type": "Recommendation", "data": {"slug": "rcm-tetanus-2034", "title": "Tetanus booster", "kind": "vaccine_dose", "authority": "Dr Ilse Vermeer", "earliest_at": "2034-03-11T00:00:00.000Z", "due_at": "2034-03-11T00:00:00.000Z", "status": "open", "reason": "Ten years after the March 2024 dose."}}
 {"edge": "RecommendationFor", "from": "rcm-tetanus-2034", "to": "per-noa", "data": {}}
 {"edge": "RecommendsVaccineAgainst", "from": "rcm-tetanus-2034", "to": "cond-tetanus", "data": {}}
-{"type": "Recommendation", "data": {"slug": "rcm-hepa-dose-2", "title": "Hepatitis A, second dose", "kind": "vaccine_dose", "authority": "Quay Travel Clinic", "earliest_at": "2023-11-08T00:00:00.000Z", "due_at": "2023-11-08T00:00:00.000Z", "latest_at": "2024-05-08T00:00:00.000Z", "dose_number": 2, "series_doses": 2, "status": "done"}}
+{"type": "Recommendation", "data": {"slug": "rcm-hepa-dose-2", "title": "Hepatitis A, second dose", "kind": "vaccine_dose", "authority": "Quay Travel Clinic", "earliest_at": "2023-11-08T00:00:00.000Z", "due_at": "2023-11-08T00:00:00.000Z", "latest_at": "2024-05-08T00:00:00.000Z", "dose_number": 2, "series_doses": 2, "status": "open"}}
 {"edge": "RecommendationFor", "from": "rcm-hepa-dose-2", "to": "per-noa", "data": {}}
 {"edge": "RecommendsVaccineAgainst", "from": "rcm-hepa-dose-2", "to": "cond-hepatitis-a", "data": {}}
 {"edge": "FulfilledByImmunization", "from": "rcm-hepa-dose-2", "to": "imm-hepa-2", "data": {}}

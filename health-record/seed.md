@@ -6,7 +6,7 @@ and product is made up. The seed is shaped so that each stored read has
 something to find; the expected results below are what the stored queries
 return on a freshly loaded graph.
 
-259 nodes and 546 edges. Load it once into an empty graph with
+266 nodes and 551 edges. Load it once into an empty graph with
 `--mode append`.
 
 ## The record
@@ -24,9 +24,10 @@ return on a freshly loaded graph.
 | Hypotheses | 5 | Three reviewed by a person, two proposed by an agent |
 | Conditions | 17 | 12 diseases vaccines protect against, 2 diagnoses, 3 kinds of reaction |
 | Cases and reactions | 5 | Raised cholesterol, a resolved vitamin D deficiency and three reactions |
-| Interventions | 6 | Diet, vitamin D3 at two doses, iron, rosuvastatin and omega-3 |
+| Interventions | 5 | Diet, vitamin D3, iron, rosuvastatin and omega-3 |
+| Dose periods | 7 | One each, and a second for vitamin D3 and for iron |
 | Vaccine doses | 19 | 18 given and 1 not given |
-| Recommendations | 7 | Four open, three done |
+| Recommendations | 8 | Three overdue, one due in 2034, three met by a result or a dose, one closed by hand |
 | Notifications | 3 | One sent, two acknowledged |
 
 The story runs from a check-up in January 2025. ApoB and LDL cholesterol were
@@ -35,7 +36,7 @@ vitamin D and iron. A year later ApoB was still above target, so rosuvastatin
 was started in February 2026 and the LDL target was tightened. The July 2026
 panel shows ApoB at target and LDL cholesterol not yet.
 
-Four things are placed in the results on purpose:
+Five things are placed in the results on purpose:
 
 - **A correction.** The July 2025 ferritin was reported as 43 and corrected
   to 34 in an amended report. Both results are in the seed; only the
@@ -46,12 +47,24 @@ Four things are placed in the results on purpose:
 - **A result entered in error.** A weight of 731 kg typed at the January 2026
   visit is marked `entered_in_error` and is left out of every read.
 - **A preliminary result.** The July 2026 Lp(a) has not been made final.
+- **A result at a detection limit.** The July 2026 hs-CRP was printed as
+  "<0.3 mg/L": comparator `lt`, value 0.3. It is under the lab's ceiling of
+  3.0 whatever the true value, so it is not out of range.
+
+Recommendations show what "met" means. Three have a result or a dose linked
+as fulfilling them and keep the status `open`: they are no longer due because
+that evidence stands, and would be due again if it were voided. One, a dental
+check-up with no document on record, was closed by hand as `done`.
 
 The vaccination history shows what a per-disease dose number is for. The 2024
 Tdap-IPV booster is the sixth dose against tetanus, diphtheria and polio and
 the fifth against pertussis, because the 2004 booster had no pertussis part.
 Hepatitis B stopped after two of three doses. The second MMR dose is
 remembered, with only its year, and no document shows it.
+
+Two interventions changed dose. Vitamin D3 went from 1000 IU to 2000 IU, and
+iron from daily to every other day after constipation. Each is one
+intervention with two dose periods.
 
 ## Codes
 
@@ -85,6 +98,7 @@ in 2034, and `upcoming_visits` is empty after 25 January 2027.
 | `unconverted_results` |  | 1 | January 2026 glucose, printed as 92 mg/dL |
 | `corrected_results` |  | 1 | July 2025 ferritin, corrected from 43 to 34 |
 | `preliminary_results` |  | 1 | July 2026 Lp(a), 41 nmol/L |
+| `detection_limit_results` |  | 1 | July 2026 hs-CRP, printed as <0.3 mg/L |
 
 ### Markers and codes
 
@@ -101,8 +115,10 @@ in 2034, and `upcoming_visits` is empty after 25 January 2027.
 |---|---|---|---|
 | `open_recommendations` |  | 4 | The three overdue ones and the 2034 tetanus booster |
 | `overdue_recommendations` |  | 3 | Hepatitis B third dose (2023-11-08), TSH retest (2026-07-31), influenza 2026 (2026-10-31) |
-| `targets_without_retest` |  | 4 | ApoB, LDL cholesterol, systolic blood pressure and vitamin D: no retest is planned for any of them |
+| `targets_without_retest` |  | 4 | ApoB, LDL cholesterol, systolic blood pressure and vitamin D: no retest is still due for any of them |
 | `overdue_not_notified` |  | 1 | The influenza dose; the other two overdue items already have a notification |
+| `met_by_result` |  | 2 | The 2025 TSH repeat, met late by the January 2026 result, and the lipid panel, met by July 2026 |
+| `met_by_dose` |  | 1 | The second hepatitis A dose |
 
 ### Immunizations
 
@@ -134,10 +150,10 @@ in 2034, and `upcoming_visits` is empty after 25 January 2027.
 
 | Stored read | With | Rows | Returns |
 |---|---|---|---|
-| `active_interventions` |  | 6 | Four interventions; diet and rosuvastatin each target two markers |
+| `active_interventions` |  | 6 | Four interventions at their current dose; diet and rosuvastatin each target two markers |
 | `intervention_effect` | `int-rosuvastatin` | 8 | ApoB and LDL cholesterol: three results before the start, one after |
 | `interventions_without_followup` |  | 1 | Omega-3: no triglyceride result since it started |
-| `intervention_history` |  | 1 | Vitamin D3 from 1000 IU to 2000 IU |
+| `dose_history` |  | 7 | Seven dose periods: vitamin D3 from 1000 IU to 2000 IU, iron from daily to every other day |
 | `active_conditions` |  | 1 | Raised cholesterol, confirmed |
 
 ### Visits

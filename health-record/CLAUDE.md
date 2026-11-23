@@ -18,9 +18,9 @@ The record keeps and surfaces facts. It does not diagnose.
 
 ## Key Files
 
-- `schema.pg` — 15 node types, 39 edge types.
-- `queries/record.gq` — 44 stored reads.
-- `queries/mutations.gq` — 51 stored writes; updates re-check their state.
+- `schema.pg` — 16 node types, 39 edge types.
+- `queries/record.gq` — 47 stored reads.
+- `queries/mutations.gq` — 52 stored writes; updates re-check their state.
 - `seed.jsonl` / `seed.md` — reference seed. Keep them in sync; `seed.md`
   lists what each read must return on the fresh seed.
 - `policies/graph.policy.yaml` — reader, writer, admin and `act-agent` roles.
@@ -31,11 +31,24 @@ The record keeps and surfaces facts. It does not diagnose.
   `omnigraph queries list --target local --graph health`.
 - Do not add stored status fields for anything a query derives: no "latest",
   "off target", "overdue" or "series complete" flags. Extend the query.
+- A record is written once. Each kind of record has one owner edge left
+  unkeyed (`MeasurementFor`, `RecordFor`, `ImmunizationFor`, `NotificationFor`
+  and the like), so a write on a slug that exists adds a second edge, breaks
+  its `@card(1..1)` and is refused with nothing changed. Do not add a `@key`
+  to those edges. Catalogue nodes (`Person`, `Organization`, `Measurable`,
+  `Condition`, `ExternalCode`) are replaced by an insert on their slug.
 - Never overwrite a reported value. A correction goes in with
   `correct_result`, which adds a result with status `amended` that supersedes
-  the old one. A result filed by mistake is voided with `void_result`. A
-  current result is one not entered in error and not superseded; every read
-  of results applies that rule, so change them together.
+  the old one. A result filed by mistake is voided with `void_result`.
+- A current result is one not entered in error and not superseded by a
+  standing correction, directly or through a chain of up to eight. A
+  correction that was itself voided hides nothing. Every read of results, and
+  every read of a hypothesis's evidence, applies that rule; change them
+  together.
+- A result at a detection limit has a `comparator`. `out_of_range`,
+  `off_target` and `targets` flag it only where the limit settles it: `lt` at
+  or under the floor, `gt` at or over the ceiling. Keep that rule in all
+  three; `detection_limit_results` lists the ones it leaves open.
 - Copy a result as the document printed it: value, unit, reference range and
   flag, with the whole printed line in `source_line`. `canonical_value` is the
   value in the marker's `canonical_unit`. Set it only when the units match or
@@ -48,7 +61,14 @@ The record keeps and surfaces facts. It does not diagnose.
   `ProtectsAgainst` link per disease, each with its own `dose_number`. A
   booster outside a fixed series has no `series_doses`.
 - A `Recommendation` records what an authority said is due. Do not compute
-  one from a schedule.
+  one from a schedule. Whether it is met is derived: it is still due while
+  its status is `open` and no result that stands and no given dose fulfils
+  it. `fulfil_with_result` and `fulfil_with_dose` only add the link; do not
+  set `done` for a recommendation that a result or dose met.
+- An `Intervention` holds what does not change: its markers, its hypothesis
+  and its dates. Each dose and frequency is an `InterventionEpisode`, and the
+  current dose is the latest episode's. Do not put a dose on the
+  intervention or start a second intervention for a dose change.
 - A `Hypothesis` status is a person's or a clinician's verdict. An agent
   passes `review_status` `ai_generated` and never runs `decide_hypothesis`.
   An agent records a `ConditionOccurrence` only when a document or the person
@@ -97,11 +117,11 @@ Every status is a stored read, never a stored field:
 | What is outside the lab's own range? | `out_of_range` |
 | What is outside my target? | `off_target`, `targets` |
 | What still needs a person's check? | `records_awaiting_review`, `hypotheses_awaiting_review`, `preliminary_results` |
-| What cannot be judged yet? | `unconverted_results` |
+| What cannot be judged yet? | `unconverted_results`, `detection_limit_results` |
 | What did a source correct? | `corrected_results` |
-| What is due, and what is late? | `open_recommendations`, `overdue_recommendations` |
+| What is due, what is late, and what was met? | `open_recommendations`, `overdue_recommendations`, `met_by_result`, `met_by_dose` |
 | What has no retest planned? | `targets_without_retest`, `interventions_without_followup` |
-| Did a change work? | `intervention_effect`, `intervention_history` |
+| Did a change work, and at which dose? | `intervention_effect`, `dose_history`, `active_interventions` |
 | Which explanations are in doubt? | `contested_hypotheses`, `hypotheses_without_evidence`, `hypothesis_support`, `hypothesis_contradiction` |
 | Where do I stand on each vaccine? | `doses_by_disease`, `disease_doses`, `incomplete_series`, `immunization_history` |
 | Which doses rest on memory, or were skipped? | `undocumented_doses`, `doses_not_given` |
@@ -163,9 +183,11 @@ the branch's commits for steps that are a person's: `mark_reviewed`,
 omnigraph mutate fulfil_with_result --target local-writer --graph health --params '{"slug":"rcm-tsh-2026","result":"m-2026-11-tsh"}'
 ```
 
-`fulfil_with_result` and `fulfil_with_dose` close the recommendation and link
-what met it in one commit. Where the recommendation repeats
-(`repeats_every_days`), raise the next one with `recommend_retest`.
+`fulfil_with_result` and `fulfil_with_dose` link what met the recommendation.
+It stops being due while that result or dose stands, and is due again if it
+is later voided. Where the recommendation repeats (`repeats_every_days`),
+raise the next one with `recommend_retest`. `close_recommendation` is for a
+person closing one as declined, superseded, or done with nothing on record.
 
 ### Corrections and units
 
@@ -227,6 +249,21 @@ omnigraph mutate decide_hypothesis --target local-writer --graph health --params
 
 `decide_hypothesis` is the person's or the clinician's step.
 
+### A change of dose
+
+```bash
+omnigraph mutate change_dose --target local-writer --graph health --params '{
+  "episode":"ep-rosuvastatin-2","intervention":"int-rosuvastatin","dose":"10 mg","frequency":"daily",
+  "changed_at":"2026-11-20T07:00:00.000Z","reason":"LDL cholesterol still above target."}'
+omnigraph query dose_history --target local-reader --graph health
+omnigraph query active_interventions --target local-reader --graph health
+```
+
+The intervention keeps its markers, so `intervention_effect` and
+`interventions_without_followup` go on working across the change. A new
+intervention goes in with `start_intervention`, which writes its first dose
+period, and `add_intervention_marker` for each further marker.
+
 ### Follow-up check
 
 ```bash
@@ -255,12 +292,13 @@ omnigraph mutate mark_sent --target local-agent --graph health --branch reminder
 omnigraph mutate acknowledge_notification --target local-writer --graph health --params '{"slug":"ntf-overdue-rcm-tsh-2026"}'
 ```
 
-Build the slug from the kind and the thing it is about. Read it first:
-`insert` on an existing slug replaces the node, so raising without reading
-would reset a prompt the person already acknowledged. The notification
-reaches `main` when the person merges the branch; until then
-`overdue_not_notified` on `main` still lists the item. An agent that sends
-before the merge keeps to one reminders branch and reads that branch.
+Build the slug from the kind and the thing it is about. Raising a slug that
+exists is refused, whatever its status, so a prompt the person acknowledged
+or dismissed is not raised again; `overdue_not_notified` counts any
+notification about a recommendation as told. The notification reaches `main`
+when the person merges the branch; until then `overdue_not_notified` on
+`main` still lists the item. An agent that sends before the merge keeps to
+one reminders branch and reads that branch.
 
 ### Before a visit
 
@@ -329,8 +367,12 @@ server, as in [live updates](../docs/local-setup.md#live-updates).
 - The policy cannot say which stored query an agent runs on its branch. Every
   commit records its actor; the review before a merge is the check.
 - A notification is one node with its latest status. It does not keep each
-  send attempt, and nothing stops a second `raise_notification` on the same
-  slug except reading it first.
+  send attempt, and a dismissed one cannot be raised again under the same
+  slug: a reminder that should repeat needs a slug with its date in it.
+- The written-once rule covers records, not the catalogue: `add_person`,
+  `add_organization`, `add_marker` and `add_condition` replace an existing
+  slug.
+- Supersession is followed through at most eight corrections of one result.
 - Files are stored as the graph stores everything else. The cookbook adds no
   encryption of its own: protect the disk or the bucket.
 - Reads that compare a date with today (`overdue_recommendations`,

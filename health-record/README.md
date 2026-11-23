@@ -37,7 +37,7 @@ graph LR
   Hypothesis -- supported or contradicted by --> Measurement
   Intervention -- motivated by --> Hypothesis
   Intervention -- meant to move --> Measurable
-  Intervention -- replaces --> Intervention
+  InterventionEpisode -- dose period of --> Intervention
   Immunization -- counts towards --> Condition
   Immunization -- shown in --> HealthRecord
   ConditionOccurrence -- case of --> Condition
@@ -54,14 +54,20 @@ graph LR
 | Who and where | `Person`, `Organization`, `Visit` | The person the record is about, their clinicians, the laboratories and clinics, and each appointment |
 | Evidence | `HealthRecord`, `Measurable`, `Measurement`, `ExternalCode` | The documents received, the markers that can be measured, each value as reported, and standard codes such as LOINC |
 | Judgement | `Target`, `Hypothesis`, `Condition`, `ConditionOccurrence` | The range you want a marker in, possible explanations with the results for and against them, diseases as concepts, and your own cases and reactions |
-| Action | `Intervention`, `Immunization`, `Recommendation`, `Notification` | What you take or do, each vaccine dose, what is due by when and who said so, and what you were told |
+| Action | `Intervention`, `InterventionEpisode`, `Immunization`, `Recommendation`, `Notification` | What you take or do and each dose period of it, each vaccine dose, what is due by when and who said so, and what you were told |
 
 - **Status is computed, never stored.** "Latest", "out of range", "off
-  target", "overdue" and "incomplete" are worked out on every read, so they
-  cannot drift from the results.
-- **A reported value is never overwritten.** A laboratory's correction is a
-  new result that replaces the old one, and the old one stays. A result filed
-  by mistake is marked as entered in error and stops counting.
+  target", "overdue", "met" and "incomplete" are worked out on every read, so
+  they cannot drift from the results.
+- **A record is written once.** Filing a result, a dose or a document under
+  an identifier that already exists is refused, so reading the same report
+  twice cannot change a value.
+- **A correction keeps what it corrects.** A laboratory's correction is a new
+  result that replaces the old one, and the old one stays. A result filed by
+  mistake is marked as entered in error and stops counting: what it had
+  corrected counts again, and a retest it had met is due again.
+- **A result at a detection limit is not a number.** "<0.3" is judged against
+  a range or a target only where the limit settles the answer.
 - **Each value keeps the line it was read from.** The name, the unit, the
   range and the whole printed line are kept as the document gave them, so a
   reviewer can check a value without guessing.
@@ -73,6 +79,9 @@ graph LR
   schedules differ by country, age and history.
 - **A hypothesis is a person's.** Its verdict is yours or your clinician's.
   One an agent proposes is marked as such until you review it.
+- **A change of dose is a new period, not a new intervention.** The
+  intervention keeps the markers it is meant to move and the hypothesis
+  behind it; each dose and its dates are a period of it.
 - **Daily summaries, not raw samples.** A wearable contributes one value a
   night or a day per marker, with the period it covers. The raw samples stay
   in its app.
@@ -80,7 +89,7 @@ graph LR
   graph, on your own disk or your own bucket. The schema has no embeddings,
   so no health text is sent to a provider.
 - **Yours to change.** The model is one file, [`schema.pg`](schema.pg), with
-  15 node types and 39 edge types.
+  16 node types and 39 edge types.
 
 ## Branching and merging
 
@@ -133,8 +142,8 @@ Every workflow has the same parts:
   workflows to telling and drafting. The cookbook includes no integrations
   for them.
 - **A prompt is recorded.** Each one is a notification in the record, named
-  for what it is about, with whether it was sent and acknowledged. An agent
-  reads it before raising the same prompt again.
+  for what it is about, with whether it was sent and acknowledged. The same
+  prompt cannot be raised twice, and one you dismissed stays dismissed.
 - **It does not diagnose.** An agent records what a document or you state. It
   may propose a hypothesis for your review; it does not set a condition or a
   verdict.
@@ -174,14 +183,14 @@ date for these.
 | What is overdue? | `overdue_recommendations` |
 | Which of my hypotheses does a result contradict? | `contested_hypotheses` |
 
-The cookbook has 44 stored reads and 51 stored writes. AGENTS.md lists them.
+The cookbook has 47 stored reads and 52 stored writes. AGENTS.md lists them.
 
 ## Sample data
 
 The cookbook comes with Noa Brandt, an invented person: 122 results of 26
 markers from two years of blood panels, a body composition scan, home readings
 and fourteen nights from a wrist tracker, with 12 documents, 19 vaccine doses
-and 6 interventions. On a fresh load, the questions above return:
+and 5 interventions. On a fresh load, the questions above return:
 
 - Two results are off target: LDL cholesterol at 2.1 mmol/L against a target
   of 1.8 or less, and vitamin D at 71 nmol/L against 75 to 125.

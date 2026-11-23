@@ -15,11 +15,19 @@
 // The reference seed (seed.jsonl / seed.md) is an invented person, "Noa
 // Brandt". Every name, date and value is made up.
 //
-// 15 node classes:
+// 16 node classes:
 //   Who and where — Person, Organization, Visit
 //   Evidence      — HealthRecord, Measurable, Measurement, ExternalCode
 //   Judgement     — Target, Hypothesis, Condition, ConditionOccurrence
-//   Action        — Intervention, Immunization, Recommendation, Notification
+//   Action        — Intervention, InterventionEpisode, Immunization,
+//                   Recommendation, Notification
+//
+// Records are written once. Each kind of record has one required edge to its
+// owner that is left unkeyed on purpose: inserting a slug that already exists
+// adds a second such edge, which breaks its @card(1..1), and the whole write
+// is refused. So filing a document, a result or a dose twice cannot replace
+// what is there. Catalogue nodes (Person, Organization, Measurable, Condition,
+// ExternalCode) have no such edge: an insert on an existing slug replaces them.
 
 // ── Who and where ─────────────────────────────────────────────────
 
@@ -84,7 +92,9 @@ node Measurement @description("One value of one measurable for one person: a lab
     period_start: DateTime?
     statistic: enum(point, mean, minimum, maximum, total, median)
     value: F64?
-    // "<5" is reported as comparator lt with value 5: the detection limit.
+    // "<5" is reported as comparator lt with value 5: the detection limit,
+    // not a measured 5. Reads judge such a result only where the limit
+    // settles it: "<5" is under a floor of 5 or more and never over a ceiling.
     comparator: enum(lt, le, gt, ge)?
     value_text: String?
     unit: String?
@@ -152,15 +162,21 @@ node ConditionOccurrence @description("One person's case of a condition, or one 
 
 // ── Action ────────────────────────────────────────────────────────
 
-node Intervention @description("Something a person takes or does for their health: a medication, a supplement, a change of diet, exercise or sleep. A dose change is a new Intervention that supersedes the old one.") {
+node Intervention @description("Something a person takes or does for their health: a medication, a supplement, a change of diet, exercise or sleep. The markers it is meant to move and the hypothesis behind it hang on this node; the dose is on its episodes.") {
     slug: String @key
     name: String @index
     kind: enum(medication, supplement, diet, exercise, sleep, behavioural, procedure, other) @index
     status: enum(planned, active, paused, stopped) @index
-    dose: String?
-    frequency: String?
     started_at: DateTime?
     stopped_at: DateTime?
+    reason: String?
+}
+
+node InterventionEpisode @description("One period of an intervention at one dose and frequency. The current dose is the latest episode's; a change of dose is a new episode, so the intervention keeps its markers and its history.") {
+    slug: String @key
+    dose: String?
+    frequency: String?
+    started_at: DateTime @index
     reason: String?
 }
 
@@ -183,8 +199,8 @@ node Immunization @description("One vaccine dose given to a person, or one that 
     origin: enum(provider_record, vaccination_card, registry, recall) @index
 }
 
-node Recommendation @description("Something due by a date: a retest, a screening, a vaccine dose or a follow-up, with the authority that set it.")
-                    @instruction("Record a recommendation with who made it. Do not work one out from a national schedule: schedules differ by country, age and history, and deciding which applies is a clinician's call.") {
+node Recommendation @description("Something due by a date: a retest, a screening, a vaccine dose or a follow-up, with the authority that set it. Whether it has been met is worked out from the result or the dose linked as fulfilling it.")
+                    @instruction("Record a recommendation with who made it. Do not work one out from a national schedule: schedules differ by country, age and history, and deciding which applies is a clinician's call. Link what met it with fulfil_with_result or fulfil_with_dose and leave status open; status records only a person's closure.") {
     slug: String @key
     title: String @index
     kind: enum(retest, screening, vaccine_dose, follow_up) @index
@@ -197,12 +213,14 @@ node Recommendation @description("Something due by a date: a retest, a screening
     repeats_every_days: I32?
     dose_number: I32?
     series_doses: I32?
+    // open until a person closes it: done without a result or dose on record,
+    // declined, or superseded. Met by a result or a dose is derived, not set.
     status: enum(open, done, declined, superseded) @index
     reason: String?
 }
 
-node Notification @description("A prompt put in front of the person, with whether it was sent and acknowledged. Its slug says what it is about, so the same prompt is not raised twice.")
-                  @instruction("Build the slug from the kind and the thing it is about, such as ntf-overdue-rec-tsh-retest, and read it before raising: an insert on an existing slug replaces the node.") {
+node Notification @description("A prompt put in front of the person, with whether it was sent and acknowledged. Its slug says what it is about, so the same prompt cannot be raised twice.")
+                  @instruction("Build the slug from the kind and the thing it is about, such as ntf-overdue-rcm-tsh-2026. Raising a slug that already exists is refused, whatever its status: a dismissed prompt stays dismissed.") {
     slug: String @key
     title: String
     body: String?
@@ -216,9 +234,7 @@ node Notification @description("A prompt put in front of the person, with whethe
 
 // ── Documents and visits ──────────────────────────────────────────
 
-edge RecordFor: HealthRecord -> Person @card(1..1) {
-    @key(@src, @dst)
-}
+edge RecordFor: HealthRecord -> Person @card(1..1) @description("Unkeyed: the record is written once.")
 
 edge RecordFrom: HealthRecord -> Organization @card(0..1) @description("The laboratory or clinic that issued the document.") {
     @key(@src, @dst)
@@ -228,9 +244,7 @@ edge RecordOfVisit: HealthRecord -> Visit @card(0..1) @description("The visit th
     @key(@src, @dst)
 }
 
-edge VisitOf: Visit -> Person @card(1..1) {
-    @key(@src, @dst)
-}
+edge VisitOf: Visit -> Person @card(1..1) @description("Unkeyed: the record is written once.")
 
 edge VisitWith: Visit -> Person @card(0..1) @description("The clinician seen.") {
     @key(@src, @dst)
@@ -242,9 +256,7 @@ edge MeasurementOf: Measurement -> Measurable @card(1..1) {
     @key(@src, @dst)
 }
 
-edge MeasurementFor: Measurement -> Person @card(1..1) {
-    @key(@src, @dst)
-}
+edge MeasurementFor: Measurement -> Person @card(1..1) @description("Unkeyed: the record is written once.")
 
 edge MeasurementIn: Measurement -> HealthRecord @card(0..1) @description("The document the value was read from. A reading from a device has none.") {
     @key(@src, @dst)
@@ -272,13 +284,9 @@ edge TargetFor: Target -> Measurable @card(1..1) {
     @key(@src, @dst)
 }
 
-edge TargetOf: Target -> Person @card(1..1) {
-    @key(@src, @dst)
-}
+edge TargetOf: Target -> Person @card(1..1) @description("Unkeyed: the record is written once.")
 
-edge HypothesisFor: Hypothesis -> Person @card(1..1) {
-    @key(@src, @dst)
-}
+edge HypothesisFor: Hypothesis -> Person @card(1..1) @description("Unkeyed: the record is written once.")
 
 edge HypothesisAbout: Hypothesis -> Measurable @description("The marker the hypothesis tries to explain.") {
     @key(@src, @dst)
@@ -298,9 +306,7 @@ edge OccurrenceOf: ConditionOccurrence -> Condition @card(1..1) {
     @key(@src, @dst)
 }
 
-edge OccurrenceFor: ConditionOccurrence -> Person @card(1..1) {
-    @key(@src, @dst)
-}
+edge OccurrenceFor: ConditionOccurrence -> Person @card(1..1) @description("Unkeyed: the record is written once.")
 
 edge ReactionToIntervention: ConditionOccurrence -> Intervention @card(0..1) @description("The occurrence is attributed to this intervention.") {
     @key(@src, @dst)
@@ -312,9 +318,7 @@ edge ReactionToImmunization: ConditionOccurrence -> Immunization @card(0..1) @de
 
 // ── Interventions ─────────────────────────────────────────────────
 
-edge InterventionFor: Intervention -> Person @card(1..1) {
-    @key(@src, @dst)
-}
+edge InterventionFor: Intervention -> Person @card(1..1) @description("Unkeyed: the record is written once.")
 
 edge Targets: Intervention -> Measurable @description("The marker the intervention is meant to move.") {
     @key(@src, @dst)
@@ -328,15 +332,11 @@ edge Treats: Intervention -> ConditionOccurrence {
     @key(@src, @dst)
 }
 
-edge InterventionSupersedes: Intervention -> Intervention @card(0..1) @description("A change of dose or product: the new intervention replaces the old one.") {
-    @key(@src, @dst)
-}
+edge EpisodeOf: InterventionEpisode -> Intervention @card(1..1) @description("Unkeyed: an episode is written once.")
 
 // ── Immunizations ─────────────────────────────────────────────────
 
-edge ImmunizationFor: Immunization -> Person @card(1..1) {
-    @key(@src, @dst)
-}
+edge ImmunizationFor: Immunization -> Person @card(1..1) @description("Unkeyed: the record is written once.")
 
 edge ProtectsAgainst: Immunization -> Condition @card(1..) @description("A disease the dose counts towards, with which dose of that disease's series it is. One combined vaccine carries a different dose number for each disease.") {
     dose_number: I32?
@@ -354,9 +354,7 @@ edge ImmunizationIn: Immunization -> HealthRecord @card(0..1) @description("The 
 
 // ── What is due and who was told ──────────────────────────────────
 
-edge RecommendationFor: Recommendation -> Person @card(1..1) {
-    @key(@src, @dst)
-}
+edge RecommendationFor: Recommendation -> Person @card(1..1) @description("Unkeyed: the record is written once.")
 
 edge RecommendsMeasuring: Recommendation -> Measurable {
     @key(@src, @dst)
@@ -374,9 +372,7 @@ edge FulfilledByImmunization: Recommendation -> Immunization {
     @key(@src, @dst)
 }
 
-edge NotificationFor: Notification -> Person @card(1..1) {
-    @key(@src, @dst)
-}
+edge NotificationFor: Notification -> Person @card(1..1) @description("Unkeyed: the record is written once.")
 
 edge AboutRecommendation: Notification -> Recommendation @card(0..1) {
     @key(@src, @dst)

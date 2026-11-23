@@ -409,7 +409,8 @@ def hardware_program_journey(env):
 def health_record_journey(env):
     """Off target and an unfinished vaccine series are derived from the results and doses.
     An agent cannot record a dose on main; on its own branch the dose completes the series
-    there while main stays put, and the series is complete on main once a person merges."""
+    there while main stays put, and the series is complete on main once a person merges.
+    Recording the same dose again is refused."""
     def scope(actor):
         return ("--target", target(actor), "--graph", "health")
 
@@ -433,6 +434,10 @@ def health_record_journey(env):
     run(env, "branch", "merge", "intake-vaccines", "--into", "main", *writer, "--json")
     assert rows("incomplete_series") == []
     run(env, "branch", "delete", "intake-vaccines", *writer, "--yes", "--json")
+    # A record is written once: the same dose again is refused, and nothing changes.
+    again = run(env, "mutate", "record_dose", *writer, "--params", dose, "--json", ok=False)
+    assert '"effects": "none"' in again.stdout + again.stderr, (again.stdout + again.stderr)[-2000:]
+    assert len(rows("disease_doses", params={"disease": "cond-hepatitis-b"})) == 3
 
 
 # What omnigraph.dev accepts in a site.json; its importer

@@ -4,12 +4,19 @@
 //
 // Agents run these on their own branches; the graph policy refuses their
 // writes on `main`, so every agent change reaches the record through a
-// person's merge. `insert` on an existing slug replaces that node: read the
-// slug first, or create rows with `omnigraph load --mode append`, which
-// refuses a slug that already exists.
+// person's merge.
 //
-// A reported value is never overwritten. A correction goes in with
-// correct_result, which adds a new result and keeps the old one.
+// A record is written once. Filing a document, a result, a dose, a target, a
+// hypothesis, an intervention, a recommendation, a visit or a notification
+// under a slug that already exists is refused: the write would add a second
+// owner edge, which the schema's @card(1..1) forbids, so nothing changes. A
+// reported value is therefore never overwritten, by a retry or by reading the
+// same report twice. A correction goes in with correct_result, which adds a
+// new result and keeps the old one.
+//
+// The catalogue is different. add_person, add_organization, add_marker and
+// add_condition replace the whole row of an existing slug: read the slug
+// first.
 
 // ── People, places and markers ────────────────────────────────────
 
@@ -41,7 +48,7 @@ query add_marker_code($slug: String, $system: String, $code: String, $display: S
 
 query file_record($slug: String, $title: String, $kind: String, $document_date: Date, $person: String,
                   $file: Blob?, $notes: String?)
-    @description("File a document for a person, with the file itself, before anything is read from it.")
+    @description("File a document for a person, with the file itself, before anything is read from it. Refused if the slug already exists.")
     @instruction("Pass the file as base64:<bytes>.") {
     insert HealthRecord { slug: $slug, title: $title, kind: $kind, document_date: $document_date, received_at: now(),
                           extraction: "raw", file: $file, notes: $notes }
@@ -74,8 +81,8 @@ query record_result($slug: String, $marker: String, $person: String, $record: St
                     $value: F64?, $comparator: String?, $value_text: String?, $unit: String?, $canonical_value: F64?,
                     $reference_low: F64?, $reference_high: F64?, $flag: String?, $status: String, $fasting: Bool?,
                     $source_name: String?, $source_line: String?)
-    @description("Record one result read from a document, as the document printed it.")
-    @instruction("status is preliminary or final. Copy value, unit, range and flag as printed and put the whole printed line in source_line. Leave canonical_value out unless the unit is the marker's canonical unit or the conversion is certain.") {
+    @description("Record one result read from a document, as the document printed it. Refused if the slug already exists, so reading a report twice cannot change a value.")
+    @instruction("status is preliminary or final. Copy value, unit, range and flag as printed and put the whole printed line in source_line. For a value at a detection limit such as <0.3, pass comparator lt and value 0.3. Leave canonical_value out unless the unit is the marker's canonical unit or the conversion is certain.") {
     insert Measurement { slug: $slug, measured_at: $measured_at, statistic: "point", value: $value, comparator: $comparator,
                          value_text: $value_text, unit: $unit, canonical_value: $canonical_value,
                          reference_low: $reference_low, reference_high: $reference_high, flag: $flag, status: $status,
@@ -109,7 +116,7 @@ query correct_result($slug: String, $replaces: String, $marker: String, $person:
 }
 
 query void_result($slug: String)
-    @description("Mark a result as entered in error, such as one filed under the wrong person. It stays on record and stops counting.") {
+    @description("Mark a result as entered in error, such as one filed under the wrong person. It stays on record and stops counting: a result it had corrected becomes current again, and a recommendation it had met is due again.") {
     update Measurement set { status: "entered_in_error" } where slug = $slug and status != "entered_in_error"
 }
 
@@ -169,13 +176,20 @@ query decide_hypothesis($slug: String, $status: String)
 
 // ── Interventions ─────────────────────────────────────────────────
 
-query start_intervention($slug: String, $name: String, $kind: String, $dose: String?, $frequency: String?,
+query start_intervention($slug: String, $episode: String, $name: String, $kind: String, $dose: String?, $frequency: String?,
                          $started_at: DateTime, $reason: String?, $person: String, $marker: String)
-    @description("Record something a person starts taking or doing, with the marker it is meant to move.") {
-    insert Intervention { slug: $slug, name: $name, kind: $kind, status: "active", dose: $dose, frequency: $frequency,
-                          started_at: $started_at, reason: $reason }
+    @description("Record something a person starts taking or doing, with its first dose period and the marker it is meant to move.")
+    @instruction("Add each further marker with add_intervention_marker in the same change.") {
+    insert Intervention { slug: $slug, name: $name, kind: $kind, status: "active", started_at: $started_at, reason: $reason }
     insert InterventionFor { from: $slug, to: $person }
     insert Targets { from: $slug, to: $marker }
+    insert InterventionEpisode { slug: $episode, dose: $dose, frequency: $frequency, started_at: $started_at }
+    insert EpisodeOf { from: $episode, to: $slug }
+}
+
+query add_intervention_marker($intervention: String, $marker: String)
+    @description("Add another marker an intervention is meant to move.") {
+    insert Targets { from: $intervention, to: $marker }
 }
 
 query link_intervention_hypothesis($intervention: String, $hypothesis: String)
@@ -194,15 +208,11 @@ query stop_intervention($slug: String, $stopped_at: DateTime, $reason: String?)
     where slug = $slug and status != "stopped"
 }
 
-query change_dose($slug: String, $replaces: String, $name: String, $kind: String, $dose: String?, $frequency: String?,
-                  $changed_at: DateTime, $reason: String?, $person: String, $marker: String)
-    @description("Record a change of dose or product: the old intervention stops and a new one that supersedes it starts, in one commit.") {
-    insert Intervention { slug: $slug, name: $name, kind: $kind, status: "active", dose: $dose, frequency: $frequency,
-                          started_at: $changed_at, reason: $reason }
-    insert InterventionFor { from: $slug, to: $person }
-    insert Targets { from: $slug, to: $marker }
-    insert InterventionSupersedes { from: $slug, to: $replaces }
-    update Intervention set { status: "stopped", stopped_at: $changed_at } where slug = $replaces and status != "stopped"
+query change_dose($episode: String, $intervention: String, $dose: String?, $frequency: String?, $changed_at: DateTime,
+                  $reason: String?)
+    @description("Record a change of dose or frequency as a new dose period of the same intervention, which keeps its markers and its history.") {
+    insert InterventionEpisode { slug: $episode, dose: $dose, frequency: $frequency, started_at: $changed_at, reason: $reason }
+    insert EpisodeOf { from: $episode, to: $intervention }
 }
 
 // ── Conditions and reactions ──────────────────────────────────────
@@ -294,7 +304,7 @@ query add_dose_code($slug: String, $system: String, $code: String, $display: Str
 }
 
 query void_dose($slug: String)
-    @description("Mark a dose as entered in error. It stays on record and stops counting.") {
+    @description("Mark a dose as entered in error. It stays on record and stops counting: a recommendation it had met is due again.") {
     update Immunization set { status: "entered_in_error" } where slug = $slug and status != "entered_in_error"
 }
 
@@ -331,19 +341,17 @@ query recommend_other($slug: String, $title: String, $kind: String, $authority: 
 }
 
 query fulfil_with_result($slug: String, $result: String)
-    @description("Close an open recommendation with the result that met it, in one commit.") {
-    update Recommendation set { status: "done" } where slug = $slug and status = "open"
+    @description("Link the result that met a recommendation. The recommendation stops being due while that result stands, and is due again if the result is later marked as entered in error.") {
     insert FulfilledByMeasurement { from: $slug, to: $result }
 }
 
 query fulfil_with_dose($slug: String, $dose: String)
-    @description("Close an open dose recommendation with the dose that met it, in one commit.") {
-    update Recommendation set { status: "done" } where slug = $slug and status = "open"
+    @description("Link the dose that met a dose recommendation. The recommendation stops being due while that dose stands.") {
     insert FulfilledByImmunization { from: $slug, to: $dose }
 }
 
 query close_recommendation($slug: String, $status: String)
-    @description("Close an open recommendation as done, declined or superseded. A person's step.") {
+    @description("Close an open recommendation as declined, superseded, or done where no result or dose in the record shows it. A person's step.") {
     update Recommendation set { status: $status } where slug = $slug and status = "open"
 }
 
@@ -368,8 +376,8 @@ query complete_visit($slug: String, $summary: String?, $commit: String?)
 
 query raise_notification($slug: String, $title: String, $body: String?, $kind: String, $person: String,
                          $recommendation: String)
-    @description("Raise a prompt about one recommendation for a person.")
-    @instruction("Read the slug with the notification query first and do not raise it again if it exists.") {
+    @description("Raise a prompt about one recommendation for a person. Refused if the slug already exists, whatever its status.")
+    @instruction("Build the slug from the kind and the recommendation, such as ntf-overdue-rcm-tsh-2026, so the same prompt cannot be raised twice.") {
     insert Notification { slug: $slug, title: $title, body: $body, kind: $kind, status: "pending", raised_at: now() }
     insert NotificationFor { from: $slug, to: $person }
     insert AboutRecommendation { from: $slug, to: $recommendation }
@@ -377,8 +385,8 @@ query raise_notification($slug: String, $title: String, $body: String?, $kind: S
 
 query raise_result_notification($slug: String, $title: String, $body: String?, $kind: String, $person: String,
                                 $result: String)
-    @description("Raise a prompt about one result, such as one off target or flagged critical.")
-    @instruction("Read the slug with the notification query first and do not raise it again if it exists.") {
+    @description("Raise a prompt about one result, such as one off target or flagged critical. Refused if the slug already exists, whatever its status.")
+    @instruction("Build the slug from the kind and the result, such as ntf-off-target-m-p4-ldl.") {
     insert Notification { slug: $slug, title: $title, body: $body, kind: $kind, status: "pending", raised_at: now() }
     insert NotificationFor { from: $slug, to: $person }
     insert AboutMeasurement { from: $slug, to: $result }
@@ -396,6 +404,6 @@ query acknowledge_notification($slug: String)
 }
 
 query dismiss_notification($slug: String)
-    @description("Dismiss a prompt as not needed.") {
+    @description("Dismiss a prompt as not needed. It stays on record, so it is not raised again.") {
     update Notification set { status: "dismissed" } where slug = $slug and (status = "pending" or status = "sent")
 }

@@ -18,6 +18,7 @@ aliases:
   unconverted:       {target: local-reader, graph: health, query: unconverted_results}
   corrected:         {target: local-reader, graph: health, query: corrected_results}
   preliminary:       {target: local-reader, graph: health, query: preliminary_results}
+  at-limit:          {target: local-reader, graph: health, query: detection_limit_results}
 
   # ── Markers and codes ───────────────────────────────────────────
   markers:           {target: local-reader, graph: health, query: markers}
@@ -30,6 +31,8 @@ aliases:
   overdue:           {target: local-reader, graph: health, query: overdue_recommendations}
   no-retest:         {target: local-reader, graph: health, query: targets_without_retest}
   not-told:          {target: local-reader, graph: health, query: overdue_not_notified}
+  met-by-result:     {target: local-reader, graph: health, query: met_by_result}
+  met-by-dose:       {target: local-reader, graph: health, query: met_by_dose}
 
   # ── Immunizations ───────────────────────────────────────────────
   doses:             {target: local-reader, graph: health, query: immunization_history}
@@ -55,7 +58,7 @@ aliases:
   taking:            {target: local-reader, graph: health, query: active_interventions}
   effect:            {target: local-reader, graph: health, query: intervention_effect}   # --params '{"intervention":"int-rosuvastatin"}'
   no-followup:       {target: local-reader, graph: health, query: interventions_without_followup}
-  dose-changes:      {target: local-reader, graph: health, query: intervention_history}
+  dose-history:      {target: local-reader, graph: health, query: dose_history}
   conditions:        {target: local-reader, graph: health, query: active_conditions}
 
   # ── Visits ──────────────────────────────────────────────────────

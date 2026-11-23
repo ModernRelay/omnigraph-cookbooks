@@ -2,9 +2,17 @@
 // range, off target, overdue, incomplete) is derived on each read from the
 // results, targets, doses and recommendations, never stored.
 //
-// A current result is one that was not entered in error and that no later
-// correction supersedes. The latest result of a marker is the current one
-// with no newer current result of the same marker for the same person.
+// A current result is one that was not entered in error and that no standing
+// correction supersedes, directly or through a chain of corrections. A
+// correction that was itself entered in error no longer hides what it
+// replaced. The latest result of a marker is the current one with no newer
+// current result of the same marker for the same person.
+//
+// A result at a detection limit ("<5") is judged only where the limit settles
+// it: it is below a floor of 5 or more, and it is never above a ceiling.
+//
+// A recommendation is still due while its status is open and nothing valid
+// fulfils it: no result that was not entered in error, and no given dose.
 
 // ── Results ───────────────────────────────────────────────────────
 
@@ -14,9 +22,9 @@ query latest_results() @description("The latest current result of each marker, p
         $m measurementFor $p
         $m measurementOf $x
         $m.status != "entered_in_error"
-        not { $c measurementSupersedes $m }
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
         not { $n measurementOf $x  $n measurementFor $p  $n.status != "entered_in_error"
-              not { $d measurementSupersedes $n }
+              not { $d measurementSupersedes{1,8} $n  $d.status != "entered_in_error" }
               $n.measured_at > $m.measured_at }
     }
     return { $p.slug as person, $x.slug as marker, $x.name, $m.value, $m.comparator, $m.unit, $m.flag, $m.status, $m.measured_at }
@@ -30,13 +38,15 @@ query out_of_range() @description("Latest results outside the range their own so
         $m measurementFor $p
         $m measurementOf $x
         $m.status != "entered_in_error"
-        not { $c measurementSupersedes $m }
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
         not { $n measurementOf $x  $n measurementFor $p  $n.status != "entered_in_error"
-              not { $d measurementSupersedes $n }
+              not { $d measurementSupersedes{1,8} $n  $d.status != "entered_in_error" }
               $n.measured_at > $m.measured_at }
-        $m.value > $m.reference_high or $m.value < $m.reference_low
+        ($m.comparator is null and ($m.value > $m.reference_high or $m.value < $m.reference_low))
+            or (($m.comparator = "lt" or $m.comparator = "le") and $m.value <= $m.reference_low)
+            or (($m.comparator = "gt" or $m.comparator = "ge") and $m.value >= $m.reference_high)
     }
-    return { $p.slug as person, $x.slug as marker, $m.value, $m.unit, $m.reference_low, $m.reference_high, $m.flag, $m.measured_at }
+    return { $p.slug as person, $x.slug as marker, $m.comparator, $m.value, $m.unit, $m.reference_low, $m.reference_high, $m.flag, $m.measured_at }
     order { $p.slug asc, $x.slug asc }
     limit 500
 }
@@ -49,13 +59,15 @@ query off_target() @description("Latest results outside the person's own active 
         $m measurementFor $p
         $m measurementOf $x
         $m.status != "entered_in_error"
-        not { $c measurementSupersedes $m }
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
         not { $n measurementOf $x  $n measurementFor $p  $n.status != "entered_in_error"
-              not { $d measurementSupersedes $n }
+              not { $d measurementSupersedes{1,8} $n  $d.status != "entered_in_error" }
               $n.measured_at > $m.measured_at }
-        $m.canonical_value > $t.high or $m.canonical_value < $t.low
+        ($m.comparator is null and ($m.canonical_value > $t.high or $m.canonical_value < $t.low))
+            or (($m.comparator = "lt" or $m.comparator = "le") and $m.canonical_value <= $t.low)
+            or (($m.comparator = "gt" or $m.comparator = "ge") and $m.canonical_value >= $t.high)
     }
-    return { $p.slug as person, $x.slug as marker, $m.canonical_value as value, $t.low, $t.high, $t.unit, $m.measured_at, $t.slug as target }
+    return { $p.slug as person, $x.slug as marker, $m.comparator, $m.canonical_value as value, $t.low, $t.high, $t.unit, $m.measured_at, $t.slug as target }
     order { $p.slug asc, $x.slug asc }
     limit 500
 }
@@ -68,14 +80,16 @@ query targets() @description("Each active target beside the latest result it is 
         $m measurementFor $p
         $m measurementOf $x
         $m.status != "entered_in_error"
-        not { $c measurementSupersedes $m }
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
         not { $n measurementOf $x  $n measurementFor $p  $n.status != "entered_in_error"
-              not { $d measurementSupersedes $n }
+              not { $d measurementSupersedes{1,8} $n  $d.status != "entered_in_error" }
               $n.measured_at > $m.measured_at }
     }
     return {
-        $p.slug as person, $x.slug as marker, $t.low, $t.high, $t.unit, $t.set_by, $m.canonical_value as latest, $m.measured_at,
-        $m.canonical_value > $t.high or $m.canonical_value < $t.low as off_target
+        $p.slug as person, $x.slug as marker, $t.low, $t.high, $t.unit, $t.set_by, $m.comparator, $m.canonical_value as latest, $m.measured_at,
+        ($m.comparator is null and ($m.canonical_value > $t.high or $m.canonical_value < $t.low))
+            or (($m.comparator = "lt" or $m.comparator = "le") and $m.canonical_value <= $t.low)
+            or (($m.comparator = "gt" or $m.comparator = "ge") and $m.canonical_value >= $t.high) as off_target
     }
     order { $p.slug asc, $x.slug asc }
     limit 500
@@ -87,7 +101,7 @@ query marker_history($marker: String) @description("Every current result of one 
         $m measurementOf $x
         $m measurementFor $p
         $m.status != "entered_in_error"
-        not { $c measurementSupersedes $m }
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
     }
     return { $p.slug as person, $m.slug, $m.measured_at, $m.value, $m.comparator, $m.unit, $m.canonical_value, $m.flag, $m.statistic, $m.device }
     order { $m.measured_at asc }
@@ -122,7 +136,7 @@ query unconverted_results() @description("Current results in a unit other than t
         $m measurementOf $x
         $m measurementFor $p
         $m.status != "entered_in_error"
-        not { $c measurementSupersedes $m }
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
         $m.value is not null
         $m.canonical_value is null
     }
@@ -131,9 +145,10 @@ query unconverted_results() @description("Current results in a unit other than t
     limit 500
 }
 
-query corrected_results() @description("Results a source corrected, each beside the value it replaced.") {
+query corrected_results() @description("Results a source corrected, each beside the value it replaced. A correction entered in error is left out.") {
     match {
         $new: Measurement
+        $new.status != "entered_in_error"
         $new measurementSupersedes $old
         $new measurementOf $x
         $new measurementFor $p
@@ -146,12 +161,29 @@ query corrected_results() @description("Results a source corrected, each beside 
 query preliminary_results() @description("Results the source marked preliminary that no final result has replaced.") {
     match {
         $m: Measurement { status: "preliminary" }
-        not { $c measurementSupersedes $m }
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
         $m measurementOf $x
         $m measurementFor $p
     }
     return { $p.slug as person, $m.slug, $x.slug as marker, $m.value, $m.unit, $m.measured_at }
     order { $m.measured_at asc }
+    limit 500
+}
+
+query detection_limit_results() @description("Latest results reported at a detection limit, such as \"<0.3\". They are judged against a range or a target only where the limit settles it.") {
+    match {
+        $m: Measurement
+        $m.comparator is not null
+        $m measurementFor $p
+        $m measurementOf $x
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
+        not { $n measurementOf $x  $n measurementFor $p  $n.status != "entered_in_error"
+              not { $d measurementSupersedes{1,8} $n  $d.status != "entered_in_error" }
+              $n.measured_at > $m.measured_at }
+    }
+    return { $p.slug as person, $x.slug as marker, $m.comparator, $m.value, $m.unit, $m.reference_low, $m.reference_high, $m.measured_at }
+    order { $x.slug asc }
     limit 500
 }
 
@@ -193,9 +225,11 @@ query unmeasured_markers() @description("Markers with no current result for anyo
 
 // ── What is due ───────────────────────────────────────────────────
 
-query open_recommendations() @description("Everything still due, soonest first.") {
+query open_recommendations() @description("Everything still due, soonest first: open, and not met by a valid result or a given dose.") {
     match {
         $r: Recommendation { status: "open" }
+        not { $r fulfilledByMeasurement $fm  $fm.status != "entered_in_error" }
+        not { $r fulfilledByImmunization $fi  $fi.status = "completed" }
         $r recommendationFor $p
     }
     return { $p.slug as person, $r.slug, $r.title, $r.kind, $r.authority, $r.due_at, $r.latest_at }
@@ -203,10 +237,12 @@ query open_recommendations() @description("Everything still due, soonest first."
     limit 500
 }
 
-query overdue_recommendations() @description("Open recommendations whose due date has passed.") {
+query overdue_recommendations() @description("Recommendations still due whose date has passed.") {
     match {
         $r: Recommendation { status: "open" }
         $r.due_at < now()
+        not { $r fulfilledByMeasurement $fm  $fm.status != "entered_in_error" }
+        not { $r fulfilledByImmunization $fi  $fi.status = "completed" }
         $r recommendationFor $p
     }
     return { $p.slug as person, $r.slug, $r.title, $r.kind, $r.authority, $r.due_at }
@@ -214,26 +250,52 @@ query overdue_recommendations() @description("Open recommendations whose due dat
     limit 500
 }
 
-query targets_without_retest() @description("Active targets whose marker has no open recommendation to measure it again.") {
+query targets_without_retest() @description("Active targets whose marker has no recommendation still due to measure it again.") {
     match {
         $t: Target { status: "active" }
         $t targetOf $p
         $t targetFor $x
-        not { $r recommendsMeasuring $x  $r recommendationFor $p  $r.status = "open" }
+        not { $r recommendsMeasuring $x  $r recommendationFor $p  $r.status = "open"
+              not { $r fulfilledByMeasurement $fm  $fm.status != "entered_in_error" } }
     }
     return { $p.slug as person, $x.slug as marker, $t.slug as target }
     order { $x.slug asc }
     limit 500
 }
 
-query overdue_not_notified() @description("Overdue recommendations nobody has been told about: no notification about them is pending, sent or acknowledged.") {
+query overdue_not_notified() @description("Overdue recommendations nobody has been told about: no notification about them exists. A dismissed one counts as told.") {
     match {
         $r: Recommendation { status: "open" }
         $r.due_at < now()
+        not { $r fulfilledByMeasurement $fm  $fm.status != "entered_in_error" }
+        not { $r fulfilledByImmunization $fi  $fi.status = "completed" }
         $r recommendationFor $p
-        not { $n aboutRecommendation $r  $n.status != "dismissed" }
+        not { $n aboutRecommendation $r }
     }
     return { $p.slug as person, $r.slug, $r.title, $r.kind, $r.due_at }
+    order { $r.due_at asc }
+    limit 500
+}
+
+query met_by_result() @description("Recommendations a valid result has met, each with the result.") {
+    match {
+        $r: Recommendation
+        $r fulfilledByMeasurement $m
+        $m.status != "entered_in_error"
+        $m measurementOf $x
+    }
+    return { $r.slug, $r.title, $r.due_at, $m.slug as result, $x.slug as marker, $m.measured_at }
+    order { $r.due_at asc }
+    limit 500
+}
+
+query met_by_dose() @description("Dose recommendations a given dose has met, each with the dose.") {
+    match {
+        $r: Recommendation
+        $r fulfilledByImmunization $i
+        $i.status = "completed"
+    }
+    return { $r.slug, $r.title, $r.due_at, $i.slug as dose, $i.vaccine, $i.administered_on }
     order { $r.due_at asc }
     limit 500
 }
@@ -300,9 +362,9 @@ query doses_not_given() @description("Doses that were due and not given, with th
     limit 500
 }
 
-query doses_by_lot($lot: String) @description("Every dose given from one lot, for a recall notice.") {
+query doses_by_lot($lot: String) @description("Every dose given from one lot, for a recall notice. Doses not given or entered in error are left out.") {
     match {
-        $i: Immunization { lot_number: $lot }
+        $i: Immunization { lot_number: $lot, status: "completed" }
         $i immunizationFor $p
     }
     return { $p.slug as person, $i.slug, $i.vaccine, $i.product, $i.manufacturer, $i.administered_on, $i.expires_on }
@@ -368,10 +430,12 @@ query hypotheses() @description("Every hypothesis with its standing and whether 
     limit 500
 }
 
-query hypothesis_support($hypothesis: String) @description("The results linked as supporting one hypothesis.") {
+query hypothesis_support($hypothesis: String) @description("The current results linked as supporting one hypothesis.") {
     match {
         $h: Hypothesis { slug: $hypothesis }
         $h supportedBy $m
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
         $m measurementOf $x
     }
     return { $m.slug, $x.slug as marker, $m.value, $m.unit, $m.flag, $m.measured_at }
@@ -379,10 +443,12 @@ query hypothesis_support($hypothesis: String) @description("The results linked a
     limit 500
 }
 
-query hypothesis_contradiction($hypothesis: String) @description("The results linked as contradicting one hypothesis.") {
+query hypothesis_contradiction($hypothesis: String) @description("The current results linked as contradicting one hypothesis.") {
     match {
         $h: Hypothesis { slug: $hypothesis }
         $h contradictedBy $m
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
         $m measurementOf $x
     }
     return { $m.slug, $x.slug as marker, $m.value, $m.unit, $m.flag, $m.measured_at }
@@ -390,11 +456,13 @@ query hypothesis_contradiction($hypothesis: String) @description("The results li
     limit 500
 }
 
-query contested_hypotheses() @description("Hypotheses still open or held as supported that a result contradicts.") {
+query contested_hypotheses() @description("Hypotheses still open or held as supported that a current result contradicts.") {
     match {
         $h: Hypothesis
         $h.status = "open" or $h.status = "supported"
         $h contradictedBy $m
+        $m.status != "entered_in_error"
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
         $m measurementOf $x
     }
     return { $h.slug, $h.title, $h.status, $m.slug as result, $x.slug as marker, $m.value, $m.unit, $m.measured_at }
@@ -402,11 +470,13 @@ query contested_hypotheses() @description("Hypotheses still open or held as supp
     limit 500
 }
 
-query hypotheses_without_evidence() @description("Open hypotheses with no result linked for or against them.") {
+query hypotheses_without_evidence() @description("Open hypotheses with no current result linked for or against them.") {
     match {
         $h: Hypothesis { status: "open" }
-        not { $h supportedBy $a }
-        not { $h contradictedBy $b }
+        not { $h supportedBy $a  $a.status != "entered_in_error"
+              not { $c measurementSupersedes{1,8} $a  $c.status != "entered_in_error" } }
+        not { $h contradictedBy $b  $b.status != "entered_in_error"
+              not { $d measurementSupersedes{1,8} $b  $d.status != "entered_in_error" } }
     }
     return { $h.slug, $h.title, $h.review_status, $h.raised_on }
     order { $h.raised_on asc }
@@ -424,13 +494,15 @@ query hypotheses_awaiting_review() @description("Hypotheses an agent proposed th
 
 // ── Interventions ─────────────────────────────────────────────────
 
-query active_interventions() @description("What the person takes or does now, with the marker each is meant to move.") {
+query active_interventions() @description("What the person takes or does now, at its current dose, with the marker each is meant to move.") {
     match {
         $v: Intervention { status: "active" }
         $v interventionFor $p
         $v targets $x
+        $e episodeOf $v
+        not { $l episodeOf $v  $l.started_at > $e.started_at }
     }
-    return { $p.slug as person, $v.slug, $v.name, $v.kind, $v.dose, $v.frequency, $v.started_at, $x.slug as marker }
+    return { $p.slug as person, $v.slug, $v.name, $v.kind, $e.dose, $e.frequency, $v.started_at, $x.slug as marker }
     order { $v.started_at asc }
     limit 500
 }
@@ -443,7 +515,7 @@ query intervention_effect($intervention: String) @description("Every current res
         $m measurementOf $x
         $m measurementFor $p
         $m.status != "entered_in_error"
-        not { $c measurementSupersedes $m }
+        not { $c measurementSupersedes{1,8} $m  $c.status != "entered_in_error" }
     }
     return { $x.slug as marker, $m.measured_at, $m.canonical_value as value, $x.canonical_unit as unit, $m.measured_at >= $v.started_at as after_start }
     order { $x.slug asc, $m.measured_at asc }
@@ -463,14 +535,15 @@ query interventions_without_followup() @description("Active interventions whose 
     limit 500
 }
 
-query intervention_history() @description("Dose changes: each intervention beside the one it replaced.") {
+query dose_history() @description("Every dose period of every intervention, oldest first: a change of dose or frequency starts a new one.") {
     match {
-        $new: Intervention
-        $new interventionSupersedes $old
+        $e: InterventionEpisode
+        $e episodeOf $v
+        $v interventionFor $p
     }
-    return { $old.slug as replaced, $old.dose as old_dose, $old.stopped_at, $new.slug as replacement, $new.dose as new_dose, $new.started_at }
-    order { $new.started_at asc }
-    limit 500
+    return { $p.slug as person, $v.slug as intervention, $v.name, $e.slug as episode, $e.dose, $e.frequency, $e.started_at, $e.reason }
+    order { $v.slug asc, $e.started_at asc }
+    limit 1000
 }
 
 query active_conditions() @description("A person's suspected and active conditions, with how certain each is.") {
