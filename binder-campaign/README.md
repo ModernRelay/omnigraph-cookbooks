@@ -1,318 +1,239 @@
-# Binder campaign: a protein design run, and whether its results hold up
+# Binder campaign: designs, evidence, and the claims they carry
 
-Protein design is the business of building a protein that does a chosen job:
-grip a particular target, catalyse a reaction, carry something somewhere. Most
-of the work now happens in software. Generative models propose structures,
-structure predictors estimate how well each proposal would fold and how
-tightly it would hold its target, and only a short list is ever made and
-tested at a bench. A *campaign* is one pass down that funnel against one set
-of targets: typically hundreds of thousands of candidates generated, a few
-hundred ordered, and a handful that work.
+Build a living record of a protein binder campaign, and the agent workflows
+around it. It keeps the targets, every design and how it was made, the scores
+that selected it, what each lab measured, and the claim that a design binds a
+target — with the rule that claim holds under and the evidence it rests on.
+Whether a design counts as a binder is worked out from the measurements under
+the rule you name, so tightening the definition re-reads the record instead of
+re-analysing it. Agents propose every change on a branch a scientist reviews.
 
-A campaign produces far more knowledge than it produces molecules, and nearly
-all of it is about how one stage led to the next — which tool drew a backbone
-and from which parent, which predictors scored a design against which target
-and against what bar, which designs were selected and under which rule, which
-of them expressed, what each lab measured and in how many replicates. Every
-stage has its own unit (a backbone, a design, a design-target pair, a well, a
-replicate), its own tools and its own file: a scoring notebook, a results
-sheet, a contract lab's report, an electronic lab notebook. The links between
-those stages are what somebody needs six months later, and they are the part
-nobody writes down.
+A campaign leaves its designs in one tool, its scores in a notebook, its
+assay results in a contract lab's spreadsheet and its verdict in a slide, and
+the rule behind that verdict in nobody's hands at all. Six months later the
+rule has been forgotten, so the list of binders cannot be re-derived or
+argued with. This cookbook sets OmniGraph up as the one place the designs,
+the evidence and the claims are held together.
 
-The last link is the one that matters most and survives least. "This design
-binds that target" is a judgement under a rule — how strong a signal counts,
-how many replicates must agree, whether two labs must agree, what off-target
-binding disqualifies. Change the rule and the list changes. Campaigns record
-the list and not the rule. This graph holds one campaign end to end with that
-link made explicit: a claim, the measurements beneath it, the rule it holds
-under, and anything the record does not contain. Tightening the definition is
-then a traversal, not a re-analysis. Graph ID `binders`.
+- **A claim names its rule.** "This design binds this target" is recorded
+  with the criterion it holds under and the measurements beneath it.
+- **Re-counting is a read.** Add a rule and ask who survives it; the old
+  answer is still there, because nothing was overwritten.
+- **A gap is a fact.** What the record does not hold is written down and
+  linked to the claims nobody can check because of it.
 
-The seed is **real**, where the other cookbooks' seeds are fictional:
-Anthropic's scorpion-toxin binder campaign of October 2026. Its targets are
-the neurotoxins in scorpion venom that jam sodium channels in nerve cells,
-which is what makes a sting dangerous; a binder covering the face a toxin uses
-to grip the channel should block it, which is roughly how an antivenom works.
-The campaign generated 318,484 designs, tested 211 at two contract labs and
-reported **17** binders — while its own report re-counts them under a dozen
-other rules and gets anything from **7 to 18**. The designs, scores and both
-labs' results are public under CC BY 4.0; the process and the criteria are
-transcribed from the technical report and cited. See [seed.md](seed.md) and
-[References](#references).
+> If you are an agent: the commands, roles and workflows are in
+> [AGENTS.md](AGENTS.md). Read that file before running anything.
 
-Sibling cookbook: [pharma-intel](../pharma-intel/) is the business around a
-drug program — compounds, trials, deals, and the sponsor's own assumptions.
-This one sits a rung lower, at a single experimental campaign and the evidence
-beneath its claims.
-
-## Quick start
-
-Use the shared [local setup](../README.md#local-setup) with folder
-`binder-campaign` and graph `binders`, then load `seed.jsonl`. With the server
-and gateway up:
-
-```bash
-omnigraph query binder_claims --target local-reader --graph binders
-omnigraph query claims_by_target --target local-reader --graph binders
-omnigraph query criteria_all --target local-reader --graph binders
-omnigraph query claims_lost_under --target local-reader --graph binders \
-  --params '{"criterion":"crit:aahi-mature-mass"}'
-omnigraph query evidence_gaps --target local-reader --graph binders
-```
-
-`binder_claims` lists the 17, and `claims_by_target` splits them: Cn2 7,
-AaH II 4, AaH I 4, LqhIII 2, and none at all against Ts1. `criteria_all` is
-the interesting one — ten different rules for calling a design a binder, each
-with the count the report gives it, from 18 down to 11. (The report's table
-reaches 7 under several rules at once, but it does not say which designs those
-drop, so they are not seeded.)
-
-`claims_lost_under` then shows what a rule costs. Scored at AaH I's documented
-mature mass it drops `AaHI-B1` through `AaHI-B4`, because the construct
-actually used in the assay was never written down — which is also the first
-row `evidence_gaps` returns. Four of seventeen claims rest on a protein
-nobody recorded.
-
-Merge the `aliases:` of
-[`omnigraph-config.example.yaml`](omnigraph-config.example.yaml) into
-`$OMNIGRAPH_HOME/config.yaml` for a short name per read, such as
-`omnigraph alias claims` or
-`omnigraph alias lost-under --params '{"criterion":"crit:no-ovalbumin"}'`.
-
-## Why not a notebook?
-
-For one campaign, analysed once, by one person: use a notebook. The released
-CSVs load into a dataframe in a line, and the sensitivity analysis above is a
-dozen lines of filtering. A graph is overhead you do not need, and it is
-better to say so than to pretend otherwise.
-
-Four things change that answer.
-
-- **The question goes more than one hop.** Design lineage is a redesign of a
-  redesign, or a fusion of two domains that were themselves selected. Asked of
-  tables, that is a join against itself, as many times as the chain is long,
-  rewritten whenever the question changes. Here it is `derivedFrom{1,3}`.
-- **A claim is not a column.** In a results sheet, "is a binder" is a column
-  somebody computed, and when the rule changes the column is overwritten.
-  There is nowhere to put who decided, under which rule, and on what evidence.
-  Separate the three and changing the rule adds a row instead of destroying
-  one.
-- **A gap has no column either.** "The construct used in this assay was never
-  written down" is not a value that fits in a results sheet. It ends up in a
-  footnote in a PDF, which is where it was. As a node it links to the four
-  claims it undermines, and a query finds them.
-- **More than one writer.** A notebook has one author. When several people and
-  agents propose changes, you want a schema enforced on every write, each
-  author on a branch, and a person merging. That is the part a dataframe has
-  no answer for.
-
-None of this argues for a graph database over any other. If that is the
-question rather than whether, see
-[open source graph databases compared](https://www.omnigraph.dev/guide/open-source-graph-databases)
-and [graph databases and agent memory](https://www.omnigraph.dev/graph-databases).
-What this cookbook leans on specifically is a typed schema checked on every
-write, branches reviewed before they merge, and history that can be read back
-as it stood when a claim was made.
-
-## Does it fit another campaign?
-
-Tested against [ProteinBase](https://huggingface.co/datasets/adaptyvbio/proteinbase)
-(Adaptyv Biosystems, ODC-BY), which holds 4,280 designs against 40 targets —
-these five scorpion toxins among them, and 35 that are nothing like them.
-
-The spine takes a non-toxin slice unchanged. Nipah glycoprotein G there is
-1,030 designs, 103 that bound and 928 that did not, from 206 independent
-designers using 98 design methods. `Target`, `Design`, `DesignTool`,
-`Measurement`, `Lab`, `BinderClaim`, `Criterion` and `EvidenceGap` all take it
-as they stand.
-
-Four fields exist here because that slice needs them, even though this seed
-leaves three of them empty:
-
-- `Designer` — 206 of them against one target there; one here, standing for
-  the campaign's agents. A benchmark is many people designing against the same
-  protein, and that has to be a node.
-- `kon_per_ms` and `koff_per_s` — recorded there, absent here. A KD is not
-  observed: it is what a model returns from the rate constants.
-- `fit_model` — **populated here**, and the reason the pair above matters.
-  Every value in this seed comes from a 1:1 fit.
-- `binding_strength`, `replicates`, `measured_on` — an ordinal call, a count
-  and a date that the release does not carry and ProteinBase does.
-
-An empty column is not an admission; it is the shape of what a second campaign
-would fill. The one that is filled, `fit_model`, is there because a value
-whose model nobody wrote down cannot be reproduced —
-`values_without_a_fit_model` finds those, and against this seed it returns
-nothing.
-
-## Model
-
-[`schema.pg`](schema.pg) has 20 node types and 32 edge types in four layers,
-plus the campaign's own process. The spine:
+## The data model
 
 ```mermaid
----
-config:
-  flowchart:
-    wrappingWidth: 320
----
-flowchart LR
-  classDef L0 fill:#e8f0fe,stroke:#4a6fd1,color:#1d1d1f,stroke-width:1.5px
-  Target["<b>Target</b>"]:::L0
-  Hotspot["<b>Hotspot</b>"]:::L0
-  classDef L1 fill:#e7f6ec,stroke:#3c9a5f,color:#1d1d1f,stroke-width:1.5px
-  Design["<b>Design</b><br/><small>↻ derived from, has domain</small>"]:::L1
-  DesignTool["<b>DesignTool</b>"]:::L1
-  classDef L2 fill:#f3e8fd,stroke:#8a4fd1,color:#1d1d1f,stroke-width:1.5px
-  Score["<b>Score</b>"]:::L2
-  Threshold["<b>Threshold</b>"]:::L2
-  Measurement["<b>Measurement</b>"]:::L2
-  Lab["<b>Lab</b>"]:::L2
-  classDef L3 fill:#fdf0e2,stroke:#d08a2b,color:#1d1d1f,stroke-width:1.5px
-  BinderClaim["<b>BinderClaim</b>"]:::L3
-  Criterion["<b>Criterion</b>"]:::L3
-  EvidenceGap["<b>EvidenceGap</b>"]:::L3
-  classDef L4 fill:#eeeeee,stroke:#888888,color:#1d1d1f,stroke-width:1.5px
-  Source["<b>Source</b>"]:::L4
-  Hotspot -->|"on"| Target
-  Design -->|"made with"| DesignTool
-  Design -->|"intended against"| Target
-  Score -->|"of"| Design
-  Score -->|"against"| Target
-  Threshold -->|"for"| Target
-  Measurement -->|"of"| Design
-  Measurement -->|"at lab"| Lab
-  BinderClaim -->|"about"| Design
-  BinderClaim -->|"against"| Target
-  BinderClaim -->|"rests on"| Measurement
-  BinderClaim -->|"survives"| Criterion
-  EvidenceGap -->|"affects"| BinderClaim
-  EvidenceGap -->|"cited in"| Source
-  Criterion -->|"cited in"| Source
+graph LR
+  Hotspot -- sits on --> Target
+  Design -- made with --> DesignTool
+  Design -- on backbone --> BackboneFamily
+  Design -- sequenced with --> SequenceMethod
+  Design -- designed by --> Designer
+  Design -- derived from --> Design
+  Design -- has domain --> Design
+  Design -- intended against --> Target
+  Score -- of --> Design
+  Score -- against --> Target
+  Threshold -- for --> Target
+  Threshold -- by predictor --> Predictor
+  Measurement -- of --> Design
+  Measurement -- at lab --> Lab
+  SpecificityCheck -- of --> Design
+  Control -- against --> Target
+  BinderClaim -- about --> Design
+  BinderClaim -- against --> Target
+  BinderClaim -- rests on --> Measurement
+  BinderClaim -- survives --> Criterion
+  EvidenceGap -- affects --> BinderClaim
+  EvidenceGap -- cited in --> Source
+  SelectionRule -- applied in --> CampaignWindow
 ```
 
-Blue is what the campaign aimed at, green what it made, purple what it
-measured, orange what anyone concluded from that, grey where a transcribed
-fact came from. Each arrow is an edge type in its schema direction; a `↻` line
-in a box is an edge between two nodes of that type.
-
-| Layer | Types | Holds |
+| Area | Types | Holds |
 |---|---|---|
-| Targets | `Target`, `Hotspot` | What the campaign designs against, and the residues on each chosen for designs to contact |
-| Designs | `Design`, `Designer`, `DesignTool`, `BackboneFamily`, `SequenceMethod` | Every tested design, who made it, the tool that drew its backbone, the design it was redesigned from, the two domains a fusion joins |
-| Evidence | `Score`, `Threshold`, `Predictor`, `Measurement`, `Lab`, `SpecificityCheck`, `Control` | What selected a design before any lab saw it, and what each lab then measured — rate constants, the model fitted to them, and binding to things it was never meant to bind |
-| Claims | `BinderClaim`, `Criterion`, `EvidenceGap` | Somebody's verdict on the measurements, the rule it holds under, and what the record does not contain. A claim is `asserted`, `provisional` or `withdrawn` — provisional was never claimed, withdrawn was claimed and taken back |
-| Process | `CampaignWindow`, `SelectionRule`, `AgentRole`, `Source` | How the run itself was organised, and where each transcribed fact comes from |
+| Targets | `Target`, `Hotspot` | What the campaign designs against, and the residues on each that designs were aimed at contacting |
+| Designs | `Design`, `Designer`, `DesignTool`, `BackboneFamily`, `SequenceMethod` | Every design that reached a lab, who made it, the model that drew its backbone, the method that chose its sequence, the design it was redesigned from and the domains a fusion joins |
+| Evidence | `Score`, `Threshold`, `Predictor`, `Measurement`, `Lab`, `SpecificityCheck`, `Control` | What selected a design before any lab saw it, and what each lab then measured: kinetic constants, the model fitted to them, binding to proteins it was never meant to bind, and whether the run's controls worked |
+| Claims | `BinderClaim`, `Criterion`, `EvidenceGap` | Somebody's verdict on the measurements, every rule it holds under, and what the record does not contain |
+| Process | `CampaignWindow`, `SelectionRule`, `AgentRole`, `Source` | How the run was organised, which rules selected designs in which stretch of it, which duties were kept apart, and where each transcribed fact came from |
 
-Three rules keep the claims layer honest, and the cookbook's
-[`CLAUDE.md`](CLAUDE.md) spells them out for agents:
+- **A claim is a node, not a column.** In a results sheet "is a binder" is a
+  column somebody computed, and changing the rule overwrites it. Here the
+  verdict, the rule and the evidence are three things, so a new rule adds
+  rows and the old answer survives.
+- **A criterion is a node, never a filter in a query.** Written into a query,
+  the definition of a binder moves somewhere no reader can see it. Each rule
+  is recorded in words precise enough to apply by hand, with the count its
+  source reports, so the graph's own count can be compared with it.
+- **A threshold is recorded as set before scoring.** The bar each predictor
+  had to clear was fixed from decoys and negative controls first, which is
+  why a claim can name the bar it cleared rather than assert one existed. A
+  bar set afterwards is recorded as such, because that is a finding.
+- **A gap is a fact, not an omission.** Where the record is silent there is
+  an `EvidenceGap` citing the source that says so, linked to the claims,
+  designs and targets it reaches. Never a plausible value in place of one.
+- **An absent result is not a negative result.** A design nobody measured
+  against a target has no row; a design measured and found not to bind has
+  one. Collapsing the two would turn a missing experiment into evidence.
+- **Yours to change.** The model is one file, [`schema.pg`](schema.pg), with
+  21 node types and 33 edge types.
 
-- **A claim never carries its own evidence.** Binding values live on
-  `Measurement`. A value copied onto the claim would disagree with the lab the
-  first time anyone refits it.
-- **A criterion is a node, never a `where` clause.** Written into a query, the
-  definition moves somewhere no reader can see it.
-- **A gap is a fact, not an omission.** Where the record is silent there is an
-  `EvidenceGap` citing the source that says so — never a plausible value.
+## Branching and merging
 
-## Reading it
+A change is made on a branch, which is a version of the whole record, and the
+baseline moves only when someone merges it.
 
-61 stored queries, 43 of them reads, in six files. `omnigraph queries list`
-names them all with their parameters.
+- **A re-count under a new rule.** Add a criterion on a branch, record which
+  claims survive it, and read the counts as they would be before anyone else
+  sees them.
+- **A lab's results.** Load a run's measurements on a branch, read them
+  against the claims they touch, and merge once a scientist has checked them
+  against the lab's own report.
+- **Two reviewers at once.** Each works on their own branch against the same
+  base, and both merge, because adding a rule and recording a gap do not
+  collide. Two branches that change the same row do, and the second merge
+  reports it instead of silently winning.
+- **A write-up's evidence, as it stood.** Every commit is readable, so the
+  claims and gaps behind a paper can be read back as they were on the day it
+  was submitted.
 
-| File | Answers |
+Review here is a practice, not a rule the graph enforces.
+[`policies/graph.policy.yaml`](policies/graph.policy.yaml) gives readers,
+writers and admins: a writer may write `main` and merge into it, and only an
+admin may change the schema. There is no actor confined to branches, so an
+agent given a writer's token can reach `main` — give agents their own actor
+and keep them to branches if you need that enforced.
+
+## Agents and workflows
+
+Agents bring results in, keep the claims honest against the evidence, and
+tell people what needs a scientist. The verdicts stay with people.
+
+| Kind | Workflow | What it does | Stored queries |
+|---|---|---|---|
+| Capture | Assay result intake | Records each measurement a contract lab returned, with its design, its target and the lab, in one write | `add_measurement`, `measurements_for_design` |
+| Capture | Source refresh | Re-reads a report or data release, moves the day it was last read, and records a source nobody had cited | `add_source`, `mark_source_fetched`, `sources`, `uncited_gaps` |
+| Maintain | Verdict from the evidence | Reads the measurements for a design and target, records the claim, and ties it to the rows it rests on | `assert_binder_claim`, `ground_claim`, `claim_evidence` |
+| Maintain | Re-count under a rule | Adds a rule for calling a design a binder and records which claims survive it, then compares the graph's count with the count its source reports | `add_criterion`, `claim_survives_criterion`, `criterion_survivor_counts`, `claims_lost_under` |
+| Maintain | Unevidenced claim sweep | Finds claims resting on nothing recorded and either grounds them or withdraws them | `claims_with_gaps`, `claims_fully_evidenced`, `ground_claim`, `withdraw_claim` |
+| Maintain | Gap register | Writes down what the record does not hold, cites the source that states the absence, and links it to the claims and targets it reaches | `record_gap`, `cite_gap`, `gap_affects_claim`, `gap_affects_target` |
+| Maintain | Value quality review | Finds designs the two labs call differently, values that are only an upper limit, and values recorded without the kinetic model fitted to produce them, and records what each costs | `lab_disagreements`, `upper_limit_only`, `values_without_a_fit_model`, `record_gap` |
+| Maintain | Assay validity review | Finds runs whose control did not work, and designs that bound a protein they were never aimed at, and records which claims each undermines | `failed_controls`, `off_target_hits`, `specificity_for_design`, `gap_affects_claim` |
+| Act | Claim-change notice | When a rule is added or a claim is withdrawn, tells whoever relied on it which claims moved and why | `claims_lost_under`, `withdrawn_claims` |
+| Act | Evidence request | For each claim resting on one lab or on an upper limit, asks the lab for the run that would settle it | `claims_with_gaps`, `upper_limit_only` |
+| Act | Pre-publication gap report | Before a write-up goes out, sends the authors every gap that blocks a check, the claims it reaches, and the claims that rest on nothing | `evidence_gaps`, `gap_reach`, `claims_fully_evidenced` |
+| Act | Round scorecard | Reports which design tools produced claimed binders, and which cleared every bar and bound nothing, for the next round | `tools_behind_binders`, `cleared_but_did_not_bind`, `scores_from_rerun` |
+
+Every workflow has the same four parts:
+
+1. Something starts it: a lab returns a run, a claim or rule changes in the
+   record, or a write-up is due.
+2. The agent reads the state it needs through stored queries.
+3. It acts. It writes to the record on its own branch, or it tells someone
+   outside the record.
+4. A scientist decides. They review the branch and merge it, or act on what
+   they were told.
+
+- **An agent does not reach a verdict alone.** Asserting that a design binds
+  a target, and withdrawing that assertion, are recorded with a name and a
+  day, and they belong to a person. An agent proposes them on a branch.
+- **The campaign's own record is history.** Designs, scores, specificity
+  checks, controls, windows, rules and roles have no stored write: they
+  arrive once, by a bulk load, and nothing edits them afterwards. What agents
+  add is the editorial layer above them.
+- **Outside actions are not held back by the record.** A message or a request
+  to a lab goes out through the agent's own tools, and nothing here reviews it
+  first. Keep those workflows to telling and drafting unless a scientist
+  approves the action, and give the agent only the outside access it needs.
+- **A repeat is not prevented.** The schema has nowhere to note that a message
+  was sent or a lab was asked, so an agent that notifies has to keep that
+  outside the record, or the same request goes twice. A gap or a criterion is
+  different: writing one under a slug that exists is refused, so recording
+  the same finding twice changes nothing.
+- **Bring your own agent.** It connects through OmniGraph's MCP server from
+  Claude Code, Codex, Cursor or another MCP client, and each stored read is a
+  tool call. The cookbook ships no skill of its own;
+  [AGENTS.md](AGENTS.md) is what an agent reads first.
+
+## Data sources
+
+The record holds the designs, the evidence and the claims that connect your
+tools. Each tool stays the authority for its own data.
+
+| Source | Examples | Feeds |
+|---|---|---|
+| Design models | RFdiffusion, BindCraft, Genie, Chai Discovery, Boltz, AlphaFold | `DesignTool`, `BackboneFamily`, `SequenceMethod`, `Design` |
+| Structure predictors and scoring | ESMFold, Protenix, Boltz, in-house scoring pipelines | `Predictor`, `Threshold`, `Score` |
+| Contract and in-house labs | Adaptyv Bio, Twist Bioscience, Charles River | `Lab`, `Measurement`, `Control` |
+| Binding instruments | Carterra for SPR, Gator Bio for BLI, Biacore, Octet | `Measurement`, `SpecificityCheck` |
+| Electronic lab notebooks and LIMS | Benchling, Dotmatics, PipeBio | `Design`, `Measurement` |
+| Public design releases and benchmarks | ProteinBase, Hugging Face datasets, PDB, UniProt | `Design`, `Measurement`, `Target`, `Source` |
+| Reports, preprints and papers | a campaign's own technical report, bioRxiv | `Source`, `Criterion`, `EvidenceGap`, `AgentRole` |
+
+The cookbook includes no connectors. A sync is a script, or an agent, that
+reads from the tool and writes through the stored mutations; a lab's whole run
+goes in as a merge load. A design that arrives with its tool, backbone and
+parent keeps that lineage, because provenance is edges rather than a column of
+notes.
+
+## Questions you can ask
+
+Nobody keeps a binder list, a sensitivity table or a caveats section up to
+date for these.
+
+| Question | Stored query |
 |---|---|
-| [`claims.gq`](queries/claims.gq) | Which designs are claimed to bind; what each claim rests on; who survives a rule; what a rule drops; where the evidence has holes |
-| [`designs.gq`](queries/designs.gq) | How a design was made; what it was derived from; which domains a fusion joins; which tools produced binders |
-| [`scores.gq`](queries/scores.gq) | Every bar, fixed before scoring; what one design scored; the score behind a claim; what cleared every threshold and still did not bind |
-| [`assays.gq`](queries/assays.gq) | What each lab measured; where the two disagree; which values are only upper limits; off-target binding; whether the controls worked |
-| [`campaign.gq`](queries/campaign.gq) | The windows the run passed through, the rules that changed between them, and the duties the agents were held to |
-| [`mutations.gq`](queries/mutations.gq) | The writes below |
+| Which binder claims survive a stricter rule? | `claims_under_criterion` |
+| Which claims rest on evidence nobody can check? | `claims_with_gaps` |
+| How was a design made, and what did it come from? | `design_provenance` |
+| Which score selected a design, and against which bar? | `score_behind_claim` |
 
-`cleared_but_did_not_bind` with `{"target":"target:ts1"}` is worth running on
-its own. It returns **131** designs that cleared every predictor's threshold
-against Ts1, not one of which bound it — the report reaches the same
-conclusion, that the final score tracked success rates across design sets but
-did not pick out binders within one.
+The cookbook has 49 stored reads and 13 stored writes.
+[AGENTS.md](AGENTS.md) lists them.
 
-## Writing to it
+## Sample data
 
-The campaign's record is history and does not change. What people add is the
-editorial layer: a rule to count under, a gap someone notices, a claim
-withdrawn when the evidence beneath it moves. Those writes run on a branch:
+The seed is a real campaign, not an invented one: Anthropic's scorpion-toxin
+binder design of October 2026, from its public data release under CC BY 4.0,
+with the process and the criteria transcribed from its technical report and
+cited. It holds 5 targets, 211 designs that reached a lab, 665 scores, 1,477
+measurements at 2 labs, 523 specificity checks, 70 controls, 21 claims, 10
+rules for calling a design a binder, and 8 recorded gaps. On a fresh load, the
+questions above return:
 
-```bash
-omnigraph branch create review/ova-rule --from main --target local-writer --graph binders
-omnigraph mutate add_criterion --target local-writer --graph binders --branch review/ova-rule \
-  --params '{"slug":"crit:strict","name":"Strict","rule":"No signal against any unrelated protein.","applied":false,"binders_under_rule":9,"recorded_at":"2026-11-19T00:00:00.000Z"}'
-omnigraph branch merge review/ova-rule --into main --target local-writer --graph binders
+- Under the rule that both labs resolve a value and agree within a factor of
+  ten, 11 of the 17 asserted claims survive; the rule the campaign applied
+  admits 15.
+- 7 claims carry a recorded gap. Four against AaH I rest on a construct
+  nobody documented, two against LqhIII were assessed at one lab only, and
+  Cn2-B1's value is an upper limit at both labs.
+- Cn2-B1 came off an RFdiffusion3 backbone in family F02, sequenced with
+  SolubleMPNN, after six rounds of redesign.
+- The score behind the claim on Cn2-B1 is 0.9222, and it cleared all three
+  predictors: ESMFold2 and ESMFold2-Fast at an ipSAE bar of 0.15, Protenix v2
+  at 0.54, each with a scDockQ bar of 0.23.
+
+[seed.md](seed.md) describes the release, row type by row type, says which
+two facts came from the report rather than the data, and names the counts that
+surprise people.
+
+## Run it
+
+Paste this prompt into a coding agent such as Claude Code or Codex:
+
+```text
+Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the binder campaign cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/binder-campaign
 ```
 
-Evidence comes before the claim that rests on it: `assert_binder_claim`
-records a reading of the results with a name and a date, and `ground_claim`
-ties it to a `Measurement` already in the graph. Retire a claim with
-`withdraw_claim`, which sets its status to `withdrawn`, rather than deleting it — a
-claim that was once made is part of the record.
+The agent installs OmniGraph if needed, creates the graph, loads the campaign
+and runs the questions above.
 
-## What it does not hold
-
-- **No neutralisation data.** Binding is shown; stopping the toxin is not.
-  The campaign tested none, in cells or in animals, so neither does this.
-- **No untested designs.** 318,484 were generated; the 211 that reached a lab
-  are here.
-- **No per-design campaign window.** The report gives the three windows and
-  the selection rules that changed between them, but not which window chose
-  each design. The windows are campaign-level facts; no design links to one.
-- **No raw instrument traces.** The release holds the sensorgrams; the graph
-  holds the fitted values and the flags on them.
-
-## Standards
-
-**There is no community ontology or reporting standard for de novo protein
-design.** Not from Rosetta Commons, the IPD, a journal or a consortium.
-Treat a claim otherwise with suspicion. The nearest thing to a shared schema
-is [Proteinbase](https://huggingface.co/datasets/adaptyvbio/proteinbase)
-(Adaptyv Biosystems), where each design carries a `designMethod` and a list of
-evaluations shaped `{type, metric, unit, value, target, method}` — close to
-the Designs and Evidence layers here, and worth matching if you publish
-designs. It does not claim to be a standard.
-
-What does exist covers the layers either side of the design itself, and this
-schema borrows from three of them at the cost of one property each.
-
-| Standard | Covers | Here |
-|---|---|---|
-| [PROV-O](https://www.w3.org/TR/prov-o/) — W3C Recommendation, 2013 | Provenance: entities, activities, agents, `wasDerivedFrom` | `DerivedFrom` is `prov:wasDerivedFrom` under another name |
-| [PSI-MI](https://www.psidev.info/groups/molecular-interactions) — HUPO-PSI, maintained | Controlled vocabulary for molecular interactions and how they were detected | `Measurement.detection_method_id` carries `MI:0107`, surface plasmon resonance |
-| [ECO](https://evidenceontology.org) — v2026-07-10 | The kind of evidence behind an assertion | `Measurement.evidence_type_id` carries `ECO:0001127`, SPR evidence |
-| [OBI](https://obi-ontology.org) — v2026-11-03 | Assays as planned processes; `OBI:0002105` is a dissociation-constant assay | Named, not modelled |
-| [Pfam / InterPro](https://www.ebi.ac.uk/interpro/) — Pfam 39.0 | Protein families | A natural target has an accession; a de novo backbone has none, which is the point |
-
-Those two ids cost nothing and make the binding values joinable with IntAct
-and IMEx, and the evidence readable by anything that speaks ECO.
-
-Not adopted, deliberately: **OBI** and **BAO** wholesale, because importing
-either drags in BFO's upper-ontology commitments and this is a cookbook, not a
-reference ontology; **SEPIO**, which models assertion, evidence line and
-criterion much as the claims layer here does and is worth reading as prior
-art, but whose OWL form is abandoned and whose LinkML successor is
-mid-migration and variant-interpretation-centric; **Allotrope** and **MIAPE**,
-which describe instrument files and proteomics, a layer below this one.
-**MIMIx**, the PSI-MI minimum-information guideline for interaction
-experiments, is the closest existing checklist to the Evidence layer if you
-need one.
-
-## References
-
-| What | Where |
-|---|---|
-| Designs, scores, assay results, controls | [Scorpion toxin binder design: data release](https://huggingface.co/datasets/Anthropic/scorpion-toxin-binder-design) — Anthropic, 20 October 2026, CC BY 4.0 |
-| Campaign process, criteria, evidence gaps | [De novo design of protein binders against scorpion toxins with Claude](https://assets.claude.com/31ac578806cffd8b3d92d8affe6edc4c04d502e1.pdf) — technical report, 20 October 2026 |
-| What the seed holds, and how it was built | [seed.md](seed.md) |
-| Domain model and the rules for adding to it | [CLAUDE.md](CLAUDE.md) |
-| Setup, roles, tokens, upgrades | [root README](../README.md) |
-
-Both sources are in the graph as `Source` nodes with the day they were read,
-so `omnigraph query sources` answers this table from the data. Every fact
-transcribed from the report carries an edge to it.
+To do it by hand, follow the shared [local setup](../docs/local-setup.md)
+using folder `binder-campaign` and Graph ID `binders`.
+[AGENTS.md](AGENTS.md) has the exact command for each question and workflow on
+this page.

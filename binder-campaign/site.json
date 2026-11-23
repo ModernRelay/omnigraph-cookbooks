@@ -1,14 +1,17 @@
 {
-  "order": 9,
+  "order": 10,
   "name": "Binder campaign",
   "category": "Research",
   "blurb": "A de novo protein design campaign as a graph: every tested design, how it was made, the scores that selected it, the assays that tested it, and the gaps under each claim.",
-  "about": "The binder campaign graph holds one AI-run protein design campaign end to end. Designs link to the tool that drew them and the design they came from; scores link to the thresholds they were judged against; claims link to the measurements they rest on and to anything the record does not hold. Tightening the definition of a binder is a query over the claims, not a re-analysis of the results.",
+  "about": "Build a living record of a protein binder campaign, and the agent workflows around it. It keeps the targets, every design and how it was made, the scores that selected it, what each lab measured, and the claim that a design binds a target — with the rule that claim holds under and the evidence it rests on. Whether a design counts as a binder is worked out from the measurements under the rule you name, so tightening the definition re-reads the record instead of re-analysing it. Agents propose every change on a branch a scientist reviews.",
   "sample": "Anthropic's scorpion-toxin binder campaign, from its public data release",
   "questions": [
     {
       "q": "Which binder claims survive a stricter rule?",
-      "query": "claims_under_criterion"
+      "query": "claims_under_criterion",
+      "params": {
+        "criterion": "crit:kd-within-tenfold"
+      }
     },
     {
       "q": "Which claims rest on evidence nobody can check?",
@@ -16,11 +19,17 @@
     },
     {
       "q": "How was a design made, and what did it come from?",
-      "query": "design_provenance"
+      "query": "design_provenance",
+      "params": {
+        "slug": "design:888c8f04"
+      }
     },
     {
       "q": "Which score selected a design, and against which bar?",
-      "query": "score_behind_claim"
+      "query": "score_behind_claim",
+      "params": {
+        "claim": "claim:cn2-b1-cn2"
+      }
     }
   ],
   "search": {
@@ -31,5 +40,16 @@
       "ontology",
       "graphrag"
     ]
-  }
+  },
+  "use_case": "usecase:research-substrate",
+  "capabilities": [
+    {
+      "capability": "cap:branch-per-agent",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "capability": "cap:three-way-merge",
+      "shown_in": "Branching and merging"
+    }
+  ]
 }
