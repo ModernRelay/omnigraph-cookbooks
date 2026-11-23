@@ -282,7 +282,7 @@ page to a question. Write each section so it serves all three.
 | Branching and merging | What a branch is used for in this use case, by people or by agents. In some, engineers branch for change requests; in others only agents do | Not empty |
 | Agents and workflows | The workflows by name and kind (capture, maintain, act), worked out as in "Working out the workflows", each with the stored queries behind it, reads and writes alike. Then what an agent may not do, and what the record does not hold back | Names stored queries, and only ones the cookbook has |
 | Data sources | The tools a team brings data in from, by product name, and the types each feeds | Every backticked type exists in `schema.pg` |
-| Questions you can ask | The questions `site.json` features, three to five. Feature only questions the sample data answers. One that is rightly empty on a fresh load, such as a check that finds nothing wrong, belongs in the workflow table | Each listed word for word on a line with its query; each returns rows on the seed |
+| Questions you can ask | The questions `site.json` features, three to five. Feature only questions the sample data answers. One that is rightly empty on a fresh load, such as a check that finds nothing wrong, belongs in the workflow table | The table's rows are the questions of `site.json`: the same ones, word for word and in the same order, each with its query; each returns rows on the seed |
 | Sample data | What the seed depicts and what the questions return on it | A link to `seed.md` |
 | Run it | The prompt, and where the commands are | Links to local setup and `AGENTS.md`; the Graph ID |
 
@@ -313,9 +313,10 @@ the list the check uses; change the two together.
   tags such as `<b>` show as text in some viewers.
 - In the workflow table, name the main stored queries of a workflow, four at
   most, and aim for eight to twelve workflows. List fewer when the cookbook's
-  stored queries do not support more; do not pad. In that table and the
-  questions table, put backticks around a snake_case word only when it is a
-  stored query; the check reads it as one.
+  stored queries do not support more; do not pad. Put only stored queries in
+  code in a stored-query column, and in those two sections put backticks
+  around a snake_case word only when it is a stored query; the check reads
+  both as query names.
 - Wrap prose at 80 columns; tables and the prompt are exempt. Aim for about
   200 lines. Neither is checked.
 

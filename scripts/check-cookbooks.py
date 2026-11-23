@@ -472,6 +472,7 @@ README_SECTIONS = ("The data model", "Branching and merging", "Agents and workfl
                    "Data sources", "Questions you can ask", "Sample data", "Run it")
 QUESTIONS = range(3, 6)   # how many questions a cookbook features
 QUERY_NAME = re.compile(r"`([a-z][a-z0-9]*(?:_[a-z0-9]+)+)`")
+CODE = re.compile(r"`([^`]+)`")
 INVOCATION = re.compile(r"omnigraph\s+(query|mutate)\s+([A-Za-z_][A-Za-z0-9_]*)")
 TYPE_NAME = re.compile(r"`([A-Z][A-Za-z0-9]*)`")
 SCHEMA_TYPE = re.compile(r"^(?:node|edge)\s+([A-Za-z_][A-Za-z0-9_]*)", re.M)
@@ -488,6 +489,7 @@ def readme_sections(folder):
             fenced = not fenced
         heading = None if fenced else re.match(r"(#{1,3}) (.+)", line)
         if heading and heading[1] == "##":
+            assert heading[2] not in sections, f"{folder}/README.md: ## {heading[2]} appears twice"
             section, part = sections.setdefault(heading[2], {"text": [], "parts": {}}), None
         elif heading and heading[1] == "###" and section:
             part = section["parts"].setdefault(heading[2], [])
@@ -500,6 +502,22 @@ def readme_sections(folder):
             if part is not None:
                 part.append(line)
     return lead, sections
+
+
+def tables(lines):
+    """The Markdown tables in some lines: each a list of rows, a row its cells by column header."""
+    found, header = [], None
+    for line in lines:
+        if not line.lstrip().startswith("|"):
+            header = None
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if header is None:
+            header = cells
+            found.append([])
+        elif not all(set(cell) <= set("-: ") for cell in cells):
+            found[-1].append(dict(zip(header, cells)))
+    return found
 
 
 def check_readme(folder, site, queries):
@@ -521,17 +539,25 @@ def check_readme(folder, site, queries):
     assert opening.startswith("Build a living ") and "agent workflows around it" in opening, \
         f"{where}: the intro opens 'Build a living <what the use case keeps> ..., and the agent workflows around it.'"
     assert "(AGENTS.md)" in intro, f"{where}: the intro must point agents at AGENTS.md"
-    # The questions are site.json's, word for word, each on a line with its stored read.
-    asked = sections["Questions you can ask"]["text"]
+    # The questions table is site.json's questions: the same ones, word for word, in the same
+    # order, each with its stored read.
     assert len(site["questions"]) in QUESTIONS, \
         f"{there}: feature {QUESTIONS.start} to {QUESTIONS.stop - 1} questions, found {len(site['questions'])}"
     for question in site["questions"]:
-        assert any(question["q"] in line and f"`{question['query']}`" in line for line in asked), \
-            f"{where}: ## Questions you can ask must list {question['q']!r} with its stored query, `{question['query']}`"
         assert isinstance(question.get("params", {}), dict), f"{there}: params of {question['q']!r} must be an object"
-    # A workflow or question names the stored queries behind it, and only ones the cookbook has.
+    listed = [(row.get("Question"), row.get("Stored query"))
+              for table in tables(sections["Questions you can ask"]["text"]) for row in table]
+    featured = [(question["q"], f"`{question['query']}`") for question in site["questions"]]
+    assert listed == featured, \
+        f"{where}: the Question and Stored query columns of ## Questions you can ask must be the questions of " \
+        f"site.json, in order; the README has {listed}, site.json has {featured}"
+    # A workflow or question names the stored queries behind it, and only ones the cookbook has:
+    # everything in code in a stored-query column, and any snake_case name in code beside it.
     for title in ("Agents and workflows", "Questions you can ask"):
-        named = QUERY_NAME.findall("\n".join(sections[title]["text"]))
+        text = sections[title]["text"]
+        named = QUERY_NAME.findall("\n".join(text))
+        named += [name for table in tables(text) for row in table for column, cell in row.items()
+                  if column.startswith("Stored quer") for name in CODE.findall(cell)]
         assert named, f"{where}: ## {title} must name the stored queries behind it"
         for name in named:
             assert name in queries, f"{where}: ## {title} names `{name}`, which queries/*.gq does not define"
@@ -547,14 +573,15 @@ def check_readme(folder, site, queries):
     for needed in ("../README.md#local-setup", "(AGENTS.md)", f"`{graph}`"):
         assert needed in run_it, f"{where}: ## Run it must link local setup and AGENTS.md and give the Graph ID; {needed} is missing"
     # The commands live in the agent guide: each stored query it or the README runs exists, with the verb that fits.
-    guide = (ROOT / folder / "AGENTS.md").read_text()
-    for source, text in ((where, (ROOT / folder / "README.md").read_text()), (f"{folder}/AGENTS.md", guide)):
+    # AGENTS.md is a link to CLAUDE.md, which a checkout without symlinks does not follow.
+    guide = (ROOT / folder / "CLAUDE.md").read_text()
+    for source, text in ((where, (ROOT / folder / "README.md").read_text()), (f"{folder}/CLAUDE.md", guide)):
         for verb, name in INVOCATION.findall(text):
             assert name in queries, f"{source}: `omnigraph {verb} {name}` names no stored query in queries/*.gq"
             assert queries[name] == (verb == "mutate"), \
                 f"{source}: {name} {'writes' if queries[name] else 'reads'}, so `omnigraph {verb} {name}` cannot run it"
     assert any(verb == "mutate" for verb, _ in INVOCATION.findall(guide)), \
-        f"{folder}/AGENTS.md: must run at least one stored mutation; a cookbook is written to, not only read"
+        f"{folder}/CLAUDE.md: must run at least one stored mutation; a cookbook is written to, not only read"
     # Where mr-ops has a use case for the cookbook: a need met or a capability used
     # points at the heading that shows it. Where it has none, all three are left out.
     use_case = site.get("use_case")
