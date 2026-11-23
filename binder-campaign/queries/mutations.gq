@@ -9,6 +9,10 @@
 
 // Record a measurement a lab reported. Evidence first: a claim may only rest
 // on a measurement that is already in the graph.
+//
+// A measurement arrives with its design, its target and its lab in this one
+// write. The three edges are @card(1..1), so a row without them is not a
+// draft to be completed later: it is refused, and nothing changes.
 query add_measurement($slug: String, $design: String, $target: String, $lab: String,
                       $method: String, $result: String, $kd_nm: F64?,
                       $kd_is_upper_limit: Bool, $rmax_ratio: F64?, $note: String?) {
@@ -16,36 +20,27 @@ query add_measurement($slug: String, $design: String, $target: String, $lab: Str
         slug: $slug, method: $method, result: $result, kd_nm: $kd_nm,
         kd_is_upper_limit: $kd_is_upper_limit, rmax_ratio: $rmax_ratio, note: $note
     }
-}
-
-query link_measurement_design($measurement: String, $design: String) {
-    insert MeasurementOf { from: $measurement, to: $design }
-}
-
-query link_measurement_target($measurement: String, $target: String) {
-    insert MeasurementAgainst { from: $measurement, to: $target }
-}
-
-query link_measurement_lab($measurement: String, $lab: String) {
-    insert MeasurementAtLab { from: $measurement, to: $lab }
+    insert MeasurementOf { from: $slug, to: $design }
+    insert MeasurementAgainst { from: $slug, to: $target }
+    insert MeasurementAtLab { from: $slug, to: $lab }
 }
 
 // Assert that a design binds a target. The claim is not the result; it is
 // somebody's reading of the results, recorded with their name and the day.
-query assert_binder_claim($slug: String, $statement: String, $status: String,
+//
+// The design and the target come with it: a claim is about one design
+// against one target, so ClaimAbout and ClaimAgainst are @card(1..1) and a
+// claim that names neither is refused. What it rests on is added after, with
+// ground_claim, because the measurements have to be in the graph already.
+query assert_binder_claim($slug: String, $design: String, $target: String,
+                          $statement: String, $status: String,
                           $recorded_at: DateTime, $recorded_by: String) {
     insert BinderClaim {
         slug: $slug, statement: $statement, status: $status,
         recorded_at: $recorded_at, recorded_by: $recorded_by
     }
-}
-
-query link_claim_design($claim: String, $design: String) {
-    insert ClaimAbout { from: $claim, to: $design }
-}
-
-query link_claim_target($claim: String, $target: String) {
-    insert ClaimAgainst { from: $claim, to: $target }
+    insert ClaimAbout { from: $slug, to: $design }
+    insert ClaimAgainst { from: $slug, to: $target }
 }
 
 // Ground a claim in a measurement. A claim with no edge here rests on
