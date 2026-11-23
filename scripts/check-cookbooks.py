@@ -434,10 +434,12 @@ def health_record_journey(env):
     run(env, "branch", "merge", "intake-vaccines", "--into", "main", *writer, "--json")
     assert rows("incomplete_series") == []
     run(env, "branch", "delete", "intake-vaccines", *writer, "--yes", "--json")
-    # A record is written once: the same dose again is refused, and nothing changes.
-    again = run(env, "mutate", "record_dose", *writer, "--params", dose, "--json", ok=False)
-    assert '"effects": "none"' in again.stdout + again.stderr, (again.stdout + again.stderr)[-2000:]
-    assert len(rows("disease_doses", params={"disease": "cond-hepatitis-b"})) == 3
+    # A record is written once: the same slug again, with other values, is refused and changes nothing.
+    replay = json.dumps({**json.loads(dose), "vaccine": "Hepatitis B, replayed"})
+    again = run(env, "mutate", "record_dose", *writer, "--params", replay, "--json", ok=False)
+    assert "@card violation" in again.stdout + again.stderr, (again.stdout, again.stderr)
+    doses = rows("disease_doses", params={"disease": "cond-hepatitis-b"})
+    assert [row["i.vaccine"] for row in doses] == ["Hepatitis B"] * 3, doses
 
 
 # What omnigraph.dev accepts in a site.json; its importer
