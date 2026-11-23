@@ -1,0 +1,409 @@
+// Writes. Each query publishes one graph commit. Updates re-check the state
+// they depend on in their `where`, so a write retried after a concurrent
+// commit changes nothing instead of applying twice.
+//
+// Agents run these on their own branches; the graph policy refuses their
+// writes on `main`, so every agent change reaches the record through a
+// person's merge.
+//
+// A record is written once. Filing a document, a result, a dose, a target, a
+// hypothesis, an intervention, a recommendation, a visit or a notification
+// under a slug that already exists is refused: the write would add a second
+// owner edge, which the schema's @card(1..1) forbids, so nothing changes. A
+// reported value is therefore never overwritten, by a retry or by reading the
+// same report twice. A correction goes in with correct_result, which adds a
+// new result and keeps the old one.
+//
+// The catalogue is different. add_person, add_organization, add_marker and
+// add_condition replace the whole row of an existing slug: read the slug
+// first.
+
+// ── People, places and markers ────────────────────────────────────
+
+query add_person($slug: String, $name: String, $role: String, $born_on: Date?)
+    @description("Add a person: the subject of a record (role subject) or a clinician.") {
+    insert Person { slug: $slug, name: $name, role: $role, born_on: $born_on }
+}
+
+query add_organization($slug: String, $name: String, $kind: String)
+    @description("Add a laboratory, clinic, hospital or pharmacy.") {
+    insert Organization { slug: $slug, name: $name, kind: $kind }
+}
+
+query add_marker($slug: String, $name: String, $kind: String, $category: String?, $canonical_unit: String,
+                 $aliases: [String]?, $description: String?)
+    @description("Add a marker with the unit its targets and canonical values use.")
+    @instruction("Search first with search_markers: the same analyte is printed under several names, and those go in aliases, not in a second marker.") {
+    insert Measurable { slug: $slug, name: $name, kind: $kind, category: $category, canonical_unit: $canonical_unit,
+                        aliases: $aliases, description: $description }
+}
+
+query add_marker_code($slug: String, $system: String, $code: String, $display: String?, $marker: String)
+    @description("Record a standard code, such as a LOINC code, for a marker.") {
+    insert ExternalCode { slug: $slug, system: $system, code: $code, display: $display }
+    insert CodeForMeasurable { from: $slug, to: $marker }
+}
+
+// ── Documents ─────────────────────────────────────────────────────
+
+query file_record($slug: String, $title: String, $kind: String, $document_date: Date, $person: String,
+                  $file: Blob?, $notes: String?)
+    @description("File a document for a person, with the file itself, before anything is read from it. Refused if the slug already exists.")
+    @instruction("Pass the file as base64:<bytes>.") {
+    insert HealthRecord { slug: $slug, title: $title, kind: $kind, document_date: $document_date, received_at: now(),
+                          extraction: "raw", file: $file, notes: $notes }
+    insert RecordFor { from: $slug, to: $person }
+}
+
+query link_record_source($record: String, $organization: String)
+    @description("Say which laboratory or clinic issued a document.") {
+    insert RecordFrom { from: $record, to: $organization }
+}
+
+query link_record_visit($record: String, $visit: String)
+    @description("Say which visit a document came out of.") {
+    insert RecordOfVisit { from: $record, to: $visit }
+}
+
+query mark_extracted($slug: String)
+    @description("Mark a raw document as read: its values are in the record and await a person's check.") {
+    update HealthRecord set { extraction: "extracted" } where slug = $slug and extraction = "raw"
+}
+
+query mark_reviewed($slug: String)
+    @description("Mark a document's extracted values as checked against the file. A person's step.") {
+    update HealthRecord set { extraction: "reviewed" } where slug = $slug and extraction = "extracted"
+}
+
+// ── Results ───────────────────────────────────────────────────────
+
+query record_result($slug: String, $marker: String, $person: String, $record: String, $measured_at: DateTime,
+                    $value: F64?, $comparator: String?, $value_text: String?, $unit: String?, $canonical_value: F64?,
+                    $reference_low: F64?, $reference_high: F64?, $flag: String?, $status: String, $fasting: Bool?,
+                    $source_name: String?, $source_line: String?)
+    @description("Record one result read from a document, as the document printed it. Refused if the slug already exists, so reading a report twice cannot change a value.")
+    @instruction("status is preliminary or final. Copy value, unit, range and flag as printed and put the whole printed line in source_line. For a value at a detection limit such as <0.3, pass comparator lt and value 0.3. Leave canonical_value out unless the unit is the marker's canonical unit or the conversion is certain.") {
+    insert Measurement { slug: $slug, measured_at: $measured_at, statistic: "point", value: $value, comparator: $comparator,
+                         value_text: $value_text, unit: $unit, canonical_value: $canonical_value,
+                         reference_low: $reference_low, reference_high: $reference_high, flag: $flag, status: $status,
+                         fasting: $fasting, source_name: $source_name, source_line: $source_line }
+    insert MeasurementOf { from: $slug, to: $marker }
+    insert MeasurementFor { from: $slug, to: $person }
+    insert MeasurementIn { from: $slug, to: $record }
+}
+
+query record_reading($slug: String, $marker: String, $person: String, $measured_at: DateTime, $period_start: DateTime?,
+                     $statistic: String, $value: F64, $unit: String, $canonical_value: F64?, $device: String?)
+    @description("Record a reading or a period summary from a device or app, with no document behind it.")
+    @instruction("statistic is point for one reading, or mean, minimum, maximum, total or median for a summary; give period_start for a summary. Keep to one summary a day per marker: the raw samples stay in the device's app.") {
+    insert Measurement { slug: $slug, measured_at: $measured_at, period_start: $period_start, statistic: $statistic,
+                         value: $value, unit: $unit, canonical_value: $canonical_value, status: "final", device: $device }
+    insert MeasurementOf { from: $slug, to: $marker }
+    insert MeasurementFor { from: $slug, to: $person }
+}
+
+query correct_result($slug: String, $replaces: String, $marker: String, $person: String, $record: String,
+                     $measured_at: DateTime, $value: F64?, $comparator: String?, $unit: String?, $canonical_value: F64?,
+                     $reference_low: F64?, $reference_high: F64?, $flag: String?, $source_line: String?)
+    @description("Record a source's correction of an earlier result. The earlier result stays on record and stops counting as current.") {
+    insert Measurement { slug: $slug, measured_at: $measured_at, statistic: "point", value: $value, comparator: $comparator,
+                         unit: $unit, canonical_value: $canonical_value, reference_low: $reference_low,
+                         reference_high: $reference_high, flag: $flag, status: "amended", source_line: $source_line }
+    insert MeasurementOf { from: $slug, to: $marker }
+    insert MeasurementFor { from: $slug, to: $person }
+    insert MeasurementIn { from: $slug, to: $record }
+    insert MeasurementSupersedes { from: $slug, to: $replaces }
+}
+
+query void_result($slug: String)
+    @description("Mark a result as entered in error, such as one filed under the wrong person. It stays on record and stops counting: a result it had corrected becomes current again, and a recommendation it had met is due again.") {
+    update Measurement set { status: "entered_in_error" } where slug = $slug and status != "entered_in_error"
+}
+
+query set_canonical_value($slug: String, $canonical_value: F64)
+    @description("Add the value in the marker's canonical unit to a result that was reported in another unit.") {
+    update Measurement set { canonical_value: $canonical_value } where slug = $slug and canonical_value is null
+}
+
+// ── Targets ───────────────────────────────────────────────────────
+
+query set_target($slug: String, $marker: String, $person: String, $low: F64?, $high: F64?, $unit: String,
+                 $set_on: Date, $set_by: String, $rationale: String?)
+    @description("Set the range a person wants a marker to stay in, in the marker's canonical unit, with who set it.")
+    @instruction("Retire the marker's previous target with retire_target in the same change.") {
+    insert Target { slug: $slug, low: $low, high: $high, unit: $unit, set_on: $set_on, set_by: $set_by,
+                    rationale: $rationale, status: "active" }
+    insert TargetFor { from: $slug, to: $marker }
+    insert TargetOf { from: $slug, to: $person }
+}
+
+query retire_target($slug: String)
+    @description("Stop judging results against a target.") {
+    update Target set { status: "retired" } where slug = $slug and status = "active"
+}
+
+// ── Hypotheses ────────────────────────────────────────────────────
+
+query raise_hypothesis($slug: String, $title: String, $thesis: String, $person: String, $marker: String,
+                       $review_status: String, $raised_on: Date)
+    @description("Raise a possible explanation about one marker, open until a person or clinician decides.")
+    @instruction("An agent passes review_status ai_generated.") {
+    insert Hypothesis { slug: $slug, title: $title, thesis: $thesis, status: "open", review_status: $review_status,
+                        raised_on: $raised_on }
+    insert HypothesisFor { from: $slug, to: $person }
+    insert HypothesisAbout { from: $slug, to: $marker }
+}
+
+query link_support($hypothesis: String, $result: String)
+    @description("Link a result as supporting a hypothesis.") {
+    insert SupportedBy { from: $hypothesis, to: $result }
+}
+
+query link_contradiction($hypothesis: String, $result: String)
+    @description("Link a result as contradicting a hypothesis.") {
+    insert ContradictedBy { from: $hypothesis, to: $result }
+}
+
+query review_hypothesis($slug: String)
+    @description("Record that a person has read an agent's proposed hypothesis. A person's step.") {
+    update Hypothesis set { review_status: "human_reviewed" } where slug = $slug and review_status = "ai_generated"
+}
+
+query decide_hypothesis($slug: String, $status: String)
+    @description("Set a hypothesis to supported, rejected or superseded. A person's or clinician's verdict.") {
+    update Hypothesis set { status: $status, review_status: "human_reviewed" } where slug = $slug
+}
+
+// ── Interventions ─────────────────────────────────────────────────
+
+query start_intervention($slug: String, $episode: String, $name: String, $kind: String, $dose: String?, $frequency: String?,
+                         $started_at: DateTime, $reason: String?, $person: String, $marker: String)
+    @description("Record something a person starts taking or doing, with its first dose period and the marker it is meant to move.")
+    @instruction("Add each further marker with add_intervention_marker in the same change.") {
+    insert Intervention { slug: $slug, name: $name, kind: $kind, status: "active", started_at: $started_at, reason: $reason }
+    insert InterventionFor { from: $slug, to: $person }
+    insert Targets { from: $slug, to: $marker }
+    insert InterventionEpisode { slug: $episode, dose: $dose, frequency: $frequency, started_at: $started_at }
+    insert EpisodeOf { from: $episode, to: $slug }
+}
+
+query add_intervention_marker($intervention: String, $marker: String)
+    @description("Add another marker an intervention is meant to move.") {
+    insert Targets { from: $intervention, to: $marker }
+}
+
+query link_intervention_hypothesis($intervention: String, $hypothesis: String)
+    @description("Say which hypothesis an intervention acts on.") {
+    insert MotivatedBy { from: $intervention, to: $hypothesis }
+}
+
+query link_intervention_condition($intervention: String, $occurrence: String)
+    @description("Say which of the person's conditions an intervention is for.") {
+    insert Treats { from: $intervention, to: $occurrence }
+}
+
+query stop_intervention($slug: String, $stopped_at: DateTime, $reason: String?)
+    @description("Stop an active or paused intervention.") {
+    update Intervention set { status: "stopped", stopped_at: $stopped_at, reason: $reason }
+    where slug = $slug and status != "stopped"
+}
+
+query change_dose($episode: String, $intervention: String, $dose: String?, $frequency: String?, $changed_at: DateTime,
+                  $reason: String?)
+    @description("Record a change of dose or frequency as a new dose period of the same intervention, which keeps its markers and its history.") {
+    insert InterventionEpisode { slug: $episode, dose: $dose, frequency: $frequency, started_at: $changed_at, reason: $reason }
+    insert EpisodeOf { from: $episode, to: $intervention }
+}
+
+// ── Conditions and reactions ──────────────────────────────────────
+
+query add_condition($slug: String, $name: String, $category: String)
+    @description("Add a disease, diagnosis or kind of reaction as a concept.") {
+    insert Condition { slug: $slug, name: $name, category: $category }
+}
+
+query record_condition($slug: String, $condition: String, $person: String, $status: String, $certainty: String,
+                       $onset_on: Date?, $severity: String?, $notes: String?)
+    @description("Record a person's case of a condition, with how certain it is.")
+    @instruction("An agent records only what a document or the person states, with the certainty stated there. It does not infer a condition from results.") {
+    insert ConditionOccurrence { slug: $slug, status: $status, certainty: $certainty, onset_on: $onset_on,
+                                 severity: $severity, notes: $notes }
+    insert OccurrenceOf { from: $slug, to: $condition }
+    insert OccurrenceFor { from: $slug, to: $person }
+}
+
+query record_dose_reaction($slug: String, $condition: String, $person: String, $dose: String, $onset_on: Date,
+                           $severity: String?, $notes: String?)
+    @description("Record a reaction that followed a vaccine dose.") {
+    insert ConditionOccurrence { slug: $slug, status: "active", certainty: "self_reported", onset_on: $onset_on,
+                                 severity: $severity, notes: $notes }
+    insert OccurrenceOf { from: $slug, to: $condition }
+    insert OccurrenceFor { from: $slug, to: $person }
+    insert ReactionToImmunization { from: $slug, to: $dose }
+}
+
+query record_intervention_reaction($slug: String, $condition: String, $person: String, $intervention: String,
+                                   $onset_on: Date, $severity: String?, $notes: String?)
+    @description("Record a reaction attributed to something the person takes or does.") {
+    insert ConditionOccurrence { slug: $slug, status: "active", certainty: "self_reported", onset_on: $onset_on,
+                                 severity: $severity, notes: $notes }
+    insert OccurrenceOf { from: $slug, to: $condition }
+    insert OccurrenceFor { from: $slug, to: $person }
+    insert ReactionToIntervention { from: $slug, to: $intervention }
+}
+
+query resolve_condition($slug: String, $resolved_on: Date)
+    @description("Mark a person's condition or reaction as resolved.") {
+    update ConditionOccurrence set { status: "resolved", resolved_on: $resolved_on }
+    where slug = $slug and status != "resolved"
+}
+
+// ── Immunizations ─────────────────────────────────────────────────
+
+query record_dose($slug: String, $vaccine: String, $product: String?, $manufacturer: String?, $lot_number: String?,
+                  $expires_on: Date?, $administered_on: Date, $date_precision: String, $site: String?, $route: String?,
+                  $origin: String, $person: String, $disease: String, $dose_number: I32?, $series_doses: I32?)
+    @description("Record one vaccine dose that was given, with the first disease it counts towards and its dose number in that series.")
+    @instruction("For a combined vaccine, add each further disease with add_dose_disease in the same change. origin is provider_record, vaccination_card, registry or recall.") {
+    insert Immunization { slug: $slug, vaccine: $vaccine, product: $product, manufacturer: $manufacturer,
+                          lot_number: $lot_number, expires_on: $expires_on, administered_on: $administered_on,
+                          date_precision: $date_precision, site: $site, route: $route, status: "completed",
+                          origin: $origin }
+    insert ImmunizationFor { from: $slug, to: $person }
+    insert ProtectsAgainst { from: $slug, to: $disease, dose_number: $dose_number, series_doses: $series_doses }
+}
+
+query add_dose_disease($dose: String, $disease: String, $dose_number: I32?, $series_doses: I32?)
+    @description("Add another disease a combined vaccine dose counts towards, with its own dose number.") {
+    insert ProtectsAgainst { from: $dose, to: $disease, dose_number: $dose_number, series_doses: $series_doses }
+}
+
+query record_dose_not_given($slug: String, $vaccine: String, $due_on: Date, $status_reason: String, $origin: String,
+                            $person: String, $disease: String)
+    @description("Record a dose that was due and not given, with the reason.") {
+    insert Immunization { slug: $slug, vaccine: $vaccine, administered_on: $due_on, date_precision: "day",
+                          status: "not_done", status_reason: $status_reason, origin: $origin }
+    insert ImmunizationFor { from: $slug, to: $person }
+    insert ProtectsAgainst { from: $slug, to: $disease }
+}
+
+query link_dose_record($dose: String, $record: String)
+    @description("Link a dose to the document that shows it.") {
+    insert ImmunizationIn { from: $dose, to: $record }
+}
+
+query link_dose_place($dose: String, $organization: String)
+    @description("Say where a dose was given.") {
+    insert AdministeredAt { from: $dose, to: $organization }
+}
+
+query add_dose_code($slug: String, $system: String, $code: String, $display: String?, $dose: String)
+    @description("Record the vaccine type of a dose as a code, such as a CVX code.") {
+    insert ExternalCode { slug: $slug, system: $system, code: $code, display: $display }
+    insert CodeForImmunization { from: $slug, to: $dose }
+}
+
+query void_dose($slug: String)
+    @description("Mark a dose as entered in error. It stays on record and stops counting: a recommendation it had met is due again.") {
+    update Immunization set { status: "entered_in_error" } where slug = $slug and status != "entered_in_error"
+}
+
+// ── Recommendations ───────────────────────────────────────────────
+
+query recommend_retest($slug: String, $title: String, $authority: String, $due_at: DateTime, $latest_at: DateTime?,
+                       $repeats_every_days: I32?, $reason: String?, $person: String, $marker: String)
+    @description("Record that a marker should be measured again by a date, with who says so.") {
+    insert Recommendation { slug: $slug, title: $title, kind: "retest", authority: $authority, due_at: $due_at,
+                            latest_at: $latest_at, repeats_every_days: $repeats_every_days, status: "open",
+                            reason: $reason }
+    insert RecommendationFor { from: $slug, to: $person }
+    insert RecommendsMeasuring { from: $slug, to: $marker }
+}
+
+query recommend_dose($slug: String, $title: String, $authority: String, $earliest_at: DateTime?, $due_at: DateTime,
+                     $latest_at: DateTime?, $dose_number: I32?, $series_doses: I32?, $reason: String?,
+                     $person: String, $disease: String)
+    @description("Record that a vaccine dose is due by a date, with the authority that set it.")
+    @instruction("Take the dates from the clinician or the schedule they name. Do not work them out.") {
+    insert Recommendation { slug: $slug, title: $title, kind: "vaccine_dose", authority: $authority,
+                            earliest_at: $earliest_at, due_at: $due_at, latest_at: $latest_at,
+                            dose_number: $dose_number, series_doses: $series_doses, status: "open", reason: $reason }
+    insert RecommendationFor { from: $slug, to: $person }
+    insert RecommendsVaccineAgainst { from: $slug, to: $disease }
+}
+
+query recommend_other($slug: String, $title: String, $kind: String, $authority: String, $due_at: DateTime,
+                      $repeats_every_days: I32?, $reason: String?, $person: String)
+    @description("Record a screening or a follow-up due by a date.") {
+    insert Recommendation { slug: $slug, title: $title, kind: $kind, authority: $authority, due_at: $due_at,
+                            repeats_every_days: $repeats_every_days, status: "open", reason: $reason }
+    insert RecommendationFor { from: $slug, to: $person }
+}
+
+query fulfil_with_result($slug: String, $result: String)
+    @description("Link the result that met a recommendation. The recommendation stops being due while that result stands, and is due again if the result is later marked as entered in error.") {
+    insert FulfilledByMeasurement { from: $slug, to: $result }
+}
+
+query fulfil_with_dose($slug: String, $dose: String)
+    @description("Link the dose that met a dose recommendation. The recommendation stops being due while that dose stands.") {
+    insert FulfilledByImmunization { from: $slug, to: $dose }
+}
+
+query close_recommendation($slug: String, $status: String)
+    @description("Close an open recommendation as declined, superseded, or done where no result or dose in the record shows it. A person's step.") {
+    update Recommendation set { status: $status } where slug = $slug and status = "open"
+}
+
+// ── Visits ────────────────────────────────────────────────────────
+
+query schedule_visit($slug: String, $title: String, $kind: String, $scheduled_at: DateTime, $reason: String?,
+                     $person: String, $clinician: String)
+    @description("Add a planned visit with the clinician to be seen.") {
+    insert Visit { slug: $slug, title: $title, kind: $kind, scheduled_at: $scheduled_at, status: "planned",
+                   reason: $reason }
+    insert VisitOf { from: $slug, to: $person }
+    insert VisitWith { from: $slug, to: $clinician }
+}
+
+query complete_visit($slug: String, $summary: String?, $commit: String?)
+    @description("Mark a visit as done, with what came of it and the graph commit the clinician saw.") {
+    update Visit set { status: "completed", summary: $summary, baseline_commit: $commit }
+    where slug = $slug and status = "planned"
+}
+
+// ── Notifications ─────────────────────────────────────────────────
+
+query raise_notification($slug: String, $title: String, $body: String?, $kind: String, $person: String,
+                         $recommendation: String)
+    @description("Raise a prompt about one recommendation for a person. Refused if the slug already exists, whatever its status.")
+    @instruction("Build the slug from the kind and the recommendation, such as ntf-overdue-rcm-tsh-2026, so the same prompt cannot be raised twice.") {
+    insert Notification { slug: $slug, title: $title, body: $body, kind: $kind, status: "pending", raised_at: now() }
+    insert NotificationFor { from: $slug, to: $person }
+    insert AboutRecommendation { from: $slug, to: $recommendation }
+}
+
+query raise_result_notification($slug: String, $title: String, $body: String?, $kind: String, $person: String,
+                                $result: String)
+    @description("Raise a prompt about one result, such as one off target or flagged critical. Refused if the slug already exists, whatever its status.")
+    @instruction("Build the slug from the kind and the result, such as ntf-off-target-m-p4-ldl.") {
+    insert Notification { slug: $slug, title: $title, body: $body, kind: $kind, status: "pending", raised_at: now() }
+    insert NotificationFor { from: $slug, to: $person }
+    insert AboutMeasurement { from: $slug, to: $result }
+}
+
+query mark_sent($slug: String, $channel: String)
+    @description("Record that a pending prompt was sent, and on which channel.") {
+    update Notification set { status: "sent", sent_at: now(), channel: $channel } where slug = $slug and status = "pending"
+}
+
+query acknowledge_notification($slug: String)
+    @description("Record that the person has seen a prompt. A person's step.") {
+    update Notification set { status: "acknowledged", acknowledged_at: now() }
+    where slug = $slug and (status = "pending" or status = "sent")
+}
+
+query dismiss_notification($slug: String)
+    @description("Dismiss a prompt as not needed. It stays on record, so it is not raised again.") {
+    update Notification set { status: "dismissed" } where slug = $slug and (status = "pending" or status = "sent")
+}

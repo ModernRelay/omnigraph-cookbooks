@@ -2,7 +2,7 @@
 
 Run from beads/client:  python3 -m unittest discover -s tests -v
 The omnigraph and omnigraph-server binaries come from $OB_OMNIGRAPH and
-$OB_OMNIGRAPH_SERVER, else PATH (the cookbooks pin the 0.14.0 release). Most
+$OB_OMNIGRAPH_SERVER, else PATH (the cookbooks pin the 0.15.0 release). Most
 tests use local graphs. ServedTests start a server for the cookbook behind the
 repository's local HTTPS gateway and drive ob through server targets;
 TransportTests put a scripted server behind the same gateway to see which
@@ -79,7 +79,7 @@ def wait_until(check, what: str, timeout: float = 60):
 
 class Gateway:
     """scripts/local-tls-gateway.py in front of a plain-HTTP port, with its own
-    CA in `certs`: the 0.14 CLI sends a target's token only over HTTPS."""
+    CA in `certs`: the CLI sends a target's token only over HTTPS."""
 
     def __init__(self, upstream: int, certs: Path):
         self.port = free_port()

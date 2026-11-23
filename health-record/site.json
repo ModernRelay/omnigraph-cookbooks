@@ -1,0 +1,45 @@
+{
+  "order": 9,
+  "name": "Personal health record",
+  "category": "Personal",
+  "blurb": "One person's lab results, readings, targets, hypotheses, medication and vaccine doses, with \"off target\", \"overdue\" and \"incomplete\" worked out from the results on every read.",
+  "about": "Build a living personal health record, and the agent workflows around it. It keeps lab results, device readings, targets, hypotheses, what you take and the vaccine doses you were given linked to the documents they came from. Whether a result is off target, a retest is overdue or a vaccine series is incomplete is worked out from the current data each time you ask. Agents read your reports and tell you what is due, on branches you review before anything reaches the record.",
+  "sample": "Noa Brandt, an invented person with two years of results",
+  "questions": [
+    {
+      "q": "Which results are outside my own targets?",
+      "query": "off_target"
+    },
+    {
+      "q": "Did this change move the marker it was meant to move?",
+      "query": "intervention_effect",
+      "params": {
+        "intervention": "int-rosuvastatin"
+      }
+    },
+    {
+      "q": "Which vaccine series did I never finish?",
+      "query": "incomplete_series"
+    },
+    {
+      "q": "What is overdue?",
+      "query": "overdue_recommendations"
+    },
+    {
+      "q": "Which of my hypotheses does a result contradict?",
+      "query": "contested_hypotheses"
+    }
+  ],
+  "search": {
+    "title": "Personal health record graph: labs, targets, vaccines",
+    "heading": "A personal health record your agents can read and keep current",
+    "keywords": [
+      "personal health record",
+      "health tracker",
+      "health tracking",
+      "immunization record",
+      "vaccination record",
+      "biomarker tracking"
+    ]
+  }
+}

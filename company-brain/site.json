@@ -3,7 +3,7 @@
   "name": "Company brain",
   "category": "Company",
   "blurb": "A company's people, projects, claims, decisions and commitments, each tied to the exact words it rests on, shared by its people and agents.",
-  "about": "A company brain is one shared record of what a company knows: who is on which team, what each project is, what was said, what was decided and who owes what. This one is a typed graph in which every claim carries the exact quote it rests on, so people and agents read the same account and can check it. Agents propose changes on their own branches, and a person reviews and merges them. It takes the place of searching chat logs and wiki pages that drift apart.",
+  "about": "Build a living company brain, and the agent workflows around it. It is one shared record of what a company knows: who is on which team, what each project is, what was said, what was decided and who owes what. Every claim carries the exact quote it rests on, so people and agents read the same account and can check it. Agents propose changes on their own branches, and a person reviews and merges them.",
   "sample": "Lanternworks, a fictional software company",
   "questions": [
     {
@@ -11,16 +11,43 @@
       "query": "current_decisions"
     },
     {
-      "q": "Which decisions rest on a claim that someone has since contradicted?",
-      "query": "decisions_at_risk"
+      "q": "Which claims dispute each other?",
+      "query": "contested_claims"
     },
     {
       "q": "What does this decision rest on, and in whose words?",
-      "query": "decision_evidence"
+      "query": "decision_evidence",
+      "params": {
+        "decision": "search-in-house"
+      }
     },
     {
       "q": "What did this meeting commit people to?",
-      "query": "actions_from_source"
+      "query": "actions_from_source",
+      "params": {
+        "source": "meet:search-review-2026-10-02"
+      }
+    }
+  ],
+  "use_case": "usecase:org-knowledge",
+  "needs": [
+    {
+      "need": "need:context-scattered",
+      "shown_in": "The data model"
+    },
+    {
+      "need": "need:links-across-apps",
+      "shown_in": "Data sources"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "cap:typed-schema",
+      "shown_in": "The data model"
+    },
+    {
+      "capability": "cap:graph-traversal",
+      "shown_in": "Questions you can ask"
     }
   ],
   "search": {

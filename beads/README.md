@@ -1,244 +1,186 @@
-# Beads: an agent work queue
+# Agent work queue: issues agents file, claim and close
 
-A dependency-aware issue tracker for coding agents, in the style of
-[beads](https://github.com/gastownhall/beads) (`bd`): file work, link what
-waits on what, ask for ready work, claim it, close it. Readiness is derived on
-every read with beads' rules, claims are atomic, and the commit history is the
-audit trail. Graph ID `beads`.
+Build a living work queue for coding agents, and the agent workflows around it.
+It keeps issues, what waits on what, parent and child work, comments and project
+memories linked, so several agents and the people directing them share one
+current plan. Whether work is ready or blocked is worked out from the links on
+every read, and a claim is atomic, so no status drifts and no two agents take
+the same issue. Agents file, claim, close and re-plan work, and a person reviews
+the plans they put on a branch.
 
-The bundle (schema, stored queries, policies, seed) works with plain
-`omnigraph` commands. [`client/ob`](client/) is a small Python client with the
-`bd` command set; it adds the retry and reconciliation that many agents
-writing at once need.
+When several coding agents work on one codebase, the plan usually lives in
+markdown files or a tracker built for people. Agents lose track of what is
+blocked, two of them pick up the same task, and nobody can say who changed
+what. This cookbook sets OmniGraph up as the one place the plan is held, in the
+style of [beads](https://github.com/gastownhall/beads) (`bd`).
 
-For a full engineering knowledge graph (specs, components, PRs, releases,
-incidents) see [dev-graph](../dev-graph/); this cookbook is the minimal queue.
+- **Ready work on every read.** An agent asks what it can claim and gets issues
+  that are open, not deferred, and not waiting on anything unfinished.
+- **No double claims.** Of several agents racing for one issue, exactly one
+  gets it.
+- **A history of every change.** Each command is one commit that records which
+  actor made it.
 
-## Quick start
+> If you are an agent: the commands, roles and workflows are in
+> [AGENTS.md](AGENTS.md). Read that file before running anything.
 
-Use the shared [local setup](../README.md#local-setup) with folder `beads` and
-graph `beads`, then load `seed.jsonl` (a fictional project, described in
-[seed.md](seed.md)). With the server and the HTTPS gateway up, in the terminal
-where you configured the CLI:
+## The data model
 
-```bash
-omnigraph query ready --target local-reader --graph beads
-omnigraph query blocked --target local-reader --graph beads
-omnigraph mutate claim --target local-writer --graph beads \
-  --params '{"id":"lk-acl","who":"act-writer","lease":null}'
+```mermaid
+graph LR
+  Issue -- waits on --> Issue
+  Issue -- is part of --> Issue
+  Issue -- relates to --> Issue
+  Issue -- was discovered from --> Issue
+  Issue -- duplicates --> Issue
+  Issue -- supersedes --> Issue
+  Comment -- comments on --> Issue
+  Memory -- is about --> Issue
 ```
 
-Or with the client, as an agent would. `OB_TARGET` names a server target from
-that operator configuration and `OB_GRAPH` the graph (default `beads`); the
-target supplies the endpoint and the token, so `ob` never handles one:
+| Area | Types | Holds |
+|---|---|---|
+| Work | `Issue` | A bug, feature, task, epic, decision, spike or milestone, with its status, priority, labels and the actor holding it |
+| Ordering | `BlockedBy`, `ChildOf` | What must close before an issue can start, and the epic or parent an issue belongs to |
+| Annotations | `RelatesTo`, `DiscoveredFrom`, `Duplicates`, `Supersedes` | How issues otherwise connect; none of them affects what is ready |
+| Discussion | `Comment`, `Memory`, `CommentOn`, `MemoryAbout` | Notes on one issue, and durable project facts every new agent session reads |
 
-```bash
-export PATH=$PWD/client:$PATH
-export OB_TARGET=local-writer OB_GRAPH=beads OB_ACTOR=act-writer
-ob ready
-ob claim lk-acl --lease 2h     # or: ob ready --claim, which takes the top issue
-ob show lk-acl
-ob close lk-acl --reason "ACLs enforced server-side"
-ob ready                       # the sharing tasks are ready now
-```
+- **Blocked is derived, never stored.** There is no `blocked` status. An issue
+  is blocked when an open issue blocks it, or when an open parent passes down a
+  block from outside its own subtree, so the status cannot disagree with the
+  links.
+- **A parent waits for its children.** The link alone says so: closing a parent
+  with an open child is refused unless they close together.
+- **The claim is on the issue.** The assignee and an optional lease sit on the
+  issue itself, so claiming is one conditional update that only one agent wins.
+- **A lease, not a heartbeat.** A claim can expire. Reclaiming reopens every
+  expired claim in one commit, so a crashed agent does not hold work forever.
+- **Yours to change.** The model is one file, [`schema.pg`](schema.pg), with 3
+  node types and 8 edge types. Add components, owners or whatever your
+  project tracks.
 
-## Your own project
+## Branching and merging
 
-`ob` also runs without a server on a local graph of its own. Start from a
-shell without the Quick Start's `OB_*` variables: `OB_TARGET` sends every
-command to the server.
+A change is made on a branch, which is a version of the whole queue. `main`
+moves when the branch is merged.
 
-```bash
-export PATH=$PWD/client:$PATH  # from the beads folder
-cd ~/your-project
-ob init                        # creates .ob/ with a local graph
-ob create "Fix login timeout" -t bug -p 1 --id ob-login
-ob create "Write auth docs" --deps ob-login
-ob ready                       # only the bug: the docs wait on it
-ob onboard >> AGENTS.md        # tell agents how to use it
-```
+- **Plans.** A planning agent files an epic and its tasks on a branch. A person
+  reads the diff and an admin merges it, so agents see the plan only once it is
+  approved.
+- **Trial re-plans.** Re-link what waits on what on a branch and read
+  `ready` there to see the order that results, before it reaches `main`.
+- **Claims and closes on `main`.** Claiming and closing are the everyday
+  writes, and they go straight to `main`. The cookbook does not hold them for
+  review.
 
-Add `--json` to any `ob` command, before or after the subcommand, for
-machine-readable output. `ob` needs only Python 3.10+ and the `omnigraph` CLI
-on `PATH` (or `OB_OMNIGRAPH`). In served mode the CLI finds its operator
-configuration as usual (`OMNIGRAPH_HOME`, else `~/.omnigraph`);
-`OB_OPERATOR_CONFIG=FILE` passes `--operator-config FILE` instead.
+## Agents and workflows
 
-## Model
+Agents do the work and keep the queue consistent, and people set direction and
+approve plans.
 
-[`schema.pg`](schema.pg) has three node types and eight edge types.
+| Kind | Workflow | What it does | Stored queries |
+|---|---|---|---|
+| Capture | Discovered work | An agent that finds a bug while working files it as a new issue and links it to the issue it was working on | `link_discovered_from`, `show` |
+| Capture | Progress notes | When CI finishes or a pull request opens, records the outcome as a comment on the issue | `comment`, `comments` |
+| Capture | Project memory | Keeps a durable fact, such as a decision or a command to run before pushing, for every later session | `remember`, `remember_about`, `recall`, `memories` |
+| Capture | Merge closes work | When a pull request merges, closes its issue with the reason, which releases what waited on it | `close`, `comment` |
+| Maintain | Claim and work | An agent takes the top ready issue, works it, then closes it or gives it back | `ready`, `claim`, `close`, `release` |
+| Maintain | Lease reclaim | Reopens issues whose claim has lapsed, so another agent can take them | `expired_leases`, `reclaim_expired` |
+| Maintain | Duplicate sweep | Finds issues that say the same thing and links the newer to the one that stays | `search`, `similar`, `link_duplicates`, `link_supersedes` |
+| Maintain | Re-plan | On a branch, changes what waits on what and reads the resulting ready set | `link_blocks`, `link_parent`, `unlink_blocks`, `ready` |
+| Maintain | Unblock the most | Works out which open issue holds up the most work, so it is picked first | `blocked`, `downstream`, `upstream` |
+| Act | Ready-work dispatch | When work is ready, starts or messages an agent to take it | `ready_filtered`, `ready_count` |
+| Act | Stalled-work notice | Tells the owner of a blocking issue, in their chat or tracker, that work waits on them | `blocked`, `blocked_by_ancestor`, `assigned` |
+| Act | Queue report | Posts the counts and the blocked list to the team on a schedule | `stats`, `ready_count`, `blocked` |
 
-| Type | Holds |
+Every workflow has the same parts:
+
+1. Something starts it: an agent finishing a task, a change in a tool such as
+   CI or GitHub, or a schedule.
+2. The agent reads the state it needs through stored queries.
+3. It acts. It writes to the record, or it tells someone outside the record: a
+   message, a ticket, a report.
+4. A person decides where it matters: they review and merge a plan branch, or
+   act on what they were told.
+
+- **Writers can change `main`, and review of an agent's work is a practice.**
+  An agent that runs as a writer can claim, close and link on `main`, and the
+  access policy does not stop it. Only an admin can merge a branch. To get
+  review, have agents file plans on a branch and give only people the admin
+  role.
+- **Outside actions are not held back by the record.** A message or a ticket
+  goes out through the agent's own tools, and nothing here reviews it first.
+  Keep those workflows to telling and drafting, and give the agent only the
+  outside access they need. The cookbook includes no integrations for them.
+- **A repeat is a practice too.** The record has no field for "notified". An
+  agent can leave a comment after telling someone and read the issue's comments
+  before telling again. Nothing enforces it.
+- **Filing is a gap.** There is no stored write for creating an issue. The
+  `ob` client files one, with its links, as a strict load that refuses an
+  existing id, and the stored writes handle everything after that.
+- **Bring your own agent.** `ob` is a command-line client with the `bd`
+  command set, which any agent that runs shell commands can use. It adds the
+  retry that many agents writing at once need. `ob onboard` prints the
+  instructions to give an agent.
+
+## Data sources
+
+The record holds the plan that connects your tools. Each tool stays the
+authority for its own data.
+
+| Source | Examples | Feeds |
+|---|---|---|
+| Issue trackers | Linear, Jira, GitHub Issues, GitLab | `Issue`, `BlockedBy`, `ChildOf` |
+| Code review | GitHub pull requests, GitLab merge requests | `Comment`, `Issue` status |
+| CI | GitHub Actions, Buildkite, CircleCI | `Comment`, new `Issue` records for failures |
+| Chat | Slack, Discord | `Memory`, `Comment` |
+| Beads | `bd`, through its JSONL export | `Issue` and its links |
+
+The cookbook includes one connector: `ob import` reads a `bd` export and
+`ob export` writes one. For the others, a sync is a script, or an agent, that
+reads from the tool and files issues with `ob create` or writes through the
+stored mutations.
+
+## Questions you can ask
+
+Nobody maintains a status column or a board for these.
+
+| Question | Stored query |
 |---|---|
-| `Issue` | A unit of work: title, kind, status (`open`, `in_progress`, `deferred`, `closed`), priority 0–4, labels, the claim (`assignee`, `lease_expires_at`), deferral and free-form JSON `metadata` |
-| `Comment` | A comment, linked to one issue by `CommentOn` |
-| `Memory` | A durable project fact that `ob prime` gives every new session, optionally linked to issues by `MemoryAbout` |
-| `BlockedBy` | The source cannot start until the target closes |
-| `ChildOf` | The source is part of the target; at most one parent (`@card(0..1)`) |
-| `RelatesTo`, `DiscoveredFrom`, `Duplicates`, `Supersedes` | Annotations; none affects readiness |
+| What can an agent claim now? | `ready` |
+| What is blocked, and by what? | `blocked` |
+| Which blocks does an issue inherit from its parents? | `ancestor_blockers` |
+| What depends on this issue, directly or not? | `downstream` |
 
-There is no `blocked` status: blocking is derived from the links, so it cannot
-disagree with them. Every edge is keyed by its endpoints, so adding a link twice
-is a no-op.
+The cookbook has 35 stored reads and 26 stored writes. AGENTS.md names them.
 
-## Readiness, with beads' rules
+## Sample data
 
-[`queries/issues.gq`](queries/issues.gq) computes readiness on every read. An
-issue is ready when it is open, its `defer_until` has passed, no open issue
-blocks it, and no ancestor passes a block down. An ancestor passes one down when
-it is not closed, no closed issue sits between it and the issue, and at least
-one of its open blockers lies outside its own subtree:
+The cookbook comes with Larkspur, a made-up note-taking app whose offline sync,
+shared notebooks and 0.9 release are being built by three agents: 22 issues, 9
+parent links, 5 blocking links, 2 comments and 2 memories. On a fresh load, the
+questions above return:
 
-```gq
-match {
-    $i: Issue { status: "open" }
-    $i.defer_until is null or $i.defer_until <= now()
-    not { $i blockedBy $b  $b.status != "closed" }
-    not { $i childOf{1,8} $a  $a.status != "closed"  $a blockedBy $c  $c.status != "closed"
-          not { $c childOf{1,8} $a }
-          not { $i childOf{1,8} $x  $x.status = "closed"  $x childOf{1,8} $a } }
-}
+- Eight issues are ready, led by the epic for offline sync and a P0 crash on
+  opening an empty notebook.
+- Three issues wait directly on open work: conflict handling, the sync docs
+  and shared notebooks. Two more, the sharing endpoint and dialog, are blocked
+  through their parent.
+- The sharing endpoint inherits its block from the shared-notebooks epic, which
+  waits on the access control task.
+- The queue task blocks conflict handling directly and the sync docs through
+  it.
+
+[seed.md](seed.md) describes the project and the ready and blocked sets.
+
+## Run it
+
+Paste this prompt into a coding agent such as Claude Code or Codex:
+
+```text
+Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the beads cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/beads
 ```
 
-The shipped query splits the last block into the parent and the deeper
-ancestors, so only the deeper ones pay for the closed-in-between check.
-
-The writes follow beads too. A parent waits for its children through the link
-alone: `ob close` refuses an issue with an open child or an open blocker unless
-they close together or `--force` is given. So `ob` refuses a link that makes an
-issue wait on its own ancestor (it would wait forever) or a parent wait on its
-own descendant (the link already says so), and `ob import` skips both, as `bd`
-does. Moving an issue under a new parent is checked for its whole subtree, and
-`ob` refuses parent loops and hierarchies deeper than eight levels.
-
-## Writes for many agents
-
-- **One commit per command.** `ob create` writes the issue and all its links in
-  one strict JSONL append, which refuses an existing id instead of upserting.
-  `ob close a b c` is one update.
-- **Atomic claims.** The claim is one conditional update on one row:
-  `update Issue set { status: "in_progress", assignee: $who, … } where slug = $id
-  and status = "open" and (assignee is null or assignee = $who)`. Of several
-  agents racing for one issue, exactly one matches.
-- **Retry lost races.** Every write to a branch is checked against its head; a
-  writer that loses is refused before any effect (`read_set_conflict`), even
-  when it touched a different issue. Rerun it: every mutation here re-checks its
-  own condition, so a rerun cannot apply twice. `ob` does this with jittered
-  backoff, and spreads agents over the ready list after a lost claim.
-- **Never replay a lost response.** Every failed `omnigraph` command reports a
-  `disposition` whose `effects` (`none`, `partial` or `unknown`) say whether it
-  changed anything. A timeout, a dropped connection or a 502/503/504 leaves a
-  write's effects unknown. `ob` resends reads, and writes refused before they
-  started (`effects: none`: busy, or the server not reached), but never a write
-  whose effects are unknown: it exits 3 with `"outcome": "unknown"`, and the
-  issue has to be read before the command runs again. `ob claim`, `ob update`
-  and `ob create` do that read themselves, since the row shows whether their
-  write landed.
-- **Concurrent commands on one operator configuration.** Each `omnigraph`
-  command on a server target briefly locks its operator configuration's
-  credential state, and a concurrent command that finds the lock held is
-  refused before it sends anything. `ob` runs such a command again.
-- **Per-issue compare-and-swap edits.** Every write stamps `updated_at`.
-  `ob update` writes back with `where slug = $id and updated_at = $expected`
-  and re-reads if someone edited the issue in between, so concurrent label
-  edits both survive.
-- **Leases, not heartbeats.** A claim can carry a lease (`--lease 2h`);
-  `ob renew` (or claiming again with `--lease`) extends it and `ob reclaim`
-  reopens every expired one in one update. A heartbeat every few seconds would
-  be a commit every few seconds. A claim ends when its issue leaves
-  `in_progress`: release, reclaim, reopen, defer and `ob update --status` clear
-  the lease and the assignee (close keeps the assignee as a record), so a
-  reopened issue is free for anyone to claim.
-- **History from commits.** `ob history <id>` reads the change feed; each
-  commit records its actor, which in served mode comes from the target's token.
-
-## Roles
-
-The bundle's [policies](policies/) follow the repository's three roles:
-`act-admin` manages configuration and merges planning branches into `main`;
-`act-writer` (agents) reads, writes, and creates or deletes branches;
-`act-reader` (dashboards, auditors) reads and invokes stored reads, and is
-refused on stored mutations. `OB_ACTOR` should name the same actor as the
-target's token: the history records the token's actor regardless, but
-`assignee` is a value the client sends.
-
-Plans go on branches: `ob branch create plan`, then
-`ob --branch plan create …` files work that `main` does not see until an admin
-runs `ob branch merge plan`.
-
-## Semantic search (optional)
-
-With an embedding provider configured (see [cluster.yaml](cluster.yaml)),
-`ob init --embed` fills issue-title and memory vectors through the offline
-`omnigraph embed` pipeline before each write, and `ob similar` and
-`ob recall --semantic` rank by meaning. The pipeline embeds each title or
-memory body exactly as written, as a query embeds its text. Vectors stored with
-OmniGraph 0.13 embedded a templated line instead; regenerate them with
-`omnigraph embed --reembed-all` and reload them, as the engine's
-[embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.14.0/docs/user/search/embeddings.md#offline-file-pipeline)
-describes. Set `OMNIGRAPH_EMBEDDINGS_MOCK=1` for deterministic test vectors.
-
-## Compared with beads
-
-`client/tests/compare_bd.py` runs `bd` 1.3.1 and `ob` on the same generated
-project (`bd`'s usage metrics off). On 2,000 issues and 3,171 links, and on this
-seed, both return **the same ready and blocked sets**; reaching that fixed
-`ob`'s handling of closed parents and adopted beads' two link rules above.
-Neither tool ever handed one issue to two agents.
-
-Measured with OmniGraph 0.13.0 on one laptop with other work running, so
-treat the timings as rough. After `bd gc`, which shrank the imported Dolt
-journal from 314 MB to 3 MB, `ready`, `show` and `search` take 200–470 ms in
-`bd` and about 200 ms in `ob`; `bd blocked` takes 1.3 s. `ob`'s writes were 2.5–7 times faster, but a local
-OmniGraph store does not fsync and Dolt syncs every commit, so that gap is not
-like for like. `bd import` took about 10 minutes for 2,000 issues, against under
-a second for `ob`'s batched load. About 90 ms of each `ob` command is Python
-starting up.
-
-## Files
-
-| Path | What |
-|---|---|
-| `schema.pg` | The ontology |
-| `queries/issues.gq` | Reads: readiness, blocked, links, search, memories, guards |
-| `queries/mutations.gq` | Writes: claim, release, renew, close, defer, links, comments, memories, the CAS edit |
-| `policies/` | Admin, writer and reader roles |
-| `cluster.yaml` | The deployment, with optional embeddings |
-| `seed.jsonl`, `seed.md` | A fictional project and its description |
-| `omnigraph-config.example.yaml` | Read aliases and mutation examples |
-| `client/ob`, `client/ob_cli.py` | The client |
-| `client/tests/test_ob.py` | End-to-end tests on local graphs, and on a served graph behind the local HTTPS gateway |
-| `client/tests/bench_ob.py` | Latency and concurrent-agent benchmark |
-| `client/tests/compare_bd.py` | Side-by-side run against `bd` |
-
-```bash
-cd client
-python3 -m unittest discover -s tests -v                  # needs omnigraph, omnigraph-server, openssl
-python3 tests/bench_ob.py --issues 2000 --agents 8        # a scratch local graph
-python3 tests/bench_ob.py --target local-writer           # a running server, on a scratch branch
-python3 tests/compare_bd.py --issues 2000 --agents 8      # needs bd
-```
-
-## Limits
-
-- `ready` lists at most 500 issues and `blocked` at most 10,000; `ob stats` and
-  `ob prime` count with aggregates. `ob ready` filters on the server, so the
-  limit applies to matching issues; only a second `-l` label is checked in the
-  client.
-- Readiness follows parent links up to eight levels; GQ needs a finite bound.
-  `ob` keeps hierarchies within that depth, but data loaded directly can go
-  deeper.
-- `upstream`, `downstream` and `ob dep tree` reach 32 links, and `ob dep tree`
-  says when a chain goes on. The cycle check before `ob dep add` follows chains
-  of any length.
-- The close guard and the link rules read before they write; unlike the claim
-  they are not atomic with the write.
-- A claim does not re-check blockers atomically; a blocker added between
-  `ready` and `claim` does not stop it. The same is true of beads.
-- Every write to a branch takes its turn at the head, so heavy write
-  contention is bounded by commit latency.
-- `ob history` replays the change feed from the beginning, so its cost grows
-  with history.
-- beads' molecules, gates, wisps, agent mail and the `conditional-blocks` and
-  `waits-for` link types are orchestration features and are not modelled.
-  `ob import` maps unknown issue types to `task` with a `bd-type:` label.
+To do it by hand, follow the shared [local setup](../docs/local-setup.md)
+using folder `beads` and Graph ID `beads`. [AGENTS.md](AGENTS.md) has the
+exact command for each question and workflow on this page.
