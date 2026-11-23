@@ -112,3 +112,8 @@ query unreferenced_callables() @description("Functions and methods nothing in th
     order { $s.symbol asc }
     limit 2000
 }
+
+query review_comment($sha: String) @description("The review posted to a pull request for this revision, if one was: the comment's URL and when it was posted.") {
+    match { $r: ReviewComment { sha: $sha } }
+    return { $r.sha, $r.pull_request, $r.url, $r.posted_at }
+}

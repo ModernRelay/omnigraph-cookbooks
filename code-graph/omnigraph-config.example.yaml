@@ -1,9 +1,9 @@
 # Read aliases for the code-graph cookbook (graph `code`).
 # Merge the `aliases:` entries below into $OMNIGRAPH_HOME/config.yaml, the operator
-# config from ../README.md#local-setup, whose `local-reader` target they use.
+# config from ../docs/local-setup.md, whose `local-reader` target they use.
 # Run one with `omnigraph alias <name>`; pass a query's parameters by name with
 # `--params '{"name":"..."}'`. Aliases only read. Writes are loads of generated
-# revisions; see README.md#index-a-pull-request.
+# revisions and the review record; see CLAUDE.md#workflows-step-by-step.
 aliases:
   # ── Finding symbols ──────────────────────────────────────────
   revision: {target: local-reader, graph: code, query: revision}

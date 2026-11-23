@@ -499,6 +499,19 @@ def code_graph_journey(env):
     assert [r["symbol"] for r in review["added"]] == ["src/router/`utils.ts`/", helper["symbol"]], review["added"]
     assert {r["symbol"] for r in review["changed"]} == changed and review["moved"] == 53, review
     assert (len(review["references"]["added"]), len(review["references"]["removed"])) == (18, 0)
+    # The review workflow records the posted comment on the branch, once per revision.
+    comment = json.dumps({"sha": head, "pull_request": "https://github.com/honojs/hono/pull/5267",
+                          "url": "https://github.com/honojs/hono/pull/5267#issuecomment-1",
+                          "posted_at": "2026-08-20T12:00:00Z"})
+    record = ("mutate", "record_review_comment")
+    refused(run(env, *record, *scope("act-reader"), "--branch", "pr-5267", "--params", comment, "--json", ok=False))
+    refused(run(env, *record, *scope("act-agent"), "--params", comment, "--json", ok=False))
+    run(env, *record, *scope("act-agent"), "--branch", "pr-5267", "--params", comment, "--json")
+    # A revision has one review: recording it again replaces the record, it does not add one.
+    run(env, *record, *scope("act-agent"), "--branch", "pr-5267", "--params", comment, "--json")
+    posted = rows("review_comment", {"sha": head}, "--branch", "pr-5267")
+    assert [r["r.url"] for r in posted] == ["https://github.com/honojs/hono/pull/5267#issuecomment-1"], posted
+    assert rows("review_comment", {"sha": head}) == []
 
     assert rows("callers", helper) == []
     assert len(rows("callers", helper, "--branch", "pr-5267")) == 14
@@ -514,6 +527,7 @@ def code_graph_journey(env):
     run(env, "branch", "delete", "pr-5267", *scope("act-writer"), "--yes", "--json")
     assert [row["r.sha"] for row in rows("revision")] == [head]
     assert len(rows("callers", helper)) == 14
+    assert len(rows("review_comment", {"sha": head})) == 1
     assert [row["r.sha"] for row in rows("revision", None, "--snapshot", previous)] == [base]
     assert rows("callers", helper, "--snapshot", previous) == []
 

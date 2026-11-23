@@ -1,6 +1,6 @@
 // code-graph: the symbols of one repository and the references between them,
-// one graph state per git revision. Every row is generated from a SCIP index by
-// sources/build_seed.py; nothing here is written by hand.
+// one graph state per git revision. Every row but a ReviewComment is generated
+// from a SCIP index by sources/build_seed.py; nothing else is written by hand.
 
 node Revision @description("The git revision this graph state was indexed from, and the indexer that read it. One per branch state.") {
     sha: String @key                 // full commit SHA
@@ -43,4 +43,14 @@ edge References: Symbol -> Symbol @description("Code inside the source's definit
 
 edge ImplementedBy: Symbol -> Symbol @description("The target implements or overrides the source, as the indexer reports it: an interface or base member and a class member implementing it. A call to the source can run the target, so the edge points the way a call goes.") {
     @key(@src, @dst)
+}
+
+// The one type the converter does not write. An overwrite load replaces only
+// the types in its file, so a review recorded on a pull request's branch stays
+// there when a later push is loaded over it, and merges with the branch.
+node ReviewComment @description("A call-graph review posted to a pull request for one indexed revision: the comment that `cg diff --markdown` wrote. One per revision, so a rerun does not post it twice.") {
+    sha: String @key                 // the revision the review describes
+    pull_request: String             // the pull request's URL
+    url: String                      // the posted comment's URL
+    posted_at: DateTime
 }
