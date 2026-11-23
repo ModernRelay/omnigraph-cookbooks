@@ -4,8 +4,8 @@ Use the `industry-intel/` cookbook in a local clone of
 [omnigraph-cookbooks](https://github.com/ModernRelay/omnigraph-cookbooks).
 The fixed seed illustrates SPIKE; it is not a current research feed.
 
-Follow the root README's
-[local setup](https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#local-setup)
+Follow the repository's
+[local setup](https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/docs/local-setup.md)
 with cookbook `industry-intel` and graph `spike`. That is the single setup
 sequence for apply, writer-lock handoff, server startup, the HTTPS gateway, CLI
 targets, readiness, and loading. Merge the cookbook's aliases into the operator
@@ -41,8 +41,8 @@ requires no embedding provider.
 ## Continue
 
 Explore `queries/*.gq` and the cookbook's aliases. For schema, query, or policy
-updates, follow the root README's
-[live update workflow](https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#live-updates).
+updates, follow the repository's
+[live update workflow](https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/docs/local-setup.md#live-updates).
 Use the `omnigraph` skill for data changes and branch review.
 
 An overwrite load replaces only the node/edge types represented in its input;

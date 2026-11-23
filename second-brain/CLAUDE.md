@@ -22,10 +22,10 @@ cluster commands, CLI — see the **omnigraph** skill and
 
 ## Setup
 
-Use the shared [local setup](../README.md#local-setup) with cookbook
+Use the shared [local setup](../docs/local-setup.md) with cookbook
 `second-brain` and graph `brain`. It owns authentication, the bootstrap writer-lock
 handoff, readiness, and served seed loading. Apply later configuration edits with
-the [live update workflow](../README.md#live-updates).
+the [live update workflow](../docs/local-setup.md#live-updates).
 
 Graph id `brain`. Stored queries and their parameters: `omnigraph queries list --target local --graph brain`.
 Aliases pass parameters by name: `omnigraph alias person-tasks-i-owe --params '{"slug":"per-theo"}'` is `omnigraph query person_tasks_i_owe --target local-reader --graph brain --params '{"slug":"per-theo"}'`.

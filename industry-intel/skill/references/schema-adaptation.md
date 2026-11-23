@@ -82,8 +82,8 @@ files and bindings. Neither validates all rows in `seed.jsonl`; the load does.
 
 ## Evolve a running graph
 
-Follow the root README's
-[live updates](https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#live-updates).
+Follow the repository's
+[live updates](https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/docs/local-setup.md#live-updates).
 Use served `cluster plan` and `cluster apply` with the full cluster bundle.
 The server activates successful changes without restarting; do not use direct
 storage apply against its held writer lock.

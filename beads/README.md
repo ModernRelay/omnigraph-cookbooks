@@ -181,6 +181,6 @@ Paste this prompt into a coding agent such as Claude Code or Codex:
 Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the beads cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/beads
 ```
 
-To do it by hand, follow the shared [local setup](../README.md#local-setup)
+To do it by hand, follow the shared [local setup](../docs/local-setup.md)
 using folder `beads` and Graph ID `beads`. [AGENTS.md](AGENTS.md) has the
 exact command for each question and workflow on this page.

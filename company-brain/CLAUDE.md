@@ -90,7 +90,7 @@ fictional company, "Lanternworks"; all names are made up.
 
 ## Running it
 
-Use the shared [local setup](../README.md#local-setup) with folder
+Use the shared [local setup](../docs/local-setup.md) with folder
 `company-brain` and graph `company`, then load `seed.jsonl` (described in
 [seed.md](seed.md)). With the server up:
 
@@ -184,7 +184,7 @@ verify and accept on main, where no agent can write. Each commit records the
 actor from the bearer token, so the history says which agent wrote what, and
 `actors` says who answers for it.
 
-The shared [local setup](../README.md#local-setup) has a token and a target
+The shared [local setup](../docs/local-setup.md) has a token and a target
 for admin, writer, reader and the generic `act-agent`. The walkthrough adds a
 token and a target for each of the two named agents. The server reads static
 tokens only at start, so stop it (Ctrl-C) and start it again with all six:
@@ -334,7 +334,7 @@ only, because an alias cannot choose a branch.
 ## Extending
 
 Each extension is a live, in-place schema change (see
-[live updates](../README.md#live-updates)): add the type, its edges and its
+[live updates](../docs/local-setup.md#live-updates)): add the type, its edges and its
 queries, then `cluster plan`/`apply` through the running server. Add one when a
 question you care about needs it, not before.
 
