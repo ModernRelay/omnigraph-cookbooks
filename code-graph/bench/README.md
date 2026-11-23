@@ -69,29 +69,8 @@ The three inexact pull requests, checked against their source diffs:
   `getPath`, `router` and `strict` removed with five references.
 - **`6cadf753`**: one removed reference the cookbook still has; unexplained.
 
-The first run of this benchmark found that keys carried scip-typescript's
-positional `typeLiteralN` numbering, so one new type literal renamed every
-member below it. The converter now leaves those containers out of keys.
-Execution recall then found 46 function constants the converter did not count
-as callable, such as `const getCookie: GetCookie = (c) => {...}`, so calls to
-them had `call: false` and changes to their code went unseen; none of the 40
-sampled pull requests changed one. The converter now takes callability from
-the initializer.
-
-The agent-cost benchmark then found that a constant holding a table of
-functions owned none of its references. scip-typescript gives such a constant,
-a class field, a getter and a setter no range, so their code belonged to the
-module or class around them, and `impact` could not follow `detectLanguage`
-through `detectors` to `detectFromCookie`. The converter now reads those
-ranges with the TypeScript parser, and the reference and the traces use the
-same owners. That gave 47 definitions a digest (25 class fields, 13 getters
-and 9 constants) and made 13 callable, among them `Context.json` and the other
-fields of `Context` that hold arrow functions, so calls to them are now call
-edges. It also caught two changes the first run missed: `17ad0e21` and
-`e9c01079` change `Context.header` and `Factory.createApp`, class fields
-holding arrow functions that had no digest. `17ad0e21` is now exact;
-`e9c01079` still is not, for the union type above. Cached conversions and
-references are keyed by a digest of the code that made them.
+Cached conversions and references are keyed by a digest of the code that made
+them, so a change to the converter or the reference builder rebuilds them.
 
 ## Execution recall
 
@@ -126,20 +105,20 @@ Results, `results/recall.json`:
 | Graph | All 917 | Functions and methods (768) | Constructors (56) | Getters and setters (93) |
 |---|---|---|---|---|
 | Compiler reference | 0.891 | 0.882 | 0.875 | 0.978 |
-| Omnigraph, every reference | 0.893 | 0.882 | 0.875 | 1.000 |
-| Omnigraph, every reference with `ImplementedBy` | 0.932 | | | |
-| Omnigraph, call edges only | 0.778 | 0.865 | 0.875 | 0 |
+| Omnigraph | 0.893 | 0.882 | 0.875 | 1.000 |
 | codegraph | 0.686 | 0.758 | 0.839 | 0 |
 | Graphify | 0.677 | 0.749 | 0.821 | 0 |
 | GitNexus | 0.632 | 0.694 | 0.839 | 0 |
 | codebase-memory-mcp | 0.627 | 0.690 | 0.804 | 0 |
 | code-review-graph | 0.604 | 0.721 | 0 | 0 |
 
-"Every reference" is what the cookbook's reads on Omnigraph answer: `callers`,
-`callees` and `impact` follow every `References` edge and report `call` as a column, not
-a filter. "Call edges only" keeps the edges whose `call` is true. "With
-`ImplementedBy`" adds a second read, `implementers`: a call through an interface
-member also reaches the implementations the graph records.
+Omnigraph's row is what the cookbook's reads answer: `callers`, `callees` and
+`impact` follow every `References` edge and report `call` as a column, not a
+filter. Adding a second read, `implementers`, which follows a call through an
+interface member to the implementations the graph records, raises it to
+0.932. Keeping only the edges whose `call` is true, as a call graph does,
+gives 0.778: 0.865 of functions and methods, 0.875 of constructors and none
+of the getters and setters.
 
 The tools record calls, so the like-for-like column is functions and
 methods, where Omnigraph's call edges find 0.865 and its references 0.882.
@@ -227,30 +206,26 @@ answer is the JSON list on a session's last `ANSWER:` line, mapped to the
 definitions the answer format names (a getter or field to its class, a
 constant that holds no function to its file) and graded by F1.
 
-Results, `results/agent.json`. The seven arms ran 168 sessions on
-2026-11-16. After the converter fix that this benchmark prompted (see
-[PR diff](#pr-diff)), the Omnigraph arm was rebuilt and ran its 24 sessions
-again on 2026-11-17; `results/agent.json` holds that rerun, and the first run's
-Omnigraph row is kept below for comparison. Medians per session; input tokens
-include every cached read:
+Results, `results/agent.json`, 168 sessions: the no-graph arm and the five
+tools on 2026-11-16, Omnigraph on 2026-11-17. Medians per session; input
+tokens include every cached read:
 
 | Arm | Exact answers | Cost | Wall time | Input tokens | Output tokens | Turns | Calls to its tool |
 |---|---|---|---|---|---|---|---|
 | No code graph | 24 of 24 | $0.100 | 16.1 s | 198k | 1,926 | 6 | |
-| Omnigraph, rerun after the fix | 24 of 24 | $0.069 | 18.6 s* | 153k | 1,198 | 5 | 48% |
-| Omnigraph, first run | 21 of 24 | $0.059 | 11.7 s | 187k | 1,018 | 5 | 52% |
+| Omnigraph | 24 of 24 | $0.069 | * | 153k | 1,198 | 5 | 48% |
 | codegraph | 24 of 24 | $0.094 | 17.6 s | 221k | 1,766 | 6 | 0% |
 | Graphify | 21 of 24 | $0.100 | 16.0 s | 165k | 1,866 | 6 | 9% |
 | GitNexus | 22 of 24 | $0.102 | 14.3 s | 207k | 1,368 | 5 | 17% |
 | codebase-memory-mcp | 24 of 24 | $0.114 | 18.1 s | 207k | 2,016 | 6 | 1% |
 | code-review-graph | 24 of 24 | $0.107 | 20.1 s | 225k | 1,931 | 6 | 7% |
 
-\* Not comparable with the other rows. During the rerun the API wrote 69
-output tokens a second, against 111 in the first run. Per question the rerun
-took within two turns of the first run and wrote about as many output tokens,
-but spent 13% to 109% longer waiting on the API. Cost moves with prompt caching too: a session that writes 25k tokens to
-the cache costs about $0.13, one that writes 4k about $0.05, for the same
-answer, and with three sessions per question the median can land on either.
+\* Not comparable. On the day Omnigraph's sessions ran, the API wrote a
+median 74 output tokens a second, against 113 to 139 for the other arms, so
+its sessions spent longer waiting on the API for the same work. Cost moves
+with prompt caching: a session that writes 25k tokens to the cache costs
+about $0.13, one that writes 4k about $0.05, for the same answer, and with
+three sessions per question the median can land on either.
 
 The same sessions paired with no code graph, question by question: the
 geometric mean over the eight questions of the ratio of the two arms' medians,
@@ -258,8 +233,7 @@ and on how many questions the arm spent less:
 
 | Arm | Cost | Wall time | Output tokens | Turns |
 |---|---|---|---|---|
-| Omnigraph, rerun after the fix | 0.84×, 5 of 8 | not comparable | 0.75×, 5 of 8 | 0.95×, 4 of 8 |
-| Omnigraph, first run | 0.77×, 6 of 8 | 0.88×, 4 of 8 | 0.70×, 6 of 8 | 0.86×, 5 of 8 |
+| Omnigraph | 0.84×, 5 of 8 | not comparable | 0.75×, 5 of 8 | 0.95×, 4 of 8 |
 | codegraph | 1.01×, 5 of 8 | 1.02×, 4 of 8 | 0.91×, 6 of 8 | 0.98×, 2 of 8 |
 | Graphify | 1.01×, 4 of 8 | 1.03×, 3 of 8 | 0.99×, 5 of 8 | 0.94×, 4 of 8 |
 | GitNexus | 0.97×, 4 of 8 | 1.01×, 3 of 8 | 0.81×, 6 of 8 | 0.87×, 4 of 8 |
@@ -269,13 +243,14 @@ and on how many questions the arm spent less:
 Input tokens are mostly the same context read again on every turn, cheap from
 the cache; cost follows what each turn adds and what the model writes. A `cg`
 read returns the definitions as one table, where a text search returns lines
-to read, so in the first run an Omnigraph session added a median 3.8k tokens
-to its context against 9.8k to 14.4k for the other arms. The saving was
-largest where names repeat: for the callers of `HonoRequest.header` an
-Omnigraph session cost $0.042 and took 14.6 s, against $0.161 and 34.2 s
-without a graph, and for the users of `HonoRequest.path` $0.048 and 12.7 s
-against $0.094 and 20.9 s. On questions one text search answers, such as the
-classes implementing `Router`, it cost a little more.
+the agent then reads files around. The saving was largest where a search
+takes several rounds: for the users of `HonoRequest.path` an Omnigraph
+session cost $0.040 against $0.094 without a graph (5 turns against 11), for
+the callers through a chain of calls to the cookie `parse` $0.071 against
+$0.129, and for the callers of `HonoRequest.header`, a name several
+definitions share, $0.135 against $0.161 (5 turns against 11). On questions
+one text search answers, such as the classes implementing `Router`, it cost a
+little more ($0.028 against $0.019).
 
 A tool also costs context before the question: a session without a graph
 starts at 36.2k tokens, and the tools add 0.4k (Omnigraph), 0.6k (Graphify),
@@ -288,18 +263,12 @@ adds context to every prompt, which needs no call; the context it gave for
 `header` counted 2 callers of `HonoRequest.header` and 14 of `Context.header`,
 which matching names produces, and its agents searched to check.
 
-In the first run, Omnigraph's three inexact answers were the three sessions
-of the transitive question: `detectLanguage` calls `detectFromCookie` through
-the `detectors` table, the reference from the table to `detectFromCookie`
-belonged to the module, and `impact` stopped after three hops on a five-hop
-chain, so the agents that followed the graph stopped short of `detectLanguage`
-and `languageDetector`. Agents that read the code found both. The converter
-now gives the table its own references and `impact` follows sixteen hops; in
-the rerun all three sessions answered exactly, each running `impact` and then
-reading `language.ts` once to rule out `validateOptions`, which reads the
-table's keys, and the `Detectors` type. Graphify and GitNexus missed the two
-in two of three sessions, and one Graphify session missed `serveStatic`'s
-chained `header` call.
+On the chain-of-calls question, `detectLanguage` calls `detectFromCookie`
+through the `detectors` table. Omnigraph's sessions ran `impact`, then read
+`language.ts` once to rule out `validateOptions`, which reads the table's
+keys, and the `Detectors` type, and all three answered exactly. Graphify and
+GitNexus missed the two in two of three sessions, and one Graphify session
+missed `serveStatic`'s chained `header` call.
 
 Each tool's first index of a fresh checkout, median of three, from
 `index_seconds_fresh` in `work/agent/ARM/setup.json`:
@@ -332,72 +301,78 @@ times each in four arms: no code graph, Omnigraph, codegraph and Graphify.
 [`scale-design.md`](scale-design.md) has the design, the hypotheses stated
 before the runs, the pilot, and every correction.
 
-The run turned up two defects in the cookbook, both fixed: the graph had
-been loaded without its indexes, which made every Omnigraph read slow but
-changed no answer, and the converter left out static members. It also turned
-up errors in its own keys. The compiler reference covered `src/vs/` rather
-than `src/`, and did not count a call or construction through dependency
-injection (`invokeFunction`, `createInstance`). Counting them leaves one
-question with 44,328 answers, so 23 are scored.
+The run turned up errors in its own keys. The compiler reference covered
+`src/vs/` rather than `src/`, and did not count a call or construction through
+dependency injection (`invokeFunction`, `createInstance`). Counting them leaves
+one question with 44,328 answers, so 23 are scored.
 
-Results, `results/agent-scale.json`, from 480 sessions on 2026-11-18 ($72 at
-list price). Medians per session:
+The arms ran in two windows, each beside its own no-graph arm, on 2026-11-18:
+codegraph and Graphify in the first, `results/agent-scale.json`, and
+Omnigraph, on the graph with its indexes, in the second,
+`results/agent-scale-window2.json`. Each arm is compared with the no-graph arm
+of its own window, since API speed and caching differ between windows. Medians
+per session:
 
-| Arm | Exact answers | Mean F1 | Cost | Wall time | Output tokens | Turns | Calls to its tool |
-|---|---|---|---|---|---|---|---|
-| No code graph | 73 of 115 | 0.960 | $0.103 | 23.6 s | 2,744 | 8 | |
-| Omnigraph | 79 of 115 | 0.964 | $0.076 | 41.7 s* | 1,417 | 5 | 36% |
-| codegraph | 73 of 115 | 0.960 | $0.112 | 42.2 s | 2,784 | 8 | 0.3% |
-| Graphify | 68 of 115 | 0.949 | $0.121 | 25.4 s | 2,968 | 10 | 5% |
-
-\* On the graph without indexes, where `cg members` took a median 48 s.
+| Arm | Window | Exact answers | Mean F1 | Cost | Wall time | Output tokens | Turns | Calls to its tool |
+|---|---|---|---|---|---|---|---|---|
+| No code graph | first | 73 of 115 | 0.960 | $0.103 | 23.6 s | 2,744 | 8 | |
+| codegraph | first | 73 of 115 | 0.960 | $0.112 | 42.2 s | 2,784 | 8 | 0.3% |
+| Graphify | first | 68 of 115 | 0.949 | $0.121 | 25.4 s | 2,968 | 10 | 5% |
+| No code graph | second | 69 of 115 | 0.951 | $0.091 | 22.9 s | 2,724 | 9 | |
+| Omnigraph | second | 80 of 115 | 0.953 | $0.047 | 14.1 s | 1,455 | 5 | 36% |
 
 Against no graph, question by question (geometric mean of the ratio of
 medians, 95% bootstrap interval, questions where the arm spent less):
 
-| Arm | Cost | Output tokens | Turns |
-|---|---|---|---|
-| Omnigraph | 0.58× [0.44, 0.77], 17 of 23 | 0.61× [0.48, 0.75], 16 | 0.71× [0.48, 1.13], 15 |
-| codegraph | 0.91× [0.83, 1.01], 16 of 23 | 0.94× [0.86, 1.02], 12 | 1.04× [0.82, 1.49], 12 |
-| Graphify | 1.12× [1.02, 1.22], 5 of 23 | 1.05× [0.97, 1.13], 6 | 1.26× [1.05, 1.71], 6 |
+| Arm | Cost | Wall time | Output tokens | Turns |
+|---|---|---|---|---|
+| Omnigraph | 0.52× [0.39, 0.69], 17 of 23 | 0.70× [0.57, 0.87], 16 | 0.64× [0.52, 0.80], 17 | 0.64× [0.48, 0.84], 15 |
+| codegraph | 0.91× [0.83, 1.01], 16 of 23 | 1.88× [1.65, 2.13], 1 | 0.94× [0.86, 1.02], 12 | 1.04× [0.82, 1.49], 12 |
+| Graphify | 1.12× [1.02, 1.22], 5 of 23 | 1.10× [1.02, 1.17], 3 | 1.05× [0.97, 1.13], 6 | 1.26× [1.05, 1.71], 6 |
 
-A second window, `results/agent-scale-window2.json`, ran no graph and
-Omnigraph again after `optimize`, 240 sessions, still without static members:
+By family, Omnigraph against no graph (`results/agent-scale-window2-analysis.json`):
 
-| Arm | Exact answers | Mean F1 | Cost | Wall time | Output tokens | Turns | Calls to its tool |
-|---|---|---|---|---|---|---|---|
-| No code graph | 69 of 115 | 0.951 | $0.091 | 22.9 s | 2,724 | 9 | |
-| Omnigraph | 80 of 115 | 0.953 | $0.047 | 14.1 s | 1,455 | 5 | 36% |
+| Family | Exact, no graph | Exact, Omnigraph | Cost | Wall time | Median turns |
+|---|---|---|---|---|---|
+| Release changes | 11 of 20 | 18 of 20 | 0.30× | 0.45× | 9 → 5 |
+| Transitive callers | 0 of 15 | 0 of 15 | 0.17× | 0.31× | 15 → 3 |
+| Controls (a uniquely named callable) | 18 of 20 | 20 of 20 | 0.36× | 0.56× | 5 → 2 |
+| Interface dispatch | 19 of 20 | 20 of 20 | 0.80× | 0.85× | 5.5 → 6 |
+| Constructions | 9 of 20 | 13 of 20 | 1.06× | 1.18× | 18 → 16.5 |
+| Shared-name callers | 12 of 20 | 9 of 20 | 1.03× | 1.29× | 8.5 → 11 |
 
-Against no graph Omnigraph cost 0.52× [0.39, 0.69], lower on 17 of 23
-questions, and took 0.70× [0.57, 0.87] of the wall time, against 1.28×
-without indexes. `cg` answered in a median 0.2 to 0.5 s a call, the slowest
-of 453 calls in 4.0 s.
+Omnigraph was exact in 11 more sessions than no graph, 7 of them on release
+changes; the no-graph arm itself was exact in 73 sessions in one window and 69
+in the other, so a few sessions either way is within run-to-run noise. On
+release changes `cg` reads both releases, where the others diff text: when
+1.146.0 moved the call to `moveEditors` into a new method, `doMergeGroup`,
+only Omnigraph's sessions named it.
 
-Omnigraph cost less; it was not more accurate, except on release changes.
-Every arm was exact on about the same questions and went wrong on the same
-entries: a call made inside a closure or a static field's initializer, a
-construction through `createInstance` left out, a subclass's `super()`
-counted as one. Over both windows Omnigraph was exact in 17 more of 230
-sessions than no graph (95% interval over questions −4 to 43), and in 3 more
-without the release questions; no graph alone moved from 73 to 69 between
-windows. On release changes Omnigraph's agents were exact in 19 and 18 of 20
-sessions, the others in 7 to 12: `cg` reads both releases, where the others
-diff text, and when 1.146.0 moved the call to `moveEditors` into a new
-method, `doMergeGroup`, only Omnigraph's sessions named it. Omnigraph saved
-most where one `cg` read answers and least where one search for the method's
-name answers too, so its saving did not grow with the lines a search returns,
-as the design predicted. On chains of calls it was cheapest (0.28× and
-0.17×) but never exact, because `impact` follows every reference, not every
-call; and on the indexed graph `impact` from a hub ran out of memory in all
-five sessions of the question left out of the scores. codegraph's and
-Graphify's agents barely used their tools, so the run says little about
-those tools.
+Omnigraph saved most where one `cg` read is the answer: release changes,
+chains of calls and the controls. Even for a uniquely named callable a text
+search returns lines, and the agent reads files to tell which definition each
+line belongs to; the graph returns the definitions. Its saving did not grow
+with the lines a search returns, as the design predicted (Spearman +0.60
+between a question's grep lines and its cost ratio). It saved nothing where
+the graph lacks the relation the question asks for and its agents read the
+code as no-graph agents do: a construction through dependency injection,
+where `createInstance(C)` names `C` without calling it, and the callers of a
+shared method name, where the agents searched the code to check the graph's
+answer, and where the graph had no static members, such as `Color`'s static
+`equals`. On
+chains of calls its answers were close (mean F1 0.90) but never exact,
+because `impact` follows every reference, not only calls; and `impact` from
+a hub ran out of memory in all five sessions of the question left out of the
+scores, which OmniGraph 0.16 fixes. codegraph's and Graphify's agents barely
+used their tools, so the run says little about those tools.
 
 ## Limits
 
 - One repository in one language for three benchmarks, and two for the
   agent-cost benchmark. The ranking may differ elsewhere.
+- The scale benchmark's graph had no static members, 5,402 of VS Code's
+  definitions, which the converter now includes. The callers of `Color`'s
+  `equals` are one question they touch.
 - The scale benchmark's keys were corrected after its run, from reading the
   entries most sessions disagreed with; `scale-design.md` lists each
   correction and why, and every question keeps the key it was asked with.
