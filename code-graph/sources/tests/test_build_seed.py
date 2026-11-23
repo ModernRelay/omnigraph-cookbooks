@@ -246,6 +246,25 @@ export function size(x: string | number[]): number {
         changed, _ = symbol(self.OVERLOADED.replace("x.length", "x.length + 1"))
         self.assertNotEqual(data["digest"], changed["digest"])
 
+    # Two definitions on one line, after a character UTF-16 counts as two units.
+    SHARED_LINE = 'export const mark = "\U0001F600"; export function f() { return 1 } export function g() { return 2 }\n'
+
+    def digests(self, source: str) -> dict:
+        return {r["data"]["name"]: r["data"]["digest"] for r in self.build({"two.ts": source})
+                if r.get("type") == "Symbol" and r["data"]["callable"]}
+
+    def test_a_digest_covers_its_own_columns_only(self):
+        before = self.digests(self.SHARED_LINE)
+        after = self.digests(self.SHARED_LINE.replace("return 2", "return 3"))
+        self.assertEqual(before["f"], after["f"])
+        self.assertNotEqual(before["g"], after["g"])
+
+    def test_a_call_after_a_wide_character_is_a_call(self):
+        rows = self.build({"call.ts": 'export function f() {}\nexport function h() { const s = "\U0001F600"; f() }\n'})
+        edge = next(r["data"] for r in rows if r.get("edge") == "References"
+                    and r["from"] == "src/`call.ts`/h()." and r["to"] == "src/`call.ts`/f().")
+        self.assertTrue(edge["call"])
+
 
 if __name__ == "__main__":
     unittest.main()

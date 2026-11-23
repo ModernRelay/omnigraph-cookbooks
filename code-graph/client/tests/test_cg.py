@@ -2,7 +2,7 @@
 resolution and the omnigraph command lines cg builds.
 
 The fixtures are real `omnigraph branch diff --json` output from OmniGraph
-0.14.0: hono PR #5267 against its base, and the base loaded back over the PR.
+0.15.0: hono PR #5267 against its base, and the base loaded back over the PR.
 Run with: python3 -m unittest discover -s code-graph/client/tests
 """
 

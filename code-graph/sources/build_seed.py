@@ -23,7 +23,8 @@ contains a reference to the symbol it names; call is true when one of those
 references is followed by a call. A definition's range is the indexer's
 enclosing range, or, for the definitions the indexer gives none (a constant
 holding something other than a function, a class field, a getter or setter),
-the one extents.mjs reads with the TypeScript parser.
+the one extents.mjs reads with the TypeScript parser. Columns count UTF-16
+code units, as SCIP and the parser do.
 """
 from __future__ import annotations
 
@@ -221,6 +222,23 @@ def is_callable(kind: str, function_initializer: bool, sig: str | None) -> bool:
     return bool(declared) and is_function_type(sig[declared.end():])
 
 
+def utf16_slice(text: str, start: int, end: int | None = None) -> str:
+    """The part of a line between two columns. Columns count UTF-16 code units,
+    as SCIP positions and the TypeScript parser do, so a character outside the
+    Basic Multilingual Plane, such as an emoji, takes two."""
+    units = text.encode("utf-16-le", "surrogatepass")
+    return units[2 * start:None if end is None else 2 * end].decode("utf-16-le", "surrogatepass")
+
+
+def span_text(lines: list[str], span) -> str:
+    """The source text of a range, from its start column to its end column."""
+    start_line, start_col, end_line, end_col = span
+    if start_line == end_line:
+        return utf16_slice(lines[start_line], start_col, end_col)
+    return "\n".join([utf16_slice(lines[start_line], start_col), *lines[start_line + 1:end_line],
+                      utf16_slice(lines[end_line], 0, end_col)])
+
+
 def contains(outer, inner) -> bool:
     return (outer[0], outer[1]) <= (inner[0], inner[1]) and (inner[2], inner[3]) <= (outer[2], outer[3])
 
@@ -302,9 +320,11 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
         callable_ = is_callable(kind, any(d[4] for d in defs), sig)
         # The location runs from the first definition to the last in the
         # first one's file, and the digest covers the text of every definition,
-        # so a change to an overload's implementation changes the symbol.
+        # so a change to an overload's implementation changes the symbol. The
+        # text runs between the range's columns, so a definition sharing a
+        # line with another does not take the other's changes.
         spans = [d[2] or d[3] for d in defs if d[1] == path]
-        texts = ["\n".join(lines(p)[s[0]:s[2] + 1]) for _, p, s, _, _ in defs if s]
+        texts = [span_text(lines(p), s) for _, p, s, _, _ in defs if s]
         digest = hashlib.sha256("\n".join(texts).encode()).hexdigest()[:16] if callable_ and texts else None
         nodes[key] = {"symbol": key, "name": parse_descriptors(key)[-1][0], "kind": kind,
                       "callable": callable_, "path": path, "signature": sig, "digest": digest,
@@ -323,7 +343,7 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
             if caller is None:
                 continue
             text = lines(d.relative_path)
-            after = text[o.range[2]][o.range[3]:].lstrip() if o.range[2] < len(text) else ""
+            after = utf16_slice(text[o.range[2]], o.range[3]).lstrip() if o.range[2] < len(text) else ""
             edge = references.setdefault((caller, callee), {"call": False, "sites": 0})
             edge["call"] = edge["call"] or (nodes[callee]["callable"] and after.startswith(CALL_SUFFIX))
             edge["sites"] += 1
