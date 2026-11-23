@@ -8,9 +8,11 @@ links to the corresponding `CLAUDE.md`; edit the target once.
 These are eight self-contained OmniGraph **0.15.0** bundles: schemas, seed data,
 stored queries and applied policies. The only application code is the beads
 cookbook's `ob` client in `beads/client/`, with its own tests, and the local
-HTTPS gateway `scripts/local-tls-gateway.py`. The root
-[README](README.md) owns setup, live updates and upgrades; individual cookbook
-guides own their domain model and worked queries.
+HTTPS gateway `scripts/local-tls-gateway.py`. The root [README](README.md)
+is the landing page for the collection.
+[docs/local-setup.md](docs/local-setup.md) owns serving a cookbook locally,
+live updates and upgrades. Individual cookbook guides own their domain model
+and worked queries.
 
 | Folder | Graph ID |
 |---|---|
@@ -51,7 +53,7 @@ before a schema change, a bulk load or a retry after an uncertain write.
   within one seed batch.
 - New cookbooks ship schema, queries, seed, role policies, `cluster.yaml`,
   operator alias examples, short domain guidance and a `site.json` (see
-  [The website](README.md#the-website)). Add their local journey to the
+  [The website](#the-website)). Add their local journey to the
   existing checker rather than creating a second harness.
 - `site.json` is the copy omnigraph.dev shows; its questions name stored read
   queries. Renaming or removing a query means updating the question in the
@@ -63,6 +65,41 @@ before a schema change, a bulk load or a retry after an uncertain write.
   covers it offline once its `site.json` names a `use_case`.
 - Update user instructions in the same change as a command or behavior. Prefer
   a link to an existing owner over copying another lifecycle walkthrough.
+- The root [README](README.md) is the landing page for the collection, for a
+  person choosing a cookbook: what a cookbook is, the table of all eight and
+  how to try one. Its only fenced block is the onboarding prompt. Each row of its
+  table is a cookbook's `name`, `blurb` and first question from `site.json`,
+  in `order`; change them there and copy them across, and the check holds the
+  two together. Setup commands go in [docs/local-setup.md](docs/local-setup.md),
+  and what a command means stays in the engine's skill and docs: link to it.
+- The checker's own options: `OMNIGRAPH_BIN` and `OMNIGRAPH_SERVER_BIN` choose
+  the binaries, CI pins the release in `.github/workflows/qualify.yml`, and a
+  failed run keeps its fixture and server logs.
+
+## The website
+
+[omnigraph.dev/use-cases](https://www.omnigraph.dev/use-cases) is built from
+this repository: each cookbook's schema, stored queries, sample counts and
+README are imported on every site build. What the site says about a cookbook
+lives in its `site.json`:
+
+| Field | Shown as |
+|---|---|
+| `order` | its place in the directory |
+| `name`, `category`, `blurb` | the card and the page header; `category` is one of Company, Engineering, Hardware, Research, Investing, Personal |
+| `about` | optional, 600 characters at most: the "What it is" paragraph under the header. Two to four sentences on what the graph is, who it is for and what it takes the place of |
+| `sample` | what the seed data depicts, beside its counts |
+| `questions` | "Questions it answers": each `q` names a stored **read** query in `queries/*.gq`, with the `params` to run it with where it takes any |
+| `search` | the page's `<title>` (60 characters at most, leading with the phrase people search), an optional `heading` (70 at most: the second line of the page's H1, in the searcher's words) and the keywords its structured data carries |
+| `use_case`, `needs`, `capabilities` | not shown yet. The use case the cookbook serves, the needs it meets and the capabilities it uses, by their slugs in ModernRelay's mr-ops graph. Each need and capability names, in `shown_in`, the heading of the README that shows it. Leave all three out where mr-ops has no use case for the cookbook |
+
+`python3 scripts/check-cookbooks.py --site` checks every `site.json`, every
+cookbook README and the root README offline in under a second; the full run
+checks them first and runs each question against the seed. Rename or remove a query in
+the same change as the question that names it. A push to `main` that touches a
+cookbook rebuilds the site (`.github/workflows/refresh-site.yml`); a cookbook
+without a `site.json` still appears there, under "More", with its README's
+title and first paragraph.
 
 ## Writing a cookbook README
 
@@ -249,7 +286,7 @@ Paste this prompt into a coding agent such as Claude Code or Codex:
 Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the <name> cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/<folder>
 ```
 
-To do it by hand, follow the shared [local setup](../README.md#local-setup)
+To do it by hand, follow the shared [local setup](../docs/local-setup.md)
 using folder `<folder>` and Graph ID `<graph>`. [AGENTS.md](AGENTS.md) has the
 exact command for each question and workflow on this page.
 ````
@@ -282,7 +319,7 @@ page to a question. Write each section so it serves all three.
 | Data sources | The tools a team brings data in from, by product name, and the types each feeds | Every backticked type exists in `schema.pg` |
 | Questions you can ask | The questions `site.json` features, three to five. Feature only questions the sample data answers. One that is rightly empty on a fresh load, such as a check that finds nothing wrong, belongs in the workflow table | The table's rows are the questions of `site.json`: the same ones, word for word and in the same order, each with its query; each returns rows on the seed |
 | Sample data | What the seed depicts and what the questions return on it | A link to `seed.md` |
-| Run it | The prompt, and where the commands are | Links to local setup and `AGENTS.md`; the Graph ID |
+| Run it | The prompt, and where the commands are | The onboarding prompt with the cookbook's folder, alone in a `text` block; links to local setup and `AGENTS.md`; the Graph ID |
 
 No other `##` is allowed. `README_SECTIONS` in `scripts/check-cookbooks.py` is
 the list the check uses; change the two together.
@@ -349,13 +386,13 @@ the list the check uses; change the two together.
   and every number in Sample data must match what you see.
 - The full `check-cookbooks.py` run does the same against a served graph. It
   needs the released `omnigraph-server` on the PATH (see
-  [local setup](README.md#local-setup)); CI runs it on every pull request.
+  [local setup](docs/local-setup.md)); CI runs it on every pull request.
 - Report what you left alone: missing links in mr-ops, missing roles, missing
   stored writes and errors you found in the cookbook.
 
 ## Operational rules
 
-Use [local setup](README.md#local-setup) for fresh roots. Fresh
+Use [local setup](docs/local-setup.md) for fresh roots. Fresh
 `cluster apply --target . --config .` creates the ledger; no separate import is
 needed. Direct apply retains exclusive admission after exit; a server releases
 it on a clean shutdown. Only clear an exact lock after its owner and accepted

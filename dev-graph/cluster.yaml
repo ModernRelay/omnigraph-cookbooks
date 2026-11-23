@@ -1,7 +1,7 @@
 # dev-graph deployment, declared as code (omnigraph cluster model).
 #
 # Filesystem-backed cluster; storage defaults to this directory.
-# Follow ../README.md#local-setup for bootstrap and writer-lock handoff.
+# Follow ../docs/local-setup.md for bootstrap and writer-lock handoff.
 # Later configuration updates go through cluster plan/apply --target local.
 version: 1
 

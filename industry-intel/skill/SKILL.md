@@ -16,13 +16,13 @@ ask only when it is unclear.
 
 ## Start with the environment
 
-Locate or clone `ModernRelay/omnigraph-cookbooks`, then read its root README and
+Locate or clone `ModernRelay/omnigraph-cookbooks`, then read its local setup and
 the selected cookbook's guidance. Check `omnigraph version`; these instructions
 target CLI and server 0.15. Use matching release binaries. The filesystem
 setup needs no object store or Docker. Existing data follows
 the repository's [upgrade procedure][upgrading], never an automatic reset.
 
-The root README owns [local setup][local-setup]: initial apply, exact writer-lock
+The repository's [local setup][local-setup] covers initial apply, exact writer-lock
 handoff, server identities, the local HTTPS gateway, CLI targets, readiness, and
 seed loading. Read and follow that sequence. A filesystem deployment needs no
 storage credentials; the server still uses bearer identities for policy and live
@@ -119,6 +119,6 @@ Use the `omnigraph` skill for command details, bulk data review, embedding
 preparation, and uncertain write outcomes. The repository vendors it;
 `omnigraph skill export DIR` writes the copy that matches the installed CLI.
 
-[local-setup]: https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#local-setup
-[live-updates]: https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#live-updates
-[upgrading]: https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/README.md#upgrading
+[local-setup]: https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/docs/local-setup.md
+[live-updates]: https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/docs/local-setup.md#live-updates
+[upgrading]: https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/docs/local-setup.md#upgrading

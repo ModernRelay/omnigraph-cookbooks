@@ -211,6 +211,6 @@ Paste this prompt into a coding agent such as Claude Code or Codex:
 Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the venture firm cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/vc-os
 ```
 
-To do it by hand, follow the shared [local setup](../README.md#local-setup)
+To do it by hand, follow the shared [local setup](../docs/local-setup.md)
 using folder `vc-os` and Graph ID `vcos`. [AGENTS.md](AGENTS.md) has the exact
 command for each question and workflow on this page.

@@ -1,6 +1,6 @@
 # Read aliases for the Second Brain cookbook (graph `brain`).
 # Merge the `aliases:` entries below into $OMNIGRAPH_HOME/config.yaml, the operator
-# config from ../README.md#local-setup, whose `local-reader` target they use.
+# config from ../docs/local-setup.md, whose `local-reader` target they use.
 # Run one with `omnigraph alias <name>`; pass a query's parameters by name with
 # `--params '{"slug":"..."}'`. Aliases only read; run stored mutations with
 # `omnigraph mutate <name> --target local-writer --graph brain --params '{...}'`.

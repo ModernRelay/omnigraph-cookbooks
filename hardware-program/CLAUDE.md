@@ -51,7 +51,7 @@ names and numbers are invented.
 
 ## Running it
 
-Use the shared [local setup](../README.md#local-setup) with folder
+Use the shared [local setup](../docs/local-setup.md) with folder
 `hardware-program` and graph `program`, and load `seed.jsonl`. Its four
 targets are the roles used below: `local` (admin), `local-writer` for
 engineers, `local-reader`, and `local-agent` for an AI agent.
@@ -270,7 +270,7 @@ by meaning. The seed has no vectors. Generate them with the offline
 `omnigraph embed` pipeline, which embeds the statement text exactly as a
 `nearest` query embeds its text, load the result, then enable the provider in
 [`cluster.yaml`](cluster.yaml) and apply it through the running server. See
-[live updates](../README.md#live-updates). `search_requirements` needs none of
+[live updates](../docs/local-setup.md#live-updates). `search_requirements` needs none of
 this; it ranks the indexed titles and statements by text.
 
 ## Extending
@@ -283,7 +283,7 @@ this; it ranks the indexed titles and statements by text.
   filter `budget_rollup` on that link.
 
 Change the schema with `cluster plan` and `cluster apply` against the running
-server, as in [live updates](../README.md#live-updates).
+server, as in [live updates](../docs/local-setup.md#live-updates).
 
 ## What it does not do
 

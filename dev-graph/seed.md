@@ -11,7 +11,7 @@ and usage billing). A five-person team plus a triage agent and a CI service acto
 **Totals (loaded):** **102 nodes across all 22 node types, 239 edges across 83
 edge types.** The seed ships **no embeddings** (the `Vector(3072)` columns are
 null — semantic search is opt-in; see [AGENTS.md](AGENTS.md)). Load it once with `--mode append`
-into a fresh graph, as in the [local setup](../README.md#local-setup).
+into a fresh graph, as in the [local setup](../docs/local-setup.md).
 
 | Node type | # | Node type | # | Node type | # |
 |---|---|---|---|---|---|

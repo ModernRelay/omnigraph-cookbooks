@@ -4,8 +4,8 @@
 Usage: check-cookbooks.py [--site] [COOKBOOK ...]   (default: every cookbook)
 
 Every run first checks each cookbook's site.json, the copy omnigraph.dev shows
-for it (see "The website" in the README), and the sections of its README (see
-"Cookbook READMEs" there). --site runs only
+for it (see "The website" in AGENTS.md), and the sections of its README (see
+"Writing a cookbook README" there). --site runs only
 that check: it is offline and needs no binaries.
 """
 
@@ -57,7 +57,7 @@ def token_variable(actor):
 
 
 def write_operator_config(home, endpoint, ca):
-    """One server target per actor, as the root README's local setup has.
+    """One server target per actor, as docs/local-setup.md has.
     The CLI sends tokens only over HTTPS, so each target trusts the
     local gateway's CA and reads its token from one named variable."""
     lines = ["version: 1", "targets:"]
@@ -463,7 +463,7 @@ def check_site(folder):
 # The sections of a cookbook README. It reads as the landing page of OmniGraph for one
 # use case: a living source of truth and the agent workflows around it. It makes sense
 # without the sample data, which has its own section, and omnigraph.dev draws its
-# use-case page from the same sections (see "Cookbook READMEs" in the README).
+# use-case page from the same sections (see "Writing a cookbook README" in AGENTS.md).
 # Commands belong in the cookbook's AGENTS.md.
 README_SECTIONS = ("The data model", "Branching and merging", "Agents and workflows",
                    "Data sources", "Questions you can ask", "Sample data", "Run it")
@@ -502,19 +502,39 @@ def readme_sections(folder):
 
 
 def tables(lines):
-    """The Markdown tables in some lines: each a list of rows, a row its cells by column header."""
-    found, header = [], None
-    for line in lines:
-        if not line.lstrip().startswith("|"):
-            header = None
+    """The Markdown tables in some lines: each a list of rows, a row its cells by column header.
+    A table is a header line, a delimiter line with as many cells, then its rows; lines of
+    cells without that delimiter do not render as a table and are not read as one."""
+    found, block = [], []
+    for line in [*lines, ""]:
+        if line.lstrip().startswith("|"):
+            block.append([cell.strip() for cell in line.strip().strip("|").split("|")])
             continue
-        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
-        if header is None:
-            header = cells
-            found.append([])
-        elif not all(set(cell) <= set("-: ") for cell in cells):
-            found[-1].append(dict(zip(header, cells)))
+        if len(block) > 1 and len(block[1]) == len(block[0]) and all(re.fullmatch(r":?-+:?", cell) for cell in block[1]):
+            found.append([dict(zip(block[0], cells)) for cells in block[2:]])
+        block = []
     return found
+
+
+def fences(lines):
+    """The fenced blocks in some lines, each as (label, body lines). One left open runs to the end."""
+    found, body = [], None
+    for line in lines:
+        if line.startswith("```"):
+            if body is None:
+                body = []
+                found.append((line[3:].strip(), body))
+            else:
+                body = None
+        elif body is not None:
+            body.append(line)
+    return found
+
+
+def prompt(name, folder):
+    """What a reader pastes into a coding agent to have a cookbook set up."""
+    return ("Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the "
+            f"{name} cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/{folder}")
 
 
 def check_readme(folder, site, queries):
@@ -567,8 +587,12 @@ def check_readme(folder, site, queries):
             assert name in types, f"{where}: ## {title} names `{name}`, which schema.pg does not declare"
     run_it = "\n".join(sections["Run it"]["text"])
     graph = COOKBOOKS[folder][0]
-    for needed in ("../README.md#local-setup", "(AGENTS.md)", f"`{graph}`"):
+    for needed in ("../docs/local-setup.md", "(AGENTS.md)", f"`{graph}`"):
         assert needed in run_it, f"{where}: ## Run it must link local setup and AGENTS.md and give the Graph ID; {needed} is missing"
+    head, tail = prompt("|", folder).split("|")
+    assert any(label == "text" and len(body) == 1 and body[0].startswith(head) and body[0].endswith(tail)
+               and len(body[0]) > len(head) + len(tail) for label, body in fences(sections["Run it"]["text"])), \
+        f"{where}: ## Run it must give the onboarding prompt in a text block: {prompt('<name>', folder)}"
     # The commands live in the agent guide: each stored query it or the README runs exists, with the verb that fits.
     # AGENTS.md is a link to CLAUDE.md, which a checkout without symlinks does not follow.
     guide = (ROOT / folder / "CLAUDE.md").read_text()
@@ -604,11 +628,28 @@ def promised_answers(folder):
     return [(q["q"], q["query"], q.get("params", {})) for q in site["questions"]]
 
 
+def check_root_readme(sites):
+    """The root README is the landing page for the collection: its table is each cookbook's
+    name, blurb and first question from site.json, in order, and it carries no commands."""
+    lines = (ROOT / "README.md").read_text().splitlines()
+    listed = [tuple(row.values()) for table in tables(lines) for row in table]
+    wanted = [(f"[{site['name']}]({folder}/)", site["blurb"], site["questions"][0]["q"])
+              for folder, site in sorted(sites.items(), key=lambda item: item[1]["order"])]
+    for have, want in zip(listed, wanted):
+        assert have == want, f"README.md: a row of the cookbook table is {have}; site.json makes it {want}"
+    assert len(listed) == len(wanted), \
+        f"README.md: the cookbook table has {len(listed)} rows for {len(wanted)} cookbooks"
+    assert fences(lines) == [("text", [prompt("<name>", "<folder>")])], \
+        "README.md: its only fenced block is the onboarding prompt, in a text block; commands belong in " \
+        "docs/local-setup.md and each cookbook's AGENTS.md"
+
+
 def check_sites(selected):
     sites = {folder: check_site(folder) for folder in selected}
     if len(selected) == len(COOKBOOKS):
         orders = [site["order"] for site in sites.values()]
         assert len(set(orders)) == len(orders), f"site.json order values repeat: {sorted(orders)}"
+        check_root_readme(sites)
     print(f"site.json passed for {len(selected)} cookbooks.")
 
 

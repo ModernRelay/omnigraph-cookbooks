@@ -60,7 +60,7 @@ that concurrent agents need. The seed is a fictional note-taking app,
 
 ## Running it
 
-Use the shared [local setup](../README.md#local-setup) with folder `beads` and
+Use the shared [local setup](../docs/local-setup.md) with folder `beads` and
 graph `beads`, then load `seed.jsonl` (a fictional project, described in
 [seed.md](seed.md)). With the server and the HTTPS gateway up, in the terminal
 where you configured the CLI, the answers the README promises:

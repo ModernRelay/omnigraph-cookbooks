@@ -32,10 +32,10 @@ All names are fabricated; the seed exists to shape the demo queries.
 
 ## Setup
 
-Use the shared [local setup](../README.md#local-setup) with cookbook
+Use the shared [local setup](../docs/local-setup.md) with cookbook
 `dev-graph` and graph `dev`. It owns authentication, the bootstrap writer-lock
 handoff, readiness, and served seed loading. Apply later configuration edits with
-the [live update workflow](../README.md#live-updates).
+the [live update workflow](../docs/local-setup.md#live-updates).
 
 Graph id `dev`. Stored queries and their parameters: `omnigraph queries list --target local --graph dev`.
 Alias parameters bind by name to `$params`: `omnigraph alias issue --params '{"slug":"iss-rate-limit"}'` is `omnigraph query issue_lookup --target local-reader --graph dev --params '{"slug":"iss-rate-limit"}'`.
@@ -211,7 +211,7 @@ matching facts" without checking vector coverage.
 
 1. Provide `GEMINI_API_KEY` in the server environment before starting it.
    Uncomment `providers:` and `graphs.dev.embedding_provider` in
-   `cluster.yaml`, then [plan and apply live](../README.md#live-updates).
+   `cluster.yaml`, then [plan and apply live](../docs/local-setup.md#live-updates).
 2. Prepare JSONL with the current node rows and an embedding spec, with the
    same provider and model as the query-time provider:
 

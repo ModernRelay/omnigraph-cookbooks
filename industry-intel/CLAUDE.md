@@ -6,23 +6,32 @@ Scoped guidance for the `industry-intel/` SPIKE cookbook. Repo-wide conventions 
 
 An Omnigraph schema + seed modeling AI/ML industry intelligence using the SPIKE framework. Schema, seed data, and queries only — no application code.
 
+SPIKE is Signal (observed fact), Pattern (recurring theme), Insight
+(interpretation), KnowHow (practice) and Element (concrete subject). It is a
+modelling convention of this cookbook and pharma-intel, not something the
+engine requires.
+
+[`skill/`](skill/) is a skill that guides choosing a domain, researching it
+and preparing a seed. Install it with
+`npx skills add https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/industry-intel/skill`.
+
 ## Key Files
 
 `schema.pg` is the source of truth. `README.md` is the landing page and follows
 the template in `../AGENTS.md`; this file holds everything it has no place for.
 `omnigraph-config.example.yaml` has read aliases over the stored queries; merge
 its `aliases:` into the operator config from the
-[local setup](../README.md#local-setup). `seed.md` describes the seed and
+[local setup](../docs/local-setup.md). `seed.md` describes the seed and
 `seed.jsonl` loads it.
 
 Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).
 
 ## Setup
 
-Use the shared [local setup](../README.md#local-setup) with cookbook
+Use the shared [local setup](../docs/local-setup.md) with cookbook
 `industry-intel` and graph `spike`. It owns authentication, the bootstrap writer-lock
 handoff, readiness, and served seed loading. Apply later configuration edits with
-the [live update workflow](../README.md#live-updates).
+the [live update workflow](../docs/local-setup.md#live-updates).
 
 Graph id `spike`. Stored queries and their parameters: `omnigraph queries list --target local --graph spike`.
 Aliases pass parameters by name: `omnigraph alias pattern-signals --params '{"slug":"pat-sovereign-ai"}'` is `omnigraph query pattern_signals --target local-reader --graph spike --params '{"slug":"pat-sovereign-ai"}'`.
@@ -159,7 +168,7 @@ runs stored mutations and `local-reader` (`act-reader`) reads. Use distinct
 private credentials outside the local demo. A stored mutation needs both query
 invocation and write permission. `omnigraph access --target local-reader
 --graph spike` lists what the reader may do. Schema, query, policy and provider
-edits use the [live update workflow](../README.md#live-updates).
+edits use the [live update workflow](../docs/local-setup.md#live-updates).
 
 ## Enable embeddings (hybrid retrieval)
 
@@ -170,7 +179,7 @@ and they fail without a provider. To enable them:
 
 1. Make the provider secret available in the server environment. Declare the
    provider in `cluster.yaml`, bind it to `spike`, and use
-   [live apply](../README.md#live-updates). A shell export cannot change an
+   [live apply](../docs/local-setup.md#live-updates). A shell export cannot change an
    already running process; provision new secrets before starting it.
 2. Prepare raw `Chunk` JSONL and a matching embedding spec, then run the
    offline file pipeline:

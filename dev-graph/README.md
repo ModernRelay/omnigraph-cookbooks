@@ -202,6 +202,6 @@ Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with th
 The agent installs OmniGraph if needed, creates the graph, loads Meridian and
 runs the questions above.
 
-To do it by hand, follow the shared [local setup](../README.md#local-setup)
+To do it by hand, follow the shared [local setup](../docs/local-setup.md)
 using folder `dev-graph` and Graph ID `dev`. [AGENTS.md](AGENTS.md) has the
 exact command for each question and workflow on this page.

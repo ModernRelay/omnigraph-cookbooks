@@ -4,7 +4,7 @@ Scoped guidance for the `pharma-intel/` starter. Repo-wide conventions live in `
 
 ## What This Is
 
-An Omnigraph schema + seed modeling competitive pharma intelligence from a sponsor's perspective. Uses the SPIKE framework for the intelligence layer, plus two additional layers: **external pipeline** (Compound, Mechanism, Trial, Company, Deal, RegulatoryAction) and **internal context** (Program, Assumption, Decision, OpenQuestion). Schema, seed data, and queries only — no application code.
+An Omnigraph schema + seed modeling competitive pharma intelligence from a sponsor's perspective. Uses the SPIKE framework (here Signal, Pattern and Insight; a modelling convention explained in `../industry-intel/CLAUDE.md`, not an engine requirement) for the intelligence layer, plus two additional layers: **external pipeline** (Compound, Mechanism, Trial, Company, Deal, RegulatoryAction) and **internal context** (Program, Assumption, Decision, OpenQuestion). Schema, seed data, and queries only — no application code.
 
 The reference seed is **Viking Therapeutics** (NASDAQ: VKTX), a public GLP-1/GIP dual-agonist sponsor in obesity. All seed data is sourced from SEC filings, investor presentations, clinicaltrials.gov, and press releases — no MNPI.
 
@@ -14,16 +14,16 @@ The reference seed is **Viking Therapeutics** (NASDAQ: VKTX), a public GLP-1/GIP
 - `README.md` — The landing page: what the cookbook gives, its workflows and its questions. Commands live here, not there.
 - `seed.md` / `seed.jsonl` — Seed dataset (human-readable / loadable).
 - `queries/*.gq` — Read and mutation queries.
-- `omnigraph-config.example.yaml` — Read aliases. Merge its `aliases:` into the operator config from the [local setup](../README.md#local-setup); this cookbook ships no `omnigraph.yaml`.
+- `omnigraph-config.example.yaml` — Read aliases. Merge its `aliases:` into the operator config from the [local setup](../docs/local-setup.md); this cookbook ships no `omnigraph.yaml`.
 
 Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/ModernRelay/omnigraph).
 
 ## Setup
 
-Use the shared [local setup](../README.md#local-setup) with cookbook
+Use the shared [local setup](../docs/local-setup.md) with cookbook
 `pharma-intel` and graph `pharma`. It owns authentication, the bootstrap writer-lock
 handoff, readiness, and served seed loading. Apply later configuration edits with
-the [live update workflow](../README.md#live-updates).
+the [live update workflow](../docs/local-setup.md#live-updates).
 
 Graph id `pharma`. Stored queries and their parameters: `omnigraph queries list --target local --graph pharma`.
 Aliases pass parameters by name: `omnigraph alias assumption-contradictions --params '{"slug":"asmp-oral-displaces-injectable"}'` is `omnigraph query assumption_contradicting_signals --target local-reader --graph pharma --params '{"slug":"asmp-oral-displaces-injectable"}'`.

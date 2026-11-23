@@ -21,10 +21,10 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 
 ## Setup
 
-Use the shared [local setup](../README.md#local-setup) with cookbook
+Use the shared [local setup](../docs/local-setup.md) with cookbook
 `vc-os` and graph `vcos`. It owns authentication, the bootstrap writer-lock
 handoff, readiness, and served seed loading. Apply later configuration edits with
-the [live update workflow](../README.md#live-updates).
+the [live update workflow](../docs/local-setup.md#live-updates).
 
 Graph id `vcos`. Stored queries and their parameters: `omnigraph queries list --target local --graph vcos`.
 Alias parameters bind by name to `$params`: `omnigraph alias pre-ic-brief-thesis --params '{"slug":"deal-helix-series-a"}'` is `omnigraph query pre_ic_brief_thesis --target local-reader --graph vcos --params '{"slug":"deal-helix-series-a"}'`.
@@ -114,7 +114,7 @@ must preserve the following conventions:
 - **Edge-property projections use a bound edge variable** — for example, `$p $r:roleInDeal $d` and `return { $r.role }`. `deal_role_participants` demonstrates the syntax.
 - **`Chunk` is declared but the seed has zero.** Embeddings come from an offline JSONL-to-JSONL pipeline; the static seed cannot generate them and `omnigraph embed` does not mutate a graph. Hybrid search needs a separate ingest.
 - **Alias parameters bind to query parameters by name.** Keep each alias's `--params` comment in `omnigraph-config.example.yaml` equal to the query's parameter names.
-- **Preview schema edits through served `cluster plan`.** Apply supported changes live. If planning refuses a type change, design a data migration or rebuild into a separate fresh cluster; never delete a managed graph root behind its ledger. See [upgrading](../README.md#upgrading).
+- **Preview schema edits through served `cluster plan`.** Apply supported changes live. If planning refuses a type change, design a data migration or rebuild into a separate fresh cluster; never delete a managed graph root behind its ledger. See [upgrading](../docs/local-setup.md#upgrading).
 - **`Artifact.blob` is declared but the seed uses none.** Same status as Chunks — populate via separate ingest.
 
 ## The Demo "Wow" Queries
