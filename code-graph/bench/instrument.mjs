@@ -7,15 +7,16 @@
 // `__cg(callee, owner, body)`. `callee` is the definition a call enters, or
 // null for a local function; `owner` is the definition that owns the code
 // inside, by the same rules as reference.mjs, so a callback written in F
-// counts as F's code wherever it runs. The owner travels through awaits in an
-// AsyncLocalStorage. At run time each new edge `caller -> callee` is appended
-// to a file in CG_TRACE_DIR. Generators, and derived-class constructors whose
-// first statement is not `super(...)`, are left as they are.
+// counts as F's code wherever it runs. The code a call runs before the body,
+// in its parameter list, and a field's initializer are wrapped the same way
+// with no callee (`tracerSites` in reference.mjs). The owner travels through
+// awaits in an AsyncLocalStorage. At run time each new edge `caller -> callee`
+// is appended to a file in CG_TRACE_DIR. Generators are left as they are.
 import fs from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildReference } from './reference.mjs'
+import { buildReference, tracerSites } from './reference.mjs'
 
 const require = createRequire(import.meta.url)
 const ts = require(process.env.CG_TYPESCRIPT ||
@@ -27,6 +28,7 @@ const RUNTIME = `const __cg = (globalThis.__cg ??= (() => {
   const als = new AsyncLocalStorage()
   const seen = (process.__cgSeen ??= new Set())
   const dir = process.env.CG_TRACE_DIR
+  if (dir) fs.mkdirSync(dir, { recursive: true })
   const file = dir ? dir + '/edges-' + process.pid + '.txt' : null
   return (callee, owner, body) => {
     if (callee !== null) {
@@ -65,22 +67,7 @@ function outsideSites(root, file) {
   const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, kind)
   const sites = []
   const visit = (node) => {
-    const fn = ts.isFunctionDeclaration(node) || ts.isMethodDeclaration(node) || ts.isConstructorDeclaration(node) ||
-      ts.isGetAccessorDeclaration(node) || ts.isSetAccessorDeclaration(node) || ts.isArrowFunction(node) ||
-      ts.isFunctionExpression(node)
-    if (fn && node.body) {
-      const derived = ts.isConstructorDeclaration(node) &&
-        (node.parent.heritageClauses || []).some((h) => h.token === ts.SyntaxKind.ExtendsKeyword)
-      const first = ts.isBlock(node.body) ? node.body.statements[0] : null
-      const superFirst = first && ts.isExpressionStatement(first) && ts.isCallExpression(first.expression) &&
-        first.expression.expression.kind === ts.SyntaxKind.SuperKeyword
-      sites.push({
-        file, block: ts.isBlock(node.body), start: node.body.getStart(sf), end: node.body.end,
-        async: (node.modifiers || []).some((m) => m.kind === ts.SyntaxKind.AsyncKeyword),
-        generator: !!node.asteriskToken, callee: null, owner: '<outside>', after: derived && superFirst ? first.end : null,
-        skip: node.asteriskToken ? 'generator' : derived && !superFirst ? 'super not first' : null,
-      })
-    }
+    sites.push(...tracerSites(node, sf, file, '<outside>', null))
     ts.forEachChild(node, visit)
   }
   visit(sf)
@@ -118,9 +105,7 @@ export function instrument(checkout, dest, { scope = 'src/' } = {}) {
       const depth = list.filter((o) => o !== s && o.start <= s.start && s.end <= o.end).length
       const head = `__cg(${JSON.stringify(s.callee)}, ${JSON.stringify(s.owner)}, ${s.async ? 'async ' : ''}() => `
       if (s.block) {
-        // After `{`, or after a leading `super(...)`, which may have no
-        // semicolon of its own: the inserted `;` ends it.
-        const open = s.after ?? s.start + 1
+        const open = s.start + 1
         add(open, 'open', depth, `; return ${head}{`)
         add(s.end - 1, 'close', depth, '}); ', open)
       } else {

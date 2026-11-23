@@ -6,9 +6,10 @@
 RAW.tsv has one edge per line: caller file, caller name, caller line, callee
 file, callee name, callee line, as each tool's own export reports them (lines
 1-based). An endpoint maps to the reference definition in the same file with
-the same name, the one whose range contains the line when names repeat. A
-callee that is a class maps to its declared constructor as well, since that
-is what an executed `new` enters.
+the same name whose range contains the line, the nearest one when several do.
+A caller that none contains is a local function, which maps to the definition
+holding it. A callee that is a class maps to its declared constructor as
+well, since that is what an executed `new` enters.
 """
 from __future__ import annotations
 
@@ -40,22 +41,18 @@ def main():
     constructors = {i.rsplit(".", 1)[0]: i for i, n in nodes.items() if n["kind"] == "constructor"}
 
     def resolve(path: str, name: str, line: str) -> str | None:
-        cands = by_name.get((path, clean(name)))
-        if not cands:
-            return None
-        if len(cands) == 1:
-            return cands[0]
+        """The definition of this name whose range, from 25 lines above its
+        name (a comment or decorator) to its end, holds the line; the nearest
+        when several do. A namesake elsewhere in the file is another
+        definition, such as an interface member named like an object-literal
+        method, so the line maps to none of them."""
         try:
             ln = int(float(line))
         except ValueError:
             return None
-
-        def rank(i):
-            n = nodes[i]
-            inside = n["line"] - 25 <= ln <= n["end_line"]
-            return (0 if inside else 1, abs(ln - n["line"]))
-
-        return min(cands, key=rank)
+        holding = [i for i in by_name.get((path, clean(name)), ())
+                   if nodes[i]["line"] - 25 <= ln <= nodes[i]["end_line"]]
+        return min(holding, key=lambda i: abs(ln - nodes[i]["line"]), default=None)
 
     by_path = collections.defaultdict(list)
     for ident, n in nodes.items():

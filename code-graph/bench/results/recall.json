@@ -1,12 +1,12 @@
 {
   "reference": {
-    "executed": 915,
-    "scored": 915,
+    "executed": 917,
+    "scored": 917,
     "unmodeled_endpoint": 0,
     "found": 817,
     "found_via_implements": 0,
-    "recall": 0.892896174863388,
-    "recall_with_implements": 0.892896174863388,
+    "recall": 0.8909487459105779,
+    "recall_with_implements": 0.8909487459105779,
     "missed": [
       [
         "src/adapter/aws-lambda/handler.ts:EventProcessor.createRequest",
@@ -113,10 +113,6 @@
         "src/router/smart-router/router.ts:SmartRouter.match"
       ],
       [
-        "src/helper/factory/index.ts:Factory.createApp",
-        "src/hono-base.ts:Hono.constructor"
-      ],
-      [
         "src/helper/html/index.ts:html",
         "src/jsx/base.ts:JSXNode.toString"
       ],
@@ -129,7 +125,7 @@
         "src/utils/concurrent.ts:createPool"
       ],
       [
-        "src/helper/streaming/sse.ts:streamSSE",
+        "src/helper/streaming/sse.ts:SSEStreamingApi.constructor",
         "src/utils/stream.ts:StreamingApi.constructor"
       ],
       [
@@ -183,6 +179,10 @@
       [
         "src/hono-base.ts:errorHandler",
         "src/http-exception.ts:HTTPException.getResponse"
+      ],
+      [
+        "src/hono.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
       ],
       [
         "src/jsx/base.ts:Fragment",
@@ -349,6 +349,14 @@
         "src/middleware/secure-headers/secure-headers.ts:NONCE"
       ],
       [
+        "src/preset/quick.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
+        "src/preset/tiny.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
         "src/request.ts:HonoRequest.query",
         "src/utils/url.ts:_getQueryParam"
       ],
@@ -403,13 +411,13 @@
     ]
   },
   "cookbook": {
-    "executed": 915,
-    "scored": 915,
+    "executed": 917,
+    "scored": 917,
     "unmodeled_endpoint": 0,
     "found": 819,
     "found_via_implements": 36,
-    "recall": 0.8950819672131147,
-    "recall_with_implements": 0.9344262295081968,
+    "recall": 0.8931297709923665,
+    "recall_with_implements": 0.9323882224645583,
     "missed": [
       [
         "src/client/client.ts:ClientRequestImpl.fetch",
@@ -436,10 +444,6 @@
         "src/router/reg-exp-router/matcher.ts:match"
       ],
       [
-        "src/helper/factory/index.ts:Factory.createApp",
-        "src/hono-base.ts:Hono.constructor"
-      ],
-      [
         "src/helper/html/index.ts:html",
         "src/jsx/base.ts:JSXNode.toString"
       ],
@@ -452,7 +456,7 @@
         "src/utils/concurrent.ts:createPool"
       ],
       [
-        "src/helper/streaming/sse.ts:streamSSE",
+        "src/helper/streaming/sse.ts:SSEStreamingApi.constructor",
         "src/utils/stream.ts:StreamingApi.constructor"
       ],
       [
@@ -482,6 +486,10 @@
       [
         "src/hono-base.ts:errorHandler",
         "src/http-exception.ts:HTTPException.getResponse"
+      ],
+      [
+        "src/hono.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
       ],
       [
         "src/jsx/base.ts:Fragment",
@@ -616,6 +624,14 @@
         "src/middleware/secure-headers/secure-headers.ts:NONCE"
       ],
       [
+        "src/preset/quick.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
+        "src/preset/tiny.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
         "src/request.ts:HonoRequest.query",
         "src/utils/url.ts:_getQueryParam"
       ],
@@ -654,13 +670,13 @@
     ]
   },
   "cookbook_calls_only": {
-    "executed": 915,
-    "scored": 915,
+    "executed": 917,
+    "scored": 917,
     "unmodeled_endpoint": 0,
     "found": 713,
     "found_via_implements": 36,
-    "recall": 0.7792349726775957,
-    "recall_with_implements": 0.8185792349726776,
+    "recall": 0.777535441657579,
+    "recall_with_implements": 0.816793893129771,
     "missed": [
       [
         "src/adapter/aws-lambda/conninfo.ts:getConnInfo",
@@ -771,10 +787,6 @@
         "src/router/reg-exp-router/matcher.ts:match"
       ],
       [
-        "src/helper/factory/index.ts:Factory.createApp",
-        "src/hono-base.ts:Hono.constructor"
-      ],
-      [
         "src/helper/html/index.ts:html",
         "src/jsx/base.ts:JSXNode.toString"
       ],
@@ -811,12 +823,12 @@
         "src/helper/ssg/utils.ts:normalizePath"
       ],
       [
-        "src/helper/streaming/sse.ts:streamSSE",
-        "src/context.ts:Context.req"
+        "src/helper/streaming/sse.ts:SSEStreamingApi.constructor",
+        "src/utils/stream.ts:StreamingApi.constructor"
       ],
       [
         "src/helper/streaming/sse.ts:streamSSE",
-        "src/utils/stream.ts:StreamingApi.constructor"
+        "src/context.ts:Context.req"
       ],
       [
         "src/helper/streaming/stream.ts:stream",
@@ -865,6 +877,10 @@
       [
         "src/hono-base.ts:errorHandler",
         "src/http-exception.ts:HTTPException.getResponse"
+      ],
+      [
+        "src/hono.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
       ],
       [
         "src/jsx/base.ts:Fragment",
@@ -1255,6 +1271,14 @@
         "src/request.ts:HonoRequest.url"
       ],
       [
+        "src/preset/quick.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
+        "src/preset/tiny.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
         "src/request.ts:HonoRequest.queries",
         "src/request.ts:HonoRequest.url"
       ],
@@ -1329,13 +1353,13 @@
     ]
   },
   "codegraph": {
-    "executed": 915,
-    "scored": 915,
+    "executed": 917,
+    "scored": 917,
     "unmodeled_endpoint": 0,
-    "found": 622,
+    "found": 629,
     "found_via_implements": 0,
-    "recall": 0.6797814207650273,
-    "recall_with_implements": 0.6797814207650273,
+    "recall": 0.6859323882224646,
+    "recall_with_implements": 0.6859323882224646,
     "missed": [
       [
         "src/adapter/aws-lambda/conninfo.ts:getConnInfo",
@@ -1422,14 +1446,6 @@
         "src/request.ts:HonoRequest.url"
       ],
       [
-        "src/adapter/bun/websocket.ts:websocket",
-        "src/adapter/bun/websocket.ts:createWSContext"
-      ],
-      [
-        "src/adapter/bun/websocket.ts:websocket",
-        "src/helper/websocket/index.ts:createWSMessageEvent"
-      ],
-      [
         "src/adapter/cloudflare-pages/conninfo.ts:getConnInfo",
         "src/context.ts:Context.req"
       ],
@@ -1510,14 +1526,6 @@
         "src/hono-base.ts:notFoundHandler"
       ],
       [
-        "src/context.ts:Context.html",
-        "src/context.ts:Context.#newResponse"
-      ],
-      [
-        "src/context.ts:Context.html",
-        "src/context.ts:setDefaultContentType"
-      ],
-      [
         "src/context.ts:Context.notFound",
         "src/hono-base.ts:notFoundHandler"
       ],
@@ -1550,18 +1558,6 @@
         "src/helper/css/common.ts:defaultOnInvalidSlug"
       ],
       [
-        "src/helper/css/index.ts:createCssContext",
-        "src/helper/css/common.ts:cssCommon"
-      ],
-      [
-        "src/helper/css/index.ts:createCssContext",
-        "src/helper/css/common.ts:cxCommon"
-      ],
-      [
-        "src/helper/css/index.ts:createCssContext",
-        "src/helper/css/common.ts:keyframesCommon"
-      ],
-      [
         "src/helper/dev/index.ts:getRouterName",
         "src/router/pattern-router/router.ts:PatternRouter.match"
       ],
@@ -1572,10 +1568,6 @@
       [
         "src/helper/dev/index.ts:getRouterName",
         "src/router/smart-router/router.ts:SmartRouter.match"
-      ],
-      [
-        "src/helper/factory/index.ts:Factory.createApp",
-        "src/hono-base.ts:Hono.constructor"
       ],
       [
         "src/helper/factory/index.ts:Factory.createApp",
@@ -1638,16 +1630,16 @@
         "src/helper/ssg/utils.ts:normalizePath"
       ],
       [
+        "src/helper/streaming/sse.ts:SSEStreamingApi.constructor",
+        "src/utils/stream.ts:StreamingApi.constructor"
+      ],
+      [
         "src/helper/streaming/sse.ts:SSEStreamingApi.writeSSE",
         "src/utils/stream.ts:StreamingApi.write"
       ],
       [
         "src/helper/streaming/sse.ts:streamSSE",
         "src/context.ts:Context.req"
-      ],
-      [
-        "src/helper/streaming/sse.ts:streamSSE",
-        "src/utils/stream.ts:StreamingApi.constructor"
       ],
       [
         "src/helper/streaming/stream.ts:stream",
@@ -1720,6 +1712,10 @@
       [
         "src/hono-base.ts:notFoundHandler",
         "src/context.ts:Context.text"
+      ],
+      [
+        "src/hono.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
       ],
       [
         "src/jsx/base.ts:Fragment",
@@ -2394,6 +2390,14 @@
         "src/request.ts:HonoRequest.url"
       ],
       [
+        "src/preset/quick.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
+        "src/preset/tiny.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
         "src/request.ts:HonoRequest.queries",
         "src/request.ts:HonoRequest.url"
       ],
@@ -2512,13 +2516,13 @@
     ]
   },
   "graphify": {
-    "executed": 915,
-    "scored": 915,
+    "executed": 917,
+    "scored": 917,
     "unmodeled_endpoint": 0,
     "found": 621,
     "found_via_implements": 0,
-    "recall": 0.6786885245901639,
-    "recall_with_implements": 0.6786885245901639,
+    "recall": 0.6772082878953108,
+    "recall_with_implements": 0.6772082878953108,
     "missed": [
       [
         "src/adapter/aws-lambda/conninfo.ts:getConnInfo",
@@ -2798,10 +2802,6 @@
       ],
       [
         "src/helper/factory/index.ts:Factory.createApp",
-        "src/hono-base.ts:Hono.constructor"
-      ],
-      [
-        "src/helper/factory/index.ts:Factory.createApp",
         "src/hono.ts:Hono.constructor"
       ],
       [
@@ -2849,6 +2849,10 @@
         "src/utils/concurrent.ts:createPool"
       ],
       [
+        "src/helper/streaming/sse.ts:SSEStreamingApi.constructor",
+        "src/utils/stream.ts:StreamingApi.constructor"
+      ],
+      [
         "src/helper/streaming/sse.ts:SSEStreamingApi.writeSSE",
         "src/utils/stream.ts:StreamingApi.write"
       ],
@@ -2863,10 +2867,6 @@
       [
         "src/helper/streaming/sse.ts:streamSSE",
         "src/utils/stream.ts:StreamingApi.abort"
-      ],
-      [
-        "src/helper/streaming/sse.ts:streamSSE",
-        "src/utils/stream.ts:StreamingApi.constructor"
       ],
       [
         "src/helper/streaming/stream.ts:stream",
@@ -2943,6 +2943,10 @@
       [
         "src/hono-base.ts:errorHandler",
         "src/http-exception.ts:HTTPException.getResponse"
+      ],
+      [
+        "src/hono.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
       ],
       [
         "src/jsx/base.ts:Fragment",
@@ -3549,6 +3553,14 @@
         "src/request.ts:HonoRequest.url"
       ],
       [
+        "src/preset/quick.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
+        "src/preset/tiny.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
         "src/request.ts:HonoRequest.parseBody",
         "src/utils/body.ts:parseBody"
       ],
@@ -3699,13 +3711,13 @@
     ]
   },
   "gitnexus": {
-    "executed": 915,
-    "scored": 915,
+    "executed": 917,
+    "scored": 917,
     "unmodeled_endpoint": 0,
-    "found": 572,
+    "found": 580,
     "found_via_implements": 0,
-    "recall": 0.6251366120218579,
-    "recall_with_implements": 0.6251366120218579,
+    "recall": 0.6324972737186477,
+    "recall_with_implements": 0.6324972737186477,
     "missed": [
       [
         "src/adapter/aws-lambda/conninfo.ts:getConnInfo",
@@ -3814,14 +3826,6 @@
       [
         "src/adapter/bun/websocket.ts:upgradeWebSocket",
         "src/request.ts:HonoRequest.url"
-      ],
-      [
-        "src/adapter/bun/websocket.ts:websocket",
-        "src/adapter/bun/websocket.ts:createWSContext"
-      ],
-      [
-        "src/adapter/bun/websocket.ts:websocket",
-        "src/helper/websocket/index.ts:createWSMessageEvent"
       ],
       [
         "src/adapter/cloudflare-pages/conninfo.ts:getConnInfo",
@@ -3949,10 +3953,6 @@
       ],
       [
         "src/context.ts:Context.html",
-        "src/context.ts:setDefaultContentType"
-      ],
-      [
-        "src/context.ts:Context.html",
         "src/utils/html.ts:resolveCallback"
       ],
       [
@@ -4025,18 +4025,6 @@
       ],
       [
         "src/helper/css/index.ts:createCssContext",
-        "src/helper/css/common.ts:cssCommon"
-      ],
-      [
-        "src/helper/css/index.ts:createCssContext",
-        "src/helper/css/common.ts:cxCommon"
-      ],
-      [
-        "src/helper/css/index.ts:createCssContext",
-        "src/helper/css/common.ts:keyframesCommon"
-      ],
-      [
-        "src/helper/css/index.ts:createCssContext",
         "src/helper/css/common.ts:viewTransitionCommon"
       ],
       [
@@ -4062,10 +4050,6 @@
       [
         "src/helper/dev/index.ts:inspectRoutes",
         "src/utils/handler.ts:isMiddleware"
-      ],
-      [
-        "src/helper/factory/index.ts:Factory.createApp",
-        "src/hono-base.ts:Hono.constructor"
       ],
       [
         "src/helper/factory/index.ts:Factory.createApp",
@@ -4148,12 +4132,12 @@
         "src/helper/ssg/utils.ts:normalizePath"
       ],
       [
-        "src/helper/streaming/sse.ts:streamSSE",
-        "src/context.ts:Context.req"
+        "src/helper/streaming/sse.ts:SSEStreamingApi.constructor",
+        "src/utils/stream.ts:StreamingApi.constructor"
       ],
       [
         "src/helper/streaming/sse.ts:streamSSE",
-        "src/utils/stream.ts:StreamingApi.constructor"
+        "src/context.ts:Context.req"
       ],
       [
         "src/helper/streaming/stream.ts:stream",
@@ -4250,6 +4234,10 @@
       [
         "src/hono-base.ts:errorHandler",
         "src/http-exception.ts:HTTPException.getResponse"
+      ],
+      [
+        "src/hono.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
       ],
       [
         "src/jsx/base.ts:Fragment",
@@ -4374,14 +4362,6 @@
       [
         "src/jsx/context.ts:createContext",
         "src/utils/html.ts:raw"
-      ],
-      [
-        "src/jsx/dom/client.ts:createRoot",
-        "src/jsx/dom/render.ts:buildNode"
-      ],
-      [
-        "src/jsx/dom/client.ts:createRoot",
-        "src/jsx/dom/render.ts:renderNode"
       ],
       [
         "src/jsx/dom/components.ts:ErrorBoundary",
@@ -4900,6 +4880,14 @@
         "src/request.ts:HonoRequest.url"
       ],
       [
+        "src/preset/quick.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
+        "src/preset/tiny.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
         "src/request.ts:HonoRequest.#getAllDecodedParams",
         "src/request.ts:HonoRequest.#getParamValue"
       ],
@@ -5082,13 +5070,13 @@
     ]
   },
   "cbm": {
-    "executed": 915,
-    "scored": 915,
+    "executed": 917,
+    "scored": 917,
     "unmodeled_endpoint": 0,
-    "found": 571,
+    "found": 575,
     "found_via_implements": 0,
-    "recall": 0.6240437158469946,
-    "recall_with_implements": 0.6240437158469946,
+    "recall": 0.6270447110141767,
+    "recall_with_implements": 0.6270447110141767,
     "missed": [
       [
         "src/adapter/aws-lambda/conninfo.ts:getConnInfo",
@@ -5189,14 +5177,6 @@
       [
         "src/adapter/bun/websocket.ts:upgradeWebSocket",
         "src/request.ts:HonoRequest.url"
-      ],
-      [
-        "src/adapter/bun/websocket.ts:websocket",
-        "src/adapter/bun/websocket.ts:createWSContext"
-      ],
-      [
-        "src/adapter/bun/websocket.ts:websocket",
-        "src/helper/websocket/index.ts:createWSMessageEvent"
       ],
       [
         "src/adapter/cloudflare-pages/conninfo.ts:getConnInfo",
@@ -5396,10 +5376,6 @@
       ],
       [
         "src/helper/factory/index.ts:Factory.createApp",
-        "src/hono-base.ts:Hono.constructor"
-      ],
-      [
-        "src/helper/factory/index.ts:Factory.createApp",
         "src/hono.ts:Hono.constructor"
       ],
       [
@@ -5479,6 +5455,10 @@
         "src/helper/ssg/utils.ts:normalizePath"
       ],
       [
+        "src/helper/streaming/sse.ts:SSEStreamingApi.constructor",
+        "src/utils/stream.ts:StreamingApi.constructor"
+      ],
+      [
         "src/helper/streaming/sse.ts:run",
         "src/helper/streaming/sse.ts:SSEStreamingApi.writeSSE"
       ],
@@ -5501,10 +5481,6 @@
       [
         "src/helper/streaming/sse.ts:streamSSE",
         "src/utils/stream.ts:StreamingApi.abort"
-      ],
-      [
-        "src/helper/streaming/sse.ts:streamSSE",
-        "src/utils/stream.ts:StreamingApi.constructor"
       ],
       [
         "src/helper/streaming/stream.ts:stream",
@@ -5601,6 +5577,10 @@
       [
         "src/hono-base.ts:notFoundHandler",
         "src/context.ts:Context.text"
+      ],
+      [
+        "src/hono.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
       ],
       [
         "src/jsx/base.ts:Fragment",
@@ -5721,14 +5701,6 @@
       [
         "src/jsx/context.ts:createContext",
         "src/jsx/base.ts:JSXNode.toString"
-      ],
-      [
-        "src/jsx/dom/client.ts:createRoot",
-        "src/jsx/dom/render.ts:buildNode"
-      ],
-      [
-        "src/jsx/dom/client.ts:createRoot",
-        "src/jsx/dom/render.ts:renderNode"
       ],
       [
         "src/jsx/dom/components.ts:ErrorBoundary",
@@ -6303,6 +6275,14 @@
         "src/request.ts:HonoRequest.url"
       ],
       [
+        "src/preset/quick.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
+        "src/preset/tiny.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
         "src/request.ts:HonoRequest.queries",
         "src/request.ts:HonoRequest.url"
       ],
@@ -6469,13 +6449,13 @@
     ]
   },
   "crg": {
-    "executed": 915,
-    "scored": 915,
+    "executed": 917,
+    "scored": 917,
     "unmodeled_endpoint": 0,
-    "found": 546,
+    "found": 554,
     "found_via_implements": 0,
-    "recall": 0.5967213114754099,
-    "recall_with_implements": 0.5967213114754099,
+    "recall": 0.604143947655398,
+    "recall_with_implements": 0.604143947655398,
     "missed": [
       [
         "src/adapter/aws-lambda/conninfo.ts:getConnInfo",
@@ -6588,14 +6568,6 @@
       [
         "src/adapter/bun/websocket.ts:upgradeWebSocket",
         "src/request.ts:HonoRequest.url"
-      ],
-      [
-        "src/adapter/bun/websocket.ts:websocket",
-        "src/adapter/bun/websocket.ts:createWSContext"
-      ],
-      [
-        "src/adapter/bun/websocket.ts:websocket",
-        "src/helper/websocket/index.ts:createWSMessageEvent"
       ],
       [
         "src/adapter/cloudflare-pages/conninfo.ts:getConnInfo",
@@ -6722,10 +6694,6 @@
         "src/context.ts:Context.#newResponse"
       ],
       [
-        "src/context.ts:Context.html",
-        "src/context.ts:setDefaultContentType"
-      ],
-      [
         "src/context.ts:Context.json",
         "src/context.ts:Context.#newResponse"
       ],
@@ -6740,6 +6708,10 @@
       [
         "src/context.ts:Context.req",
         "src/request.ts:HonoRequest.constructor"
+      ],
+      [
+        "src/context.ts:Context.res",
+        "src/context.ts:createResponseInstance"
       ],
       [
         "src/context.ts:Context.text",
@@ -6779,18 +6751,6 @@
       ],
       [
         "src/helper/css/index.ts:createCssContext",
-        "src/helper/css/common.ts:cssCommon"
-      ],
-      [
-        "src/helper/css/index.ts:createCssContext",
-        "src/helper/css/common.ts:cxCommon"
-      ],
-      [
-        "src/helper/css/index.ts:createCssContext",
-        "src/helper/css/common.ts:keyframesCommon"
-      ],
-      [
-        "src/helper/css/index.ts:createCssContext",
         "src/helper/css/common.ts:viewTransitionCommon"
       ],
       [
@@ -6808,10 +6768,6 @@
       [
         "src/helper/dev/index.ts:getRouterName",
         "src/router/smart-router/router.ts:SmartRouter.match"
-      ],
-      [
-        "src/helper/factory/index.ts:Factory.createApp",
-        "src/hono-base.ts:Hono.constructor"
       ],
       [
         "src/helper/factory/index.ts:Factory.createApp",
@@ -6882,6 +6838,10 @@
         "src/helper/ssg/utils.ts:normalizePath"
       ],
       [
+        "src/helper/streaming/sse.ts:SSEStreamingApi.constructor",
+        "src/utils/stream.ts:StreamingApi.constructor"
+      ],
+      [
         "src/helper/streaming/sse.ts:SSEStreamingApi.writeSSE",
         "src/utils/stream.ts:StreamingApi.write"
       ],
@@ -6900,10 +6860,6 @@
       [
         "src/helper/streaming/sse.ts:streamSSE",
         "src/utils/stream.ts:StreamingApi.abort"
-      ],
-      [
-        "src/helper/streaming/sse.ts:streamSSE",
-        "src/utils/stream.ts:StreamingApi.constructor"
       ],
       [
         "src/helper/streaming/stream.ts:stream",
@@ -7032,6 +6988,10 @@
       [
         "src/hono-base.ts:errorHandler",
         "src/http-exception.ts:HTTPException.getResponse"
+      ],
+      [
+        "src/hono.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
       ],
       [
         "src/hono.ts:Hono.constructor",
@@ -7164,18 +7124,6 @@
       [
         "src/jsx/context.ts:createContext",
         "src/utils/html.ts:raw"
-      ],
-      [
-        "src/jsx/dom/client.ts:createRoot",
-        "src/jsx/dom/render.ts:buildNode"
-      ],
-      [
-        "src/jsx/dom/client.ts:createRoot",
-        "src/jsx/dom/render.ts:renderNode"
-      ],
-      [
-        "src/jsx/dom/client.ts:createRoot",
-        "src/jsx/hooks/index.ts:useState"
       ],
       [
         "src/jsx/dom/components.ts:ErrorBoundary",
@@ -7679,7 +7627,15 @@
       ],
       [
         "src/preset/quick.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
+      ],
+      [
+        "src/preset/quick.ts:Hono.constructor",
         "src/router/smart-router/router.ts:SmartRouter.constructor"
+      ],
+      [
+        "src/preset/tiny.ts:Hono.constructor",
+        "src/hono-base.ts:Hono.constructor"
       ],
       [
         "src/request.ts:HonoRequest.#getAllDecodedParams",
@@ -7963,9 +7919,9 @@
         "recall": 0.8815104166666666
       },
       "constructor": {
-        "executed": 54,
+        "executed": 56,
         "found": 49,
-        "recall": 0.9074074074074074
+        "recall": 0.875
       },
       "getter/setter": {
         "executed": 93,
@@ -7980,9 +7936,9 @@
         "recall": 0.8815104166666666
       },
       "constructor": {
-        "executed": 54,
+        "executed": 56,
         "found": 49,
-        "recall": 0.9074074074074074
+        "recall": 0.875
       },
       "getter/setter": {
         "executed": 93,
@@ -7997,9 +7953,9 @@
         "recall": 0.8645833333333334
       },
       "constructor": {
-        "executed": 54,
+        "executed": 56,
         "found": 49,
-        "recall": 0.9074074074074074
+        "recall": 0.875
       },
       "getter/setter": {
         "executed": 93,
@@ -8010,13 +7966,13 @@
     "codegraph": {
       "function/method": {
         "executed": 768,
-        "found": 575,
-        "recall": 0.7486979166666666
+        "found": 582,
+        "recall": 0.7578125
       },
       "constructor": {
-        "executed": 54,
+        "executed": 56,
         "found": 47,
-        "recall": 0.8703703703703703
+        "recall": 0.8392857142857143
       },
       "getter/setter": {
         "executed": 93,
@@ -8031,9 +7987,9 @@
         "recall": 0.7486979166666666
       },
       "constructor": {
-        "executed": 54,
+        "executed": 56,
         "found": 46,
-        "recall": 0.8518518518518519
+        "recall": 0.8214285714285714
       },
       "getter/setter": {
         "executed": 93,
@@ -8044,13 +8000,13 @@
     "gitnexus": {
       "function/method": {
         "executed": 768,
-        "found": 525,
-        "recall": 0.68359375
+        "found": 533,
+        "recall": 0.6940104166666666
       },
       "constructor": {
-        "executed": 54,
+        "executed": 56,
         "found": 47,
-        "recall": 0.8703703703703703
+        "recall": 0.8392857142857143
       },
       "getter/setter": {
         "executed": 93,
@@ -8061,13 +8017,13 @@
     "cbm": {
       "function/method": {
         "executed": 768,
-        "found": 526,
-        "recall": 0.6848958333333334
+        "found": 530,
+        "recall": 0.6901041666666666
       },
       "constructor": {
-        "executed": 54,
+        "executed": 56,
         "found": 45,
-        "recall": 0.8333333333333334
+        "recall": 0.8035714285714286
       },
       "getter/setter": {
         "executed": 93,
@@ -8078,11 +8034,11 @@
     "crg": {
       "function/method": {
         "executed": 768,
-        "found": 546,
-        "recall": 0.7109375
+        "found": 554,
+        "recall": 0.7213541666666666
       },
       "constructor": {
-        "executed": 54,
+        "executed": 56,
         "found": 0,
         "recall": 0.0
       },
@@ -8178,18 +8134,18 @@
     "codegraph": {
       "top-level function": {
         "executed": 569,
-        "found": 479,
-        "recall": 0.8418277680140598
+        "found": 485,
+        "recall": 0.8523725834797891
       },
       "class member": {
         "executed": 199,
-        "found": 96,
-        "recall": 0.4824120603015075
+        "found": 97,
+        "recall": 0.48743718592964824
       },
       "unique name": {
         "executed": 513,
-        "found": 443,
-        "recall": 0.8635477582846004
+        "found": 450,
+        "recall": 0.8771929824561403
       },
       "name shared by 2-3": {
         "executed": 130,
@@ -8232,8 +8188,8 @@
     "gitnexus": {
       "top-level function": {
         "executed": 569,
-        "found": 461,
-        "recall": 0.8101933216168717
+        "found": 469,
+        "recall": 0.8242530755711776
       },
       "class member": {
         "executed": 199,
@@ -8242,8 +8198,8 @@
       },
       "unique name": {
         "executed": 513,
-        "found": 422,
-        "recall": 0.8226120857699805
+        "found": 430,
+        "recall": 0.8382066276803118
       },
       "name shared by 2-3": {
         "executed": 130,
@@ -8259,8 +8215,8 @@
     "cbm": {
       "top-level function": {
         "executed": 569,
-        "found": 482,
-        "recall": 0.8471001757469244
+        "found": 486,
+        "recall": 0.8541300527240774
       },
       "class member": {
         "executed": 199,
@@ -8269,8 +8225,8 @@
       },
       "unique name": {
         "executed": 513,
-        "found": 441,
-        "recall": 0.8596491228070176
+        "found": 445,
+        "recall": 0.8674463937621832
       },
       "name shared by 2-3": {
         "executed": 130,
@@ -8286,8 +8242,8 @@
     "crg": {
       "top-level function": {
         "executed": 569,
-        "found": 469,
-        "recall": 0.8242530755711776
+        "found": 477,
+        "recall": 0.8383128295254832
       },
       "class member": {
         "executed": 199,
@@ -8296,8 +8252,8 @@
       },
       "unique name": {
         "executed": 513,
-        "found": 432,
-        "recall": 0.8421052631578947
+        "found": 440,
+        "recall": 0.8576998050682261
       },
       "name shared by 2-3": {
         "executed": 130,

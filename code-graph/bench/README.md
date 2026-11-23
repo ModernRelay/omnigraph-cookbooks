@@ -102,10 +102,12 @@ python3 code-graph/bench/recall.py work/trace COOKBOOK.jsonl REFERENCE.json [TOO
 and wraps every function under `src/` so that a call into a definition records
 `caller -> callee`. The caller is the definition that owns the code making the
 call, by the same rules as the static graphs: a callback written in F is F's
-code wherever it runs. Test code runs as `<outside>` and is never a caller.
-The owner travels through awaits in an `AsyncLocalStorage`. The instrumented
-suite runs 3,956 tests like the untouched copy; one test differs. The tests
-executed 915 distinct calls between hono's definitions.
+code wherever it runs, and so are F's default parameters and, in a
+constructor, its `super(...)`; a field's initializer is the field's code.
+Test code runs as `<outside>` and is never a caller. The owner travels
+through awaits in an `AsyncLocalStorage`. The instrumented suite runs 3,956
+tests like the untouched copy; one test differs. The tests executed 917
+distinct calls between hono's definitions.
 
 Recall is the share of executed calls a graph contains. An edge the tests
 never ran is not wrong, so this measures recall only. Every graph is mapped
@@ -118,17 +120,17 @@ AST only) and code-review-graph 2.3.9.
 
 Results, `results/recall.json`:
 
-| Graph | All 915 | Functions and methods (768) | Constructors (54) | Getters and setters (93) |
+| Graph | All 917 | Functions and methods (768) | Constructors (56) | Getters and setters (93) |
 |---|---|---|---|---|
-| Compiler reference | 0.893 | 0.882 | 0.907 | 0.978 |
-| Omnigraph, every reference | 0.895 | 0.882 | 0.907 | 1.000 |
-| Omnigraph, every reference with `ImplementedBy` | 0.934 | | | |
-| Omnigraph, call edges only | 0.779 | 0.865 | 0.907 | 0 |
-| codegraph | 0.680 | 0.749 | 0.870 | 0 |
-| Graphify | 0.679 | 0.749 | 0.852 | 0 |
-| GitNexus | 0.625 | 0.684 | 0.870 | 0 |
-| codebase-memory-mcp | 0.624 | 0.685 | 0.833 | 0 |
-| code-review-graph | 0.597 | 0.711 | 0 | 0 |
+| Compiler reference | 0.891 | 0.882 | 0.875 | 0.978 |
+| Omnigraph, every reference | 0.893 | 0.882 | 0.875 | 1.000 |
+| Omnigraph, every reference with `ImplementedBy` | 0.932 | | | |
+| Omnigraph, call edges only | 0.778 | 0.865 | 0.875 | 0 |
+| codegraph | 0.686 | 0.758 | 0.839 | 0 |
+| Graphify | 0.677 | 0.749 | 0.821 | 0 |
+| GitNexus | 0.632 | 0.694 | 0.839 | 0 |
+| codebase-memory-mcp | 0.627 | 0.690 | 0.804 | 0 |
+| code-review-graph | 0.604 | 0.721 | 0 | 0 |
 
 "Every reference" is what the cookbook's reads on Omnigraph answer: `callers`,
 `callees` and `impact` follow every `References` edge and report `call` as a column, not
@@ -148,8 +150,8 @@ Two things separate Omnigraph from the tools, and they are of different
 kinds. The first is what is recorded. Omnigraph's references contain 819
 executed calls and its call edges 713; the 106 between them are 93 getter
 calls, which run when a property is read, and 13 calls to functions the code
-passes as values. That is half of the gap between 0.895 and the tools' best,
-0.680, and it is a choice of what to record more than better extraction.
+passes as values. That is half of the gap between 0.893 and the tools' best,
+0.686, and it is a choice of what to record more than better extraction.
 
 The second is resolution. The tools find definitions by name; the graph
 loaded into Omnigraph comes from the type checker, through scip-typescript.
@@ -158,9 +160,9 @@ Recall on calls to functions and methods, from `functions_by_call_shape` in
 
 | Callee | Executed | Omnigraph calls | codegraph | Graphify | GitNexus | codebase-memory-mcp | code-review-graph |
 |---|---|---|---|---|---|---|---|
-| Top-level function | 569 | 0.896 | 0.842 | 0.880 | 0.810 | 0.847 | 0.824 |
-| Class member | 199 | 0.774 | 0.482 | 0.372 | 0.322 | 0.221 | 0.387 |
-| Name defined once | 513 | 0.955 | 0.864 | 0.918 | 0.823 | 0.860 | 0.842 |
+| Top-level function | 569 | 0.896 | 0.852 | 0.880 | 0.824 | 0.854 | 0.838 |
+| Class member | 199 | 0.774 | 0.487 | 0.372 | 0.322 | 0.221 | 0.387 |
+| Name defined once | 513 | 0.955 | 0.877 | 0.918 | 0.838 | 0.867 | 0.858 |
 | Name defined 4 or more times | 125 | 0.640 | 0.424 | 0.288 | 0.272 | 0.192 | 0.264 |
 
 Where a name identifies its definition, the tools come close: Graphify is
@@ -174,12 +176,13 @@ The tools find 23 executed calls Omnigraph lacks, 13 of them codegraph's.
 Most are calls dispatched to an override, which matching by name catches by
 linking every method of that name.
 
-The compiler reference misses 98 executed calls, about one in nine. 47 are
+The compiler reference misses 100 executed calls, about one in nine. 47 are
 function values called indirectly: a function passed as an argument, stored
 in a property or returned, then called by code that never names it. 44 are
 calls dispatched to an override, such as `this.getHeaders()` in an abstract
 class running a subclass's method; Omnigraph's `ImplementedBy` edges recover
-most of these. The other seven reach constructors and getters.
+most of these. The other nine reach constructors and getters, among them
+four `super(...)` calls, which no graph here records.
 
 ## Agent cost
 
@@ -402,6 +405,7 @@ those tools.
 - The reference shares the TypeScript compiler with scip-typescript, so the
   PR-diff accuracy measures conversion and modeling, not resolution.
 - Execution recall covers only what hono's tests run, and the tracer skips
-  two generators.
+  two generators. It would credit a getter that a parameter's destructuring
+  reads to the caller; no parameter in hono reads one.
 - Tools are mapped by file, name and line into the reference's identities; a
   tool's own node that the reference does not model counts as not found.

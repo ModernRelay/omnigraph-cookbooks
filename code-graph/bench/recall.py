@@ -72,13 +72,15 @@ def recall(dyn: set, static: set, nodes: set, impl: dict | None = None) -> dict:
 def main():
     trace_dir, cook_path, ref_path, *tools = sys.argv[1:]
     dyn = executed(trace_dir)
-    cn, ce = load_cookbook(Path(cook_path))
+    _, ce = load_cookbook(Path(cook_path))
     rn, re_ = load_reference(Path(ref_path))
     impl = implementations(cook_path)
+    # Every graph is scored over the reference's definitions, so an executed
+    # call whose endpoint a graph lacks is a miss, not left out.
     results = {
         "reference": recall(dyn, set(re_), set(rn)),
-        "cookbook": recall(dyn, set(ce), set(cn), impl),
-        "cookbook_calls_only": recall(dyn, {e for e, v in ce.items() if v["call"]}, set(cn), impl),
+        "cookbook": recall(dyn, set(ce), set(rn), impl),
+        "cookbook_calls_only": recall(dyn, {e for e, v in ce.items() if v["call"]}, set(rn), impl),
     }
     graphs = {"reference": set(re_), "cookbook": set(ce),
               "cookbook_calls_only": {e for e, v in ce.items() if v["call"]}}

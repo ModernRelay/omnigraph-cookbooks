@@ -21,6 +21,57 @@ const here = path.dirname(fileURLToPath(import.meta.url))
 const require = createRequire(import.meta.url)
 const ts = require(process.env.CG_TYPESCRIPT || path.join(here, '../sources/indexer/node_modules/typescript'))
 
+const unwrap = (e) => {
+  while (e && (ts.isParenthesizedExpression(e) || ts.isAsExpression(e) || ts.isSatisfiesExpression(e) ||
+    ts.isTypeAssertionExpression(e))) e = e.expression
+  return e
+}
+const isFunctionValue = (e) => !!e && (ts.isArrowFunction(e) || ts.isFunctionExpression(e))
+const hasBody = (n) => (ts.isFunctionDeclaration(n) || ts.isMethodDeclaration(n) || ts.isConstructorDeclaration(n) ||
+  ts.isGetAccessorDeclaration(n) || ts.isSetAccessorDeclaration(n)) && !!n.body
+const isFunction = (n) => hasBody(n) || ts.isArrowFunction(n) || ts.isFunctionExpression(n)
+const hasModifier = (n, kind) => (n.modifiers || []).some((m) => m.kind === kind)
+
+// The code the call tracer (instrument.mjs) wraps for one node, to run with
+// `owner` as the definition whose code it is. A function's body is entered by a
+// call to `callee`, or null for a local function. A derived constructor's body
+// is wrapped whole, `super(...)` included: the wrapper is an arrow function,
+// which reads `this` only when the code in it does. Before a body runs, a call
+// runs the expressions in its parameter list and a construction runs each
+// instance field's initializer; each is wrapped with no callee. A function or
+// class value is not: making one runs nothing, and wrapping it would lose the
+// name it takes from its binding. Destructuring a parameter still reads
+// properties before the body, so a getter it reaches is credited to the caller.
+export function tracerSites(node, sf, file, owner, callee) {
+  const expression = (e) => (isFunctionValue(unwrap(e)) || ts.isClassExpression(unwrap(e)) ? []
+    : [{ file, block: false, start: e.getStart(sf), end: e.end, async: false, callee: null, owner, skip: null }])
+  if (isFunction(node)) {
+    const found = []
+    const bindings = (name) => {
+      if (ts.isIdentifier(name)) return
+      for (const el of name.elements) {
+        if (ts.isOmittedExpression(el)) continue
+        if (el.propertyName && ts.isComputedPropertyName(el.propertyName)) found.push(el.propertyName.expression)
+        if (el.initializer) found.push(el.initializer)
+        bindings(el.name)
+      }
+    }
+    for (const p of node.parameters) {
+      bindings(p.name)
+      if (p.initializer) found.push(p.initializer)
+    }
+    return [...found.flatMap(expression), {
+      file, block: ts.isBlock(node.body), start: node.body.getStart(sf), end: node.body.end,
+      async: hasModifier(node, ts.SyntaxKind.AsyncKeyword), callee, owner,
+      skip: node.asteriskToken ? 'generator' : null,
+    }]
+  }
+  if (ts.isPropertyDeclaration(node) && node.initializer && !hasModifier(node, ts.SyntaxKind.StaticKeyword)) {
+    return expression(node.initializer)
+  }
+  return []
+}
+
 export function buildReference(checkout, { project = 'tsconfig.build.json', scope = 'src/' } = {}) {
   const root = path.resolve(checkout)
   const configPath = path.join(root, project)
@@ -52,28 +103,30 @@ export function buildReference(checkout, { project = 'tsconfig.build.json', scop
   const refs = [] // [owner identity, identifier node]
   const keyRefs = [] // [owner identity, object-literal member]
   const fnToId = new Map() // function node -> identity of the definition it is
-  const sites = [] // function bodies, for the call tracer
+  const sites = [] // the code the call tracer wraps (tracerSites)
 
   const lineOf = (sf, pos) => sf.getLineAndCharacterOfPosition(pos).line + 1
   const nameText = (name) =>
     name && (ts.isIdentifier(name) || ts.isPrivateIdentifier(name) || ts.isStringLiteral(name) ||
       ts.isNumericLiteral(name)) ? name.text : null
-  const unwrap = (e) => {
-    while (e && (ts.isParenthesizedExpression(e) || ts.isAsExpression(e) || ts.isSatisfiesExpression(e) ||
-      ts.isTypeAssertionExpression(e))) e = e.expression
-    return e
-  }
-  const isFunctionValue = (e) => !!e && (ts.isArrowFunction(e) || ts.isFunctionExpression(e))
-  const hasBody = (n) => (ts.isFunctionDeclaration(n) || ts.isMethodDeclaration(n) || ts.isConstructorDeclaration(n) ||
-    ts.isGetAccessorDeclaration(n) || ts.isSetAccessorDeclaration(n)) && !!n.body
 
   function register(node, id, kind, callable, sf, nameNode, codeNode) {
-    if (!nodes[id]) {
+    const line = lineOf(sf, (nameNode || node).getStart(sf))
+    const endLine = lineOf(sf, node.getEnd())
+    const known = nodes[id]
+    if (!known) {
       nodes[id] = {
         kind, callable, path: rel(sf.fileName), name: id.includes(':') ? id.split(':').pop().split('.').pop() : rel(sf.fileName),
-        line: lineOf(sf, (nameNode || node).getStart(sf)), end_line: lineOf(sf, node.getEnd()), digest: null,
-        owns: false,
+        line, end_line: endLine, digest: null, owns: false,
       }
+    } else {
+      // Several declarations of one identity, such as an overloaded function's
+      // signatures and its implementation, or a getter and its setter, are one
+      // definition: it runs from the first to the last, and is callable if any
+      // of them is, as the converter decides.
+      known.line = Math.min(known.line, line)
+      known.end_line = Math.max(known.end_line, endLine)
+      known.callable ||= callable
     }
     // A callable's code is its declaration text; overloads and merges add up.
     if (callable && codeNode) {
@@ -87,31 +140,6 @@ export function buildReference(checkout, { project = 'tsconfig.build.json', scop
       if (fn) fnToId.set(fn, id)
     }
     declId.set(node, id)
-  }
-
-  // Every function with a body, for the call tracer: where its body is, the
-  // definition a call to it enters (null for a local function) and the
-  // definition that owns the code inside it.
-  function recordSite(node, sf, owner) {
-    const body = node.body
-    if (!body) return
-    const isAsync = (node.modifiers || []).some((m) => m.kind === ts.SyntaxKind.AsyncKeyword)
-    const site = {
-      file: rel(sf.fileName), block: ts.isBlock(body), start: body.getStart(sf), end: body.end,
-      async: isAsync, generator: !!node.asteriskToken, callee: fnToId.get(node) ?? null, owner,
-      constructor: ts.isConstructorDeclaration(node), after: null, skip: null,
-    }
-    if (site.generator) site.skip = 'generator'
-    if (site.constructor) {
-      const cls = node.parent
-      const derived = (cls.heritageClauses || []).some((h) => h.token === ts.SyntaxKind.ExtendsKeyword)
-      const first = body.statements[0]
-      const superFirst = first && ts.isExpressionStatement(first) && ts.isCallExpression(first.expression) &&
-        first.expression.expression.kind === ts.SyntaxKind.SuperKeyword
-      if (derived && !superFirst) site.skip = 'super not first'
-      else if (derived) site.after = first.end
-    }
-    sites.push(site)
   }
 
   // Walk one file. `chain` is the container names above this point, `owner`
@@ -177,16 +205,15 @@ export function buildReference(checkout, { project = 'tsconfig.build.json', scop
         }
       }
     }
+    // The code the tracer wraps belongs to the owner its references have.
+    sites.push(...tracerSites(node, sf, prefix, nextOwner, fnToId.get(node) ?? null))
     // Function bodies hold locals: their declarations are not global symbols.
-    if (hasBody(node) || ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
-      recordSite(node, sf, nextOwner)
-      nextInBody = true
-    }
+    if (isFunction(node)) nextInBody = true
     // A non-function initializer is an expression: walk it as a body, so the
     // declarations in it are locals and its code belongs to the declaration.
     if (!nextInBody && (ts.isVariableDeclaration(node) || ts.isPropertyDeclaration(node)) && node.initializer &&
       !isFunctionValue(unwrap(node.initializer))) {
-      visitChildren(node, sf, nextChain, nextOwner, true, node.initializer)
+      visitChildren(node, sf, nextChain, nextOwner, false, node.initializer)
       return
     }
     if (isReference(node)) refs.push([nextOwner, node])
