@@ -603,7 +603,9 @@ def check_site(folder):
 # use-case page from the same sections (see "Writing a cookbook README" in AGENTS.md).
 # Commands belong in the cookbook's AGENTS.md.
 README_SECTIONS = ("The data model", "Branching and merging", "Agents and workflows",
-                   "Data sources", "Questions you can ask", "Sample data", "Run it")
+                   "Data sources", "Questions you can ask", "Sample data", "Benchmarks", "Run it")
+# The sections a README may leave out: Benchmarks belongs only to a cookbook that measured itself.
+README_OPTIONAL = {"Benchmarks"}
 QUESTIONS = range(3, 6)   # how many questions a cookbook features
 QUERY_NAME = re.compile(r"`([a-z][a-z0-9]*(?:_[a-z0-9]+)+)`")
 CODE = re.compile(r"`([^`]+)`")
@@ -678,9 +680,10 @@ def check_readme(folder, site, queries):
     """The README in the shared sections, each claim backed by something the cookbook holds."""
     where, there = f"{folder}/README.md", f"{folder}/site.json"
     lead, sections = readme_sections(folder)
-    assert tuple(sections) == README_SECTIONS, \
-        f"{where}: its ## sections must be exactly {', '.join(README_SECTIONS)}, in that order; " \
-        f"found {', '.join(sections) or 'none'}"
+    expected = tuple(title for title in README_SECTIONS if title in sections or title not in README_OPTIONAL)
+    assert tuple(sections) == expected, \
+        f"{where}: its ## sections must be {', '.join(README_SECTIONS)}, in that order, leaving out only " \
+        f"{', '.join(sorted(README_OPTIONAL))} when it has none; found {', '.join(sections) or 'none'}"
     for title, section in sections.items():
         assert "".join(section["text"]).strip(), f"{where}: ## {title} is empty"
     # The intro: the living thing the use case builds and the agent workflows around it, in the

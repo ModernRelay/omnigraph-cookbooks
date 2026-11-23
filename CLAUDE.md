@@ -283,6 +283,12 @@ what it does, where a person decides.>
 
 [seed.md](seed.md) describes it and lists what every stored read returns.
 
+## Benchmarks
+
+<Optional: only for a cookbook that has measured itself. What was measured, on
+what data and against which baseline or tools, with the headline results. The
+methods stay with the scripts that produce them; link them.>
+
 ## Run it
 
 Paste this prompt into a coding agent such as Claude Code or Codex:
@@ -311,6 +317,7 @@ page to a question. Write each section so it serves all three.
 | Data sources | Think of what they could bring in from tools they already use | Know which tools to read from and which types to write | People search by tool name, so each product named is a match |
 | Questions you can ask | See answers they cannot get today | The named queries to call | The questions are the site's featured questions and read as an FAQ |
 | Sample data | Check the claims against real numbers | Know what a correct load returns | Little; it keeps the rest of the page free of sample detail |
+| Benchmarks (optional) | Weigh the claims against measurements on real data and against the alternatives | Know how far the answers can be trusted, and where they are known to miss | Comparisons people search for: the alternatives by name, accuracy, cost |
 | Run it | The one action to take | The prompt it is started with, and where the commands are | Little |
 
 ### Section by section
@@ -324,10 +331,12 @@ page to a question. Write each section so it serves all three.
 | Data sources | The tools a team brings data in from, by product name, and the types each feeds | Every backticked type exists in `schema.pg` |
 | Questions you can ask | The questions `site.json` features, three to five. Feature only questions the sample data answers. One that is rightly empty on a fresh load, such as a check that finds nothing wrong, belongs in the workflow table | The table's rows are the questions of `site.json`: the same ones, word for word and in the same order, each with its query; each returns rows on the seed |
 | Sample data | What the seed depicts and what the questions return on it | A link to `seed.md` |
+| Benchmarks | Only when the cookbook has measured itself: what was measured, on what and against what, the headline results and a link to the scripts and methods. Otherwise leave the section out | Not empty when present |
 | Run it | The prompt, and where the commands are | The onboarding prompt with the cookbook's folder, alone in a `text` block; links to local setup and `AGENTS.md`; the Graph ID |
 
-No other `##` is allowed. `README_SECTIONS` in `scripts/check-cookbooks.py` is
-the list the check uses; change the two together.
+No other `##` is allowed, and Benchmarks is the only one a README may leave
+out. `README_SECTIONS` and `README_OPTIONAL` in `scripts/check-cookbooks.py`
+are the lists the check uses; change them together.
 
 ### How to write it
 
