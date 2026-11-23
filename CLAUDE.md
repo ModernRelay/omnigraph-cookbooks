@@ -67,7 +67,7 @@ before a schema change, a bulk load or a retry after an uncertain write.
   a link to an existing owner over copying another lifecycle walkthrough.
 - The root [README](README.md) is the landing page for the collection, for a
   person choosing a cookbook: what a cookbook is, the table of all eight and
-  how to try one. Its only command is the onboarding prompt. Each row of its
+  how to try one. Its only fenced block is the onboarding prompt. Each row of its
   table is a cookbook's `name`, `blurb` and first question from `site.json`,
   in `order`; change them there and copy them across, and the check holds the
   two together. Setup commands go in [docs/local-setup.md](docs/local-setup.md),
@@ -319,7 +319,7 @@ page to a question. Write each section so it serves all three.
 | Data sources | The tools a team brings data in from, by product name, and the types each feeds | Every backticked type exists in `schema.pg` |
 | Questions you can ask | The questions `site.json` features, three to five. Feature only questions the sample data answers. One that is rightly empty on a fresh load, such as a check that finds nothing wrong, belongs in the workflow table | The table's rows are the questions of `site.json`: the same ones, word for word and in the same order, each with its query; each returns rows on the seed |
 | Sample data | What the seed depicts and what the questions return on it | A link to `seed.md` |
-| Run it | The prompt, and where the commands are | Links to local setup and `AGENTS.md`; the Graph ID |
+| Run it | The prompt, and where the commands are | The onboarding prompt with the cookbook's folder, alone in a `text` block; links to local setup and `AGENTS.md`; the Graph ID |
 
 No other `##` is allowed. `README_SECTIONS` in `scripts/check-cookbooks.py` is
 the list the check uses; change the two together.
