@@ -184,9 +184,9 @@ latency target."
   `claims_without_source`, `claims_without_speaker`, `unowned_actions`,
   `unsupported_actions` and `agents_without_owner` each return zero rows.
 
-## The walkthrough in the README
+## The walkthrough in AGENTS.md
 
-Run against this seed, the README's "Agents extract, people decide" steps
+Run against this seed, the "Agents extract, people decide" steps in AGENTS.md
 give:
 
 - On `agent/notes-oct-14`, after `mark_contradiction`, `decisions_at_risk`

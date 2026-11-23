@@ -15,7 +15,7 @@
 #   to one of them in an agent's commit is a reason not to merge.
 #
 # act-admin, act-writer and act-reader are the roles every cookbook ships.
-# act-alice, act-notes-bot and act-slack-bot are the cast of the README
+# act-alice, act-notes-bot and act-slack-bot are the cast of the AGENTS.md
 # walkthrough: one actor per agent, so every commit says which agent wrote it.
 version: 1
 groups:
