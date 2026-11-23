@@ -112,9 +112,9 @@ prepare briefs. Partners decide.
 
 | Kind | Workflow | What it does | Stored queries |
 |---|---|---|---|
-| Capture | Call intake | After a call or meeting, records the meeting, its transcript and the commitments made, with their owners and due dates | `add_meeting`, `add_artifact`, `link_artifact_from_meeting`, `add_commitment` |
+| Capture | Call intake | After a call or meeting, records the meeting, its transcript and the commitments made, with their owners | `add_meeting`, `add_artifact`, `link_artifact_from_meeting`, `add_commitment` |
 | Capture | Signal intake | Records a funding round, launch, hire or regulatory move, and links it to the organizations and the assumptions it supports or contradicts | `add_signal`, `link_signal_about_organization`, `link_contradicts_assumption`, `link_supports_assumption` |
-| Capture | Scout triage | Checks a new startup against the firm's records, then adds it as watched with its sector and the discovery signal | `search_organizations`, `add_organization`, `link_organization_in_market`, `add_signal` |
+| Capture | Scout triage | Checks a new startup against the firm's records, then adds it with its sector and the discovery signal | `search_organizations`, `add_organization`, `link_organization_in_market`, `add_signal` |
 | Maintain | Evidence check | After a signal lands, lists the assumptions it contradicts and the decisions that rest on them | `recent_contradictions`, `signal_portfolio_impact`, `assumption_decisions` |
 | Maintain | Thesis review | Finds active theses with contradicting evidence and shows which assumptions carry it | `contradicted_active_theses`, `thesis_contradictions_via_assumptions`, `thesis_assumptions` |
 | Maintain | Source review | When a source is rated low, lists the signals that came from its articles | `sources_by_reliability`, `source_downstream_signals` |

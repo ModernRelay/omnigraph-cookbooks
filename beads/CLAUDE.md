@@ -126,9 +126,10 @@ local-writer` to writes. Aliases and `ob` cover the reads.
 - **Project memory.** `ob remember`, stored as `remember` (or `remember_about`
   to link an issue); `ob recall` and `memories` read them. `ob prime` gives a
   new session its memories, its own work and the ready list.
-- **Merge closes work.** `ob close <id> --reason "<why>"`, stored `close` with
-  `ids`, `reason` and `never: null`. It refuses an issue with an open child or
-  blocker unless they close together or `--force` is given.
+- **Merge closes work.** Run `ob close <id> --reason "<why>"`. It refuses an
+  issue with an open child or blocker unless they close together or `--force`
+  is given. The stored `close` (`ids`, `reason`, `never: null`) is what it
+  writes with, and run directly it makes none of those checks.
 - **Claim and work.** `ob ready --claim`, or `ready` then `claim`. A lost race
   affects 0 rows. `ob release <id>` gives it back.
 - **Lease reclaim.** `expired_leases` lists lapsed claims and `ob reclaim`

@@ -121,10 +121,11 @@ a person.
 
 - *Signal intake.* Start: a new press release, filing, registry entry or agency
   letter. Read `recent_signals` and `search_signals` to avoid a duplicate.
-  Write `add_artifact` (set `link` to the live URL), `add_source` if the
-  publisher is new, `add_signal`, `link_signal_artifact`, `link_artifact_source`.
-  `add_signal` takes only slug, name, brief and times, so `domain` and
-  `description` stay unset.
+  Write `add_artifact`, `add_source` if the publisher is new, `add_signal`,
+  `link_signal_artifact`, `link_artifact_source`. `add_artifact` takes no URL,
+  so the stored writes leave the artifact without its address; a merge load of
+  the artifact on the branch can carry it. `add_signal` takes only slug, name, brief and times, so
+  `domain` and `description` stay unset.
 - *Pipeline tracking.* Start: a new compound, trial, deal or agency action.
   Read `compounds_all`, `trials_by_status`, `deals_all`. Write `add_compound`,
   `add_trial`, `link_compound_mechanism`, `link_compound_company`,

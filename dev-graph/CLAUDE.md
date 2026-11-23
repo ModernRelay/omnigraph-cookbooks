@@ -84,7 +84,7 @@ merge `main`. There is no agent role. Do not add one without task authorization.
 | Backlog triage | Read `stale_candidates`, filter by date, then `update_issue_status` or `set_issue_priority` |
 | Upstream watch | Read `blocked_on_upstream` and `assumptions_for_blocker`; when upstream ships, `mark_blocker_shipped` |
 | Invariant check | Read `unheld_invariants` and `gaps_undermining_invariants`; `set_invariant_status`, `update_gap_state` |
-| Decision upkeep | `record_decision` the new one, then `supersede_decision` (new, old) |
+| Decision upkeep | `record_decision` the new one, then `supersede_decision` (new, old). That only links the two: no stored write changes the old decision's status or ties the new one to a component, so `decisions_for_component` still returns the old one. Say so in the report |
 | Coverage audit | Read `components_without_spec`, `capabilities_without_component`, `assumptions`; no stored write fixes these |
 | Review context | Read `decisions_for_component`, `issues_for_component`, `prs_for_component` for the touched component |
 | Unblock notice | Read `blocked_on_upstream` and `issue_owner`; draft the message, a person sends it |

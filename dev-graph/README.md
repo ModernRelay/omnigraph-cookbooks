@@ -107,7 +107,7 @@ needs them. Engineers decide.
 | Maintain | Backlog triage | Finds issues that have not moved, then sets their status or priority | `stale_candidates`, `update_issue_status`, `set_issue_priority` |
 | Maintain | Upstream watch | When an upstream fix ships, marks the blocker shipped and checks the assumptions that covered it | `blocked_on_upstream`, `assumptions_for_blocker`, `mark_blocker_shipped` |
 | Maintain | Invariant check | Lists violated invariants and the gaps behind them, and updates their status | `unheld_invariants`, `gaps_undermining_invariants`, `set_invariant_status`, `update_gap_state` |
-| Maintain | Decision upkeep | Supersedes a decision that no longer holds and lists the decisions that apply to a component | `decisions_for_component`, `record_decision`, `supersede_decision` |
+| Maintain | Decision upkeep | Records the decision that replaces one that no longer holds and links the two; a person changes the old one's status | `decisions_for_component`, `record_decision`, `supersede_decision` |
 | Maintain | Coverage audit | Finds components with no spec, capabilities nothing implements and assumptions with no guard | `components_without_spec`, `capabilities_without_component`, `assumptions` |
 | Act | Review context | Before an agent reviews or changes a component, hands it the decisions, open issues and recent pull requests | `decisions_for_component`, `issues_for_component`, `prs_for_component` |
 | Act | Unblock notice | When a blocker ships, tells the owners of the issues that waited on it | `blocked_on_upstream`, `issue_owner` |

@@ -82,8 +82,10 @@ non-optional property must be supplied.
 **Signal intake (capture).** Starts with a new article, filing or post.
 1. Search first, so the signal is not filed twice:
    `omnigraph query search_signals --target local-reader --graph spike --params '{"q":"..."}'`.
-2. On a branch run `add_artifact` (give `artifactType` and its link),
-   `add_source` for a publisher not yet in the record, then `add_signal`.
+2. On a branch run `add_artifact` (give `artifactType`), `add_source` for a
+   publisher not yet in the record, then `add_signal`. `add_artifact` takes no
+   URL, so the stored writes leave the artifact without its address; a merge
+   load of the artifact on the branch can carry it.
 3. Attach with `link_signal_spotted_in` and `link_signal_sourced_from`.
 4. An analyst merges. `add_signal` takes only slug, name, brief and three
    timestamps; no stored write sets `description` or `domain`.

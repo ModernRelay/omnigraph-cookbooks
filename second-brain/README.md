@@ -105,7 +105,6 @@ needs you. You review what they wrote and decide what to do.
 | Capture | Commitment capture | Turns a promise made in a message into a task for the person it concerns, linked to the source | `add_task`, `link_task_for_person`, `link_task_from_artifact` |
 | Capture | Note capture | Files an idea, a journal entry or a preference as a note linked to the people and projects it is about | `add_note`, `link_note_about_person`, `link_note_about_project`, `link_note_from_artifact` |
 | Capture | Event and reading capture | Records a gathering with who was there, and a book someone recommended | `add_event`, `link_attended_by`, `add_media`, `link_media_recommended_by` |
-| Maintain | Provenance check | Finds notes that do not trace to a source and links them to the message or event they came from | `notes_recent`, `note_from_artifact`, `link_note_from_artifact` |
 | Maintain | Relationship upkeep | Checks that both sides of each friendship and family link are stored, and adds the missing one | `person_knows`, `person_family`, `link_knows`, `link_related` |
 | Maintain | Weekly review | Reads active projects, their tasks and the goals above them, and drafts a reflection note | `projects_active`, `project_tasks`, `goal_tasks`, `add_note` |
 | Maintain | Open questions | Gathers the questions and principles you have noted and drafts how recent notes bear on them | `open_questions`, `principles_all`, `notes_by_kind` |
@@ -177,7 +176,7 @@ return:
 - Twelve tasks are next actions, the first of them replying to Marco's
   playdate text.
 - Two books are on the reading list: Outlive and Pachinko.
-- Maya recommended the documentary Jiro Dreams of Sushi.
+- Maya recommended Pachinko.
 
 [seed.md](seed.md) describes it and lists what the main stored reads return.
 

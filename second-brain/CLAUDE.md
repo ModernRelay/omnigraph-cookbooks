@@ -50,7 +50,7 @@ omnigraph mutate link_task_for_person --target local-writer --graph brain --para
 omnigraph query person_tasks_i_owe --target local-reader --graph brain --params '{"slug":"per-theo"}'
 omnigraph query tasks_next --target local-reader --graph brain
 omnigraph query reading_queue --target local-reader --graph brain
-omnigraph query media_recommended_by --target local-reader --graph brain --params '{"slug":"med-jiro"}'
+omnigraph query media_recommended_by --target local-reader --graph brain --params '{"slug":"med-pachinko"}'
 ```
 
 ## Access
@@ -75,7 +75,6 @@ query` as `local-reader` and writes with `omnigraph mutate` as `local-writer`.
 | Commitment capture | `add_task`, `link_task_for_person`, `link_task_from_artifact` |
 | Note capture | `add_note`, then `link_note_about_person` / `link_note_about_project` / `link_note_about_area`, and `link_note_from_artifact` or `link_note_from_event` |
 | Event and reading capture | `add_event`, `link_attended_by`, `link_happened_at`; `add_media`, `link_media_recommended_by` |
-| Provenance check | `notes_recent`, then `note_from_artifact` per note; where it returns nothing, find the source and `link_note_from_artifact` |
 | Relationship upkeep | `person_knows` and `person_family` per person; add the missing inverse with `link_knows` or `link_related` (invert `relation`) |
 | Weekly review | `projects_active`, `project_tasks`, `goal_tasks`; draft a reflection with `add_note` and link it with `link_note_about_project` |
 | Open questions | `open_questions`, `principles_all`, `notes_by_kind`; draft an insight note |
@@ -99,6 +98,9 @@ sent.
   record, retires one or merges duplicates.
 - `add_artifact` does not take `content`, `thread_id` or `url`; there is no
   stored write for `Chunk`.
+- No stored read lists the sources of a note. `note_from_artifact` takes an
+  artifact and returns the notes drawn from it, so a check for notes with no
+  source cannot run on the stored reads.
 - No connectors and no automatic sync. The example policy has no agent role.
 
 ## Domain Model
