@@ -1,12 +1,13 @@
-# Binder campaign: designs, evidence, and the claims they carry
+# Protein binder design campaign: designs, evidence, and the claims they carry
 
-Build a living record of a protein binder campaign, and the agent workflows
-around it. It keeps the targets, every design and how it was made, the scores
-that selected it, what each lab measured, and the claim that a design binds a
-target — with the rule that claim holds under and the evidence it rests on.
-Whether a design counts as a binder is worked out from the measurements under
-the rule you name, so tightening the definition re-reads the record instead of
-re-analysing it. Agents propose every change on a branch a scientist reviews.
+Build a living record of a protein binder design campaign, and the agent
+workflows around it. It keeps the targets, every design and how it was made,
+the scores that selected it, what each lab measured, and the claim that a
+design binds a target — with the rule that claim holds under and the evidence
+it rests on. Whether a design counts as a binder is worked out from the
+measurements under the rule you name, so tightening the definition re-reads
+the record instead of re-analysing it. Agents propose every change on a branch
+a scientist reviews.
 
 A campaign leaves its designs in one tool, its scores in a notebook, its
 assay results in a contract lab's spreadsheet and its verdict in a slide, and
@@ -88,6 +89,10 @@ graph LR
 A change is made on a branch, which is a version of the whole record, and the
 baseline moves only when someone merges it.
 
+- **A round of the campaign.** An agent registers the bars, records the
+  designs a generation run produced and the readings a predictor returned,
+  all on one branch, so a scientist reads the shortlist and its provenance
+  before any of it becomes the baseline.
 - **A re-count under a new rule.** Add a criterion on a branch, record which
   claims survive it, and read the counts as they would be before anyone else
   sees them.
@@ -111,50 +116,61 @@ and keep them to branches if you need that enforced.
 
 ## Agents and workflows
 
-Agents bring results in, keep the claims honest against the evidence, and
-tell people what needs a scientist. The verdicts stay with people.
+Agents run the campaign: they choose what to aim at, generate designs, operate
+the predictors, order the synthesis and the assays, and bring every result
+back. The record is what they read from and write to. The verdicts stay with
+people.
 
 | Kind | Workflow | What it does | Stored queries |
 |---|---|---|---|
-| Capture | Assay result intake | Records each measurement a contract lab returned, with its design, its target and the lab, in one write | `add_measurement`, `measurements_for_design` |
-| Capture | Source refresh | Re-reads a report or data release, moves the day it was last read, and records a source nobody had cited | `add_source`, `mark_source_fetched`, `sources`, `uncited_gaps` |
+| Capture | Target and bar registration | Records a target, the epitope residues to aim at, and the bar each predictor has to clear, before anything is scored | `add_target`, `add_hotspot`, `set_threshold`, `hotspots` |
+| Capture | Design intake from a generation run | Runs a design tool and a sequence method, then records each design with its tool, backbone family, designer and intended targets, a redesign with its parent, and a fusion with its two domains | `add_design`, `derive_design_from`, `add_fusion_domain`, `intend_design_against` |
+| Capture | Co-folding and scoring run | Takes a design's sequence and a target's structure, co-folds them with each predictor, and records the interface scores and whether they cleared the registered bar | `get_design`, `thresholds_all`, `record_scores`, `design_scores` |
+| Capture | Assay result intake | Records what a lab returned: each measurement with its design, target and lab, the controls that ran beside it, and the checks against proteins the design was never aimed at | `add_measurement`, `add_control`, `record_specificity_check`, `measurements_for_design` |
 | Maintain | Verdict from the evidence | Reads the measurements for a design and target, records the claim, and ties it to the rows it rests on | `assert_binder_claim`, `ground_claim`, `claim_evidence` |
-| Maintain | Re-count under a rule | Adds a rule for calling a design a binder and records which claims survive it, then compares the graph's count with the count its source reports | `add_criterion`, `claim_survives_criterion`, `criterion_survivor_counts`, `claims_lost_under` |
-| Maintain | Unevidenced claim sweep | Finds claims resting on nothing recorded and either grounds them or withdraws them | `claims_with_gaps`, `claims_fully_evidenced`, `ground_claim`, `withdraw_claim` |
-| Maintain | Gap register | Writes down what the record does not hold, cites the source that states the absence, and links it to the claims and targets it reaches | `record_gap`, `cite_gap`, `gap_affects_claim`, `gap_affects_target` |
-| Maintain | Value quality review | Finds designs the two labs call differently, values that are only an upper limit, and values recorded without the kinetic model fitted to produce them, and records what each costs | `lab_disagreements`, `upper_limit_only`, `values_without_a_fit_model`, `record_gap` |
-| Maintain | Assay validity review | Finds runs whose control did not work, and designs that bound a protein they were never aimed at, and records which claims each undermines | `failed_controls`, `off_target_hits`, `specificity_for_design`, `gap_affects_claim` |
-| Act | Claim-change notice | When a rule is added or a claim is withdrawn, tells whoever relied on it which claims moved and why | `claims_lost_under`, `withdrawn_claims` |
-| Act | Evidence request | For each claim resting on one lab or on an upper limit, asks the lab for the run that would settle it | `claims_with_gaps`, `upper_limit_only` |
+| Maintain | Re-count under a rule | Adds a rule for calling a design a binder, records which claims survive it, and compares the count with the one its source reports | `add_criterion`, `claim_survives_criterion`, `criterion_survivor_counts`, `claims_lost_under` |
+| Maintain | Score-to-bar audit | Finds scores computed after selection had happened, and designs whose recorded verdict no longer matches the bars now standing | `scores_from_rerun`, `cleared_against`, `design_scores`, `thresholds_all` |
+| Maintain | Claim and evidence sweep | Finds claims resting on nothing recorded and either grounds them, withdraws them, or writes down what the evidence does not hold | `claims_with_gaps`, `ground_claim`, `withdraw_claim`, `record_gap` |
+| Act | Shortlist and synthesis order | Turns the designs that cleared their bars into an order a vendor can make, under the campaign's own selection rules, and queues the assay with the controls to run beside it | `cleared_against`, `top_scores`, `selection_rules` |
+| Act | Next redesign round | Takes the designs that cleared every bar and bound nothing, and starts a round from those parents with the tools that have produced binders | `cleared_but_did_not_bind`, `design_provenance`, `tools_behind_binders` |
+| Act | Confirmatory run request | For a claim resting on one lab, an upper limit, a run whose control failed, or a design that bound something it was never aimed at, asks the lab for the run that would settle it | `claims_with_gaps`, `upper_limit_only`, `failed_controls`, `off_target_hits` |
 | Act | Pre-publication gap report | Before a write-up goes out, sends the authors every gap that blocks a check, the claims it reaches, and the claims that rest on nothing | `evidence_gaps`, `gap_reach`, `claims_fully_evidenced` |
-| Act | Round scorecard | Reports which design tools produced claimed binders, and which cleared every bar and bound nothing, for the next round | `tools_behind_binders`, `cleared_but_did_not_bind`, `scores_from_rerun` |
 
 Every workflow has the same four parts:
 
-1. Something starts it: a lab returns a run, a claim or rule changes in the
-   record, or a write-up is due.
+1. Something starts it: a generation or scoring run finishes, a lab returns a
+   result, a claim or rule changes in the record, or a write-up is due.
 2. The agent reads the state it needs through stored queries.
-3. It acts. It writes to the record on its own branch, or it tells someone
-   outside the record.
-4. A scientist decides. They review the branch and merge it, or act on what
-   they were told.
+3. It acts. It operates a tool, writes to the record on its own branch, or
+   asks someone outside for something.
+4. A scientist decides. They review the branch and merge it, or approve the
+   order, the run or the message.
 
 - **An agent does not reach a verdict alone.** Asserting that a design binds
   a target, and withdrawing that assertion, are recorded with a name and a
   day, and they belong to a person. An agent proposes them on a branch.
-- **The campaign's own record is history.** Designs, scores, specificity
-  checks, controls, windows, rules and roles have no stored write: they
-  arrive once, by a bulk load, and nothing edits them afterwards. What agents
-  add is the editorial layer above them.
-- **Outside actions are not held back by the record.** A message or a request
-  to a lab goes out through the agent's own tools, and nothing here reviews it
-  first. Keep those workflows to telling and drafting unless a scientist
-  approves the action, and give the agent only the outside access it needs.
-- **A repeat is not prevented.** The schema has nowhere to note that a message
-  was sent or a lab was asked, so an agent that notifies has to keep that
-  outside the record, or the same request goes twice. A gap or a criterion is
-  different: writing one under a slug that exists is refused, so recording
-  the same finding twice changes nothing.
+- **A tool is a row, so bringing one in is not a schema change.** A new
+  backbone generator, sequence method, structure predictor, lab or designer
+  is written with `add_design_tool`, `add_sequence_method`, `add_predictor`,
+  `add_lab` or `add_designer`, and a design or a bar can name it the same day.
+  An agent is a `Designer` whose kind is `agent`, so the designs it generates
+  carry it.
+- **A score still names its predictors in columns.** `Threshold` reaches a
+  `Predictor` through an edge, so a bar can be set for any predictor you
+  register. `Score` instead holds one column per predictor for the three this
+  campaign ran, so a reading from a fourth cannot be recorded, however the
+  bar is set. Until that is a row per predictor, scoring is the one step of
+  the loop a new tool cannot join.
+- **Outside actions are not held back by the record.** An order, a run
+  request or a message goes out through the agent's own tools, and nothing
+  here reviews it first. Keep those workflows to drafting and asking unless a
+  scientist approves the action, and give the agent only the outside access
+  it needs.
+- **A repeat is not prevented.** The schema has nowhere to note that an order
+  was placed or a lab was asked, so an agent that acts outside has to keep
+  that outside the record, or the same request goes twice. A design, a score,
+  a gap or a criterion is different: writing one under a slug that exists is
+  refused, so recording the same result twice changes nothing.
 - **Bring your own agent.** It connects through OmniGraph's MCP server from
   Claude Code, Codex, Cursor or another MCP client, and each stored read is a
   tool call. The cookbook ships no skill of its own;
@@ -193,15 +209,26 @@ date for these.
 | How was a design made, and what did it come from? | `design_provenance` |
 | Which score selected a design, and against which bar? | `score_behind_claim` |
 
-The cookbook has 49 stored reads and 13 stored writes.
+The cookbook has 49 stored reads and 29 stored writes.
 [AGENTS.md](AGENTS.md) lists them.
 
 ## Sample data
 
 The seed is a real campaign, not an invented one: Anthropic's scorpion-toxin
-binder design of October 2026, from its public data release under CC BY 4.0,
-with the process and the criteria transcribed from its technical report and
-cited. It holds 5 targets, 211 designs that reached a lab, 665 scores, 1,477
+binder design of October 2026, in which Claude generated 318,484 designs and
+selected 180, to which the authors added 31 more with its help. The designs,
+scores, assay results and
+controls come from the
+[data release on Hugging Face](https://huggingface.co/datasets/Anthropic/scorpion-toxin-binder-design)
+(CC BY 4.0). The epitope residues, the criteria for calling a design a binder,
+the selection rules and the recorded gaps are transcribed from the technical
+report,
+[De novo design of protein binders against scorpion toxins with Claude](https://assets.claude.com/31ac578806cffd8b3d92d8affe6edc4c04d502e1.pdf),
+and each one carries an edge to it in the graph. Both are by Claude Science,
+Nathaniel Horwitz, James van Geelen, Kat Kajderowicz and Amir Shanehsazzadeh,
+20 October 2026; Anthropic's write-up is
+[Claude's scorpion toxin binder design](https://www.anthropic.com/research/claude-scorpion-toxin-binder-design).
+It holds 5 targets, 211 designs that reached a lab, 665 scores, 1,477
 measurements at 2 labs, 523 specificity checks, 70 controls, 21 claims, 10
 rules for calling a design a binder, and 8 recorded gaps. On a fresh load, the
 questions above return:
@@ -227,7 +254,7 @@ surprise people.
 Paste this prompt into a coding agent such as Claude Code or Codex:
 
 ```text
-Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the binder campaign cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/binder-campaign
+Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the protein binder design campaign cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/binder-campaign
 ```
 
 The agent installs OmniGraph if needed, creates the graph, loads the campaign

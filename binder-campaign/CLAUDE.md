@@ -17,14 +17,14 @@ by stored queries on every read, never stored. Schema, seed, queries and
 policies; no application code and no connectors.
 
 The seed is **real**, where the other cookbooks' seeds are invented:
-Anthropic's scorpion-toxin binder campaign of October 2026.
+Anthropic's scorpion-toxin binder design campaign of October 2026.
 
 ## Key Files
 
 - `schema.pg` — 21 node types, 33 edge types.
 - `queries/claims.gq`, `designs.gq`, `scores.gq`, `assays.gq`,
   `campaign.gq` — 49 stored reads.
-- `queries/mutations.gq` — 13 stored writes.
+- `queries/mutations.gq` — 29 stored writes.
 - `seed.jsonl` / `seed.md` — reference seed. Keep them in sync; `seed.md`
   describes the release row type by row type and names the counts that
   surprise people. It does not list what each read returns.
@@ -108,7 +108,9 @@ than an error.
 
 The same applies to a bulk load: `Score`, `SpecificityCheck`, `Control`,
 `Threshold` and `Hotspot` all have required edges, so each arrives in the same
-batch as its own.
+batch as its own. Their stored writes are built that way too: `record_scores`,
+`record_specificity_check`, `add_control`, `set_threshold` and `add_hotspot`
+each insert the node and its required edges in one query.
 
 ## Descriptions are the interface, not the comments
 
@@ -256,9 +258,73 @@ did not pick out binders within one.
 
 ## Workflows
 
-The campaign's own record is history and does not change. What people add is
-the editorial layer: a rule to count under, a gap someone notices, a claim
-withdrawn when the evidence beneath it moves. Those writes run on a branch.
+Two layers write here. The campaign as it runs — a target chosen, an epitope
+picked, a bar registered, a design generated, a predictor's reading, a lab's
+result — and the editorial layer above it: a rule to count under, a gap someone
+notices, a claim withdrawn when the evidence beneath it moves. Every write
+runs on a branch.
+
+### A round of the campaign: aim, generate, score, shortlist
+
+The loop an agent runs. Each node arrives with its required edges, so the
+`add_hotspot`, `set_threshold` and `record_scores` calls below cannot leave a
+half-built row behind.
+
+```bash
+omnigraph branch create run/round-7 --target local-writer --graph binders
+# 1. Aim: the target, the epitope residues, and the bar, before any scoring.
+omnigraph mutate add_target --target local-writer --graph binders --branch run/round-7 --params '{
+  "slug":"target:test-toxin","name":"Test toxin","family":"beta","binding_site":"site 4",
+  "organism":"Test sp.","region":null,"uniprot":null,"length_aa":66,"sequence":"AAAA",
+  "structure_used":"PDB 0TST","structure_is_predicted":false}'
+omnigraph mutate add_hotspot --target local-writer --graph binders --branch run/round-7 --params '{"slug":"hotspot:test-e15","target":"target:test-toxin","residue":"E15","design_models_in_contact":12}'
+omnigraph mutate set_threshold --target local-writer --graph binders --branch run/round-7 --params '{
+  "slug":"threshold:test-esmfold2","target":"target:test-toxin","predictor":"pred:esmfold2",
+  "ipsae":0.15,"scdockq":0.23,"set_before_scoring":true}'
+# 2. Generate: register the tool and the agent, then the design with its provenance.
+omnigraph mutate add_design_tool --target local-writer --graph binders --branch run/round-7 --params '{"slug":"tool:your-generator","name":"Your generator"}'
+omnigraph mutate add_designer --target local-writer --graph binders --branch run/round-7 --params '{"slug":"act:scout-agent","name":"Scout agent","kind":"agent","affiliation":null}'
+omnigraph mutate add_backbone_family --target local-writer --graph binders --branch run/round-7 --params '{"slug":"family:F99","name":"F99"}'
+omnigraph mutate add_design --target local-writer --graph binders --branch run/round-7 --params '{
+  "slug":"design:test-1","uuid":"test0001","name":"Test-B1","design_set":1,"rank_in_set":1,
+  "format":"single_domain","length_aa":104,"sequence":"MMMM","redesign_round":0,
+  "substitutions_from_parent":null,"linker":null,"added_after_campaign":false,
+  "designer":"act:scout-agent","tool":"tool:your-generator","backbone_family":"family:F99",
+  "sequence_method":"method:solublempnn","target":"target:test-toxin"}'
+# 3. Score: read the sequence and the bar, co-fold outside, record the reading.
+omnigraph query get_design --target local-reader --graph binders --branch run/round-7 --params '{"slug":"design:test-1"}'
+omnigraph query thresholds_all --target local-reader --graph binders --branch run/round-7
+omnigraph mutate record_scores --target local-writer --graph binders --branch run/round-7 --params '{
+  "slug":"score:test-1","design":"design:test-1","target":"target:test-toxin","final_score":0.81,
+  "ipsae_esmfold2":0.72,"ipsae_esmfold2_fast":0.66,"ipsae_protenix":0.70,
+  "scdockq_esmfold2":0.91,"scdockq_esmfold2_fast":0.88,"scdockq_protenix":0.90,
+  "cleared_thresholds":true,"from_later_rerun":false}'
+# 4. Shortlist: what cleared, under the campaign's own rules. Then a scientist reviews.
+omnigraph query cleared_against --target local-reader --graph binders --branch run/round-7 --params '{"target":"target:test-toxin"}'
+omnigraph query selection_rules --target local-reader --graph binders --branch run/round-7
+omnigraph branch diff run/round-7 --target local-writer --graph binders
+```
+
+A redesign keeps its parent, and a fusion its two domains. The child is a
+design in its own right, so it arrives the same way:
+
+```bash
+omnigraph mutate add_design --target local-writer --graph binders --branch run/round-7 --params '{
+  "slug":"design:test-2","uuid":"test0002","name":"Test-B2","design_set":1,"rank_in_set":2,
+  "format":"single_domain","length_aa":104,"sequence":"MMMN","redesign_round":1,
+  "substitutions_from_parent":"M4N","linker":null,"added_after_campaign":false,
+  "designer":"act:scout-agent","tool":"tool:your-generator","backbone_family":"family:F99",
+  "sequence_method":"method:solublempnn","target":"target:test-toxin"}'
+omnigraph mutate derive_design_from --target local-writer --graph binders --branch run/round-7 --params '{"design":"design:test-2","parent":"design:test-1"}'
+omnigraph mutate add_fusion_domain --target local-writer --graph binders --branch run/round-7 --params '{"design":"design:test-2","domain":"design:test-1","position":"a"}'
+omnigraph mutate intend_design_against --target local-writer --graph binders --branch run/round-7 --params '{"design":"design:test-2","target":"target:cn2"}'
+```
+
+The order and the assay are not in here. `cleared_against` and
+`selection_rules` give the agent the shortlist and the rules it has to respect;
+placing the order with a vendor and queueing the run at a lab happen through
+the agent's own tools, and nothing in the record holds them back or records
+that they happened. Keep them to drafting until a scientist approves.
 
 ### A new rule, and who survives it
 
@@ -445,12 +511,30 @@ server, as in [live updates](../docs/local-setup.md#live-updates).
   The campaign tested none, in cells or in animals, so neither does this.
 - **No untested designs.** 318,484 were generated; the 211 that reached a lab
   are here.
+- **No structures.** A design has a sequence and no structure, and nothing
+  holds the predicted complex a predictor produced. `Target.structure_used`
+  is a string naming a PDB chain, not a structure the graph has. This bites
+  hardest at scoring: scDockQ is the DockQ between the predicted complex and
+  the design model, so the record keeps the number while neither structure it
+  comes from is reachable. The release ships them under `structures/`, one
+  folder per design. Holding them as Blob values, with a predicted complex
+  linked to the design and the predictor that produced it, is what would let
+  an agent run a predictor and leave the structure behind rather than two
+  floating numbers.
 - **No raw instrument traces.** The release holds the sensorgrams; the graph
   holds the fitted values and the flags on them.
-- **No per-design campaign window**, and no stored write for a design, score,
-  specificity check, control, window, rule, role, threshold, target, lab,
-  predictor, tool, backbone family, sequence method or designer. That part of
-  the record arrives by bulk load and nothing edits it.
+- **No stored write for `CampaignWindow`, `SelectionRule` or `AgentRole`**,
+  and none for the citation edges except `GapCitedIn`. Those are the
+  campaign's narrative, transcribed from the report when the seed is loaded.
+  Everything else — targets, hotspots, designs, scores, thresholds,
+  measurements, controls, specificity checks, tools, labs, designers — has
+  one.
+- **No reading per predictor.** `Score` holds one column for each of the three
+  predictors this campaign ran. A bar can be registered for any `Predictor`,
+  because `ThresholdByPredictor` is an edge, but a reading from a fourth
+  predictor has no column to go in. Making `Score` a row per predictor, the
+  way `Measurement` is a row per lab, is the change that would let a new
+  predictor join the scoring step.
 - **No enforced review.** The policy has no actor confined to branches, so a
   writer may write `main` and merge. Review is a practice here.
 - **No connectors and no automatic sync.** A lab's run arrives as a merge

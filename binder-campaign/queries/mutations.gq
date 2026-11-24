@@ -3,9 +3,14 @@
 //   omnigraph mutate <name> --target $TARGET --graph binders --branch review/<topic> --params '{...}'
 //   omnigraph branch merge review/<topic> --into main --target $TARGET --graph binders
 //
-// The campaign's own record is read-only history. What people add is the
-// editorial layer: a new criterion to count under, a gap someone notices, a
-// claim retired when the evidence under it moves.
+// Two layers write here. The campaign's own record is the work as it ran:
+// a target chosen, a design generated, a predictor's score, a lab's result.
+// The editorial layer sits above it: a new criterion to count under, a gap
+// someone notices, a claim retired when the evidence under it moves.
+//
+// A node whose edges are @card(1..1) arrives with them in one write. That is
+// not a convention here, it is the only thing the engine accepts: a row
+// without them is refused and nothing changes.
 
 // Record a measurement a lab reported. Evidence first: a claim may only rest
 // on a measurement that is already in the graph.
@@ -107,4 +112,171 @@ query add_source($slug: String, $kind: String, $title: String, $url: String,
 
 query mark_source_fetched($slug: String, $fetched_on: Date) {
     update Source set { fetched_on: $fetched_on } where slug = $slug
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────
+// The campaign as it runs: targets, epitopes, tools, designs, scores.
+// A new predictor or design tool is a row, not a schema change, so an agent
+// can bring one in and score against it the same day.
+// ─────────────────────────────────────────────────────────────────────────
+
+// A target enters the campaign. structure_used names the structure the
+// designs were made against, and structure_is_predicted says whether anyone
+// has solved it.
+query add_target($slug: String, $name: String, $family: String?,
+                 $binding_site: String?, $organism: String?, $region: String?,
+                 $uniprot: String?, $length_aa: I32, $sequence: String,
+                 $structure_used: String, $structure_is_predicted: Bool) {
+    insert Target {
+        slug: $slug, name: $name, family: $family, binding_site: $binding_site,
+        organism: $organism, region: $region, uniprot: $uniprot,
+        length_aa: $length_aa, sequence: $sequence,
+        structure_used: $structure_used,
+        structure_is_predicted: $structure_is_predicted
+    }
+}
+
+// An epitope residue to aim at. HotspotOn is @card(1..1): a hotspot is always
+// a residue of one target.
+query add_hotspot($slug: String, $target: String, $residue: String,
+                  $design_models_in_contact: I32) {
+    insert Hotspot {
+        slug: $slug, residue: $residue,
+        design_models_in_contact: $design_models_in_contact
+    }
+    insert HotspotOn { from: $slug, to: $target }
+}
+
+// Register a tool. These four exist so that bringing in a new backbone
+// generator, sequence designer or structure predictor is data.
+query add_design_tool($slug: String, $name: String) {
+    insert DesignTool { slug: $slug, name: $name }
+}
+
+query add_sequence_method($slug: String, $name: String) {
+    insert SequenceMethod { slug: $slug, name: $name }
+}
+
+query add_predictor($slug: String, $name: String) {
+    insert Predictor { slug: $slug, name: $name }
+}
+
+query add_backbone_family($slug: String, $name: String) {
+    insert BackboneFamily { slug: $slug, name: $name }
+}
+
+// Whoever or whatever designs. kind is person, team, agent or unknown, so an
+// agent that generates designs is recorded as their designer.
+query add_designer($slug: String, $name: String, $kind: String,
+                   $affiliation: String?) {
+    insert Designer { slug: $slug, name: $name, kind: $kind,
+                      affiliation: $affiliation }
+}
+
+// A lab that measures.
+query add_lab($slug: String, $name: String, $expression_system: String) {
+    insert Lab { slug: $slug, name: $name, expression_system: $expression_system }
+}
+
+// A design arrives with its provenance: who made it, with which tool, on
+// which backbone family, by which sequence method, and the target it was
+// made and intended against. None of those edges is required by the engine,
+// which is exactly why they are written here: a design that arrives without
+// them is a sequence nobody can trace.
+query add_design($slug: String, $uuid: String, $name: String, $design_set: I32,
+                 $rank_in_set: I32?, $format: String, $length_aa: I32,
+                 $sequence: String, $redesign_round: I32?,
+                 $substitutions_from_parent: String?, $linker: String?,
+                 $added_after_campaign: Bool, $designer: String, $tool: String,
+                 $backbone_family: String, $sequence_method: String,
+                 $target: String) {
+    insert Design {
+        slug: $slug, uuid: $uuid, name: $name, design_set: $design_set,
+        rank_in_set: $rank_in_set, format: $format, length_aa: $length_aa,
+        sequence: $sequence, redesign_round: $redesign_round,
+        substitutions_from_parent: $substitutions_from_parent, linker: $linker,
+        added_after_campaign: $added_after_campaign
+    }
+    insert DesignedBy { from: $slug, to: $designer }
+    insert MadeWithTool { from: $slug, to: $tool }
+    insert OnBackbone { from: $slug, to: $backbone_family }
+    insert SequencedWith { from: $slug, to: $sequence_method }
+    insert BackboneMadeAgainst { from: $slug, to: $target }
+    insert IntendedAgainst { from: $slug, to: $target }
+}
+
+// A design aimed at a further target. A multi-toxin design is intended
+// against several, and each one is an edge.
+query intend_design_against($design: String, $target: String) {
+    insert IntendedAgainst { from: $design, to: $target }
+}
+
+// A redesign round, and a fusion's two domains. These are what make lineage
+// readable: design_lineage and fusion_domains walk them.
+query derive_design_from($design: String, $parent: String) {
+    insert DerivedFrom { from: $design, to: $parent }
+}
+
+query add_fusion_domain($design: String, $domain: String, $position: String) {
+    insert HasDomain { from: $design, to: $domain, position: $position }
+}
+
+// The bar a design has to clear, per target and per predictor, set before
+// anything is scored. Never update one after scoring has begun: record a
+// second Threshold instead, as the schema's instruction says.
+query set_threshold($slug: String, $target: String, $predictor: String,
+                    $ipsae: F64, $scdockq: F64, $set_before_scoring: Bool) {
+    insert Threshold {
+        slug: $slug, ipsae: $ipsae, scdockq: $scdockq,
+        set_before_scoring: $set_before_scoring
+    }
+    insert ThresholdForTarget { from: $slug, to: $target }
+    insert ThresholdByPredictor { from: $slug, to: $predictor }
+}
+
+// What co-folding a design with a target produced. cleared_thresholds is the
+// verdict the campaign recorded against the bars standing at the time;
+// from_later_rerun marks a score computed after selection had happened.
+query record_scores($slug: String, $design: String, $target: String,
+                    $final_score: F64?, $ipsae_esmfold2: F64?,
+                    $ipsae_esmfold2_fast: F64?, $ipsae_protenix: F64?,
+                    $scdockq_esmfold2: F64?, $scdockq_esmfold2_fast: F64?,
+                    $scdockq_protenix: F64?, $cleared_thresholds: Bool,
+                    $from_later_rerun: Bool) {
+    insert Score {
+        slug: $slug, final_score: $final_score,
+        ipsae_esmfold2: $ipsae_esmfold2,
+        ipsae_esmfold2_fast: $ipsae_esmfold2_fast,
+        ipsae_protenix: $ipsae_protenix,
+        scdockq_esmfold2: $scdockq_esmfold2,
+        scdockq_esmfold2_fast: $scdockq_esmfold2_fast,
+        scdockq_protenix: $scdockq_protenix,
+        cleared_thresholds: $cleared_thresholds,
+        from_later_rerun: $from_later_rerun
+    }
+    insert ScoreOf { from: $slug, to: $design }
+    insert ScoreAgainst { from: $slug, to: $target }
+}
+
+// Binding against a protein the design was never aimed at.
+query record_specificity_check($slug: String, $design: String,
+                               $protein: String, $result: String, $run: I32?) {
+    insert SpecificityCheck {
+        slug: $slug, protein: $protein, result: $result, run: $run
+    }
+    insert SpecificityOf { from: $slug, to: $design }
+}
+
+// A positive control, and whether it worked. A run whose control failed says
+// nothing about the designs in it, which is what failed_controls is for.
+query add_control($slug: String, $target: String, $lab: String, $name: String,
+                  $format: String?, $method: String, $control_worked: String,
+                  $result: String?, $kd_nm: F64?) {
+    insert Control {
+        slug: $slug, name: $name, format: $format, method: $method,
+        control_worked: $control_worked, result: $result, kd_nm: $kd_nm
+    }
+    insert ControlAgainst { from: $slug, to: $target }
+    insert ControlAtLab { from: $slug, to: $lab }
 }

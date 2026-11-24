@@ -1,7 +1,7 @@
 # Seed data
 
 `seed.jsonl` holds 11,609 rows describing one de novo protein design
-campaign: Anthropic's scorpion-toxin binder campaign of October 2026.
+campaign: Anthropic's scorpion-toxin binder design campaign of October 2026.
 
 ## Where it comes from
 
