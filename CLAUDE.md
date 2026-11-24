@@ -5,7 +5,7 @@ links to the corresponding `CLAUDE.md`; edit the target once.
 
 ## Scope and sources
 
-These are nine self-contained OmniGraph **0.15.0** bundles: schemas, seed data,
+These are ten self-contained OmniGraph **0.15.0** bundles: schemas, seed data,
 stored queries and applied policies. The only application code is the beads
 cookbook's `ob` client in `beads/client/`, with its own tests, and the local
 HTTPS gateway `scripts/local-tls-gateway.py`. The root [README](README.md)
@@ -25,6 +25,7 @@ and worked queries.
 | `company-brain` | `company` |
 | `hardware-program` | `program` |
 | `health-record` | `health` |
+| `binder-campaign` | `binders` |
 
 The graph ID is the key in `cluster.yaml`, not the folder name. Configurations
 omit `storage`, so local roots default to their directory. Explicit storage
@@ -41,7 +42,7 @@ before a schema change, a bulk load or a retry after an uncertain write.
 
 ## Changes and validation
 
-- Run `python3 scripts/check-cookbooks.py` for all nine local journeys, or
+- Run `python3 scripts/check-cookbooks.py` for all ten local journeys, or
   name cookbooks to run only those. It uses the released CLI/server, isolated
   operator homes, disposable roots and the local HTTPS gateway; it never
   touches a deployed graph. For beads the checker also drives the `ob`

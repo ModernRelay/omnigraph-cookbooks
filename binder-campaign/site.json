@@ -1,0 +1,55 @@
+{
+  "order": 10,
+  "name": "Protein binder design campaign",
+  "category": "Research",
+  "blurb": "A de novo protein design campaign as a graph: every tested design, how it was made, the scores that selected it, the assays that tested it, and the gaps under each claim.",
+  "about": "Build a living record of a protein binder design campaign, and the agent workflows around it. It keeps the targets, every design and how it was made, the scores that selected it, what each lab measured, and the claim that a design binds a target — with the rule that claim holds under and the evidence it rests on. Whether a design counts as a binder is worked out from the measurements under the rule you name, so tightening the definition re-reads the record instead of re-analysing it. Agents propose every change on a branch a scientist reviews.",
+  "sample": "Anthropic's scorpion-toxin binder design campaign, from its public data release",
+  "questions": [
+    {
+      "q": "Which binder claims survive a stricter rule?",
+      "query": "claims_under_criterion",
+      "params": {
+        "criterion": "crit:kd-within-tenfold"
+      }
+    },
+    {
+      "q": "Which claims rest on evidence nobody can check?",
+      "query": "claims_with_gaps"
+    },
+    {
+      "q": "How was a design made, and what did it come from?",
+      "query": "design_provenance",
+      "params": {
+        "slug": "design:888c8f04"
+      }
+    },
+    {
+      "q": "Which score selected a design, and against which bar?",
+      "query": "score_behind_claim",
+      "params": {
+        "claim": "claim:cn2-b1-cn2"
+      }
+    }
+  ],
+  "search": {
+    "title": "Protein design campaign as a knowledge graph",
+    "heading": "A binder design campaign, with the evidence under every claim",
+    "keywords": [
+      "knowledge graph",
+      "ontology",
+      "graphrag"
+    ]
+  },
+  "use_case": "usecase:research-substrate",
+  "capabilities": [
+    {
+      "capability": "cap:branch-per-agent",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "capability": "cap:three-way-merge",
+      "shown_in": "Branching and merging"
+    }
+  ]
+}

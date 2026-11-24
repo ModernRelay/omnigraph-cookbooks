@@ -39,6 +39,7 @@ COOKBOOKS = {
     "company-brain": ("company", "current_decisions"),
     "hardware-program": ("program", "budget_rollup"),
     "health-record": ("health", "latest_results"),
+    "binder-campaign": ("binders", "binder_claims"),
 }
 # Cookbooks whose policy lets act-agent write only on unprotected branches.
 BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program", "health-record"}

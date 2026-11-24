@@ -1,0 +1,132 @@
+// Designs: what was tested, how each was made, and what it came from.
+// The campaign generated 318,484 designs and tested 211. Only the tested
+// ones are here, with the tool, backbone and parent that produced each.
+
+query get_design($slug: String)
+    @description("One design: its set, format, length and sequence") {
+    match {
+        $d: Design { slug: $slug }
+    }
+    return { $d.slug, $d.uuid, $d.name, $d.design_set, $d.rank_in_set, $d.format,
+             $d.length_aa, $d.redesign_round, $d.added_after_campaign, $d.sequence }
+}
+
+// How a design was made: the tool that drew the backbone, the family that
+// backbone belongs to, and the method that chose its sequence.
+query design_provenance($slug: String)
+    @description("How one design was made: design tool, backbone family and sequence method") {
+    match {
+        $d: Design { slug: $slug }
+        $d madeWithTool $tool
+        $d onBackbone $bb
+        $d sequencedWith $seq
+    }
+    return { $d.name, $tool.name, $bb.name, $seq.name, $d.redesign_round, $d.substitutions_from_parent }
+}
+
+// What a design came from. A redesign points back at its parent; following
+// the chain reaches the backbone a tool first produced.
+query design_lineage($slug: String)
+    @description("The designs one design was derived from, up to three steps back") {
+    match {
+        $d: Design { slug: $slug }
+        $d derivedFrom{1,3} $ancestor
+    }
+    return { $ancestor.slug, $ancestor.name, $ancestor.design_set, $ancestor.redesign_round }
+    order { $ancestor.redesign_round }
+}
+
+// The two single domains inside a fusion, and the linker joining them.
+query fusion_domains($slug: String)
+    @description("The single domains a fusion design joins, and the linker between them") {
+    match {
+        $f: Design { slug: $slug }
+        $f $e:hasDomain $part
+    }
+    return { $f.name, $f.linker, $e.position, $part.slug, $part.name, $part.length_aa }
+    order { $e.position }
+}
+
+// Every design a tool produced, with how many reached a binder claim.
+query designs_by_tool($tool: String)
+    @description("The tested designs one design tool produced") {
+    match {
+        $t: DesignTool { slug: $tool }
+        $d madeWithTool $t
+    }
+    return { $d.slug, $d.name, $d.design_set, $d.format, $d.added_after_campaign }
+    order { $d.design_set, $d.name }
+}
+
+// Which tools produced the designs that went on to be claimed as binders.
+query tools_behind_binders()
+    @description("The design tools behind the designs asserted to bind, counted") {
+    match {
+        $c: BinderClaim
+        $c.status = "asserted"
+        $c claimAbout $d
+        $d madeWithTool $tool
+    }
+    return { $tool.name, count($c) as binder_claims }
+    order { count($c) desc }
+}
+
+// The designs added after the campaign closed. They were scored in a later
+// re-run, so their numbers did not come from the campaign that selected the
+// other 180.
+query designs_added_after()
+    @description("Designs added after the campaign closed, whose scores come from a later re-run") {
+    match {
+        $d: Design { added_after_campaign: true }
+    }
+    return { $d.slug, $d.name, $d.design_set, $d.format, $d.length_aa }
+    order { $d.name }
+}
+
+// A design and the targets it was meant to bind. A design made against five
+// targets is a much harder ask than one made against a single target.
+query design_targets($slug: String)
+    @description("The targets one design was intended to bind, and the target its backbone was made against") {
+    match {
+        $d: Design { slug: $slug }
+        $d intendedAgainst $t
+    }
+    return { $d.name, $t.name, $t.family, $t.binding_site }
+    order { $t.name }
+}
+
+// Designs aimed at more than one target. The campaign asked for these; none
+// met the criteria against more than one.
+query multi_target_designs()
+    @description("Designs intended against more than one target, with how many they were aimed at") {
+    match {
+        $d: Design
+        $d intendedAgainst $t
+        count { $d intendedAgainst $x } > 1
+    }
+    return { $d.slug, $d.name, $d.format, count($t) as targets_intended }
+    order { count($t) desc }
+}
+
+// Who made the designs. One campaign has one designer; a public benchmark has
+// hundreds of entrants against the same target, and the same query answers
+// both.
+query designers()
+    @description("Who made the designs, and how many each contributed") {
+    match {
+        $d: Design
+        $d designedBy $who
+    }
+    return { $who.slug, $who.name, $who.kind, $who.affiliation, count($d) as designs }
+    order { count($d) desc }
+}
+
+query designs_by_designer($designer: String)
+    @description("The tested designs one designer contributed") {
+    match {
+        $who: Designer { slug: $designer }
+        $d designedBy $who
+    }
+    return { $d.slug, $d.name, $d.design_set, $d.format }
+    order { $d.name }
+}
