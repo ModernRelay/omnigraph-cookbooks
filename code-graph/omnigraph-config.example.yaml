@@ -12,9 +12,11 @@ aliases:
   file:     {target: local-reader, graph: code, query: file_symbols}    # --params '{"path":"src/router/utils.ts"}'
   members:  {target: local-reader, graph: code, query: members}         # --params '{"symbol":"..."}'
 
-  # ── References ───────────────────────────────────────────────
+  # ── Calls and references ─────────────────────────────────────
   callers:      {target: local-reader, graph: code, query: callers}        # --params '{"symbol":"..."}'
   callees:      {target: local-reader, graph: code, query: callees}        # --params '{"symbol":"..."}'
+  referrers:    {target: local-reader, graph: code, query: referrers}      # --params '{"symbol":"..."}'
+  transitive-callers: {target: local-reader, graph: code, query: transitive_callers}  # --params '{"symbol":"..."}'
   impact:       {target: local-reader, graph: code, query: impact}         # --params '{"symbol":"..."}'
   implementers: {target: local-reader, graph: code, query: implementers}   # --params '{"symbol":"..."}'
 

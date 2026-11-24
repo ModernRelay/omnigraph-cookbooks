@@ -19,8 +19,10 @@ To graph another TypeScript repository, index it and convert the index:
 Standard library only, plus Node.js to run indexer/extents.mjs. Nodes are the
 global symbols the index defines; locals, parameters and type parameters are
 left out. A References edge joins the innermost definition whose range
-contains a reference to the symbol it names; call is true when one of those
-references is followed by a call. A definition's range is the indexer's
+contains a reference to the symbol it names, and a Calls edge joins it to the
+same symbol when one of those references is a call: a callable followed by
+its arguments, or a class after `new`, which also calls the class's declared
+constructor. A definition's range is the indexer's
 enclosing range, or, for the definitions the indexer gives none (a constant
 holding something other than a function, a class field, a getter or setter),
 the one extents.mjs reads with the TypeScript parser. Columns count UTF-16
@@ -64,8 +66,11 @@ VALUE_KINDS = {"constant", "variable", "property", "field"}
 DECLARED_TYPE = re.compile(r"^(?:\(\w+\)\s*)?(?:const|let|var|property)?\s*[\w$#]+\??\s*:\s*")
 NULLISH_UNION = re.compile(r"^(?:\|\s*(?:undefined|null)\s*)+$")
 CALL_SUFFIX = ("(", "`", "?.(", "<")
+# `new C(` or `new ns.C(`: the text before a class name that constructs it.
+NEW_BEFORE = re.compile(r"\bnew\s+(?:[\w$]+\s*\.\s*)*$")
+CONSTRUCTOR = "`<constructor>`()."
 TYPES = ("Revision", "Symbol", "Location")
-EDGES = ("DefinedAt", "MemberOf", "References", "ImplementedBy")
+EDGES = ("DefinedAt", "MemberOf", "References", "Calls", "ImplementedBy")
 IDENTIFIER = re.compile(r"[\w+\-$]+")
 TYPE_LITERAL = re.compile(r"^typeLiteral\d+$")
 
@@ -331,6 +336,7 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
                       "line": min(s[0] for s in spans) + 1, "end_line": max(s[2] for s in spans) + 1}
 
     references: dict[tuple[str, str], dict] = {}
+    seen_sites: set[tuple] = set()
     for d in idx.documents:
         doc_scopes = scopes.get(d.relative_path, [])
         for o in d.occurrences:
@@ -343,10 +349,26 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
             if caller is None:
                 continue
             text = lines(d.relative_path)
+            line = text[o.range[0]] if o.range[0] < len(text) else ""
             after = utf16_slice(text[o.range[2]], o.range[3]).lstrip() if o.range[2] < len(text) else ""
-            edge = references.setdefault((caller, callee), {"call": False, "sites": 0})
-            edge["call"] = edge["call"] or (nodes[callee]["callable"] and after.startswith(CALL_SUFFIX))
-            edge["sites"] += 1
+            constructs = bool(NEW_BEFORE.search(utf16_slice(line, 0, o.range[1])))
+            call = (nodes[callee]["callable"] and after.startswith(CALL_SUFFIX)) or (
+                nodes[callee]["kind"] == "class" and constructs)
+            targets = [callee]
+            # `new C(` names the class, and the indexer resolves the name to C's
+            # constructor when C declares one: the site calls both.
+            if constructs and nodes[callee]["kind"] == "constructor" and callee.endswith(CONSTRUCTOR):
+                cls = callee[:-len(CONSTRUCTOR)]
+                if cls in nodes:
+                    targets.append(cls)
+            for target in targets:
+                site = (caller, target, tuple(o.range))
+                if site in seen_sites:  # the indexer can report one name as both symbols
+                    continue
+                seen_sites.add(site)
+                edge = references.setdefault((caller, target), {"sites": 0, "calls": 0})
+                edge["sites"] += 1
+                edge["calls"] += call
 
     member_of = set()
     for key in nodes:
@@ -379,8 +401,9 @@ def build(index_path: str, checkout: str, revision: str, repository: str, slice_
     rows += [{"edge": "DefinedAt", "from": n["symbol"], "to": n["symbol"], "data": {}} for n in ordered_nodes]
     rows += [{"edge": "MemberOf", "from": a, "to": b, "data": {}} for a, b in sorted(member_of)
              if a in keep and b in keep]
-    rows += [{"edge": "References", "from": a, "to": b, "data": e} for (a, b), e in sorted(references.items())
-             if a in keep and b in keep]
+    linked = [(a, b, e) for (a, b), e in sorted(references.items()) if a in keep and b in keep]
+    rows += [{"edge": "References", "from": a, "to": b, "data": {"sites": e["sites"]}} for a, b, e in linked]
+    rows += [{"edge": "Calls", "from": a, "to": b, "data": {"sites": e["calls"]}} for a, b, e in linked if e["calls"]]
     rows += [{"edge": "ImplementedBy", "from": a, "to": b, "data": {}} for a, b in sorted(implemented_by)
              if a in keep and b in keep]
     return rows

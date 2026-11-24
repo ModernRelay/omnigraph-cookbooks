@@ -32,6 +32,7 @@ references are held, for every commit.
 ```mermaid
 graph LR
   Symbol -- references --> Symbol
+  Symbol -- calls --> Symbol
   Symbol -- implemented by --> Symbol
   Symbol -- member of --> Symbol
   Symbol -- defined at --> Location
@@ -42,7 +43,7 @@ graph LR
 | Area | Types | Holds |
 |---|---|---|
 | Code | `Symbol`, `Location` | Every named definition, from modules, classes and interfaces to functions, methods, constants and members, and the lines each one spans |
-| Links | `References`, `ImplementedBy`, `MemberOf`, `DefinedAt` | Code that names another definition, with whether it calls it; the members that implement an interface or override a base member; where each definition is declared and sits |
+| Links | `References`, `Calls`, `ImplementedBy`, `MemberOf`, `DefinedAt` | Code that names another definition, and the code among it that calls one; the members that implement an interface or override a base member; where each definition is declared and sits |
 | Provenance | `Revision` | The commit a graph state was indexed from, and the indexer and version that read it |
 | Review | `ReviewComment` | The call-graph reviews posted to pull requests, one per indexed commit |
 
@@ -53,11 +54,13 @@ graph LR
   changes only when its own code or declared type does, which it records as a
   digest of its definition text, so a diff separates the functions a pull
   request rewrote from the ones it only pushed down the file.
-- **References, not only calls.** A `References` edge covers calls, type uses,
-  imports and value uses, which is what "what breaks if I change this" needs,
-  and says whether one of them is a call. A call through an interface names
-  the interface member, so `ImplementedBy` leads on to each implementation, the
-  way the call goes.
+- **References, and the calls among them.** A `References` edge covers calls,
+  type uses, imports and value uses, which is what "what breaks if I change
+  this" needs. The ones that call, including a construction with `new`, are
+  also a `Calls` edge, so a read of callers or of a chain of calls leaves the
+  type uses and imports out. A call through an interface names the interface
+  member, so `ImplementedBy` leads on to each implementation, the way the call
+  goes.
 - **One definition type.** Every kind of definition is a `Symbol`, so an impact
   read follows references and implementations through functions, methods and
   classes alike, up to sixteen hops.
@@ -93,9 +96,9 @@ code while they work. People merge.
 | Capture | Pull request indexing | On every push to a pull request, CI indexes the head commit with the compiler and loads it onto the pull request's branch, replacing the previous push | `revision` |
 | Capture | Repository onboarding | Indexes the default branch once and loads it onto `main` with the writer role, then builds the read indexes; after that, `main` moves by merging pull request branches | `revision` |
 | Maintain | Unused code review | Lists the functions and methods nothing in the repository refers to, without the ones reached through an interface, for a person to confirm | `unreferenced_callables`, `implementers` |
-| Maintain | Load-bearing code | Lists the definitions most code depends on, so a change to one of them gets a closer review | `most_referenced`, `callers` |
+| Maintain | Load-bearing code | Lists the definitions most code depends on, so a change to one of them gets a closer review | `most_referenced`, `referrers` |
 | Act | Call-graph review comment | Posts the branch diff to the pull request as a comment, once per pushed commit, with the callers of each changed function | `review_comment`, `record_review_comment`, `callers` |
-| Act | Impact check before an edit | Before an agent changes a function, it reads everything that reaches it and every implementation behind an interface it touches, and plans the change with them | `symbols_named`, `impact`, `implementers` |
+| Act | Impact check before an edit | Before an agent changes a function, it reads everything that reaches it, the code whose calls can run it, and every implementation behind an interface it touches, and plans the change with them | `symbols_named`, `impact`, `transitive_callers`, `implementers` |
 | Act | Code context for an agent | While an agent works, it asks what a function calls, who calls it and what a class or file declares, on `main` or on its own branch | `callers`, `callees`, `members`, `file_symbols` |
 | Act | Release comparison | Answers who called a function at the last release and who calls it now, by reading at the graph commit `main` had then | `callers`, `revision` |
 
@@ -130,7 +133,7 @@ the code itself.
 |---|---|---|
 | Code host | GitHub, GitLab, Bitbucket | `Revision`, and the checkout the indexer reads |
 | CI | GitHub Actions, GitLab CI, Buildkite, CircleCI | Runs the indexer on each push and loads the result |
-| SCIP indexer | scip-typescript from Sourcegraph, on the TypeScript compiler | `Symbol`, `Location`, `References`, `ImplementedBy`, `MemberOf`, `DefinedAt` |
+| SCIP indexer | scip-typescript from Sourcegraph, on the TypeScript compiler | `Symbol`, `Location`, `References`, `Calls`, `ImplementedBy`, `MemberOf`, `DefinedAt` |
 | Pull request comments | GitHub pull requests, GitLab merge requests | `ReviewComment`, recorded when a review is posted |
 
 The cookbook includes the converter from a SCIP index to graph rows and the
@@ -147,11 +150,12 @@ Nobody keeps a call graph or a dependency map by hand for these.
 | Question | Stored query |
 |---|---|
 | Who calls this function? | `callers` |
+| What reaches it through a chain of calls? | `transitive_callers` |
 | What breaks if I change it? | `impact` |
 | Which classes implement this interface method? | `implementers` |
 | What does everything else depend on? | `most_referenced` |
 
-The cookbook has 12 stored reads and one stored write. AGENTS.md lists them.
+The cookbook has 14 stored reads and one stored write. AGENTS.md lists them.
 
 ## Sample data
 
@@ -161,16 +165,18 @@ with 132 definitions, 292 references and 24 implementations, and the PR's own
 commit as a second revision to load onto a branch. On a fresh load, the
 questions above return:
 
-- The `match` function in the RegExp router's matcher is named by four
-  definitions: both RegExp routers' `match`, which call it, and their two
-  modules, which import it.
+- The `match` function in the RegExp router's matcher is called by both
+  RegExp routers' `match`; their two modules import it, which `referrers`
+  adds.
+- Through a chain of calls, `SmartRouter`'s `match` reaches it too: it calls
+  `match` on each router it holds.
 - Changing the `Router` interface's `add` reaches 8 definitions, among them
   `SmartRouter`'s `match`, which calls `add` on every router it holds.
 - The six routers implement `Router`'s `add`.
 - `Router` itself is what the most code depends on: 19 definitions refer to it.
 
-Loaded onto its branch, the PR adds 2 definitions and 18 references and
-changes 5 methods; 53 more definitions only move. [seed.md](seed.md) describes the
+Loaded onto its branch, the PR adds 2 definitions and 18 references, 10 of
+them calls, and changes 5 methods; 53 more definitions only move. [seed.md](seed.md) describes the
 seed and lists what every stored read returns.
 
 ## Benchmarks

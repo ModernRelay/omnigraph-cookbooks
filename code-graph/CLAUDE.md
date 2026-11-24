@@ -56,6 +56,7 @@ The README's questions, with the parameters `site.json` gives them:
 | Question | Command |
 |---|---|
 | Who calls this function? | ``omnigraph alias callers --params '{"symbol":"src/router/reg-exp-router/`matcher.ts`/match()."}'`` |
+| What reaches it through a chain of calls? | ``omnigraph alias transitive-callers --params '{"symbol":"src/router/reg-exp-router/`matcher.ts`/match()."}'`` |
 | What breaks if I change it? | ``omnigraph alias impact --params '{"symbol":"src/`router.ts`/Router#add()."}'`` |
 | Which classes implement this interface method? | ``omnigraph alias implementers --params '{"symbol":"src/`router.ts`/Router#add()."}'`` |
 | What does everything else depend on? | `omnigraph alias hubs` |
@@ -94,13 +95,14 @@ refuses to build the cookbook's files otherwise, because a type missing from an
 `overwrite` file keeps its old rows. `ReviewComment` is never in a revision
 file, so the reviews recorded on a branch survive each new push.
 
-The diff for PR #5267 has 90 changes:
+The diff for PR #5267 has 100 changes:
 
 | Change | Count | Meaning |
 |---|---|---|
 | `Symbol` insert | 2 | the new `src/router/utils.ts` and its `createNullObject` |
 | `Symbol` update | 5 | the methods whose code changed: `RegExpRouter`'s constructor, `add`, `buildAllMatchers` and `#buildMatcher`, and trie-router `Node#pushHandlerSets` |
 | `References` insert | 18 | code that now names `createNullObject` (14) or imports its module (4) |
+| `Calls` insert | 10 | the references among those 14 that call `createNullObject` |
 | `MemberOf`, `DefinedAt`, `Location` insert | 1, 2, 2 | the new symbols' structure |
 | `Location` update | 58 | definitions that moved; 53 of them only moved |
 | `Revision` delete and insert | 1 each | the indexed commit |
@@ -133,7 +135,7 @@ merges, and retire the branch:
 ```bash
 omnigraph alias callers --params '{"symbol":"src/router/`utils.ts`/createNullObject."}'   # main: none yet
 omnigraph query callers --target local-reader --graph code --branch pr-5267 \
-  --params '{"symbol":"src/router/`utils.ts`/createNullObject."}' --json                     # 14 definitions
+  --params '{"symbol":"src/router/`utils.ts`/createNullObject."}' --json                     # 10 definitions
 omnigraph branch merge pr-5267 --into main --target local-writer --graph code --json
 omnigraph branch delete pr-5267 --target local-writer --graph code --yes --json
 ```
@@ -161,22 +163,22 @@ code.
 ### Load-bearing code
 
 `cg hubs` (`most_referenced`) lists the twenty definitions the most code refers
-to; `cg callers` on one shows who depends on it. A pull request whose branch
+to; `cg referrers` on one shows who depends on it. A pull request whose branch
 diff changes one of these deserves a closer review.
 
 ### Impact check before an edit
 
 Before changing a function, an agent finds its key with `cg find NAME`, reads
 `cg impact KEY` (everything that reaches it within sixteen hops of references
-and implementations) and, for an interface or base member, `cg implementers
-KEY`. It plans the change with that list, or asks a person when the list is
-long.
+and implementations), `cg transitive-callers KEY` (the code whose calls can
+run it) and, for an interface or base member, `cg implementers KEY`. It plans
+the change with those lists, or asks a person when they are long.
 
 ### Code context for an agent
 
-`cg callers`, `cg callees`, `cg members` and `cg find` answer what an agent
-would otherwise grep for, on `main` or with `--branch` on its own pull
-request's branch. Every read is a stored read, so the agent needs only the
+`cg callers`, `cg callees`, `cg referrers`, `cg members` and `cg find` answer
+what an agent would otherwise grep for, on `main` or with `--branch` on its
+own pull request's branch. Every read is a stored read, so the agent needs only the
 reader role.
 
 ### Release comparison
@@ -203,11 +205,11 @@ revision with `--mode overwrite`. It takes its target from `CG_TARGET` or
 | Command | What it does |
 |---|---|
 | `cg find NAME` | the keys of the symbols with that name |
-| `cg callers SYMBOL` | also `callees`, `impact`, `implementers` and `members`; SYMBOL is a key or a name that matches one symbol, `--path` narrows a name, `--branch` reads a branch |
+| `cg callers SYMBOL` | also `callees`, `referrers`, `transitive-callers`, `impact`, `implementers` and `members`; SYMBOL is a key or a name that matches one symbol, `--path` narrows a name, `--branch` reads a branch |
 | `cg hubs`, `cg unreferenced`, `cg revision` | the most referenced symbols, unreferenced callables, the indexed commit |
 | `cg load FILE --branch B` | load a revision file, creating `B` from `--base` (default `main`) when it does not exist; a load onto `main` of a local graph then builds its indexes |
 | `cg index [CHECKOUT] --branch B` | index a TypeScript checkout, convert it and load it, in one step |
-| `cg diff B` | the branch diff as a review: symbols added, removed and changed, references added and removed per caller, definitions that only moved; `--markdown` for a pull request comment |
+| `cg diff B` | the branch diff as a review: symbols added, removed and changed, what each definition now calls or names and no longer does, definitions that only moved; `--markdown` for a pull request comment |
 
 Add `--json` to any command for machine output. A refused write exits 1 and
 changed nothing; an ambiguous name exits 2 and lists the candidates; a write
@@ -220,7 +222,7 @@ CG_TARGET=local-reader code-graph/client/cg diff pr-5267
 ```
 
 ```text
-pr-5267 against main, revision a10592f3..4b44abe1: 2 symbols added, 0 removed, 5 changed; 18 references added, 0 removed, 0 changed; 53 definitions only moved.
+pr-5267 against main, revision a10592f3..4b44abe1: 2 symbols added, 0 removed, 5 changed; 18 references added, 0 removed, 0 changed; 10 calls added, 0 removed; 53 definitions only moved.
 
 Added:
   src/router/utils.ts (module)
@@ -235,15 +237,17 @@ References added:
 ```
 
 Every list read stops at a limit: 1,000 symbols for a name, 2,000 callers,
-callees, members or unreferenced callables, and 5,000 definitions for
-`impact`. A read that returns exactly its limit may be cut, and `cg` says so
-(`"cut": true` in JSON). `--path` filters a name inside the query, so a name
-with more definitions than the limit is still found in its directory.
+callees, referrers, members or unreferenced callables, and 5,000 definitions
+for `impact` and `transitive_callers`. A read that returns exactly its limit
+may be cut, and `cg` says so (`"cut": true` in JSON). `--path` filters a name
+inside the query, so a name with more definitions than the limit is still
+found in its directory.
 
 A revision file over 32 MiB loads into a local graph with `write_max_bytes`
 raised to its size, which holds its largest type in memory as one batch; a
 server's load request is capped at 32 MiB, so `cg` refuses such a file for a
-server target before sending anything. `impact` walks two edge types, which
+server target before sending anything. `impact` and `transitive_callers` walk
+two edge types, which
 the engine admits against every selected edge table's full row count on each
 probe; on a local graph `cg` lifts that `traversal_work_limit` and raises
 `query_memory_bytes` to 2 GiB. A server's stored query takes no session
@@ -335,22 +339,30 @@ from the reads' actual output.
 - Every list read has a `limit`; `cg_cli.py` `LIMITS` mirrors them and its
   tests check the two agree. Change both together.
 - A line number is on `Location` (`$s definedAt $l`), never on `Symbol`.
-- `References` means "names", not "calls": filter on the bound edge's `call`
-  for call sites (`$c $r:references $t`, then `$r.call`).
+- `References` means "names", not "calls". The references that call are
+  also `Calls` edges with the same ends, so match `$c calls $t` for callers;
+  `sites` on each counts its own sites.
 - Multi-hop reads work because every definition is one `Symbol` type; keep it
   that way rather than adding a node type per kind.
 - `ImplementedBy` runs from an interface or base member to each member
   implementing it, the way a call through it goes, so `impact` can walk
-  `(references | implementedBy)` forwards; GQ cannot reverse one member of a
+  `(references | implementedBy)` and `transitive_callers`
+  `(calls | implementedBy)` forwards; GQ cannot reverse one member of a
   multi-hop alternation.
 - Lint after every edit: `omnigraph lint --schema schema.pg --query
   queries/code.gq`, and the same for `queries/mutations.gq`.
 
 ## What it does not do
 
-- **`call` is a text check.** A reference counts as a call when the next
-  characters are `(`, a backtick, `?.(` or `<`. The indexer does not mark
-  call sites.
+- **A call is a text check.** A reference to a callable counts as a call when
+  the next characters are `(`, a backtick, `?.(` or `<`, and a reference to a
+  class when `new` comes before its name; the indexer does not mark call
+  sites. `new C(` names `C`'s constructor when `C` declares one, and the site
+  calls both. Over hono's `src/` the calls match the compiler's with precision
+  0.991 and recall 0.985. A property whose function type hides behind an
+  alias, such as `getPath: GetPath<E>`, is not callable to the converter, so a
+  call to it is a reference only; a method written in an object literal,
+  `{ close(code) { … } }`, can read as a call to the member it implements.
 - **A reference belongs to the innermost definition around it.**
   scip-typescript gives a range only to functions, classes, interfaces, enums,
   type aliases, methods, constructors and constants whose initializer is a
@@ -364,19 +376,26 @@ from the reads' actual output.
   module.
 - **A call through a table is a reference to the table.** `detectors[name](c)`
   names `detectors`, and `detectors` names each function in it, so `impact`
-  reaches the caller in two hops, and `callers` of a function in the table
-  lists `detectors`, not the code that calls through it. Telling a call
-  through the table from a read of its keys would need the type checker's
-  data flow, which SCIP does not record.
+  reaches the caller in two hops, `referrers` of a function in the table lists
+  `detectors`, and `callers` and `transitive_callers` list neither. Telling a
+  call through the table from a read of its keys would need the type
+  checker's data flow, which SCIP does not record.
 - **A function handed to another is a reference, not a call.** VS Code's
   `invokeFunction(fn)` calls `fn` and `createInstance(C)` constructs a `C`,
-  but neither name is followed by `(`, so `call` is false there. `callers`
-  still lists the code that hands them over, and `impact` follows it.
+  but neither name is followed by `(`, so neither is a call. `referrers`
+  lists the code that hands them over and `impact` follows it; `callers` and
+  `transitive_callers` do not.
 - **A static and an instance member of one name are one definition.**
   scip-typescript gives `static equals` and `equals` in one class the same
   symbol, so the graph holds one `equals` with the references of both.
-- **`impact` follows at most sixteen hops.** Omnigraph requires a finite
-  bound on a multi-hop traversal. The longest chain of references and
+- **`transitive_callers` keeps a base member it passes through when the member
+  calls anything.** A bounded walk in GQ starts at one hop, so the read cannot
+  require a definition's first hop to be a call; it walks calls and
+  implementations and keeps the definitions that call something. A base
+  member whose override is on the chain is a point a call dispatches
+  through, not a caller, and stays in the list when it calls anything itself.
+- **`impact` and `transitive_callers` follow at most sixteen hops.** Omnigraph
+  requires a finite bound on a multi-hop traversal. The longest chain of references and
   implementations to a callable in hono's `src/` is 14; a deeper chain is
   cut at sixteen.
 - **On 0.15, `impact` from a hub can exceed any memory limit.** On VS Code a

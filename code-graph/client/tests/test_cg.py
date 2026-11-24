@@ -3,6 +3,10 @@ resolution and the omnigraph command lines cg builds.
 
 The fixtures are real `omnigraph branch diff --json` output from OmniGraph
 0.15.0: hono PR #5267 against its base, and the base loaded back over the PR.
+To capture them again: init a graph with schema.pg, load seed.jsonl onto main,
+load examples/pr-5267.jsonl onto branch pr-5267, load seed.jsonl onto branch
+revert-5267 created from pr-5267, and run `branch diff pr-5267 --into main` and
+`branch diff revert-5267 --into pr-5267` with `--json`.
 Run with: python3 -m unittest discover -s code-graph/client/tests
 """
 
@@ -54,7 +58,13 @@ class Summarize(unittest.TestCase):
         self.assertEqual((len(refs["added"]), len(refs["removed"]), len(refs["changed"])), (18, 0, 0))
         self.assertEqual(collections.Counter(r["to"] for r in refs["added"]), {HELPER: 14, MODULE: 4})
         self.assertIn({"from": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().", "to": HELPER,
-                       "call": True, "sites": 1}, refs["added"])
+                       "sites": 1}, refs["added"])
+        # Ten of the references to the helper call it; the module's imports do not.
+        calls = s["calls"]
+        self.assertEqual((len(calls["added"]), len(calls["removed"]), len(calls["changed"])), (10, 0, 0))
+        self.assertEqual({r["to"] for r in calls["added"]}, {HELPER})
+        self.assertLessEqual({(r["from"], r["to"]) for r in calls["added"]},
+                             {(r["from"], r["to"]) for r in refs["added"]})
         self.assertEqual(s["members"]["added"], [{"from": HELPER, "to": MODULE}])
         self.assertEqual(s["implementations"], {"added": [], "removed": [], "changed": []})
 
@@ -66,16 +76,28 @@ class Summarize(unittest.TestCase):
         self.assertEqual({r["symbol"] for r in s["changed"]}, CHANGED)
         self.assertEqual(len(s["references"]["removed"]), 18)
         self.assertEqual(s["references"]["added"], [])
+        self.assertEqual(len(s["calls"]["removed"]), 10)
         self.assertEqual(s["members"]["removed"], [{"from": HELPER, "to": MODULE}])
 
     def test_edge_update_keeps_both_sides(self):
+        ends = {"from": "a/`b.ts`/f().", "to": "a/`b.ts`/g()."}
         diff = {"changes": [{"kind": "edge", "type": {"name": "References"}, "op": "update",
-                             "before": {"properties": {"call": False, "sites": 1}, "endpoints": {"from": "a/`b.ts`/f().", "to": "a/`b.ts`/g()."}},
-                             "after": {"properties": {"call": True, "sites": 2}, "endpoints": {"from": "a/`b.ts`/f().", "to": "a/`b.ts`/g()."}}}]}
+                             "before": {"properties": {"sites": 1}, "endpoints": ends},
+                             "after": {"properties": {"sites": 3}, "endpoints": ends}},
+                            {"kind": "edge", "type": {"name": "Calls"}, "op": "update",
+                             "before": {"properties": {"sites": 1}, "endpoints": ends},
+                             "after": {"properties": {"sites": 2}, "endpoints": ends}}]}
         s = cg_cli.summarize(diff)
-        self.assertEqual(s["references"]["changed"], [{"from": "a/`b.ts`/f().", "to": "a/`b.ts`/g().", "call": True,
-                                                        "sites": 2, "before": {"call": False, "sites": 1}}])
-        self.assertIn("call False to True, sites 1 to 2", cg_cli.render(s, "b", "main"))
+        self.assertEqual(s["references"]["changed"], [{**ends, "sites": 3, "before": {"sites": 1}}])
+        self.assertEqual(s["calls"]["changed"], [{**ends, "sites": 2, "before": {"sites": 1}}])
+        self.assertIn("a/b.ts:f() to a/b.ts:g(): references 1 to 3, calls 1 to 2", cg_cli.render(s, "b", "main"))
+
+    def test_a_reference_that_becomes_a_call(self):
+        # The code already named g and now also calls it: a Calls insert alone.
+        ends = {"from": "a/`b.ts`/f().", "to": "a/`b.ts`/g()."}
+        diff = {"changes": [{"kind": "edge", "type": {"name": "Calls"}, "op": "insert",
+                             "after": {"properties": {"sites": 1}, "endpoints": ends}}]}
+        self.assertIn("a/b.ts:f() now calls a/b.ts:g()", cg_cli.render(cg_cli.summarize(diff), "b", "main"))
 
 
 class Render(unittest.TestCase):
@@ -83,11 +105,13 @@ class Render(unittest.TestCase):
         text = cg_cli.render(cg_cli.summarize(fixture("pr-5267.diff.json")), "pr-5267", "main")
         first = text.splitlines()[0]
         self.assertEqual(first, "pr-5267 against main, revision a10592f3..4b44abe1: 2 symbols added, 0 removed, "
-                                "5 changed; 18 references added, 0 removed, 0 changed; 53 definitions only moved.")
+                                "5 changed; 18 references added, 0 removed, 0 changed; 10 calls added, 0 removed; "
+                                "53 definitions only moved.")
         self.assertIn("  src/router/utils.ts:createNullObject (constant)", text)
         self.assertIn("  src/router/reg-exp-router/router.ts:RegExpRouter.add() (method): code changed", text)
         self.assertIn("  src/router/reg-exp-router/router.ts:RegExpRouter.add() now calls "
                       "src/router/utils.ts:createNullObject", text)
+        self.assertIn("  src/router/reg-exp-router/router.ts now names src/router/utils.ts", text)
         self.assertNotIn("Removed:", text)
 
     def test_markdown(self):
