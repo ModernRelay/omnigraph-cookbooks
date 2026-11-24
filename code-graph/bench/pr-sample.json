@@ -1,0 +1,206 @@
+{
+  "rule": "the 40 most recent first-parent commits on main before 2026-11-01 that change a non-test .ts file under src/",
+  "repository": "https://github.com/honojs/hono.git",
+  "pull_requests": [
+    {
+      "head": "e1dd58856eea8c3e91494ca6a12578325b01cf46",
+      "base": "bf16471913b5199212dac33f5d170f94745dd26a",
+      "subject": "fix(jwt): reject a signature segment outside the base64url alphabet and a header with crit (#5597)"
+    },
+    {
+      "head": "bf16471913b5199212dac33f5d170f94745dd26a",
+      "base": "d88fab372415277a9e540e895650943dd08eef4a",
+      "subject": "Merge commit from fork"
+    },
+    {
+      "head": "d88fab372415277a9e540e895650943dd08eef4a",
+      "base": "34f90432a1794b28e52802670efcd01963f716d6",
+      "subject": "Merge commit from fork"
+    },
+    {
+      "head": "34f90432a1794b28e52802670efcd01963f716d6",
+      "base": "8a103aa59bcfbffd5396b1548a0dff3688777c36",
+      "subject": "Merge commit from fork"
+    },
+    {
+      "head": "8a103aa59bcfbffd5396b1548a0dff3688777c36",
+      "base": "15bbd96ad1b62a0b189db4fd8dc7bf8ef280c513",
+      "subject": "Merge commit from fork"
+    },
+    {
+      "head": "15bbd96ad1b62a0b189db4fd8dc7bf8ef280c513",
+      "base": "3cb29de8f110654c37aa9b4c7eccdeae5254f5f2",
+      "subject": "Merge commit from fork"
+    },
+    {
+      "head": "17ad0e21f5a91c939eeafa3df05793a8ea60f016",
+      "base": "ee88684625077a2cd0e2f4613e593e2635ffe4c7",
+      "subject": "fix(context): allow `c.header()` after the response body is consumed (#5587)"
+    },
+    {
+      "head": "ed1d5f72135ccf7e09c17d64dc4af7588dd3e491",
+      "base": "bac5c4a8bcd76b165428ce757e1185753c7935bd",
+      "subject": "fix(auth): escape backslashes in the WWW-Authenticate realm (#5590)"
+    },
+    {
+      "head": "eb78ecaabe26baa8addc053cf8a94b5b7603c001",
+      "base": "06a45bc3a639c1f9eea28e16370bc03447f0d7cb",
+      "subject": "fix(utils/url): preserve encoded duplicate query order (#5495)"
+    },
+    {
+      "head": "06a45bc3a639c1f9eea28e16370bc03447f0d7cb",
+      "base": "5ca49b0720755c585c9a9835f0a479ceea36fb52",
+      "subject": "feat(bearer-auth): allow MessageFunction to return a Response (#5269)"
+    },
+    {
+      "head": "5ca49b0720755c585c9a9835f0a479ceea36fb52",
+      "base": "e9c01079a932ffdfa269c0011075ac43fd8a1035",
+      "subject": "fix(css): Fix multiline CSS handling in style replacement (#5405)"
+    },
+    {
+      "head": "e9c01079a932ffdfa269c0011075ac43fd8a1035",
+      "base": "08807ce12aa3aa27c8c5adf63e677bbab6bceda9",
+      "subject": "fix(hono-base): disallow `getPath` when `strict` is `false` (#5563)"
+    },
+    {
+      "head": "08807ce12aa3aa27c8c5adf63e677bbab6bceda9",
+      "base": "e77c7c8eb9fea50a496ba10010063998b55d7a6b",
+      "subject": "fix(trie-router): keep first value for duplicate path params (#5422) (#5423)"
+    },
+    {
+      "head": "e77c7c8eb9fea50a496ba10010063998b55d7a6b",
+      "base": "d54720da80134a180f5fe2dd98a7676cfc8f08b4",
+      "subject": "fix(helper/route): match regex params in basePath() the same way as the router (#5498)"
+    },
+    {
+      "head": "d54720da80134a180f5fe2dd98a7676cfc8f08b4",
+      "base": "ae401f080004872678100e890fd3398d3df09e67",
+      "subject": "fix(serve-static): respect q-values in Accept-Encoding for precompressed files (#5436)"
+    },
+    {
+      "head": "ae401f080004872678100e890fd3398d3df09e67",
+      "base": "2013fed5b21719bb1e6f44ce7f49757660946856",
+      "subject": "fix(css): keep the descendant combinator before a pseudo-class when minifying (#5451)"
+    },
+    {
+      "head": "2013fed5b21719bb1e6f44ce7f49757660946856",
+      "base": "43379d93e23abaaa54ff85f2ce64a149f50d4295",
+      "subject": "fix(css): keep \"//\" inside an unquoted url() when minifying (#5450)"
+    },
+    {
+      "head": "43379d93e23abaaa54ff85f2ce64a149f50d4295",
+      "base": "3362244401515a1530616aefb87eb388152f82a3",
+      "subject": "fix(jsx): preserve self-closing void elements in cloneElement (#5314)"
+    },
+    {
+      "head": "3362244401515a1530616aefb87eb388152f82a3",
+      "base": "588ec13fa68ea44fed1b5e1b503341db2bf09d70",
+      "subject": "fix(build): keep barrel imports in the bundled `d.ts` (#5557)"
+    },
+    {
+      "head": "588ec13fa68ea44fed1b5e1b503341db2bf09d70",
+      "base": "552ea024250093a48071b3ded9710de4c6e05f14",
+      "subject": "fix(serve-static): only serve GET and HEAD requests (#5514)"
+    },
+    {
+      "head": "ae595de8ae05ea548560da93140ee1d53e5a8202",
+      "base": "f23b146afcec63606144cde50b5fbd360dd60238",
+      "subject": "feat(mount): introduce Mount Middleware and deprecate `app.mount` (#5221)"
+    },
+    {
+      "head": "f23b146afcec63606144cde50b5fbd360dd60238",
+      "base": "6d73a74f9757ed65d6103c0e8375097fa20873c4",
+      "subject": "fix(jsx): allow JSXNode function component results (#5476)"
+    },
+    {
+      "head": "6d73a74f9757ed65d6103c0e8375097fa20873c4",
+      "base": "deff529656cff775b35956f7f9071388d4eb55ae",
+      "subject": "docs(request): fix jsdoc comments for some getters (#5445)"
+    },
+    {
+      "head": "afb2068c1c53a530528ac5f237e245793dd03c07",
+      "base": "e5bb2062a3ddd645e3a16d1300bd76d6c9af33a5",
+      "subject": "fix(combine): return a Response from a short-circuiting middleware in some() (#5391)"
+    },
+    {
+      "head": "e5bb2062a3ddd645e3a16d1300bd76d6c9af33a5",
+      "base": "c3053ccf14f1c4c70a0c2888eed6121b9f6c8f95",
+      "subject": "fix(jsx): add px to numeric gridGap, gridRowGap and gridColumnGap (#5487)"
+    },
+    {
+      "head": "c3053ccf14f1c4c70a0c2888eed6121b9f6c8f95",
+      "base": "c437d7569219a21e45fa81797749e8f34fe19dcc",
+      "subject": "fix(etag): correctly match mixed-case header name in retainedHeader option (#5475)"
+    },
+    {
+      "head": "be1f7498fed269544a3c544db0a5a727048462a8",
+      "base": "37ce06904e732d4bc11c9075adf362c76049a594",
+      "subject": "fix(build): keep internal types private in bundled d.ts and avoid a self-referencing JSX.IntrinsicElements (#5485)"
+    },
+    {
+      "head": "8b05c774ef1555c70f5ba5e2991b7e77cc3635cc",
+      "base": "18331a905e2415f7f73038357f2eec354123f7a6",
+      "subject": "Merge commit from fork"
+    },
+    {
+      "head": "b877827fccde0be4ee78457ae8b65db2436139f9",
+      "base": "4d9f2a2ed4bf2fbd1c891a261b033caf138ea1f8",
+      "subject": "feat(adapters): add the seven adapters as workspace packages (#5463)"
+    },
+    {
+      "head": "fc2343dbad8af7ab82bc4a6c6907e57416aed878",
+      "base": "d7fb6972924f0a22fa3877b1a6e11e5273828527",
+      "subject": "feat(adapters): add @hono/bun as a workspace package (#5447)"
+    },
+    {
+      "head": "90d02fb1645c12a65d27f39594d2129db2065ba7",
+      "base": "5f31392d724cf98c9e48a3de119a55284583ad5f",
+      "subject": "fix(types): allow returning a Blob as a response body (#5446)"
+    },
+    {
+      "head": "859e2c2bd0ec6d104e98e126eaa86cfcf5def0d9",
+      "base": "57ba76a2a45d0573ed8f1c1e4a9d11dda9c6ab11",
+      "subject": "chore: let oxfmt sort imports instead of eslint (#5442)"
+    },
+    {
+      "head": "8dcd52b92beada28962e818bdca8a137a6beb656",
+      "base": "a79a8048b6b3fd777c8f2b842cc4ad81c250ba2b",
+      "subject": "chore: replace prettier with oxfmt (#5435)"
+    },
+    {
+      "head": "6cadf7537385c6e3df9cbd6d05c9b84c82ae0361",
+      "base": "de310ac063febf3e7b73f6206142d0e88800661f",
+      "subject": "fix(lambda-edge): fail with a descriptive error on a malformed event (#5358)"
+    },
+    {
+      "head": "de310ac063febf3e7b73f6206142d0e88800661f",
+      "base": "28e8572cd265b4da1160ce6cd51919bb70516e2c",
+      "subject": "fix(lambda-edge): sync content type detection with aws-lambda (#5426)"
+    },
+    {
+      "head": "28e8572cd265b4da1160ce6cd51919bb70516e2c",
+      "base": "0d86899d28e146da0c8760201b2d08ddae732eaa",
+      "subject": "fix(aws-lambda): preserve empty query parameters (#5292)"
+    },
+    {
+      "head": "0d86899d28e146da0c8760201b2d08ddae732eaa",
+      "base": "52febbcc30bc509d5e4987577e63906fe08fc471",
+      "subject": "fix(aws-lambda): treat binary +xml archive media types as binary (#5424)"
+    },
+    {
+      "head": "52febbcc30bc509d5e4987577e63906fe08fc471",
+      "base": "f950277cd3d9264622785e82785f21c648da699a",
+      "subject": "fix(jwt): throw JwtTokenInvalid when the signature is not valid base64url (#5379)"
+    },
+    {
+      "head": "f950277cd3d9264622785e82785f21c648da699a",
+      "base": "00ee875728e2369b98a9ab7dda0690b77afedcff",
+      "subject": "fix(pretty-json): don't break responses with unparseable JSON bodies (#5377)"
+    },
+    {
+      "head": "00ee875728e2369b98a9ab7dda0690b77afedcff",
+      "base": "f5a53463ad2ff791fc02418b645750ce75a260ad",
+      "subject": "fix(linear-router): don't match an empty path segment as a param (#5373)"
+    }
+  ]
+}

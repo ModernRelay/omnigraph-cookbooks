@@ -1,0 +1,132 @@
+{
+  "revision": "a10592f3e1864cbe277619633db953450a6b1e4b",
+  "answer_format": "End your reply with one line that starts with ANSWER: followed by a JSON array of strings. Name each definition as path:Name for a top-level function, class, interface or constant, and as path:Class.member for a member of a class, with the path relative to the repository root, for example src/request.ts:HonoRequest.header. For code that belongs to no named function, method or class, give the file path alone. Leave out test files (names ending in .test.ts or .test.tsx). Do not change any file.",
+  "questions": [
+    {
+      "id": "header-callers",
+      "shape": "a method whose name six definitions share",
+      "question": "Which functions and methods in src/ call the header method of HonoRequest, the class in src/request.ts?",
+      "answer": [
+        "src/adapter/aws-lambda/conninfo.ts:getConnInfo",
+        "src/adapter/bun/websocket.ts",
+        "src/adapter/cloudflare-pages/conninfo.ts:getConnInfo",
+        "src/adapter/cloudflare-workers/conninfo.ts:getConnInfo",
+        "src/adapter/cloudflare-workers/websocket.ts",
+        "src/adapter/deno/websocket.ts",
+        "src/adapter/vercel/conninfo.ts:getConnInfo",
+        "src/helper/accepts/accepts.ts:accepts",
+        "src/middleware/bearer-auth/index.ts:bearerAuth",
+        "src/middleware/compress/index.ts:compress",
+        "src/middleware/cors/index.ts:cors",
+        "src/middleware/csrf/index.ts:csrf",
+        "src/middleware/etag/index.ts:etag",
+        "src/middleware/language/language.ts:detectFromHeader",
+        "src/middleware/method-override/index.ts:methodOverride",
+        "src/middleware/request-id/request-id.ts:requestId",
+        "src/middleware/serve-static/index.ts:serveStatic",
+        "src/request.ts:cloneRawRequest",
+        "src/validator/validator.ts:validator"
+      ]
+    },
+    {
+      "id": "getcookie-callers",
+      "shape": "a function constant with a declared type",
+      "question": "Which functions and methods in src/ call getCookie, defined in src/helper/cookie/index.ts?",
+      "answer": [
+        "src/helper/cookie/index.ts:deleteCookie",
+        "src/middleware/jwk/jwk.ts:jwk",
+        "src/middleware/jwt/jwt.ts:jwt",
+        "src/middleware/language/language.ts:detectFromCookie",
+        "src/validator/validator.ts:validator"
+      ]
+    },
+    {
+      "id": "router-implementers",
+      "shape": "the implementations of an interface",
+      "question": "Which classes in src/ implement the Router interface declared in src/router.ts?",
+      "answer": [
+        "src/router/linear-router/router.ts:LinearRouter",
+        "src/router/pattern-router/router.ts:PatternRouter",
+        "src/router/reg-exp-router/prepared-router.ts:PreparedRegExpRouter",
+        "src/router/reg-exp-router/router.ts:RegExpRouter",
+        "src/router/smart-router/router.ts:SmartRouter",
+        "src/router/trie-router/router.ts:TrieRouter"
+      ]
+    },
+    {
+      "id": "getheaders-dispatch",
+      "shape": "a call dispatched to overrides",
+      "question": "In src/adapter/aws-lambda/handler.ts, EventProcessor.createRequest calls this.getHeaders(event). Which method bodies can that call run?",
+      "answer": [
+        "src/adapter/aws-lambda/handler.ts:ALBProcessor.getHeaders",
+        "src/adapter/aws-lambda/handler.ts:EventV1Processor.getHeaders",
+        "src/adapter/aws-lambda/handler.ts:EventV2Processor.getHeaders",
+        "src/adapter/aws-lambda/handler.ts:LatticeV2Processor.getHeaders"
+      ]
+    },
+    {
+      "id": "path-users",
+      "shape": "a property whose name 17 definitions share",
+      "question": "Which functions and methods in src/ use the path property of HonoRequest, the class in src/request.ts?",
+      "answer": [
+        "src/helper/route/index.ts:basePath",
+        "src/helper/ssg/middleware.ts:ssgParams",
+        "src/middleware/combine/index.ts:except",
+        "src/middleware/method-not-allowed/index.ts:methodNotAllowed",
+        "src/middleware/serve-static/index.ts:serveStatic",
+        "src/middleware/trailing-slash/index.ts:appendTrailingSlash",
+        "src/middleware/trailing-slash/index.ts:trimTrailingSlash"
+      ],
+      "optional": [
+        "src/request.ts:HonoRequest.constructor"
+      ],
+      "note": "The constructor assigns this.path and reads nothing, so naming it or leaving it out are both right."
+    },
+    {
+      "id": "httpexception-constructions",
+      "shape": "the constructions of a class",
+      "question": "Which functions and methods in src/ construct an HTTPException, the class in src/http-exception.ts?",
+      "answer": [
+        "src/helper/proxy/index.ts:buildRequestInitFromRequest",
+        "src/middleware/basic-auth/index.ts:basicAuth",
+        "src/middleware/bearer-auth/index.ts:bearerAuth",
+        "src/middleware/body-limit/index.ts:bodyLimit",
+        "src/middleware/csrf/index.ts:csrf",
+        "src/middleware/ip-restriction/index.ts:ipRestriction",
+        "src/middleware/jwk/jwk.ts:jwk",
+        "src/middleware/jwt/jwt.ts:jwt",
+        "src/middleware/timeout/index.ts",
+        "src/request.ts:cloneRawRequest",
+        "src/validator/validator.ts:validator"
+      ]
+    },
+    {
+      "id": "compose-callers",
+      "shape": "a function with a unique name",
+      "question": "Which functions and methods in src/ call compose, defined in src/compose.ts?",
+      "answer": [
+        "src/hono-base.ts:Hono.#dispatch",
+        "src/hono-base.ts:Hono.route",
+        "src/middleware/combine/index.ts:every"
+      ]
+    },
+    {
+      "id": "cookie-parse-impact",
+      "shape": "callers through any chain of calls",
+      "question": "Which functions and methods in src/ call parse from src/utils/cookie.ts, either directly or through any chain of other calls?",
+      "answer": [
+        "src/helper/cookie/index.ts:deleteCookie",
+        "src/helper/cookie/index.ts:getCookie",
+        "src/helper/cookie/index.ts:getSignedCookie",
+        "src/middleware/jwk/jwk.ts:jwk",
+        "src/middleware/jwt/jwt.ts:jwt",
+        "src/middleware/language/language.ts:detectFromCookie",
+        "src/middleware/language/language.ts:detectLanguage",
+        "src/middleware/language/language.ts:languageDetector",
+        "src/utils/cookie.ts:parseSigned",
+        "src/validator/validator.ts:validator"
+      ],
+      "note": "detectLanguage calls detectFromCookie through the detectors table (detectors[detectorName](c, options)), and languageDetector calls detectLanguage. Neither reference on that path, detectLanguage reading detectors and detectors naming detectFromCookie, is a call, so a key built from call edges misses these two; they were added after checking the source."
+    }
+  ]
+}

@@ -179,6 +179,127 @@ Loaded onto its branch, the PR adds 2 definitions and 18 references, 10 of
 them calls, and changes 5 methods; 53 more definitions only move. [seed.md](seed.md) describes the
 seed and lists what every stored read returns.
 
+## Benchmarks
+
+Measured on hono, and the agent benchmark again on VS Code, by the scripts in
+[`bench/`](bench/README.md), which has the methods, the adjudication of every
+miss and the limits. They run by hand, not in CI.
+
+**Pull request diffs.** The 40 most recent hono pull requests before
+2026-11-01 that change `src/`, each loaded as its base and merge commit and
+reviewed with `cg diff`. Scored against the difference of the converted files
+(mechanics) and against two reference graphs built with the TypeScript
+compiler API (accuracy):
+
+| | Exact pull requests | Added | Removed | Changed | References added | References removed | Calls added | Calls removed |
+|---|---|---|---|---|---|---|---|---|
+| Mechanics | 40 of 40 | 19 of 19 | 9 of 9 | 48 of 48 | 91 of 91 | 40 of 40 | 12 of 12 | 6 of 6 |
+| Accuracy, precision | 36 of 40 | 1.000 | 0.667 | 0.938 | 1.000 | 0.875 | 1.000 | 1.000 |
+| Accuracy, recall | | 1.000 | 1.000 | 1.000 | 1.000 | 0.972 | 1.000 | 0.857 |
+
+Over hono's whole `src/`, the calls the converter records match the
+compiler's with precision 0.991 and recall 0.985; the calls it misses are to
+properties whose function type hides behind a type alias.
+
+**Execution recall against other code-graph tools.** hono's test suite, run
+on an instrumented copy, made 917 distinct calls between definitions. Recall
+is the share of them each graph contains:
+
+| Graph | All 917 | Functions and methods (768) | Class-member calls (199) |
+|---|---|---|---|
+| Omnigraph | 0.893 | 0.882 | 0.774 |
+| codegraph 1.6.2 | 0.686 | 0.758 | 0.487 |
+| Graphify 0.9.102 | 0.677 | 0.749 | 0.372 |
+| GitNexus 1.6.12 | 0.632 | 0.694 | 0.322 |
+| codebase-memory-mcp 0.12.1 | 0.627 | 0.690 | 0.221 |
+| code-review-graph 2.3.9 | 0.604 | 0.721 | 0.387 |
+
+Omnigraph's row counts every reference, which is what `referrers` returns.
+Its `Calls` edges alone, what `callers` returns and what the other tools'
+call graphs hold, give 0.778, so about half of its lead over the tools comes
+from recording references: a getter runs when a property is read, and a
+function passed as a value runs when the code it was passed to calls it. The
+rest is resolution.
+On calls to top-level functions and uniquely named ones, the name-matching
+tools come within two to four points of Omnigraph's call edges; they fall
+behind on method calls and on names several definitions share, which need the
+receiver's type. The benchmark measures recall only, on one repository.
+
+**Agent cost.** Claude Code with Sonnet 5.5 answered eight code-structure
+questions about hono three times in each of seven arms: no code graph,
+Omnigraph through `cg`, and the five tools above, each set up by its own
+Claude Code installer. Each arm ran beside a no-graph arm in the same window
+and is compared with it question by question (geometric mean of the ratio of
+medians):
+
+| Arm | Exact answers | No graph, same window | Cost against no graph | Wall time against no graph | Calls to its tool |
+|---|---|---|---|---|---|
+| Omnigraph | 21 of 24 | 21 of 24 | 0.62×, lower on 5 of 8 | 0.81×, lower on 5 of 8 | 52% |
+| codegraph | 24 of 24 | 24 of 24 | 1.01×, lower on 5 of 8 | 1.02× | 0% |
+| Graphify | 21 of 24 | 24 of 24 | 1.01×, lower on 4 of 8 | 1.03× | 9% |
+| GitNexus | 22 of 24 | 24 of 24 | 0.97×, lower on 4 of 8 | 1.01× | 17% |
+| codebase-memory-mcp | 24 of 24 | 24 of 24 | 1.14×, lower on 0 of 8 | 1.11× | 1% |
+| code-review-graph | 24 of 24 | 24 of 24 | 1.33×, lower on 2 of 8 | 1.15× | 7% |
+
+hono is small enough that a text search usually answers in a few turns, so
+the saving shows only where it takes several: the callers of
+`HonoRequest.header`, a name several definitions share, cost $0.028 with
+Omnigraph against $0.172 (3 turns against 13), and the callers through a
+chain of calls to the cookie `parse` $0.079 against $0.224 (3 against 10).
+Where one search answers, as for the classes implementing `Router`, it costs
+about the same. The six sessions on that chain, with and without the graph,
+left out the two definitions that reach `parse` through a table of functions,
+which `transitive_callers` does not follow. The other tools' agents called
+their tool for 0 to 17% of their tool calls, so the run says little about
+those tools. Indexing hono takes Omnigraph 2.2 s, the tools 2.0 to 21.3 s.
+
+**Agent cost at scale.** The same benchmark on VS Code 1.146.0, 89 times
+hono's size: 23 scored questions in six families, picked by rule from a
+compiler reference and asked five times each
+([design and corrections](bench/scale-design.md)). Each arm ran beside a
+no-graph arm in the same window and is compared with it question by question
+(geometric mean of the ratio of medians, 95% bootstrap interval):
+
+| Arm | Exact answers | No graph, same window | Cost against no graph | Wall time against no graph | Turns against no graph |
+|---|---|---|---|---|---|
+| Omnigraph | 85 of 115 | 67 of 115 | 0.61× [0.43, 0.85], lower on 20 of 23 | 0.54× [0.43, 0.67] | 0.39× [0.30, 0.51] |
+| codegraph | 73 of 115 | 73 of 115 | 0.91× [0.83, 1.01], lower on 16 of 23 | 1.88× [1.65, 2.13] | 1.04× [0.82, 1.49] |
+| Graphify | 68 of 115 | 73 of 115 | 1.12× [1.02, 1.22], lower on 5 of 23 | 1.10× [1.02, 1.17] | 1.26× [1.05, 1.71] |
+
+In Omnigraph's window a no-graph session cost a median $0.22 and took 31 s;
+an Omnigraph session $0.17 and 16 s. In that window half the sessions of
+either arm wrote Claude Code's 45k-token starting context to the prompt
+cache, about $0.15 a session, which is why the cost ratio is nearer 1 than
+the ratio of turns. By family, Omnigraph against no graph, with the questions
+the graph answers exactly by itself, one read per question:
+
+| Family | Exact, no graph | Exact, Omnigraph | The graph by itself | Cost | Median turns |
+|---|---|---|---|---|---|
+| Constructions of a class | 10 of 20 | 14 of 20 | 3 of 4 | 0.21× | 16.5 → 3 |
+| Callers through a chain of calls | 0 of 15 | 0 of 15 | 0 of 3 | 0.59× | 19 → 4 |
+| Callers of a method whose name is shared | 13 of 20 | 15 of 20 | 3 of 4 | 0.35× | 10.5 → 3 |
+| Release changes | 7 of 20 | 18 of 20 | 4 of 4 | 0.73× | 13 → 6 |
+| Callers of a uniquely named function | 19 of 20 | 20 of 20 | 4 of 4 | 1.32× | 5 → 3 |
+| Implementations a call can reach | 18 of 20 | 18 of 20 | 4 of 4 | 1.20× | 8.5 → 7.5 |
+
+The graph saves most where one `cg` read is the answer and a text search
+returns lines the agent has to sort into definitions: the constructions of a
+class, the callers of a shared method name, and callers through a chain of
+calls, where a session took three or four turns against 10 to 19. On release
+changes `cg` reads both releases, where the other agents diff text: when
+1.146.0 moved a call to `moveEditors` into a new method, `doMergeGroup`, only
+Omnigraph's sessions named it. Where both arms answer in a few turns, as for
+a uniquely named function, the cost of a median session follows which
+sessions missed the cache. By itself the graph answers 18 of the 23 questions
+exactly, and most of the sessions' misses are its five: three constructions
+through dependency injection, where `createInstance(C)` passes `C` as an
+argument and the graph records a reference rather than a call; a function
+constant declared in a block of module code, whose calls the converter
+assigns to the module; and a call the compiler does not resolve. Each chain
+question has one, so no session in either arm answered one exactly.
+codegraph's and Graphify's agents called their tools for 0.3% and 5% of
+their tool calls.
+
 ## Run it
 
 Paste this prompt into a coding agent such as Claude Code or Codex:

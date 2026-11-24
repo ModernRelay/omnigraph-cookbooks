@@ -1,0 +1,1646 @@
+{
+  "suite": "vscode",
+  "model": "claude-sonnet-5-5",
+  "summary": {
+    "bare": {
+      "tool": "no code graph",
+      "runs": 6,
+      "completed": 6,
+      "mean_f1": 0.933,
+      "exact": 5,
+      "median_input_tokens": 212343.5,
+      "median_output_tokens": 2459.5,
+      "median_cache_write_tokens": 29832.0,
+      "median_first_context_tokens": 25472.0,
+      "median_cost_usd": 0.1576,
+      "total_cost_usd": 1.47,
+      "median_wall_seconds": 19.5,
+      "median_api_seconds": 17.365000000000002,
+      "median_turns": 8.0,
+      "median_output_tokens_per_api_second": 134.45,
+      "per_family": {
+        "shared-name": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.1384,
+          "median_turns": 8
+        },
+        "dispatch": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.0912,
+          "median_turns": 4
+        },
+        "transitive": {
+          "runs": 1,
+          "exact": 0,
+          "mean_f1": 0.596,
+          "median_cost_usd": 0.6369,
+          "median_turns": 37
+        },
+        "construction": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.1767,
+          "median_turns": 5
+        },
+        "release": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.2966,
+          "median_turns": 20
+        },
+        "control": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.134,
+          "median_turns": 8
+        }
+      },
+      "median_tool_calls": 7.0,
+      "graph_tool_share": 0.211,
+      "per_question": {
+        "shared-name-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 198719,
+          "median_wall_seconds": 20.27
+        },
+        "dispatch-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 78464,
+          "median_wall_seconds": 8.13
+        },
+        "transitive-1": {
+          "mean_f1": 0.596,
+          "median_input_tokens": 1259177,
+          "median_wall_seconds": 96.1
+        },
+        "construction-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 133897,
+          "median_wall_seconds": 18.73
+        },
+        "release-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 625570,
+          "median_wall_seconds": 40.79
+        },
+        "control-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 225968,
+          "median_wall_seconds": 17.68
+        }
+      },
+      "setup": {
+        "given": {
+          "mcp_servers": [],
+          "instructions_bytes": {
+            "AGENTS.md": 271
+          },
+          "skills": [],
+          "subagents": [],
+          "hooks": {},
+          "shell": [
+            "git"
+          ]
+        },
+        "index_seconds": {}
+      },
+      "vs_bare": {
+        "cost_usd": {
+          "geomean_ratio": 1.0,
+          "questions_lower": 0,
+          "questions": 6
+        },
+        "wall_seconds": {
+          "geomean_ratio": 1.0,
+          "questions_lower": 0,
+          "questions": 6
+        },
+        "input_tokens": {
+          "geomean_ratio": 1.0,
+          "questions_lower": 0,
+          "questions": 6
+        },
+        "output_tokens": {
+          "geomean_ratio": 1.0,
+          "questions_lower": 0,
+          "questions": 6
+        },
+        "turns": {
+          "geomean_ratio": 1.0,
+          "questions_lower": 0,
+          "questions": 6
+        }
+      }
+    },
+    "omnigraph": {
+      "tool": "Omnigraph (this cookbook, through cg)",
+      "runs": 6,
+      "completed": 6,
+      "mean_f1": 0.967,
+      "exact": 5,
+      "median_input_tokens": 138209.5,
+      "median_output_tokens": 1182.5,
+      "median_cache_write_tokens": 25373.5,
+      "median_first_context_tokens": 25949.0,
+      "median_cost_usd": 0.125,
+      "total_cost_usd": 0.89,
+      "median_wall_seconds": 22.925,
+      "median_api_seconds": 10.629999999999999,
+      "median_turns": 5.5,
+      "median_output_tokens_per_api_second": 120.2,
+      "per_family": {
+        "shared-name": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.1001,
+          "median_turns": 3
+        },
+        "dispatch": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.141,
+          "median_turns": 6
+        },
+        "transitive": {
+          "runs": 1,
+          "exact": 0,
+          "mean_f1": 0.8,
+          "median_cost_usd": 0.2768,
+          "median_turns": 23
+        },
+        "construction": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.1841,
+          "median_turns": 12
+        },
+        "release": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.109,
+          "median_turns": 5
+        },
+        "control": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.0826,
+          "median_turns": 2
+        }
+      },
+      "median_tool_calls": 4.5,
+      "graph_tool_share": 0.267,
+      "per_question": {
+        "shared-name-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 83681,
+          "median_wall_seconds": 9.75
+        },
+        "dispatch-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 164763,
+          "median_wall_seconds": 51.14
+        },
+        "transitive-1": {
+          "mean_f1": 0.8,
+          "median_input_tokens": 759638,
+          "median_wall_seconds": 81.6
+        },
+        "construction-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 311160,
+          "median_wall_seconds": 32.29
+        },
+        "release-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 111656,
+          "median_wall_seconds": 13.56
+        },
+        "control-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 52394,
+          "median_wall_seconds": 7.64
+        }
+      },
+      "setup": {
+        "index_seconds": {
+          "index 1.146.0": 308.6,
+          "convert 1.146.0": 223.9,
+          "reference 1.146.0": 160.8,
+          "load 1.146.0": 122.5
+        },
+        "given": {
+          "mcp_servers": [],
+          "instructions_bytes": {
+            "CLAUDE.md": 1164,
+            "AGENTS.md": 271
+          },
+          "skills": [],
+          "subagents": [],
+          "hooks": {},
+          "shell": [
+            "git",
+            "cg"
+          ]
+        }
+      },
+      "vs_bare": {
+        "cost_usd": {
+          "geomean_ratio": 0.697,
+          "questions_lower": 4,
+          "questions": 6
+        },
+        "wall_seconds": {
+          "geomean_ratio": 0.927,
+          "questions_lower": 4,
+          "questions": 6
+        },
+        "input_tokens": {
+          "geomean_ratio": 0.61,
+          "questions_lower": 4,
+          "questions": 6
+        },
+        "output_tokens": {
+          "geomean_ratio": 0.534,
+          "questions_lower": 4,
+          "questions": 6
+        },
+        "turns": {
+          "geomean_ratio": 0.612,
+          "questions_lower": 4,
+          "questions": 6
+        }
+      }
+    },
+    "codegraph": {
+      "tool": "codegraph 1.6.2",
+      "runs": 6,
+      "completed": 6,
+      "mean_f1": 0.933,
+      "exact": 5,
+      "median_input_tokens": 231685.0,
+      "median_output_tokens": 2552.0,
+      "median_cache_write_tokens": 33279.0,
+      "median_first_context_tokens": 31609.5,
+      "median_cost_usd": 0.1766,
+      "total_cost_usd": 1.28,
+      "median_wall_seconds": 43.370000000000005,
+      "median_api_seconds": 16.9,
+      "median_turns": 7.0,
+      "median_output_tokens_per_api_second": 142.35,
+      "per_family": {
+        "shared-name": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.1435,
+          "median_turns": 7
+        },
+        "dispatch": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.1134,
+          "median_turns": 4
+        },
+        "transitive": {
+          "runs": 1,
+          "exact": 0,
+          "mean_f1": 0.6,
+          "median_cost_usd": 0.4011,
+          "median_turns": 27
+        },
+        "construction": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.2002,
+          "median_turns": 7
+        },
+        "release": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.2667,
+          "median_turns": 13
+        },
+        "control": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.153,
+          "median_turns": 7
+        }
+      },
+      "median_tool_calls": 6.0,
+      "graph_tool_share": 0.169,
+      "per_question": {
+        "shared-name-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 137247,
+          "median_wall_seconds": 40.2
+        },
+        "dispatch-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 96678,
+          "median_wall_seconds": 33.88
+        },
+        "transitive-1": {
+          "mean_f1": 0.6,
+          "median_input_tokens": 896773,
+          "median_wall_seconds": 86.11
+        },
+        "construction-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 224418,
+          "median_wall_seconds": 46.13
+        },
+        "release-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 380962,
+          "median_wall_seconds": 61.25
+        },
+        "control-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 238952,
+          "median_wall_seconds": 40.61
+        }
+      },
+      "setup": {
+        "index_seconds": {
+          "install_and_index": 785.24
+        },
+        "given": {
+          "mcp_servers": [
+            "codegraph"
+          ],
+          "instructions_bytes": {
+            ".claude/CLAUDE.md": 806,
+            "AGENTS.md": 271
+          },
+          "skills": [],
+          "subagents": [],
+          "hooks": {
+            "UserPromptSubmit": 1
+          },
+          "shell": [
+            "git",
+            "codegraph"
+          ]
+        }
+      },
+      "vs_bare": {
+        "cost_usd": {
+          "geomean_ratio": 0.991,
+          "questions_lower": 2,
+          "questions": 6
+        },
+        "wall_seconds": {
+          "geomean_ratio": 1.994,
+          "questions_lower": 1,
+          "questions": 6
+        },
+        "input_tokens": {
+          "geomean_ratio": 0.932,
+          "questions_lower": 3,
+          "questions": 6
+        },
+        "output_tokens": {
+          "geomean_ratio": 0.883,
+          "questions_lower": 5,
+          "questions": 6
+        },
+        "turns": {
+          "geomean_ratio": 0.893,
+          "questions_lower": 4,
+          "questions": 6
+        }
+      }
+    },
+    "graphify": {
+      "tool": "Graphify 0.9.102",
+      "runs": 6,
+      "completed": 6,
+      "mean_f1": 0.958,
+      "exact": 5,
+      "median_input_tokens": 211144.0,
+      "median_output_tokens": 2870.5,
+      "median_cache_write_tokens": 35713.0,
+      "median_first_context_tokens": 26121.0,
+      "median_cost_usd": 0.1938,
+      "total_cost_usd": 1.35,
+      "median_wall_seconds": 24.45,
+      "median_api_seconds": 20.384999999999998,
+      "median_turns": 9.5,
+      "median_output_tokens_per_api_second": 130.85000000000002,
+      "per_family": {
+        "shared-name": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.1702,
+          "median_turns": 11
+        },
+        "dispatch": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.0935,
+          "median_turns": 3
+        },
+        "transitive": {
+          "runs": 1,
+          "exact": 0,
+          "mean_f1": 0.75,
+          "median_cost_usd": 0.466,
+          "median_turns": 30
+        },
+        "construction": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.2175,
+          "median_turns": 6
+        },
+        "release": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.274,
+          "median_turns": 16
+        },
+        "control": {
+          "runs": 1,
+          "exact": 1,
+          "mean_f1": 1.0,
+          "median_cost_usd": 0.1298,
+          "median_turns": 8
+        }
+      },
+      "median_tool_calls": 8.5,
+      "graph_tool_share": 0.074,
+      "per_question": {
+        "shared-name-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 250535,
+          "median_wall_seconds": 24.0
+        },
+        "dispatch-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 80951,
+          "median_wall_seconds": 7.8
+        },
+        "transitive-1": {
+          "mean_f1": 0.75,
+          "median_input_tokens": 1047992,
+          "median_wall_seconds": 85.25
+        },
+        "construction-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 171361,
+          "median_wall_seconds": 24.9
+        },
+        "release-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 580199,
+          "median_wall_seconds": 54.69
+        },
+        "control-1": {
+          "mean_f1": 1.0,
+          "median_input_tokens": 171753,
+          "median_wall_seconds": 15.54
+        }
+      },
+      "setup": {
+        "index_seconds": {
+          "update": 1018.06
+        },
+        "given": {
+          "mcp_servers": [],
+          "instructions_bytes": {
+            "CLAUDE.md": 1388,
+            "AGENTS.md": 271
+          },
+          "skills": [
+            "graphify"
+          ],
+          "subagents": [],
+          "hooks": {
+            "PreToolUse": 2
+          },
+          "shell": [
+            "git",
+            "graphify"
+          ]
+        }
+      },
+      "vs_bare": {
+        "cost_usd": {
+          "geomean_ratio": 1.003,
+          "questions_lower": 3,
+          "questions": 6
+        },
+        "wall_seconds": {
+          "geomean_ratio": 1.079,
+          "questions_lower": 3,
+          "questions": 6
+        },
+        "input_tokens": {
+          "geomean_ratio": 0.996,
+          "questions_lower": 3,
+          "questions": 6
+        },
+        "output_tokens": {
+          "geomean_ratio": 0.985,
+          "questions_lower": 3,
+          "questions": 6
+        },
+        "turns": {
+          "geomean_ratio": 0.964,
+          "questions_lower": 3,
+          "questions": 6
+        }
+      }
+    }
+  },
+  "runs": [
+    {
+      "arm": "bare",
+      "question": "construction-1",
+      "rep": 1,
+      "wall_seconds": 18.73,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 17.19,
+      "output_tokens_per_api_second": 155.8,
+      "turns": 5,
+      "input_tokens": 133897,
+      "output_tokens": 2679,
+      "cache_write_tokens": 35012,
+      "first_context_tokens": 25457,
+      "cost_usd": 0.1767417,
+      "tool_calls": {
+        "Grep": 3,
+        "Bash": 1,
+        "Bash:cd": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "bare",
+      "question": "control-1",
+      "rep": 1,
+      "wall_seconds": 17.68,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 15.85,
+      "output_tokens_per_api_second": 119.7,
+      "turns": 8,
+      "input_tokens": 225968,
+      "output_tokens": 1897,
+      "cache_write_tokens": 23693,
+      "first_context_tokens": 25476,
+      "cost_usd": 0.1339999,
+      "tool_calls": {
+        "Grep": 4,
+        "Bash": 3,
+        "Bash:cd": 1,
+        "Bash:grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "bare",
+      "question": "dispatch-1",
+      "rep": 1,
+      "wall_seconds": 8.13,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.24,
+      "output_tokens_per_api_second": 140.5,
+      "turns": 4,
+      "input_tokens": 78464,
+      "output_tokens": 877,
+      "cache_write_tokens": 19110,
+      "first_context_tokens": 25480,
+      "cost_usd": 0.09115680000000001,
+      "tool_calls": {
+        "Grep": 3
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "bare",
+      "question": "release-1",
+      "rep": 1,
+      "wall_seconds": 40.79,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 37.82,
+      "output_tokens_per_api_second": 128.4,
+      "turns": 20,
+      "input_tokens": 625570,
+      "output_tokens": 4858,
+      "cache_write_tokens": 47553,
+      "first_context_tokens": 25503,
+      "cost_usd": 0.2966469,
+      "tool_calls": {
+        "Bash": 19,
+        "Bash:git": 16,
+        "Bash:for": 1,
+        "Bash:cd": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "bare",
+      "question": "shared-name-1",
+      "rep": 1,
+      "wall_seconds": 20.27,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 17.54,
+      "output_tokens_per_api_second": 127.7,
+      "turns": 8,
+      "input_tokens": 198719,
+      "output_tokens": 2240,
+      "cache_write_tokens": 24652,
+      "first_context_tokens": 25442,
+      "cost_usd": 0.13844130000000002,
+      "tool_calls": {
+        "Bash": 6,
+        "Bash:ls;": 1,
+        "Bash:grep": 1,
+        "Grep": 1,
+        "Bash:cd": 4
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "bare",
+      "question": "transitive-1",
+      "rep": 1,
+      "wall_seconds": 96.1,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 92.78,
+      "output_tokens_per_api_second": 146.7,
+      "turns": 37,
+      "input_tokens": 1259177,
+      "output_tokens": 13608,
+      "cache_write_tokens": 96102,
+      "first_context_tokens": 25468,
+      "cost_usd": 0.6368753000000001,
+      "tool_calls": {
+        "Grep": 23,
+        "Read": 10,
+        "Bash": 3,
+        "Bash:cd": 2,
+        "Bash:awk": 1
+      },
+      "mcp_status": {},
+      "precision": 0.4722222222222222,
+      "recall": 0.8095238095238095,
+      "f1": 0.5964912280701755,
+      "exact": false,
+      "wrong": [
+        "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService._resumeTurnsAfterWake",
+        "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService._scheduleNext",
+        "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService._scheduleResumesAfterWake",
+        "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService._startPendingRuns",
+        "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService._startRun",
+        "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService.handleCancel",
+        "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService.runAutomation",
+        "src/vs/platform/agentHost/node/agentHostSessionLifecycle.ts:AgentHostSessionLifecycle._evaluateCandidate",
+        "src/vs/platform/agentHost/node/agentHostSessionLifecycle.ts:AgentHostSessionLifecycle.run",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._dispatchClientAction",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._dispatchClientActionNow",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleAuthorizedRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleClientNotification",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleDispatchActionRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleLegacyNotificationRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleNewConnection",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleRequest",
+        "src/vs/platform/agentHost/node/shared/sessionServerTools.ts:applyArchiveChatTool",
+        "src/vs/platform/agentHost/node/shared/sessionServerTools.ts:createSessionServerToolGroup"
+      ],
+      "missed": [
+        "src/vs/platform/agentHost/node/agentHostMain.ts",
+        "src/vs/platform/agentHost/node/agentHostMain.ts:startAgentHost",
+        "src/vs/platform/agentHost/node/agentHostServerMain.ts",
+        "src/vs/platform/agentHost/node/agentHostServerMain.ts:main"
+      ],
+      "regraded": {
+        "precision": 0.6944444444444444,
+        "recall": 0.7352941176470589,
+        "f1": 0.7142857142857144,
+        "exact": false,
+        "wrong": [
+          "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService._resumeTurnsAfterWake",
+          "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService._scheduleNext",
+          "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService._scheduleResumesAfterWake",
+          "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService._startPendingRuns",
+          "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService._startRun",
+          "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService.handleCancel",
+          "src/vs/platform/agentHost/node/agentHostAutomationService.ts:AgentHostAutomationService.runAutomation",
+          "src/vs/platform/agentHost/node/agentHostSessionLifecycle.ts:AgentHostSessionLifecycle._evaluateCandidate",
+          "src/vs/platform/agentHost/node/agentHostSessionLifecycle.ts:AgentHostSessionLifecycle.run",
+          "src/vs/platform/agentHost/node/shared/sessionServerTools.ts:applyArchiveChatTool",
+          "src/vs/platform/agentHost/node/shared/sessionServerTools.ts:createSessionServerToolGroup"
+        ],
+        "missed": [
+          "src/vs/platform/agentHost/node/agentHostMain.ts",
+          "src/vs/platform/agentHost/node/agentHostMain.ts:startAgentHost",
+          "src/vs/platform/agentHost/node/agentHostServerMain.ts",
+          "src/vs/platform/agentHost/node/agentHostServerMain.ts:main",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleReconnect",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._restoreReconnectSubscriptions",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._serveStateWindow",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler.constructor"
+        ]
+      }
+    },
+    {
+      "arm": "codegraph",
+      "question": "construction-1",
+      "rep": 1,
+      "wall_seconds": 46.13,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 19.7,
+      "output_tokens_per_api_second": 152.2,
+      "turns": 7,
+      "input_tokens": 224418,
+      "output_tokens": 2997,
+      "cache_write_tokens": 37894,
+      "first_context_tokens": 31597,
+      "cost_usd": 0.2002212,
+      "tool_calls": {
+        "Grep": 4,
+        "Bash": 2,
+        "Bash:cd": 2
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "codegraph",
+      "question": "control-1",
+      "rep": 1,
+      "wall_seconds": 40.61,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 14.01,
+      "output_tokens_per_api_second": 123.5,
+      "turns": 7,
+      "input_tokens": 238952,
+      "output_tokens": 1730,
+      "cache_write_tokens": 28664,
+      "first_context_tokens": 31715,
+      "cost_usd": 0.15301139999999996,
+      "tool_calls": {
+        "Grep": 4,
+        "Bash": 2,
+        "Bash:cd": 1,
+        "Bash:grep": 1
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "codegraph",
+      "question": "dispatch-1",
+      "rep": 1,
+      "wall_seconds": 33.88,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.11,
+      "output_tokens_per_api_second": 131.2,
+      "turns": 4,
+      "input_tokens": 96678,
+      "output_tokens": 802,
+      "cache_write_tokens": 24551,
+      "first_context_tokens": 31593,
+      "cost_usd": 0.1134481,
+      "tool_calls": {
+        "Grep": 3
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "codegraph",
+      "question": "release-1",
+      "rep": 1,
+      "wall_seconds": 61.25,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 29.5,
+      "output_tokens_per_api_second": 143.5,
+      "turns": 13,
+      "input_tokens": 380962,
+      "output_tokens": 4234,
+      "cache_write_tokens": 47749,
+      "first_context_tokens": 31653,
+      "cost_usd": 0.2666915,
+      "tool_calls": {
+        "Bash": 12,
+        "Bash:git": 10,
+        "Bash:for": 1,
+        "Bash:cd": 1
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "codegraph",
+      "question": "shared-name-1",
+      "rep": 1,
+      "wall_seconds": 40.2,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 14.1,
+      "output_tokens_per_api_second": 149.4,
+      "turns": 7,
+      "input_tokens": 137247,
+      "output_tokens": 2107,
+      "cache_write_tokens": 27876,
+      "first_context_tokens": 31578,
+      "cost_usd": 0.1435263,
+      "tool_calls": {
+        "Grep": 5,
+        "Read": 1
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "codegraph",
+      "question": "transitive-1",
+      "rep": 1,
+      "wall_seconds": 86.11,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 59.62,
+      "output_tokens_per_api_second": 141.2,
+      "turns": 27,
+      "input_tokens": 896773,
+      "output_tokens": 8418,
+      "cache_write_tokens": 58253,
+      "first_context_tokens": 31622,
+      "cost_usd": 0.40111620000000003,
+      "tool_calls": {
+        "Grep": 16,
+        "Bash": 4,
+        "Bash:cd": 3,
+        "Bash:awk": 1,
+        "Read": 6
+      },
+      "mcp_status": {
+        "codegraph": "connected"
+      },
+      "precision": 0.631578947368421,
+      "recall": 0.5714285714285714,
+      "f1": 0.6,
+      "exact": false,
+      "wrong": [
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._dispatchClientAction",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._dispatchClientActionNow",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleClientNotification",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleDispatchActionRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleLegacyNotificationRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._serveStateWindow"
+      ],
+      "missed": [
+        "src/vs/platform/agentHost/node/agentHostBootstrap.ts:createAgentHostRuntime",
+        "src/vs/platform/agentHost/node/agentHostMain.ts",
+        "src/vs/platform/agentHost/node/agentHostMain.ts:startAgentHost",
+        "src/vs/platform/agentHost/node/agentHostServerMain.ts",
+        "src/vs/platform/agentHost/node/agentHostServerMain.ts:main",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService._createSessionServerToolAccessor",
+        "src/vs/platform/agentHost/node/agentService.ts:AgentService.constructor",
+        "src/vs/platform/agentHost/node/agentServiceComposition.ts:createAgentServiceComposition",
+        "src/vs/platform/agentHost/node/agentServiceComposition.ts:createSessionLifecycleAccessor"
+      ],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 0.5588235294117647,
+        "f1": 0.7169811320754718,
+        "exact": false,
+        "wrong": [],
+        "missed": [
+          "src/vs/platform/agentHost/node/agentHostBootstrap.ts:createAgentHostRuntime",
+          "src/vs/platform/agentHost/node/agentHostMain.ts",
+          "src/vs/platform/agentHost/node/agentHostMain.ts:startAgentHost",
+          "src/vs/platform/agentHost/node/agentHostServerMain.ts",
+          "src/vs/platform/agentHost/node/agentHostServerMain.ts:main",
+          "src/vs/platform/agentHost/node/agentService.ts:AgentService._createSessionServerToolAccessor",
+          "src/vs/platform/agentHost/node/agentService.ts:AgentService.constructor",
+          "src/vs/platform/agentHost/node/agentServiceComposition.ts:createAgentServiceComposition",
+          "src/vs/platform/agentHost/node/agentServiceComposition.ts:createSessionLifecycleAccessor",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleAuthorizedRequest",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleNewConnection",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleReconnect",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._restoreReconnectSubscriptions",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler.constructor"
+        ]
+      }
+    },
+    {
+      "arm": "graphify",
+      "question": "construction-1",
+      "rep": 1,
+      "wall_seconds": 24.9,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 19.45,
+      "output_tokens_per_api_second": 151.7,
+      "turns": 6,
+      "input_tokens": 171361,
+      "output_tokens": 2950,
+      "cache_write_tokens": 43799,
+      "first_context_tokens": 26106,
+      "cost_usd": 0.21747119999999998,
+      "tool_calls": {
+        "Grep": 3,
+        "Bash": 2,
+        "Bash:cd": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "graphify",
+      "question": "control-1",
+      "rep": 1,
+      "wall_seconds": 15.54,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 13.39,
+      "output_tokens_per_api_second": 130.8,
+      "turns": 8,
+      "input_tokens": 171753,
+      "output_tokens": 1752,
+      "cache_write_tokens": 24369,
+      "first_context_tokens": 26125,
+      "cost_usd": 0.12975720000000002,
+      "tool_calls": {
+        "Grep": 2,
+        "Bash": 2,
+        "Bash:grep": 2,
+        "Read": 3
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "graphify",
+      "question": "dispatch-1",
+      "rep": 1,
+      "wall_seconds": 7.8,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 5.55,
+      "output_tokens_per_api_second": 127.3,
+      "turns": 3,
+      "input_tokens": 80951,
+      "output_tokens": 706,
+      "cache_write_tokens": 20097,
+      "first_context_tokens": 26129,
+      "cost_usd": 0.09354480000000001,
+      "tool_calls": {
+        "Bash": 2,
+        "Bash:ls": 1,
+        "Bash:cd": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "graphify",
+      "question": "release-1",
+      "rep": 1,
+      "wall_seconds": 54.69,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 42.18,
+      "output_tokens_per_api_second": 129.5,
+      "turns": 16,
+      "input_tokens": 580199,
+      "output_tokens": 5462,
+      "cache_write_tokens": 41372,
+      "first_context_tokens": 26152,
+      "cost_usd": 0.2740477,
+      "tool_calls": {
+        "Bash": 15,
+        "Bash:git": 4,
+        "Bash:for": 1,
+        "Bash:f=src/vs/workbench/contrib/chat/browser/widgetHosts/viewPane/chatViewPane.ts;": 1,
+        "Bash:cd": 9
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "graphify",
+      "question": "shared-name-1",
+      "rep": 1,
+      "wall_seconds": 24.0,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 21.32,
+      "output_tokens_per_api_second": 130.9,
+      "turns": 11,
+      "input_tokens": 250535,
+      "output_tokens": 2791,
+      "cache_write_tokens": 30054,
+      "first_context_tokens": 26091,
+      "cost_usd": 0.17020449999999998,
+      "tool_calls": {
+        "Bash": 6,
+        "Bash:ls;": 1,
+        "Bash:graphify": 1,
+        "Grep": 3,
+        "Bash:cd": 4,
+        "Read": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "graphify",
+      "question": "transitive-1",
+      "rep": 1,
+      "wall_seconds": 85.25,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 79.89,
+      "output_tokens_per_api_second": 135.9,
+      "turns": 30,
+      "input_tokens": 1047992,
+      "output_tokens": 10860,
+      "cache_write_tokens": 64740,
+      "first_context_tokens": 26117,
+      "cost_usd": 0.4659688,
+      "tool_calls": {
+        "Bash": 6,
+        "Bash:ls": 1,
+        "Bash:cd": 3,
+        "Bash:awk": 2,
+        "Grep": 20,
+        "Read": 3
+      },
+      "mcp_status": {},
+      "precision": 0.6666666666666666,
+      "recall": 0.8571428571428571,
+      "f1": 0.75,
+      "exact": false,
+      "wrong": [
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._dispatchClientAction",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._dispatchClientActionNow",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleAuthorizedRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleClientNotification",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleDispatchActionRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleLegacyNotificationRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleNewConnection",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleRequest",
+        "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._serveStateWindow"
+      ],
+      "missed": [
+        "src/vs/platform/agentHost/node/agentHostMain.ts",
+        "src/vs/platform/agentHost/node/agentHostServerMain.ts",
+        "src/vs/platform/agentHost/node/agentServiceComposition.ts:createSessionLifecycleAccessor"
+      ],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 0.7941176470588235,
+        "f1": 0.8852459016393442,
+        "exact": false,
+        "wrong": [],
+        "missed": [
+          "src/vs/platform/agentHost/node/agentHostMain.ts",
+          "src/vs/platform/agentHost/node/agentHostServerMain.ts",
+          "src/vs/platform/agentHost/node/agentServiceComposition.ts:createSessionLifecycleAccessor",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleReconnect",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._restoreReconnectSubscriptions",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler.constructor"
+        ]
+      }
+    },
+    {
+      "arm": "omnigraph",
+      "question": "construction-1",
+      "rep": 1,
+      "wall_seconds": 32.29,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 29.04,
+      "output_tokens_per_api_second": 145.2,
+      "turns": 12,
+      "input_tokens": 311160,
+      "output_tokens": 4216,
+      "cache_write_tokens": 28415,
+      "first_context_tokens": 25934,
+      "cost_usd": 0.1841325,
+      "tool_calls": {
+        "Bash": 11,
+        "Bash:cg": 2,
+        "Bash:cd": 9
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "omnigraph",
+      "question": "control-1",
+      "rep": 1,
+      "wall_seconds": 7.64,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 3.72,
+      "output_tokens_per_api_second": 120.2,
+      "turns": 2,
+      "input_tokens": 52394,
+      "output_tokens": 447,
+      "cache_write_tokens": 18696,
+      "first_context_tokens": 25953,
+      "cost_usd": 0.0826314,
+      "tool_calls": {
+        "Bash": 1,
+        "Bash:cg": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "omnigraph",
+      "question": "dispatch-1",
+      "rep": 1,
+      "wall_seconds": 51.14,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 11.97,
+      "output_tokens_per_api_second": 108.3,
+      "turns": 6,
+      "input_tokens": 164763,
+      "output_tokens": 1296,
+      "cache_write_tokens": 28590,
+      "first_context_tokens": 25957,
+      "cost_usd": 0.1409601,
+      "tool_calls": {
+        "Bash": 5,
+        "Bash:cg": 2,
+        "Bash:cd": 3
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "omnigraph",
+      "question": "release-1",
+      "rep": 1,
+      "wall_seconds": 13.56,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 9.29,
+      "output_tokens_per_api_second": 115.0,
+      "turns": 5,
+      "input_tokens": 111656,
+      "output_tokens": 1069,
+      "cache_write_tokens": 22332,
+      "first_context_tokens": 25980,
+      "cost_usd": 0.10896560000000002,
+      "tool_calls": {
+        "Bash": 4,
+        "Bash:cg": 3,
+        "Bash:K='src/vs/workbench/contrib/chat/browser/widget/`chatWidget.ts`/ChatWidget#setModel().';": 1
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "omnigraph",
+      "question": "shared-name-1",
+      "rep": 1,
+      "wall_seconds": 9.75,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 6.7,
+      "output_tokens_per_api_second": 120.2,
+      "turns": 3,
+      "input_tokens": 83681,
+      "output_tokens": 805,
+      "cache_write_tokens": 21447,
+      "first_context_tokens": 25919,
+      "cost_usd": 0.10007279999999999,
+      "tool_calls": {
+        "Bash": 2,
+        "Bash:cg": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact": true,
+      "wrong": [],
+      "missed": [],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "exact": true,
+        "wrong": [],
+        "missed": []
+      }
+    },
+    {
+      "arm": "omnigraph",
+      "question": "transitive-1",
+      "rep": 1,
+      "wall_seconds": 81.6,
+      "timed_out": false,
+      "completed": true,
+      "answered": true,
+      "api_seconds": 54.98,
+      "output_tokens_per_api_second": 131.7,
+      "turns": 23,
+      "input_tokens": 759638,
+      "output_tokens": 7242,
+      "cache_write_tokens": 32893,
+      "first_context_tokens": 25945,
+      "cost_usd": 0.2767539,
+      "tool_calls": {
+        "Bash": 20,
+        "Bash:cg": 2,
+        "Bash:cd": 18,
+        "Grep": 2
+      },
+      "mcp_status": {},
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "f1": 0.8,
+      "exact": false,
+      "wrong": [],
+      "missed": [
+        "src/vs/platform/agentHost/node/agentHostBootstrap.ts:createAgentHostRuntime",
+        "src/vs/platform/agentHost/node/agentHostMain.ts",
+        "src/vs/platform/agentHost/node/agentHostMain.ts:startAgentHost",
+        "src/vs/platform/agentHost/node/agentHostServerMain.ts",
+        "src/vs/platform/agentHost/node/agentHostServerMain.ts:main",
+        "src/vs/platform/agentHost/node/agentServiceComposition.ts:createAgentServiceComposition",
+        "src/vs/platform/agentHost/node/agentServiceComposition.ts:createSessionLifecycleAccessor"
+      ],
+      "regraded": {
+        "precision": 1.0,
+        "recall": 0.4117647058823529,
+        "f1": 0.5833333333333334,
+        "exact": false,
+        "wrong": [],
+        "missed": [
+          "src/vs/platform/agentHost/node/agentHostBootstrap.ts:createAgentHostRuntime",
+          "src/vs/platform/agentHost/node/agentHostMain.ts",
+          "src/vs/platform/agentHost/node/agentHostMain.ts:startAgentHost",
+          "src/vs/platform/agentHost/node/agentHostServerMain.ts",
+          "src/vs/platform/agentHost/node/agentHostServerMain.ts:main",
+          "src/vs/platform/agentHost/node/agentServiceComposition.ts:createAgentServiceComposition",
+          "src/vs/platform/agentHost/node/agentServiceComposition.ts:createSessionLifecycleAccessor",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._dispatchClientAction",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._dispatchClientActionNow",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleAuthorizedRequest",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleClientNotification",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleDispatchActionRequest",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleLegacyNotificationRequest",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleNewConnection",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleReconnect",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._handleRequest",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._restoreReconnectSubscriptions",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler._serveStateWindow",
+          "src/vs/platform/agentHost/node/protocolServerHandler.ts:ProtocolServerHandler.constructor"
+        ]
+      }
+    }
+  ],
+  "regraded_summary": {
+    "bare": {
+      "exact": 5,
+      "mean_f1": 0.952,
+      "runs": 6
+    },
+    "codegraph": {
+      "exact": 5,
+      "mean_f1": 0.953,
+      "runs": 6
+    },
+    "graphify": {
+      "exact": 5,
+      "mean_f1": 0.981,
+      "runs": 6
+    },
+    "omnigraph": {
+      "exact": 5,
+      "mean_f1": 0.931,
+      "runs": 6
+    }
+  }
+}
