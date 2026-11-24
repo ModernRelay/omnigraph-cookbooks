@@ -10,6 +10,11 @@ campaign: Anthropic's scorpion-toxin binder campaign of October 2026.
 | Targets, designs, scores, measurements, specificity checks, controls | the [data release](https://huggingface.co/datasets/Anthropic/scorpion-toxin-binder-design), CC BY 4.0 |
 | Hotspot residues, criteria, evidence gaps, windows, selection rules, agent roles | the [technical report](https://assets.claude.com/31ac578806cffd8b3d92d8affe6edc4c04d502e1.pdf), transcribed |
 
+Both are by Claude Science, Nathaniel Horwitz, James van Geelen, Kat
+Kajderowicz and Amir Shanehsazzadeh, 20 October 2026. The data release is
+CC BY 4.0, which asks that its creators be credited by name; the report
+states that licence for the release and none for itself.
+
 Everything transcribed from the report carries a `Source` edge to it. The
 data release files are read as tables; nothing in the graph is inferred from
 them beyond the threshold comparison described below.
@@ -35,7 +40,7 @@ them beyond the threshold comparison described below.
 | `BinderClaim` | 21 | 17 `asserted`, 4 `provisional` — admitted only by a looser rule, never claimed as binders |
 | `Criterion` | 10 | the applied rule and nine others the report counts under |
 | `EvidenceGap` | 8 | what the record does not hold |
-| `CampaignWindow` | 3 | |
+| `CampaignWindow` | 3 | the stretches in which the design sets changed, of one prompt and four follow-ups |
 | `SelectionRule` | 3 | including the one that replaced the diversity caps |
 | `AgentRole` | 4 | generate, score, select, orchestrate |
 | `Source` | 2 | the report and the data release |

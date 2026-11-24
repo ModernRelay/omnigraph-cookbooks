@@ -368,10 +368,16 @@ Counts that trip people up:
 - **1,477 measurements, 665 scores.** Scores exist only for the toxins a
   design was intended against; the labs measured beyond intent, which is what
   makes "no hit against a toxin it was not made against" a usable criterion.
-- **No per-design window.** The report gives the three windows and the rules
-  that changed between them, but not which window selected each design.
-  `CampaignWindow` and `SelectionRule` are campaign-level; do not invent edges
-  from designs to them.
+- **Three windows, four follow-ups.** The report describes an initial prompt
+  and four follow-ups. The seed keeps the three stretches in which the
+  design sets themselves changed: the original window, the first follow-up
+  and the third. The second asked only that nothing go to Twist Bioscience
+  before review, and the fourth appears instead as `rule:toxins-passed-order`,
+  the selection rule that replaced the diversity caps for set 8.
+- **No per-design window.** The report says which rules changed between the
+  windows, but not which window selected each design. `CampaignWindow` and
+  `SelectionRule` are campaign-level; do not invent edges from designs to
+  them.
 - **No gap touches a design.** `GapAffectsDesign` exists and the seed uses
   none of it: every recorded gap reaches claims or targets.
 
@@ -451,8 +457,8 @@ server, as in [live updates](../docs/local-setup.md#live-updates).
 
 | What | Where |
 |---|---|
-| Designs, scores, assay results, controls | [Scorpion toxin binder design: data release](https://huggingface.co/datasets/Anthropic/scorpion-toxin-binder-design) — Anthropic, 20 October 2026, CC BY 4.0 |
-| Campaign process, criteria, evidence gaps | [De novo design of protein binders against scorpion toxins with Claude](https://assets.claude.com/31ac578806cffd8b3d92d8affe6edc4c04d502e1.pdf) — technical report, 20 October 2026 |
+| Designs, scores, assay results, controls | [Scorpion toxin binder design: data release](https://huggingface.co/datasets/Anthropic/scorpion-toxin-binder-design) — Claude Science, Nathaniel Horwitz, James van Geelen, Kat Kajderowicz and Amir Shanehsazzadeh, 20 October 2026, CC BY 4.0 |
+| Campaign process, criteria, evidence gaps | [De novo design of protein binders against scorpion toxins with Claude](https://assets.claude.com/31ac578806cffd8b3d92d8affe6edc4c04d502e1.pdf) — Claude Science, Nathaniel Horwitz, James van Geelen, Kat Kajderowicz and Amir Shanehsazzadeh, 20 October 2026 |
 | What the seed holds, and how it was built | [seed.md](seed.md) |
 | Serving it, roles, tokens, upgrades | [local setup](../docs/local-setup.md) |
 | How a cookbook is changed and checked | [`../CLAUDE.md`](../CLAUDE.md) |

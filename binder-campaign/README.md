@@ -167,8 +167,8 @@ tools. Each tool stays the authority for its own data.
 
 | Source | Examples | Feeds |
 |---|---|---|
-| Design models | RFdiffusion, BindCraft, Genie, Chai Discovery, Boltz, AlphaFold | `DesignTool`, `BackboneFamily`, `SequenceMethod`, `Design` |
-| Structure predictors and scoring | ESMFold, Protenix, Boltz, in-house scoring pipelines | `Predictor`, `Threshold`, `Score` |
+| Design models | RFdiffusion, BoltzDesign1, BoltzGen, FreeBindCraft, Genie 3, PXDesign, ProteinMPNN | `DesignTool`, `BackboneFamily`, `SequenceMethod`, `Design` |
+| Structure predictors and scoring | ESMFold, Protenix, Boltz, AlphaFold, Chai-1, in-house scoring pipelines | `Predictor`, `Threshold`, `Score` |
 | Contract and in-house labs | Adaptyv Bio, Twist Bioscience, Charles River | `Lab`, `Measurement`, `Control` |
 | Binding instruments | Carterra for SPR, Gator Bio for BLI, Biacore, Octet | `Measurement`, `SpecificityCheck` |
 | Electronic lab notebooks and LIMS | Benchling, Dotmatics, PipeBio | `Design`, `Measurement` |
@@ -208,7 +208,7 @@ questions above return:
 
 - Under the rule that both labs resolve a value and agree within a factor of
   ten, 11 of the 17 asserted claims survive; the rule the campaign applied
-  admits 15.
+  admits 15, the two LqhIII claims having been measured at one lab only.
 - 7 claims carry a recorded gap. Four against AaH I rest on a construct
   nobody documented, two against LqhIII were assessed at one lab only, and
   Cn2-B1's value is an upper limit at both labs.
