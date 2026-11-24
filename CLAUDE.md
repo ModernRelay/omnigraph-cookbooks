@@ -5,11 +5,13 @@ links to the corresponding `CLAUDE.md`; edit the target once.
 
 ## Scope and sources
 
-These are nine self-contained OmniGraph **0.15.0** bundles: schemas, seed data,
+These are ten self-contained OmniGraph **0.15.0** bundles: schemas, seed data,
 stored queries and applied policies. The only application code is the beads
-cookbook's `ob` client in `beads/client/`, with its own tests, and the local
-HTTPS gateway `scripts/local-tls-gateway.py`. The root [README](README.md)
-is the landing page for the collection.
+cookbook's `ob` client in `beads/client/`, the code-graph cookbook's `cg`
+client in `code-graph/client/` and its seed tools in `code-graph/sources/`,
+each with its own tests, and the local HTTPS gateway
+`scripts/local-tls-gateway.py`. The root
+[README](README.md) is the landing page for the collection.
 [docs/local-setup.md](docs/local-setup.md) owns serving a cookbook locally,
 live updates and upgrades. Individual cookbook guides own their domain model
 and worked queries.
@@ -25,6 +27,7 @@ and worked queries.
 | `company-brain` | `company` |
 | `hardware-program` | `program` |
 | `health-record` | `health` |
+| `code-graph` | `code` |
 
 The graph ID is the key in `cluster.yaml`, not the folder name. Configurations
 omit `storage`, so local roots default to their directory. Explicit storage
@@ -41,12 +44,13 @@ before a schema change, a bulk load or a retry after an uncertain write.
 
 ## Changes and validation
 
-- Run `python3 scripts/check-cookbooks.py` for all nine local journeys, or
+- Run `python3 scripts/check-cookbooks.py` for all ten local journeys, or
   name cookbooks to run only those. It uses the released CLI/server, isolated
   operator homes, disposable roots and the local HTTPS gateway; it never
-  touches a deployed graph. For beads the checker also drives the `ob`
-  client against the served graph; the client's local tests run with
-  `python3 -m unittest discover -s beads/client/tests`.
+  touches a deployed graph. For beads and code-graph the checker also drives
+  the `ob` and `cg` clients against the served graph; their local tests run
+  with `python3 -m unittest discover -s beads/client/tests` and
+  `python3 -m unittest discover -s code-graph/client/tests`.
 - For a query edit, start with `omnigraph lint --schema schema.pg --query
   queries/<file>.gq`. This is an offline check. Comments in `.pg`/`.gq` use `//`.
 - Keep `seed.md` and `seed.jsonl` consistent. Preserve the domain examples and
@@ -146,7 +150,7 @@ Moving a cookbook to the template changes its README, its `CLAUDE.md` and its
   leave `use_case`, `needs` and `capabilities` out of `site.json`. Do not pick
   the nearest one. If it lacks a link the cookbook shows, leave that need or
   capability out. Leave `search.keywords` as they are.
-- **Roles.** Only company-brain, hardware-program and health-record have an
+- **Roles.** Only company-brain, hardware-program, health-record and code-graph have an
   agent role that is kept to branches. For any other cookbook, read its
   `policies/graph.policy.yaml` and say what it does: who can write `main` and
   who can merge. Where nothing keeps an agent on a branch, say that review of
@@ -409,8 +413,9 @@ need only `main` live. Adoption, missing-root recreation and out-of-band schema
 changes are refused.
 
 All bundles include `act-admin`, `act-writer`, `act-reader` role policies.
-company-brain, hardware-program and health-record add `act-agent`
-(company-brain also named agents), which write only on unprotected branches and cannot merge or delete
+company-brain, hardware-program, health-record and code-graph add `act-agent`
+(company-brain also named agents; in code-graph it is the pull-request
+indexer), which write only on unprotected branches and cannot merge or delete
 branches. Static actor-to-token JSON remains supported. `omnigraph access
 --target NAME --graph ID --branch B` reports what a target's role may do. The
 bearer token selects the trusted actor; a query's `$actor` is merely application

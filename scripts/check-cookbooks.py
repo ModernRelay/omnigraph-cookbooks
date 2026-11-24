@@ -39,9 +39,10 @@ COOKBOOKS = {
     "company-brain": ("company", "current_decisions"),
     "hardware-program": ("program", "budget_rollup"),
     "health-record": ("health", "latest_results"),
+    "code-graph": ("code", "most_referenced"),
 }
 # Cookbooks whose policy lets act-agent write only on unprotected branches.
-BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program", "health-record"}
+BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program", "health-record", "code-graph"}
 ACTORS = ("act-admin", "act-writer", "act-reader", "act-agent")
 TOKENS = {actor: f"cookbook-test-{actor}" for actor in ACTORS}
 GATEWAY = ROOT / "scripts" / "local-tls-gateway.py"
@@ -252,6 +253,8 @@ def qualify(name, graph, stored_query, workspace, env):
                 hardware_program_journey(env)
             if name == "health-record":
                 health_record_journey(env)
+            if name == "code-graph":
+                code_graph_journey(env)
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
@@ -259,7 +262,8 @@ def qualify(name, graph, stored_query, workspace, env):
                   + (", ob client" if name == "beads" else "")
                   + (", review journey" if name == "company-brain" else "")
                   + (", review gate" if name == "hardware-program" else "")
-                  + (", intake review" if name == "health-record" else ""), flush=True)
+                  + (", intake review" if name == "health-record" else "")
+                  + (", pull request diff, cg client" if name == "code-graph" else ""), flush=True)
         finally:
             gateway.terminate()
             process.terminate()
@@ -440,6 +444,107 @@ def health_record_journey(env):
     assert "@card violation" in again.stdout + again.stderr, (again.stdout, again.stderr)
     doses = rows("disease_doses", params={"disease": "cond-hepatitis-b"})
     assert [row["i.vaccine"] for row in doses] == ["Hepatitis B"] * 3, doses
+
+
+def code_graph_journey(env):
+    """The indexer loads a pull request's revision onto its own branch, the
+    branch diff is exactly what the PR changed, the reads see the new code
+    only on the branch, a person merges, and the previous main stays readable."""
+    def scope(actor):
+        return ("--target", target(actor), "--graph", "code")
+
+    def rows(query, params=None, *extra):
+        return run(env, "query", query, *scope("act-reader"), "--params", json.dumps(params or {}),
+                   *extra, "--json")["rows"]
+
+    base, head = "a10592f3e1864cbe277619633db953450a6b1e4b", "4b44abe1b5c7755aac8555d7943611555183450b"
+    helper = {"symbol": "src/router/`utils.ts`/createNullObject."}
+    assert [row["r.sha"] for row in rows("revision")] == [base]
+    routers = {"linear-router/`router.ts`/LinearRouter", "pattern-router/`router.ts`/PatternRouter",
+               "reg-exp-router/`prepared-router.ts`/PreparedRegExpRouter", "reg-exp-router/`router.ts`/RegExpRouter",
+               "smart-router/`router.ts`/SmartRouter", "trie-router/`router.ts`/TrieRouter"}
+    implementers = {row["i.symbol"] for row in rows("implementers", {"symbol": "src/`router.ts`/Router#add()."})}
+    assert implementers == {f"src/router/{r}#add()." for r in routers}, implementers
+    previous = run(env, "commit", "list", *scope("act-reader"), "--json")["commits"][0]["graph_commit_id"]
+
+    # The cg client, through each actor's server target like any operator.
+    base_env = {k: v for k, v in env.items() if not k.startswith("CG_")}
+    base_env.update(CG_OMNIGRAPH=CLI, CG_GRAPH="code")
+
+    def cg(actor, *args, ok=True):
+        result = subprocess.run([sys.executable, str(ROOT / "code-graph/client/cg"), *args, "--json"],
+                                capture_output=True, text=True, timeout=120,
+                                env={**base_env, "CG_TARGET": target(actor)})
+        if (result.returncode == 0) != ok:
+            raise AssertionError(f"cg {args} as {actor}: exit {result.returncode}\n{result.stdout}{result.stderr}")
+        return json.loads(result.stdout) if ok else result
+
+    pr_file = str(ROOT / "code-graph/examples/pr-5267.jsonl")
+    denied = cg("act-reader", "load", pr_file, "--branch", "pr-5267", ok=False)
+    # Refused before any effect, so cg reports a plain failure, not an unknown outcome.
+    assert denied.returncode == 1 and "policy denied" in denied.stderr, (denied.returncode, denied.stderr)
+    loaded = cg("act-agent", "load", pr_file, "--branch", "pr-5267")
+    assert loaded["branch"] == "pr-5267" and loaded["commit"] and loaded["rows"] == 895, loaded
+    changes = run(env, "branch", "diff", "pr-5267", *scope("act-reader"), "--json")["changes"]
+    summary = collections.Counter((c["type"]["name"], c["op"]) for c in changes)
+    assert summary == {("Symbol", "insert"): 2, ("Symbol", "update"): 5, ("References", "insert"): 18,
+                       ("Calls", "insert"): 10, ("MemberOf", "insert"): 1, ("DefinedAt", "insert"): 2, ("Location", "insert"): 2,
+                       ("Location", "update"): 58, ("Revision", "insert"): 1, ("Revision", "delete"): 1}, summary
+    changed = {c["id"] for c in changes if c["type"]["name"] == "Symbol" and c["op"] == "update"}
+    assert changed == {f"src/router/reg-exp-router/`router.ts`/RegExpRouter#{m}" for m in
+                       ("`<constructor>`().", "add().", "buildAllMatchers().", "`#buildMatcher`().")} | {
+                       "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`()."}, changed
+    review = cg("act-reader", "diff", "pr-5267")
+    assert (review["from_revision"], review["to_revision"]) == (base, head), review
+    assert [r["symbol"] for r in review["added"]] == ["src/router/`utils.ts`/", helper["symbol"]], review["added"]
+    assert {r["symbol"] for r in review["changed"]} == changed and review["moved"] == 53, review
+    assert (len(review["references"]["added"]), len(review["references"]["removed"])) == (18, 0)
+    assert (len(review["calls"]["added"]), len(review["calls"]["removed"])) == (10, 0)
+    # The review workflow records the posted comment on the branch, once per revision.
+    comment = json.dumps({"sha": head, "pull_request": "https://github.com/honojs/hono/pull/5267",
+                          "url": "https://github.com/honojs/hono/pull/5267#issuecomment-1",
+                          "posted_at": "2026-08-20T12:00:00Z"})
+    record = ("mutate", "record_review_comment")
+    refused(run(env, *record, *scope("act-reader"), "--branch", "pr-5267", "--params", comment, "--json", ok=False))
+    refused(run(env, *record, *scope("act-agent"), "--params", comment, "--json", ok=False))
+    run(env, *record, *scope("act-agent"), "--branch", "pr-5267", "--params", comment, "--json")
+    # A revision has one review: recording it again replaces the record, it does not add one.
+    run(env, *record, *scope("act-agent"), "--branch", "pr-5267", "--params", comment, "--json")
+    posted = rows("review_comment", {"sha": head}, "--branch", "pr-5267")
+    assert [r["r.url"] for r in posted] == ["https://github.com/honojs/hono/pull/5267#issuecomment-1"], posted
+    assert rows("review_comment", {"sha": head}) == []
+
+    assert rows("callers", helper) == []
+    # Ten definitions call the helper; with the four modules that import it, fourteen name it.
+    assert len(rows("callers", helper, "--branch", "pr-5267")) == 10
+    assert len(rows("referrers", helper, "--branch", "pr-5267")) == 14
+    # cg resolves a unique name to its key, and lists the candidates of an ambiguous one.
+    assert len(cg("act-reader", "callers", "createNullObject", "--branch", "pr-5267")["rows"]) == 10
+    # Through calls alone, four more definitions reach the helper, SmartRouter#match among them.
+    chain = {r["calls into it"] for r in cg("act-reader", "transitive-callers", "createNullObject",
+                                            "--branch", "pr-5267")["rows"]}
+    assert "src/router/smart-router/`router.ts`/SmartRouter#match()." in chain and len(chain) == 14, chain
+    assert cg("act-reader", "implementers", "add", ok=False).returncode == 2
+    # impact walks references and implementations: a call to Router#match can run SmartRouter#match.
+    reach = {r["reaches it"] for r in cg("act-reader", "impact", "src/`router.ts`/Router#add().")["rows"]}
+    assert "src/router/smart-router/`router.ts`/SmartRouter#match()." in reach and len(reach) == 8, reach
+    refused(run(env, "branch", "merge", "pr-5267", "--into", "main", *scope("act-agent"), "--json", ok=False))
+    merged = run(env, "branch", "merge", "pr-5267", "--into", "main", *scope("act-writer"), "--json")
+    assert merged["outcome"] == "fast_forward", merged
+    run(env, "branch", "delete", "pr-5267", *scope("act-writer"), "--yes", "--json")
+    assert [row["r.sha"] for row in rows("revision")] == [head]
+    assert len(rows("callers", helper)) == 10
+    assert len(rows("review_comment", {"sha": head})) == 1
+    assert [row["r.sha"] for row in rows("revision", None, "--snapshot", previous)] == [base]
+    assert rows("callers", helper, "--snapshot", previous) == []
+
+    # Loading the base back over the merged PR removes what the PR added.
+    cg("act-agent", "load", str(ROOT / "code-graph/seed.jsonl"), "--branch", "revert-5267")
+    revert = cg("act-reader", "diff", "revert-5267")
+    assert [r["symbol"] for r in revert["removed"]] == ["src/router/`utils.ts`/", helper["symbol"]], revert
+    assert (len(revert["references"]["added"]), len(revert["references"]["removed"])) == (0, 18), revert
+    assert (len(revert["calls"]["added"]), len(revert["calls"]["removed"])) == (0, 10), revert
+    run(env, "branch", "delete", "revert-5267", *scope("act-writer"), "--yes", "--json")
 
 
 # What omnigraph.dev accepts in a site.json; its importer

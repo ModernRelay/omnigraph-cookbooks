@@ -1,0 +1,63 @@
+// code-graph: the symbols of one repository and the references between them,
+// one graph state per git revision. Every row but a ReviewComment is generated
+// from a SCIP index by sources/build_seed.py; nothing else is written by hand.
+
+node Revision @description("The git revision this graph state was indexed from, and the indexer that read it. One per branch state.") {
+    sha: String @key                 // full commit SHA
+    repository: String               // clone URL
+    indexer: String                  // SCIP tool, e.g. scip-typescript
+    indexer_version: String
+}
+
+node Symbol @description("A named definition: a module (one file), namespace, class, interface, type, enum, function, method, constant, variable or member. Locals and parameters are not symbols.") @instruction("Find a symbol with symbols_named, by its name. Its key is the SCIP descriptor path without package or version, such as src/router/`utils.ts`/createNullObject. for a constant or src/router/reg-exp-router/`router.ts`/RegExpRouter#add(). for a method; it stays the same across commits while the symbol keeps its name and file.") {
+    symbol: String @key              // SCIP descriptors
+    name: String @index              // the last descriptor's name: add, createNullObject, utils.ts
+    kind: enum(module, namespace, class, interface, type_alias, enum, enum_member, function, method, constructor, getter, setter, constant, variable, property, field) @index
+    callable: Bool                   // a function or method, or a constant, variable or property holding one
+    path: String @index              // the file that defines it, relative to the repository root
+    signature: String?               // the indexer's hover text, first line
+    digest: String?                  // SHA-256 prefix of a callable's definition text; it changes when the code does
+}
+
+// Line numbers move whenever code above a definition changes. Keeping them off
+// Symbol means a branch diff reports a Symbol only when the symbol itself changed.
+node Location @description("Where a symbol's definition sits in its file at this revision.") {
+    symbol: String @key              // the Symbol's key
+    line: I32                        // 1-based first line of the definition
+    end_line: I32
+}
+
+edge DefinedAt: Symbol -> Location @card(1..1) @description("The symbol's current location.") {
+    @key(@src, @dst)
+}
+
+edge MemberOf: Symbol -> Symbol @card(0..1) @description("The source is declared directly inside the target: a top-level symbol in its module, a member in its class or interface.") {
+    @key(@src, @dst)
+}
+
+edge References: Symbol -> Symbol @description("Code inside the source's definition names the target: a call, a type use, an import or a value use. Resolved by the compiler through the SCIP index, not by matching names. Code outside every definition belongs to its module.") {
+    sites: I32                       // how many references the source makes to the target
+    @key(@src, @dst)
+}
+
+// The references that are calls, as edges of their own so that a chain of
+// calls can be followed without the type uses, imports and values around it.
+// Every Calls edge has a References edge with the same ends.
+edge Calls: Symbol -> Symbol @description("Code inside the source's definition calls the target: a callable followed by its arguments, or a class constructed with `new`, which also calls the class's constructor when it declares one.") {
+    sites: I32                       // how many of the source's references to the target are calls
+    @key(@src, @dst)
+}
+
+edge ImplementedBy: Symbol -> Symbol @description("The target implements or overrides the source, as the indexer reports it: an interface or base member and a class member implementing it. A call to the source can run the target, so the edge points the way a call goes.") {
+    @key(@src, @dst)
+}
+
+// The one type the converter does not write. An overwrite load replaces only
+// the types in its file, so a review recorded on a pull request's branch stays
+// there when a later push is loaded over it, and merges with the branch.
+node ReviewComment @description("A call-graph review posted to a pull request for one indexed revision: the comment that `cg diff --markdown` wrote. One per revision, so a rerun does not post it twice.") {
+    sha: String @key                 // the revision the review describes
+    pull_request: String             // the pull request's URL
+    url: String                      // the posted comment's URL
+    posted_at: DateTime
+}

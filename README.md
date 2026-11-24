@@ -16,6 +16,7 @@ workflows agents run and sample data to try them on.
 | [Venture firm](vc-os/) | A venture firm's deals, portfolio, people and investment theses, with every signal tied to the beliefs it supports or contradicts. | Which active theses has new evidence contradicted? |
 | [Second brain](second-brain/) | One person's people, projects, notes, tasks, habits and reading, with where each piece came from. | What do I still owe this person? |
 | [Personal health record](health-record/) | One person's lab results, readings, targets, hypotheses, medication and vaccine doses, with "off target", "overdue" and "incomplete" worked out from the results on every read. | Which results are outside my own targets? |
+| [Code graph](code-graph/) | A repository's definitions and the references between them, resolved by the TypeScript compiler, one graph state per commit, so a pull request's branch diff shows what it changed in the call graph. | Who calls this function? |
 
 Each cookbook's README is the page for its use case: the data model, how
 changes are reviewed, the workflows, the tools it takes data from and the

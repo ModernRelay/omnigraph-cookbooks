@@ -1,0 +1,2154 @@
+{
+  "from_commit_id": "hb1.01M85J0JSVK6P1BVCRE665TME5.1.01M85J0JSVK6P1BVCRE665TME5",
+  "to_commit_id": "hb1.01M85J0JWHXV6NHR32NYNK5PGX.2.01M85J0JWHXV6NHR32NYNK5PGX",
+  "base_commit_id": "hb1.01M85J0JSVK6P1BVCRE665TME5.1.01M85J0JSVK6P1BVCRE665TME5",
+  "changes": [
+    {
+      "kind": "node",
+      "type": {
+        "id": "A5M6EpED6nKsbG-ZuF1kzQQxzd4ozTyrzxN5RgIyYTI",
+        "name": "Revision"
+      },
+      "id": "4b44abe1b5c7755aac8555d7943611555183450b",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sha": "4b44abe1b5c7755aac8555d7943611555183450b",
+          "indexer": "scip-typescript",
+          "indexer_version": "0.6.2",
+          "repository": "https://github.com/honojs/hono.git"
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "A5M6EpED6nKsbG-ZuF1kzQQxzd4ozTyrzxN5RgIyYTI",
+        "name": "Revision"
+      },
+      "id": "a10592f3e1864cbe277619633db953450a6b1e4b",
+      "op": "delete",
+      "before": {
+        "properties": {
+          "sha": "a10592f3e1864cbe277619633db953450a6b1e4b",
+          "indexer": "scip-typescript",
+          "indexer_version": "0.6.2",
+          "repository": "https://github.com/honojs/hono.git"
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "E8jtrRWxvztaFzho_pGJtsgo4f44lK6dR4F2y_Begf0",
+        "name": "Symbol"
+      },
+      "id": "src/router/`utils.ts`/",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "digest": null,
+          "callable": false,
+          "kind": "module",
+          "name": "utils.ts",
+          "path": "src/router/utils.ts",
+          "signature": "module \"utils.ts\"",
+          "symbol": "src/router/`utils.ts`/"
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "E8jtrRWxvztaFzho_pGJtsgo4f44lK6dR4F2y_Begf0",
+        "name": "Symbol"
+      },
+      "id": "src/router/`utils.ts`/createNullObject.",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "symbol": "src/router/`utils.ts`/createNullObject.",
+          "callable": true,
+          "digest": "5608a494b0ae75c3",
+          "kind": "constant",
+          "name": "createNullObject",
+          "path": "src/router/utils.ts",
+          "signature": "var createNullObject: () => any"
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "E8jtrRWxvztaFzho_pGJtsgo4f44lK6dR4F2y_Begf0",
+        "name": "Symbol"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
+          "callable": true,
+          "digest": "4e8f46ed8719e608",
+          "kind": "method",
+          "name": "#buildMatcher",
+          "path": "src/router/reg-exp-router/router.ts",
+          "signature": "(method) #buildMatcher(method: string): Matcher<T>"
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
+          "callable": true,
+          "digest": "2a3af5157a70ab69",
+          "kind": "method",
+          "name": "#buildMatcher",
+          "path": "src/router/reg-exp-router/router.ts",
+          "signature": "(method) #buildMatcher(method: string): Matcher<T>"
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "E8jtrRWxvztaFzho_pGJtsgo4f44lK6dR4F2y_Begf0",
+        "name": "Symbol"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
+          "callable": true,
+          "digest": "8b17c69a88f84bae",
+          "kind": "constructor",
+          "name": "<constructor>",
+          "path": "src/router/reg-exp-router/router.ts",
+          "signature": "constructor<T>(): RegExpRouter<T>"
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
+          "callable": true,
+          "digest": "03f6fb91b555e157",
+          "kind": "constructor",
+          "name": "<constructor>",
+          "path": "src/router/reg-exp-router/router.ts",
+          "signature": "constructor<T>(): RegExpRouter<T>"
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "E8jtrRWxvztaFzho_pGJtsgo4f44lK6dR4F2y_Begf0",
+        "name": "Symbol"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
+          "callable": true,
+          "digest": "e8c3ffc0e442dcd9",
+          "kind": "method",
+          "name": "add",
+          "path": "src/router/reg-exp-router/router.ts",
+          "signature": "(method) add(method: string, path: string, handler: T): void"
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
+          "callable": true,
+          "digest": "758fb960ae38d5ea",
+          "kind": "method",
+          "name": "add",
+          "path": "src/router/reg-exp-router/router.ts",
+          "signature": "(method) add(method: string, path: string, handler: T): void"
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "E8jtrRWxvztaFzho_pGJtsgo4f44lK6dR4F2y_Begf0",
+        "name": "Symbol"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
+          "callable": true,
+          "digest": "7abba7fc6ea0b20e",
+          "kind": "method",
+          "name": "buildAllMatchers",
+          "path": "src/router/reg-exp-router/router.ts",
+          "signature": "(method) buildAllMatchers(): MatcherMap<T>"
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
+          "callable": true,
+          "digest": "46559c987f58071d",
+          "kind": "method",
+          "name": "buildAllMatchers",
+          "path": "src/router/reg-exp-router/router.ts",
+          "signature": "(method) buildAllMatchers(): MatcherMap<T>"
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "E8jtrRWxvztaFzho_pGJtsgo4f44lK6dR4F2y_Begf0",
+        "name": "Symbol"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
+          "callable": true,
+          "digest": "2e0f4d7d0cd0998b",
+          "kind": "method",
+          "name": "#pushHandlerSets",
+          "path": "src/router/trie-router/node.ts",
+          "signature": "(method) #pushHandlerSets(handlerSets: HandlerParamsSet<T>[], node: Node<T>, method: string, nodeParams: Record<string, string>, params?: Record<string, string> | undefined): void"
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
+          "callable": true,
+          "digest": "58af7ec0a42ef9d8",
+          "kind": "method",
+          "name": "#pushHandlerSets",
+          "path": "src/router/trie-router/node.ts",
+          "signature": "(method) #pushHandlerSets(handlerSets: HandlerParamsSet<T>[], node: Node<T>, method: string, nodeParams: Record<string, string>, params?: Record<string, string> | undefined): void"
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/`utils.ts`/",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "symbol": "src/router/`utils.ts`/",
+          "end_line": 2,
+          "line": 1
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/`utils.ts`/createNullObject.",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "symbol": "src/router/`utils.ts`/createNullObject.",
+          "end_line": 1,
+          "line": 1
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/",
+          "end_line": 169,
+          "line": 1
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/",
+          "end_line": 171,
+          "line": 1
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Context#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Context#",
+          "end_line": 9,
+          "line": 7
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Context#",
+          "end_line": 11,
+          "line": 9
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Context#varIndex.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Context#varIndex.",
+          "end_line": 8,
+          "line": 8
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Context#varIndex.",
+          "end_line": 10,
+          "line": 10
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/LABEL_REG_EXP_STR.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/LABEL_REG_EXP_STR.",
+          "end_line": 1,
+          "line": 1
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/LABEL_REG_EXP_STR.",
+          "end_line": 3,
+          "line": 3
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Node#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#",
+          "end_line": 168,
+          "line": 45
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#",
+          "end_line": 170,
+          "line": 47
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Node#`#children`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#children`.",
+          "end_line": 49,
+          "line": 49
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#children`.",
+          "end_line": 51,
+          "line": 51
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Node#`#index`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#index`.",
+          "end_line": 47,
+          "line": 47
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#index`.",
+          "end_line": 49,
+          "line": 49
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Node#`#varIndex`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#varIndex`.",
+          "end_line": 48,
+          "line": 48
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#`#varIndex`.",
+          "end_line": 50,
+          "line": 50
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr().",
+          "end_line": 167,
+          "line": 137
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#buildRegExpStr().",
+          "end_line": 169,
+          "line": 139
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/Node#insert().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#insert().",
+          "end_line": 135,
+          "line": 51
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/Node#insert().",
+          "end_line": 137,
+          "line": 53
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/ONLY_WILDCARD_REG_EXP_STR.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/ONLY_WILDCARD_REG_EXP_STR.",
+          "end_line": 2,
+          "line": 2
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/ONLY_WILDCARD_REG_EXP_STR.",
+          "end_line": 4,
+          "line": 4
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/PATH_ERROR.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/PATH_ERROR.",
+          "end_line": 4,
+          "line": 4
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/PATH_ERROR.",
+          "end_line": 6,
+          "line": 6
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/ParamAssocArray#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/ParamAssocArray#",
+          "end_line": 6,
+          "line": 6
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/ParamAssocArray#",
+          "end_line": 8,
+          "line": 8
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/TAIL_WILDCARD_REG_EXP_STR.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/TAIL_WILDCARD_REG_EXP_STR.",
+          "end_line": 3,
+          "line": 3
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/TAIL_WILDCARD_REG_EXP_STR.",
+          "end_line": 5,
+          "line": 5
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/compareKey().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/compareKey().",
+          "end_line": 43,
+          "line": 20
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/compareKey().",
+          "end_line": 45,
+          "line": 22
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`node.ts`/regExpMetaChars.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/regExpMetaChars.",
+          "end_line": 11,
+          "line": 11
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`node.ts`/regExpMetaChars.",
+          "end_line": 13,
+          "line": 13
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/",
+          "end_line": 174,
+          "line": 1
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/",
+          "end_line": 175,
+          "line": 1
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/HandlerWithMetadata#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/HandlerWithMetadata#",
+          "end_line": 18,
+          "line": 18
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/HandlerWithMetadata#",
+          "end_line": 19,
+          "line": 19
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#",
+          "end_line": 173,
+          "line": 47
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#",
+          "end_line": 174,
+          "line": 48
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
+          "end_line": 172,
+          "line": 144
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
+          "end_line": 173,
+          "line": 145
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#insertPath`().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#insertPath`().",
+          "end_line": 65,
+          "line": 59
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#insertPath`().",
+          "end_line": 66,
+          "line": 60
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#middleware`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#middleware`.",
+          "end_line": 49,
+          "line": 49
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#middleware`.",
+          "end_line": 50,
+          "line": 50
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#routes`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#routes`.",
+          "end_line": 50,
+          "line": 50
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#routes`.",
+          "end_line": 51,
+          "line": 51
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#tries`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#tries`.",
+          "end_line": 51,
+          "line": 51
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#tries`.",
+          "end_line": 52,
+          "line": 52
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
+          "end_line": 57,
+          "line": 53
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
+          "end_line": 58,
+          "line": 54
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
+          "end_line": 126,
+          "line": 67
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
+          "end_line": 127,
+          "line": 68
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
+          "end_line": 142,
+          "line": 130
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
+          "end_line": 143,
+          "line": 131
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#match.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#match.",
+          "end_line": 128,
+          "line": 128
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#match.",
+          "end_line": 129,
+          "line": 129
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/RegExpRouter#name.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#name.",
+          "end_line": 48,
+          "line": 48
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/RegExpRouter#name.",
+          "end_line": 49,
+          "line": 49
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().",
+          "end_line": 35,
+          "line": 21
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/buildWildcardRegExp().",
+          "end_line": 36,
+          "line": 22
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/findMiddleware().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/findMiddleware().",
+          "end_line": 45,
+          "line": 37
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/findMiddleware().",
+          "end_line": 46,
+          "line": 38
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.",
+          "end_line": 20,
+          "line": 20
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.",
+          "end_line": 21,
+          "line": 21
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/",
+          "end_line": 84,
+          "line": 1
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/",
+          "end_line": 85,
+          "line": 1
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/ReplacementMap#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/ReplacementMap#",
+          "end_line": 4,
+          "line": 4
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/ReplacementMap#",
+          "end_line": 5,
+          "line": 5
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#",
+          "end_line": 83,
+          "line": 6
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#",
+          "end_line": 84,
+          "line": 7
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#`#context`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#context`.",
+          "end_line": 7,
+          "line": 7
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#context`.",
+          "end_line": 8,
+          "line": 8
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#`#index`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#index`.",
+          "end_line": 9,
+          "line": 9
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#index`.",
+          "end_line": 10,
+          "line": 10
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#`#root`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#root`.",
+          "end_line": 8,
+          "line": 8
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#`#root`.",
+          "end_line": 9,
+          "line": 9
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#buildRegExp().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#buildRegExp().",
+          "end_line": 82,
+          "line": 58
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#buildRegExp().",
+          "end_line": 83,
+          "line": 59
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#insert().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#insert().",
+          "end_line": 56,
+          "line": 13
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#insert().",
+          "end_line": 57,
+          "line": 14
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/reg-exp-router/`trie.ts`/Trie#paths.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#paths.",
+          "end_line": 11,
+          "line": 11
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/reg-exp-router/`trie.ts`/Trie#paths.",
+          "end_line": 12,
+          "line": 12
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/",
+          "end_line": 217,
+          "line": 1
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/",
+          "end_line": 218,
+          "line": 1
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/HandlerParamsSet#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerParamsSet#",
+          "end_line": 14,
+          "line": 12
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerParamsSet#",
+          "end_line": 15,
+          "line": 13
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/HandlerSet#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#",
+          "end_line": 10,
+          "line": 6
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#",
+          "end_line": 11,
+          "line": 7
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/HandlerSet#handler.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#handler.",
+          "end_line": 7,
+          "line": 7
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#handler.",
+          "end_line": 8,
+          "line": 8
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/HandlerSet#possibleKeys.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#possibleKeys.",
+          "end_line": 8,
+          "line": 8
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#possibleKeys.",
+          "end_line": 9,
+          "line": 9
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/HandlerSet#score.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#score.",
+          "end_line": 9,
+          "line": 9
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/HandlerSet#score.",
+          "end_line": 10,
+          "line": 10
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#",
+          "end_line": 216,
+          "line": 19
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#",
+          "end_line": 217,
+          "line": 20
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#`#children`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#children`.",
+          "end_line": 22,
+          "line": 22
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#children`.",
+          "end_line": 23,
+          "line": 23
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#`#methods`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#methods`.",
+          "end_line": 20,
+          "line": 20
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#methods`.",
+          "end_line": 21,
+          "line": 21
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#`#params`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#params`.",
+          "end_line": 25,
+          "line": 25
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#params`.",
+          "end_line": 26,
+          "line": 26
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#`#pattern`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#pattern`.",
+          "end_line": 24,
+          "line": 24
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#pattern`.",
+          "end_line": 25,
+          "line": 25
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#`#patterns`.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#patterns`.",
+          "end_line": 23,
+          "line": 23
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#patterns`.",
+          "end_line": 24,
+          "line": 24
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
+          "end_line": 83,
+          "line": 63
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
+          "end_line": 84,
+          "line": 64
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#insert().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#insert().",
+          "end_line": 61,
+          "line": 27
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#insert().",
+          "end_line": 62,
+          "line": 28
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/Node#search().",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#search().",
+          "end_line": 215,
+          "line": 85
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/Node#search().",
+          "end_line": 216,
+          "line": 86
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/emptyParams.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/emptyParams.",
+          "end_line": 16,
+          "line": 16
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/emptyParams.",
+          "end_line": 17,
+          "line": 17
+        }
+      }
+    },
+    {
+      "kind": "node",
+      "type": {
+        "id": "VkhWIDeODIq4d0rCu1i-9EaHFSFkmQFRjFAfeQL8c3o",
+        "name": "Location"
+      },
+      "id": "src/router/trie-router/`node.ts`/order.",
+      "op": "update",
+      "before": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/order.",
+          "end_line": 17,
+          "line": 17
+        }
+      },
+      "after": {
+        "properties": {
+          "symbol": "src/router/trie-router/`node.ts`/order.",
+          "end_line": 18,
+          "line": 18
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/reg-exp-router/`node.ts`/\",\"src/router/`utils.ts`/\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`node.ts`/",
+          "to": "src/router/`utils.ts`/"
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/reg-exp-router/`node.ts`/\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`node.ts`/",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/reg-exp-router/`node.ts`/Node#`#children`.\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`node.ts`/Node#`#children`.",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/reg-exp-router/`router.ts`/\",\"src/router/`utils.ts`/\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`router.ts`/",
+          "to": "src/router/`utils.ts`/"
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/reg-exp-router/`router.ts`/\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`router.ts`/",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 3
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 2
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#add().\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 2
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/reg-exp-router/`trie.ts`/\",\"src/router/`utils.ts`/\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`trie.ts`/",
+          "to": "src/router/`utils.ts`/"
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/reg-exp-router/`trie.ts`/\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`trie.ts`/",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/reg-exp-router/`trie.ts`/Trie#paths.\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`trie.ts`/Trie#paths.",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/trie-router/`node.ts`/\",\"src/router/`utils.ts`/\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/trie-router/`node.ts`/",
+          "to": "src/router/`utils.ts`/"
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/trie-router/`node.ts`/\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/trie-router/`node.ts`/",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/trie-router/`node.ts`/Node#`#children`.\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/trie-router/`node.ts`/Node#`#children`.",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "HDwptCtkOsNG-zlJIbdqrMTHvnEgZ9U716Gydh3bCD0",
+        "name": "References"
+      },
+      "id": "[\"src/router/trie-router/`node.ts`/emptyParams.\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/trie-router/`node.ts`/emptyParams.",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "V5naxZv-3bAU7e51Q25IVzJ7oimkH8Rydq7Eav_1pLU",
+        "name": "MemberOf"
+      },
+      "id": "[\"src/router/`utils.ts`/createNullObject.\",\"src/router/`utils.ts`/\"]",
+      "op": "insert",
+      "after": {
+        "properties": {},
+        "endpoints": {
+          "from": "src/router/`utils.ts`/createNullObject.",
+          "to": "src/router/`utils.ts`/"
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "bdxOyNFEmFSSguKV-1KTxbyQXEYnV0EVzcpMfxHW4Is",
+        "name": "DefinedAt"
+      },
+      "id": "[\"src/router/`utils.ts`/\",\"src/router/`utils.ts`/\"]",
+      "op": "insert",
+      "after": {
+        "properties": {},
+        "endpoints": {
+          "from": "src/router/`utils.ts`/",
+          "to": "src/router/`utils.ts`/"
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "bdxOyNFEmFSSguKV-1KTxbyQXEYnV0EVzcpMfxHW4Is",
+        "name": "DefinedAt"
+      },
+      "id": "[\"src/router/`utils.ts`/createNullObject.\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {},
+        "endpoints": {
+          "from": "src/router/`utils.ts`/createNullObject.",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "eUuPxx8EpxdoJl7JzIybbNJdr30kkDq1TNRgdFsS0Lg",
+        "name": "Calls"
+      },
+      "id": "[\"src/router/reg-exp-router/`node.ts`/Node#`#children`.\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`node.ts`/Node#`#children`.",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "eUuPxx8EpxdoJl7JzIybbNJdr30kkDq1TNRgdFsS0Lg",
+        "name": "Calls"
+      },
+      "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 3
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`#buildMatcher`().",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "eUuPxx8EpxdoJl7JzIybbNJdr30kkDq1TNRgdFsS0Lg",
+        "name": "Calls"
+      },
+      "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 2
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`router.ts`/RegExpRouter#`<constructor>`().",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "eUuPxx8EpxdoJl7JzIybbNJdr30kkDq1TNRgdFsS0Lg",
+        "name": "Calls"
+      },
+      "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#add().\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`router.ts`/RegExpRouter#add().",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "eUuPxx8EpxdoJl7JzIybbNJdr30kkDq1TNRgdFsS0Lg",
+        "name": "Calls"
+      },
+      "id": "[\"src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 2
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`router.ts`/RegExpRouter#buildAllMatchers().",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "eUuPxx8EpxdoJl7JzIybbNJdr30kkDq1TNRgdFsS0Lg",
+        "name": "Calls"
+      },
+      "id": "[\"src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`router.ts`/wildcardRegExpCache.",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "eUuPxx8EpxdoJl7JzIybbNJdr30kkDq1TNRgdFsS0Lg",
+        "name": "Calls"
+      },
+      "id": "[\"src/router/reg-exp-router/`trie.ts`/Trie#paths.\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/reg-exp-router/`trie.ts`/Trie#paths.",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "eUuPxx8EpxdoJl7JzIybbNJdr30kkDq1TNRgdFsS0Lg",
+        "name": "Calls"
+      },
+      "id": "[\"src/router/trie-router/`node.ts`/Node#`#children`.\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/trie-router/`node.ts`/Node#`#children`.",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "eUuPxx8EpxdoJl7JzIybbNJdr30kkDq1TNRgdFsS0Lg",
+        "name": "Calls"
+      },
+      "id": "[\"src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/trie-router/`node.ts`/Node#`#pushHandlerSets`().",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    },
+    {
+      "kind": "edge",
+      "type": {
+        "id": "eUuPxx8EpxdoJl7JzIybbNJdr30kkDq1TNRgdFsS0Lg",
+        "name": "Calls"
+      },
+      "id": "[\"src/router/trie-router/`node.ts`/emptyParams.\",\"src/router/`utils.ts`/createNullObject.\"]",
+      "op": "insert",
+      "after": {
+        "properties": {
+          "sites": 1
+        },
+        "endpoints": {
+          "from": "src/router/trie-router/`node.ts`/emptyParams.",
+          "to": "src/router/`utils.ts`/createNullObject."
+        }
+      }
+    }
+  ]
+}

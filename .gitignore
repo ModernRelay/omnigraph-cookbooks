@@ -34,6 +34,10 @@ vc-os/P9_MIGRATION.md
 # Cluster control-plane local state (ledger, catalog, approvals)
 __cluster/
 
+# code-graph: checkouts and indexes from sources/fetch.py, the installed indexer
+code-graph/sources/work/
+code-graph/sources/indexer/node_modules/
+
 # beads client: local graphs from `ob init`, Python bytecode
 .ob/
 __pycache__/

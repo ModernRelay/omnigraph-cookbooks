@@ -1,0 +1,8 @@
+// The one write a person or agent makes by hand. Symbols, references and
+// revisions are only ever loaded from generated revision files.
+
+query record_review_comment($sha: String, $pull_request: String, $url: String, $posted_at: DateTime)
+    @description("Record that the call-graph review of a revision was posted to its pull request.")
+    @instruction("Run it on the pull request's branch right after posting the comment, and read review_comment before posting. A revision has one review: recording it again replaces the record.") {
+    insert ReviewComment { sha: $sha, pull_request: $pull_request, url: $url, posted_at: $posted_at }
+}

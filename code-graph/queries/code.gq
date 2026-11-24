@@ -1,0 +1,140 @@
+// code-graph stored reads. Writes are loads of generated revisions, never
+// hand-written mutations: see README.md#index-a-pull-request.
+//
+// Every list read stops at its limit. cg reports a read that returns exactly
+// its limit as possibly cut (client/cg_cli.py LIMITS, checked against this file
+// by its tests); narrow it with symbols_named_in or a more specific symbol.
+
+query revision() @description("The git revision and indexer behind this graph state.") {
+    match {
+        $r: Revision
+    }
+    return { $r.sha, $r.repository, $r.indexer, $r.indexer_version }
+}
+
+query symbols_named($name: String) @description("Symbols with this exact name, and where each is defined. Start here to find a symbol's key.") {
+    match {
+        $s: Symbol { name: $name }
+        $s definedAt $l
+    }
+    return { $s.symbol, $s.kind, $s.path, $l.line }
+    order { $s.path asc, $l.line asc }
+    limit 1000
+}
+
+query symbols_named_in($name: String, $path: String) @description("Symbols with this exact name in files whose path starts with the given prefix. Use it when a name has many definitions.") {
+    match {
+        $s: Symbol { name: $name }
+        $s.path starts_with $path
+        $s definedAt $l
+    }
+    return { $s.symbol, $s.kind, $s.path, $l.line }
+    order { $s.path asc, $l.line asc }
+    limit 1000
+}
+
+query file_symbols($path: String) @description("Every symbol a file defines, in source order.") {
+    match {
+        $s: Symbol { path: $path }
+        $s definedAt $l
+    }
+    return { $s.symbol, $s.name, $s.kind, $l.line, $l.end_line }
+    order { $l.line asc }
+    limit 2000
+}
+
+query members($symbol: String) @description("Symbols declared directly inside a module, class or interface.") {
+    match {
+        $p: Symbol { symbol: $symbol }
+        $m memberOf $p
+        $m definedAt $l
+    }
+    return { $m.symbol, $m.name, $m.kind, $l.line }
+    order { $l.line asc }
+    limit 2000
+}
+
+query callers($symbol: String) @description("Definitions whose code calls the symbol, and how many calls each makes. For a class, the definitions that construct it with `new`.") {
+    match {
+        $t: Symbol { symbol: $symbol }
+        $c $r:calls $t
+    }
+    return { $c.symbol, $c.kind, $c.path, $r.sites }
+    order { $c.symbol asc }
+    limit 2000
+}
+
+query callees($symbol: String) @description("What the symbol's code calls, and how many times.") {
+    match {
+        $s: Symbol { symbol: $symbol }
+        $s $r:calls $t
+    }
+    return { $t.symbol, $t.kind, $t.path, $r.sites }
+    order { $t.symbol asc }
+    limit 2000
+}
+
+query referrers($symbol: String) @description("Definitions whose code names the symbol in any way: a call, a type use, an import or a value use, and how many references each makes.") {
+    match {
+        $t: Symbol { symbol: $symbol }
+        $c $r:references $t
+    }
+    return { $c.symbol, $c.kind, $c.path, $r.sites }
+    order { $c.symbol asc }
+    limit 2000
+}
+
+query transitive_callers($symbol: String) @description("The symbol's callers at any depth: definitions that call something and reach the symbol through a chain of up to sixteen calls. A call to an interface or base member can run each member implementing it, so the chain goes on through it; a base member it passes through is listed too when it calls anything itself.") {
+    match {
+        $t: Symbol { symbol: $symbol }
+        $c (calls | implementedBy){1,16} $t
+        exists { $c calls $_ }
+    }
+    return distinct { $c.symbol, $c.kind, $c.path }
+    order { $c.symbol asc }
+    limit 5000
+}
+
+query impact($symbol: String) @description("Every definition that reaches the symbol through a chain of up to sixteen references and implementations: what a change to it can break. A call to an interface or base member reaches each member implementing it.") {
+    match {
+        $t: Symbol { symbol: $symbol }
+        $c (references | implementedBy){1,16} $t
+    }
+    return distinct { $c.symbol, $c.kind, $c.path }
+    order { $c.symbol asc }
+    limit 5000
+}
+
+query implementers($symbol: String) @description("Class members that implement or override the given interface or base member.") {
+    match {
+        $t: Symbol { symbol: $symbol }
+        $t implementedBy $i
+    }
+    return { $i.symbol, $i.path }
+    order { $i.symbol asc }
+}
+
+query most_referenced() @description("The symbols the most definitions refer to: the code everything else depends on.") {
+    match {
+        $t: Symbol
+        $c references $t
+    }
+    return { $t.symbol, $t.kind, count($c) as referrers }
+    order { referrers desc, $t.symbol asc }
+    limit 20
+}
+
+query unreferenced_callables() @description("Functions and methods nothing in the indexed code refers to. Entry points and exports used outside the repository show up here too, so this is a list to review, not dead code.") {
+    match {
+        $s: Symbol { callable: true }
+        not { $_ references $s }
+    }
+    return { $s.symbol, $s.kind, $s.path }
+    order { $s.symbol asc }
+    limit 2000
+}
+
+query review_comment($sha: String) @description("The review posted to a pull request for this revision, if one was: the comment's URL and when it was posted.") {
+    match { $r: ReviewComment { sha: $sha } }
+    return { $r.sha, $r.pull_request, $r.url, $r.posted_at }
+}
