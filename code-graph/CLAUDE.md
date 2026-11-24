@@ -358,7 +358,11 @@ from the reads' actual output.
   the next characters are `(`, a backtick, `?.(` or `<`, and a reference to a
   class when `new` comes before its name; the indexer does not mark call
   sites. `new C(` names `C`'s constructor when `C` declares one, and the site
-  calls both.
+  calls both. Over hono's `src/` the calls match the compiler's with precision
+  0.991 and recall 0.985. A property whose function type hides behind an
+  alias, such as `getPath: GetPath<E>`, is not callable to the converter, so a
+  call to it is a reference only; a method written in an object literal,
+  `{ close(code) { … } }`, can read as a call to the member it implements.
 - **A reference belongs to the innermost definition around it.**
   scip-typescript gives a range only to functions, classes, interfaces, enums,
   type aliases, methods, constructors and constants whose initializer is a
