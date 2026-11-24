@@ -22,9 +22,10 @@ these files by hand.
 | `DefinedAt` | 132 | 134 |
 | `MemberOf` | 116 | 117 |
 | `References` | 292 | 310 |
+| `Calls` | 31 | 41 |
 | `ImplementedBy` | 24 | 24 |
 | `ReviewComment` | 0 | 0 |
-| **Rows** | **829** | **854** |
+| **Rows** | **860** | **895** |
 
 The router has six implementations of `Router`: `LinearRouter`,
 `PatternRouter`, `PreparedRegExpRouter`, `RegExpRouter`, `SmartRouter` and
@@ -44,9 +45,15 @@ pass the full key from `symbols_named` as a parameter.
 | `symbols_named_in` | `name: add`, `path: src/router/trie-router` | 1 row: `TrieRouter#add` at line 9 | the same |
 | `file_symbols` | `path: src/router/utils.ts` | none | the module and `createNullObject` |
 | `members` | `RegExpRouter#` | 10 members: `name`, `#middleware`, `#routes`, `#tries`, the constructor, `#insertPath`, `add`, `match`, `buildAllMatchers`, `#buildMatcher` | the same |
-| `callers` | `reg-exp-router/matcher.ts/match().` | 4: the `match` properties of `RegExpRouter` and `PreparedRegExpRouter`, which call it, and their two modules, which import it | the same |
-| `callers` | `utils.ts/createNullObject.` | none | 14: four modules, for their imports; the fields `#children` of `Node` in both routers and `paths` of `Trie`; the module constants `wildcardRegExpCache` and `emptyParams`; `RegExpRouter`'s constructor, `add`, `buildAllMatchers` and `#buildMatcher`; and trie-router `Node#pushHandlerSets` |
-| `callees` | `reg-exp-router/router.ts/RegExpRouter#add().` | 9 | 10: the same plus `createNullObject` |
+| `callers` | `reg-exp-router/matcher.ts/match().` | 2: the `match` properties of `RegExpRouter` and `PreparedRegExpRouter` | the same |
+| `callers` | `utils.ts/createNullObject.` | none | 10: the fields `#children` of `Node` in both routers and `paths` of `Trie`; the module-level `wildcardRegExpCache` and `emptyParams`; `RegExpRouter`'s constructor, `add`, `buildAllMatchers` and `#buildMatcher`; and trie-router `Node#pushHandlerSets` |
+| `callers` | `trie-router/node.ts/Node#` | 2: `Node#insert` and `TrieRouter`'s field `#node`, which construct it | the same |
+| `callees` | `reg-exp-router/router.ts/RegExpRouter#add().` | 4: `#insertPath`, `buildWildcardRegExp`, `findMiddleware`, and `Trie`, which it constructs | 5: the same plus `createNullObject` |
+| `referrers` | `reg-exp-router/matcher.ts/match().` | 4: the two callers, and their two modules, which import it | the same |
+| `referrers` | `utils.ts/createNullObject.` | none | 14: the ten callers, and four modules, for their imports |
+| `transitive_callers` | `reg-exp-router/matcher.ts/match().` | 3: the two callers, and `SmartRouter#match`, which calls `match` on each router it holds | the same |
+| `transitive_callers` | `utils.ts/createNullObject.` | none | 14: the ten callers, and `SmartRouter#match`, `TrieRouter#match`, trie-router `Node#search` and `buildInitParams` in the prepared router, whose calls reach them |
+| `transitive_callers` | `src/router.ts` `Router#add()` | 1: `SmartRouter#match` | the same |
 | `impact` | `utils.ts/createNullObject.` | none | 37 definitions within sixteen hops, 8 of them modules |
 | `impact` | `src/router.ts` `Router#add()` | 8: `SmartRouter#match`, which calls `add` on each router it holds, and seven that reach it, such as `Router#match`, whose calls can run `SmartRouter#match` | the same |
 | `implementers` | `src/router.ts` `Router#add()` | the six routers' `add` | the same |
@@ -57,13 +64,14 @@ pass the full key from `symbols_named` as a parameter.
 ## The branch diff
 
 `omnigraph branch diff pr-5267` after loading the PR file with `--mode
-overwrite` reports 90 changes:
+overwrite` reports 100 changes:
 
 | Change | Count |
 |---|---|
 | `Symbol` insert: ``utils.ts/`` and ``utils.ts/createNullObject.`` | 2 |
 | `Symbol` update: `RegExpRouter` constructor, `add`, `buildAllMatchers`, `#buildMatcher`; trie-router `Node#pushHandlerSets` | 5 |
-| `References` insert | 18 |
+| `References` insert: code that now names `createNullObject` (14) or imports its module (4) | 18 |
+| `Calls` insert: the ten references that call `createNullObject` | 10 |
 | `MemberOf` insert | 1 |
 | `DefinedAt` insert | 2 |
 | `Location` insert | 2 |

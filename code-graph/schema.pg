@@ -36,8 +36,15 @@ edge MemberOf: Symbol -> Symbol @card(0..1) @description("The source is declared
 }
 
 edge References: Symbol -> Symbol @description("Code inside the source's definition names the target: a call, a type use, an import or a value use. Resolved by the compiler through the SCIP index, not by matching names. Code outside every definition belongs to its module.") {
-    call: Bool                       // at least one of the references is a call
     sites: I32                       // how many references the source makes to the target
+    @key(@src, @dst)
+}
+
+// The references that are calls, as edges of their own so that a chain of
+// calls can be followed without the type uses, imports and values around it.
+// Every Calls edge has a References edge with the same ends.
+edge Calls: Symbol -> Symbol @description("Code inside the source's definition calls the target: a callable followed by its arguments, or a class constructed with `new`, which also calls the class's constructor when it declares one.") {
+    sites: I32                       // how many of the source's references to the target are calls
     @key(@src, @dst)
 }
 

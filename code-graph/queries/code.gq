@@ -54,24 +54,45 @@ query members($symbol: String) @description("Symbols declared directly inside a 
     limit 2000
 }
 
-query callers($symbol: String) @description("Definitions whose code names the symbol, whether one of those references is a call, and how many there are.") {
+query callers($symbol: String) @description("Definitions whose code calls the symbol, and how many calls each makes. For a class, the definitions that construct it with `new`.") {
     match {
         $t: Symbol { symbol: $symbol }
-        $c $r:references $t
+        $c $r:calls $t
     }
-    return { $c.symbol, $c.kind, $c.path, $r.call, $r.sites }
+    return { $c.symbol, $c.kind, $c.path, $r.sites }
     order { $c.symbol asc }
     limit 2000
 }
 
-query callees($symbol: String) @description("What the symbol's code names: what it calls, and the types and values it uses.") {
+query callees($symbol: String) @description("What the symbol's code calls, and how many times.") {
     match {
         $s: Symbol { symbol: $symbol }
-        $s $r:references $t
+        $s $r:calls $t
     }
-    return { $t.symbol, $t.kind, $t.path, $r.call, $r.sites }
+    return { $t.symbol, $t.kind, $t.path, $r.sites }
     order { $t.symbol asc }
     limit 2000
+}
+
+query referrers($symbol: String) @description("Definitions whose code names the symbol in any way: a call, a type use, an import or a value use, and how many references each makes.") {
+    match {
+        $t: Symbol { symbol: $symbol }
+        $c $r:references $t
+    }
+    return { $c.symbol, $c.kind, $c.path, $r.sites }
+    order { $c.symbol asc }
+    limit 2000
+}
+
+query transitive_callers($symbol: String) @description("The symbol's callers at any depth: definitions that call something and reach the symbol through a chain of up to sixteen calls. A call to an interface or base member can run each member implementing it, so the chain goes on through it; a base member it passes through is listed too when it calls anything itself.") {
+    match {
+        $t: Symbol { symbol: $symbol }
+        $c (calls | implementedBy){1,16} $t
+        exists { $c calls $_ }
+    }
+    return distinct { $c.symbol, $c.kind, $c.path }
+    order { $c.symbol asc }
+    limit 5000
 }
 
 query impact($symbol: String) @description("Every definition that reaches the symbol through a chain of up to sixteen references and implementations: what a change to it can break. A call to an interface or base member reaches each member implementing it.") {

@@ -33,27 +33,31 @@ BUNDLE = HERE.parent
 QUERIES = BUNDLE / "queries" / "code.gq"
 SOURCES = BUNDLE / "sources"
 EXIT_FAILED, EXIT_USAGE, EXIT_UNKNOWN = 1, 2, 3
-LINK_TYPES = {"References": "references", "ImplementedBy": "implementations", "MemberOf": "members"}
+LINK_TYPES = {"References": "references", "Calls": "calls", "ImplementedBy": "implementations",
+              "MemberOf": "members"}
 # How a changed Symbol property reads in a review.
 FIELD_WORDS = {"digest": "code", "path": "file", "callable": "callability"}
 # Each list read's `limit` in queries/code.gq (the tests check they agree). A
 # read that returns exactly its limit may have been cut, and cg says so.
 LIMITS = {"symbols_named": 1000, "symbols_named_in": 1000, "file_symbols": 2000, "members": 2000,
-          "callers": 2000, "callees": 2000, "impact": 5000, "unreferenced_callables": 2000}
+          "callers": 2000, "callees": 2000, "referrers": 2000, "transitive_callers": 5000, "impact": 5000,
+          "unreferenced_callables": 2000}
 # What one load may stage before `write_max_bytes` refuses it. A local load of
 # a larger file raises the setting to the file's size; a server's load request
 # is capped at the same size and takes no settings.
 WRITE_MAX_BYTES = 32 * 1024 * 1024
-# Session settings a read runs with. impact walks two edge types, and the
-# engine admits such a walk against every selected edge table's full row count
-# on each frontier probe, hop and window of 8,192 rows: on VS Code the first
-# probe alone charges 1.9 million rows, over the default traversal_work_limit
+# Session settings a read runs with. impact and transitive_callers walk two
+# edge types, and the engine admits such a walk against every selected edge
+# table's full row count on each frontier probe, hop and window of 8,192
+# rows: on VS Code the first probe alone charges 1.9 million rows, over the
+# default traversal_work_limit
 # of 1 million, however few neighbours the symbol has. The charge is not the
 # work, so the cap is lifted; the read's own limit and query_memory_bytes still
 # bound it, the second raised for a hub's frontier. Only a local graph takes
 # them: a server's stored query takes no session settings, so its process
 # settings (OMNIGRAPH_TRAVERSAL_WORK_LIMIT, OMNIGRAPH_QUERY_MEMORY_BYTES) apply.
-READ_SETTINGS = {"impact": {"traversal_work_limit": 10**12, "query_memory_bytes": 2 * 1024**3}}
+WALK_SETTINGS = {"traversal_work_limit": 10**12, "query_memory_bytes": 2 * 1024**3}
+READ_SETTINGS = {"impact": WALK_SETTINGS, "transitive_callers": WALK_SETTINGS}
 
 
 class CgError(Exception):
@@ -246,12 +250,13 @@ def _short(sha: str | None) -> str:
 
 
 def render(summary: dict, branch: str, into: str, markdown: bool = False) -> str:
-    refs = summary["references"]
+    refs, calls = summary["references"], summary["calls"]
     head = (f"{branch} against {into}, revision {_short(summary['from_revision'])}.."
             f"{_short(summary['to_revision'])}: {len(summary['added'])} symbols added, "
             f"{len(summary['removed'])} removed, {len(summary['changed'])} changed; "
             f"{len(refs['added'])} references added, {len(refs['removed'])} removed, "
-            f"{len(refs['changed'])} changed; {summary['moved']} definitions only moved.")
+            f"{len(refs['changed'])} changed; {len(calls['added'])} calls added, {len(calls['removed'])} removed; "
+            f"{summary['moved']} definitions only moved.")
     code = (lambda s: f"`{s}`") if markdown else (lambda s: s)
     lines = [f"### Code graph: {head}" if markdown else head]
 
@@ -267,19 +272,22 @@ def render(summary: dict, branch: str, into: str, markdown: bool = False) -> str
                         f"{', '.join(FIELD_WORDS.get(f, f) for f in r['fields'])} changed"
                         for r in summary["changed"]])
 
-    def links(rows: list[dict], verb_call: str, verb_ref: str) -> list[str]:
+    def links(named: list[dict], called: list[dict], verb_call: str, verb_ref: str) -> list[str]:
+        """One line per definition: what it now calls or only names, or no longer does."""
+        calls_ = {(r["from"], r["to"]) for r in called}
         by_caller = collections.defaultdict(list)
-        for r in rows:
-            verb = verb_call if r.get("call") else verb_ref
-            by_caller[r["from"]].append(f"{verb} {code(display(r['to']))}")
+        for a, b in sorted(calls_ | {(r["from"], r["to"]) for r in named}):
+            by_caller[a].append(f"{verb_call if (a, b) in calls_ else verb_ref} {code(display(b))}")
         return [f"{code(display(caller))} {'; '.join(targets)}" for caller, targets in sorted(by_caller.items())]
 
-    section("References added", links(refs["added"], "now calls", "now names"))
-    section("References removed", links(refs["removed"], "no longer calls", "no longer names"))
-    section("References changed", [f"{code(display(r['from']))} to {code(display(r['to']))}: "
-                                   f"call {r['before'].get('call')} to {r.get('call')}, "
-                                   f"sites {r['before'].get('sites')} to {r.get('sites')}"
-                                   for r in refs["changed"]])
+    section("References added", links(refs["added"], calls["added"], "now calls", "now names"))
+    section("References removed", links(refs["removed"], calls["removed"], "no longer calls", "no longer names"))
+    counts = collections.defaultdict(list)
+    for rows, word in ((refs["changed"], "references"), (calls["changed"], "calls")):
+        for r in rows:
+            counts[(r["from"], r["to"])].append(f"{word} {r['before'].get('sites')} to {r.get('sites')}")
+    section("References changed", [f"{code(display(a))} to {code(display(b))}: {', '.join(parts)}"
+                                   for (a, b), parts in sorted(counts.items())])
     # Both read "X of Y": an implementation of the member it implements, a
     # member of its container. ImplementedBy runs from Y to X, MemberOf from X to Y.
     for name, title, flip in (("implementations", "Implementations", True), ("members", "Members", False)):
@@ -368,8 +376,10 @@ def cmd_find(args, g: Graph):
 
 READS = {
     # command: (stored query, result columns, human columns)
-    "callers": ("callers", [("c.symbol", "caller"), ("c.kind", "kind"), ("r.call", "call"), ("r.sites", "sites")]),
-    "callees": ("callees", [("t.symbol", "callee"), ("t.kind", "kind"), ("r.call", "call"), ("r.sites", "sites")]),
+    "callers": ("callers", [("c.symbol", "caller"), ("c.kind", "kind"), ("r.sites", "sites")]),
+    "callees": ("callees", [("t.symbol", "callee"), ("t.kind", "kind"), ("r.sites", "sites")]),
+    "referrers": ("referrers", [("c.symbol", "referrer"), ("c.kind", "kind"), ("r.sites", "sites")]),
+    "transitive-callers": ("transitive_callers", [("c.symbol", "calls into it"), ("c.kind", "kind")]),
     "impact": ("impact", [("c.symbol", "reaches it"), ("c.kind", "kind")]),
     "implementers": ("implementers", [("i.symbol", "implementer")]),
     "members": ("members", [("m.symbol", "member"), ("m.kind", "kind"), ("l.line", "line")]),
@@ -496,8 +506,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("name")
     p.add_argument("--path", help="only symbols in this file or directory")
     p.set_defaults(run=cmd_find)
-    for name, text in (("callers", "definitions that call or name a symbol"),
-                       ("callees", "what a symbol's code calls or names"),
+    for name, text in (("callers", "definitions that call a symbol, or construct a class"),
+                       ("callees", "what a symbol's code calls"),
+                       ("referrers", "definitions that name a symbol in any way"),
+                       ("transitive-callers", "a symbol's callers at any depth, through up to sixteen calls"),
                        ("impact", "everything within sixteen references or implementations of a symbol"),
                        ("implementers", "class members implementing or overriding a member"),
                        ("members", "what a module, class or interface declares")):

@@ -259,11 +259,36 @@ export function size(x: string | number[]): number {
         self.assertEqual(before["f"], after["f"])
         self.assertNotEqual(before["g"], after["g"])
 
+    def edges(self, rows: list, edge: str) -> dict:
+        return {(r["from"], r["to"]): r["data"] for r in rows if r.get("edge") == edge}
+
     def test_a_call_after_a_wide_character_is_a_call(self):
         rows = self.build({"call.ts": 'export function f() {}\nexport function h() { const s = "\U0001F600"; f() }\n'})
-        edge = next(r["data"] for r in rows if r.get("edge") == "References"
-                    and r["from"] == "src/`call.ts`/h()." and r["to"] == "src/`call.ts`/f().")
-        self.assertTrue(edge["call"])
+        self.assertEqual(self.edges(rows, "Calls")[("src/`call.ts`/h().", "src/`call.ts`/f().")], {"sites": 1})
+
+    CONSTRUCTIONS = """\
+export class Plain {}
+export class Built { constructor(public n: number) {} }
+export namespace ns { export class Inner {} }
+export function make(): Plain { return new Plain() }
+export function build(): Built { return new Built(1) }
+export function nested() { return new ns.Inner() }
+export function typed(p: Plain, f: () => void): Plain { f(); return p }
+"""
+
+    def test_a_construction_calls_the_class_and_its_constructor(self):
+        rows = self.build({"new.ts": self.CONSTRUCTIONS})
+        calls, refs = self.edges(rows, "Calls"), self.edges(rows, "References")
+        self.assertIn(("src/`new.ts`/make().", "src/`new.ts`/Plain#"), calls)
+        self.assertIn(("src/`new.ts`/build().", "src/`new.ts`/Built#"), calls)
+        self.assertIn(("src/`new.ts`/build().", "src/`new.ts`/Built#`<constructor>`()."), calls)
+        self.assertIn(("src/`new.ts`/nested().", "src/`new.ts`/ns/Inner#"), calls)
+        # A type use names the class without calling it.
+        self.assertIn(("src/`new.ts`/typed().", "src/`new.ts`/Plain#"), refs)
+        self.assertNotIn(("src/`new.ts`/typed().", "src/`new.ts`/Plain#"), calls)
+        # Every call is also a reference, with no more call sites than references.
+        self.assertLessEqual(set(calls), set(refs))
+        self.assertTrue(all(calls[k]["sites"] <= refs[k]["sites"] for k in calls))
 
 
 if __name__ == "__main__":

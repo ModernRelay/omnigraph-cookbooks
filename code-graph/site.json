@@ -14,6 +14,13 @@
       }
     },
     {
+      "q": "What reaches it through a chain of calls?",
+      "query": "transitive_callers",
+      "params": {
+        "symbol": "src/router/reg-exp-router/`matcher.ts`/match()."
+      }
+    },
+    {
       "q": "What breaks if I change it?",
       "query": "impact",
       "params": {
