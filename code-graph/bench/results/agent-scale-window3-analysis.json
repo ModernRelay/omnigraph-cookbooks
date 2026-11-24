@@ -1,0 +1,387 @@
+{
+  "results": "agent-scale-window3.json",
+  "questions": "scale-questions.json",
+  "by_family": {
+    "bare": {
+      "all": {
+        "runs": 115,
+        "exact": 67,
+        "mean_f1": 0.944,
+        "median_cost_usd": 0.2244,
+        "median_turns": 10,
+        "median_wall_seconds": 30.8
+      },
+      "shared-name": {
+        "runs": 20,
+        "exact": 13,
+        "mean_f1": 0.899,
+        "median_cost_usd": 0.2334,
+        "median_turns": 10.5,
+        "median_wall_seconds": 28.3
+      },
+      "dispatch": {
+        "runs": 20,
+        "exact": 18,
+        "mean_f1": 0.997,
+        "median_cost_usd": 0.2083,
+        "median_turns": 8.5,
+        "median_wall_seconds": 22.8
+      },
+      "transitive": {
+        "runs": 15,
+        "exact": 0,
+        "mean_f1": 0.963,
+        "median_cost_usd": 0.3243,
+        "median_turns": 19,
+        "median_wall_seconds": 52.8
+      },
+      "construction": {
+        "runs": 20,
+        "exact": 10,
+        "mean_f1": 0.963,
+        "median_cost_usd": 0.3371,
+        "median_turns": 16.5,
+        "median_wall_seconds": 61.7
+      },
+      "release": {
+        "runs": 20,
+        "exact": 7,
+        "mean_f1": 0.86,
+        "median_cost_usd": 0.2571,
+        "median_turns": 13.0,
+        "median_wall_seconds": 40.1
+      },
+      "control": {
+        "runs": 20,
+        "exact": 19,
+        "mean_f1": 0.988,
+        "median_cost_usd": 0.1786,
+        "median_turns": 5.0,
+        "median_wall_seconds": 12.8
+      }
+    },
+    "omnigraph": {
+      "all": {
+        "runs": 115,
+        "exact": 85,
+        "mean_f1": 0.981,
+        "median_cost_usd": 0.1656,
+        "median_turns": 4,
+        "median_wall_seconds": 16.0
+      },
+      "shared-name": {
+        "runs": 20,
+        "exact": 15,
+        "mean_f1": 0.977,
+        "median_cost_usd": 0.1198,
+        "median_turns": 3.0,
+        "median_wall_seconds": 13.1
+      },
+      "dispatch": {
+        "runs": 20,
+        "exact": 18,
+        "mean_f1": 0.997,
+        "median_cost_usd": 0.1847,
+        "median_turns": 7.5,
+        "median_wall_seconds": 23.4
+      },
+      "transitive": {
+        "runs": 15,
+        "exact": 0,
+        "mean_f1": 0.961,
+        "median_cost_usd": 0.1789,
+        "median_turns": 4,
+        "median_wall_seconds": 16.0
+      },
+      "construction": {
+        "runs": 20,
+        "exact": 14,
+        "mean_f1": 0.979,
+        "median_cost_usd": 0.0552,
+        "median_turns": 3.0,
+        "median_wall_seconds": 16.9
+      },
+      "release": {
+        "runs": 20,
+        "exact": 18,
+        "mean_f1": 0.965,
+        "median_cost_usd": 0.1869,
+        "median_turns": 6.0,
+        "median_wall_seconds": 20.4
+      },
+      "control": {
+        "runs": 20,
+        "exact": 20,
+        "mean_f1": 1.0,
+        "median_cost_usd": 0.164,
+        "median_turns": 3.0,
+        "median_wall_seconds": 10.7
+      }
+    }
+  },
+  "vs_bare": {
+    "omnigraph": {
+      "cost_usd": {
+        "all": {
+          "geomean_ratio": 0.606,
+          "ci95": [
+            0.435,
+            0.846
+          ],
+          "questions_lower": 20,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 0.354,
+          "ci95": [
+            0.179,
+            0.64
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 1.199,
+          "ci95": [
+            0.753,
+            2.062
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 0.589,
+          "ci95": [
+            0.497,
+            0.714
+          ],
+          "questions_lower": 3,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 0.206,
+          "ci95": [
+            0.129,
+            0.339
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 0.725,
+          "ci95": [
+            0.694,
+            0.756
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 1.321,
+          "ci95": [
+            0.837,
+            3.037
+          ],
+          "questions_lower": 3,
+          "questions": 4
+        }
+      },
+      "grep_vs_cost_ratio_spearman": -0.344,
+      "turns": {
+        "all": {
+          "geomean_ratio": 0.393,
+          "ci95": [
+            0.3,
+            0.507
+          ],
+          "questions_lower": 21,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 0.318,
+          "ci95": [
+            0.186,
+            0.499
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 0.855,
+          "ci95": [
+            0.683,
+            1.069
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 0.252,
+          "ci95": [
+            0.136,
+            0.444
+          ],
+          "questions_lower": 3,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 0.231,
+          "ci95": [
+            0.123,
+            0.433
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 0.415,
+          "ci95": [
+            0.333,
+            0.505
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 0.504,
+          "ci95": [
+            0.344,
+            0.678
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        }
+      },
+      "output_tokens": {
+        "all": {
+          "geomean_ratio": 0.409,
+          "ci95": [
+            0.333,
+            0.507
+          ],
+          "questions_lower": 22,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 0.327,
+          "ci95": [
+            0.215,
+            0.446
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 0.695,
+          "ci95": [
+            0.503,
+            0.94
+          ],
+          "questions_lower": 3,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 0.297,
+          "ci95": [
+            0.185,
+            0.411
+          ],
+          "questions_lower": 3,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 0.266,
+          "ci95": [
+            0.161,
+            0.508
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 0.46,
+          "ci95": [
+            0.451,
+            0.473
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 0.524,
+          "ci95": [
+            0.353,
+            0.664
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        }
+      },
+      "wall_seconds": {
+        "all": {
+          "geomean_ratio": 0.541,
+          "ci95": [
+            0.434,
+            0.667
+          ],
+          "questions_lower": 20,
+          "questions": 23
+        },
+        "shared-name": {
+          "geomean_ratio": 0.483,
+          "ci95": [
+            0.337,
+            0.691
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "dispatch": {
+          "geomean_ratio": 0.928,
+          "ci95": [
+            0.66,
+            1.307
+          ],
+          "questions_lower": 2,
+          "questions": 4
+        },
+        "transitive": {
+          "geomean_ratio": 0.358,
+          "ci95": [
+            0.252,
+            0.535
+          ],
+          "questions_lower": 3,
+          "questions": 3
+        },
+        "construction": {
+          "geomean_ratio": 0.353,
+          "ci95": [
+            0.226,
+            0.724
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "release": {
+          "geomean_ratio": 0.489,
+          "ci95": [
+            0.446,
+            0.537
+          ],
+          "questions_lower": 4,
+          "questions": 4
+        },
+        "control": {
+          "geomean_ratio": 0.819,
+          "ci95": [
+            0.63,
+            1.002
+          ],
+          "questions_lower": 3,
+          "questions": 4
+        }
+      }
+    }
+  }
+}

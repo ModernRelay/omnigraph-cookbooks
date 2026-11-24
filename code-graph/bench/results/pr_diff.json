@@ -1,7 +1,7 @@
 {
   "prs": 40,
   "mechanics_exact_prs": 40,
-  "accuracy_exact_prs": 37,
+  "accuracy_exact_prs": 36,
   "mechanics": {
     "added": {
       "tp": 19,
@@ -43,8 +43,32 @@
       "recall": 1.0,
       "f1": 1.0
     },
+    "calls_added": {
+      "tp": 12,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "calls_removed": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
     "refs_changed": {
-      "tp": 26,
+      "tp": 29,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "calls_changed": {
+      "tp": 9,
       "fp": 0,
       "fn": 0,
       "precision": 1.0,
@@ -92,6 +116,22 @@
       "precision": 0.875,
       "recall": 0.9722222222222222,
       "f1": 0.9210526315789473
+    },
+    "calls_added": {
+      "tp": 12,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "calls_removed": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1.0,
+      "recall": 0.8571428571428571,
+      "f1": 0.923076923076923
     }
   },
   "per_pr": [
@@ -119,6 +159,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -153,6 +203,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -179,6 +239,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -213,7 +283,17 @@
         0,
         0
       ],
-      "exact": true
+      "calls_added": [
+        6,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        1
+      ],
+      "exact": false
     },
     {
       "head": "8a103aa59bcf",
@@ -243,6 +323,16 @@
         0,
         0
       ],
+      "calls_added": [
+        2,
+        0,
+        0
+      ],
+      "calls_removed": [
+        6,
+        0,
+        0
+      ],
       "exact": false
     },
     {
@@ -269,6 +359,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -303,6 +403,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -329,6 +439,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -363,6 +483,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -389,6 +519,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -423,6 +563,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -453,6 +603,16 @@
         5,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": false
     },
     {
@@ -479,6 +639,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -513,6 +683,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -539,6 +719,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        1,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -573,6 +763,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -599,6 +799,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -633,6 +843,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -659,6 +879,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -693,6 +923,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -719,6 +959,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        2,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -753,6 +1003,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -779,6 +1039,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -813,6 +1083,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -839,6 +1119,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -873,6 +1163,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -903,6 +1203,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -929,6 +1239,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -963,6 +1283,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -989,6 +1319,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -1023,6 +1363,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -1049,6 +1399,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -1083,6 +1443,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -1113,6 +1483,16 @@
         0,
         1
       ],
+      "calls_added": [
+        1,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": false
     },
     {
@@ -1139,6 +1519,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -1173,6 +1563,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -1199,6 +1599,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0
@@ -1233,6 +1643,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -1263,6 +1683,16 @@
         0,
         0
       ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
+        0,
+        0,
+        0
+      ],
       "exact": true
     },
     {
@@ -1289,6 +1719,16 @@
         0
       ],
       "refs_removed": [
+        0,
+        0,
+        0
+      ],
+      "calls_added": [
+        0,
+        0,
+        0
+      ],
+      "calls_removed": [
         0,
         0,
         0

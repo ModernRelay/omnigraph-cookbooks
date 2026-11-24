@@ -4,7 +4,8 @@ Status: run. The pilot and the full run are below, with what each changed in
 the benchmark; [README.md](README.md#agent-cost-at-scale) has the results.
 Measurements up to the pilot were taken on
 2026-11-17 on one Mac (18 cores, 48 GiB) with the 0.14.0 `omnigraph` CLI; the
-runs were on a dev box. `scale.py` builds the repository, graph, reference and questions;
+full run was on a dev box, and the third window, which the scores report for
+Omnigraph, on the Mac with OmniGraph 0.16.0. `scale.py` builds the repository, graph, reference and questions;
 `agent.py --suite vscode` sets up the arms and runs and scores the sessions.
 
 ## Why
@@ -204,8 +205,8 @@ the protocol, and is not a result. What it changed:
   stops at its 5,000-row limit and the alphabetical first 5,000 hold none of
   them. A walk over calls alone needs either a filter on each hop of a
   multi-hop traversal, which GQ does not have, or calls as an edge type of
-  their own, beside `References`. Until then the agent has to follow `cg
-  callers` itself.
+  their own, beside `References`. The cookbook now has the second, the
+  `Calls` edge (item 6 under the full run).
 - **Graph use is counted by tool.** The pilot's own summary counted `git` as
   a graph tool; `agent.py` no longer does.
 
@@ -230,9 +231,11 @@ convert 140 s, load 77 s), codegraph 10.1 min (606 s), Graphify 12.4 min
    ran `omnigraph optimize`, so every Omnigraph read scanned whole tables: on
    the box `cg members` took a median 48 s. `cg load` now runs `optimize`
    after a load onto `main` of a local graph. Omnigraph's arm was therefore
-   run again on the optimized graph, in a second window beside its own
-   no-graph arm, and that is the arm the scores report. The first window's
-   results, `results/agent-scale.json`, hold no graph, codegraph and Graphify.
+   run again, beside its own no-graph arm, once the problems below were
+   fixed, and that is the arm the scores report: the third window. A second
+   window ran it on the optimized graph before items 2 and 6 were fixed; the
+   third replaces it. The first window's results, `results/agent-scale.json`,
+   hold no graph, codegraph and Graphify.
 2. **Static members were missing from the graph.** scip-typescript gives a
    static method and a static property kinds of their own, which the
    converter's kind map did not include, so VS Code's graph lacked 1,751
@@ -240,7 +243,7 @@ convert 140 s, load 77 s), codegraph 10.1 min (606 s), Graphify 12.4 min
    static member's symbol went with it: `Color` has a static and an instance
    `equals`, and the graph had neither. The converter maps both kinds now. Two
    of the 24 questions touch a static member (`shared-name-2`'s target, and
-   four entries of `construction-4`'s key); the scored graph ran without them.
+   four entries of `construction-4`'s key); the third window's graph has them.
 3. **Keys needed correcting.** Every entry that most of a question's 20
    sessions disagreed with the key about was read in the source:
    - The compiler reference covered `src/vs/`, the questions `src/`.
@@ -282,30 +285,58 @@ convert 140 s, load 77 s), codegraph 10.1 min (606 s), Graphify 12.4 min
    seeds it counted 849 or 850 transitive candidates. Each hop is now computed
    from whole sets, and two runs under different seeds write the same file as
    the one the run asked.
+6. **The reads followed references, not calls.** `callers` returned every
+   definition whose code names the target, a type annotation or an import
+   included, and `impact` walked every reference. A question about calls then
+   got definitions that only name the target, and on constructions the agents
+   searched text for `new` to tell them apart. The converter now writes a
+   `Calls` edge: a callable followed by its arguments, or a class constructed
+   with `new`, which also calls the class's declared constructor. `callers`
+   and `callees` follow it, `referrers` returns every reference, and
+   `transitive-callers` walks calls and dispatch. On hono's `src/` the calls
+   it records match the compiler's with precision 0.991 and recall 0.985.
 
-### The second window
+### The third window
 
-Run on 2026-11-18 from 07:35 to 09:07 UTC on the same box. The build ran the
-two loads again, each followed by `optimize` (72.5 s and 80.9 s), and no graph
-and Omnigraph ran the same 24 questions five times each, 240 sessions, with no
-usage-limit stop and no session over its time limit. The API wrote a median
-138 output tokens a second for no graph and 126 for Omnigraph. Results are in
-`results/agent-scale-window2.json`, scored against the corrected keys. `cg`
-answered in a median 0.43 s for `callers`, 0.53 s for `find`, 0.47 s for
-`impact` and 0.23 s for `members`; the slowest of its 453 calls took 4.0 s.
+Run on 2026-11-24 from 02:14 to 03:38 UTC on the Mac, two sessions at a
+time, with OmniGraph 0.16.0 and Claude Code 2.1.325. The build converted both
+releases again with static members and `Calls` edges and loaded each with
+`optimize`; 1.146.0 has 823,401 definitions, 1,919,016 `References` edges and
+426,469 `Calls` edges. No graph and Omnigraph ran the same 24 questions five
+times each, 240 sessions, with no usage-limit stop and no session over its
+time limit. Results are in `results/agent-scale-window3.json`, scored against
+the corrected keys.
+
+Other work on the Mac kept its load average at a median 34 (at most 209), so
+both arms' sessions ran slower than on the box. The API wrote a median 129
+output tokens a second for no graph and 117 for Omnigraph. `cg` answered in a
+median 0.28 s for `callers`, 0.27 s for `transitive-callers`, 0.23 s for
+`implementers`, 0.38 s for `members` and 1.4 s for `find`; the slowest of its
+233 calls took 4.7 s. No session hit a memory limit, including the five on
+`transitive-4`, whose walk starts at a hub.
+
+Claude Code 2.1.325 starts a session with 45k tokens of context, against 25k
+in the first window, and only 53 of 120 no-graph sessions and 57 of 120
+Omnigraph sessions found it in the prompt cache; in the first window about
+three in four did. A session that misses writes it to the cache, which adds about $0.15
+to its cost. That adds the same to both arms, so both cost more per session
+than in the first window, and Omnigraph's cost ratio is nearer 1 than its
+ratios of turns and output tokens. Where both arms answer in a few turns, the
+controls and dispatch, the ratio of medians follows which sessions missed the
+cache, and is above 1 while the ratio of turns is below.
 
 ### Scores
 
 Medians per session over the 23 scored questions, five sessions each, each
 arm beside the no-graph arm of its own window:
 
-| Arm | Window | Exact | Mean F1 | Cost | Wall time | Output tokens | Turns | Calls to its tool |
-|---|---|---|---|---|---|---|---|---|
-| No code graph | first | 73 of 115 | 0.960 | $0.103 | 23.6 s | 2,744 | 8 | |
-| codegraph | first | 73 of 115 | 0.960 | $0.112 | 42.2 s | 2,784 | 8 | 0.3% |
-| Graphify | first | 68 of 115 | 0.949 | $0.121 | 25.4 s | 2,968 | 10 | 5% |
-| No code graph | second | 69 of 115 | 0.951 | $0.091 | 22.9 s | 2,724 | 9 | |
-| Omnigraph | second | 80 of 115 | 0.953 | $0.047 | 14.1 s | 1,455 | 5 | 36% |
+| Arm | Window | Exact | Mean F1 | Cost | Cache writes | Wall time | Output tokens | Turns | Calls to its tool |
+|---|---|---|---|---|---|---|---|---|---|
+| No code graph | first | 73 of 115 | 0.960 | $0.103 | 12,471 | 23.6 s | 2,744 | 8 | |
+| codegraph | first | 73 of 115 | 0.960 | $0.112 | 11,667 | 42.2 s | 2,784 | 8 | 0.3% |
+| Graphify | first | 68 of 115 | 0.949 | $0.121 | 15,903 | 25.4 s | 2,968 | 10 | 5% |
+| No code graph | third | 67 of 115 | 0.944 | $0.224 | 41,328 | 30.8 s | 3,305 | 10 | |
+| Omnigraph | third | 85 of 115 | 0.981 | $0.166 | 38,465 | 16.0 s | 1,361 | 4 | 50% |
 
 Against the no-graph arm of the same window, question by question (geometric
 mean of the ratio of medians, 95% bootstrap interval, questions where the arm
@@ -313,65 +344,91 @@ spent less):
 
 | Arm | Cost | Wall time | Output tokens | Turns |
 |---|---|---|---|---|
-| Omnigraph | 0.52× [0.39, 0.69], 17 of 23 | 0.70× [0.57, 0.87], 16 | 0.64× [0.52, 0.80], 17 | 0.64× [0.48, 0.84], 15 |
+| Omnigraph | 0.61× [0.43, 0.85], 20 of 23 | 0.54× [0.43, 0.67], 20 | 0.41× [0.33, 0.51], 22 | 0.39× [0.30, 0.51], 21 |
 | codegraph | 0.91× [0.83, 1.01], 16 of 23 | 1.88× [1.65, 2.13], 1 | 0.94× [0.86, 1.02], 12 | 1.04× [0.82, 1.49], 12 |
 | Graphify | 1.12× [1.02, 1.22], 5 of 23 | 1.10× [1.02, 1.17], 3 | 1.05× [0.97, 1.13], 6 | 1.26× [1.05, 1.71], 6 |
 
-Exact sessions by family:
+Exact sessions by family, and the questions the graph answers exactly by
+itself (below):
 
-| Family | No graph, first | codegraph | Graphify | No graph, second | Omnigraph | Omnigraph's cost | Omnigraph's wall time |
-|---|---|---|---|---|---|---|---|
-| Shared-name callers | 13 of 20 | 14 of 20 | 11 of 20 | 12 of 20 | 9 of 20 | 1.03× [0.98, 1.10] | 1.29× [1.14, 1.45] |
-| Interface dispatch | 17 of 20 | 18 of 20 | 18 of 20 | 19 of 20 | 20 of 20 | 0.80× [0.66, 0.91] | 0.85× [0.72, 0.95] |
-| Transitive callers | 1 of 15 | 1 of 15 | 0 of 15 | 0 of 15 | 0 of 15 | 0.17× [0.11, 0.25] | 0.31× [0.24, 0.45] |
-| Constructions | 11 of 20 | 9 of 20 | 13 of 20 | 9 of 20 | 13 of 20 | 1.06× [0.89, 1.21] | 1.18× [0.97, 1.39] |
-| Release changes | 12 of 20 | 11 of 20 | 7 of 20 | 11 of 20 | 18 of 20 | 0.30× [0.19, 0.41] | 0.45× [0.35, 0.54] |
-| Controls | 19 of 20 | 20 of 20 | 19 of 20 | 18 of 20 | 20 of 20 | 0.36× [0.26, 0.44] | 0.56× [0.47, 0.65] |
+| Family | No graph, first | codegraph | Graphify | No graph, third | Omnigraph | The graph by itself |
+|---|---|---|---|---|---|---|
+| Shared-name callers | 13 of 20 | 14 of 20 | 11 of 20 | 13 of 20 | 15 of 20 | 3 of 4 |
+| Interface dispatch | 17 of 20 | 18 of 20 | 18 of 20 | 18 of 20 | 18 of 20 | 4 of 4 |
+| Transitive callers | 1 of 15 | 1 of 15 | 0 of 15 | 0 of 15 | 0 of 15 | 0 of 3 |
+| Constructions | 11 of 20 | 9 of 20 | 13 of 20 | 10 of 20 | 14 of 20 | 3 of 4 |
+| Release changes | 12 of 20 | 11 of 20 | 7 of 20 | 7 of 20 | 18 of 20 | 4 of 4 |
+| Controls | 19 of 20 | 20 of 20 | 19 of 20 | 19 of 20 | 20 of 20 | 4 of 4 |
 
-The no-graph arm was exact in 73 sessions in one window and 69 in the other
-with the same keys, which shows how far a count moves between runs.
+Omnigraph against no graph by family, as above:
+
+| Family | Cost | Wall time | Turns | Median turns |
+|---|---|---|---|---|
+| Shared-name callers | 0.35× [0.18, 0.64] | 0.48× [0.34, 0.69] | 0.32× [0.19, 0.50] | 10.5 → 3 |
+| Interface dispatch | 1.20× [0.75, 2.06] | 0.93× [0.66, 1.31] | 0.86× [0.68, 1.07] | 8.5 → 7.5 |
+| Transitive callers | 0.59× [0.50, 0.71] | 0.36× [0.25, 0.54] | 0.25× [0.14, 0.44] | 19 → 4 |
+| Constructions | 0.21× [0.13, 0.34] | 0.35× [0.23, 0.72] | 0.23× [0.12, 0.43] | 16.5 → 3 |
+| Release changes | 0.73× [0.69, 0.76] | 0.49× [0.45, 0.54] | 0.42× [0.33, 0.51] | 13 → 6 |
+| Controls | 1.32× [0.84, 3.04] | 0.82× [0.63, 1.00] | 0.50× [0.34, 0.68] | 5 → 3 |
+
+The no-graph arm was exact in 73 sessions in the first window and 67 in the
+third with the same keys, which shows how far a count moves between runs.
+
+**The graph by itself.** `graph_answers.py` asks the graph each scored
+question with the one read the Omnigraph arm's instructions name for its
+family (`callers`, `transitive-callers`, the implementers at every level, or
+`callers` on both releases), leaves out test code as the answer format says,
+and grades the rows with the same rules as the sessions: 18 of 23 exact, mean
+F1 0.989 (`results/graph-answers.json`). The five it misses are the causes of
+most of the sessions' misses below.
 
 The hypotheses:
 
-1. **Correctness: refuted.** Without a graph, exactness fell on chains (0 and
-   1 of 15) and on shared names (12 and 13 of 20), though not on dispatch (17
-   and 19 of 20), as predicted. With Omnigraph it fell the same way, 0 of 15
-   and 9 of 20. Only on release changes did Omnigraph's agents answer
-   differently: 18 of 20, against 7 to 12, because `cg` reads both releases
-   where the others diff text. On `release-4` the code calling `moveEditors`
-   moved from `mergeGroup` into a new method, `doMergeGroup`; Omnigraph's five
-   sessions named it, and none of the other arms' 20 did.
-2. **Cost: refuted.** The rank correlation between a question's grep count
-   and Omnigraph's cost ratio is +0.60, so the ratio rises with the lines a
-   search returns, where the hypothesis said it would fall. Omnigraph saved
-   most where one `cg` read answers: controls (0.36×), release changes
-   (0.30×) and chains (0.17×, none exact). It saved least on dispatch (0.80×)
-   and nothing on shared names and constructions (1.03× and 1.06×): `cg
-   callers` of a class lists every reference to it, type annotations included,
-   so on constructions the agents searched text for `new` anyway, 184
-   searches to 37 `cg` calls.
+1. **Correctness: half supported.** Without a graph, exactness fell on chains
+   (0 of 15) and on shared names (13 of 20), though not on dispatch (18 of
+   20), as predicted. With Omnigraph it did not stay exact: 0 of 15 on chains
+   and 15 of 20 on shared names, because the sessions took the graph's answer
+   and the graph's own answer to those questions misses a caller (below).
+   Over every family Omnigraph's sessions were exact in 85 of 115 against 67.
+   On release changes `cg` reads both releases, where no-graph agents diff
+   text: on `release-4` the code calling `moveEditors` moved from
+   `mergeGroup` into a new method, `doMergeGroup`; Omnigraph's five sessions
+   named it, and none of the other arms' 20 did.
+2. **Cost: not supported.** The rank correlation between a question's grep
+   count and Omnigraph's cost ratio is −0.34: in the predicted direction, but
+   over 23 questions not distinguishable from none. Omnigraph saved most where
+   one `cg` read is the answer and a text search returns lines the agent must
+   sort into definitions: constructions (0.21×, 3 turns against 16.5) and
+   shared names (0.35×). It saved least on dispatch, where both arms took
+   about eight turns.
 3. **Name matching: not tested.** codegraph's agents called its tool for
    0.3% of their calls, Graphify's for 5%; both arms mostly searched text, as
    on hono.
 
-Omnigraph's 35 inexact answers, by cause:
+Omnigraph's 30 inexact answers, by cause:
 
-- **Chains (15).** `impact` follows every reference, not every call, so
-  agents that trusted it took definitions that only reference the chain, and
-  a class handed to `createInstance` is a reference to the class, not a call
-  to its constructor, so `impact` does not reach a constructor called that
-  way.
-- **Shared names (11).** The graph lacked `Color.equals`, so all five
-  `shared-name-2` sessions searched text for its callers; on `shared-name-1`
-  and `shared-name-4` sessions left out or added one or two entries.
-- **Constructions (7) and release changes (2).** One or two entries a
-  session, such as a `createInstance` site left out of `construction-2`, static fields
-  of `Color` and `PaneDraggable` that construct an `RGBA` in `construction-4`
-  (the graph lacked `Color`'s), and `release-3`'s moved file.
-- **`impact` from a hub ran out of memory.** All five Omnigraph sessions on
-  `transitive-4`, the question left out of the scores, hit the 2 GiB
-  `query_memory_bytes` limit, 18 times in all. OmniGraph 0.16 streams each
-  traversal step's edge probe and fixes it.
+- **The graph's own answer (24).** The sessions took `cg`'s answer, and on
+  five questions it is not exact:
+  - A construction through dependency injection (14: every session on
+    `transitive-1` and `transitive-3`, four on `construction-2`).
+    `createInstance(C, …)` constructs a `C`, but the code passes `C` as an
+    argument, so the graph records a reference to the class, not a call.
+  - A function constant declared in a block of a module's top-level code (5,
+    `transitive-2`). scip-typescript gives it a local symbol, so the converter
+    assigns its code to the module, and the graph names `src/server-main.ts`
+    where the key also names `getRemoteExtensionHostAgentServer`.
+  - A call the compiler does not resolve (5, `shared-name-2`):
+    `TokenStyle.equals` calls `equals` on a value of type `any` narrowed by
+    `instanceof`, which the key adds by hand.
+  - On `transitive-3`, `transitive-callers` also lists
+    `SimpleFindReplaceWidget.hide` and `show`, base members the chain passes
+    through to reach their overrides. The walk keeps such a member when it
+    calls anything itself, because GQ refuses a walk of zero or more hops,
+    which the exact rule needs.
+- **Agent errors (6).** One or more entries a session: an extra `render`
+  override in two `dispatch-1` sessions, constructions of `RGBA` in static
+  fields and module-level color registrations left out of two `construction-4`
+  sessions, and one entry each on `release-1` and `release-3`.
 
 ## Build order
 
@@ -385,9 +442,9 @@ Omnigraph's 35 inexact answers, by cause:
    four arms, 24 sessions, on a dev box. Done; results above.
 5. Index with the other three tools; record times and failures. Not done:
    their Linux installs are not scripted, so the full run had four arms.
-6. Full run, 480 sessions, then a second window for no graph and Omnigraph
-   on the optimized graph; scored, written up here, in `bench/README.md`
-   (Results). Done.
+6. Full run, 480 sessions, then a third window for no graph and Omnigraph
+   on the rebuilt graph; scored, written up here and in `bench/README.md`.
+   Done.
 
 ## Limits
 
@@ -402,5 +459,6 @@ Omnigraph's 35 inexact answers, by cause:
   sessions disagreed with. Two of the rules added then, calls through
   `invokeFunction` and constructions through `createInstance`, are VS Code's
   own idiom for dependency injection.
-- Each window's arms ran side by side, but the two windows ran hours apart,
-  so wall times compare within a window, not across.
+- Each window's arms ran side by side, but the first and third windows ran
+  six days apart, on different machines and Claude Code versions, so cost and
+  wall time compare within a window, not across.
