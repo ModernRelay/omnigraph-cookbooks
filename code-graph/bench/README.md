@@ -408,6 +408,51 @@ No session ran out of memory, including the five whose walk starts at a hub.
 codegraph's and Graphify's agents barely used their tools, so the run says
 little about those tools.
 
+## How other benchmarks measure
+
+The tools' own benchmarks, read in November 2026, and the research on code
+graphs for agents measure other things. None compares an agent's cost on
+graded questions with a no-graph arm in the same window, as the agent
+benchmarks here do.
+
+- **Token ratios, no agent.**
+  [code-review-graph](https://github.com/tirth8205/code-review-graph)
+  divides the tokens of reading every file, or of a scripted grep that reads
+  the top three files, by the tokens its query returns (medians 63× and
+  6.65×). Nothing answers a question and nothing is graded.
+- **An agent, answers not graded.**
+  [codegraph](https://github.com/colbymchenry/codegraph) runs a headless
+  agent on one question per repository with and without its MCP server, one
+  run per arm, and counts file reads (76% fewer) and tool calls. Its cost was
+  flat or a little higher, as on hono here.
+- **Graded, a few questions.** [Graphify](https://github.com/Graphify-Labs/graphify)
+  grades key-fact coverage on six questions about one repository: 70.8%
+  with grep and read, 82.0% with its tool.
+  [codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp)
+  grades answers to 12 questions per language as pass, partial or fail.
+- **Tasks.** [GitNexus](https://github.com/abhigyanpatwari/GitNexus)'s
+  release evaluation of October 2026 reports no accuracy gain or cost saving;
+  its tool arm could read code holding later fixes, so it cannot isolate the
+  tool.
+  [RepoGraph](https://arxiv.org/abs/2410.14684) adds 2.3 to 2.7 points to
+  two frameworks' SWE-bench Lite resolve rate. A pre-registered study of
+  small open models localizing SWE-bench code
+  ([arXiv 2610.33958](https://arxiv.org/abs/2610.33958)) finds tools raise
+  accuracy for small models and little at 32B, and that the embedding index,
+  not the code graph, carries the gain.
+- **Agents skip the tool.** In [CodeCompass](https://arxiv.org/abs/2602.20048),
+  58% of trials made no call to the graph tool despite an instruction to;
+  on its coverage score those that did reached 99.5%, those that did not
+  80.2%, the same as without the tool.
+  Here codegraph's and Graphify's agents called their tools for 0.3% and 5%
+  of their tool calls, and Omnigraph's, whose instructions were written for
+  the benchmark, for 50%.
+
+The next benchmark would measure whole tasks:
+[SWE-PolyBench](https://arxiv.org/abs/2504.08703) has TypeScript issues with
+tests, so it can score a fix rather than an answer list, with a no-graph arm
+in the same window.
+
 ## Limits
 
 - One repository in one language for three benchmarks, and two for the
