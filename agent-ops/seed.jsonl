@@ -1,0 +1,457 @@
+{"type": "Agent", "data": {"slug": "agent-runner", "name": "Runner", "status": "active", "harness": "Claude Code", "model": "claude-sonnet-5-5", "brief": "Runs the engineering workflows: reviews, reproductions and the weekly report."}}
+{"type": "Agent", "data": {"slug": "agent-desk", "name": "Support desk", "status": "active", "harness": "LangGraph service", "model": "claude-haiku-5-5", "brief": "Triages the support inbox every hour."}}
+{"type": "Agent", "data": {"slug": "agent-judge", "name": "Judge", "status": "active", "harness": "Claude Code", "model": "claude-opus-5-5", "brief": "Judges finished runs against their workflow's criteria."}}
+{"type": "Agent", "data": {"slug": "agent-tuner", "name": "Tuner", "status": "active", "harness": "Claude Code", "model": "claude-opus-5-5", "brief": "Reads failed judgments and proposes new instructions on a branch."}}
+{"type": "Skill", "data": {"slug": "skill-code-review", "name": "Code review", "status": "active", "brief": "How Harbor reviews a change: correctness first, then tests, then naming.", "content": "How Harbor reviews a change: correctness first, then tests, then naming."}}
+{"type": "Skill", "data": {"slug": "skill-github", "name": "GitHub", "status": "active", "brief": "Read a pull request or issue and comment on it with the gh CLI.", "content": "Read a pull request or issue and comment on it with the gh CLI."}}
+{"type": "Skill", "data": {"slug": "skill-reproduce", "name": "Reproducing a bug", "status": "active", "brief": "Check out the reported version in a clean worktree and write the smallest script that fails.", "content": "Check out the reported version in a clean worktree and write the smallest script that fails."}}
+{"type": "Skill", "data": {"slug": "skill-support-routing", "name": "Support routing", "status": "active", "brief": "Which team owns which product area, and the labels for each.", "content": "Which team owns which product area, and the labels for each."}}
+{"type": "Skill", "data": {"slug": "skill-slack", "name": "Slack", "status": "active", "brief": "Post to a channel as the team's bot.", "content": "Post to a channel as the team's bot."}}
+{"type": "Skill", "data": {"slug": "skill-judging", "name": "Judging a run", "status": "active", "brief": "Read the trace and the outputs, judge each criterion on its own, and quote what the verdict rests on.", "content": "Read the trace and the outputs, judge each criterion on its own, and quote what the verdict rests on."}}
+{"type": "Skill", "data": {"slug": "skill-agent-ops", "name": "The agent-ops record", "status": "active", "brief": "Start a run before working, attach its traces, record each outside action, finish it with what it did.", "content": "Start a run before working, attach its traces, record each outside action, finish it with what it did."}}
+{"edge": "AgentHasSkill", "from": "agent-runner", "to": "skill-code-review", "data": {}}
+{"edge": "AgentHasSkill", "from": "agent-runner", "to": "skill-github", "data": {}}
+{"edge": "AgentHasSkill", "from": "agent-runner", "to": "skill-reproduce", "data": {}}
+{"edge": "AgentHasSkill", "from": "agent-runner", "to": "skill-slack", "data": {}}
+{"edge": "AgentHasSkill", "from": "agent-runner", "to": "skill-agent-ops", "data": {}}
+{"edge": "AgentHasSkill", "from": "agent-desk", "to": "skill-support-routing", "data": {}}
+{"edge": "AgentHasSkill", "from": "agent-desk", "to": "skill-agent-ops", "data": {}}
+{"edge": "AgentHasSkill", "from": "agent-judge", "to": "skill-judging", "data": {}}
+{"edge": "AgentHasSkill", "from": "agent-judge", "to": "skill-agent-ops", "data": {}}
+{"edge": "AgentHasSkill", "from": "agent-tuner", "to": "skill-judging", "data": {}}
+{"edge": "AgentHasSkill", "from": "agent-tuner", "to": "skill-agent-ops", "data": {}}
+{"type": "Workflow", "data": {"slug": "wf-review-pr", "name": "Review a pull request", "goal": "Every pull request on harbor/ledger gets a first review before a person looks at it.", "output": "One review comment on the pull request. A pull request with nothing to flag gets a short approval note.", "status": "active"}}
+{"edge": "WorkflowUsesSkill", "from": "wf-review-pr", "to": "skill-code-review", "data": {}}
+{"edge": "WorkflowUsesSkill", "from": "wf-review-pr", "to": "skill-github", "data": {}}
+{"type": "Criterion", "data": {"slug": "crit-review-cites-lines", "name": "Cites file and line", "statement": "Every finding names the file and line it is about."}}
+{"edge": "WorkflowJudgedBy", "from": "wf-review-pr", "to": "crit-review-cites-lines", "data": {}}
+{"type": "Criterion", "data": {"slug": "crit-review-no-style-nits", "name": "No style nits", "statement": "The review raises no formatting or naming point the linter already enforces."}}
+{"edge": "WorkflowJudgedBy", "from": "wf-review-pr", "to": "crit-review-no-style-nits", "data": {}}
+{"type": "Trigger", "data": {"slug": "trg-review-pr-opened", "name": "Pull request opened or updated", "kind": "event", "status": "active", "condition": "A pull request on harbor/ledger is opened or gets a new head commit."}}
+{"edge": "TriggerOf", "from": "trg-review-pr-opened", "to": "wf-review-pr", "data": {}}
+{"type": "Trigger", "data": {"slug": "trg-review-pr-manual", "name": "Asked for in a comment", "kind": "manual", "status": "active"}}
+{"edge": "TriggerOf", "from": "trg-review-pr-manual", "to": "wf-review-pr", "data": {}}
+{"type": "Revision", "data": {"slug": "wf-review-pr-r1", "number": 1, "instructions": "Review the diff for correctness, missing tests and unclear names. Summarise the findings in one comment.", "status": "retired", "proposed_at": "2026-10-01T09:00:00Z", "decided_at": "2026-10-01T09:00:00Z"}}
+{"edge": "RevisionOf", "from": "wf-review-pr-r1", "to": "wf-review-pr", "data": {}}
+{"type": "Revision", "data": {"slug": "wf-review-pr-r2", "number": 2, "instructions": "Review the diff for correctness and missing tests. Give every finding as path:line and the reason. Leave formatting and naming to the linter. Summarise the findings in one comment.", "rationale": "Four of six reviews under revision 1 gave findings without a file or line, so the author had to search for them.", "status": "active", "proposed_at": "2026-11-10T07:20:00Z", "decided_at": "2026-11-11T10:05:00Z", "decision_note": "Matches how we review by hand. Activate."}}
+{"edge": "RevisionOf", "from": "wf-review-pr-r2", "to": "wf-review-pr", "data": {}}
+{"edge": "RevisionRevises", "from": "wf-review-pr-r2", "to": "wf-review-pr-r1", "data": {}}
+{"edge": "RevisionProposedBy", "from": "wf-review-pr-r2", "to": "agent-tuner", "data": {}}
+{"type": "Workflow", "data": {"slug": "wf-reproduce-issue", "name": "Reproduce a reported bug", "goal": "A bug report comes with a script that shows it, before anyone works on a fix.", "output": "A comment on the issue with the script and the version it fails on, or a note that it does not reproduce.", "status": "active"}}
+{"edge": "WorkflowUsesSkill", "from": "wf-reproduce-issue", "to": "skill-reproduce", "data": {}}
+{"edge": "WorkflowUsesSkill", "from": "wf-reproduce-issue", "to": "skill-github", "data": {}}
+{"type": "Criterion", "data": {"slug": "crit-repro-script", "name": "Attaches a failing script", "statement": "The comment carries a script that fails on the reported version."}}
+{"edge": "WorkflowJudgedBy", "from": "wf-reproduce-issue", "to": "crit-repro-script", "data": {}}
+{"type": "Criterion", "data": {"slug": "crit-repro-version", "name": "Names the version", "statement": "The comment names the exact version or commit it reproduced on."}}
+{"edge": "WorkflowJudgedBy", "from": "wf-reproduce-issue", "to": "crit-repro-version", "data": {}}
+{"type": "Trigger", "data": {"slug": "trg-issue-labelled-bug", "name": "Issue labelled bug", "kind": "event", "status": "active", "condition": "An issue on harbor/ledger gets the bug label."}}
+{"edge": "TriggerOf", "from": "trg-issue-labelled-bug", "to": "wf-reproduce-issue", "data": {}}
+{"type": "Revision", "data": {"slug": "wf-reproduce-issue-r1", "number": 1, "instructions": "Check out the version the report names, write the smallest script that shows the bug and post it on the issue.", "status": "active", "proposed_at": "2026-10-01T09:00:00Z", "decided_at": "2026-10-01T09:00:00Z"}}
+{"edge": "RevisionOf", "from": "wf-reproduce-issue-r1", "to": "wf-reproduce-issue", "data": {}}
+{"type": "Revision", "data": {"slug": "wf-reproduce-issue-r2", "number": 2, "instructions": "Check out the version the report names inside a fresh container, write the smallest script that shows the bug and post it on the issue with the container image.", "rationale": "Issue 89 did not reproduce because a cached build hid the bug.", "status": "rejected", "proposed_at": "2026-11-17T07:15:00Z", "decided_at": "2026-11-18T11:30:00Z", "decision_note": "A container adds six minutes to every issue. A clean worktree already avoids the cached build; say so in the skill instead."}}
+{"edge": "RevisionOf", "from": "wf-reproduce-issue-r2", "to": "wf-reproduce-issue", "data": {}}
+{"edge": "RevisionRevises", "from": "wf-reproduce-issue-r2", "to": "wf-reproduce-issue-r1", "data": {}}
+{"edge": "RevisionProposedBy", "from": "wf-reproduce-issue-r2", "to": "agent-tuner", "data": {}}
+{"type": "Workflow", "data": {"slug": "wf-triage-support", "name": "Triage the support inbox", "goal": "Every support email reaches the team that owns its product area within the hour.", "output": "Each new email labelled with its area and assigned. An hour with no new email leaves nothing.", "status": "active"}}
+{"edge": "WorkflowUsesSkill", "from": "wf-triage-support", "to": "skill-support-routing", "data": {}}
+{"type": "Criterion", "data": {"slug": "crit-triage-routes-owner", "name": "Routes to the owner", "statement": "Each email goes to the team that owns the product area it is about."}}
+{"edge": "WorkflowJudgedBy", "from": "wf-triage-support", "to": "crit-triage-routes-owner", "data": {}}
+{"type": "Trigger", "data": {"slug": "trg-support-hourly", "name": "Every hour", "kind": "time", "status": "active", "schedule": "FREQ=HOURLY;BYMINUTE=0", "next_due_at": "2026-11-23T10:00:00Z"}}
+{"edge": "TriggerOf", "from": "trg-support-hourly", "to": "wf-triage-support", "data": {}}
+{"type": "Revision", "data": {"slug": "wf-triage-support-r1", "number": 1, "instructions": "Read the emails received since the last run. Label each with its product area and assign it to the owning team.", "status": "active", "proposed_at": "2026-10-01T09:00:00Z", "decided_at": "2026-10-01T09:00:00Z"}}
+{"edge": "RevisionOf", "from": "wf-triage-support-r1", "to": "wf-triage-support", "data": {}}
+{"type": "Workflow", "data": {"slug": "wf-judge-runs", "name": "Judge finished runs", "goal": "Every finished run of a workflow with criteria is judged within a day.", "output": "One evaluation per run and criterion, on a branch for review. A day with nothing to judge leaves nothing.", "status": "active"}}
+{"edge": "WorkflowUsesSkill", "from": "wf-judge-runs", "to": "skill-judging", "data": {}}
+{"edge": "WorkflowUsesSkill", "from": "wf-judge-runs", "to": "skill-agent-ops", "data": {}}
+{"type": "Trigger", "data": {"slug": "trg-judge-daily", "name": "Every morning", "kind": "time", "status": "active", "schedule": "FREQ=DAILY;BYHOUR=6;BYMINUTE=0", "next_due_at": "2026-11-23T06:00:00Z"}}
+{"edge": "TriggerOf", "from": "trg-judge-daily", "to": "wf-judge-runs", "data": {}}
+{"type": "Revision", "data": {"slug": "wf-judge-runs-r1", "number": 1, "instructions": "List the runs to judge. For each, read its traces and outputs and record one evaluation per criterion.", "status": "active", "proposed_at": "2026-10-01T09:00:00Z", "decided_at": "2026-10-01T09:00:00Z"}}
+{"edge": "RevisionOf", "from": "wf-judge-runs-r1", "to": "wf-judge-runs", "data": {}}
+{"type": "Workflow", "data": {"slug": "wf-tune-prompts", "name": "Propose revisions from failed judgments", "goal": "Instructions that keep failing a criterion get a proposed fix, with the runs that show the problem.", "output": "At most one proposed revision per workflow, on a branch, citing the evaluations it answers.", "status": "active"}}
+{"edge": "WorkflowUsesSkill", "from": "wf-tune-prompts", "to": "skill-judging", "data": {}}
+{"edge": "WorkflowUsesSkill", "from": "wf-tune-prompts", "to": "skill-agent-ops", "data": {}}
+{"type": "Trigger", "data": {"slug": "trg-tune-weekly", "name": "Monday morning", "kind": "time", "status": "active", "schedule": "FREQ=WEEKLY;BYDAY=MO;BYHOUR=7;BYMINUTE=0", "next_due_at": "2026-11-30T07:00:00Z"}}
+{"edge": "TriggerOf", "from": "trg-tune-weekly", "to": "wf-tune-prompts", "data": {}}
+{"type": "Revision", "data": {"slug": "wf-tune-prompts-r1", "number": 1, "instructions": "For each workflow, read failures_to_answer and revision_history. Where one criterion fails repeatedly and no rejected revision already tried the fix, propose a revision and cite the evaluations.", "status": "active", "proposed_at": "2026-10-01T09:00:00Z", "decided_at": "2026-10-01T09:00:00Z"}}
+{"edge": "RevisionOf", "from": "wf-tune-prompts-r1", "to": "wf-tune-prompts", "data": {}}
+{"type": "Workflow", "data": {"slug": "wf-weekly-report", "name": "Post the weekly agent report", "goal": "The team sees each week what its agents ran, what failed and what it cost.", "output": "One message in #eng-agents with runs by outcome, failures and cost by revision.", "status": "active"}}
+{"edge": "WorkflowUsesSkill", "from": "wf-weekly-report", "to": "skill-slack", "data": {}}
+{"edge": "WorkflowUsesSkill", "from": "wf-weekly-report", "to": "skill-agent-ops", "data": {}}
+{"type": "Trigger", "data": {"slug": "trg-report-weekly", "name": "Friday afternoon", "kind": "time", "status": "active", "schedule": "FREQ=WEEKLY;BYDAY=FR;BYHOUR=16;BYMINUTE=0", "next_due_at": "2026-11-27T16:00:00Z"}}
+{"edge": "TriggerOf", "from": "trg-report-weekly", "to": "wf-weekly-report", "data": {}}
+{"type": "Revision", "data": {"slug": "wf-weekly-report-r1", "number": 1, "instructions": "Read workflow_scorecard, failed_runs since the last report and revision_cost. Post them as one short message.", "status": "active", "proposed_at": "2026-10-01T09:00:00Z", "decided_at": "2026-10-01T09:00:00Z"}}
+{"edge": "RevisionOf", "from": "wf-weekly-report-r1", "to": "wf-weekly-report", "data": {}}
+{"type": "Run", "data": {"slug": "wf-review-pr@pr-401", "status": "succeeded", "started_at": "2026-10-20T14:02:00Z", "finished_at": "2026-10-20T14:09:00Z", "summary": "Reviewed pull request 401: three findings."}}
+{"edge": "RunUsedRevision", "from": "wf-review-pr@pr-401", "to": "wf-review-pr-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-review-pr@pr-401", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-review-pr@pr-401", "to": "trg-review-pr-opened", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-401", "to": "skill-code-review", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-401", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-review-pr-pr-401", "source": "claude-code", "session_id": "cc-401a7", "model": "claude-sonnet-5-5", "input_tokens": 65010, "output_tokens": 4200, "cost_usd": 0.38, "tool_calls": 31}}
+{"edge": "TraceOfRun", "from": "trace-review-pr-pr-401", "to": "wf-review-pr@pr-401", "data": {}}
+{"type": "Output", "data": {"slug": "out-review-pr-pr-401-1", "kind": "comment", "title": "Review of pull request 401", "url": "https://github.example/harbor/ledger/pull/401", "created_at": "2026-10-20T14:09:00Z"}}
+{"edge": "OutputOfRun", "from": "out-review-pr-pr-401-1", "to": "wf-review-pr@pr-401", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-401/crit-review-cites-lines", "verdict": "fail", "rationale": "Findings say 'in the parser' and 'the new test' with no file or line.", "method": "model", "evaluated_at": "2026-10-20T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-401/crit-review-cites-lines", "to": "wf-review-pr@pr-401", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-401/crit-review-cites-lines", "to": "crit-review-cites-lines", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-401/crit-review-cites-lines", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-401/crit-review-no-style-nits", "verdict": "pass", "rationale": "No formatting or naming points.", "method": "model", "evaluated_at": "2026-10-20T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-401/crit-review-no-style-nits", "to": "wf-review-pr@pr-401", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-401/crit-review-no-style-nits", "to": "crit-review-no-style-nits", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-401/crit-review-no-style-nits", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-review-pr@pr-402", "status": "succeeded", "started_at": "2026-10-23T14:02:00Z", "finished_at": "2026-10-23T14:09:00Z", "summary": "Reviewed pull request 402: two findings."}}
+{"edge": "RunUsedRevision", "from": "wf-review-pr@pr-402", "to": "wf-review-pr-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-review-pr@pr-402", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-review-pr@pr-402", "to": "trg-review-pr-opened", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-402", "to": "skill-code-review", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-402", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-review-pr-pr-402", "source": "claude-code", "session_id": "cc-402a7", "model": "claude-sonnet-5-5", "input_tokens": 65020, "output_tokens": 4200, "cost_usd": 0.41, "tool_calls": 31}}
+{"edge": "TraceOfRun", "from": "trace-review-pr-pr-402", "to": "wf-review-pr@pr-402", "data": {}}
+{"type": "Output", "data": {"slug": "out-review-pr-pr-402-1", "kind": "comment", "title": "Review of pull request 402", "url": "https://github.example/harbor/ledger/pull/402", "created_at": "2026-10-23T14:09:00Z"}}
+{"edge": "OutputOfRun", "from": "out-review-pr-pr-402-1", "to": "wf-review-pr@pr-402", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-402/crit-review-cites-lines", "verdict": "pass", "rationale": "Each finding names path and line.", "method": "model", "evaluated_at": "2026-10-23T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-402/crit-review-cites-lines", "to": "wf-review-pr@pr-402", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-402/crit-review-cites-lines", "to": "crit-review-cites-lines", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-402/crit-review-cites-lines", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-402/crit-review-no-style-nits", "verdict": "pass", "rationale": "No formatting or naming points.", "method": "model", "evaluated_at": "2026-10-23T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-402/crit-review-no-style-nits", "to": "wf-review-pr@pr-402", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-402/crit-review-no-style-nits", "to": "crit-review-no-style-nits", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-402/crit-review-no-style-nits", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-review-pr@pr-403", "status": "succeeded", "started_at": "2026-10-27T14:02:00Z", "finished_at": "2026-10-27T14:09:00Z", "summary": "Reviewed pull request 403: three findings."}}
+{"edge": "RunUsedRevision", "from": "wf-review-pr@pr-403", "to": "wf-review-pr-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-review-pr@pr-403", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-review-pr@pr-403", "to": "trg-review-pr-opened", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-403", "to": "skill-code-review", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-403", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-review-pr-pr-403", "source": "claude-code", "session_id": "cc-403a7", "model": "claude-sonnet-5-5", "input_tokens": 65030, "output_tokens": 4200, "cost_usd": 0.36, "tool_calls": 31}}
+{"edge": "TraceOfRun", "from": "trace-review-pr-pr-403", "to": "wf-review-pr@pr-403", "data": {}}
+{"type": "Output", "data": {"slug": "out-review-pr-pr-403-1", "kind": "comment", "title": "Review of pull request 403", "url": "https://github.example/harbor/ledger/pull/403", "created_at": "2026-10-27T14:09:00Z"}}
+{"edge": "OutputOfRun", "from": "out-review-pr-pr-403-1", "to": "wf-review-pr@pr-403", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-403/crit-review-cites-lines", "verdict": "fail", "rationale": "Findings say 'in the parser' and 'the new test' with no file or line.", "method": "model", "evaluated_at": "2026-10-27T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-403/crit-review-cites-lines", "to": "wf-review-pr@pr-403", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-403/crit-review-cites-lines", "to": "crit-review-cites-lines", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-403/crit-review-cites-lines", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-403/crit-review-no-style-nits", "verdict": "pass", "rationale": "No formatting or naming points.", "method": "model", "evaluated_at": "2026-10-27T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-403/crit-review-no-style-nits", "to": "wf-review-pr@pr-403", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-403/crit-review-no-style-nits", "to": "crit-review-no-style-nits", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-403/crit-review-no-style-nits", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-review-pr@pr-404", "status": "succeeded", "started_at": "2026-10-30T14:02:00Z", "finished_at": "2026-10-30T14:09:00Z", "summary": "Reviewed pull request 404: three findings."}}
+{"edge": "RunUsedRevision", "from": "wf-review-pr@pr-404", "to": "wf-review-pr-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-review-pr@pr-404", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-review-pr@pr-404", "to": "trg-review-pr-opened", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-404", "to": "skill-code-review", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-404", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-review-pr-pr-404", "source": "claude-code", "session_id": "cc-404a7", "model": "claude-sonnet-5-5", "input_tokens": 65040, "output_tokens": 4200, "cost_usd": 0.44, "tool_calls": 31}}
+{"edge": "TraceOfRun", "from": "trace-review-pr-pr-404", "to": "wf-review-pr@pr-404", "data": {}}
+{"type": "Output", "data": {"slug": "out-review-pr-pr-404-1", "kind": "comment", "title": "Review of pull request 404", "url": "https://github.example/harbor/ledger/pull/404", "created_at": "2026-10-30T14:09:00Z"}}
+{"edge": "OutputOfRun", "from": "out-review-pr-pr-404-1", "to": "wf-review-pr@pr-404", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-404/crit-review-cites-lines", "verdict": "fail", "rationale": "Findings say 'in the parser' and 'the new test' with no file or line.", "method": "model", "evaluated_at": "2026-10-30T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-404/crit-review-cites-lines", "to": "wf-review-pr@pr-404", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-404/crit-review-cites-lines", "to": "crit-review-cites-lines", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-404/crit-review-cites-lines", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-404/crit-review-no-style-nits", "verdict": "fail", "rationale": "Two of the five findings are import ordering, which the linter fixes.", "method": "human", "evaluated_at": "2026-10-30T23:30:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-404/crit-review-no-style-nits", "to": "wf-review-pr@pr-404", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-404/crit-review-no-style-nits", "to": "crit-review-no-style-nits", "data": {}}
+{"type": "Run", "data": {"slug": "wf-review-pr@pr-405", "status": "succeeded", "started_at": "2026-11-04T14:02:00Z", "finished_at": "2026-11-04T14:09:00Z", "summary": "Reviewed pull request 405: two findings."}}
+{"edge": "RunUsedRevision", "from": "wf-review-pr@pr-405", "to": "wf-review-pr-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-review-pr@pr-405", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-review-pr@pr-405", "to": "trg-review-pr-opened", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-405", "to": "skill-code-review", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-405", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-review-pr-pr-405", "source": "claude-code", "session_id": "cc-405a7", "model": "claude-sonnet-5-5", "input_tokens": 65050, "output_tokens": 4200, "cost_usd": 0.4, "tool_calls": 31}}
+{"edge": "TraceOfRun", "from": "trace-review-pr-pr-405", "to": "wf-review-pr@pr-405", "data": {}}
+{"type": "Output", "data": {"slug": "out-review-pr-pr-405-1", "kind": "comment", "title": "Review of pull request 405", "url": "https://github.example/harbor/ledger/pull/405", "created_at": "2026-11-04T14:09:00Z"}}
+{"edge": "OutputOfRun", "from": "out-review-pr-pr-405-1", "to": "wf-review-pr@pr-405", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-405/crit-review-cites-lines", "verdict": "pass", "rationale": "Each finding names path and line.", "method": "model", "evaluated_at": "2026-11-04T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-405/crit-review-cites-lines", "to": "wf-review-pr@pr-405", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-405/crit-review-cites-lines", "to": "crit-review-cites-lines", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-405/crit-review-cites-lines", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-405/crit-review-no-style-nits", "verdict": "pass", "rationale": "No formatting or naming points.", "method": "model", "evaluated_at": "2026-11-04T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-405/crit-review-no-style-nits", "to": "wf-review-pr@pr-405", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-405/crit-review-no-style-nits", "to": "crit-review-no-style-nits", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-405/crit-review-no-style-nits", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-review-pr@pr-406", "status": "succeeded", "started_at": "2026-11-07T14:02:00Z", "finished_at": "2026-11-07T14:09:00Z", "summary": "Reviewed pull request 406: three findings."}}
+{"edge": "RunUsedRevision", "from": "wf-review-pr@pr-406", "to": "wf-review-pr-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-review-pr@pr-406", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-review-pr@pr-406", "to": "trg-review-pr-opened", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-406", "to": "skill-code-review", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-406", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-review-pr-pr-406", "source": "claude-code", "session_id": "cc-406a7", "model": "claude-sonnet-5-5", "input_tokens": 65060, "output_tokens": 4200, "cost_usd": 0.39, "tool_calls": 31}}
+{"edge": "TraceOfRun", "from": "trace-review-pr-pr-406", "to": "wf-review-pr@pr-406", "data": {}}
+{"type": "Output", "data": {"slug": "out-review-pr-pr-406-1", "kind": "comment", "title": "Review of pull request 406", "url": "https://github.example/harbor/ledger/pull/406", "created_at": "2026-11-07T14:09:00Z"}}
+{"edge": "OutputOfRun", "from": "out-review-pr-pr-406-1", "to": "wf-review-pr@pr-406", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-406/crit-review-cites-lines", "verdict": "fail", "rationale": "Findings say 'in the parser' and 'the new test' with no file or line.", "method": "model", "evaluated_at": "2026-11-07T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-406/crit-review-cites-lines", "to": "wf-review-pr@pr-406", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-406/crit-review-cites-lines", "to": "crit-review-cites-lines", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-406/crit-review-cites-lines", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-406/crit-review-no-style-nits", "verdict": "pass", "rationale": "No formatting or naming points.", "method": "model", "evaluated_at": "2026-11-07T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-406/crit-review-no-style-nits", "to": "wf-review-pr@pr-406", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-406/crit-review-no-style-nits", "to": "crit-review-no-style-nits", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-406/crit-review-no-style-nits", "to": "agent-judge", "data": {}}
+{"edge": "RevisionCites", "from": "wf-review-pr-r2", "to": "wf-review-pr@pr-401/crit-review-cites-lines", "data": {}}
+{"edge": "RevisionCites", "from": "wf-review-pr-r2", "to": "wf-review-pr@pr-403/crit-review-cites-lines", "data": {}}
+{"edge": "RevisionCites", "from": "wf-review-pr-r2", "to": "wf-review-pr@pr-404/crit-review-cites-lines", "data": {}}
+{"type": "Run", "data": {"slug": "wf-review-pr@pr-410", "status": "succeeded", "started_at": "2026-11-12T14:02:00Z", "finished_at": "2026-11-12T14:10:00Z", "summary": "Reviewed pull request 410: findings given as path:line."}}
+{"edge": "RunUsedRevision", "from": "wf-review-pr@pr-410", "to": "wf-review-pr-r2", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-review-pr@pr-410", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-review-pr@pr-410", "to": "trg-review-pr-opened", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-410", "to": "skill-code-review", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-410", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-review-pr-pr-410", "source": "claude-code", "session_id": "cc-410b2", "model": "claude-sonnet-5-5", "input_tokens": 68100, "output_tokens": 4900, "cost_usd": 0.52, "tool_calls": 34}}
+{"edge": "TraceOfRun", "from": "trace-review-pr-pr-410", "to": "wf-review-pr@pr-410", "data": {}}
+{"type": "Output", "data": {"slug": "out-review-pr-pr-410-1", "kind": "comment", "title": "Review of pull request 410", "url": "https://github.example/harbor/ledger/pull/410", "created_at": "2026-11-12T14:10:00Z"}}
+{"edge": "OutputOfRun", "from": "out-review-pr-pr-410-1", "to": "wf-review-pr@pr-410", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-410/crit-review-cites-lines", "verdict": "pass", "rationale": "Every finding is given as path:line.", "method": "model", "evaluated_at": "2026-11-12T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-410/crit-review-cites-lines", "to": "wf-review-pr@pr-410", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-410/crit-review-cites-lines", "to": "crit-review-cites-lines", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-410/crit-review-cites-lines", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-410/crit-review-no-style-nits", "verdict": "pass", "rationale": "No formatting or naming points.", "method": "model", "evaluated_at": "2026-11-12T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-410/crit-review-no-style-nits", "to": "wf-review-pr@pr-410", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-410/crit-review-no-style-nits", "to": "crit-review-no-style-nits", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-410/crit-review-no-style-nits", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-review-pr@pr-411", "status": "succeeded", "started_at": "2026-11-14T14:02:00Z", "finished_at": "2026-11-14T14:10:00Z", "summary": "Reviewed pull request 411: findings given as path:line."}}
+{"edge": "RunUsedRevision", "from": "wf-review-pr@pr-411", "to": "wf-review-pr-r2", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-review-pr@pr-411", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-review-pr@pr-411", "to": "trg-review-pr-opened", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-411", "to": "skill-code-review", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-411", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-review-pr-pr-411", "source": "claude-code", "session_id": "cc-411b2", "model": "claude-sonnet-5-5", "input_tokens": 68110, "output_tokens": 4900, "cost_usd": 0.49, "tool_calls": 34}}
+{"edge": "TraceOfRun", "from": "trace-review-pr-pr-411", "to": "wf-review-pr@pr-411", "data": {}}
+{"type": "Output", "data": {"slug": "out-review-pr-pr-411-1", "kind": "comment", "title": "Review of pull request 411", "url": "https://github.example/harbor/ledger/pull/411", "created_at": "2026-11-14T14:10:00Z"}}
+{"edge": "OutputOfRun", "from": "out-review-pr-pr-411-1", "to": "wf-review-pr@pr-411", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-411/crit-review-cites-lines", "verdict": "pass", "rationale": "Every finding is given as path:line.", "method": "model", "evaluated_at": "2026-11-14T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-411/crit-review-cites-lines", "to": "wf-review-pr@pr-411", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-411/crit-review-cites-lines", "to": "crit-review-cites-lines", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-411/crit-review-cites-lines", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-411/crit-review-no-style-nits", "verdict": "pass", "rationale": "No formatting or naming points.", "method": "model", "evaluated_at": "2026-11-14T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-411/crit-review-no-style-nits", "to": "wf-review-pr@pr-411", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-411/crit-review-no-style-nits", "to": "crit-review-no-style-nits", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-411/crit-review-no-style-nits", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-review-pr@pr-412", "status": "succeeded", "started_at": "2026-11-17T14:02:00Z", "finished_at": "2026-11-17T14:10:00Z", "summary": "Reviewed pull request 412: findings given as path:line."}}
+{"edge": "RunUsedRevision", "from": "wf-review-pr@pr-412", "to": "wf-review-pr-r2", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-review-pr@pr-412", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-review-pr@pr-412", "to": "trg-review-pr-opened", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-412", "to": "skill-code-review", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-412", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-review-pr-pr-412", "source": "claude-code", "session_id": "cc-412b2", "model": "claude-sonnet-5-5", "input_tokens": 68120, "output_tokens": 4900, "cost_usd": 0.55, "tool_calls": 34}}
+{"edge": "TraceOfRun", "from": "trace-review-pr-pr-412", "to": "wf-review-pr@pr-412", "data": {}}
+{"type": "Output", "data": {"slug": "out-review-pr-pr-412-1", "kind": "comment", "title": "Review of pull request 412", "url": "https://github.example/harbor/ledger/pull/412", "created_at": "2026-11-17T14:10:00Z"}}
+{"edge": "OutputOfRun", "from": "out-review-pr-pr-412-1", "to": "wf-review-pr@pr-412", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-412/crit-review-cites-lines", "verdict": "pass", "rationale": "Every finding is given as path:line.", "method": "model", "evaluated_at": "2026-11-17T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-412/crit-review-cites-lines", "to": "wf-review-pr@pr-412", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-412/crit-review-cites-lines", "to": "crit-review-cites-lines", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-412/crit-review-cites-lines", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-412/crit-review-no-style-nits", "verdict": "fail", "rationale": "Asks to rename a local variable the linter accepts.", "method": "model", "evaluated_at": "2026-11-17T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-412/crit-review-no-style-nits", "to": "wf-review-pr@pr-412", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-412/crit-review-no-style-nits", "to": "crit-review-no-style-nits", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-412/crit-review-no-style-nits", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-review-pr@pr-413", "status": "succeeded", "started_at": "2026-11-19T14:02:00Z", "finished_at": "2026-11-19T14:10:00Z", "summary": "Reviewed pull request 413: findings given as path:line."}}
+{"edge": "RunUsedRevision", "from": "wf-review-pr@pr-413", "to": "wf-review-pr-r2", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-review-pr@pr-413", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-review-pr@pr-413", "to": "trg-review-pr-opened", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-413", "to": "skill-code-review", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-413", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-review-pr-pr-413", "source": "claude-code", "session_id": "cc-413b2", "model": "claude-sonnet-5-5", "input_tokens": 68130, "output_tokens": 4900, "cost_usd": 0.51, "tool_calls": 34}}
+{"edge": "TraceOfRun", "from": "trace-review-pr-pr-413", "to": "wf-review-pr@pr-413", "data": {}}
+{"type": "Output", "data": {"slug": "out-review-pr-pr-413-1", "kind": "comment", "title": "Review of pull request 413", "url": "https://github.example/harbor/ledger/pull/413", "created_at": "2026-11-19T14:10:00Z"}}
+{"edge": "OutputOfRun", "from": "out-review-pr-pr-413-1", "to": "wf-review-pr@pr-413", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-413/crit-review-cites-lines", "verdict": "pass", "rationale": "Every finding is given as path:line.", "method": "model", "evaluated_at": "2026-11-19T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-413/crit-review-cites-lines", "to": "wf-review-pr@pr-413", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-413/crit-review-cites-lines", "to": "crit-review-cites-lines", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-413/crit-review-cites-lines", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-review-pr@pr-413/crit-review-no-style-nits", "verdict": "pass", "rationale": "No formatting or naming points.", "method": "model", "evaluated_at": "2026-11-19T23:00:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-review-pr@pr-413/crit-review-no-style-nits", "to": "wf-review-pr@pr-413", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-review-pr@pr-413/crit-review-no-style-nits", "to": "crit-review-no-style-nits", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-review-pr@pr-413/crit-review-no-style-nits", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-review-pr@pr-414", "status": "succeeded", "started_at": "2026-11-21T14:02:00Z", "finished_at": "2026-11-21T14:10:00Z", "summary": "Reviewed pull request 414: findings given as path:line."}}
+{"edge": "RunUsedRevision", "from": "wf-review-pr@pr-414", "to": "wf-review-pr-r2", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-review-pr@pr-414", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-review-pr@pr-414", "to": "trg-review-pr-opened", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-414", "to": "skill-code-review", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-review-pr@pr-414", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-review-pr-pr-414", "source": "claude-code", "session_id": "cc-414b2", "model": "claude-sonnet-5-5", "input_tokens": 68140, "output_tokens": 4900, "cost_usd": 0.5, "tool_calls": 34}}
+{"edge": "TraceOfRun", "from": "trace-review-pr-pr-414", "to": "wf-review-pr@pr-414", "data": {}}
+{"type": "Output", "data": {"slug": "out-review-pr-pr-414-1", "kind": "comment", "title": "Review of pull request 414", "url": "https://github.example/harbor/ledger/pull/414", "created_at": "2026-11-21T14:10:00Z"}}
+{"edge": "OutputOfRun", "from": "out-review-pr-pr-414-1", "to": "wf-review-pr@pr-414", "data": {}}
+{"type": "Run", "data": {"slug": "wf-review-pr@pr-415", "status": "running", "started_at": "2026-11-22T03:00:00Z"}}
+{"edge": "RunUsedRevision", "from": "wf-review-pr@pr-415", "to": "wf-review-pr-r2", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-review-pr@pr-415", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-review-pr@pr-415", "to": "trg-review-pr-opened", "data": {}}
+{"type": "Run", "data": {"slug": "wf-reproduce-issue@issue-88", "status": "succeeded", "started_at": "2026-11-03T10:00:00Z", "finished_at": "2026-11-03T10:21:00Z", "summary": "Reproduced on v2.4.1 with a nine-line script."}}
+{"edge": "RunUsedRevision", "from": "wf-reproduce-issue@issue-88", "to": "wf-reproduce-issue-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-reproduce-issue@issue-88", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-reproduce-issue@issue-88", "to": "trg-issue-labelled-bug", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-reproduce-issue@issue-88", "to": "skill-reproduce", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-reproduce-issue@issue-88", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-reproduce-issue-issue-88", "source": "claude-code", "session_id": "cc-88c1", "model": "claude-sonnet-5-5", "input_tokens": 88000, "output_tokens": 6100, "cost_usd": 0.71, "tool_calls": 52}}
+{"edge": "TraceOfRun", "from": "trace-reproduce-issue-issue-88", "to": "wf-reproduce-issue@issue-88", "data": {}}
+{"type": "Output", "data": {"slug": "out-reproduce-issue-issue-88-1", "kind": "comment", "title": "Reproduction of issue 88", "url": "https://github.example/harbor/ledger/issues/88", "created_at": "2026-11-03T10:21:00Z"}}
+{"edge": "OutputOfRun", "from": "out-reproduce-issue-issue-88-1", "to": "wf-reproduce-issue@issue-88", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-reproduce-issue@issue-88/crit-repro-script", "verdict": "pass", "rationale": "The script fails on v2.4.1 as reported.", "method": "model", "evaluated_at": "2026-11-04T06:10:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-reproduce-issue@issue-88/crit-repro-script", "to": "wf-reproduce-issue@issue-88", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-reproduce-issue@issue-88/crit-repro-script", "to": "crit-repro-script", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-reproduce-issue@issue-88/crit-repro-script", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-reproduce-issue@issue-88/crit-repro-version", "verdict": "pass", "rationale": "Names v2.4.1 and commit 3c1e9a0.", "method": "model", "evaluated_at": "2026-11-04T06:10:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-reproduce-issue@issue-88/crit-repro-version", "to": "wf-reproduce-issue@issue-88", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-reproduce-issue@issue-88/crit-repro-version", "to": "crit-repro-version", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-reproduce-issue@issue-88/crit-repro-version", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-reproduce-issue@issue-89", "status": "succeeded", "started_at": "2026-11-10T10:00:00Z", "finished_at": "2026-11-10T10:30:00Z", "summary": "Could not reproduce on v2.4.2."}}
+{"edge": "RunUsedRevision", "from": "wf-reproduce-issue@issue-89", "to": "wf-reproduce-issue-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-reproduce-issue@issue-89", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-reproduce-issue@issue-89", "to": "trg-issue-labelled-bug", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-reproduce-issue@issue-89", "to": "skill-reproduce", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-reproduce-issue@issue-89", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-reproduce-issue-issue-89", "source": "claude-code", "session_id": "cc-89c1", "model": "claude-sonnet-5-5", "input_tokens": 97000, "output_tokens": 5400, "cost_usd": 0.83, "tool_calls": 61}}
+{"edge": "TraceOfRun", "from": "trace-reproduce-issue-issue-89", "to": "wf-reproduce-issue@issue-89", "data": {}}
+{"type": "Output", "data": {"slug": "out-reproduce-issue-issue-89-1", "kind": "comment", "title": "Issue 89 does not reproduce", "url": "https://github.example/harbor/ledger/issues/89", "created_at": "2026-11-10T10:30:00Z"}}
+{"edge": "OutputOfRun", "from": "out-reproduce-issue-issue-89-1", "to": "wf-reproduce-issue@issue-89", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-reproduce-issue@issue-89/crit-repro-script", "verdict": "fail", "rationale": "Reported as not reproducing; the trace shows a cached build from before the regression.", "method": "model", "evaluated_at": "2026-11-11T06:10:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-reproduce-issue@issue-89/crit-repro-script", "to": "wf-reproduce-issue@issue-89", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-reproduce-issue@issue-89/crit-repro-script", "to": "crit-repro-script", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-reproduce-issue@issue-89/crit-repro-script", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-reproduce-issue@issue-89/crit-repro-version", "verdict": "pass", "rationale": "Names v2.4.2.", "method": "model", "evaluated_at": "2026-11-11T06:10:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-reproduce-issue@issue-89/crit-repro-version", "to": "wf-reproduce-issue@issue-89", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-reproduce-issue@issue-89/crit-repro-version", "to": "crit-repro-version", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-reproduce-issue@issue-89/crit-repro-version", "to": "agent-judge", "data": {}}
+{"edge": "RevisionCites", "from": "wf-reproduce-issue-r2", "to": "wf-reproduce-issue@issue-89/crit-repro-script", "data": {}}
+{"type": "Run", "data": {"slug": "wf-reproduce-issue@issue-90", "status": "failed", "started_at": "2026-11-18T10:00:00Z", "finished_at": "2026-11-18T10:04:00Z", "summary": "The checkout of v2.3.0 failed: tag not found.", "error_type": "executor-error"}}
+{"edge": "RunUsedRevision", "from": "wf-reproduce-issue@issue-90", "to": "wf-reproduce-issue-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-reproduce-issue@issue-90", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-reproduce-issue@issue-90", "to": "trg-issue-labelled-bug", "data": {}}
+{"type": "Run", "data": {"slug": "wf-reproduce-issue@issue-90-retry", "status": "succeeded", "started_at": "2026-11-18T11:00:00Z", "finished_at": "2026-11-18T11:18:00Z", "summary": "Reproduced on v2.3.0 after fetching tags."}}
+{"edge": "RunUsedRevision", "from": "wf-reproduce-issue@issue-90-retry", "to": "wf-reproduce-issue-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-reproduce-issue@issue-90-retry", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-reproduce-issue@issue-90-retry", "to": "trg-issue-labelled-bug", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-reproduce-issue@issue-90-retry", "to": "skill-reproduce", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-reproduce-issue@issue-90-retry", "to": "skill-github", "data": {}}
+{"edge": "RunRetryOf", "from": "wf-reproduce-issue@issue-90-retry", "to": "wf-reproduce-issue@issue-90", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-reproduce-issue-issue-90-retry", "source": "claude-code", "session_id": "cc-90c2", "model": "claude-sonnet-5-5", "input_tokens": 79000, "output_tokens": 5800, "cost_usd": 0.66, "tool_calls": 47}}
+{"edge": "TraceOfRun", "from": "trace-reproduce-issue-issue-90-retry", "to": "wf-reproduce-issue@issue-90-retry", "data": {}}
+{"type": "Output", "data": {"slug": "out-reproduce-issue-issue-90-retry-1", "kind": "comment", "title": "Reproduction of issue 90", "url": "https://github.example/harbor/ledger/issues/90", "created_at": "2026-11-18T11:18:00Z"}}
+{"edge": "OutputOfRun", "from": "out-reproduce-issue-issue-90-retry-1", "to": "wf-reproduce-issue@issue-90-retry", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-reproduce-issue@issue-90-retry/crit-repro-script", "verdict": "pass", "rationale": "The script fails on v2.3.0.", "method": "model", "evaluated_at": "2026-11-19T06:10:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-reproduce-issue@issue-90-retry/crit-repro-script", "to": "wf-reproduce-issue@issue-90-retry", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-reproduce-issue@issue-90-retry/crit-repro-script", "to": "crit-repro-script", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-reproduce-issue@issue-90-retry/crit-repro-script", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-reproduce-issue@issue-90-retry/crit-repro-version", "verdict": "pass", "rationale": "Names v2.3.0.", "method": "model", "evaluated_at": "2026-11-19T06:10:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-reproduce-issue@issue-90-retry/crit-repro-version", "to": "wf-reproduce-issue@issue-90-retry", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-reproduce-issue@issue-90-retry/crit-repro-version", "to": "crit-repro-version", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-reproduce-issue@issue-90-retry/crit-repro-version", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-reproduce-issue@issue-91", "status": "succeeded", "started_at": "2026-11-20T10:00:00Z", "finished_at": "2026-11-20T10:19:00Z", "summary": "Reproduced with a twelve-line script."}}
+{"edge": "RunUsedRevision", "from": "wf-reproduce-issue@issue-91", "to": "wf-reproduce-issue-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-reproduce-issue@issue-91", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-reproduce-issue@issue-91", "to": "trg-issue-labelled-bug", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-reproduce-issue@issue-91", "to": "skill-reproduce", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-reproduce-issue@issue-91", "to": "skill-github", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-reproduce-issue-issue-91", "source": "claude-code", "session_id": "cc-91c1", "model": "claude-sonnet-5-5", "input_tokens": 84000, "output_tokens": 6000, "cost_usd": 0.69, "tool_calls": 50}}
+{"edge": "TraceOfRun", "from": "trace-reproduce-issue-issue-91", "to": "wf-reproduce-issue@issue-91", "data": {}}
+{"type": "Output", "data": {"slug": "out-reproduce-issue-issue-91-1", "kind": "comment", "title": "Reproduction of issue 91", "url": "https://github.example/harbor/ledger/issues/91", "created_at": "2026-11-20T10:19:00Z"}}
+{"edge": "OutputOfRun", "from": "out-reproduce-issue-issue-91-1", "to": "wf-reproduce-issue@issue-91", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-reproduce-issue@issue-91/crit-repro-script", "verdict": "pass", "rationale": "The script fails as reported.", "method": "model", "evaluated_at": "2026-11-21T06:10:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-reproduce-issue@issue-91/crit-repro-script", "to": "wf-reproduce-issue@issue-91", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-reproduce-issue@issue-91/crit-repro-script", "to": "crit-repro-script", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-reproduce-issue@issue-91/crit-repro-script", "to": "agent-judge", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-reproduce-issue@issue-91/crit-repro-version", "verdict": "partial", "rationale": "Says 'latest main' but no commit.", "method": "model", "evaluated_at": "2026-11-21T06:10:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-reproduce-issue@issue-91/crit-repro-version", "to": "wf-reproduce-issue@issue-91", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-reproduce-issue@issue-91/crit-repro-version", "to": "crit-repro-version", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-reproduce-issue@issue-91/crit-repro-version", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-triage-support@2026-11-23T06", "status": "succeeded", "started_at": "2026-11-23T06:00:00Z", "finished_at": "2026-11-23T06:03:00Z", "summary": "Routed 4 emails.", "covered_from": "2026-11-23T05:00:00Z", "covered_through": "2026-11-23T06:00:00Z"}}
+{"edge": "RunUsedRevision", "from": "wf-triage-support@2026-11-23T06", "to": "wf-triage-support-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-triage-support@2026-11-23T06", "to": "agent-desk", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-triage-support@2026-11-23T06", "to": "trg-support-hourly", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-triage-support@2026-11-23T06", "to": "skill-support-routing", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-triage-support-2026-11-23T06", "source": "langsmith", "session_id": "ls-06f0", "url": "https://smith.langchain.example/harbor/runs/ls-06f0", "model": "claude-haiku-5-5", "input_tokens": 15600, "output_tokens": 800, "cost_usd": 0.036, "tool_calls": 8}}
+{"edge": "TraceOfRun", "from": "trace-triage-support-2026-11-23T06", "to": "wf-triage-support@2026-11-23T06", "data": {}}
+{"type": "Output", "data": {"slug": "out-triage-support-2026-11-23T06-1", "kind": "other", "title": "Routed 4 emails", "url": "https://help.harbor.example/views/triage-2026-11-23T06", "created_at": "2026-11-23T06:03:00Z"}}
+{"edge": "OutputOfRun", "from": "out-triage-support-2026-11-23T06-1", "to": "wf-triage-support@2026-11-23T06", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-triage-support@2026-11-23T06/crit-triage-routes-owner", "verdict": "pass", "rationale": "Every email went to its owner.", "method": "model", "evaluated_at": "2026-11-23T06:30:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-triage-support@2026-11-23T06/crit-triage-routes-owner", "to": "wf-triage-support@2026-11-23T06", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-triage-support@2026-11-23T06/crit-triage-routes-owner", "to": "crit-triage-routes-owner", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-triage-support@2026-11-23T06/crit-triage-routes-owner", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-triage-support@2026-11-23T07", "status": "succeeded", "started_at": "2026-11-23T07:00:00Z", "finished_at": "2026-11-23T07:03:00Z", "summary": "Routed 6 emails.", "covered_from": "2026-11-23T06:00:00Z", "covered_through": "2026-11-23T07:00:00Z"}}
+{"edge": "RunUsedRevision", "from": "wf-triage-support@2026-11-23T07", "to": "wf-triage-support-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-triage-support@2026-11-23T07", "to": "agent-desk", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-triage-support@2026-11-23T07", "to": "trg-support-hourly", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-triage-support@2026-11-23T07", "to": "skill-support-routing", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-triage-support-2026-11-23T07", "source": "langsmith", "session_id": "ls-07f0", "url": "https://smith.langchain.example/harbor/runs/ls-07f0", "model": "claude-haiku-5-5", "input_tokens": 17400, "output_tokens": 800, "cost_usd": 0.044, "tool_calls": 12}}
+{"edge": "TraceOfRun", "from": "trace-triage-support-2026-11-23T07", "to": "wf-triage-support@2026-11-23T07", "data": {}}
+{"type": "Output", "data": {"slug": "out-triage-support-2026-11-23T07-1", "kind": "other", "title": "Routed 6 emails", "url": "https://help.harbor.example/views/triage-2026-11-23T07", "created_at": "2026-11-23T07:03:00Z"}}
+{"edge": "OutputOfRun", "from": "out-triage-support-2026-11-23T07-1", "to": "wf-triage-support@2026-11-23T07", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-triage-support@2026-11-23T07/crit-triage-routes-owner", "verdict": "pass", "rationale": "Every email went to its owner.", "method": "model", "evaluated_at": "2026-11-23T07:30:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-triage-support@2026-11-23T07/crit-triage-routes-owner", "to": "wf-triage-support@2026-11-23T07", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-triage-support@2026-11-23T07/crit-triage-routes-owner", "to": "crit-triage-routes-owner", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-triage-support@2026-11-23T07/crit-triage-routes-owner", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-triage-support@2026-11-23T08", "status": "succeeded", "started_at": "2026-11-23T08:00:00Z", "finished_at": "2026-11-23T08:03:00Z", "summary": "Routed 5 emails.", "covered_from": "2026-11-23T07:00:00Z", "covered_through": "2026-11-23T08:00:00Z"}}
+{"edge": "RunUsedRevision", "from": "wf-triage-support@2026-11-23T08", "to": "wf-triage-support-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-triage-support@2026-11-23T08", "to": "agent-desk", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-triage-support@2026-11-23T08", "to": "trg-support-hourly", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-triage-support@2026-11-23T08", "to": "skill-support-routing", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-triage-support-2026-11-23T08", "source": "langsmith", "session_id": "ls-08f0", "url": "https://smith.langchain.example/harbor/runs/ls-08f0", "model": "claude-haiku-5-5", "input_tokens": 16500, "output_tokens": 800, "cost_usd": 0.04, "tool_calls": 10}}
+{"edge": "TraceOfRun", "from": "trace-triage-support-2026-11-23T08", "to": "wf-triage-support@2026-11-23T08", "data": {}}
+{"type": "Output", "data": {"slug": "out-triage-support-2026-11-23T08-1", "kind": "other", "title": "Routed 5 emails", "url": "https://help.harbor.example/views/triage-2026-11-23T08", "created_at": "2026-11-23T08:03:00Z"}}
+{"edge": "OutputOfRun", "from": "out-triage-support-2026-11-23T08-1", "to": "wf-triage-support@2026-11-23T08", "data": {}}
+{"type": "Evaluation", "data": {"slug": "wf-triage-support@2026-11-23T08/crit-triage-routes-owner", "verdict": "fail", "rationale": "A refund question went to Platform; Billing owns refunds.", "method": "model", "evaluated_at": "2026-11-23T08:30:00Z"}}
+{"edge": "EvaluationOf", "from": "wf-triage-support@2026-11-23T08/crit-triage-routes-owner", "to": "wf-triage-support@2026-11-23T08", "data": {}}
+{"edge": "EvaluationAgainst", "from": "wf-triage-support@2026-11-23T08/crit-triage-routes-owner", "to": "crit-triage-routes-owner", "data": {}}
+{"edge": "EvaluatedBy", "from": "wf-triage-support@2026-11-23T08/crit-triage-routes-owner", "to": "agent-judge", "data": {}}
+{"type": "Run", "data": {"slug": "wf-triage-support@2026-11-23T09", "status": "succeeded", "started_at": "2026-11-23T09:00:00Z", "finished_at": "2026-11-23T09:03:00Z", "summary": "Routed 3 emails.", "covered_from": "2026-11-23T08:00:00Z", "covered_through": "2026-11-23T09:00:00Z"}}
+{"edge": "RunUsedRevision", "from": "wf-triage-support@2026-11-23T09", "to": "wf-triage-support-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-triage-support@2026-11-23T09", "to": "agent-desk", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-triage-support@2026-11-23T09", "to": "trg-support-hourly", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-triage-support@2026-11-23T09", "to": "skill-support-routing", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-triage-support-2026-11-23T09", "source": "langsmith", "session_id": "ls-09f0", "url": "https://smith.langchain.example/harbor/runs/ls-09f0", "model": "claude-haiku-5-5", "input_tokens": 14700, "output_tokens": 800, "cost_usd": 0.032, "tool_calls": 6}}
+{"edge": "TraceOfRun", "from": "trace-triage-support-2026-11-23T09", "to": "wf-triage-support@2026-11-23T09", "data": {}}
+{"type": "Output", "data": {"slug": "out-triage-support-2026-11-23T09-1", "kind": "other", "title": "Routed 3 emails", "url": "https://help.harbor.example/views/triage-2026-11-23T09", "created_at": "2026-11-23T09:03:00Z"}}
+{"edge": "OutputOfRun", "from": "out-triage-support-2026-11-23T09-1", "to": "wf-triage-support@2026-11-23T09", "data": {}}
+{"type": "Run", "data": {"slug": "wf-judge-runs@2026-11-21", "status": "succeeded", "started_at": "2026-11-21T06:00:00Z", "finished_at": "2026-11-21T06:14:00Z", "summary": "Judged 4 runs.", "covered_from": "2026-11-20T06:00:00Z", "covered_through": "2026-11-21T06:00:00Z"}}
+{"edge": "RunUsedRevision", "from": "wf-judge-runs@2026-11-21", "to": "wf-judge-runs-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-judge-runs@2026-11-21", "to": "agent-judge", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-judge-runs@2026-11-21", "to": "trg-judge-daily", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-judge-runs@2026-11-21", "to": "skill-judging", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-judge-runs@2026-11-21", "to": "skill-agent-ops", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-judge-runs-2026-11-21", "source": "claude-code", "session_id": "cc-j21", "model": "claude-opus-5-5", "input_tokens": 140000, "output_tokens": 9000, "cost_usd": 1.92, "tool_calls": 40}}
+{"edge": "TraceOfRun", "from": "trace-judge-runs-2026-11-21", "to": "wf-judge-runs@2026-11-21", "data": {}}
+{"type": "Run", "data": {"slug": "wf-judge-runs@2026-11-22", "status": "succeeded", "started_at": "2026-11-22T06:00:00Z", "finished_at": "2026-11-22T06:09:00Z", "summary": "Judged 2 runs.", "covered_from": "2026-11-21T06:00:00Z", "covered_through": "2026-11-22T06:00:00Z"}}
+{"edge": "RunUsedRevision", "from": "wf-judge-runs@2026-11-22", "to": "wf-judge-runs-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-judge-runs@2026-11-22", "to": "agent-judge", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-judge-runs@2026-11-22", "to": "trg-judge-daily", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-judge-runs@2026-11-22", "to": "skill-judging", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-judge-runs@2026-11-22", "to": "skill-agent-ops", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-judge-runs-2026-11-22", "source": "claude-code", "session_id": "cc-j22", "model": "claude-opus-5-5", "input_tokens": 90000, "output_tokens": 6000, "cost_usd": 1.24, "tool_calls": 22}}
+{"edge": "TraceOfRun", "from": "trace-judge-runs-2026-11-22", "to": "wf-judge-runs@2026-11-22", "data": {}}
+{"type": "Run", "data": {"slug": "wf-tune-prompts@2026-11-10", "status": "succeeded", "started_at": "2026-11-10T07:00:00Z", "finished_at": "2026-11-10T07:20:00Z", "summary": "Proposed wf-review-pr-r2."}}
+{"edge": "RunUsedRevision", "from": "wf-tune-prompts@2026-11-10", "to": "wf-tune-prompts-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-tune-prompts@2026-11-10", "to": "agent-tuner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-tune-prompts@2026-11-10", "to": "trg-tune-weekly", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-tune-prompts@2026-11-10", "to": "skill-judging", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-tune-prompts@2026-11-10", "to": "skill-agent-ops", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-tune-prompts-2026-11-10", "source": "claude-code", "session_id": "cc-t10", "model": "claude-opus-5-5", "input_tokens": 120000, "output_tokens": 7000, "cost_usd": 1.61, "tool_calls": 18}}
+{"edge": "TraceOfRun", "from": "trace-tune-prompts-2026-11-10", "to": "wf-tune-prompts@2026-11-10", "data": {}}
+{"type": "Run", "data": {"slug": "wf-tune-prompts@2026-11-17", "status": "succeeded", "started_at": "2026-11-17T07:00:00Z", "finished_at": "2026-11-17T07:15:00Z", "summary": "Proposed wf-reproduce-issue-r2."}}
+{"edge": "RunUsedRevision", "from": "wf-tune-prompts@2026-11-17", "to": "wf-tune-prompts-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-tune-prompts@2026-11-17", "to": "agent-tuner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-tune-prompts@2026-11-17", "to": "trg-tune-weekly", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-tune-prompts@2026-11-17", "to": "skill-judging", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-tune-prompts@2026-11-17", "to": "skill-agent-ops", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-tune-prompts-2026-11-17", "source": "claude-code", "session_id": "cc-t17", "model": "claude-opus-5-5", "input_tokens": 110000, "output_tokens": 6500, "cost_usd": 1.48, "tool_calls": 16}}
+{"edge": "TraceOfRun", "from": "trace-tune-prompts-2026-11-17", "to": "wf-tune-prompts@2026-11-17", "data": {}}
+{"type": "Run", "data": {"slug": "wf-weekly-report@2026-11-14", "status": "succeeded", "started_at": "2026-11-14T16:00:00Z", "finished_at": "2026-11-14T16:04:00Z", "summary": "Posted the weekly report.", "covered_from": "2026-11-07T16:00:00Z", "covered_through": "2026-11-14T16:00:00Z"}}
+{"edge": "RunUsedRevision", "from": "wf-weekly-report@2026-11-14", "to": "wf-weekly-report-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-weekly-report@2026-11-14", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-weekly-report@2026-11-14", "to": "trg-report-weekly", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-weekly-report@2026-11-14", "to": "skill-slack", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-weekly-report@2026-11-14", "to": "skill-agent-ops", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-weekly-report-2026-11-14", "source": "claude-code", "session_id": "cc-r14", "model": "claude-sonnet-5-5", "input_tokens": 30000, "output_tokens": 1500, "cost_usd": 0.21, "tool_calls": 6}}
+{"edge": "TraceOfRun", "from": "trace-weekly-report-2026-11-14", "to": "wf-weekly-report@2026-11-14", "data": {}}
+{"type": "Output", "data": {"slug": "out-weekly-report-2026-11-14-1", "kind": "message", "title": "Agent report, week to 2026-11-14", "url": "https://harbor.slack.example/archives/C0AGENTS/p202611141600", "created_at": "2026-11-14T16:04:00Z"}}
+{"edge": "OutputOfRun", "from": "out-weekly-report-2026-11-14-1", "to": "wf-weekly-report@2026-11-14", "data": {}}
+{"type": "Run", "data": {"slug": "wf-weekly-report@2026-11-21", "status": "succeeded", "started_at": "2026-11-21T16:00:00Z", "finished_at": "2026-11-21T16:04:00Z", "summary": "Posted the weekly report.", "covered_from": "2026-11-14T16:00:00Z", "covered_through": "2026-11-21T16:00:00Z"}}
+{"edge": "RunUsedRevision", "from": "wf-weekly-report@2026-11-21", "to": "wf-weekly-report-r1", "data": {}}
+{"edge": "RunExecutedBy", "from": "wf-weekly-report@2026-11-21", "to": "agent-runner", "data": {}}
+{"edge": "RunTriggeredBy", "from": "wf-weekly-report@2026-11-21", "to": "trg-report-weekly", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-weekly-report@2026-11-21", "to": "skill-slack", "data": {}}
+{"edge": "RunLoadedSkill", "from": "wf-weekly-report@2026-11-21", "to": "skill-agent-ops", "data": {}}
+{"type": "Trace", "data": {"slug": "trace-weekly-report-2026-11-21", "source": "claude-code", "session_id": "cc-r21", "model": "claude-sonnet-5-5", "input_tokens": 30000, "output_tokens": 1500, "cost_usd": 0.21, "tool_calls": 6}}
+{"edge": "TraceOfRun", "from": "trace-weekly-report-2026-11-21", "to": "wf-weekly-report@2026-11-21", "data": {}}
+{"type": "Output", "data": {"slug": "out-weekly-report-2026-11-21-1", "kind": "message", "title": "Agent report, week to 2026-11-21", "url": "https://harbor.slack.example/archives/C0AGENTS/p202611211600", "created_at": "2026-11-21T16:04:00Z"}}
+{"edge": "OutputOfRun", "from": "out-weekly-report-2026-11-21-1", "to": "wf-weekly-report@2026-11-21", "data": {}}

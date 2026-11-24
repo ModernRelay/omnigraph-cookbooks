@@ -5,7 +5,7 @@ links to the corresponding `CLAUDE.md`; edit the target once.
 
 ## Scope and sources
 
-These are nine self-contained Omnigraph **0.16.0** bundles: schemas, seed data,
+These are ten self-contained Omnigraph **0.16.0** bundles: schemas, seed data,
 stored queries and applied policies. The only application code is the beads
 cookbook's `ob` client in `beads/client/`, with its own tests, and the local
 HTTPS gateway `scripts/local-tls-gateway.py`. The root [README](README.md)
@@ -25,6 +25,7 @@ and worked queries.
 | `company-brain` | `company` |
 | `hardware-program` | `program` |
 | `health-record` | `health` |
+| `agent-ops` | `agents` |
 
 The graph ID is the key in `cluster.yaml`, not the folder name. Configurations
 omit `storage`, so local roots default to their directory. Explicit storage
@@ -41,7 +42,7 @@ before a schema change, a bulk load or a retry after an uncertain write.
 
 ## Changes and validation
 
-- Run `python3 scripts/check-cookbooks.py` for all nine local journeys, or
+- Run `python3 scripts/check-cookbooks.py` for all ten local journeys, or
   name cookbooks to run only those. It uses the released CLI/server, isolated
   operator homes, disposable roots and the local HTTPS gateway; it never
   touches a deployed graph. For beads the checker also drives the `ob`
@@ -146,8 +147,8 @@ Moving a cookbook to the template changes its README, its `CLAUDE.md` and its
   leave `use_case`, `needs` and `capabilities` out of `site.json`. Do not pick
   the nearest one. If it lacks a link the cookbook shows, leave that need or
   capability out. Leave `search.keywords` as they are.
-- **Roles.** Only company-brain, hardware-program and health-record have an
-  agent role that is kept to branches. For any other cookbook, read its
+- **Roles.** Only company-brain, hardware-program, health-record and agent-ops
+  have an agent role that is kept to branches. For any other cookbook, read its
   `policies/graph.policy.yaml` and say what it does: who can write `main` and
   who can merge. Where nothing keeps an agent on a branch, say that review of
   its work is a practice there and not enforced. Do not add or change a role.
@@ -410,9 +411,10 @@ need only `main` live. Adoption, missing-root recreation and out-of-band schema
 changes are refused.
 
 All bundles include `act-admin`, `act-writer`, `act-reader` role policies.
-company-brain, hardware-program and health-record add `act-agent`
+company-brain, hardware-program, health-record and agent-ops add `act-agent`
 (company-brain also named agents), which write only on unprotected branches and cannot merge or delete
-branches. Static actor-to-token JSON remains supported. `omnigraph access
+branches. agent-ops also has `act-executor`, which records runs on `main` and
+cannot merge or delete branches. Static actor-to-token JSON remains supported. `omnigraph access
 --target NAME --graph ID --branch B` reports what a target's role may do. The
 bearer token selects the trusted actor; a query's `$actor` is merely application
 provenance. `config_manage` authorizes live deployment, and schema changes also

@@ -1,0 +1,197 @@
+// agent-ops — the workflows a team's agents run, every run of them, and the
+// prompt revisions that come out of judging those runs
+//
+// A Workflow is a job: what it is for and what it delivers. How it is done
+// is its instructions, and those live on a Revision. Exactly one revision of
+// a workflow is active; the rest are retired, rejected or still proposed.
+// Every Run records the revision it ran, so whether a change of
+// instructions helped is a read over runs, never a number someone keeps.
+//
+// The loop the record supports:
+//   a Trigger makes a workflow due → an agent starts a Run of its active
+//   Revision → the run leaves Traces and Outputs → a judging agent records
+//   an Evaluation of the run against each Criterion → a tuning agent reads
+//   the failures and proposes a new Revision, citing them, on a branch → a
+//   person activates or rejects it and merges → later runs show whether it
+//   helped.
+//
+// The tracing tool stays the authority for spans and tool calls. A Trace
+// here is one agent session: where to find it, and the few totals that are
+// compared across runs.
+//
+// The reference seed (seed.jsonl / seed.md) is an invented engineering team,
+// "Harbor Labs". Every name, link and figure is made up.
+//
+// 10 node classes:
+//   Who and how   — Agent, Skill
+//   The job       — Workflow, Revision, Trigger, Criterion
+//   What happened — Run, Trace, Output, Evaluation
+//
+// Records are written once. Each kind of record has one required edge left
+// unkeyed on purpose: inserting a slug that already exists adds a second such
+// edge, which breaks its @card(1..1), and the whole write is refused. So a
+// run started for an occurrence that already has one, a revision proposed
+// under a number that exists, or an evaluation recorded twice changes
+// nothing. Agent, Skill, Workflow, Trigger and Criterion have no such edge:
+// an insert on an existing slug replaces them.
+
+// ── Who and how ───────────────────────────────────────────────────
+
+node Agent @description("An accountable agent that runs, judges or tunes workflows. Not a model name and not a job.") {
+    slug: String @key
+    name: String @index
+    status: enum(active, paused, retired) @index
+    harness: String? @description("What it runs in, such as Claude Code, Codex or a LangGraph service.")
+    model: String? @description("The model it runs on by default.")
+    brief: String?
+}
+
+node Skill @description("A reusable procedure an agent loads: how to review code, how to use GitHub, how to post to Slack. A workflow names the skills it uses instead of repeating them.") {
+    slug: String @key
+    name: String @index
+    status: enum(experimental, active, deprecated) @index
+    brief: String?
+    content: String? @index @description("The skill's main instructions, the text an agent loads.")
+}
+
+edge AgentHasSkill: Agent -> Skill {
+    @key(@src, @dst)
+}
+
+// ── The job ───────────────────────────────────────────────────────
+
+node Workflow @description("A job agents run: what it is for and what it delivers. Changing the goal makes a new workflow; changing how it is done makes a new Revision.") {
+    slug: String @key
+    name: String @index
+    goal: String @description("The outcome the job exists for.")
+    output: String @description("What a run delivers, and what a run that finds nothing to do leaves behind.")
+    status: enum(draft, active, retired) @index
+}
+
+node Revision @description("One version of a workflow's instructions. Exactly one revision of a workflow is active. A proposed revision waits for a person, who activates or rejects it.") {
+    slug: String @key
+    number: I32 @index
+    instructions: String @description("The prompt: the job-specific decisions. Procedures belong in skills.")
+    rationale: String? @description("Why this revision was written: the failures it answers.")
+    status: enum(proposed, active, retired, rejected) @index
+    proposed_at: DateTime @index
+    decided_at: DateTime?
+    decision_note: String? @description("The person's reason for activating or rejecting it.")
+}
+
+edge RevisionOf: Revision -> Workflow @card(1..1) @description("Unkeyed: a revision is written once.")
+
+edge RevisionRevises: Revision -> Revision @card(0..1) @description("The revision it was written from.") {
+    @key(@src, @dst)
+}
+
+edge RevisionProposedBy: Revision -> Agent @card(0..1) @description("The agent that proposed it. Absent means a person wrote it.") {
+    @key(@src, @dst)
+}
+
+edge RevisionCites: Revision -> Evaluation @description("An evaluation the revision answers: the evidence for the change.") {
+    @key(@src, @dst)
+}
+
+node Trigger @description("A reason to run a workflow: a schedule, an event in another tool, or a person asking. next_due_at is when the schedule next makes it due; the agent that starts a run moves it on.") {
+    slug: String @key
+    name: String
+    kind: enum(manual, time, event) @index
+    status: enum(active, paused) @index
+    schedule: String? @description("For time: an RFC 5545 recurrence rule, such as FREQ=DAILY;BYHOUR=6.")
+    condition: String? @description("For event: what in which tool starts it, such as a pull request opened on a repository.")
+    next_due_at: DateTime? @index @description("For time: the next occurrence. A query cannot expand a recurrence rule, so the agent that starts a run stores the one after it.")
+}
+
+edge TriggerOf: Trigger -> Workflow @card(1..1) {
+    @key(@src, @dst)
+}
+
+node Criterion @description("What a good run of a workflow does, stated so a person or a model can judge a run against it.") {
+    slug: String @key
+    name: String @index
+    statement: String
+}
+
+edge WorkflowJudgedBy: Workflow -> Criterion {
+    @key(@src, @dst)
+}
+
+edge WorkflowUsesSkill: Workflow -> Skill {
+    @key(@src, @dst)
+}
+
+// ── What happened ─────────────────────────────────────────────────
+
+node Run @description("One attempt of a workflow. The slug names the workflow and the occurrence, such as the pull request and its head commit, so the same occurrence cannot be started twice. A retry gets its own slug.") {
+    slug: String @key
+    status: enum(running, succeeded, failed, cancelled, unknown) @index
+    started_at: DateTime @index
+    finished_at: DateTime? @index
+    summary: String?
+    error_type: String? @index
+    covered_from: DateTime? @description("For a run over a stream: the start of the window it read completely.")
+    covered_through: DateTime? @index @description("The end of that window. The next run starts here.")
+}
+
+edge RunUsedRevision: Run -> Revision @card(1..1) @description("Unkeyed: a run is written once. The run's workflow is its revision's workflow.")
+
+edge RunExecutedBy: Run -> Agent @card(1..1) {
+    @key(@src, @dst)
+}
+
+edge RunTriggeredBy: Run -> Trigger @card(1..1) {
+    @key(@src, @dst)
+}
+
+edge RunLoadedSkill: Run -> Skill @description("A skill the run loaded, as its trace shows. Loading a skill does not prove it was followed.") {
+    @key(@src, @dst)
+}
+
+edge RunRetryOf: Run -> Run @card(0..1) @description("A retry, pointing to the attempt it repeats.") {
+    @key(@src, @dst)
+}
+
+node Trace @description("One agent session of a run, as the harness or tracing tool recorded it. The full transcript stays there or in the blob; the totals here are what runs are compared on.") {
+    slug: String @key
+    source: enum(claude-code, codex, cursor, langsmith, langfuse, braintrust, other) @index
+    session_id: String @index
+    url: String?
+    model: String?
+    input_tokens: I64?
+    output_tokens: I64?
+    cost_usd: F64?
+    tool_calls: I32?
+    transcript: Blob? @description("The session's files, redacted of secrets, when the team keeps them in the record.")
+}
+
+edge TraceOfRun: Trace -> Run @card(1..1) @description("Unkeyed: a trace is written once.")
+
+node Output @description("Something a run did outside the record: a review comment, a pull request, a message, an issue. It is how the record knows an action was taken, so it is not taken twice.") {
+    slug: String @key
+    kind: enum(comment, pull-request, message, issue, document, other) @index
+    title: String
+    url: String? @index
+    created_at: DateTime @index
+}
+
+edge OutputOfRun: Output -> Run @card(1..1) @description("Unkeyed: an output is written once.")
+
+node Evaluation @description("A judgment of one run against one criterion, by a person, a model or a rule.") {
+    slug: String @key
+    verdict: enum(pass, fail, partial) @index
+    score: F64? @description("Optional, from 0 to 1.")
+    rationale: String @description("What in the trace or output the verdict rests on.")
+    method: enum(human, model, rule) @index
+    evaluated_at: DateTime @index
+}
+
+edge EvaluationOf: Evaluation -> Run @card(1..1) @description("Unkeyed: an evaluation is written once.")
+
+edge EvaluationAgainst: Evaluation -> Criterion @card(1..1) {
+    @key(@src, @dst)
+}
+
+edge EvaluatedBy: Evaluation -> Agent @card(0..1) @description("The agent that judged the run. Absent means a person did.") {
+    @key(@src, @dst)
+}

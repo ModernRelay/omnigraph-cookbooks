@@ -1,0 +1,172 @@
+// Judging runs and changing instructions. An evaluation judges one run
+// against one criterion; a revision cites the evaluations it answers; and
+// every run records its revision, so the scorecards below compare revisions
+// on the runs each one actually ran.
+
+query runs_to_judge() @description("Finished runs with a trace, of workflows that have criteria, and no evaluation yet, oldest first.") {
+    match {
+        $r: Run
+        $r.status = "succeeded" or $r.status = "failed"
+        not { $e evaluationOf $r }
+        exists { $t traceOfRun $r }
+        $v: Revision
+        $r runUsedRevision $v
+        $w: Workflow
+        $v revisionOf $w
+        exists { $w workflowJudgedBy $c }
+    }
+    return { $w.slug as workflow, $r.slug as run, $v.number as revision, $r.status as status,
+             $r.finished_at as finished_at }
+    order { finished_at asc }
+}
+
+query run_evaluations($run: String) @description("Every judgment of one run, by criterion.") {
+    match {
+        $r: Run { slug: $run }
+        $e: Evaluation
+        $e evaluationOf $r
+        $c: Criterion
+        $e evaluationAgainst $c
+    }
+    return { $e.slug as evaluation, $c.slug as criterion, $e.verdict as verdict, $e.score as score,
+             $e.method as method, $e.rationale as rationale }
+    order { criterion asc }
+}
+
+query criterion_failures() @description("Which criteria each workflow fails under its active revision, most failures first.") {
+    match {
+        $w: Workflow
+        $v: Revision
+        $v revisionOf $w
+        $v.status = "active"
+        $r: Run
+        $r runUsedRevision $v
+        $e: Evaluation
+        $e evaluationOf $r
+        $e.verdict = "fail" or $e.verdict = "partial"
+        $c: Criterion
+        $e evaluationAgainst $c
+    }
+    return { $w.slug as workflow, $v.number as revision, $c.slug as criterion, count($e) as failures }
+    order { failures desc, workflow asc }
+}
+
+query failures_to_answer($workflow: String) @description("Failed or partial judgments of a workflow's active revision that no proposed or accepted revision cites: the evidence a new revision would answer. One a rejected revision cited stays here; revision_history says what was tried.") {
+    match {
+        $w: Workflow { slug: $workflow }
+        $v: Revision
+        $v revisionOf $w
+        $v.status = "active"
+        $r: Run
+        $r runUsedRevision $v
+        $e: Evaluation
+        $e evaluationOf $r
+        $e.verdict = "fail" or $e.verdict = "partial"
+        not { $p revisionCites $e  $p.status != "rejected" }
+        $c: Criterion
+        $e evaluationAgainst $c
+    }
+    return { $e.slug as evaluation, $r.slug as run, $c.slug as criterion, $e.verdict as verdict,
+             $e.rationale as rationale }
+    order { criterion asc, run asc }
+}
+
+query revision_scorecard($workflow: String) @description("Judgments of one workflow's runs, by revision and verdict: did a change of instructions help?") {
+    match {
+        $w: Workflow { slug: $workflow }
+        $v: Revision
+        $v revisionOf $w
+        $r: Run
+        $r runUsedRevision $v
+        $e: Evaluation
+        $e evaluationOf $r
+    }
+    return { $v.number as revision, $v.status as status, $e.verdict as verdict, count($e) as judgments,
+             count(distinct $r) as runs }
+    order { revision asc, verdict asc }
+}
+
+query revision_cost() @description("What each revision of each workflow has cost: runs, tokens and dollars from their traces.") {
+    match {
+        $w: Workflow
+        $v: Revision
+        $v revisionOf $w
+        $r: Run
+        $r runUsedRevision $v
+        $t: Trace
+        $t traceOfRun $r
+    }
+    return { $w.slug as workflow, $v.number as revision, count(distinct $r) as runs,
+             sum($t.input_tokens) as input_tokens, sum($t.output_tokens) as output_tokens,
+             sum($t.cost_usd) as cost_usd }
+    order { workflow asc, revision asc }
+}
+
+query revision_history($workflow: String) @description("Every revision of one workflow, with why it was written and what a person decided. Read it before proposing, so a rejected idea is not proposed again.") {
+    match {
+        $w: Workflow { slug: $workflow }
+        $v: Revision
+        $v revisionOf $w
+    }
+    return { $v.slug as revision, $v.number as number, $v.status as status, $v.rationale as rationale,
+             $v.proposed_at as proposed_at, $v.decided_at as decided_at, $v.decision_note as decision_note }
+    order { number asc }
+}
+
+query revision_instructions($revision: String) @description("The full instructions of one revision, and of the revision it was written from, to compare.") {
+    match {
+        $v: Revision { slug: $revision }
+        $b: Revision
+        $v revisionRevises $b
+    }
+    return { $b.number as from_number, $b.instructions as from_instructions, $v.number as number,
+             $v.instructions as instructions }
+}
+
+query proposed_revisions() @description("Revisions waiting for a person, with the agent that proposed each. On main this is empty: run it against the agent's branch.") {
+    match {
+        $v: Revision
+        $v.status = "proposed"
+        $w: Workflow
+        $v revisionOf $w
+        $a: Agent
+        $v revisionProposedBy $a
+    }
+    return { $w.slug as workflow, $v.slug as revision, $v.number as number, $a.slug as agent,
+             $v.rationale as rationale, $v.proposed_at as proposed_at }
+    order { proposed_at asc }
+}
+
+query revision_evidence($revision: String) @description("The judgments a revision cites, with the run each judged.") {
+    match {
+        $v: Revision { slug: $revision }
+        $e: Evaluation
+        $v revisionCites $e
+        $r: Run
+        $e evaluationOf $r
+        $c: Criterion
+        $e evaluationAgainst $c
+    }
+    return { $e.slug as evaluation, $r.slug as run, $c.slug as criterion, $e.verdict as verdict,
+             $e.rationale as rationale }
+    order { run asc }
+}
+
+query workflows_without_active_revision() @description("Active workflows with no active revision: nothing an agent can run.") {
+    match {
+        $w: Workflow
+        $w.status = "active"
+        not { $v revisionOf $w  $v.status = "active" }
+    }
+    return { $w.slug as workflow, $w.name as name }
+    order { workflow asc }
+}
+
+query workflows_with_several_active_revisions() @description("Workflows with more than one active revision, which an activation that did not retire the old one leaves behind.") {
+    match {
+        $w: Workflow
+        count { $v revisionOf $w  $v.status = "active" } > 1
+    }
+    return { $w.slug as workflow, $w.name as name }
+    order { workflow asc }
+}

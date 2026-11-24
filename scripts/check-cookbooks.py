@@ -39,10 +39,12 @@ COOKBOOKS = {
     "company-brain": ("company", "current_decisions"),
     "hardware-program": ("program", "budget_rollup"),
     "health-record": ("health", "latest_results"),
+    "agent-ops": ("agents", "workflows"),
 }
 # Cookbooks whose policy lets act-agent write only on unprotected branches.
-BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program", "health-record"}
-ACTORS = ("act-admin", "act-writer", "act-reader", "act-agent")
+BRANCH_ONLY_AGENTS = {"company-brain", "hardware-program", "health-record", "agent-ops"}
+# act-executor has a role only in agent-ops; elsewhere its token authorizes nothing.
+ACTORS = ("act-admin", "act-writer", "act-reader", "act-agent", "act-executor")
 TOKENS = {actor: f"cookbook-test-{actor}" for actor in ACTORS}
 GATEWAY = ROOT / "scripts" / "local-tls-gateway.py"
 HTTP = urllib.request.build_opener(urllib.request.ProxyHandler({}))
@@ -250,6 +252,8 @@ def qualify(name, graph, stored_query, workspace, env):
                 hardware_program_journey(env)
             if name == "health-record":
                 health_record_journey(env)
+            if name == "agent-ops":
+                agent_ops_journey(env)
             assert process.poll() is None
             assert request(url, "/readyz")["loading_graph_count"] == 0
             print(f"PASS {name}: lint, seed counts, roles, branches, live schema/query activation"
@@ -257,7 +261,8 @@ def qualify(name, graph, stored_query, workspace, env):
                   + (", ob client" if name == "beads" else "")
                   + (", review journey" if name == "company-brain" else "")
                   + (", review gate" if name == "hardware-program" else "")
-                  + (", intake review" if name == "health-record" else ""), flush=True)
+                  + (", intake review" if name == "health-record" else "")
+                  + (", run claims and revision review" if name == "agent-ops" else ""), flush=True)
         finally:
             gateway.terminate()
             process.terminate()
@@ -438,6 +443,66 @@ def health_record_journey(env):
     assert "@card violation" in again.stdout + again.stderr, (again.stdout, again.stderr)
     doses = rows("disease_doses", params={"disease": "cond-hepatitis-b"})
     assert [row["i.vaccine"] for row in doses] == ["Hepatitis B"] * 3, doses
+
+
+def agent_ops_journey(env):
+    """An executor claims an occurrence on main, and a second claim is refused. The tuning
+    agent proposes a revision on its own branch and cannot run a run or merge; main keeps
+    the old instructions, and runs written on main meanwhile survive the merge that makes
+    the new revision the one agents run."""
+    def scope(actor):
+        return ("--target", target(actor), "--graph", "agents")
+
+    def mutate(actor, query, params, *extra, ok=True):
+        return run(env, "mutate", query, *scope(actor), *extra, "--params", json.dumps(params), "--json", ok=ok)
+
+    def rows(query, *extra, params=None):
+        return run(env, "query", query, *scope("act-reader"), "--params", json.dumps(params or {}),
+                   *extra, "--json")["rows"]
+
+    def refused_by_card(result):
+        assert "@card violation" in result.stdout + result.stderr, (result.stdout, result.stderr)
+
+    verdicts = {(row["revision"], row["verdict"]): row["judgments"]
+                for row in rows("revision_scorecard", params={"workflow": "wf-review-pr"})}
+    assert verdicts == {(1, "fail"): 5, (1, "pass"): 7, (2, "fail"): 1, (2, "pass"): 7}, verdicts
+
+    executor, agent, writer = "act-executor", "act-agent", "act-writer"
+    claim = {"slug": "wf-triage-support@2026-11-23T10", "revision": "wf-triage-support-r1", "agent": "agent-desk",
+             "trigger": "trg-support-hourly", "now": "2026-11-23T10:00:00.000Z",
+             "next_due_at": "2026-11-23T11:00:00.000Z"}
+    refused(mutate(agent, "start_run", claim, ok=False))
+    mutate(executor, "start_run", claim)
+    refused_by_card(mutate(executor, "start_run", {**claim, "next_due_at": "2026-11-23T12:00:00.000Z"}, ok=False))
+    due = {row["workflow"]: row["due_at"] for row in rows("due_workflows", params={"as_of": "2026-11-23T12:00:00.000Z"})}
+    assert due["wf-triage-support"].startswith("2026-11-23T11:00"), due
+
+    run(env, "branch", "create", "tune-wf-review-pr-r3", *scope(agent), "--json")
+    branch = ("--branch", "tune-wf-review-pr-r3")
+    mutate(agent, "propose_revision", {
+        "slug": "wf-review-pr-r3", "workflow": "wf-review-pr", "previous": "wf-review-pr-r2", "agent": "agent-tuner",
+        "number": 3, "instructions": "Revision 2, and no point about a name the linter accepts.",
+        "rationale": "Pull request 412.", "now": "2026-11-24T07:10:00.000Z"}, *branch)
+    mutate(agent, "cite_evaluation", {"revision": "wf-review-pr-r3",
+                                      "evaluation": "wf-review-pr@pr-412/crit-review-no-style-nits"}, *branch)
+    assert [row["revision"] for row in rows("proposed_revisions", *branch)] == ["wf-review-pr-r3"]
+    assert rows("proposed_revisions") == []
+    refused(run(env, "branch", "merge", "tune-wf-review-pr-r3", "--into", "main", *scope(agent), "--json", ok=False))
+    refused(run(env, "branch", "merge", "tune-wf-review-pr-r3", "--into", "main", *scope(executor), "--json", ok=False))
+
+    # main moves on while the proposal waits.
+    mutate(executor, "finish_run", {"slug": claim["slug"], "status": "succeeded", "summary": "Routed 2 emails.",
+                                    "now": "2026-11-23T10:02:00.000Z", "covered_from": "2026-11-23T09:00:00.000Z",
+                                    "covered_through": "2026-11-23T10:00:00.000Z"})
+    mutate(writer, "activate_revision", {"revision": "wf-review-pr-r3", "previous": "wf-review-pr-r2",
+                                         "note": "Agreed.", "now": "2026-11-24T09:00:00.000Z"}, *branch)
+    assert rows("active_revision", params={"workflow": "wf-review-pr"})[0]["number"] == 2, "main moved before the merge"
+    run(env, "branch", "merge", "tune-wf-review-pr-r3", "--into", "main", *scope(writer), "--json")
+    run(env, "branch", "delete", "tune-wf-review-pr-r3", *scope(writer), "--yes", "--json")
+    assert rows("active_revision", params={"workflow": "wf-review-pr"})[0]["number"] == 3
+    assert rows("workflows_with_several_active_revisions") == [] and rows("workflows_without_active_revision") == []
+    assert rows("last_covered", params={"workflow": "wf-triage-support"})[0]["covered_through"].startswith(
+        "2026-11-23T10:00"), "the merge lost a run written on main"
 
 
 # What omnigraph.dev accepts in a site.json; its importer

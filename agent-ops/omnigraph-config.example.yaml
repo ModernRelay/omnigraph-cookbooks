@@ -1,0 +1,46 @@
+# Read aliases for the agent-ops cookbook (graph `agents`).
+# Merge the `aliases:` entries below into $OMNIGRAPH_HOME/config.yaml, the operator
+# config from ../docs/local-setup.md, whose `local-reader` target they use.
+# Run one with `omnigraph alias <name>`; pass a query's parameters by name with
+# `--params '{"workflow":"..."}'`. Aliases only read; run stored mutations with
+# `omnigraph mutate <name> --target local-executor --graph agents --params '{...}'`
+# for runs, or as a judging or tuning agent with `--target local-agent --branch <your branch>`.
+# An alias reads main. proposed_revisions is empty there; read it on the proposal's branch with
+# `omnigraph query proposed_revisions --target local-reader --graph agents --branch <branch>`.
+aliases:
+
+  # ── What to run ─────────────────────────────────────────────────
+  workflows:         {target: local-reader, graph: agents, query: workflows}
+  due:               {target: local-reader, graph: agents, query: due_workflows}        # --params '{"as_of":"2026-11-23T12:00:00Z"}'
+  triggers:          {target: local-reader, graph: agents, query: workflow_triggers}    # --params '{"workflow":"wf-review-pr"}'
+  instructions:      {target: local-reader, graph: agents, query: active_revision}      # --params '{"workflow":"wf-review-pr"}'
+  skills:            {target: local-reader, graph: agents, query: workflow_skills}      # --params '{"workflow":"wf-review-pr"}'
+  criteria:          {target: local-reader, graph: agents, query: workflow_criteria}    # --params '{"workflow":"wf-review-pr"}'
+  agent-skills:      {target: local-reader, graph: agents, query: agent_skills}         # --params '{"agent":"agent-runner"}'
+  skill-users:       {target: local-reader, graph: agents, query: skill_users}          # --params '{"skill":"skill-github"}'
+
+  # ── Runs ────────────────────────────────────────────────────────
+  runs:              {target: local-reader, graph: agents, query: recent_runs}          # --params '{"workflow":"wf-review-pr"}'
+  traces:            {target: local-reader, graph: agents, query: run_traces}           # --params '{"run":"wf-review-pr@pr-404"}'
+  outputs:           {target: local-reader, graph: agents, query: run_outputs}          # --params '{"run":"wf-review-pr@pr-404"}'
+  acted-on:          {target: local-reader, graph: agents, query: output_at}            # --params '{"url":"https://github.example/harbor/ledger/pull/412"}'
+  run-skills:        {target: local-reader, graph: agents, query: run_skills}           # --params '{"run":"wf-review-pr@pr-404"}'
+  failed:            {target: local-reader, graph: agents, query: failed_runs}          # --params '{"since":"2026-11-16T00:00:00Z"}'
+  stuck:             {target: local-reader, graph: agents, query: stuck_runs}           # --params '{"before":"2026-11-23T00:00:00Z"}'
+  no-trace:          {target: local-reader, graph: agents, query: runs_without_trace}
+  covered:           {target: local-reader, graph: agents, query: last_covered}         # --params '{"workflow":"wf-triage-support"}'
+  outcomes:          {target: local-reader, graph: agents, query: workflow_scorecard}
+  agent-runs:        {target: local-reader, graph: agents, query: agent_runs}           # --params '{"agent":"agent-runner"}'
+
+  # ── Judging and revisions ───────────────────────────────────────
+  to-judge:          {target: local-reader, graph: agents, query: runs_to_judge}
+  judgments:         {target: local-reader, graph: agents, query: run_evaluations}      # --params '{"run":"wf-review-pr@pr-404"}'
+  failing:           {target: local-reader, graph: agents, query: criterion_failures}
+  to-answer:         {target: local-reader, graph: agents, query: failures_to_answer}   # --params '{"workflow":"wf-review-pr"}'
+  scorecard:         {target: local-reader, graph: agents, query: revision_scorecard}   # --params '{"workflow":"wf-review-pr"}'
+  cost:              {target: local-reader, graph: agents, query: revision_cost}
+  history:           {target: local-reader, graph: agents, query: revision_history}     # --params '{"workflow":"wf-review-pr"}'
+  compare:           {target: local-reader, graph: agents, query: revision_instructions} # --params '{"revision":"wf-review-pr-r2"}'
+  evidence:          {target: local-reader, graph: agents, query: revision_evidence}    # --params '{"revision":"wf-review-pr-r2"}'
+  no-active:         {target: local-reader, graph: agents, query: workflows_without_active_revision}
+  several-active:    {target: local-reader, graph: agents, query: workflows_with_several_active_revisions}

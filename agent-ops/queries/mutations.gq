@@ -1,0 +1,162 @@
+// Stored writes. Records (Run, Trace, Output, Evaluation, Revision) are
+// written once: each insert carries an unkeyed required edge, so a slug that
+// exists is refused with nothing changed. Updates re-check the state they
+// move from.
+
+// ── Agents, skills and workflows ──────────────────────────────────
+
+query add_agent($slug: String, $name: String, $harness: String?, $model: String?, $brief: String?)
+    @description("Register an agent, or replace its description.") {
+    insert Agent { slug: $slug, name: $name, status: "active", harness: $harness, model: $model, brief: $brief }
+}
+
+query set_agent_status($slug: String, $status: String) @description("Pause, resume or retire an agent: active, paused or retired.") {
+    update Agent set { status: $status } where slug = $slug
+}
+
+query add_skill($slug: String, $name: String, $brief: String?, $content: String?)
+    @description("Add a skill, or replace its text.") {
+    insert Skill { slug: $slug, name: $name, status: "active", brief: $brief, content: $content }
+}
+
+query grant_skill($agent: String, $skill: String) @description("An agent holds a skill.") {
+    insert AgentHasSkill { from: $agent, to: $skill }
+}
+
+query add_workflow($slug: String, $name: String, $goal: String, $output: String, $revision: String,
+                   $instructions: String, $now: DateTime)
+    @description("Add a workflow with its first revision, active from the start.")
+    @instruction("Name the revision <workflow>-r1. Add its triggers, criteria and skills next.") {
+    insert Workflow { slug: $slug, name: $name, goal: $goal, output: $output, status: "active" }
+    insert Revision { slug: $revision, number: 1, instructions: $instructions, status: "active",
+                      proposed_at: $now, decided_at: $now }
+    insert RevisionOf { from: $revision, to: $slug }
+}
+
+query set_workflow_status($slug: String, $status: String) @description("Retire or reopen a workflow: draft, active or retired.") {
+    update Workflow set { status: $status } where slug = $slug
+}
+
+query use_skill($workflow: String, $skill: String) @description("A workflow uses a skill.") {
+    insert WorkflowUsesSkill { from: $workflow, to: $skill }
+}
+
+query add_trigger($slug: String, $workflow: String, $name: String, $kind: String, $schedule: String?,
+                  $condition: String?, $next_due_at: DateTime?)
+    @description("Add a reason to run a workflow: manual, time or event.")
+    @instruction("A time trigger needs schedule and its first next_due_at; an event trigger needs condition.") {
+    insert Trigger { slug: $slug, name: $name, kind: $kind, status: "active", schedule: $schedule,
+                     condition: $condition, next_due_at: $next_due_at }
+    insert TriggerOf { from: $slug, to: $workflow }
+}
+
+query set_trigger_status($slug: String, $status: String) @description("Pause or resume a trigger: active or paused.") {
+    update Trigger set { status: $status } where slug = $slug
+}
+
+query add_criterion($slug: String, $workflow: String, $name: String, $statement: String)
+    @description("Add what a good run of a workflow does, to judge runs against.") {
+    insert Criterion { slug: $slug, name: $name, statement: $statement }
+    insert WorkflowJudgedBy { from: $workflow, to: $slug }
+}
+
+// ── Runs ──────────────────────────────────────────────────────────
+
+query start_run($slug: String, $revision: String, $agent: String, $trigger: String, $now: DateTime,
+                $next_due_at: DateTime?)
+    @description("Start a run of a revision: the claim on one occurrence of the workflow.")
+    @instruction("Name the run <workflow>@<occurrence>, such as the due time or the pull request and head commit. Starting an occurrence that already has a run is refused: read that run instead. Pass the trigger's next occurrence as next_due_at for a time trigger, and nothing for the others.") {
+    insert Run { slug: $slug, status: "running", started_at: $now }
+    insert RunUsedRevision { from: $slug, to: $revision }
+    insert RunExecutedBy { from: $slug, to: $agent }
+    insert RunTriggeredBy { from: $slug, to: $trigger }
+    update Trigger set { next_due_at: $next_due_at } where slug = $trigger
+}
+
+query finish_run($slug: String, $status: String, $summary: String, $error_type: String?, $now: DateTime,
+                 $covered_from: DateTime?, $covered_through: DateTime?)
+    @description("Close a running run: succeeded, failed, cancelled or unknown, with what it did.")
+    @instruction("A run over a stream passes the window it read completely. A run you cannot account for is unknown, not failed.") {
+    update Run set { status: $status, summary: $summary, error_type: $error_type, finished_at: $now,
+                     covered_from: $covered_from, covered_through: $covered_through }
+        where slug = $slug and status = "running"
+}
+
+query mark_retry($run: String, $previous: String) @description("A run repeats an earlier attempt.") {
+    insert RunRetryOf { from: $run, to: $previous }
+}
+
+query record_loaded_skill($run: String, $skill: String) @description("A run loaded a skill, as its trace shows.") {
+    insert RunLoadedSkill { from: $run, to: $skill }
+}
+
+query attach_trace($slug: String, $run: String, $source: String, $session_id: String, $url: String?,
+                   $model: String?, $input_tokens: I64?, $output_tokens: I64?, $cost_usd: F64?,
+                   $tool_calls: I32?)
+    @description("Link one agent session to its run, with its totals.")
+    @instruction("source is claude-code, codex, cursor, langsmith, langfuse, braintrust or other. Copy the totals from the trace; leave out what it does not report.") {
+    insert Trace { slug: $slug, source: $source, session_id: $session_id, url: $url, model: $model,
+                   input_tokens: $input_tokens, output_tokens: $output_tokens, cost_usd: $cost_usd,
+                   tool_calls: $tool_calls }
+    insert TraceOfRun { from: $slug, to: $run }
+}
+
+query record_output($slug: String, $run: String, $kind: String, $title: String, $url: String?, $now: DateTime)
+    @description("Record something a run did outside the record, so it is not done twice.")
+    @instruction("kind is comment, pull-request, message, issue, document or other. Record it as soon as the action is taken, with its link.") {
+    insert Output { slug: $slug, kind: $kind, title: $title, url: $url, created_at: $now }
+    insert OutputOfRun { from: $slug, to: $run }
+}
+
+// ── Judging ───────────────────────────────────────────────────────
+
+query record_evaluation($slug: String, $run: String, $criterion: String, $agent: String, $verdict: String,
+                        $score: F64?, $rationale: String, $method: String, $now: DateTime)
+    @description("An agent judges one run against one criterion.")
+    @instruction("Name it <run>/<criterion>. method is model for a judgment, rule for a check that code decides. verdict is pass, fail or partial; rationale quotes what in the trace or output it rests on.") {
+    insert Evaluation { slug: $slug, verdict: $verdict, score: $score, rationale: $rationale, method: $method,
+                        evaluated_at: $now }
+    insert EvaluationOf { from: $slug, to: $run }
+    insert EvaluationAgainst { from: $slug, to: $criterion }
+    insert EvaluatedBy { from: $slug, to: $agent }
+}
+
+query record_human_evaluation($slug: String, $run: String, $criterion: String, $verdict: String,
+                              $score: F64?, $rationale: String, $now: DateTime)
+    @description("A person judges one run against one criterion.") {
+    insert Evaluation { slug: $slug, verdict: $verdict, score: $score, rationale: $rationale, method: "human",
+                        evaluated_at: $now }
+    insert EvaluationOf { from: $slug, to: $run }
+    insert EvaluationAgainst { from: $slug, to: $criterion }
+}
+
+// ── Revisions ─────────────────────────────────────────────────────
+
+query propose_revision($slug: String, $workflow: String, $previous: String, $agent: String, $number: I32,
+                       $instructions: String, $rationale: String, $now: DateTime)
+    @description("Propose new instructions for a workflow, written from its active revision.")
+    @instruction("Read revision_history first and do not propose again what a person rejected. Name it <workflow>-r<number>, one more than the highest number. Cite each evaluation it answers with cite_evaluation.") {
+    insert Revision { slug: $slug, number: $number, instructions: $instructions, rationale: $rationale,
+                      status: "proposed", proposed_at: $now }
+    insert RevisionOf { from: $slug, to: $workflow }
+    insert RevisionRevises { from: $slug, to: $previous }
+    insert RevisionProposedBy { from: $slug, to: $agent }
+}
+
+query cite_evaluation($revision: String, $evaluation: String) @description("A revision answers a judgment.") {
+    insert RevisionCites { from: $revision, to: $evaluation }
+}
+
+query activate_revision($revision: String, $previous: String, $note: String, $now: DateTime)
+    @description("A person makes a proposed revision the one agents run, and retires the one it replaces.")
+    @instruction("previous is the active revision. Afterwards workflows_with_several_active_revisions and workflows_without_active_revision must both be empty.") {
+    update Revision set { status: "active", decided_at: $now, decision_note: $note }
+        where slug = $revision and status = "proposed"
+    update Revision set { status: "retired" } where slug = $previous and status = "active"
+}
+
+query reject_revision($revision: String, $note: String, $now: DateTime)
+    @description("A person turns down a proposed revision, with the reason, so it is not proposed again.") {
+    update Revision set { status: "rejected", decided_at: $now, decision_note: $note }
+        where slug = $revision and status = "proposed"
+}
