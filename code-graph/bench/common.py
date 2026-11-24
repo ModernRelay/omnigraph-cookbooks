@@ -67,7 +67,8 @@ def load_implements(path: Path) -> dict[str, set[str]]:
 
 
 def load_cookbook_rows(rows: list[dict]) -> tuple[dict, dict]:
-    """Nodes and References edges of a cookbook revision, in identity space."""
+    """Nodes and References edges of a cookbook revision, in identity space; `call`
+    says whether a Calls edge joins the same ends."""
     nodes, edges = {}, {}
     locations = {}
     for r in rows:
@@ -83,12 +84,14 @@ def load_cookbook_rows(rows: list[dict]) -> tuple[dict, dict]:
             nodes.setdefault(ident, {"kind": d["kind"], "callable": d["callable"], "digest": d.get("digest"),
                                      "path": d["path"], "line": loc.get("line"), "end_line": loc.get("end_line"),
                                      "keys": []})["keys"].append(d["symbol"])
-        elif r.get("edge") == "References":
+        elif r.get("edge") in ("References", "Calls"):
             a, b = identity_from_key(r["from"]), identity_from_key(r["to"])
             if a and b:
                 e = edges.setdefault((a, b), {"call": False, "sites": 0})
-                e["call"] = e["call"] or r["data"]["call"]
-                e["sites"] += r["data"]["sites"]
+                if r["edge"] == "Calls":  # every Calls edge has a References edge with the same ends
+                    e["call"] = True
+                else:
+                    e["sites"] += r["data"]["sites"]
     return nodes, edges
 
 

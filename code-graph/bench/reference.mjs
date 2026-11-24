@@ -325,12 +325,12 @@ export function buildReference(checkout, { project = 'tsconfig.build.json', scop
       try { sym = checker.getAliasedSymbol(sym) } catch { continue }
     }
     const targets = new Set()
-    // `new C()` names C's declared constructor, as SCIP records it; a class
-    // without one is named itself.
+    // `new C()` names the class C, and its declared constructor too, to which
+    // SCIP resolves the name; the cookbook counts the site as calling both.
     const ctor = isConstructed(id) && (sym.declarations || [])
       .flatMap((d) => (ts.isClassDeclaration(d) ? d.members : []))
       .find((m) => ts.isConstructorDeclaration(m) && declId.get(m))
-    for (const d of ctor ? [ctor] : sym.declarations || []) {
+    for (const d of ctor ? [ctor, ...(sym.declarations || [])] : sym.declarations || []) {
       const t = declId.get(d)
       if (t) targets.add(t)
     }

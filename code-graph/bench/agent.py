@@ -31,7 +31,8 @@ line may also run it. Its stream is kept under work/agent-runs/.
 Needs the tools the recall benchmark installed under work/tools (codegraph,
 GitNexus, codebase-memory-mcp), uv for Graphify and code-review-graph, Node.js
 22.23.4 or later (NODE_BIN, else `mise where node@24.20.0`), the locked
-indexer, the 0.14.0 omnigraph CLI (OMNIGRAPH_BIN) and a signed-in `claude`.
+indexer, the omnigraph CLI (OMNIGRAPH_BIN; the README names the version each
+result used) and a signed-in `claude`.
 """
 from __future__ import annotations
 
@@ -115,9 +116,11 @@ reference is resolved by type, not by name. Query it with `cg` before
 searching text; `cg --help` lists every command.
 
 - `cg find NAME`: the definitions with that name, and their keys
-- `cg callers SYMBOL`: every definition whose code names SYMBOL; `call` says whether one of those references is a call
-- `cg callees SYMBOL`: what SYMBOL's code calls or names
-- `cg impact SYMBOL`: every definition that reaches SYMBOL through up to sixteen references and implementations, so a call through an interface reaches the methods implementing it
+- `cg callers SYMBOL`: the definitions whose code calls SYMBOL; for a class, the code that constructs it with `new`
+- `cg callees SYMBOL`: what SYMBOL's code calls
+- `cg referrers SYMBOL`: every definition whose code names SYMBOL: calls, type uses, imports and values
+- `cg transitive-callers SYMBOL`: SYMBOL's callers at any depth, through up to sixteen calls; a call through an interface reaches the methods implementing it
+- `cg impact SYMBOL`: every definition that reaches SYMBOL through up to sixteen references and implementations: what a change to it can break
 - `cg implementers MEMBER`: the class members that implement or override an interface or base member
 - `cg members SYMBOL`: what a module, class or interface declares
 
@@ -159,7 +162,7 @@ def node_bin() -> Path:
 def omnigraph_bin() -> str:
     binary = os.environ.get("OMNIGRAPH_BIN") or shutil.which("omnigraph")
     if not binary:
-        raise SystemExit("set OMNIGRAPH_BIN to the 0.14.0 omnigraph CLI")
+        raise SystemExit("set OMNIGRAPH_BIN to the omnigraph CLI")
     return binary
 
 
@@ -848,9 +851,10 @@ def main():
             p.add_argument("--arms", default=",".join(ARMS))
         if name in ("run", "score"):
             p.add_argument("--model", default=DEFAULT_MODEL)
-        if name == "score":
-            # A second window of sessions keeps its transcripts and results apart.
+        if name in ("run", "score"):
+            # A later window of sessions keeps its transcripts and results apart.
             p.add_argument("--runs", help="the transcripts' directory, instead of the suite's")
+        if name == "score":
             p.add_argument("--results", help="the results file's name under results/, instead of the suite's")
         if name == "index":
             p.add_argument("--reps", type=int, default=3)
@@ -871,6 +875,7 @@ def main():
             raise SystemExit("index times the hono suite; the vscode suite records them in setup and build.json")
         index_times(arms, args.reps)
     elif args.cmd == "run":
+        RUNS = Path(args.runs).resolve() if args.runs else RUNS
         run(arms, args.questions.split(",") if args.questions else None, args.reps, args.model, args.jobs)
     else:
         RUNS = Path(args.runs).resolve() if args.runs else RUNS

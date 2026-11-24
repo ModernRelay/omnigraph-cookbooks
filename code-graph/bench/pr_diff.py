@@ -125,26 +125,33 @@ def branch_diff(pr: dict, cook_base: Path, cook_head: Path, omnigraph: str) -> d
 def file_diff(base: Path, head: Path) -> dict:
     """The set difference of two converted files, keyed like the review."""
     def read(p):
-        sym, refs = {}, {}
+        sym, refs, calls = {}, {}, {}
         for line in p.read_text().splitlines():
             r = json.loads(line)
             if r.get("type") == "Symbol":
                 sym[r["data"]["symbol"]] = r["data"]
             elif r.get("edge") == "References":
                 refs[(r["from"], r["to"])] = r["data"]
-        return sym, refs
-    (sb, rb), (sh_, rh) = read(base), read(head)
+            elif r.get("edge") == "Calls":
+                calls[(r["from"], r["to"])] = r["data"]
+        return sym, refs, calls
+    (sb, rb, cb), (sh_, rh, ch) = read(base), read(head)
     return {
         "added": set(sh_) - set(sb), "removed": set(sb) - set(sh_),
         "changed": {k for k in set(sb) & set(sh_) if sb[k] != sh_[k]},
         "refs_added": set(rh) - set(rb), "refs_removed": set(rb) - set(rh),
         "refs_changed": {k for k in set(rb) & set(rh) if rb[k] != rh[k]},
+        "calls_added": set(ch) - set(cb), "calls_removed": set(cb) - set(ch),
+        "calls_changed": {k for k in set(cb) & set(ch) if cb[k] != ch[k]},
     }
 
 
 def review_sets(review: dict) -> dict:
-    refs = review["references"]
+    refs, calls = review["references"], review["calls"]
     return {
+        "calls_added": {(r["from"], r["to"]) for r in calls["added"]},
+        "calls_removed": {(r["from"], r["to"]) for r in calls["removed"]},
+        "calls_changed": {(r["from"], r["to"]) for r in calls["changed"]},
         "added": {r["symbol"] for r in review["added"]}, "removed": {r["symbol"] for r in review["removed"]},
         "changed": {r["symbol"] for r in review["changed"]},
         "refs_added": {(r["from"], r["to"]) for r in refs["added"]},
@@ -172,8 +179,8 @@ def main():
     prs = sample(repo, args.count, args.before)
     from common import identity_from_key  # noqa: PLC0415
 
-    cats = ("added", "removed", "changed", "refs_added", "refs_removed")
-    mech = {c: [0, 0, 0] for c in cats + ("refs_changed",)}
+    cats = ("added", "removed", "changed", "refs_added", "refs_removed", "calls_added", "calls_removed")
+    mech = {c: [0, 0, 0] for c in cats + ("refs_changed", "calls_changed")}
     acc = {c: [0, 0, 0] for c in cats}
     exact_mech = exact_acc = 0
     per_pr = []
@@ -203,11 +210,15 @@ def main():
             "changed": {k for k in set(rnb) & set(rnh) & aligned
                         if rnb[k].get("digest") and rnb[k]["digest"] != rnh[k].get("digest")},
             "refs_added": in_aligned(set(reh) - set(reb)), "refs_removed": in_aligned(set(reb) - set(reh)),
+            # The compiler's calls: a callee, a `new`, a tagged template.
+            "calls_added": in_aligned({e for e, v in reh.items() if v["call"]} - {e for e, v in reb.items() if v["call"]}),
+            "calls_removed": in_aligned({e for e, v in reb.items() if v["call"]} - {e for e, v in reh.items() if v["call"]}),
         }
         ours = {
             "added": idset(review["added"]), "removed": idset(review["removed"]),
             "changed": idset(k for k in review["changed"]),
             "refs_added": edgeset(review["refs_added"]), "refs_removed": edgeset(review["refs_removed"]),
+            "calls_added": edgeset(review["calls_added"]), "calls_removed": edgeset(review["calls_removed"]),
         }
         # A changed Symbol counts only when its code changed, not its kind or signature alone.
         ok_acc = True

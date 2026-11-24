@@ -14,8 +14,9 @@ exists is skipped, so delete an output to rebuild it. The questions and their
 keys go to scale-questions.json, which now holds the set the full run asked:
 `questions` would pick a different set under the current rules, so after the
 run a rule change goes through `rekey`. Needs curl, git, Node.js 22.23.4 or later,
-the locked indexer (`npm ci` in code-graph/sources/indexer), the 0.14.0
-omnigraph CLI (OMNIGRAPH_BIN) and about 10 GB of memory per step.
+the locked indexer (`npm ci` in code-graph/sources/indexer), the omnigraph
+CLI (OMNIGRAPH_BIN; the results used 0.16.0) and about 10 GB of memory per
+step.
 """
 from __future__ import annotations
 

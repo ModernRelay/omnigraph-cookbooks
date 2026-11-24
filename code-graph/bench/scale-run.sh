@@ -4,7 +4,7 @@
 # sessions. Run from anywhere; outputs go under work/scale/ and
 # results/agent-scale.json.
 #
-#   OMNIGRAPH_BIN=/path/to/0.14.0/omnigraph NODE_BIN=/path/to/node/bin sh code-graph/bench/scale-run.sh pilot
+#   OMNIGRAPH_BIN=/path/to/omnigraph NODE_BIN=/path/to/node/bin sh code-graph/bench/scale-run.sh pilot
 #   ... sh code-graph/bench/scale-run.sh full
 #
 # pilot: one session of each family's first question in each arm (24).
