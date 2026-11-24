@@ -127,6 +127,13 @@ one. Do not strip them because the seed does not use them, and do not
 back-fill them with a plausible value — if a campaign records them, populate
 them; if it does not, leave them and let the absence show.
 
+`src:technical-report` carries no `licence`, and that is the field working
+as its description says: what the data may be reused for, absent where
+nothing grants it. The report states CC BY 4.0 for the data release and
+no licence for itself, so the row claims none. `src:data-release` carries
+it. Do not copy a licence across sources because they were published
+together.
+
 `fit_model` is the exception that earns the rest. A KD is derived from the
 rate constants by a chosen model, so a value whose model nobody recorded
 cannot be reproduced. The report states every value here came from a 1:1 fit,

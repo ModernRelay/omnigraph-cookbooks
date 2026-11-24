@@ -43,7 +43,7 @@ them beyond the threshold comparison described below.
 | `CampaignWindow` | 3 | the stretches in which the design sets changed, of one prompt and four follow-ups |
 | `SelectionRule` | 3 | including the one that replaced the diversity caps |
 | `AgentRole` | 4 | generate, score, select, orchestrate |
-| `Source` | 2 | the report and the data release |
+| `Source` | 2 | the report and the data release; only the release carries a `licence` |
 
 Edges follow the same counts: 665 `IntendedAgainst`, 1,477 each of
 `MeasurementOf`, `MeasurementAgainst` and `MeasurementAtLab`, 140
