@@ -279,8 +279,10 @@ its head and when it last moved, which is how a person finds the agent work
 waiting on them without reading each branch's history. Rows an agent writes on
 its branch are not covered by the graph's indexes, so `search_claims` and
 `search_quotes` scan them: covering them takes `omnigraph index build --target
-. --graph company --branch agent/notes-oct-14` against the root with the server
-stopped, which a short-lived review branch does not need.
+. --graph company --branch agent/notes-oct-14 --as <actor>` against the root with
+the server stopped, which a short-lived review branch does not need. The actor
+needs `maintain` on that branch, which none of this cookbook's roles grants, so
+the deployment has to add it to the policy first.
 
 Then the person runs the [hygiene](queries/hygiene.gq) reads on the branch,
 previews the merge, merges, and settles the contradiction and the proposal on

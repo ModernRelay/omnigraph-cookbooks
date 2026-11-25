@@ -444,4 +444,8 @@ nearer row may exist. Rows written on a branch are not covered by the graph's
 indexes, so a read over them scans; `index build --branch B` covers them and
 `optimize` covers only `main`. Both address the storage root directly and
 refuse a server target with `target_incompatible`, so a served cookbook builds
-a branch's indexes with its server stopped.
+a branch's indexes with its server stopped. They also check the applied graph
+policy: pass `--as` an actor granted `maintain` on that branch. No shipped role
+has that grant, so adding one is a policy change for the deployment to make.
+Direct maintenance keeps the admission lock when it finishes; clear that exact
+lock before the server starts again.
