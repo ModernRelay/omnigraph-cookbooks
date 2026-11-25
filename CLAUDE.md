@@ -165,6 +165,15 @@ half and it reads like one more registry or tracker that has nothing to do
 with agents. Where the field's own word is already "system of record", as in
 a hardware program, the two coincide and one phrase does both.
 
+The join is not the intro's alone. Every part below has a field side and an
+Omnigraph side, and the claim it makes is where the two meet: in the data
+model, the distinction the field keeps apart is the one an agent reads and a
+query derives an answer from, so no status drifts from the evidence; in
+branching, the field's own change control is what the branch policy enforces;
+in the workflows, what the field does by hand is what an agent does around the
+record. Write the field's words first and let Omnigraph's half be the reason
+the claim holds, never a property listed on its own.
+
 **The intro.** Who this is for, and why them rather than anyone:
 
 | Ask | hardware-program | agent-ops |
@@ -203,6 +212,7 @@ re-checking the program on branches an engineer reviews.
 | What is each of those called in the field? | Requirement, interface, budget, test case | Workflow, revision, run, trace |
 | What goes wrong if two of them are one type? | A requirement changes and its old verification still reads as current | New instructions rewrite the past, so every earlier run looks as if it ran them |
 | Which link does a reader's question travel along? | From a requirement to the tests that verify it | From a run to the revision it ran |
+| What does a query derive on read instead of storing? | Whether a requirement is verified, and whether a budget still closes | A revision's scorecard, from the runs it had |
 
 The modelling choices worth writing down are the ones where the model refuses
 to collapse two things the field keeps apart, and what a reader gets for that.
