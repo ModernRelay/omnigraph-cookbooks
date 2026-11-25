@@ -150,6 +150,21 @@ nothing about this one.
 Each part below has the questions to answer first, worked through for the two
 examples. Put the answers in your report, one line each.
 
+**What does not change.** Omnigraph is one thing applied to one kind of work:
+a system of record for automating work with people and agents. They share one
+current record, agents do the work around it, and a person reviews what an
+agent writes. The root [README](README.md) states it; do not restate it in
+your own words.
+
+That positioning is half of the intro, and the field's own category word is
+the other half. The two do different jobs, so the page needs both. The
+category tells the reader what they are looking at, in a word they already
+use. Omnigraph's half tells them what kind of system it is and who works in
+it. Drop the category and the page reads like the other ten; drop Omnigraph's
+half and it reads like one more registry or tracker that has nothing to do
+with agents. Where the field's own word is already "system of record", as in
+a hardware program, the two coincide and one phrase does both.
+
 **The intro.** Who this is for, and why them rather than anyone:
 
 | Ask | hardware-program | agent-ops |
@@ -159,16 +174,26 @@ examples. Put the answers in your report, one line each.
 | What job are they trying to get done? | Know what a change breaks before the design review | Know whether a prompt change made an agent better |
 | What would they use instead? | Flow Engineering, or links kept by hand | LangSmith, Langfuse or Braintrust |
 | What does this do for that job that the alternative does not? | One record from requirement to test, with every change reviewed on a branch | Each prompt revision tied to the runs, traces and judgments after it, and each new one reviewed on a branch |
+| What do the people and the agents each do with it? | Engineers change the design and review a branch; agents re-check the program on every change and propose on branches | A person decides which instructions agents run; agents run the work, judge it and propose better instructions |
 
-The opening sentence names the category and then gives the difference for the
-reader's job: "A living system of record for a hardware program, so you know
-what a design change breaks before the design review." The category is the
-name people already know this kind of thing by and search for: a system of
-record, a company brain, a second brain, a personal health record, a CRM, a
-work queue. It tells a reader at once what they are looking at. Use
-"living" where staying current is the point. The difference is what makes it
-this cookbook, and it has to be something the schema and queries do, said in
-the reader's words.
+The first paragraph makes three claims, in this order: the category, the
+difference for the reader's job, and what the people and the agents each do.
+
+The category is the name people already know this kind of thing by and search
+for: a system of record, a registry, a company brain, a second brain, a
+personal health record, a CRM, a work queue. Take the word from what the
+field's own products call themselves, not from what seems to fit. Use
+"living" where staying current is the point.
+
+The difference is what makes it this cookbook. It has to be something the
+schema and queries do, said in the reader's words.
+
+The third claim is Omnigraph's half, and it is the one a page most easily
+loses: who shares the record, what the agents do in it, and that a person
+reviews what they write. Worked through, hardware-program opens "A living
+system of record for a hardware program, so you know what a design change
+breaks before the design review", and closes the paragraph on agents
+re-checking the program on branches an engineer reviews.
 
 **The data model.** What this work is made of, in its own terms:
 
@@ -276,7 +301,8 @@ writes. Then be exact about review:
 
 <The category the reader knows, and what sets this one apart for their job,
 from "Work it out from first principles".> <What it keeps linked, in the
-field's words.> <What agents do, and that a person reviews it.>
+field's words.> <Who shares it, what agents do in it, and that a person
+reviews what they write.>
 
 <The problem in two sentences: where the data lives today and what goes wrong.>
 This cookbook sets Omnigraph up as <the one place it is held>.
@@ -384,7 +410,7 @@ page to a question. Write each section so it serves all three.
 
 | Section | Write | The check holds you to |
 |---|---|---|
-| Title and intro | The opening sentence worked out as in "Work it out from first principles": the category the reader knows, and what sets this one apart for their job. Then the problem and three benefits | The first paragraph equal to `about` in `site.json`; a link to `AGENTS.md` |
+| Title and intro | The first paragraph's three claims, worked out as in "Work it out from first principles": the category the reader knows, what sets this one apart for their job, and what the people and the agents each do with it. Then the problem and three benefits | The first paragraph equal to `about` in `site.json`; a link to `AGENTS.md` |
 | The data model | The ontology of this use case, drawn, then the type table and the modelling choices that matter, which are the ones answered in "Work it out from first principles". Say what Omnigraph provides, such as object storage, only where this use case has its own reason for it | Every backticked type exists in `schema.pg` |
 | Branching and merging | What a branch is used for in this use case, by people or by agents, in the field's own words for a proposed change and an accepted one, as worked out in "Work it out from first principles". In some, engineers branch for change requests; in others only agents do | Not empty |
 | Agents and workflows | The workflows by name and kind (capture, maintain, act), worked out as in "Working out the workflows", each with the stored queries behind it, reads and writes alike. Then what an agent may not do, and what the record does not hold back | Names stored queries, and only ones the cookbook has |
