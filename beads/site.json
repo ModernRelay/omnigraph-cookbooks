@@ -3,7 +3,7 @@
   "name": "Agent work queue",
   "category": "Engineering",
   "blurb": "A dependency-aware issue queue for coding agents, in the style of beads: file work, link what waits on what, claim what is ready, close it.",
-  "about": "Build a living work queue for coding agents, and the agent workflows around it. It keeps issues, what waits on what, parent and child work, comments and project memories linked, so several agents and the people directing them share one current plan. Whether work is ready or blocked is worked out from the links on every read, and a claim is atomic, so no status drifts and no two agents take the same issue. Agents file, claim, close and re-plan work, and a person reviews the plans they put on a branch.",
+  "about": "A work queue for coding agents, where each agent asks what is ready, claims it so no other agent can, and closes it when done. Issues, what waits on what, parent and child work, comments and project memories are linked, and readiness is worked out from those links on every read. Agents file and re-plan work, and a person reviews the plans they put on a branch.",
   "sample": "Larkspur, a fictional note-taking app",
   "questions": [
     {

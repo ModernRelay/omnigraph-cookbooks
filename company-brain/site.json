@@ -3,7 +3,7 @@
   "name": "Company brain",
   "category": "Company",
   "blurb": "A company's people, projects, claims, decisions and commitments, each tied to the exact words it rests on, shared by its people and agents.",
-  "about": "Build a living company brain, and the agent workflows around it. It is one shared record of what a company knows: who is on which team, what each project is, what was said, what was decided and who owes what. Every claim carries the exact quote it rests on, so people and agents read the same account and can check it. Agents propose changes on their own branches, and a person reviews and merges them.",
+  "about": "A company brain your people and agents share, with every decision tied to the exact words it rests on. Who is on which team, what each project is, what was said, what was decided and who owes what are held once. A claim that disputes an older one is linked to it, so the decisions resting on the older one come to the surface. Agents propose changes on their own branches, and a person reviews and merges them.",
   "sample": "Lanternworks, a fictional software company",
   "questions": [
     {

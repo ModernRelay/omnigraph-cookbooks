@@ -1,18 +1,16 @@
-# Software development: issues to incidents
+# Software development: the reasoning behind the code
 
-Build a living system of record for software development, and the agent
-workflows around it. It keeps issues, epics, specs, decisions, pull requests,
-releases and incidents linked, with the rules that constrain them, so a coding
-agent sees the upstream decisions and cross-repository context that a diff
-lacks. Whether work is ready or blocked is worked out from the links on every
-read. Agents propose changes on branches that a person reviews. The Git host
-stays the record for code.
+A living system of record for software development, which gives a coding agent
+the decisions, specs and open issues behind a component before it changes a
+line. Issues, epics, specs, decisions, pull requests, releases and incidents
+are linked with the rules that constrain them, and whether work is ready or
+blocked is worked out from those links on every read. Agents propose changes on
+branches that a person reviews, and the Git host stays the record for code.
 
-Issues live in a tracker, code in a Git host, specs in a wiki, decisions in
-old threads and incident notes in another tool. A coding agent, or a new
-engineer, reviews a diff without the decision that shaped it, and the links
-between these things are kept in people's heads. This cookbook sets Omnigraph
-up as the one place those links are held.
+Issues live in a tracker, code in a Git host, specs in a wiki, decisions in old
+threads and incident notes in another tool. A coding agent, or a new engineer,
+reviews a diff without the decision that shaped it. This cookbook sets
+Omnigraph up as the one place those links are held.
 
 - **Context for every change.** An agent or engineer reads the decisions,
   specs and open issues that touch a component before changing it.

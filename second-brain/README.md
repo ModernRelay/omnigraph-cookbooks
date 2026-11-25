@@ -1,16 +1,16 @@
-# Second brain: a personal knowledge graph for people and their agents
+# Second brain: a memory of your life that you can check
 
-Build a living second brain, and the agent workflows around it. It keeps one
-person's people, projects, notes, tasks, habits and reading linked, with the
-message, email or memo each piece came from. It stays current because agents
-capture what arrives and tidy what is there, and the owner reviews their work on
-a branch before it joins the record.
+A second brain your agents keep, where every note, task and promise links back
+to the message it came from. It holds one person's people, projects, notes,
+tasks, habits and reading, linked to each other. Agents capture what arrives
+and tidy what is there, and you review their work on a branch before it joins
+the record.
 
-Today a life is spread over messages, email, calendars, a notes app, a reading
-app and a task list. Nothing connects "Theo loves Islay malts" to the text
-where you promised him a book, so an agent that reads them answers from
-whichever it found. This cookbook sets Omnigraph up as the one place your
-people, commitments and thinking are held.
+Your life is spread over messages, email, a calendar, a notes app and a task
+list. Nothing connects "Theo loves Islay malts" to the text where you promised
+him a book, so an agent that reads them answers from whichever it found. This
+cookbook sets Omnigraph up as the one place your people, commitments and
+thinking are held.
 
 - **Every note has its source.** A note, task or fact links back to the
   message, email or voice memo it came from.

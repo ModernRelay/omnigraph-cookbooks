@@ -1,12 +1,10 @@
-# Agent work queue: issues agents file, claim and close
+# Agent work queue: one plan that several coding agents share
 
-Build a living work queue for coding agents, and the agent workflows around it.
-It keeps issues, what waits on what, parent and child work, comments and project
-memories linked, so several agents and the people directing them share one
-current plan. Whether work is ready or blocked is worked out from the links on
-every read, and a claim is atomic, so no status drifts and no two agents take
-the same issue. Agents file, claim, close and re-plan work, and a person reviews
-the plans they put on a branch.
+A work queue for coding agents, where each agent asks what is ready, claims it
+so no other agent can, and closes it when done. Issues, what waits on what,
+parent and child work, comments and project memories are linked, and readiness
+is worked out from those links on every read. Agents file and re-plan work, and
+a person reviews the plans they put on a branch.
 
 When several coding agents work on one codebase, the plan usually lives in
 markdown files or a tracker built for people. Agents lose track of what is
