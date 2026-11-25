@@ -230,7 +230,7 @@ omnigraph cluster validate --config .
 These checks validate schema/query compatibility and configuration, not seed
 rows. Follow the repository's
 [local setup](https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/docs/local-setup.md)
-for initial apply, writer-lock handoff, server startup, and served seed loading.
+for initial apply, the writer lock, server startup, and served seed loading.
 
 If load reports a deterministic pre-effect validation refusal, correct the
 input before retrying. A timeout or lost response may hide a committed write;

@@ -33,8 +33,8 @@ All names are fabricated; the seed exists to shape the demo queries.
 ## Setup
 
 Use the shared [local setup](../docs/local-setup.md) with cookbook
-`dev-graph` and graph `dev`. It owns authentication, the bootstrap writer-lock
-handoff, readiness, and served seed loading. Apply later configuration edits with
+`dev-graph` and graph `dev`. It owns authentication, the bootstrap apply and
+writer lock, readiness, and served seed loading. Apply later configuration edits with
 the [live update workflow](../docs/local-setup.md#live-updates).
 
 Graph id `dev`. Stored queries and their parameters: `omnigraph queries list --target local --graph dev`.
@@ -225,7 +225,7 @@ matching facts" without checking vector coverage.
 
    `omnigraph embed` transforms files; load preserves supplied vectors and does
    not generate them. See the
-   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.15.0/docs/user/search/embeddings.md#offline-file-pipeline).
+   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.16.0/docs/user/search/embeddings.md#offline-file-pipeline).
 3. `omnigraph alias sem-issue --params '{"q":"tenant isolation"}'`.
 
 ## What this does not do

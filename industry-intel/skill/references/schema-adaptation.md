@@ -93,12 +93,14 @@ storage apply against its held writer lock.
 - Use `@rename_from` for a supported type/property rename so identity and data
   are preserved.
 - Adding nullable properties, types, or enum variants is supported. Adding a
-  required property to an existing type, tightening nullable to required,
-  changing keys, or narrowing enums is refused. Plan reveals the actual steps.
+  required property to an existing type, changing keys, or narrowing enums is
+  refused. Tightening a nullable property to required (`T?` to `T`) plans as a
+  `require_property` step; apply refuses it while any stored row holds a null
+  there, so backfill those rows first. Plan reveals the actual steps.
 - Dropping a property/type removes it from the current schema, while retained
   history still references the old data. Removing an entire graph declaration
   instead purges that graph's managed storage and retained history.
 
 For the full supported migration boundary, consult the `omnigraph` skill's
-`references/schema.md`. The repository vendors that skill;
+`references/schema.md`. That skill ships in the CLI:
 `omnigraph skill export DIR` writes the copy that matches the installed CLI.

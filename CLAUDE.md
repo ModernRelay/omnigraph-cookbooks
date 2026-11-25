@@ -5,7 +5,7 @@ links to the corresponding `CLAUDE.md`; edit the target once.
 
 ## Scope and sources
 
-These are nine self-contained OmniGraph **0.15.0** bundles: schemas, seed data,
+These are nine self-contained Omnigraph **0.16.0** bundles: schemas, seed data,
 stored queries and applied policies. The only application code is the beads
 cookbook's `ob` client in `beads/client/`, with its own tests, and the local
 HTTPS gateway `scripts/local-tls-gateway.py`. The root [README](README.md)
@@ -87,10 +87,10 @@ lives in its `site.json`:
 | Field | Shown as |
 |---|---|
 | `order` | its place in the directory |
-| `name`, `category`, `blurb` | the card and the page header; `category` is one of Company, Engineering, Hardware, Research, Investing, Personal |
+| `name`, `category`, `blurb` | the card and the page header; `category` is one of Company, Engineering, Hardware, Research, Investing, Personal. The `blurb` is also the page's meta description, so it is 160 characters at most |
 | `about` | optional, 600 characters at most: the "What it is" paragraph under the header. Two to four sentences on what the graph is, who it is for and what it takes the place of |
 | `sample` | what the seed data depicts, beside its counts |
-| `questions` | "Questions it answers": each `q` names a stored **read** query in `queries/*.gq`, with the `params` to run it with where it takes any |
+| `questions` | "Questions it answers": each `q` names a stored **read** query in `queries/*.gq`, with the `params` to run it with where it takes any. The query's `@description` is the caption under the question: one or two plain sentences on what it returns and when to use it, with no notes for developers |
 | `search` | the page's `<title>` (60 characters at most, leading with the phrase people search), an optional `heading` (70 at most: the second line of the page's H1, in the searcher's words) and the keywords its structured data carries |
 | `use_case`, `needs`, `capabilities` | not shown yet. The use case the cookbook serves, the needs it meets and the capabilities it uses, by their slugs in ModernRelay's mr-ops graph. Each need and capability names, in `shown_in`, the heading of the README that shows it. Leave all three out where mr-ops has no use case for the cookbook |
 
@@ -104,7 +104,7 @@ title and first paragraph.
 
 ## Writing a cookbook README
 
-A cookbook README is the landing page of OmniGraph for one use case. It tells
+A cookbook README is the landing page of Omnigraph for one use case. It tells
 an engineer in that field what they get: a living source of truth for the
 people and agents doing the work, and the agent workflows that run around it.
 It is not a manual. Commands, roles and step-by-step workflows go in the
@@ -208,7 +208,7 @@ Build a living <what the use case keeps>, and the agent workflows around it.
 agents do, and that a person reviews it.>
 
 <The problem in two sentences: where the data lives today and what goes wrong.>
-This cookbook sets OmniGraph up as <the one place it is held>.
+This cookbook sets Omnigraph up as <the one place it is held>.
 
 - **<Benefit>.** <One sentence.>
 - **<Benefit>.** <One sentence.>
@@ -314,7 +314,7 @@ page to a question. Write each section so it serves all three.
 | Section | Write | The check holds you to |
 |---|---|---|
 | Title and intro | The opening sentence as in the template, where X is what the use case keeps: a system of record for a hardware program, a company brain. Then the problem and three benefits | That opening; the first paragraph equal to `about` in `site.json`; a link to `AGENTS.md` |
-| The data model | The ontology of this use case, drawn, then the type table and the few modelling choices that matter. Say what OmniGraph provides, such as object storage, only where this use case has its own reason for it | Every backticked type exists in `schema.pg` |
+| The data model | The ontology of this use case, drawn, then the type table and the few modelling choices that matter. Say what Omnigraph provides, such as object storage, only where this use case has its own reason for it | Every backticked type exists in `schema.pg` |
 | Branching and merging | What a branch is used for in this use case, by people or by agents. In some, engineers branch for change requests; in others only agents do | Not empty |
 | Agents and workflows | The workflows by name and kind (capture, maintain, act), worked out as in "Working out the workflows", each with the stored queries behind it, reads and writes alike. Then what an agent may not do, and what the record does not hold back | Names stored queries, and only ones the cookbook has |
 | Data sources | The tools a team brings data in from, by product name, and the types each feeds | Every backticked type exists in `schema.pg` |
@@ -327,7 +327,7 @@ the list the check uses; change the two together.
 
 ### How to write it
 
-- Use the field's vocabulary first and OmniGraph's second. Say "design
+- Use the field's vocabulary first and Omnigraph's second. Say "design
   review", "baseline" and "impact analysis" before "schema", "stored query" or
   "MCP".
 - Write short sentences that say who does what and when. Prefer "an engineer
@@ -395,12 +395,13 @@ the list the check uses; change the two together.
 
 Use [local setup](docs/local-setup.md) for fresh roots. Fresh
 `cluster apply --target . --config .` creates the ledger; no separate import is
-needed. Direct apply retains exclusive admission after exit; a server releases
-it on a clean shutdown. Only clear an exact lock after its owner and accepted
+needed. A converged direct apply on local storage releases its admission lock;
+a server releases it on a clean shutdown, and keeps it when killed or when its
+graph fails to open. Only clear an exact lock after its owner and accepted
 I/O have stopped. Never automatically force-unlock or edit the ledger; never
 direct-apply while serving.
 
-The 0.15 CLI selects destinations with `--target` and source folders with
+The 0.16 CLI selects destinations with `--target` and source folders with
 `--config`; it sends tokens only over HTTPS, which is why local setup puts the
 gateway in front of the server. Use `cluster plan/apply --target NAME --config
 DIR` for live schema, query, policy and provider changes. Review deletions:
@@ -443,4 +444,8 @@ nearer row may exist. Rows written on a branch are not covered by the graph's
 indexes, so a read over them scans; `index build --branch B` covers them and
 `optimize` covers only `main`. Both address the storage root directly and
 refuse a server target with `target_incompatible`, so a served cookbook builds
-a branch's indexes with its server stopped.
+a branch's indexes with its server stopped. They also check the applied graph
+policy: pass `--as` an actor granted `maintain` on that branch. No shipped role
+has that grant, so adding one is a policy change for the deployment to make.
+Direct maintenance keeps the admission lock when it finishes; clear that exact
+lock before the server starts again.

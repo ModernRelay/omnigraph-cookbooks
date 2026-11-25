@@ -1,8 +1,8 @@
-"""End-to-end tests for ob against a real OmniGraph graph.
+"""End-to-end tests for ob against a real Omnigraph graph.
 
 Run from beads/client:  python3 -m unittest discover -s tests -v
 The omnigraph and omnigraph-server binaries come from $OB_OMNIGRAPH and
-$OB_OMNIGRAPH_SERVER, else PATH (the cookbooks pin the 0.15.0 release). Most
+$OB_OMNIGRAPH_SERVER, else PATH (the cookbooks pin the 0.16.0 release). Most
 tests use local graphs. ServedTests start a server for the cookbook behind the
 repository's local HTTPS gateway and drive ob through server targets;
 TransportTests put a scripted server behind the same gateway to see which
@@ -15,7 +15,6 @@ import concurrent.futures
 import http.server
 import json
 import os
-import re
 import shutil
 import socket
 import subprocess
@@ -51,7 +50,7 @@ SERVER = find_binary("omnigraph-server")
 
 
 def clean_env(**extra: str) -> dict:
-    """The caller's environment without any ob or OmniGraph setting, so that a
+    """The caller's environment without any ob or Omnigraph setting, so that a
     shell configured for a real graph (OB_TARGET, OMNIGRAPH_HOME, ...) cannot
     leak in."""
     env = {k: v for k, v in os.environ.items() if not k.startswith(("OB_", "OMNIGRAPH_", "OG_"))}
@@ -597,7 +596,7 @@ API_HEADER = "Omnigraph-Http-Api"
 
 
 def from_server(status: int, body: dict) -> tuple[int, dict, bool]:
-    """A response the OmniGraph server sent: it carries the API header."""
+    """A response the Omnigraph server sent: it carries the API header."""
     return status, body, True
 
 
@@ -768,10 +767,10 @@ class ServedTests(unittest.TestCase):
                                 "act-admin", "--json"], cwd=root, env=env, capture_output=True, text=True)
         if apply.returncode != 0:
             raise AssertionError(f"cluster apply failed: {apply.stdout}{apply.stderr}")
-        # The apply keeps its admission lock; nothing else uses this root.
-        lock = re.search(r"Admission lock: (\S+?);", apply.stderr).group(1)
-        subprocess.run([OMNIGRAPH, "cluster", "force-unlock", lock, "--target", "."], cwd=root, env=env,
-                       check=True, capture_output=True)
+        # A converged direct apply on local storage releases its admission lock.
+        status = subprocess.run([OMNIGRAPH, "cluster", "status", "--target", ".", "--json"], cwd=root, env=env,
+                                check=True, capture_output=True, text=True)
+        assert json.loads(status.stdout)["lock_id"] is None, status.stdout
         port = free_port()
         cls.log = open(cls.tmp / "server.log", "w")
         server = subprocess.Popen([SERVER, "--cluster", ".", "--bind", f"127.0.0.1:{port}"], cwd=root,

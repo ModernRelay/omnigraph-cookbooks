@@ -7,9 +7,8 @@ query get_media($slug: String) {
     return { $m.slug, $m.name, $m.kind, $m.status, $m.rating, $m.url, $m.published_date, $m.brief, $m.tags }
 }
 
-// "Reading queue" specifically — books with status=want.
-// For other "want" media (movies, podcasts), filter notes-by-kind or use media-by-kind.
-query reading_queue() {
+// Books only: other media marked want (films, podcasts) are in media_by_kind.
+query reading_queue() @description("Books you have marked as wanting to read, in title order.") {
     match {
         $m: Media { kind: "book", status: "want" }
     }
@@ -44,7 +43,7 @@ query media_authored_by($slug: String) {
 
 // Media ← RecommendedBy
 
-query media_recommended_by($slug: String) {
+query media_recommended_by($slug: String) @description("Who recommended a book or other piece of media, and how you know each of them. Use it to remember where a recommendation came from.") {
     match {
         $m: Media { slug: $slug }
         $m mediaRecommendedBy $p

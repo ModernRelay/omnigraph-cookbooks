@@ -11,7 +11,7 @@ the plans they put on a branch.
 When several coding agents work on one codebase, the plan usually lives in
 markdown files or a tracker built for people. Agents lose track of what is
 blocked, two of them pick up the same task, and nobody can say who changed
-what. This cookbook sets OmniGraph up as the one place the plan is held, in the
+what. This cookbook sets Omnigraph up as the one place the plan is held, in the
 style of [beads](https://github.com/gastownhall/beads) (`bd`).
 
 - **Ready work on every read.** An agent asks what it can claim and gets issues

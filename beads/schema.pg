@@ -1,4 +1,4 @@
-// OmniGraph beads: a dependency-aware issue tracker for coding agents.
+// Omnigraph beads: a dependency-aware issue tracker for coding agents.
 //
 // The graph stores facts only. Whether an issue is ready or blocked is
 // derived by the queries in queries/issues.gq on every read, so there is no

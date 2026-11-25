@@ -11,7 +11,7 @@ stays the record for code.
 Issues live in a tracker, code in a Git host, specs in a wiki, decisions in
 old threads and incident notes in another tool. A coding agent, or a new
 engineer, reviews a diff without the decision that shaped it, and the links
-between these things are kept in people's heads. This cookbook sets OmniGraph
+between these things are kept in people's heads. This cookbook sets Omnigraph
 up as the one place those links are held.
 
 - **Context for every change.** An agent or engineer reads the decisions,
@@ -136,7 +136,7 @@ Every workflow has the same parts:
   outside access it needs. The cookbook includes no integrations, and an issue
   comment is the only place to note that a message was sent, so a repeat has
   to be avoided by the agent checking that comment first.
-- **Bring your own agent.** It connects through OmniGraph's MCP server from
+- **Bring your own agent.** It connects through Omnigraph's MCP server from
   Claude Code, Codex, Cursor or another MCP client. The cookbook has no skill
   of its own; [AGENTS.md](AGENTS.md) is what it reads.
 
@@ -199,7 +199,7 @@ Paste this prompt into a coding agent such as Claude Code or Codex:
 Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the development graph cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/dev-graph
 ```
 
-The agent installs OmniGraph if needed, creates the graph, loads Meridian and
+The agent installs Omnigraph if needed, creates the graph, loads Meridian and
 runs the questions above.
 
 To do it by hand, follow the shared [local setup](../docs/local-setup.md)

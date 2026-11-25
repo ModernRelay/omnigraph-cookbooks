@@ -29,8 +29,8 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 ## Setup
 
 Use the shared [local setup](../docs/local-setup.md) with cookbook
-`industry-intel` and graph `spike`. It owns authentication, the bootstrap writer-lock
-handoff, readiness, and served seed loading. Apply later configuration edits with
+`industry-intel` and graph `spike`. It owns authentication, the bootstrap apply and
+writer lock, readiness, and served seed loading. Apply later configuration edits with
 the [live update workflow](../docs/local-setup.md#live-updates).
 
 Graph id `spike`. Stored queries and their parameters: `omnigraph queries list --target local --graph spike`.
@@ -193,7 +193,7 @@ and they fail without a provider. To enable them:
    for new chunks or `--mode merge` for updates. `omnigraph embed` never opens
    or mutates a graph. The offline and server providers must use the same model
    and vector dimension. See the engine's
-   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.15.0/docs/user/search/embeddings.md#offline-file-pipeline)
+   [embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.16.0/docs/user/search/embeddings.md#offline-file-pipeline)
    for the spec format.
 
 A ranked read answers a `ranking` object beside its rows, naming the search
@@ -240,7 +240,7 @@ data-eng, context`. `slug` is the identity, with prefixes `sig-`, `pat-`, `el-`,
 - PatternKind: `challenge, disruption, dynamic`
 - Domain is an enum property on Signal/Element, not a node
 - Edges follow `VerbTargetType` naming (e.g. `FormsPattern`, `DevelopedByCompany`)
-- Embeddings only on Chunk: `Vector(3072) @embed("text")`. OmniGraph does not populate `@embed` fields during load; prepare vectors with the offline JSONL-to-JSONL `omnigraph embed` pipeline, then load that output. The query-time provider must use the same model and dimension.
+- Embeddings only on Chunk: `Vector(3072) @embed("text")`. Omnigraph does not populate `@embed` fields during load; prepare vectors with the offline JSONL-to-JSONL `omnigraph embed` pipeline, then load that output. The query-time provider must use the same model and dimension.
 - Chunk is immutable (no `updatedAt`)
 
 ## When Editing

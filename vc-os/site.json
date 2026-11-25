@@ -18,7 +18,7 @@
       }
     },
     {
-      "q": "Who on the team can get an introduction to this founder?",
+      "q": "Who on the team can get an introduction to this founder through someone they know?",
       "query": "intro_path_to_founder",
       "params": {
         "slug": "per-helix-yuki"

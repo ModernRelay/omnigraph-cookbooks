@@ -1,7 +1,7 @@
 # beads deployment, declared as code (omnigraph cluster model).
 #
 # Filesystem-backed cluster; storage defaults to this directory.
-# Follow ../docs/local-setup.md for bootstrap and writer-lock handoff.
+# Follow ../docs/local-setup.md for bootstrap and the writer lock.
 # Later configuration updates go through the running server:
 # cluster plan/apply --target local --config .
 version: 1

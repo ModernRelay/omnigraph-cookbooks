@@ -17,8 +17,8 @@ belongs to the engine, in the **omnigraph** skill that ships in the CLI:
 
 ## Before you start
 
-- The 0.15.0 `omnigraph` and `omnigraph-server` on your PATH, from the
-  [engine release](https://github.com/ModernRelay/omnigraph/releases/tag/v0.15.0).
+- The 0.16.0 `omnigraph` and `omnigraph-server` on your PATH, from the
+  [engine release](https://github.com/ModernRelay/omnigraph/releases/tag/v0.16.0).
   `omnigraph version` reports the release. The
   [install guide](https://www.omnigraph.dev/docs/getting-started/install.md#release-channels)
   shows how to pin a version.
@@ -39,12 +39,13 @@ omnigraph cluster apply --target "$COOKBOOK" --config "$COOKBOOK" --as act-admin
 
 `--config` names the folder holding `cluster.yaml`, and `--target` names the
 storage root, here the same folder. A fresh apply creates the graph and its
-stored queries and prints an **Admission lock** ID. The apply keeps that lock
-after it exits. Wait for it to finish, make sure nothing else writes to the
-folder, then clear that exact lock once and start the server:
+stored queries. It takes the folder's admission lock and, once the apply has
+converged, releases it, so the server can start next. If
+`omnigraph cluster status --target "$COOKBOOK" --json` still reports a
+`lock_id`, the apply did not finish cleanly: read the engine's cluster
+reference before clearing it. Then start the server:
 
 ```bash
-omnigraph cluster force-unlock '<LOCK_ID_FROM_APPLY>' --target "$COOKBOOK"
 export OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-admin":"local-admin-token","act-writer":"local-writer-token","act-reader":"local-reader-token","act-agent":"local-agent-token"}'
 omnigraph-server --cluster "$COOKBOOK" --bind 127.0.0.1:8080
 ```
@@ -55,8 +56,8 @@ an actor in the cookbook's `policies/graph.policy.yaml`, which decides what it
 may do; `act-agent` exists only in the cookbooks that define an agent role.
 
 Ctrl-C releases the server's lock, so the next start needs no unlock. A server
-that was killed keeps it: follow the engine's
-[ownership-transfer rules](https://github.com/ModernRelay/omnigraph/blob/v0.15.0/docs/user/deployment.md#writer-topology)
+that was killed, or that failed to open its graph, keeps it: follow the engine's
+[ownership-transfer rules](https://github.com/ModernRelay/omnigraph/blob/v0.16.0/docs/user/deployment.md#writer-topology)
 before clearing it.
 
 ## 2. Reach the server over HTTPS

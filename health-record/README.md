@@ -11,7 +11,7 @@ record.
 Most people's health data sits in lab PDFs, a patient portal, a wearable's app
 and a paper vaccination card. Nobody connects a result to the target it was
 meant to reach, or a dose to the series it belongs to. This cookbook sets
-OmniGraph up as the one place those links are held, on your own machine.
+Omnigraph up as the one place those links are held, on your own machine.
 
 - **One record.** You and your agents read the same current picture: every
   result, with the document and the printed line it came from.
@@ -147,7 +147,7 @@ Every workflow has the same parts:
 - **It does not diagnose.** An agent records what a document or you state. It
   may propose a hypothesis for your review; it does not set a condition or a
   verdict.
-- **Bring your own agent.** It connects through OmniGraph's MCP server from
+- **Bring your own agent.** It connects through Omnigraph's MCP server from
   Claude Code, Codex, Cursor or another MCP client.
 
 ## Data sources
@@ -213,7 +213,7 @@ Paste this prompt into a coding agent such as Claude Code or Codex:
 Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the personal health record cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/health-record
 ```
 
-The agent installs OmniGraph if needed, creates the graph, loads Noa Brandt
+The agent installs Omnigraph if needed, creates the graph, loads Noa Brandt
 and runs the questions above.
 
 To do it by hand, follow the shared [local setup](../docs/local-setup.md)

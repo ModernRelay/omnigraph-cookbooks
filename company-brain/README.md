@@ -9,7 +9,7 @@ and merges them.
 
 Today that knowledge is spread over meeting notes, chat threads, documents and
 tickets, and the summaries of them drift apart. An agent that reads them
-answers from whichever one it found. This cookbook sets OmniGraph up as the one
+answers from whichever one it found. This cookbook sets Omnigraph up as the one
 record they all read and write.
 
 - **Every fact has its source.** A decision rests on claims, and each claim
@@ -122,7 +122,7 @@ Every workflow has the same parts:
   keep track of that itself.
 - **Each agent has a name and an owner.** Every agent has its own identity and
   a person who answers for it.
-- **Bring your own agent.** It connects through OmniGraph's MCP server from
+- **Bring your own agent.** It connects through Omnigraph's MCP server from
   Claude Code, Codex, Cursor or another MCP client.
 
 ## Data sources
@@ -183,7 +183,7 @@ Paste this prompt into a coding agent such as Claude Code or Codex:
 Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the company brain cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/company-brain
 ```
 
-The agent installs OmniGraph if needed, creates the graph, loads Lanternworks
+The agent installs Omnigraph if needed, creates the graph, loads Lanternworks
 and runs the questions above.
 
 To do it by hand, follow the shared [local setup](../docs/local-setup.md)

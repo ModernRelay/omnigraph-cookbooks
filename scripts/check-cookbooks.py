@@ -137,12 +137,10 @@ def qualify(name, graph, stored_query, workspace, env):
     applied = run(env, "cluster", "apply", "--target", str(bundle), "--config", str(bundle),
                   "--as", "act-admin", "--json")
     assert applied["status"] == "complete" and applied["result"]["converged"]
+    # A converged direct apply on local storage releases its admission lock,
+    # so the server starts with no unlock, as docs/local-setup.md says.
     status = run(env, "cluster", "status", "--target", str(bundle), "--json")
-    lock = status["lock_id"]
-    assert lock
-    # This harness created the exclusive local root. The direct child exited;
-    # no external object store or other owner can have accepted work here.
-    run(env, "cluster", "force-unlock", lock, "--target", str(bundle), "--json")
+    assert status["lock_id"] is None, status
 
     port, gateway_port = free_port(), free_port()
     url = f"http://127.0.0.1:{port}"
@@ -448,22 +446,35 @@ SITE_CATEGORIES = {"Company", "Engineering", "Hardware", "Research", "Investing"
 SITE_TITLE_MAX = 60  # a search result shows about this much; the site appends " | Omnigraph"
 SITE_HEADING_MAX = 70  # the second line of the page's H1
 SITE_ABOUT_MAX = 600  # two to four sentences: what the graph is, who it is for, what it takes the place of
+SITE_BLURB_MAX = 160  # the page's meta description; search results cut one past about this
+STRING = re.compile(r'"(?:[^"\\]|\\.)*"')
 QUERY_START = re.compile(r"^query\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(", re.M)
 WRITES = re.compile(r"\b(insert|update|delete)\b")
 
 
-def stored_queries(folder):
-    """Each stored query in the cookbook's queries/*.gq, by name: whether it writes."""
+def query_sources(folder):
+    """Each stored query in the cookbook's queries/*.gq, by name: its text from
+    its parameters to the next query, with strings emptied and comments removed."""
     found = {}
     for path in sorted((ROOT / folder / "queries").glob("*.gq")):
         source = path.read_text()
         starts = list(QUERY_START.finditer(source))
         for i, match in enumerate(starts):
             body = source[match.end():starts[i + 1].start() if i + 1 < len(starts) else len(source)]
-            body = re.sub(r'"(?:[^"\\]|\\.)*"', "", body)
-            body = re.sub(r"//.*", "", body)
-            found[match.group(1)] = bool(WRITES.search(body))
+            found[match.group(1)] = re.sub(r"//.*", "", STRING.sub('""', body))
     return found
+
+
+def stored_queries(folder):
+    """Each stored query in the cookbook's queries/*.gq, by name: whether it writes."""
+    return {name: bool(WRITES.search(body)) for name, body in query_sources(folder).items()}
+
+
+def described_queries(folder):
+    """The stored queries that carry a @description before their body: the
+    caption omnigraph.dev shows under a featured question."""
+    return {name for name, body in query_sources(folder).items()
+            if "@description(" in body.split("{", 1)[0]}
 
 
 def check_site(folder):
@@ -477,13 +488,16 @@ def check_site(folder):
         assert isinstance(site.get(key), kind) and site[key] != "", f"{where}: {key} must be a non-empty {kind.__name__}"
     assert site["category"] in SITE_CATEGORIES, \
         f"{where}: category {site['category']!r} is not one of {', '.join(sorted(SITE_CATEGORIES))}"
+    assert len(site["blurb"]) <= SITE_BLURB_MAX, f"{where}: blurb must be at most {SITE_BLURB_MAX} characters"
     queries = stored_queries(folder)
+    described = described_queries(folder)
     assert site["questions"], f"{where}: name at least one question"
     for question in site["questions"]:
         assert isinstance(question.get("q"), str) and question["q"], f"{where}: every question needs its text in q"
         name = question.get("query")
         assert name in queries, f"{where}: question {question['q']!r} names {name!r}, which queries/*.gq does not define"
         assert not queries[name], f"{where}: question {question['q']!r} names {name!r}, which writes; name a read"
+        assert name in described, f"{where}: question {question['q']!r} names {name!r}, which has no @description to show under it"
     search = site["search"]
     title, keywords = search.get("title"), search.get("keywords")
     assert isinstance(title, str) and 0 < len(title) <= SITE_TITLE_MAX, \
@@ -500,7 +514,7 @@ def check_site(folder):
     return site
 
 
-# The sections of a cookbook README. It reads as the landing page of OmniGraph for one
+# The sections of a cookbook README. It reads as the landing page of Omnigraph for one
 # use case: a living source of truth and the agent workflows around it. It makes sense
 # without the sample data, which has its own section, and omnigraph.dev draws its
 # use-case page from the same sections (see "Writing a cookbook README" in AGENTS.md).
@@ -704,7 +718,7 @@ def main():
     if site_only:
         return
     if not CLI or not SERVER:
-        raise SystemExit("Put 0.15.0 omnigraph and omnigraph-server on PATH or set OMNIGRAPH_BIN / OMNIGRAPH_SERVER_BIN")
+        raise SystemExit("Put 0.16.0 omnigraph and omnigraph-server on PATH or set OMNIGRAPH_BIN / OMNIGRAPH_SERVER_BIN")
     workspace = Path(tempfile.mkdtemp(prefix="omnigraph-cookbooks-test-"))
     env = {k: v for k, v in os.environ.items()
            if not k.startswith(("OMNIGRAPH_", "OG_", "AWS_", "AZURE_"))}
@@ -718,7 +732,7 @@ def main():
     gateway.ensure_certificates(workspace / "tls")
     try:
         version = run(env, "version").stdout
-        assert version.splitlines()[0] == "omnigraph 0.15.0", version
+        assert version.splitlines()[0] == "omnigraph 0.16.0", version
         for name in selected:
             graph, query = COOKBOOKS[name]
             qualify(name, graph, query, workspace, env)
@@ -727,7 +741,7 @@ def main():
         raise
     else:
         shutil.rmtree(workspace)
-        print(f"All {len(selected)} selected cookbooks passed against OmniGraph 0.15.0.")
+        print(f"All {len(selected)} selected cookbooks passed against Omnigraph 0.16.0.")
 
 
 if __name__ == "__main__":

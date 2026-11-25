@@ -7,7 +7,7 @@ query get_signal($slug: String) {
     return { $s.slug, $s.name, $s.brief, $s.description, $s.domain, $s.stagingTimestamp }
 }
 
-query recent_signals() {
+query recent_signals() @description("The 50 most recently added signals, newest first, each with its brief and domain. Use it to see what has come in lately.") {
     match {
         $s: Signal
     }

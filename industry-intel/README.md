@@ -10,7 +10,7 @@ review.
 Market intelligence usually lives in a feed reader, a folder of clippings and
 the analyst's memory. The links between a claim, its source and the belief it
 bears on are never written down, so a thesis keeps standing after the evidence
-turns. This cookbook sets OmniGraph up as the one place those links are held.
+turns. This cookbook sets Omnigraph up as the one place those links are held.
 
 - **Evidence on both sides.** A signal can support a pattern or contradict it,
   so a belief is never judged by its supporters alone.
@@ -122,7 +122,7 @@ Every workflow has the same parts:
   the agent has to keep track of that itself.
 - **Some work has no stored write.** There is no stored query to retire a
   stale pattern, drop a signal or change one. Those edits are left to a person.
-- **Bring your own agent.** It connects through OmniGraph's MCP server from
+- **Bring your own agent.** It connects through Omnigraph's MCP server from
   Claude Code, Codex, Cursor or another MCP client.
   [`skill/SKILL.md`](skill/SKILL.md) is a skill for setting up a graph for a
   new market.
@@ -185,7 +185,7 @@ Paste this prompt into a coding agent such as Claude Code or Codex:
 Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the industry intel cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/industry-intel
 ```
 
-The agent installs OmniGraph if needed, creates the graph, loads the sample
+The agent installs Omnigraph if needed, creates the graph, loads the sample
 data and runs the questions above.
 
 To do it by hand, follow the shared [local setup](../docs/local-setup.md)

@@ -7,7 +7,7 @@ query get_task($slug: String) {
     return { $t.slug, $t.name, $t.status, $t.kind, $t.context, $t.priority, $t.due, $t.direction, $t.brief }
 }
 
-query tasks_next() {
+query tasks_next() @description("Tasks marked as next, earliest due first, with their context and priority. Use it to choose what to do now.") {
     match {
         $t: Task { status: "next" }
     }

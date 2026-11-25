@@ -1,7 +1,7 @@
-"""ob: a dependency-aware issue tracker for coding agents, built on OmniGraph.
+"""ob: a dependency-aware issue tracker for coding agents, built on Omnigraph.
 
 ob speaks the beads (`bd`) workflow: create work, link dependencies, ask for
-ready work, claim it, close it. The graph lives in OmniGraph; ob is a thin
+ready work, claim it, close it. The graph lives in Omnigraph; ob is a thin
 client over the `omnigraph` CLI and needs nothing beyond the Python standard
 library. Every command publishes at most one graph commit.
 
@@ -22,7 +22,7 @@ from pathlib import Path
 
 # tempfile, shutil, secrets, random and threading are imported where used:
 # ob runs once per agent action, and on Python 3.14 those imports alone cost
-# about as much as the OmniGraph call they wrap.
+# about as much as the Omnigraph call they wrap.
 
 HERE = Path(os.path.realpath(__file__)).parent
 BUNDLE = HERE.parent  # the cookbook: schema.pg, queries/, cluster.yaml
@@ -82,7 +82,7 @@ EXIT_UNKNOWN, EXIT_USAGE, EXIT_BUSY = 2, 64, 75
 # held is refused at once, before it sends anything. The refusal has no
 # `code`, so ob knows it by its message.
 LOCKED_CONFIG = "could not lock operator configuration"
-# Settings of OmniGraph 0.13 that served mode no longer reads.
+# Settings of Omnigraph 0.13 that served mode no longer reads.
 RETIRED_ENV = {
     "OB_SERVER": "OB_TARGET, the name of a server target in the operator configuration",
     "OB_TOKEN": "the token source of that target (ob never handles tokens)",
@@ -214,7 +214,7 @@ def find_config_dir(start: Path) -> Path | None:
 
 
 def refuse_retired_settings() -> None:
-    """OmniGraph reaches a server only through a registered target, so the
+    """Omnigraph reaches a server only through a registered target, so the
     old server URL and token settings would be silently wrong; refuse them."""
     found = [name for name in RETIRED_ENV if os.environ.get(name)]
     if found:
@@ -231,7 +231,7 @@ def load_config(args) -> tuple[Path | None, dict]:
         if cfg.get("store"):
             cfg["store"] = local_store(cfg["store"], cfg_dir)
     if "server" in cfg:
-        raise ObError(f'{cfg_dir / CONFIG_FILE} names a "server", which OmniGraph no longer accepts: '
+        raise ObError(f'{cfg_dir / CONFIG_FILE} names a "server", which Omnigraph no longer accepts: '
                       "register the server as a target in the operator configuration, then replace "
                       '"server" with "target": "<name>" in that file, or set OB_TARGET')
     if os.environ.get("OB_STORE"):
@@ -251,7 +251,7 @@ def local_store(store: str, base: Path) -> str:
     if store.startswith("file://"):
         return store
     if "://" in store:
-        raise ObError(f"{store}: OmniGraph reaches remote storage only through a server; serve the "
+        raise ObError(f"{store}: Omnigraph reaches remote storage only through a server; serve the "
                       "graph and set OB_TARGET to its server target")
     return str((base / store).resolve())
 
@@ -272,7 +272,7 @@ def default_actor(cfg: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
-# The OmniGraph client
+# The Omnigraph client
 
 
 def omnigraph_binary() -> str:
@@ -421,7 +421,7 @@ class Graph:
         return self._run(argv, read=action == "list", rerun_conflicts=False)
 
     def _embed_file(self, path: Path) -> Path:
-        """Fill the declared embeddings with OmniGraph's offline pipeline."""
+        """Fill the declared embeddings with Omnigraph's offline pipeline."""
         spec = {
             "dimension": EMBED_DIM,
             "types": {
@@ -1278,7 +1278,7 @@ def cmd_prime(args, out: Out, g: Graph, cfg: dict):
 
 
 ONBOARD = """
-This project tracks work with ob (beads on OmniGraph). Do not keep markdown TODO lists.
+This project tracks work with ob (beads on Omnigraph). Do not keep markdown TODO lists.
 - `ob ready` lists claimable work; `ob ready --claim` takes the top item atomically.
 - `ob show <id>` shows an issue, its links, comments and memories.
 - `ob create "title" -t bug|task|feature|epic -p 0-4 [--deps <id>] [--parent <id>]` files work;
@@ -1388,7 +1388,7 @@ def cmd_import(args, out: Out, g: Graph, cfg: dict):
 
     load_chunks(nodes, 2000)
     load_chunks(edges, 8000)
-    # Compact and index the bulk load now, as OmniGraph advises after a large
+    # Compact and index the bulk load now, as Omnigraph advises after a large
     # load; reads are correct without it, but scan what the indexes miss.
     if g.store:
         g.maintain(["optimize"])
@@ -1433,7 +1433,7 @@ def cmd_export(args, out: Out, g: Graph, cfg: dict):
             "dependencies": [{"issue_id": issue["slug"], "depends_on_id": o["slug"], "type": reverse[o["link"]]}
                              for o in outs],
         })
-    # OmniGraph prints DateTime in UTC without a zone; bd requires RFC 3339.
+    # Omnigraph prints DateTime in UTC without a zone; bd requires RFC 3339.
     for bead in beads:
         for key in ("created_at", "updated_at", "closed_at", "started_at", "defer_until", "due_at"):
             if bead.get(key):
@@ -1469,7 +1469,7 @@ def cmd_maintain(args, out: Out, g: Graph, cfg: dict):
 def build_parser() -> argparse.ArgumentParser:
     # Colored help costs a 30 ms import on every run; ob is called in tight agent loops.
     plain = {"color": False} if sys.version_info >= (3, 14) else {}
-    p = argparse.ArgumentParser(prog="ob", description="Beads on OmniGraph: issue tracking for coding agents.",
+    p = argparse.ArgumentParser(prog="ob", description="Beads on Omnigraph: issue tracking for coding agents.",
                                 **plain)
     def global_flags(parser, suppress=False):
         unset = {"default": argparse.SUPPRESS} if suppress else {}
@@ -1498,7 +1498,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--store", help="local graph path or file:// URI (default .ob/graph.omni)")
     s.add_argument("--target", help="server target in the operator configuration (served mode)")
     s.add_argument("--graph", default="beads", help="graph id on the server")
-    s.add_argument("--server", help=argparse.SUPPRESS)  # OmniGraph 0.13; refused with a pointer to --target
+    s.add_argument("--server", help=argparse.SUPPRESS)  # Omnigraph 0.13; refused with a pointer to --target
     s.add_argument("--embed", action="store_true", help="store title and memory embeddings")
     s.set_defaults(fn=cmd_init, needs_graph=False)
 

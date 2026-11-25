@@ -2,7 +2,7 @@
   "order": 9,
   "name": "Personal health record",
   "category": "Personal",
-  "blurb": "One person's lab results, readings, targets, hypotheses, medication and vaccine doses, with \"off target\", \"overdue\" and \"incomplete\" worked out from the results on every read.",
+  "blurb": "One person's lab results, readings, targets, hypotheses, medication and vaccine doses, with \"off target\", \"overdue\" and \"incomplete\" worked out on every read.",
   "about": "Build a living personal health record, and the agent workflows around it. It keeps lab results, device readings, targets, hypotheses, what you take and the vaccine doses you were given linked to the documents they came from. Whether a result is off target, a retest is overdue or a vaccine series is incomplete is worked out from the current data each time you ask. Agents read your reports and tell you what is due, on branches you review before anything reaches the record.",
   "sample": "Noa Brandt, an invented person with two years of results",
   "questions": [

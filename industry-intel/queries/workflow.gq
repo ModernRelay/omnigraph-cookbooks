@@ -14,11 +14,9 @@ query orphan_signals() {
     order { $s.stagingTimestamp desc }
 }
 
-// Momentum: how much evidence each pattern attracted since a cutoff. Both
-// kinds count — a pattern drawing contradictions is moving, not idling, and
-// which way it points is `contested_patterns` below.
-// Params: since — e.g. {"since": "2026-05-01T00:00:00Z"}
-query pattern_momentum($since: DateTime) {
+// Both kinds of evidence count: a pattern drawing contradictions is moving,
+// not idling. contested_patterns says which way it points.
+query pattern_momentum($since: DateTime) @description("How many signals each pattern has drawn since a date, supporting and contradicting alike. Use it to see which patterns are gathering evidence fastest.") {
     match {
         $p: Pattern
         $s (formsPattern | contradictsPattern) $p
@@ -42,9 +40,8 @@ query stale_patterns($since: DateTime) {
     return { $p.slug, $p.name }
 }
 
-// Tension: patterns with contradicting evidence — where the thesis is
-// actively contested. High counts deserve an Insight.
-query contested_patterns() {
+// A pattern with many contradictions is worth an Insight.
+query contested_patterns() @description("Patterns that signals contradict, with how many signals contradict each. Use it to find the theses that new evidence argues against.") {
     match {
         $p: Pattern
         $s contradictsPattern $p

@@ -1,4 +1,4 @@
-// OmniGraph company brain: the shared context of one company, kept coherent
+// Omnigraph company brain: the shared context of one company, kept coherent
 // by its people and by their agents.
 //
 // Four layers, connected only by named edges:
@@ -43,7 +43,7 @@ node Person @description("Someone in the real world: an employee, a customer, a 
     github: String? @unique
 }
 
-node Actor @description("Someone who reads or writes this graph: a person's own login or a software agent. slug is the OmniGraph actor id the bearer token selects, so commit history joins to this node.")
+node Actor @description("Someone who reads or writes this graph: a person's own login or a software agent. slug is the Omnigraph actor id the bearer token selects, so commit history joins to this node.")
            @instruction("Register with add_actor, which refuses a slug that already exists; retire with deactivate_actor. Agents write only on the branch they were given; they cannot write main, merge or delete branches. The policy cannot tell one agent's branch from another's, so a person checks each commit's actor before merging.") {
     slug: String @key
     kind: enum(human, agent)
