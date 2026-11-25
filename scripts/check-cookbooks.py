@@ -580,7 +580,8 @@ def check_site(folder):
 
 
 # The sections of a cookbook README. It reads as the landing page of Omnigraph for one
-# use case: a living source of truth and the agent workflows around it. It makes sense
+# use case: the record its people and agents share and the agent workflows around it,
+# opened from the cookbook's own positioning. It makes sense
 # without the sample data, which has its own section, and omnigraph.dev draws its
 # use-case page from the same sections (see "Writing a cookbook README" in AGENTS.md).
 # Commands belong in the cookbook's AGENTS.md.
@@ -665,15 +666,13 @@ def check_readme(folder, site, queries):
         f"found {', '.join(sections) or 'none'}"
     for title, section in sections.items():
         assert "".join(section["text"]).strip(), f"{where}: ## {title} is empty"
-    # The intro: the living thing the use case builds and the agent workflows around it, in the
-    # words site.json's about carries, and where an agent finds the commands.
+    # The intro: in the words site.json's about carries, and where an agent finds the commands.
+    # Its opening comes from the cookbook's positioning ("Positioning" in AGENTS.md), so no
+    # fixed wording is checked.
     intro = "\n".join(lead).strip()
     first = " ".join(intro.split("\n\n")[0].split())
     assert first and first == site.get("about"), \
         f"{where}: its first paragraph and about in site.json must be the same text"
-    opening = first.split(". ")[0]
-    assert opening.startswith("Build a living ") and "agent workflows around it" in opening, \
-        f"{where}: the intro opens 'Build a living <what the use case keeps> ..., and the agent workflows around it.'"
     assert "(AGENTS.md)" in intro, f"{where}: the intro must point agents at AGENTS.md"
     # The questions table is site.json's questions: the same ones, word for word, in the same
     # order, each with its stored read.

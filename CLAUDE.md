@@ -106,9 +106,9 @@ title and first paragraph.
 ## Writing a cookbook README
 
 A cookbook README is the landing page of Omnigraph for one use case. It tells
-an engineer in that field what they get: a living source of truth for the
-people and agents doing the work, and the agent workflows that run around it.
-It is not a manual. Commands, roles and step-by-step workflows go in the
+a person in that field what it does for their work: the record their people
+and agents share, and the agent workflows that run around it. It is not a
+manual. Commands, roles and step-by-step workflows go in the
 cookbook's own `AGENTS.md`.
 
 [hardware-program/README.md](hardware-program/README.md) and
@@ -137,6 +137,34 @@ README.
   the tools its product pages name. If you cannot reach the web, use the
   terms the cookbook's own schema and seed use. Say in your report which
   pages you read, or that you read none.
+
+### Positioning
+
+Work out the page's position before you write a sentence of it. Start from the
+reader, not from a phrase another cookbook uses:
+
+| Ask | hardware-program | agent-ops |
+|---|---|---|
+| Who arrives, and what do they use today? | A systems engineer with requirements in DOORS or Jama and tests in a spreadsheet | An engineer running agents in production, with prompts in code and traces in LangSmith |
+| What do they call this kind of thing? | A system of record for the program | A control plane for agents, or a prompt registry with evaluations |
+| What job are they trying to get done? | Know what a change breaks before the design review | Know whether a prompt change made an agent better |
+| What would they use instead? | Flow Engineering, or links kept by hand | LangSmith, Langfuse or Braintrust |
+| What does this do for that job that the alternative does not? | One record from requirement to test, with every change reviewed on a branch | Each prompt revision tied to the runs, traces and judgments after it, and each new one reviewed on a branch |
+
+The opening sentence names the category and then gives the difference for the
+reader's job: "A living system of record for a hardware program, so you know
+what a design change breaks before the design review." The category is the
+name people already know this kind of thing by and search for: a system of
+record, a company brain, a second brain, a personal health record, a CRM, a
+work queue. It tells a reader at once what they are looking at. Use
+"living" where staying current is the point.
+
+The difference is what makes it this cookbook. It has to be something the
+schema and queries do, said in the reader's words. Without it, the cookbooks
+read alike: they sit side by side in one directory, and a sentence every card
+could carry tells the reader nothing about this one.
+
+Put the five answers in your report, one line each.
 
 ### What a README change does not do
 
@@ -168,7 +196,7 @@ Moving a cookbook to the template changes its README, its `CLAUDE.md` and its
 ### Working out the workflows
 
 Do not start from the stored queries and ask what could be done with them.
-Start from the work. A workflow around a living record is a loop with five
+Start from the work. A workflow around the record is a loop with five
 parts: what starts it, what the agent reads, what it does, where a person
 decides, and how the record shows it happened. Ask these questions about the
 use case, and each answer is a workflow:
@@ -204,9 +232,9 @@ writes. Then be exact about review:
 ````markdown
 # <Use case>: <what it covers>
 
-Build a living <what the use case keeps>, and the agent workflows around it.
-<What it keeps linked, in the field's words.> <Why it stays current.> <What
-agents do, and that a person reviews it.>
+<The category the reader knows, and what sets this one apart for their job,
+from "Positioning".> <What it keeps linked, in the
+field's words.> <What agents do, and that a person reviews it.>
 
 <The problem in two sentences: where the data lives today and what goes wrong.>
 This cookbook sets Omnigraph up as <the one place it is held>.
@@ -314,7 +342,7 @@ page to a question. Write each section so it serves all three.
 
 | Section | Write | The check holds you to |
 |---|---|---|
-| Title and intro | The opening sentence as in the template, where X is what the use case keeps: a system of record for a hardware program, a company brain. Then the problem and three benefits | That opening; the first paragraph equal to `about` in `site.json`; a link to `AGENTS.md` |
+| Title and intro | The opening sentence from "Positioning": the category the reader knows, and what sets this one apart for their job. Then the problem and three benefits | The first paragraph equal to `about` in `site.json`; a link to `AGENTS.md` |
 | The data model | The ontology of this use case, drawn, then the type table and the few modelling choices that matter. Say what Omnigraph provides, such as object storage, only where this use case has its own reason for it | Every backticked type exists in `schema.pg` |
 | Branching and merging | What a branch is used for in this use case, by people or by agents. In some, engineers branch for change requests; in others only agents do | Not empty |
 | Agents and workflows | The workflows by name and kind (capture, maintain, act), worked out as in "Working out the workflows", each with the stored queries behind it, reads and writes alike. Then what an agent may not do, and what the record does not hold back | Names stored queries, and only ones the cookbook has |
