@@ -13,7 +13,7 @@ query workflows() @description("Every workflow with its status and the number of
     order { workflow asc }
 }
 
-query due_workflows($as_of: DateTime) @description("Active workflows a schedule makes due by a time, e.g. 2026-11-23T12:00:00Z, with the revision to run and the trigger to start it from.") {
+query due_workflows($as_of: DateTime) @description("Active workflows whose schedule has come due by the time you give, with the instructions to run and the trigger that starts them.") {
     match {
         $t: Trigger
         $t.kind = "time"

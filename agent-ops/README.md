@@ -1,23 +1,24 @@
-# Agent operations: workflows, runs and the instructions that improve
+# Agent operations: prompt changes judged by the runs that follow
 
-Build a living record of agent operations, and the agent workflows around it.
-It keeps each workflow's instructions, triggers and criteria linked to every
-run, the trace and outputs it left, and the judgments made of it. A run records
-the revision of the instructions it ran, so whether a prompt change helped is
-read from the runs each time you ask. Agents run the work, judge it and propose
-better instructions; a person reviews each change on a branch before agents run
-it.
+A control plane for the agents you run in production, where every prompt change
+is judged by the runs that follow it. It holds what each workflow runs and
+when, and every run with the revision of the instructions it used, its trace in
+Claude Code or LangSmith, what it did and how it was judged, so a scorecard
+compares revisions on their own runs. A judging agent scores runs and a tuning
+agent proposes new instructions from the failures; a person reviews each
+proposal on a branch before agents run it.
 
-Today a team's prompts sit in code, schedules in a cron file, traces in a
-tracing tool and feedback in a spreadsheet, and nothing connects a change of
-instructions to the runs that came after it. This cookbook sets Omnigraph up as
-the one place where agents read what to run and write down what happened.
+Most teams keep a workflow's schedule in a cron file, its prompt in code, its
+traces and scores in a tracing tool and what it did in GitHub or Slack. Asking
+whether a prompt change helped means joining those by hand. This cookbook sets
+Omnigraph up as the one place where agents read what to run and write down what
+happened.
 
 - **Instructions with a history.** Every revision of a workflow's instructions
   is kept, with why it was written, the runs that showed the problem and the
   person who approved it.
 - **Evaluation tied to the change.** Judgments by people, models and rules sit
-  on the run they judge, so a scorecard compares revisions on their own runs.
+  on the run they judge, against criteria the workflow names.
 - **A loop that improves itself.** One agent judges runs, another proposes new
   instructions from the failures, and nothing reaches the agents until a person
   merges it.

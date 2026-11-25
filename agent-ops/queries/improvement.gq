@@ -3,7 +3,7 @@
 // every run records its revision, so the scorecards below compare revisions
 // on the runs each one actually ran.
 
-query runs_to_judge() @description("Finished runs with a trace, of workflows that have criteria, and no evaluation yet, oldest first.") {
+query runs_to_judge() @description("Finished runs nobody has judged yet, oldest first: those that left a trace, of workflows with criteria to judge them against.") {
     match {
         $r: Run
         $r.status = "succeeded" or $r.status = "failed"

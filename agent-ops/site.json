@@ -2,8 +2,8 @@
   "order": 11,
   "name": "Agent operations",
   "category": "Engineering",
-  "blurb": "The workflows a team's agents run, every run with its trace, outputs and judgments, and the prompt revisions that come from them, with \"did this change help?\" read from the runs.",
-  "about": "Build a living record of agent operations, and the agent workflows around it. It keeps each workflow's instructions, triggers and criteria linked to every run, the trace and outputs it left, and the judgments made of it. A run records the revision of the instructions it ran, so whether a prompt change helped is read from the runs each time you ask. Agents run the work, judge it and propose better instructions; a person reviews each change on a branch before agents run it.",
+  "blurb": "A control plane for production agents: each run with its prompt revision, trace, outputs and judgments, so you can see whether a prompt change helped.",
+  "about": "A control plane for the agents you run in production, where every prompt change is judged by the runs that follow it. It holds what each workflow runs and when, and every run with the revision of the instructions it used, its trace in Claude Code or LangSmith, what it did and how it was judged, so a scorecard compares revisions on their own runs. A judging agent scores runs and a tuning agent proposes new instructions from the failures; a person reviews each proposal on a branch before agents run it.",
   "sample": "Harbor Labs, an invented engineering team with four agents and six workflows",
   "questions": [
     {
