@@ -3,7 +3,7 @@
   "name": "Pharma intelligence",
   "category": "Research",
   "blurb": "Competitive intelligence for a biotech program: the compounds, trials and deals around it, the program's own assumptions, and which signals contradict them.",
-  "about": "Build a living competitive intelligence record for a biotech program, and the agent workflows around it. It keeps the compounds, trials, deals and regulatory actions around the program linked to the program's own assumptions, decisions and open questions, so each outside signal shows what it supports or threatens. New public signals are linked as they appear, so a decision briefing is a read and not a rebuilt slide deck. Agents propose signals and links on branches for an analyst to review.",
+  "about": "A living competitive intelligence record for a biotech program, where each competitor readout, deal and regulatory action is tied to the assumptions your next decision rests on. The compounds, trials and deals around the program are linked to its own assumptions, decisions and open questions, so each new signal shows what it supports or weakens. Before a go/no-go, the briefing is a read. Agents propose signals and links on branches for an analyst to review.",
   "sample": "Viking Therapeutics' obesity program, from public sources",
   "questions": [
     {

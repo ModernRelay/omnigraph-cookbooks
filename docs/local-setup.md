@@ -46,14 +46,15 @@ converged, releases it, so the server can start next. If
 reference before clearing it. Then start the server:
 
 ```bash
-export OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-admin":"local-admin-token","act-writer":"local-writer-token","act-reader":"local-reader-token","act-agent":"local-agent-token"}'
+export OMNIGRAPH_SERVER_BEARER_TOKENS_JSON='{"act-admin":"local-admin-token","act-writer":"local-writer-token","act-reader":"local-reader-token","act-agent":"local-agent-token","act-executor":"local-executor-token"}'
 omnigraph-server --cluster "$COOKBOOK" --bind 127.0.0.1:8080
 ```
 
 
 Leave the server running. The tokens are for this loopback demo. Each one is
 an actor in the cookbook's `policies/graph.policy.yaml`, which decides what it
-may do; `act-agent` exists only in the cookbooks that define an agent role.
+may do; `act-agent` exists only in the cookbooks that define an agent role,
+and `act-executor` only in agent-ops.
 
 Ctrl-C releases the server's lock, so the next start needs no unlock. A server
 that was killed, or that failed to open its graph, keeps it: follow the engine's
@@ -115,12 +116,18 @@ targets:
     endpoint: https://localhost:8443
     auth: {provider: token, source: {env: OG_LOCAL_AGENT_TOKEN}}
     transport: {tls: {ca: {mode: append, file: local-tls/ca.pem}}}
+  local-executor:
+    kind: server
+    endpoint: https://localhost:8443
+    auth: {provider: token, source: {env: OG_LOCAL_EXECUTOR_TOKEN}}
+    transport: {tls: {ca: {mode: append, file: local-tls/ca.pem}}}
 defaults:
   target: local
   output: table
 EOF
 export OG_LOCAL_ADMIN_TOKEN=local-admin-token OG_LOCAL_WRITER_TOKEN=local-writer-token
 export OG_LOCAL_READER_TOKEN=local-reader-token OG_LOCAL_AGENT_TOKEN=local-agent-token
+export OG_LOCAL_EXECUTOR_TOKEN=local-executor-token
 omnigraph config validate
 ```
 

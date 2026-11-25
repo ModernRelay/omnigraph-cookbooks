@@ -1,0 +1,147 @@
+// Runs, their traces and what they did outside the record. A run's workflow
+// is its revision's workflow, so every read here reaches the workflow
+// through the revision the run used.
+
+query recent_runs($workflow: String) @description("Runs of one workflow, newest first, with the revision each ran and the agent that ran it.") {
+    match {
+        $w: Workflow { slug: $workflow }
+        $v: Revision
+        $v revisionOf $w
+        $r: Run
+        $r runUsedRevision $v
+        $a: Agent
+        $r runExecutedBy $a
+    }
+    return { $r.slug as run, $v.number as revision, $r.status as status, $a.slug as agent,
+             $r.started_at as started_at, $r.summary as summary }
+    order { started_at desc }
+    limit 50
+}
+
+query run_traces($run: String) @description("The agent sessions of a run: where each trace is, its model, tokens, cost and tool calls.") {
+    match {
+        $r: Run { slug: $run }
+        $t: Trace
+        $t traceOfRun $r
+    }
+    return { $t.slug as trace, $t.source as source, $t.session_id as session_id, $t.url as url, $t.model as model,
+             $t.input_tokens as input_tokens, $t.output_tokens as output_tokens, $t.cost_usd as cost_usd,
+             $t.tool_calls as tool_calls }
+    order { trace asc }
+}
+
+query run_outputs($run: String) @description("What a run did outside the record.") {
+    match {
+        $r: Run { slug: $run }
+        $o: Output
+        $o outputOfRun $r
+    }
+    return { $o.slug as output, $o.kind as kind, $o.title as title, $o.url as url, $o.created_at as created_at }
+    order { created_at asc }
+}
+
+query output_at($url: String) @description("Whether a run already acted on a link, such as a pull request it commented on, and which run.") {
+    match {
+        $o: Output { url: $url }
+        $r: Run
+        $o outputOfRun $r
+    }
+    return { $o.slug as output, $o.kind as kind, $o.title as title, $r.slug as run, $o.created_at as created_at }
+    order { created_at desc }
+}
+
+query run_skills($run: String) @description("The skills a run loaded, as its trace showed.") {
+    match {
+        $r: Run { slug: $run }
+        $s: Skill
+        $r runLoadedSkill $s
+    }
+    return { $s.slug as skill, $s.name as name }
+    order { skill asc }
+}
+
+query failed_runs($since: DateTime) @description("Runs started since a time that failed or ended unknown, with the error and the agent, e.g. since 2026-11-16T00:00:00Z.") {
+    match {
+        $r: Run
+        $r.status = "failed" or $r.status = "unknown"
+        $r.started_at >= $since
+        $v: Revision
+        $r runUsedRevision $v
+        $w: Workflow
+        $v revisionOf $w
+        $a: Agent
+        $r runExecutedBy $a
+    }
+    return { $w.slug as workflow, $r.slug as run, $r.status as status, $r.error_type as error_type,
+             $a.slug as agent, $r.started_at as started_at, $r.summary as summary }
+    order { started_at desc }
+}
+
+query stuck_runs($before: DateTime) @description("Runs still marked running that started before a time: an agent that stopped without closing its run.") {
+    match {
+        $r: Run
+        $r.status = "running"
+        $r.started_at < $before
+        $v: Revision
+        $r runUsedRevision $v
+        $w: Workflow
+        $v revisionOf $w
+        $a: Agent
+        $r runExecutedBy $a
+    }
+    return { $w.slug as workflow, $r.slug as run, $a.slug as agent, $r.started_at as started_at }
+    order { started_at asc }
+}
+
+query runs_without_trace() @description("Finished runs with no trace: nothing to judge them by.") {
+    match {
+        $r: Run
+        $r.status != "running"
+        not { $t traceOfRun $r }
+        $v: Revision
+        $r runUsedRevision $v
+        $w: Workflow
+        $v revisionOf $w
+    }
+    return { $w.slug as workflow, $r.slug as run, $r.status as status, $r.started_at as started_at }
+    order { started_at asc }
+}
+
+query last_covered($workflow: String) @description("How far a workflow over a stream has read: the end of the latest window a succeeded run covered. Its next run starts there.") {
+    match {
+        $w: Workflow { slug: $workflow }
+        $v: Revision
+        $v revisionOf $w
+        $r: Run
+        $r runUsedRevision $v
+        $r.status = "succeeded"
+        $r.covered_through is not null
+    }
+    return { max($r.covered_through) as covered_through, count($r) as runs }
+}
+
+query workflow_scorecard() @description("Runs of every workflow by outcome.") {
+    match {
+        $w: Workflow
+        $v: Revision
+        $v revisionOf $w
+        $r: Run
+        $r runUsedRevision $v
+    }
+    return { $w.slug as workflow, $r.status as status, count($r) as runs }
+    order { workflow asc, status asc }
+}
+
+query agent_runs($agent: String) @description("What one agent has run, by workflow and outcome.") {
+    match {
+        $a: Agent { slug: $agent }
+        $r: Run
+        $r runExecutedBy $a
+        $v: Revision
+        $r runUsedRevision $v
+        $w: Workflow
+        $v revisionOf $w
+    }
+    return { $w.slug as workflow, $r.status as status, count($r) as runs }
+    order { workflow asc, status asc }
+}

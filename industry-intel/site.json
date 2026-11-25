@@ -3,7 +3,7 @@
   "name": "Industry intelligence",
   "category": "Research",
   "blurb": "Signals, patterns and insights about an industry, linked to the products and technologies they concern, with hybrid search over the sources.",
-  "about": "Build a living record of an industry's signals and patterns, and the agent workflows around it. It keeps each signal, the pattern it supports or contradicts, the products and companies it concerns and the source it came from linked, so a new signal shows which beliefs it weakens. Agents file evidence and flag what is stale or contested, on branches for an analyst to review.",
+  "about": "A living market intelligence record for one industry, where each signal is filed for or against the beliefs it bears on, so you know when the evidence turns. Each signal is linked to the products, companies and source it concerns, so a belief is weighed on both sides and a contradiction shows up the day it is filed. Agents file what comes in and flag what is stale or contested, on branches an analyst reviews.",
   "sample": "The AI infrastructure market, from public sources",
   "questions": [
     {

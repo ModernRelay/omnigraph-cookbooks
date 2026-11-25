@@ -1,12 +1,11 @@
-# Hardware program: requirements to verification
+# Hardware program: what a change breaks, before the design review
 
-Build a living system of record for a hardware program, and the agent workflows
-around it. It keeps requirements, the architecture they are allocated to,
-design values, budgets and test evidence linked, so they stay aligned as the
-design changes. Whether a requirement is verified or a budget closes is worked
-out from the current data each time you ask, so no status drifts from the
-evidence. Agents re-check the program on every change, on branches an engineer
-reviews before anything reaches the baseline.
+A living system of record for a hardware program, so you know what a design
+change breaks before the design review. Requirements, the architecture they are
+allocated to, design values, budgets and test evidence are linked, and whether
+a requirement is verified or a budget closes is worked out from the current
+data each time you ask. Agents re-check the program on every change, on
+branches an engineer reviews before anything reaches the baseline.
 
 On most programs the requirements, budgets, CAD model and test results live in
 different tools, and the links between them are kept by hand. What gets missed

@@ -1,18 +1,17 @@
-# Pharma intelligence: competitive pipeline to program decisions
+# Pharma intelligence: the competitive pipeline against your program's assumptions
 
-Build a living competitive intelligence record for a biotech program, and the
-agent workflows around it. It keeps the compounds, trials, deals and regulatory
-actions around the program linked to the program's own assumptions, decisions
-and open questions, so each outside signal shows what it supports or threatens.
-New public signals are linked as they appear, so a decision briefing is a read
-and not a rebuilt slide deck. Agents propose signals and links on branches for
-an analyst to review.
+A living competitive intelligence record for a biotech program, where each
+competitor readout, deal and regulatory action is tied to the assumptions your
+next decision rests on. The compounds, trials and deals around the program are
+linked to its own assumptions, decisions and open questions, so each new signal
+shows what it supports or weakens. Before a go/no-go, the briefing is a read.
+Agents propose signals and links on branches for an analyst to review.
 
-Competitive intelligence usually sits in a pipeline database, a folder of
-press-release clippings and a strategy deck, and nothing connects them. A
-readout lands, and nobody can say which assumption it weakens or which decision
-it touches. This cookbook sets Omnigraph up as the one place the outside
-pipeline and the program's own beliefs are held together.
+A pipeline database tells you what competitors are running, and the program's
+assumptions sit in a strategy deck. When a readout lands, nobody can say which
+assumption it weakens or which decision it touches. This cookbook sets
+Omnigraph up as the one place the outside pipeline and the program's own
+beliefs are held together.
 
 - **Evidence against each assumption.** See which signals support or contradict
   a belief the program rests on, from any team's reading of the market.

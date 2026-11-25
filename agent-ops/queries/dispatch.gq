@@ -1,0 +1,93 @@
+// What to run next, and what an agent loads to run it. A run is always of
+// the workflow's active revision; these reads are what an executor reads
+// before it starts one.
+
+query workflows() @description("Every workflow with its status and the number of its active revision.") {
+    match {
+        $w: Workflow
+        $r: Revision
+        $r revisionOf $w
+        $r.status = "active"
+    }
+    return { $w.slug as workflow, $w.name as name, $w.status as status, $r.number as revision }
+    order { workflow asc }
+}
+
+query due_workflows($as_of: DateTime) @description("Active workflows whose schedule has come due by the time you give, with the instructions to run and the trigger that starts them.") {
+    match {
+        $t: Trigger
+        $t.kind = "time"
+        $t.status = "active"
+        $t.next_due_at <= $as_of
+        $w: Workflow
+        $t triggerOf $w
+        $w.status = "active"
+        $r: Revision
+        $r revisionOf $w
+        $r.status = "active"
+    }
+    return { $w.slug as workflow, $t.slug as trigger, $t.next_due_at as due_at, $r.slug as revision }
+    order { due_at asc }
+}
+
+query workflow_triggers($workflow: String) @description("Every trigger of one workflow.") {
+    match {
+        $w: Workflow { slug: $workflow }
+        $t: Trigger
+        $t triggerOf $w
+    }
+    return { $t.slug as trigger, $t.kind as kind, $t.status as status, $t.schedule as schedule,
+             $t.condition as condition, $t.next_due_at as next_due_at }
+    order { trigger asc }
+}
+
+query active_revision($workflow: String) @description("What an agent runs: the workflow's goal and output with the instructions of its active revision.") {
+    match {
+        $w: Workflow { slug: $workflow }
+        $r: Revision
+        $r revisionOf $w
+        $r.status = "active"
+    }
+    return { $r.slug as revision, $r.number as number, $w.goal as goal, $r.instructions as instructions,
+             $w.output as output }
+}
+
+query workflow_skills($workflow: String) @description("The skills a workflow uses, with the text an agent loads.") {
+    match {
+        $w: Workflow { slug: $workflow }
+        $s: Skill
+        $w workflowUsesSkill $s
+    }
+    return { $s.slug as skill, $s.name as name, $s.status as status, $s.content as content }
+    order { skill asc }
+}
+
+query workflow_criteria($workflow: String) @description("What a run of the workflow is judged against.") {
+    match {
+        $w: Workflow { slug: $workflow }
+        $c: Criterion
+        $w workflowJudgedBy $c
+    }
+    return { $c.slug as criterion, $c.name as name, $c.statement as statement }
+    order { criterion asc }
+}
+
+query agent_skills($agent: String) @description("The skills an agent holds.") {
+    match {
+        $a: Agent { slug: $agent }
+        $s: Skill
+        $a agentHasSkill $s
+    }
+    return { $s.slug as skill, $s.name as name, $s.status as status }
+    order { skill asc }
+}
+
+query skill_users($skill: String) @description("The workflows that use a skill: what a change to the skill reaches.") {
+    match {
+        $s: Skill { slug: $skill }
+        $w: Workflow
+        $w workflowUsesSkill $s
+    }
+    return { $w.slug as workflow, $w.name as name, $w.status as status }
+    order { workflow asc }
+}

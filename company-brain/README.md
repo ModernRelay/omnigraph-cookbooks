@@ -1,16 +1,16 @@
-# Company brain: shared context for a company's people and agents
+# Company brain: one account of what the company decided
 
-Build a living company brain, and the agent workflows around it. It is one
-shared record of what a company knows: who is on which team, what each project
-is, what was said, what was decided and who owes what. Every claim carries the
-exact quote it rests on, so people and agents read the same account and can
-check it. Agents propose changes on their own branches, and a person reviews
+A company brain your people and agents share, with every decision tied to the
+exact words it rests on. Who is on which team, what each project is, what was
+said, what was decided and who owes what are held once. A claim that disputes
+an older one is linked to it, so the decisions resting on the older one come to
+the surface. Agents propose changes on their own branches, and a person reviews
 and merges them.
 
 Today that knowledge is spread over meeting notes, chat threads, documents and
-tickets, and the summaries of them drift apart. An agent that reads them
-answers from whichever one it found. This cookbook sets Omnigraph up as the one
-record they all read and write.
+tickets, and the summaries of them drift apart. A search over them returns
+every version, and an agent answers from whichever it found. This cookbook sets
+Omnigraph up as the one record they all read and write.
 
 - **Every fact has its source.** A decision rests on claims, and each claim
   quotes the exact words and says where they are.

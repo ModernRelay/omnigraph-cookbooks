@@ -3,7 +3,7 @@
   "name": "Development graph",
   "category": "Engineering",
   "blurb": "Issues, epics, specs, decisions, pull requests, releases and incidents as one graph, with the Git host still the record for code.",
-  "about": "Build a living system of record for software development, and the agent workflows around it. It keeps issues, epics, specs, decisions, pull requests, releases and incidents linked, with the rules that constrain them, so a coding agent sees the upstream decisions and cross-repository context that a diff lacks. Whether work is ready or blocked is worked out from the links on every read. Agents propose changes on branches that a person reviews. The Git host stays the record for code.",
+  "about": "A living system of record for software development, which gives a coding agent the decisions, specs and open issues behind a component before it changes a line. Issues, epics, specs, decisions, pull requests, releases and incidents are linked with the rules that constrain them, and whether work is ready or blocked is worked out from those links on every read. Agents propose changes on branches that a person reviews, and the Git host stays the record for code.",
   "sample": "Meridian, a fictional collaborative-document product",
   "questions": [
     {

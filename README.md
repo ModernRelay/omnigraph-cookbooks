@@ -1,7 +1,7 @@
 # Omnigraph Cookbooks
 
-Each cookbook sets Omnigraph up for one kind of work: a living record that the
-people and agents doing that work share, and the agent workflows around it.
+Each cookbook sets Omnigraph up for one kind of work: a record that the people
+and agents doing that work share, and the agent workflows around it.
 You get the data model for the field, the questions the record answers, the
 workflows agents run and sample data to try them on.
 
@@ -16,6 +16,7 @@ workflows agents run and sample data to try them on.
 | [Venture firm](vc-os/) | A venture firm's deals, portfolio, people and investment theses, with every signal tied to the beliefs it supports or contradicts. | Which active theses has new evidence contradicted? |
 | [Second brain](second-brain/) | One person's people, projects, notes, tasks, habits and reading, with where each piece came from. | What do I still owe this person? |
 | [Personal health record](health-record/) | One person's lab results, readings, targets, hypotheses, medication and vaccine doses, with "off target", "overdue" and "incomplete" worked out on every read. | Which results are outside my own targets? |
+| [Agent operations](agent-ops/) | A control plane for production agents: each run with its prompt revision, trace, outputs and judgments, so you can see whether a prompt change helped. | Did the last change to its instructions make a workflow better? |
 
 Each cookbook's README is the page for its use case: the data model, how
 changes are reviewed, the workflows, the tools it takes data from and the
@@ -33,9 +34,9 @@ questions you can ask.
 - **Agent workflows.** What agents bring into the record, what they keep
   consistent in it, and whom they tell when something needs a person.
 - **Review on branches.** An agent makes its changes on a branch, and a person
-  reads the difference and merges it. company-brain, hardware-program and
-  health-record enforce this: an agent there cannot write the main record or
-  merge. In the others it is how the workflows are written, and nothing
+  reads the difference and merges it. company-brain, hardware-program,
+  health-record and agent-ops enforce this: an agent there cannot write the
+  main record or merge. In the others it is how the workflows are written, and nothing
   enforces it.
 - **Sample data.** A made-up case, described in `seed.md`, that every featured
   question returns an answer on.

@@ -1,20 +1,18 @@
-# Venture firm: deals, theses and portfolio in one record
+# Venture firm: deals and theses held against the evidence
 
-Build a living operating record for a venture firm, and the agent workflows
-around it. It keeps deals, portfolio companies, people, meetings, investment
-theses and the evidence for and against them linked, so every decision traces
-back to the beliefs it rests on. New evidence is tied to the assumptions it
-supports or contradicts as it arrives. Agents prepare briefs, capture calls and
-propose lessons, and a partner reviews what they write.
+An operating system for a venture firm, where every deal and thesis is held
+against the evidence for and against it, so you go into investment committee
+knowing what contradicts the deal. Deals, portfolio companies, people, meetings
+and theses are linked, and every decision traces back to the beliefs it rested
+on. Agents prepare briefs, capture calls and propose lessons, and a partner
+reviews what they write.
 
-A firm's pipeline, notes, chat, call recordings, spreadsheets and portfolio
-models sit in separate tools, and agents glue them together with brittle
-integrations. Nobody can say which belief a decision rested on, or which news
-has since weakened it. This cookbook sets Omnigraph up as the one place the
-firm's deals, beliefs and evidence are held.
+A firm's pipeline sits in a CRM, with memos, call notes, chat and portfolio
+models in other tools. Nobody can say which belief a decision rested on, or
+which news has since weakened it. This cookbook sets Omnigraph up as the one
+place the firm's deals, beliefs and evidence are held.
 
-- **Every decision shows its basis.** A decision links to the deal, the
-  assumptions it rests on, the open questions and the partner who made it.
+- **A path to the founder.** See who on the team knows someone who knows them.
 - **Evidence moves beliefs.** A signal is linked to the assumption or thesis it
   supports or contradicts, so a weakened thesis is a query, not a memory.
 - **Review before it counts.** An agent's tentative lesson or note waits on a

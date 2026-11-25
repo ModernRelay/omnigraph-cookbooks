@@ -1,12 +1,11 @@
-# Personal health record: results, targets and vaccinations
+# Personal health record: your results against your own targets
 
-Build a living personal health record, and the agent workflows around it. It
-keeps lab results, device readings, targets, hypotheses, what you take and the
-vaccine doses you were given linked to the documents they came from. Whether a
-result is off target, a retest is overdue or a vaccine series is incomplete is
-worked out from the current data each time you ask. Agents read your reports
-and tell you what is due, on branches you review before anything reaches the
-record.
+A personal health record that holds your results, readings and vaccinations
+against your own targets, so you see what is off target, overdue or unfinished
+each time you ask. Each result, reading, medication and vaccine dose links to
+the document it came from and to the target or series it belongs to. Agents
+read your reports and tell you what is due, on branches you review before
+anything reaches the record.
 
 Most people's health data sits in lab PDFs, a patient portal, a wearable's app
 and a paper vaccination card. Nobody connects a result to the target it was

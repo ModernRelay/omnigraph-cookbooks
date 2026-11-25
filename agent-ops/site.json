@@ -1,0 +1,69 @@
+{
+  "order": 11,
+  "name": "Agent operations",
+  "category": "Engineering",
+  "blurb": "A control plane for production agents: each run with its prompt revision, trace, outputs and judgments, so you can see whether a prompt change helped.",
+  "about": "A control plane for the agents you run in production, where every prompt change is judged by the runs that follow it. It holds what each workflow runs and when, and every run with the revision of the instructions it used, its trace in Claude Code or LangSmith, what it did and how it was judged, so a scorecard compares revisions on their own runs. A judging agent scores runs and a tuning agent proposes new instructions from the failures; a person reviews each proposal on a branch before agents run it.",
+  "sample": "Harbor Labs, an invented engineering team with four agents and six workflows",
+  "questions": [
+    {
+      "q": "Did the last change to its instructions make a workflow better?",
+      "query": "revision_scorecard",
+      "params": {
+        "workflow": "wf-review-pr"
+      }
+    },
+    {
+      "q": "Which criteria does each workflow fail under its current instructions?",
+      "query": "criterion_failures"
+    },
+    {
+      "q": "What has each revision of each workflow cost to run?",
+      "query": "revision_cost"
+    },
+    {
+      "q": "Which workflows are due to run?",
+      "query": "due_workflows",
+      "params": {
+        "as_of": "2026-11-23T12:00:00Z"
+      }
+    },
+    {
+      "q": "Which finished runs has nobody judged yet?",
+      "query": "runs_to_judge"
+    }
+  ],
+  "search": {
+    "title": "Agent memory graph: workflows, runs, traces, prompts",
+    "heading": "Agent workflows, runs and prompts that improve, in one record",
+    "keywords": [
+      "agent memory",
+      "ai agent memory"
+    ]
+  },
+  "use_case": "usecase:agent-memory",
+  "needs": [
+    {
+      "need": "need:agent-state-held-once",
+      "shown_in": "The data model"
+    },
+    {
+      "need": "need:agents-diverge",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "need": "need:context-carried-across-tasks",
+      "shown_in": "Agents and workflows"
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "cap:branch-per-agent",
+      "shown_in": "Branching and merging"
+    },
+    {
+      "capability": "cap:three-way-merge",
+      "shown_in": "Branching and merging"
+    }
+  ]
+}
