@@ -1,7 +1,7 @@
 # CLAUDE.md — company-brain
 
 Scoped guidance for the `company-brain/` cookbook. Repo-wide conventions live
-in `../CLAUDE.md`. For general OmniGraph operations use the **omnigraph** skill;
+in `../CLAUDE.md`. For general Omnigraph operations use the **omnigraph** skill;
 this file covers only what is specific to the company brain.
 
 ## What This Is
@@ -71,7 +71,7 @@ fictional company, "Lanternworks"; all names are made up.
   before merging, check that no agent commit updated a Claim, Decision or
   ActionItem ("Agents extract, people decide" below). Accept only decisions
   whose claims are verified (`accepted_on_unverified` must return zero rows).
-- A Person is anyone in the real world; an Actor is an OmniGraph actor id that
+- A Person is anyone in the real world; an Actor is an Omnigraph actor id that
   reads or writes, linked to its person with `ActsFor`. Resolve every handle
   with `person_by_handle` before creating a person. Handles (`email`,
   `slack`, `github`) are lowercased properties of Person; change them, a name
@@ -133,7 +133,7 @@ omnigraph query overdue_actions --target local-reader --graph company \
   deprecated later. A rejected successor replaces nothing, and
   `withdraw_successor` frees the slot for another.
 - **People are not logins.** A Person exists whether or not they ever touch
-  the graph. An Actor is an OmniGraph identity that can; it `ActsFor` a
+  the graph. An Actor is an Omnigraph identity that can; it `ActsFor` a
   person. Agents resolve a handle with `person_by_handle` before creating
   anyone, so the same person does not appear three times. Someone who leaves
   is marked with `deactivate_person` and `end_membership`, never deleted, and

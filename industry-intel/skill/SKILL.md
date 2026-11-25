@@ -18,12 +18,12 @@ ask only when it is unclear.
 
 Locate or clone `ModernRelay/omnigraph-cookbooks`, then read its local setup and
 the selected cookbook's guidance. Check `omnigraph version`; these instructions
-target CLI and server 0.15. Use matching release binaries. The filesystem
+target CLI and server 0.16. Use matching release binaries. The filesystem
 setup needs no object store or Docker. Existing data follows
 the repository's [upgrade procedure][upgrading], never an automatic reset.
 
-The repository's [local setup][local-setup] covers initial apply, exact writer-lock
-handoff, server identities, the local HTTPS gateway, CLI targets, readiness, and
+The repository's [local setup][local-setup] covers initial apply, the writer lock,
+server identities, the local HTTPS gateway, CLI targets, readiness, and
 seed loading. Read and follow that sequence. A filesystem deployment needs no
 storage credentials; the server still uses bearer identities for policy and live
 configuration management. Pick free ports for the server and gateway if others
@@ -111,12 +111,14 @@ its server owns the writer lock.
 
 Schema changes require `main` to be the only live branch. Supported renames use
 `@rename_from`; enum widening and nullable property additions are supported,
-but arbitrary type/key changes and nullable-to-required tightening are not.
-Plan before apply. Removing a graph from `cluster.yaml` permanently deletes its
-managed storage and retained history; it is not a way to pause serving.
+but arbitrary type/key changes are not. Tightening a nullable property to
+required (`T?` to `T`) plans as a `require_property` step, and apply refuses it
+while any stored row holds a null there, so backfill first. Plan before apply.
+Removing a graph from `cluster.yaml` permanently deletes its managed storage
+and retained history; it is not a way to pause serving.
 
 Use the `omnigraph` skill for command details, bulk data review, embedding
-preparation, and uncertain write outcomes. The repository vendors it;
+preparation, and uncertain write outcomes. It ships in the CLI:
 `omnigraph skill export DIR` writes the copy that matches the installed CLI.
 
 [local-setup]: https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/docs/local-setup.md

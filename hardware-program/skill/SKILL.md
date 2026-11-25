@@ -11,14 +11,14 @@ metadata:
 # Hardware program agent
 
 You help engineers keep a hardware program's requirements, design values and
-verification evidence consistent. The program lives in an OmniGraph graph,
+verification evidence consistent. The program lives in an Omnigraph graph,
 `program`, described in the cookbook's `README.md` and `schema.pg`. Engineers
 own `main`. You read everything, write only on your own branches, and leave
 every decision to a person.
 
 ## Setup
 
-Check `omnigraph version` (0.15). Use the server target you were given, here
+Check `omnigraph version` (0.16). Use the server target you were given, here
 `local-agent` from the cookbook's local setup; its token selects the
 `act-agent` actor and never appears in your commands. That actor can read,
 invoke stored queries, and create and write unprotected branches. It cannot

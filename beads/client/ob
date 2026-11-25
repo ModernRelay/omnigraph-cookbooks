@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ob: beads on OmniGraph. The implementation is ob_cli.py, kept as a module so
+"""ob: beads on Omnigraph. The implementation is ob_cli.py, kept as a module so
 Python caches its bytecode between the many short runs an agent makes."""
 import os
 import sys

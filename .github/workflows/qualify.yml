@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 env:
-  # The OmniGraph release every journey is qualified against.
-  OMNIGRAPH_VERSION: v0.15.0
+  # The Omnigraph release every journey is qualified against.
+  OMNIGRAPH_VERSION: v0.16.0
 
 jobs:
   cookbooks:

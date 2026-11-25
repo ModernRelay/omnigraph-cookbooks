@@ -29,7 +29,7 @@ query epic_issue_counts($epic: String)
 }
 
 query epic_spec($epic: String)
-    @description("The spec file(s) that specify an epic")
+    @description("The specs that describe an epic, with their status and version.")
 {
     match {
         $e: Epic { slug: $epic }

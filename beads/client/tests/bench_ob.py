@@ -200,7 +200,7 @@ def main() -> int:
                      f"{len(doubles)} double claims, {len(errors)} errors"))
 
         mode = f"served through target {args.target}, branch {branch}" if args.target else "local store"
-        print(f"\nob on OmniGraph, {mode}: {args.issues} issues, {links} links "
+        print(f"\nob on Omnigraph, {mode}: {args.issues} issues, {links} links "
               f"({subprocess.run([OMNIGRAPH, 'version'], capture_output=True, text=True).stdout.splitlines()[0]})\n")
         print("| operation | median ms | detail |")
         print("|---|---:|---|")

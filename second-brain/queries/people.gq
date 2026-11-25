@@ -118,7 +118,7 @@ query person_artifacts_from($slug: String) {
 
 // Open commitments I owe to a person (excludes done/cancelled)
 
-query person_tasks_i_owe($slug: String) {
+query person_tasks_i_owe($slug: String) @description("Open tasks you owe one person, earliest due first. Use it before you next talk to them.") {
     match {
         $p: Person { slug: $slug }
         $t: Task { direction: "i-owe" }

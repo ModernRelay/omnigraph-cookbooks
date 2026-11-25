@@ -10,7 +10,7 @@ propose lessons, and a partner reviews what they write.
 A firm's pipeline, notes, chat, call recordings, spreadsheets and portfolio
 models sit in separate tools, and agents glue them together with brittle
 integrations. Nobody can say which belief a decision rested on, or which news
-has since weakened it. This cookbook sets OmniGraph up as the one place the
+has since weakened it. This cookbook sets Omnigraph up as the one place the
 firm's deals, beliefs and evidence are held.
 
 - **Every decision shows its basis.** A decision links to the deal, the
@@ -145,7 +145,7 @@ Every workflow has the same parts:
   reminder was sent, and no stored write changes a commitment's status or a
   thesis's status or a source's rating. The agent has to keep track of what it
   sent, and a person changes those fields.
-- **Bring your own agent.** It connects through OmniGraph's MCP server from
+- **Bring your own agent.** It connects through Omnigraph's MCP server from
   Claude Code, Codex, Cursor or another MCP client. The cookbook has no skill
   of its own, so [AGENTS.md](AGENTS.md) is the brief.
 
@@ -177,7 +177,7 @@ Nobody keeps a thesis tracker or an evidence spreadsheet up to date for these.
 |---|---|
 | Which active theses has new evidence contradicted? | `contradicted_active_theses` |
 | Before investment committee, what contradicts the assumptions behind this deal? | `pre_ic_brief_evidence` |
-| Who on the team can get an introduction to this founder? | `intro_path_to_founder` |
+| Who on the team can get an introduction to this founder through someone they know? | `intro_path_to_founder` |
 | What have the portfolio companies reported recently? | `portfolio_updates_recent` |
 
 The cookbook has 204 stored reads and 87 stored writes. AGENTS.md has the

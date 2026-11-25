@@ -7,7 +7,7 @@ The fixed seed illustrates SPIKE; it is not a current research feed.
 Follow the repository's
 [local setup](https://github.com/ModernRelay/omnigraph-cookbooks/blob/main/docs/local-setup.md)
 with cookbook `industry-intel` and graph `spike`. That is the single setup
-sequence for apply, writer-lock handoff, server startup, the HTTPS gateway, CLI
+sequence for apply, the writer lock, server startup, the HTTPS gateway, CLI
 targets, readiness, and loading. Merge the cookbook's aliases into the operator
 config without replacing unrelated entries. They use the `local-reader` target,
 the reader identity, for exploration.

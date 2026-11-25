@@ -9,7 +9,7 @@ a branch before it joins the record.
 Today a life is spread over messages, email, calendars, a notes app, a reading
 app and a task list. Nothing connects "Theo loves Islay malts" to the text
 where you promised him a book, so an agent that reads them answers from
-whichever it found. This cookbook sets OmniGraph up as the one place your
+whichever it found. This cookbook sets Omnigraph up as the one place your
 people, commitments and thinking are held.
 
 - **Every note has its source.** A note, task or fact links back to the

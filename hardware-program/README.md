@@ -10,7 +10,7 @@ reviews before anything reaches the baseline.
 
 On most programs the requirements, budgets, CAD model and test results live in
 different tools, and the links between them are kept by hand. What gets missed
-turns up at integration or on the test stand. This cookbook sets OmniGraph up
+turns up at integration or on the test stand. This cookbook sets Omnigraph up
 as the one place those links are held.
 
 - **One source of truth.** Engineers and agents read the same current record of
@@ -59,7 +59,7 @@ graph LR
 - **Rules are enforced on write.** An interface joins exactly two blocks, a
   design value belongs to a block, and a test run belongs to a test case.
 - **Evidence stays in the record.** Each test run keeps its measured value and
-  its report file, and every earlier version is kept. OmniGraph stores it all
+  its report file, and every earlier version is kept. Omnigraph stores it all
   as files in object storage or a local folder, so there is no database server
   to size.
 - **Yours to change.** The model is one file, [`schema.pg`](schema.pg), with 15
@@ -119,7 +119,7 @@ Every workflow has the same parts:
   keep track of that itself.
 - **Drafts are marked.** A requirement an agent drafted is labelled as
   agent-generated until a person reviews it.
-- **Bring your own agent.** It connects through OmniGraph's MCP server from
+- **Bring your own agent.** It connects through Omnigraph's MCP server from
   Claude Code, Codex, Cursor or another MCP client.
   [`skill/SKILL.md`](skill/SKILL.md) is a ready skill for it.
 
@@ -183,7 +183,7 @@ Paste this prompt into a coding agent such as Claude Code or Codex:
 Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the hardware program cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/hardware-program
 ```
 
-The agent installs OmniGraph if needed, creates the graph, loads Petrel and
+The agent installs Omnigraph if needed, creates the graph, loads Petrel and
 runs the questions above.
 
 To do it by hand, follow the shared [local setup](../docs/local-setup.md)

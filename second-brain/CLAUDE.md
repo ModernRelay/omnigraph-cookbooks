@@ -23,8 +23,8 @@ cluster commands, CLI — see the **omnigraph** skill and
 ## Setup
 
 Use the shared [local setup](../docs/local-setup.md) with cookbook
-`second-brain` and graph `brain`. It owns authentication, the bootstrap writer-lock
-handoff, readiness, and served seed loading. Apply later configuration edits with
+`second-brain` and graph `brain`. It owns authentication, the bootstrap apply and
+writer lock, readiness, and served seed loading. Apply later configuration edits with
 the [live update workflow](../docs/local-setup.md#live-updates).
 
 Graph id `brain`. Stored queries and their parameters: `omnigraph queries list --target local --graph brain`.

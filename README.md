@@ -1,6 +1,6 @@
-# OmniGraph Cookbooks
+# Omnigraph Cookbooks
 
-Each cookbook sets OmniGraph up for one kind of work: a living record that the
+Each cookbook sets Omnigraph up for one kind of work: a living record that the
 people and agents doing that work share, and the agent workflows around it.
 You get the data model for the field, the questions the record answers, the
 workflows agents run and sample data to try them on.
@@ -15,7 +15,7 @@ workflows agents run and sample data to try them on.
 | [Pharma intelligence](pharma-intel/) | Competitive intelligence for a biotech program: the compounds, trials and deals around it, the program's own assumptions, and which signals contradict them. | Which signals contradict an assumption the program relies on? |
 | [Venture firm](vc-os/) | A venture firm's deals, portfolio, people and investment theses, with every signal tied to the beliefs it supports or contradicts. | Which active theses has new evidence contradicted? |
 | [Second brain](second-brain/) | One person's people, projects, notes, tasks, habits and reading, with where each piece came from. | What do I still owe this person? |
-| [Personal health record](health-record/) | One person's lab results, readings, targets, hypotheses, medication and vaccine doses, with "off target", "overdue" and "incomplete" worked out from the results on every read. | Which results are outside my own targets? |
+| [Personal health record](health-record/) | One person's lab results, readings, targets, hypotheses, medication and vaccine doses, with "off target", "overdue" and "incomplete" worked out on every read. | Which results are outside my own targets? |
 
 Each cookbook's README is the page for its use case: the data model, how
 changes are reviewed, the workflows, the tools it takes data from and the
@@ -49,7 +49,7 @@ cookbook you picked:
 Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the <name> cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/<folder>
 ```
 
-The agent installs OmniGraph, loads the cookbook into a graph on your machine
+The agent installs Omnigraph, loads the cookbook into a graph on your machine
 and runs its questions. Then it asks what you want your own record to hold and
 trims the cookbook to that.
 [omnigraph.dev/onboarding.md](https://www.omnigraph.dev/onboarding.md) is the
@@ -60,7 +60,7 @@ To serve a cookbook the way a team or several agents would share it, follow
 
 ## Version
 
-The cookbooks are checked against OmniGraph **0.15.0** on every pull request.
+The cookbooks are checked against Omnigraph **0.16.0** on every pull request.
 For a graph made with an earlier release, see
 [upgrading](docs/local-setup.md#upgrading).
 

@@ -49,7 +49,7 @@ query program_decisions($slug: String) {
     order { $d.decision_date }
 }
 
-query program_competitors($slug: String) {
+query program_competitors($slug: String) @description("Compounds that target a mechanism the program competes in, with each one's phase and route. Use it to map the competition around a program.") {
     match {
         $p: Program { slug: $slug }
         $p programCompetesInMechanism $m
@@ -108,7 +108,7 @@ query assumption_supporting_signals($slug: String) {
     order { $s.stagingTimestamp desc }
 }
 
-query assumption_contradicting_signals($slug: String) {
+query assumption_contradicting_signals($slug: String) @description("Signals that contradict one of the program's assumptions, newest first. Use it to see whether a belief the program relies on still holds.") {
     match {
         $a: Assumption { slug: $slug }
         $s contradictsAssumption $a
@@ -126,7 +126,7 @@ query get_decision($slug: String) {
     return { $d.slug, $d.name, $d.status, $d.decision_date, $d.decider, $d.brief, $d.description, $d.outcome }
 }
 
-query decisions_upcoming() {
+query decisions_upcoming() @description("Decisions still to be made, soonest first, with the date and who decides. Use it to see what the program has to decide next.") {
     match {
         $d: Decision { status: "upcoming" }
     }

@@ -1,7 +1,7 @@
 # CLAUDE.md — health-record
 
 Scoped guidance for the `health-record/` cookbook. Repo-wide conventions
-live in `../CLAUDE.md`. For general OmniGraph operations use the **omnigraph**
+live in `../CLAUDE.md`. For general Omnigraph operations use the **omnigraph**
 skill; this file covers only what is specific to this cookbook.
 
 ## What This Is

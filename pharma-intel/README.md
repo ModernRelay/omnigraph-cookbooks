@@ -11,7 +11,7 @@ an analyst to review.
 Competitive intelligence usually sits in a pipeline database, a folder of
 press-release clippings and a strategy deck, and nothing connects them. A
 readout lands, and nobody can say which assumption it weakens or which decision
-it touches. This cookbook sets OmniGraph up as the one place the outside
+it touches. This cookbook sets Omnigraph up as the one place the outside
 pipeline and the program's own beliefs are held together.
 
 - **Evidence against each assumption.** See which signals support or contradict
@@ -124,7 +124,7 @@ Every workflow has the same parts:
 - **Some changes have no stored write.** The cookbook only adds. It has no
   stored write to resolve a question, record a decision's outcome or change a
   compound's phase, so those changes are made by a person outside it.
-- **Bring your own agent.** It connects through OmniGraph's MCP server from
+- **Bring your own agent.** It connects through Omnigraph's MCP server from
   Claude Code, Codex, Cursor or another MCP client. The cookbook has no skill
   of its own.
 
@@ -186,7 +186,7 @@ Paste this prompt into a coding agent such as Claude Code or Codex:
 Read https://www.omnigraph.dev/onboarding.md and set up Omnigraph for me with the pharma intelligence cookbook: https://github.com/ModernRelay/omnigraph-cookbooks/tree/main/pharma-intel
 ```
 
-The agent installs OmniGraph if needed, creates the graph, loads the sample
+The agent installs Omnigraph if needed, creates the graph, loads the sample
 and runs the questions above.
 
 To do it by hand, follow the shared [local setup](../docs/local-setup.md)

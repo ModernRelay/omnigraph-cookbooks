@@ -23,7 +23,7 @@ query compounds_by_phase($phase: String) {
     order { $c.name }
 }
 
-query compounds_by_mechanism($mechanism: String) {
+query compounds_by_mechanism($mechanism: String) @description("Every compound that targets one mechanism, with its phase, route and mechanism of action. Use it to see how crowded a mechanism is.") {
     match {
         $m: Mechanism { slug: $mechanism }
         $c targetsMechanism $m

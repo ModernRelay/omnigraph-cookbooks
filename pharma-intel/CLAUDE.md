@@ -21,8 +21,8 @@ Omnigraph CLI/schema reference: [ModernRelay/omnigraph](https://github.com/Moder
 ## Setup
 
 Use the shared [local setup](../docs/local-setup.md) with cookbook
-`pharma-intel` and graph `pharma`. It owns authentication, the bootstrap writer-lock
-handoff, readiness, and served seed loading. Apply later configuration edits with
+`pharma-intel` and graph `pharma`. It owns authentication, the bootstrap apply and
+writer lock, readiness, and served seed loading. Apply later configuration edits with
 the [live update workflow](../docs/local-setup.md#live-updates).
 
 Graph id `pharma`. Stored queries and their parameters: `omnigraph queries list --target local --graph pharma`.

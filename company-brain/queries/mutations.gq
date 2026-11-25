@@ -158,7 +158,7 @@ query end_membership($person: String, $team: String, $since: Date, $until: Date)
     insert LeftTeam { from: $person, to: $team, since: $since, until: $until }
 }
 
-query add_actor($slug: String, $kind: String, $name: String, $purpose: String?, $person: String) @description("Register an actor under its OmniGraph actor id: a person's own login, or an agent with the person accountable for it. Refused if the slug already exists.") {
+query add_actor($slug: String, $kind: String, $name: String, $purpose: String?, $person: String) @description("Register an actor under its Omnigraph actor id: a person's own login, or an agent with the person accountable for it. Refused if the slug already exists.") {
     insert Actor { slug: $slug, kind: $kind, name: $name, purpose: $purpose, active: true }
     insert ActsFor { from: $slug, to: $person }
 }

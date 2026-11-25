@@ -39,7 +39,7 @@ query portco_rounds($slug: String) {
 // Operating updates across the portfolio, time-sorted (most recent first).
 // There is no window-function form of "latest per organization" here; the
 // agent or UI can take the first row per organization from this ordered stream.
-query portfolio_updates_recent() {
+query portfolio_updates_recent() @description("Operating updates from portfolio companies, newest first. Use it to catch up on how the portfolio is doing.") {
     match {
         $c: Organization { status: "portfolio" }
         $s signalAboutOrganization $c
@@ -152,7 +152,7 @@ query pre_ic_brief_thesis($slug: String) {
     return { $t.slug, $t.name, $t.status, $a.slug, $a.name, $a.level, $a.confidence, $a.brief }
 }
 
-query pre_ic_brief_evidence($slug: String) {
+query pre_ic_brief_evidence($slug: String) @description("Signals that contradict an assumption behind a deal's theses, newest first. Use it to prepare the risks for an investment committee brief.") {
     match {
         $d: Deal { slug: $slug }
         $d relevantThesis $t
@@ -204,8 +204,7 @@ query reserve_pressure($fund_slug: String) {
 // Contradicted-theses dashboard
 // ──────────────────────────────────────────────
 
-// All active theses with at least one contradicting signal
-query contradicted_active_theses() {
+query contradicted_active_theses() @description("Active theses with each signal that contradicts them, newest signal first. Use it to see which investment beliefs need a second look.") {
     match {
         $t: Thesis { status: "active" }
         $s contradictsThesis $t

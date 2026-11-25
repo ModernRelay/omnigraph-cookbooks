@@ -144,10 +144,9 @@ query person_decision_maker_at($slug: String) {
 // 2-hop: team member → bridge person → founder. Constrains the target to a
 // Person with at least one FounderOf edge so non-founders don't slip through.
 //
-// NOTE: This pattern *requires* a bridge — if a teammate knows the founder
-// directly, no row is returned. To cover the full JTBD "who can intro me?",
-// also call `intro_direct_to_founder` (1-hop) and union the results.
-query intro_path_to_founder($slug: String) {
+// A teammate who knows the founder directly returns no row here. For every
+// way in, also call intro_direct_to_founder (1-hop) and union the results.
+query intro_path_to_founder($slug: String) @description("Teammates who know someone who knows this founder, with that contact, who can make the introduction. A teammate who already knows the founder is not listed.") {
     match {
         $founder: Person { slug: $slug }
         $founder founderOf $f_organization

@@ -1,7 +1,7 @@
 # CLAUDE.md — beads
 
 Scoped guidance for the `beads/` cookbook. Repo-wide conventions live in
-`../CLAUDE.md`. For general OmniGraph operations use the **omnigraph** skill;
+`../CLAUDE.md`. For general Omnigraph operations use the **omnigraph** skill;
 this file covers only what is specific to beads.
 
 ## What This Is
@@ -54,7 +54,7 @@ that concurrent agents need. The seed is a fictional note-taking app,
   trees.
 - After a query or client change, run `python3 -m unittest discover -s tests`
   from `client/` (local graphs, and a served one behind the local HTTPS
-  gateway; it needs the 0.15.0 `omnigraph` and `omnigraph-server`, and
+  gateway; it needs the 0.16.0 `omnigraph` and `omnigraph-server`, and
   `openssl`) and `../scripts/check-cookbooks.py`, which also drives `ob` against
   the served cookbook. `SeedTests` pins the ready and blocked sets in `seed.md`.
 
@@ -256,9 +256,9 @@ With an embedding provider configured (see [cluster.yaml](cluster.yaml)),
 `omnigraph embed` pipeline before each write, and `ob similar` and
 `ob recall --semantic` rank by meaning. The pipeline embeds each title or
 memory body exactly as written, as a query embeds its text. Vectors stored with
-OmniGraph 0.13 embedded a templated line instead; regenerate them with
+Omnigraph 0.13 embedded a templated line instead; regenerate them with
 `omnigraph embed --reembed-all` and reload them, as the engine's
-[embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.15.0/docs/user/search/embeddings.md#offline-file-pipeline)
+[embedding guide](https://github.com/ModernRelay/omnigraph/blob/v0.16.0/docs/user/search/embeddings.md#offline-file-pipeline)
 describes. Set `OMNIGRAPH_EMBEDDINGS_MOCK=1` for deterministic test vectors.
 
 ## Compared with beads
@@ -269,11 +269,11 @@ seed, both return **the same ready and blocked sets**; reaching that fixed
 `ob`'s handling of closed parents and adopted beads' two link rules above.
 Neither tool ever handed one issue to two agents.
 
-Measured with OmniGraph 0.13.0 on one laptop with other work running, so
+Measured with Omnigraph 0.13.0 on one laptop with other work running, so
 treat the timings as rough. After `bd gc`, which shrank the imported Dolt
 journal from 314 MB to 3 MB, `ready`, `show` and `search` take 200–470 ms in
 `bd` and about 200 ms in `ob`; `bd blocked` takes 1.3 s. `ob`'s writes were 2.5–7 times faster, but a local
-OmniGraph store does not fsync and Dolt syncs every commit, so that gap is not
+Omnigraph store does not fsync and Dolt syncs every commit, so that gap is not
 like for like. `bd import` took about 10 minutes for 2,000 issues, against under
 a second for `ob`'s batched load. About 90 ms of each `ob` command is Python
 starting up.

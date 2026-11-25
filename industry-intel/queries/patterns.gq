@@ -25,7 +25,7 @@ query search_patterns($q: String) {
 
 // Pattern <- Signal (what signals form this pattern?)
 
-query pattern_signals($slug: String) {
+query pattern_signals($slug: String) @description("The signals that support one pattern, newest first. Use it to check the evidence behind a pattern.") {
     match {
         $p: Pattern { slug: $slug }
         $s formsPattern $p

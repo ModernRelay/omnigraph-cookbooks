@@ -36,7 +36,7 @@ query pr_lookup($slug: String)
 // ═══════════════════════════════════════════════════════════════
 
 query ready()
-    @description("Issues ready to pick up: backlog/todo, no incoming block, no outgoing wait")
+    @description("Backlog and to-do issues that nothing holds up: no blocking issue or parent, and no wait on another issue, a gate or an upstream fix. Use it to choose the next piece of work.")
     @instruction("Excludes started + terminal states and any incoming Blocks/ParentChild or outgoing WaitsFor*. The strict 'blocking source must itself be non-terminal' / 'gate must be pending' refinement is left to the caller; this returns the structural candidates.")
 {
     match {
@@ -134,7 +134,7 @@ query blocked_by_wait()
 }
 
 query blocked_on_upstream()
-    @description("Non-terminal issues gated on an external (upstream) blocker — the cross-system dependency view")
+    @description("Unfinished issues waiting on something outside the project, such as an upstream library fix, with the blocker's status and any workaround.")
 {
     match {
         $i: Issue
@@ -193,7 +193,7 @@ query epic_open_issues($epic: String)
 // ═══════════════════════════════════════════════════════════════
 
 query release_prs($release: String)
-    @description("PRs included in a release (the per-release changeset)")
+    @description("The pull requests a release includes, with each one's status and GitHub reference: the release's changeset.")
 {
     match {
         $r: Release { slug: $release }
