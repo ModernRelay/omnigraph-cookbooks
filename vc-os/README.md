@@ -1,22 +1,25 @@
-# Venture firm: deals and theses held against the evidence
+# Venture firm: deals, evidence and the views behind them
 
-An operating system for a venture firm, where every deal and thesis is held
-against the evidence for and against it, so you go into investment committee
-knowing what contradicts the deal. Deals, portfolio companies, people, meetings
-and theses are linked, and every decision traces back to the beliefs it rested
-on. Agents prepare briefs, capture calls and propose lessons, and a partner
-reviews what they write.
+A living system of record for a venture firm: its companies, people and deals,
+what was said and written about them, and the insights, patterns and theses the
+firm builds from those. A new company arrives against what the firm already
+believes, and every decision keeps the beliefs it rested on. Agents source,
+brief, chase commitments and draft conclusions on their own branches, and the
+deal or thesis owner reviews before a merge.
 
-A firm's pipeline sits in a CRM, with memos, call notes, chat and portfolio
-models in other tools. Nobody can say which belief a decision rested on, or
-which news has since weakened it. This cookbook sets Omnigraph up as the one
-place the firm's deals, beliefs and evidence are held.
+A firm's records sit in a CRM, its calls in a notetaker, its documents in a
+drive, and its views in people's heads. A CRM has fields for contacts,
+companies and pipeline stages, so the reasoning behind a decision lands
+nowhere, and an agent asked what the firm knows reads every tool and matches
+names on the spot. This cookbook sets Omnigraph up as the one place the firm's
+deals, evidence and views are held.
 
-- **A path to the founder.** See who on the team knows someone who knows them.
-- **Evidence moves beliefs.** A signal is linked to the assumption or thesis it
+- **What the firm knows, in one read.** A company's deals, calls, documents
+  and the teammate closest to it are all one walk from the company.
+- **Evidence moves views.** A signal is linked to the assumption or thesis it
   supports or contradicts, so a weakened thesis is a query, not a memory.
-- **Review before it counts.** An agent's tentative lesson or note waits on a
-  branch for a partner to merge.
+- **Agents propose, owners decide.** An agent drafts on a branch; the deal or
+  thesis owner reads the diff and merges it or deletes it.
 
 > If you are an agent: the commands, roles and workflows are in
 > [AGENTS.md](AGENTS.md). Read that file before running anything.

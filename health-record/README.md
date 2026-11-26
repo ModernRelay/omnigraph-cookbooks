@@ -1,16 +1,18 @@
-# Personal health record: your results against your own targets
+# Personal health record: questions answered from your own evidence
 
-A personal health record that holds your results, readings and vaccinations
-against your own targets, so you see what is off target, overdue or unfinished
-each time you ask. Each result, reading, medication and vaccine dose links to
-the document it came from and to the target or series it belongs to. Agents
-read your reports and tell you what is due, on branches you review before
-anything reaches the record.
+A personal health record you can ask real questions of: whether a change you
+made moved the marker it was meant to move, which of your own hypotheses a
+result contradicts, and what is overdue. Your lab results, device readings,
+targets, what you take and the vaccine doses you were given are linked to the
+documents they came from and to standard codes, so every answer comes from your
+own data. Agents read your reports and keep the record current, on branches you
+review before anything reaches it.
 
 Most people's health data sits in lab PDFs, a patient portal, a wearable's app
-and a paper vaccination card. Nobody connects a result to the target it was
-meant to reach, or a dose to the series it belongs to. This cookbook sets
-Omnigraph up as the one place those links are held, on your own machine.
+and a paper vaccination card. Nothing connects a result to the target it was
+meant to reach or to the change you made to reach it, so a question about your
+own health gets a guess rather than an answer. This cookbook sets Omnigraph up
+as the one place those links are held, on your own machine.
 
 - **One record.** You and your agents read the same current picture: every
   result, with the document and the printed line it came from.

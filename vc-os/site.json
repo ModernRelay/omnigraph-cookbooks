@@ -3,7 +3,7 @@
   "name": "Venture firm",
   "category": "Investing",
   "blurb": "A venture firm's deals, portfolio, people and investment theses, with every signal tied to the beliefs it supports or contradicts.",
-  "about": "An operating system for a venture firm, where every deal and thesis is held against the evidence for and against it, so you go into investment committee knowing what contradicts the deal. Deals, portfolio companies, people, meetings and theses are linked, and every decision traces back to the beliefs it rested on. Agents prepare briefs, capture calls and propose lessons, and a partner reviews what they write.",
+  "about": "A living system of record for a venture firm: its companies, people and deals, what was said and written about them, and the insights, patterns and theses the firm builds from those. A new company arrives against what the firm already believes, and every decision keeps the beliefs it rested on. Agents source, brief, chase commitments and draft conclusions on their own branches, and the deal or thesis owner reviews before a merge.",
   "sample": "Quito Capital, a fictional AI-infrastructure fund",
   "questions": [
     {
