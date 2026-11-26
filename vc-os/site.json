@@ -3,7 +3,7 @@
   "name": "Venture firm",
   "category": "Investing",
   "blurb": "A venture firm's deals, portfolio, people and investment theses, with every signal tied to the beliefs it supports or contradicts.",
-  "about": "An operating system for a venture firm that holds every belief behind a decision against the evidence for and against it. Deals, portfolio companies, people, meetings and theses are one record, so a thesis new evidence has weakened surfaces itself, a decision shows what it rested on, and a path to a founder runs through someone the team already knows. Agents capture calls, prepare briefs and propose lessons, and a partner reviews what they write before it joins the record.",
+  "about": "An operating system for a venture firm: one memory its people and its agents share. It holds the companies, people and deals, what was said and written about them, and what the firm concludes from that: insights, patterns and the theses they build into. A CRM has places for contacts, companies and pipeline stages but none for how a view forms. Agents source, brief, chase commitments and draft conclusions on their own branches, and the deal or thesis owner reviews before a merge.",
   "sample": "Quito Capital, a fictional AI-infrastructure fund",
   "questions": [
     {
