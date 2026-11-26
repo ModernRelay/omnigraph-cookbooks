@@ -1,11 +1,11 @@
-# Venture firm: a CRM that holds how a view forms
+# Venture firm: deals, evidence and the views behind them
 
-A venture firm's CRM, with a place for what a CRM leaves out: how a view forms.
-It holds the companies, people and deals, what was said and written about them,
-and the insights, patterns and theses the firm builds from those, so a new
-company arrives against what the firm already believes. Agents source, brief,
-chase commitments and draft conclusions on their own branches, and the deal or
-thesis owner reviews before a merge.
+A living system of record for a venture firm: its companies, people and deals,
+what was said and written about them, and the insights, patterns and theses the
+firm builds from those. A new company arrives against what the firm already
+believes, and every decision keeps the beliefs it rested on. Agents source,
+brief, chase commitments and draft conclusions on their own branches, and the
+deal or thesis owner reviews before a merge.
 
 A firm's records sit in a CRM, its calls in a notetaker, its documents in a
 drive, and its views in people's heads. A CRM has fields for contacts,

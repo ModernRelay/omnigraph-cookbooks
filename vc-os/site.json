@@ -2,8 +2,8 @@
   "order": 7,
   "name": "Venture firm",
   "category": "Investing",
-  "blurb": "The CRM a venture firm runs on, plus the insights, patterns and theses behind its decisions, with every signal tied to the belief it supports or contradicts.",
-  "about": "A venture firm's CRM, with a place for what a CRM leaves out: how a view forms. It holds the companies, people and deals, what was said and written about them, and the insights, patterns and theses the firm builds from those, so a new company arrives against what the firm already believes. Agents source, brief, chase commitments and draft conclusions on their own branches, and the deal or thesis owner reviews before a merge.",
+  "blurb": "A venture firm's deals, portfolio, people and investment theses, with every signal tied to the beliefs it supports or contradicts.",
+  "about": "A living system of record for a venture firm: its companies, people and deals, what was said and written about them, and the insights, patterns and theses the firm builds from those. A new company arrives against what the firm already believes, and every decision keeps the beliefs it rested on. Agents source, brief, chase commitments and draft conclusions on their own branches, and the deal or thesis owner reviews before a merge.",
   "sample": "Quito Capital, a fictional AI-infrastructure fund",
   "questions": [
     {
@@ -30,8 +30,8 @@
     }
   ],
   "search": {
-    "title": "Venture capital CRM with theses, evidence and decisions",
-    "heading": "A venture CRM that holds how a view forms, not just the pipeline",
+    "title": "Venture firm context graph: deals, theses, portfolio",
+    "heading": "A context graph for a venture firm's deals, theses and portfolio",
     "keywords": [
       "context graph",
       "world model",
