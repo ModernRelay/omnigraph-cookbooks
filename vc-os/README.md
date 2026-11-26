@@ -14,9 +14,8 @@ company, an agent reads every tool and matches names on the spot, so the answer
 is whatever it found that session. This cookbook sets Omnigraph up as the one
 place the firm's deals, evidence and views are held.
 
-- **What the firm knows, in one read.** A company's deals, calls, documents and
-  the teammate closest to it are one walk from the company, each with its
-  source.
+- **What the firm knows, in one read.** A company's deals, calls, documents
+  and the teammate closest to it are all one walk from the company.
 - **Evidence moves views.** A signal is linked to the assumption or thesis it
   supports or contradicts, so a weakened thesis is a query, not a memory.
 - **Agents propose, owners decide.** An agent drafts on a branch; the deal or
