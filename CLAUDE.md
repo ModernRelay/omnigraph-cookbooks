@@ -200,7 +200,14 @@ from one moment in the work or one query's answer: "know what a change breaks
 before the design review" is a job a systems engineer has every week, while
 "see which tests a requirement links to" is a query that serves it. Lead with
 the query and the page sells one feature, leaving the reader to work out for
-themselves what the record is for.
+themselves what the record is for. Name what the reader gets and not how it is
+done: provenance, derived reads and branches are mechanisms, and they belong in
+the sections that explain them. In the intro a mechanism is at most the reason
+the claim holds.
+
+Read the cookbook's featured questions before you settle the difference. They
+are the shortest honest statement of what this reader gets, so an opening that
+claims less than they already answer is the wrong opening.
 
 The third claim is Omnigraph's half, and it is the one a page most easily
 loses: what the agents do in the record, and that a person reviews what they
