@@ -1,10 +1,12 @@
-# Second brain: a memory of your life that you can check
+# Second brain: one record your agents keep and answer from
 
-A second brain your agents keep, where every note, task and promise links back
-to the message it came from. It holds one person's people, projects, notes,
-tasks, habits and reading, linked to each other. Agents capture what arrives
-and tidy what is there, and you review their work on a branch before it joins
-the record.
+A second brain your agents keep rather than just store: they file what arrives
+against the people, projects and commitments it concerns, and answer what you
+owe someone, what to do next and who told you a thing. Your people, projects,
+notes, tasks, habits and reading are one record, each piece linked to the
+message, email or memo it came from, so an answer can be checked against the
+words that produced it. You review what an agent writes on a branch before it
+joins the record.
 
 Your life is spread over messages, email, a calendar, a notes app and a task
 list. Nothing connects "Theo loves Islay malts" to the text where you promised
