@@ -1,19 +1,20 @@
-# Software development: the reasoning behind the code
+# Software development: a live record of the lifecycle
 
-A living system of record for software development, which gives a coding agent
-the decisions, specs and open issues behind a component before it changes a
-line. Issues, epics, specs, decisions, pull requests, releases and incidents
-are linked with the rules that constrain them, and whether work is ready or
-blocked is worked out from those links on every read. Agents propose changes on
-branches that a person reviews, and the Git host stays the record for code.
+A living system of record for the whole software lifecycle, from a spec to the
+incident it caused, that coding agents work inside rather than around. Issues,
+epics, specs, decisions, pull requests, releases and incidents are linked with
+the rules that constrain them, so what is ready, what is blocked and why
+something was built the way it was are answered from the links on every read.
+Agents pick up work and propose changes on branches a person reviews, and the
+Git host stays the record for code.
 
 Issues live in a tracker, code in a Git host, specs in a wiki, decisions in old
-threads and incident notes in another tool. A coding agent, or a new engineer,
-reviews a diff without the decision that shaped it. This cookbook sets
-Omnigraph up as the one place those links are held.
+threads and incident notes in another tool. An agent set to work on any of it
+has to be told the state by a person first, and told again when it changes.
+This cookbook sets Omnigraph up as the one place those links are held.
 
-- **Context for every change.** An agent or engineer reads the decisions,
-  specs and open issues that touch a component before changing it.
+- **Agents that need no briefing.** An agent reads what is ready, the specs
+  and decisions that constrain it, and why, then writes back what it did.
 - **Ready and blocked, worked out.** What can be picked up, and what waits on
   what, comes from the links on every read, so no status field goes stale.
 - **Decisions that stay put.** A decision is never rewritten; a later one

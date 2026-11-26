@@ -195,7 +195,12 @@ field's own products call themselves, not from what seems to fit. Use
 "living" where staying current is the point.
 
 The difference is what makes it this cookbook. It has to be something the
-schema and queries do, said in the reader's words.
+schema and queries do, said in the reader's words. Take it from the job and not
+from one moment in the work or one query's answer: "know what a change breaks
+before the design review" is a job a systems engineer has every week, while
+"see which tests a requirement links to" is a query that serves it. Lead with
+the query and the page sells one feature, leaving the reader to work out for
+themselves what the record is for.
 
 The third claim is Omnigraph's half, and it is the one a page most easily
 loses: what the agents do in the record, and that a person reviews what they
