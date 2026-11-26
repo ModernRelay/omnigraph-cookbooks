@@ -198,11 +198,11 @@ The difference is what makes it this cookbook. It has to be something the
 schema and queries do, said in the reader's words.
 
 The third claim is Omnigraph's half, and it is the one a page most easily
-loses: who shares the record, what the agents do in it, and that a person
-reviews what they write. Worked through, hardware-program opens "A living
-system of record for a hardware program, so you know what a design change
-breaks before the design review", and closes the paragraph on agents
-re-checking the program on branches an engineer reviews.
+loses: what the agents do in the record, and that a person reviews what they
+write. Worked through, hardware-program opens "A living system of record for a
+hardware program, so you know what a design change breaks before the design
+review", and closes the paragraph on agents re-checking the program on branches
+an engineer reviews.
 
 **The data model.** What this work is made of, in its own terms:
 
@@ -311,8 +311,8 @@ writes. Then be exact about review:
 
 <The category the reader knows, and what sets this one apart for their job,
 from "Work it out from first principles".> <What it keeps linked, in the
-field's words.> <Who shares it, what agents do in it, and that a person
-reviews what they write.>
+field's words.> <What agents do in it, and that a person reviews what they
+write.>
 
 <The problem in two sentences: where the data lives today and what goes wrong.>
 This cookbook sets Omnigraph up as <the one place it is held>.
