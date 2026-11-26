@@ -1,18 +1,18 @@
-# Venture firm: one memory for the firm and its agents
+# Venture firm: a CRM that holds how a view forms
 
-An operating system for a venture firm: one memory its people and its agents
-share. It holds the companies, people and deals, what was said and written
-about them, and what the firm concludes from that: insights, patterns and the
-theses they build into. A CRM has places for contacts, companies and pipeline
-stages but none for how a view forms. Agents source, brief, chase commitments
-and draft conclusions on their own branches, and the deal or thesis owner
-reviews before a merge.
+A venture firm's CRM, with a place for what a CRM leaves out: how a view forms.
+It holds the companies, people and deals, what was said and written about them,
+and the insights, patterns and theses the firm builds from those, so a new
+company arrives against what the firm already believes. Agents source, brief,
+chase commitments and draft conclusions on their own branches, and the deal or
+thesis owner reviews before a merge.
 
 A firm's records sit in a CRM, its calls in a notetaker, its documents in a
-drive, and its views in people's heads. Asked what the firm knows about a
-company, an agent reads every tool and matches names on the spot, so the answer
-is whatever it found that session. This cookbook sets Omnigraph up as the one
-place the firm's deals, evidence and views are held.
+drive, and its views in people's heads. A CRM has fields for contacts,
+companies and pipeline stages, so the reasoning behind a decision lands
+nowhere, and an agent asked what the firm knows reads every tool and matches
+names on the spot. This cookbook sets Omnigraph up as the one place the firm's
+deals, evidence and views are held.
 
 - **What the firm knows, in one read.** A company's deals, calls, documents
   and the teammate closest to it are all one walk from the company.
